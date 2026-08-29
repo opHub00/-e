@@ -15,7 +15,7 @@ import { duration, travel } from '../design/motion';
 import { colors, radius, spacing, tint, type } from '../design/tokens';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
-import { buildNewsImpactContext } from '../features/news/ai';
+import { buildNewsImpactContext, createNewsImpactFallback } from '../features/news/ai';
 import type { NewsImpactBriefing, NewsImpactGrounding } from '../features/news/ai';
 import type { NewsArticle, NewsRelevance } from '../features/news/types';
 import type { UserProfile } from '../domain/types';
@@ -29,6 +29,7 @@ type Props = {
   profile: UserProfile;
   article: NewsArticle | null;
   relevance: NewsRelevance | null;
+  aiAllowed?: boolean;
   onClose: () => void;
 };
 
@@ -49,12 +50,25 @@ const formatDate = (iso: string) => {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export function NewsImpactSheet({ visible, profile, article, relevance, onClose }: Props) {
+export function NewsImpactSheet({ visible, profile, article, relevance, aiAllowed = true, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<SheetState>({ status: 'idle' });
 
   const load = useCallback(async () => {
     if (!article || !relevance) return;
+    const context = buildNewsImpactContext(profile, article, relevance);
+    if (!aiAllowed) {
+      setState({
+        status: 'ready',
+        briefing: createNewsImpactFallback(context),
+        grounding: {
+          factualSummary: context.evidence.isDescriptionTruncated ? 'fallback' : 'source',
+          personalization: 'fallback',
+        },
+        usedFallback: true,
+      });
+      return;
+    }
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       setState({ status: 'error', message: 'AI 연결이 설정되지 않았어요.' });
       return;
@@ -64,7 +78,6 @@ export function NewsImpactSheet({ visible, profile, article, relevance, onClose 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const context = buildNewsImpactContext(profile, article, relevance);
       const res = await fetch(`${SUPABASE_URL}/functions/v1/news-impact`, {
         method: 'POST',
         headers: {
@@ -97,7 +110,7 @@ export function NewsImpactSheet({ visible, profile, article, relevance, onClose 
     } finally {
       clearTimeout(timer);
     }
-  }, [article, profile, relevance]);
+  }, [aiAllowed, article, profile, relevance]);
 
   useEffect(() => {
     if (visible) void load();

@@ -99,11 +99,15 @@ export default function AiRoute() {
     futureScenario?: string;
   }>();
   const profile = useUserStore((s) => s.profile);
+  const applicantProfile = useUserStore((s) => s.applicantProfile);
 
-  const ctx = buildAiContext(profile);
+  const ctx = buildAiContext(profile, applicantProfile);
   const suggestions = getSuggestedQuestions(ctx);
   const selectedFutureScenario = parseFutureScenario(profile, futureScenario);
-  const promptContext = selectedFutureScenario
+  const canShareFutureContext =
+    applicantProfile.subscriptionAccount.hasAccount.status === 'known' &&
+    applicantProfile.housing.currentOwnership.status === 'known';
+  const promptContext = selectedFutureScenario && canShareFutureContext
     ? `${formatContextForPrompt(ctx)}\n\n${formatFutureAiContextForPrompt(
         buildFutureAiContext(profile, selectedFutureScenario),
       )}`

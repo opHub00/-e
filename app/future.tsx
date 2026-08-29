@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Appear } from '../components/motion/Appear';
@@ -8,8 +8,10 @@ import { ScreenEnter } from '../components/motion/ScreenEnter';
 import { useCountUp } from '../hooks/useCountUp';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
 import { NewsBriefingSection } from '../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../components/NewsImpactSheet';
+import { ProfilePromptSheet } from '../components/ProfilePromptSheet';
 import { duration, travel } from '../design/motion';
 import { colors, radius, spacing, tint, type } from '../design/tokens';
 import {
@@ -26,6 +28,7 @@ import {
 } from '../domain/futureSimulation';
 import { useNewsBriefing } from '../features/news/useNewsBriefing';
 import type { RankedNews } from '../features/news/useNewsBriefing';
+import type { ProfileQuestionBundleId } from '../features/profile/domain';
 import { useUserStore } from '../store/useUserStore';
 import { dismissActiveFocus, focusWebElementOnNextFrame } from '../utils/webFocus';
 
@@ -80,6 +83,9 @@ export default function FutureRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const profile = useUserStore((s) => s.profile);
+  const applicantProfile = useUserStore((s) => s.applicantProfile);
+  const requestProfileBundle = useUserStore((s) => s.requestProfileBundle);
+  const dismissProfileBundle = useUserStore((s) => s.dismissProfileBundle);
 
   const [offsetMonths, setOffsetMonths] = useState<FutureMonthOffset>(24);
   const [scenarioId, setScenarioId] = useState<FutureScenarioId>('baseline');
@@ -90,6 +96,12 @@ export default function FutureRoute() {
   const railRef = useRef<ScrollView>(null);
   const { state: newsState, reload: reloadNews } = useNewsBriefing(profile, 1);
   const [openedNews, setOpenedNews] = useState<RankedNews | null>(null);
+  const [profilePrompt, setProfilePrompt] = useState<ProfileQuestionBundleId | null>(null);
+
+  useEffect(() => {
+    const bundleId = requestProfileBundle('future');
+    if (bundleId) setProfilePrompt(bundleId);
+  }, [requestProfileBundle]);
 
   const scenarios = createFutureScenarios(profile, customInput);
   const scenario = scenarios.find((item) => item.id === scenarioId) ?? scenarios[0];
@@ -637,9 +649,24 @@ export default function FutureRoute() {
       <NewsImpactSheet
         visible={openedNews !== null}
         profile={profile}
+        aiAllowed={
+          applicantProfile.subscriptionAccount.hasAccount.status === 'known' &&
+          applicantProfile.housing.currentOwnership.status === 'known'
+        }
         article={openedNews?.article ?? null}
         relevance={openedNews?.relevance ?? null}
         onClose={() => setOpenedNews(null)}
+      />
+      <ProfilePromptSheet
+        bundleId={profilePrompt}
+        onEdit={(bundleId) => {
+          setProfilePrompt(null);
+          router.push(`/profile?bundle=${bundleId}&returnTo=/future` as Href);
+        }}
+        onLater={(bundleId) => {
+          dismissProfileBundle(bundleId);
+          setProfilePrompt(null);
+        }}
       />
     </ScreenEnter>
   );

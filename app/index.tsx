@@ -19,27 +19,24 @@ import { BrandMark } from '../components/BrandMark';
 import { colors, radius, size, spacing, tint, type } from '../design/tokens';
 import { LIMITS, validateNumberField } from '../domain/preparation';
 import type { FieldIssue } from '../domain/preparation';
-import type { Occupation, UserProfile } from '../domain/types';
+import { createMinimalApplicantProfile } from '../features/profile/domain';
 import { defaultProfile, shouldRedirectToIntro, useUserStore } from '../store/useUserStore';
 
-const OCCUPATIONS: { value: Occupation; label: string }[] = [
-  { value: 'student', label: '학생' },
-  { value: 'worker', label: '직장인' },
-  { value: 'etc', label: '그 외' },
-];
+const REGION_CHOICES = ['서울특별시', '경기도', '인천광역시'];
 
 /** 숫자 입력은 편집 중 빈 문자열을 허용해야 해서 문자열로 들고 있는다. */
-type Draft = Omit<UserProfile, 'age' | 'accountMonths' | 'monthlyPayment'> & {
+type Draft = {
+  name: string;
   age: string;
-  accountMonths: string;
-  monthlyPayment: string;
+  currentRegion: string;
+  preferredRegions: string[];
 };
 
-const toDraft = (p: UserProfile): Draft => ({
-  ...p,
-  age: String(p.age),
-  accountMonths: String(p.accountMonths),
-  monthlyPayment: String(p.monthlyPayment),
+const toDraft = (): Draft => ({
+  name: defaultProfile.name,
+  age: String(defaultProfile.age),
+  currentRegion: defaultProfile.region,
+  preferredRegions: [defaultProfile.region],
 });
 
 const digits = (v: string) => v.replace(/[^0-9]/g, '');
@@ -59,7 +56,7 @@ function fieldError(raw: string, limit: { min: number; max: number }, unit: stri
   return issue ? ISSUE_TEXT[issue](limit, unit) : null;
 }
 
-type Step = 'intro' | 'basic' | 'account';
+type Step = 'intro' | 'basic';
 
 const VALUE_ROWS = [
   {
@@ -85,14 +82,14 @@ const VALUE_ROWS = [
 export default function OnboardingRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const setProfile = useUserStore((s) => s.setProfile);
+  const setApplicantProfile = useUserStore((s) => s.setApplicantProfile);
   const hasSeenIntro = useUserStore((s) => s.hasSeenIntro);
   const introHydrated = useUserStore((s) => s.introHydrated);
   const hydrateIntro = useUserStore((s) => s.hydrateIntro);
   // intro 를 막 마친 사용자는 브랜드 소개를 반복하지 않고 바로 입력으로 간다.
   const params = useLocalSearchParams<{ step?: string }>();
   const [step, setStep] = useState<Step>(params.step === 'basic' ? 'basic' : 'intro');
-  const [draft, setDraft] = useState<Draft>(() => toDraft(defaultProfile));
+  const [draft, setDraft] = useState<Draft>(toDraft);
 
   useEffect(() => {
     void hydrateIntro();
@@ -102,27 +99,21 @@ export default function OnboardingRoute() {
 
   const errors = {
     age: fieldError(draft.age, LIMITS.age, '세'),
-    accountMonths: draft.hasSubscriptionAccount
-      ? fieldError(draft.accountMonths, LIMITS.accountMonths, '개월')
-      : null,
-    monthlyPayment: draft.hasSubscriptionAccount
-      ? fieldError(draft.monthlyPayment, LIMITS.monthlyPayment, '원')
-      : null,
   };
-  const basicInvalid = Boolean(errors.age);
-  const accountInvalid = Boolean(errors.accountMonths || errors.monthlyPayment);
-  const hasError = basicInvalid || accountInvalid;
+  const basicInvalid = Boolean(
+    errors.age || !draft.currentRegion.trim() || draft.preferredRegions.length === 0,
+  );
 
   const submit = () => {
-    if (hasError) return;
-    // 범위 밖 값과 통장 미보유 시 0 정규화는 store 의 setProfile 이 최종 보장한다.
-    setProfile({
-      ...draft,
-      name: draft.name.trim() || '완판이',
-      age: num(draft.age),
-      accountMonths: draft.hasSubscriptionAccount ? num(draft.accountMonths) : 0,
-      monthlyPayment: num(draft.monthlyPayment),
-    });
+    if (basicInvalid) return;
+    setApplicantProfile(
+      createMinimalApplicantProfile({
+        name: draft.name,
+        age: num(draft.age),
+        currentRegion: draft.currentRegion,
+        preferredRegions: draft.preferredRegions,
+      }),
+    );
     router.replace('/home');
   };
 
@@ -196,9 +187,7 @@ export default function OnboardingRoute() {
   }
 
   /* ── 2. Guided setup ── */
-  const basic = step === 'basic';
-  const stepIndex = basic ? 1 : 2;
-  const blocked = basic ? basicInvalid : accountInvalid;
+  const blocked = basicInvalid;
 
   return (
     <ScreenEnter style={styles.screen}>
@@ -207,16 +196,16 @@ export default function OnboardingRoute() {
           <MotionPressable
             accessibilityRole="button"
             accessibilityLabel="이전"
-            onPress={() => setStep(basic ? 'intro' : 'basic')}
+            onPress={() => setStep('intro')}
             style={styles.backButton}
           >
             <MaterialIcons name="arrow-back" size={20} color={colors.text} />
           </MotionPressable>
-          <Text style={styles.stepCount}>STEP {stepIndex} / 2</Text>
+          <Text style={styles.stepCount}>STEP 1 / 1</Text>
           <View style={styles.backButtonGhost} />
         </View>
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: basic ? '50%' : '100%' }]} />
+          <View style={[styles.progressFill, { width: '100%' }]} />
         </View>
       </View>
 
@@ -229,144 +218,80 @@ export default function OnboardingRoute() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* 단계마다 다른 tint 밴드로 시각적 identity 를 준다. */}
-          <View
-            style={[
-              styles.stepBanner,
-              { backgroundColor: basic ? colors.lavender : tint.amber.bg },
-            ]}
-          >
+          <View style={[styles.stepBanner, { backgroundColor: colors.lavender }]}>
             <View
-              style={[
-                styles.stepBannerIcon,
-                { backgroundColor: basic ? colors.primaryFixed : '#FFD0A8' },
-              ]}
+              style={[styles.stepBannerIcon, { backgroundColor: colors.primaryFixed }]}
             >
               <MaterialIcons
-                name={basic ? 'person' : 'account-balance-wallet'}
+                name="person"
                 size={19}
-                color={basic ? colors.primary : tint.amber.fg}
+                color={colors.primary}
               />
             </View>
             <View style={styles.stepBannerCopy}>
-              <Text
-                style={[
-                  styles.stepBannerTitle,
-                  { color: basic ? colors.primary : tint.amber.fg },
-                ]}
-              >
-                {basic ? '지금의 나' : '청약 준비 상태'}
-              </Text>
+              <Text style={[styles.stepBannerTitle, { color: colors.primary }]}>지금의 나</Text>
               <Text style={styles.stepBannerBody}>
-                {basic
-                  ? '또래 기준과 지역 조건을 맞추는 데 써요'
-                  : '준비도 점수와 미래 변화 계산에 쓰여요'}
+                지금은 꼭 필요한 정보만 받고, 나머지는 사용할 때 물어볼게요
               </Text>
             </View>
           </View>
 
-          {basic ? (
-            <Appear replayKey="setup-basic" style={styles.fields}>
-              <Field label="이름">
-                <TextInput
-                  style={styles.input}
-                  value={draft.name}
-                  onChangeText={(name) => patch({ name })}
-                  placeholder="지민"
-                  placeholderTextColor={colors.outline}
-                />
-              </Field>
+          <Appear replayKey="setup-basic" style={styles.fields}>
+            <Field label="이름 또는 닉네임">
+              <TextInput
+                style={styles.input}
+                value={draft.name}
+                onChangeText={(name) => patch({ name })}
+                placeholder="지민"
+                placeholderTextColor={colors.outline}
+              />
+            </Field>
 
-              <Field label="나이" error={errors.age}>
-                <TextInput
-                  style={[styles.input, errors.age && styles.inputError]}
-                  value={draft.age}
-                  onChangeText={(v) => patch({ age: digits(v) })}
-                  keyboardType="number-pad"
-                  maxLength={3}
-                />
-              </Field>
+            <Field label="나이" error={errors.age}>
+              <TextInput
+                style={[styles.input, errors.age && styles.inputError]}
+                value={draft.age}
+                onChangeText={(v) => patch({ age: digits(v) })}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+            </Field>
 
-              <Field label="지금 하는 일">
-                <View style={styles.chipRow}>
-                  {OCCUPATIONS.map((o) => (
+            <Field label="현재 거주지역">
+              <View style={styles.chipRow}>
+                {REGION_CHOICES.map((region) => (
+                  <Chip
+                    key={region}
+                    label={region.replace('특별시', '').replace('광역시', '').replace('도', '')}
+                    active={draft.currentRegion === region}
+                    onPress={() => patch({ currentRegion: region })}
+                  />
+                ))}
+              </View>
+            </Field>
+
+            <Field label="관심지역 · 여러 곳 선택 가능">
+              <View style={styles.chipRow}>
+                {REGION_CHOICES.map((region) => {
+                  const active = draft.preferredRegions.includes(region);
+                  return (
                     <Chip
-                      key={o.value}
-                      label={o.label}
-                      active={draft.occupation === o.value}
-                      onPress={() => patch({ occupation: o.value })}
+                      key={region}
+                      label={region.replace('특별시', '').replace('광역시', '').replace('도', '')}
+                      active={active}
+                      onPress={() =>
+                        patch({
+                          preferredRegions: active
+                            ? draft.preferredRegions.filter((item) => item !== region)
+                            : [...draft.preferredRegions, region],
+                        })
+                      }
                     />
-                  ))}
-                </View>
-              </Field>
-
-              <Field label="사는 지역">
-                <TextInput
-                  style={styles.input}
-                  value={draft.region}
-                  onChangeText={(region) => patch({ region })}
-                  placeholder="서울특별시"
-                  placeholderTextColor={colors.outline}
-                />
-              </Field>
-            </Appear>
-          ) : (
-            <Appear replayKey="setup-account" style={styles.fields}>
-              <Field label="청약통장이 있나요?">
-                <View style={styles.chipRow}>
-                  <Chip
-                    label="있어요"
-                    active={draft.hasSubscriptionAccount}
-                    onPress={() => patch({ hasSubscriptionAccount: true })}
-                  />
-                  <Chip
-                    label="아직 없어요"
-                    active={!draft.hasSubscriptionAccount}
-                    onPress={() => patch({ hasSubscriptionAccount: false })}
-                  />
-                </View>
-              </Field>
-
-              {draft.hasSubscriptionAccount ? (
-                <>
-                  <Field label="가입한 지 몇 개월 됐나요?" error={errors.accountMonths}>
-                    <TextInput
-                      style={[styles.input, errors.accountMonths && styles.inputError]}
-                      value={draft.accountMonths}
-                      onChangeText={(v) => patch({ accountMonths: digits(v) })}
-                      keyboardType="number-pad"
-                      maxLength={3}
-                    />
-                  </Field>
-
-                  <Field label="매달 넣는 금액 (원)" error={errors.monthlyPayment}>
-                    <TextInput
-                      style={[styles.input, errors.monthlyPayment && styles.inputError]}
-                      value={draft.monthlyPayment}
-                      onChangeText={(v) => patch({ monthlyPayment: digits(v) })}
-                      keyboardType="number-pad"
-                      maxLength={9}
-                    />
-                  </Field>
-                </>
-              ) : null}
-
-              <Field label="지금 무주택인가요?">
-                <View style={styles.chipRow}>
-                  <Chip
-                    label="무주택이에요"
-                    active={draft.isNoHomeOwner}
-                    onPress={() => patch({ isNoHomeOwner: true })}
-                  />
-                  <Chip
-                    label="아니에요"
-                    active={!draft.isNoHomeOwner}
-                    onPress={() => patch({ isNoHomeOwner: false })}
-                  />
-                </View>
-              </Field>
-            </Appear>
-          )}
+                  );
+                })}
+              </View>
+            </Field>
+          </Appear>
         </ScrollView>
 
         <View style={[styles.setupFooter, { paddingBottom: Math.max(insets.bottom, 10) + 10 }]}>
@@ -374,13 +299,13 @@ export default function OnboardingRoute() {
             accessibilityRole="button"
             accessibilityState={{ disabled: blocked }}
             disabled={blocked}
-            onPress={() => (basic ? setStep('account') : submit())}
+            onPress={submit}
           style={[
             styles.cta,
             blocked && styles.ctaDisabled,
           ]}
           >
-            <Text style={styles.ctaText}>{basic ? '다음' : '내 준비도 보기'}</Text>
+            <Text style={styles.ctaText}>완판e 시작하기</Text>
             <MaterialIcons name="arrow-forward" size={18} color={colors.onPrimary} />
           </MotionPressable>
         </View>

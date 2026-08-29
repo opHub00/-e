@@ -41,19 +41,25 @@ export default function PreparationRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const profile = useUserStore((state) => state.profile);
+  const applicantProfile = useUserStore((state) => state.applicantProfile);
   const todayQuizDone = useUserStore((state) => state.todayQuizDone);
   const { state: newsState, reload: reloadNews } = useNewsBriefing(profile, 4);
   const [openedNews, setOpenedNews] = useState<RankedNews | null>(null);
 
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
-  const actions = getRecommendedActions(profile);
+  const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
+  const actions = accountKnown
+    ? getRecommendedActions(profile)
+    : ['청약통장 정보를 확인하면 준비도를 더 정확하게 볼 수 있어요.', ...getRecommendedActions(profile).slice(1)];
   const inOne = simulateFuture(profile, 1);
   const inTwo = simulateFuture(profile, 2);
   const inFive = simulateFuture(profile, 5);
 
   const monthsLeft = MILESTONE_MONTHS - profile.accountMonths;
-  const milestoneBody = !profile.hasSubscriptionAccount
+  const milestoneBody = !accountKnown
+    ? '통장 정보를 확인해 주세요'
+    : !profile.hasSubscriptionAccount
     ? '통장을 열면 여기서부터 쌓여요'
     : monthsLeft > 0
       ? `${monthsLeft}개월 남았어요`
@@ -63,16 +69,26 @@ export default function PreparationRoute() {
     {
       key: 'start',
       when: '시작',
-      title: profile.hasSubscriptionAccount ? '청약통장 개설' : '청약통장 개설 전',
-      body: profile.hasSubscriptionAccount ? `${profile.accountMonths}개월 유지 중` : '아직 시작 전',
+      title: !accountKnown
+        ? '청약통장 정보 확인 전'
+        : profile.hasSubscriptionAccount
+          ? '청약통장 개설'
+          : '청약통장 개설 전',
+      body: !accountKnown
+        ? '프로필에서 통장 상태를 알려주세요'
+        : profile.hasSubscriptionAccount
+          ? `${profile.accountMonths}개월 유지 중`
+          : '아직 시작 전',
       score: null,
-      state: profile.hasSubscriptionAccount ? 'done' : 'current',
+      state: accountKnown && profile.hasSubscriptionAccount ? 'done' : 'current',
     },
     {
       key: 'now',
       when: '지금',
       title: `${stage.emoji} ${stage.label}`,
-      body: profile.hasSubscriptionAccount
+      body: !accountKnown
+        ? `${profile.age}세 · 통장 확인 필요`
+        : profile.hasSubscriptionAccount
         ? `${profile.age}세 · 통장 ${profile.accountMonths}개월`
         : `${profile.age}세 · 통장 없음`,
       score,
@@ -268,6 +284,10 @@ export default function PreparationRoute() {
       <NewsImpactSheet
         visible={openedNews !== null}
         profile={profile}
+        aiAllowed={
+          applicantProfile.subscriptionAccount.hasAccount.status === 'known' &&
+          applicantProfile.housing.currentOwnership.status === 'known'
+        }
         article={openedNews?.article ?? null}
         relevance={openedNews?.relevance ?? null}
         onClose={() => setOpenedNews(null)}

@@ -27,6 +27,7 @@ import {
 import { discoveryListings } from '../../features/discovery/mockListings';
 import type { DiscoveryListing } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
+import { toDiscoveryUserProfile } from '../../features/profile/domain';
 import { useUserStore } from '../../store/useUserStore';
 
 const GAUGE_SEGMENTS = 20;
@@ -35,6 +36,8 @@ export default function HomeRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const profile = useUserStore((state) => state.profile);
+  const applicantProfile = useUserStore((state) => state.applicantProfile);
+  const discoveryProfile = toDiscoveryUserProfile(applicantProfile);
   const xp = useUserStore((state) => state.xp);
   const todayQuizDone = useUserStore((state) => state.todayQuizDone);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
@@ -42,7 +45,10 @@ export default function HomeRoute() {
   const level = getLevel(xp);
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
-  const actions = getRecommendedActions(profile);
+  const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
+  const actions = accountKnown
+    ? getRecommendedActions(profile)
+    : ['청약통장 정보를 확인하면 준비도를 더 정확하게 볼 수 있어요.', ...getRecommendedActions(profile).slice(1)];
   const inTwoYears = simulateFuture(profile, 2);
   const delta = inTwoYears.preparationScore - score;
 
@@ -54,20 +60,26 @@ export default function HomeRoute() {
     discoveryListings.filter(
       (listing) => listing.recruitmentStatus !== 'closed' && !savedListingIds.includes(listing.id),
     ),
-    profile,
+    discoveryProfile,
     true,
   ).slice(0, 2);
 
   const watchlist = savedListings.length > 0 ? savedListings.slice(0, 3) : suggested;
 
-  const nextChange = !profile.hasSubscriptionAccount
+  const nextChange = !accountKnown
+    ? '정보 확인'
+    : !profile.hasSubscriptionAccount
     ? '통장 확인'
     : profile.accountMonths < MILESTONE_MONTHS
       ? `${MILESTONE_MONTHS - profile.accountMonths}개월`
       : '유지 중';
 
   const profileLine = `${profile.region.replace('특별시', '')} · ${profile.age}세 · ${
-    profile.hasSubscriptionAccount ? `통장 ${profile.accountMonths}개월` : '통장 없음'
+    !accountKnown
+      ? '통장 확인 필요'
+      : profile.hasSubscriptionAccount
+        ? `통장 ${profile.accountMonths}개월`
+        : '통장 없음'
   }`;
 
   // 최초 등장·의미 있는 값 변경에서만 재생된다. 탭을 오갈 때마다 0부터 세지 않는다.
@@ -151,7 +163,7 @@ export default function HomeRoute() {
             </View>
 
             {watchlist.map((listing, index) => {
-              const relevance = getListingRelevance(profile, listing);
+              const relevance = getListingRelevance(discoveryProfile, listing);
               const open = listing.recruitmentStatus === 'open';
               const priceLabel = formatPrice(listing.representativePrice).replace('억', '');
               return (

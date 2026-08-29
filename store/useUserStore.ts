@@ -3,9 +3,23 @@ import { createStore, type StateCreator } from 'zustand/vanilla';
 import { normalizeProfile } from '../domain/preparation.ts';
 import { XP_PER_QUIZ } from '../domain/quiz.ts';
 import type { UserProfile } from '../domain/types.ts';
+import {
+  createApplicantProfileFromLegacy,
+  createPromptFatigueState,
+  migrateApplicantProfile,
+  recordBundleDismissed,
+  recordBundleShown,
+  resolveFeaturePrompt,
+  toLegacyUserProfile,
+  type ApplicantProfileV2,
+  type ProfileFeature,
+  type ProfileQuestionBundleId,
+  type PromptFatigueState,
+} from '../features/profile/domain.ts';
 import { introStorage, type IntroStorage } from './introStorage.ts';
+import { profileStorage, type ProfileStorage } from './profileStorage.ts';
 
-/** 시연 시작 속도를 위한 기본값. 온보딩에서 그대로 수정할 수 있다. */
+/** 시연 시작 속도를 위한 기존 기본값. V2 migration의 backward-compatible seed이기도 하다. */
 export const defaultProfile: UserProfile = {
   name: '지민',
   age: 22,
@@ -17,18 +31,29 @@ export const defaultProfile: UserProfile = {
   isNoHomeOwner: true,
 };
 
+export const defaultApplicantProfile = createApplicantProfileFromLegacy(defaultProfile);
+
 export type UserState = {
+  /** 새 profile source of truth. */
+  applicantProfile: ApplicantProfileV2;
+  /** 기존 계산/화면을 위한 V2 → legacy adapter 결과. */
   profile: UserProfile;
+  profileHydrated: boolean;
+  promptFatigue: PromptFatigueState;
   xp: number;
   todayQuizDone: boolean;
   /** 최초 사용자 intro 를 봤는지. 건너뛰기도 본 것으로 친다. */
   hasSeenIntro: boolean;
   introHydrated: boolean;
   setProfile: (profile: UserProfile) => void;
-  /** 발표 중 처음 상태로 되돌린다. intro 도 다시 볼 수 있게 초기화한다. */
+  setApplicantProfile: (profile: ApplicantProfileV2) => void;
+  requestProfileBundle: (feature: ProfileFeature) => ProfileQuestionBundleId | null;
+  dismissProfileBundle: (bundleId: ProfileQuestionBundleId) => void;
+  /** 발표 중 처음 상태로 되돌린다. intro 와 로컬 profile도 초기화한다. */
   resetDemo: () => Promise<void>;
   completeIntro: () => Promise<void>;
   hydrateIntro: () => Promise<void>;
+  hydrateProfile: () => Promise<void>;
   /** 정답 여부와 무관하게 한 번만 XP를 준다. 다시 풀어도 중복 지급하지 않는다. */
   completeTodayQuiz: () => void;
 };
@@ -36,7 +61,10 @@ export type UserState = {
 const initialState = {
   hasSeenIntro: false,
   introHydrated: false,
+  applicantProfile: defaultApplicantProfile,
   profile: defaultProfile,
+  profileHydrated: false,
+  promptFatigue: createPromptFatigueState(),
   xp: 30,
   todayQuizDone: false,
 };
@@ -44,30 +72,91 @@ const initialState = {
 export const shouldRedirectToIntro = (state: Pick<UserState, 'hasSeenIntro' | 'introHydrated'>) =>
   state.introHydrated && !state.hasSeenIntro;
 
-export function createUserState(storage: IntroStorage): StateCreator<UserState> {
-  let hydration: Promise<void> | null = null;
+export function createUserState(
+  introStore: IntroStorage,
+  applicantStore: ProfileStorage,
+): StateCreator<UserState> {
+  let introHydration: Promise<void> | null = null;
+  let profileHydration: Promise<void> | null = null;
+
+  const persistApplicant = (profile: ApplicantProfileV2) => {
+    void applicantStore.write(profile).catch(() => undefined);
+  };
+
   return (set, get) => ({
     ...initialState,
-    setProfile: (profile) => set({ profile: normalizeProfile(profile) }),
+    setProfile: (profile) => {
+      const legacy = normalizeProfile(profile);
+      const applicantProfile = createApplicantProfileFromLegacy(legacy);
+      set({ applicantProfile, profile: legacy, profileHydrated: true });
+      persistApplicant(applicantProfile);
+    },
+    setApplicantProfile: (input) => {
+      const applicantProfile = migrateApplicantProfile(input, defaultProfile);
+      set({
+        applicantProfile,
+        profile: normalizeProfile(toLegacyUserProfile(applicantProfile)),
+        profileHydrated: true,
+      });
+      persistApplicant(applicantProfile);
+    },
+    requestProfileBundle: (feature) => {
+      const state = get();
+      const bundleId = resolveFeaturePrompt(feature, state.applicantProfile, state.promptFatigue);
+      if (bundleId) set({ promptFatigue: recordBundleShown(state.promptFatigue, bundleId) });
+      return bundleId;
+    },
+    dismissProfileBundle: (bundleId) =>
+      set((state) => ({
+        promptFatigue: recordBundleDismissed(state.promptFatigue, bundleId),
+      })),
     resetDemo: async () => {
-      await storage.write(false).catch(() => undefined);
-      set({ ...initialState, introHydrated: true });
+      await Promise.all([
+        introStore.write(false).catch(() => undefined),
+        applicantStore.clear().catch(() => undefined),
+      ]);
+      set({
+        ...initialState,
+        introHydrated: true,
+        profileHydrated: true,
+        promptFatigue: createPromptFatigueState(),
+      });
     },
     completeIntro: async () => {
-      await storage.write(true).catch(() => undefined);
+      await introStore.write(true).catch(() => undefined);
       set({ hasSeenIntro: true, introHydrated: true });
     },
     hydrateIntro: () => {
       if (get().introHydrated) return Promise.resolve();
-      if (hydration) return hydration;
-      hydration = storage
+      if (introHydration) return introHydration;
+      introHydration = introStore
         .read()
         .then((hasSeenIntro) => set({ hasSeenIntro, introHydrated: true }))
         .catch(() => set({ introHydrated: true }))
         .finally(() => {
-          hydration = null;
+          introHydration = null;
         });
-      return hydration;
+      return introHydration;
+    },
+    hydrateProfile: () => {
+      if (get().profileHydrated) return Promise.resolve();
+      if (profileHydration) return profileHydration;
+      profileHydration = applicantStore
+        .read()
+        .then((stored) => {
+          const applicantProfile = migrateApplicantProfile(stored, defaultProfile);
+          set({
+            applicantProfile,
+            profile: normalizeProfile(toLegacyUserProfile(applicantProfile)),
+            profileHydrated: true,
+          });
+          if (stored) persistApplicant(applicantProfile);
+        })
+        .catch(() => set({ profileHydrated: true }))
+        .finally(() => {
+          profileHydration = null;
+        });
+      return profileHydration;
     },
     completeTodayQuiz: () =>
       set((state) =>
@@ -76,5 +165,6 @@ export function createUserState(storage: IntroStorage): StateCreator<UserState> 
   });
 }
 
-export const createUserStore = (storage: IntroStorage) => createStore(createUserState(storage));
-export const useUserStore = create<UserState>(createUserState(introStorage));
+export const createUserStore = (introStore: IntroStorage, applicantStore: ProfileStorage) =>
+  createStore(createUserState(introStore, applicantStore));
+export const useUserStore = create<UserState>(createUserState(introStorage, profileStorage));

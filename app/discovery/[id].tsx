@@ -4,6 +4,7 @@ import type { Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
+import { Appear } from '../../components/motion/Appear';
 import { ScreenEnter } from '../../components/motion/ScreenEnter';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconChip } from '../../components/IconChip';
@@ -133,18 +134,20 @@ export default function DiscoveryDetailRoute() {
           <TabButton label="이야기" icon="forum" active={tab === 'stories'} onPress={() => setTab('stories')} />
         </View>
 
-        {tab === 'info' ? <InformationTab listing={listing} /> : null}
-        {tab === 'conditions' ? (
-          <ConditionsTab
-            profileName={profile.name}
-            relevance={relevance}
-            checkpoints={listing.checkpoints}
-            interestTags={listing.interestTags}
-          />
-        ) : null}
-        {tab === 'stories' ? (
-          <StoriesTab listingName={listing.complexName} stories={stories} isDemo={listing.isDemo} />
-        ) : null}
+        <Appear replayKey={tab} distance={0}>
+          {tab === 'info' ? <InformationTab listing={listing} /> : null}
+          {tab === 'conditions' ? (
+            <ConditionsTab
+              profileName={profile.name}
+              relevance={relevance}
+              checkpoints={listing.checkpoints}
+              interestTags={listing.interestTags}
+            />
+          ) : null}
+          {tab === 'stories' ? (
+            <StoriesTab listingName={listing.complexName} stories={stories} isDemo={listing.isDemo} />
+          ) : null}
+        </Appear>
       </ScrollView>
 
       <View style={styles.footer}>

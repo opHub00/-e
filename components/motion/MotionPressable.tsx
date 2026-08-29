@@ -56,7 +56,7 @@ export function MotionPressable({
   };
 
   const handlePressOut = (event: GestureResponderEvent) => {
-    animate(0);
+    if (!disabled) animate(0);
     onPressOut?.(event);
   };
 

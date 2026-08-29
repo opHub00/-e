@@ -135,7 +135,7 @@ export default function FutureRoute() {
     }
   }
 
-  const animatedFuture = useCountUp(future.preparationScore, { durationMs: 320 });
+  const animatedFuture = useCountUp(future.preparationScore, { durationMs: duration.screen });
   const scoreChanges = future.changes.filter((c) => c.affectsPreparationScore);
   const infoChanges = future.changes.filter((c) => !c.affectsPreparationScore);
   const milestone = future.nextMilestone;

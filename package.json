@@ -12,8 +12,9 @@
     "test:domain": "node --experimental-strip-types domain/preparation.test.ts && node --experimental-strip-types domain/futureSimulation.test.ts && node --experimental-strip-types domain/quiz.test.ts && node --experimental-strip-types domain/aiContext.test.ts && node --experimental-strip-types domain/regression.test.ts && node --experimental-strip-types store/useUserStore.test.ts",
     "test:discovery": "node --experimental-strip-types features/discovery/discovery.test.ts && node --experimental-strip-types features/discovery/data/dataLayer.test.ts && node --experimental-strip-types features/discovery/data/applyHome.test.ts && node --experimental-strip-types features/discovery/data/runtimeData.test.ts && node --experimental-strip-types features/discovery/server/KakaoGeocoding.test.ts && node --experimental-strip-types features/discovery/components/kakaoMap.test.ts",
     "test:news": "node --experimental-strip-types features/news/news.test.ts",
+    "test:motion": "node components/motion/motion.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:edge"
+    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:motion && npm run test:edge"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

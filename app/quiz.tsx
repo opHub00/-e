@@ -58,7 +58,7 @@ export default function QuizRoute() {
       shake.setValue(0);
       Animated.timing(shake, {
         toValue: 1,
-        duration: duration.micro + 60,
+        duration: duration.content,
         easing: easing.standard,
         useNativeDriver: useNative,
       }).start();
@@ -70,8 +70,8 @@ export default function QuizRoute() {
     xpLift.setValue(0);
     const animation = Animated.timing(xpLift, {
       toValue: 1,
-      duration: 520,
-      delay: 260,
+      duration: duration.major,
+      delay: duration.screen,
       easing: easing.enter,
       useNativeDriver: useNative,
     });

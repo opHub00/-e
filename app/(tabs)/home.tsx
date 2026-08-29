@@ -8,6 +8,7 @@ import { Appear } from '../../components/motion/Appear';
 import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
 import { Disclaimer } from '../../components/Disclaimer';
+import { stagger, travel } from '../../design/motion';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
@@ -126,7 +127,7 @@ export default function HomeRoute() {
 
         {/* Monzo: 밴드 아래는 하나의 연속 surface. 카드를 여러 장 띄우지 않는다. */}
         <View style={styles.sheet}>
-          <Appear delay={140} distance={6} style={styles.statRow}>
+          <Appear delay={stagger.normal} distance={travel.content} style={styles.statRow}>
             <Stat label="다음 변화" value={nextChange} lead />
             <View style={styles.statDivider} />
             <Stat label="오늘 학습" value={todayQuizDone ? `+${XP_PER_QUIZ} XP` : '아직'} />

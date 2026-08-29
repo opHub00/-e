@@ -4,12 +4,14 @@ import type { Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
+import { Appear } from '../../components/motion/Appear';
 import { ScreenEnter } from '../../components/motion/ScreenEnter';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconChip } from '../../components/IconChip';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
+import { duration } from '../../design/motion';
 import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
@@ -133,18 +135,21 @@ export default function DiscoveryDetailRoute() {
           <TabButton label="이야기" icon="forum" active={tab === 'stories'} onPress={() => setTab('stories')} />
         </View>
 
-        {tab === 'info' ? <InformationTab listing={listing} /> : null}
-        {tab === 'conditions' ? (
-          <ConditionsTab
-            profileName={profile.name}
-            relevance={relevance}
-            checkpoints={listing.checkpoints}
-            interestTags={listing.interestTags}
-          />
-        ) : null}
-        {tab === 'stories' ? (
-          <StoriesTab listingName={listing.complexName} stories={stories} isDemo={listing.isDemo} />
-        ) : null}
+        {/* 탭 내용은 통째로 바뀌므로 아주 짧게만 이어준다. content 길이면 전환이 번쩍인다. */}
+        <Appear replayKey={tab} distance={0} durationMs={duration.micro}>
+          {tab === 'info' ? <InformationTab listing={listing} /> : null}
+          {tab === 'conditions' ? (
+            <ConditionsTab
+              profileName={profile.name}
+              relevance={relevance}
+              checkpoints={listing.checkpoints}
+              interestTags={listing.interestTags}
+            />
+          ) : null}
+          {tab === 'stories' ? (
+            <StoriesTab listingName={listing.complexName} stories={stories} isDemo={listing.isDemo} />
+          ) : null}
+        </Appear>
       </ScrollView>
 
       <View style={styles.footer}>

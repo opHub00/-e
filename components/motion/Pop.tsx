@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import { duration, easing, useNative } from '../../design/motion';
+import { duration, easing, scale, useNative } from '../../design/motion';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 type Props = {
@@ -25,7 +25,7 @@ export function Pop({ children, active, style }: Props) {
     previous.current = active;
     if (!turnedOn || reduced) return;
 
-    value.setValue(0.86);
+    value.setValue(scale.selection);
     const animation = Animated.timing(value, {
       toValue: 1,
       duration: duration.content,

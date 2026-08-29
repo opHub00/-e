@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { duration } from '../design/motion';
+import { duration, travel } from '../design/motion';
 import { colors, radius, spacing, tint, type } from '../design/tokens';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
@@ -114,7 +114,7 @@ export function NewsImpactSheet({ visible, profile, article, relevance, onClose 
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="닫기" />
       <Appear
-        distance={24}
+        distance={travel.sheet}
         durationMs={duration.sheet}
         style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 12) + 8 }]}
       >

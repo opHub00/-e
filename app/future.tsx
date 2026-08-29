@@ -10,7 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { NewsBriefingSection } from '../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../components/NewsImpactSheet';
-import { duration } from '../design/motion';
+import { duration, travel } from '../design/motion';
 import { colors, radius, spacing, tint, type } from '../design/tokens';
 import {
   FUTURE_TIMELINE_MONTHS,
@@ -135,7 +135,7 @@ export default function FutureRoute() {
     }
   }
 
-  const animatedFuture = useCountUp(future.preparationScore, { durationMs: 320 });
+  const animatedFuture = useCountUp(future.preparationScore, { durationMs: duration.screen });
   const scoreChanges = future.changes.filter((c) => c.affectsPreparationScore);
   const infoChanges = future.changes.filter((c) => !c.affectsPreparationScore);
   const milestone = future.nextMilestone;
@@ -255,7 +255,9 @@ export default function FutureRoute() {
         </View>
 
         {/* ── 2. 미래 상태 (full-bleed 밝은 밴드 + 숫자 전이) ── */}
-        <Appear replayKey={`${scenarioId}-${offsetMonths}`} distance={6} style={styles.stateBand}>
+        {/* 시점을 옮길 때 읽혀야 하는 변화는 점수 하나다.
+            밴드까지 매번 페이드하면 숫자가 바뀌는 게 안 보이고 화면이 깜빡인다. */}
+        <View style={styles.stateBand}>
           <Text style={styles.stateLabel}>
             {offsetMonths === 0 ? '지금의' : `${future.label}의`} {profile.name}님
           </Text>
@@ -293,7 +295,7 @@ export default function FutureRoute() {
               {future.hasSubscriptionAccount ? `통장 ${future.accountMonths}개월` : '통장 없음'}
             </Text>
           </View>
-        </Appear>
+        </View>
 
         {/* ── 3. 마일스톤 (좌측 accent 행) ── */}
         <View style={styles.milestone}>
@@ -509,7 +511,7 @@ export default function FutureRoute() {
           />
 
           <Appear
-            distance={24}
+            distance={travel.sheet}
             durationMs={duration.sheet}
             style={[styles.customSheet, { paddingBottom: Math.max(insets.bottom, 12) + 12 }]}
           >

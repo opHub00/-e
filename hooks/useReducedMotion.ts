@@ -7,7 +7,11 @@ import { AccessibilityInfo, Platform } from 'react-native';
  * 값을 못 읽으면 false 로 두어 앱이 애니메이션 완료에 의존하지 않게 한다.
  */
 export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+  const [reduced, setReduced] = useState(() =>
+    Platform.OS === 'web' && typeof window !== 'undefined' && window.matchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false,
+  );
 
   useEffect(() => {
     let alive = true;

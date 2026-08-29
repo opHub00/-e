@@ -23,7 +23,7 @@ import type { DiscoveryFilters } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 import { Appear } from '../../components/motion/Appear';
 import { Pop } from '../../components/motion/Pop';
-import { duration } from '../../design/motion';
+import { duration, travel } from '../../design/motion';
 import { useUserStore } from '../../store/useUserStore';
 
 type ViewMode = 'map' | 'list';
@@ -190,12 +190,12 @@ export default function DiscoveryRoute() {
             />
           </View>
 
-          {/* 핀 선택 결과 bottom sheet */}
+          {/* 핀 선택 결과 bottom sheet.
+              핀을 바꾸면 내용은 즉시 갈아끼운다. 매번 페이드하면 시트가 깜빡인다. */}
           {selected ? (
-            <Appear distance={24} durationMs={duration.sheet} style={styles.sheet}>
+            <Appear distance={travel.sheet} durationMs={duration.sheet} style={styles.sheet}>
               <View style={styles.sheetHandle} />
 
-              <Appear replayKey={selected.id} distance={0}>
               <View style={styles.sheetTopRow}>
                 <View
                   style={[
@@ -222,6 +222,8 @@ export default function DiscoveryRoute() {
                   }
                   onPress={() => toggleSavedListing(selected.id)}
                   hitSlop={10}
+                  // 켜지는 순간은 Pop 이 맡는다. 눌림 scale 까지 겹치면 두 번 튄다.
+                  pressedScale={1}
                   style={styles.saveButton}
                 >
                   <Pop active={savedListingIds.includes(selected.id)}>
@@ -287,7 +289,6 @@ export default function DiscoveryRoute() {
               <Text style={styles.provenance}>
                 {selected.isDemo ? '데모 데이터 기준' : '청약홈 모집공고 기준'}
               </Text>
-              </Appear>
             </Appear>
           ) : (
             <View style={styles.sheet}>
@@ -387,12 +388,8 @@ function FilterChip({
         !primary && active && styles.chipQuietActive,
       ]}
     >
-      <Appear
-        replayKey={`${label}-${active}`}
-        distance={0}
-        durationMs={duration.micro}
-        style={styles.chipContent}
-      >
+      {/* 선택은 배경색이 이미 말해준다. 라벨까지 페이드하면 누를 때마다 글자가 깜빡인다. */}
+      <View style={styles.chipContent}>
         {icon ? (
           <MaterialIcons
             name={icon}
@@ -410,7 +407,7 @@ function FilterChip({
         >
           {label}
         </Text>
-      </Appear>
+      </View>
     </MotionPressable>
   );
 }

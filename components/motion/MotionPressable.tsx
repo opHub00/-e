@@ -45,7 +45,8 @@ export function MotionPressable({
         : toValue === 1
           ? duration.pressIn
           : duration.pressOut,
-      easing: toValue === 1 ? easing.standard : easing.enter,
+      // 양방향 모두 앞쪽에 몰린 곡선을 쓴다. ease-in-out 은 초반이 느려 누른 순간이 늦게 온다.
+      easing: easing.enter,
       useNativeDriver: useNative,
     }).start();
   };
@@ -56,7 +57,7 @@ export function MotionPressable({
   };
 
   const handlePressOut = (event: GestureResponderEvent) => {
-    animate(0);
+    if (!disabled) animate(0);
     onPressOut?.(event);
   };
 

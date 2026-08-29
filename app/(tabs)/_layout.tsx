@@ -73,7 +73,7 @@ export default function AppTabsLayout() {
           sceneStyle: {
             opacity: current.progress.interpolate({
               inputRange: [-1, 0, 1],
-              outputRange: [0, 1, 0],
+              outputRange: [0.96, 1, 0.96],
             }),
             transform: reducedMotion
               ? []

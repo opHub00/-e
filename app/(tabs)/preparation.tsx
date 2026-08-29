@@ -9,6 +9,7 @@ import { BrandMark } from '../../components/BrandMark';
 import { Appear } from '../../components/motion/Appear';
 import { NewsBriefingSection } from '../../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../../components/NewsImpactSheet';
+import { stagger, travel } from '../../design/motion';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
@@ -152,8 +153,9 @@ export default function PreparationRoute() {
             return (
               <Appear
                 key={node.key}
-                delay={index === 0 ? 0 : index === 1 ? 90 : 170}
-                distance={6}
+                // 3단계까지만 계단을 두고 나머지는 같이 뜬다. 노드마다 밀면 로드맵이 줄줄이 튄다.
+                delay={index === 0 ? 0 : index === 1 ? stagger.short : stagger.normal}
+                distance={travel.content}
                 style={styles.node}
               >
                 <View style={styles.rail}>

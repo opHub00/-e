@@ -11,6 +11,7 @@ import { IconChip } from '../../components/IconChip';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
+import { duration } from '../../design/motion';
 import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
@@ -134,7 +135,8 @@ export default function DiscoveryDetailRoute() {
           <TabButton label="이야기" icon="forum" active={tab === 'stories'} onPress={() => setTab('stories')} />
         </View>
 
-        <Appear replayKey={tab} distance={0}>
+        {/* 탭 내용은 통째로 바뀌므로 아주 짧게만 이어준다. content 길이면 전환이 번쩍인다. */}
+        <Appear replayKey={tab} distance={0} durationMs={duration.micro}>
           {tab === 'info' ? <InformationTab listing={listing} /> : null}
           {tab === 'conditions' ? (
             <ConditionsTab

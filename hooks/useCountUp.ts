@@ -17,7 +17,8 @@ type Options = {
 export function useCountUp(target: number, options: Options = {}) {
   const reduced = useReducedMotion();
   const value = useRef(new Animated.Value(target)).current;
-  const [display, setDisplay] = useState(target);
+  // 첫 렌더에서 target 을 그렸다가 effect 가 0 으로 되돌리면 최종 점수가 한 프레임 번쩍인다.
+  const [display, setDisplay] = useState(() => (reduced ? target : 0));
   const played = useRef(false);
   const previous = useRef(target);
 

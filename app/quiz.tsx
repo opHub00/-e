@@ -20,7 +20,7 @@ import {
   getTodayQuiz,
 } from '../domain/quiz';
 import { Appear } from '../components/motion/Appear';
-import { duration, easing, useNative } from '../design/motion';
+import { duration, easing, stagger, useNative } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useUserStore } from '../store/useUserStore';
 
@@ -68,10 +68,11 @@ export default function QuizRoute() {
   useEffect(() => {
     if (picked === null || !earnedXp || reduced) return;
     xpLift.setValue(0);
+    // 작은 안내 한 줄이다. major + 지연은 결과를 다 읽고 나서야 뜬다.
     const animation = Animated.timing(xpLift, {
       toValue: 1,
-      duration: duration.major,
-      delay: duration.screen,
+      duration: duration.content,
+      delay: stagger.normal,
       easing: easing.enter,
       useNativeDriver: useNative,
     });
@@ -184,7 +185,7 @@ export default function QuizRoute() {
         </View>
 
         {/* 결과 화면의 핵심. 가장 크고 진하게. */}
-        <Appear delay={120} style={styles.personalCard}>
+        <Appear delay={stagger.short} style={styles.personalCard}>
           <View style={styles.personalTop}>
             <IconChip name="person-pin" tone="purple" size="md" />
             <View style={styles.personalHeading}>
@@ -199,7 +200,7 @@ export default function QuizRoute() {
           </View>
         </Appear>
 
-        <Appear delay={200} style={styles.explainCard}>
+        <Appear delay={stagger.normal} style={styles.explainCard}>
           <View style={styles.explainHeading}>
             <IconChip name="menu-book" tone="amber" />
             <Text style={styles.cardLabel}>왜 그런가요?</Text>

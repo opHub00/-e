@@ -20,6 +20,9 @@ const loader = read('features/discovery/components/kakaoMapsLoader.ts');
 
 check(/pressIn:\s*120/.test(motion) && /pressOut:\s*160/.test(motion), 'press duration token');
 check(/pressed:\s*0\.98/.test(motion), 'pressed scale token');
+check(/sheet:\s*24/.test(motion), 'sheet travel token');
+// ease-in-out 은 초반이 느려 누른 순간이 늦게 온다. 눌림은 양방향 모두 앞쪽에 몰린 곡선을 쓴다.
+check(!/easing\.standard/.test(pressable), 'press feedback never uses the slow-start curve');
 check(/if \(!disabled\) animate\(1\)/.test(pressable), 'disabled press-in does not animate');
 check(/if \(!disabled\) animate\(0\)/.test(pressable), 'disabled press-out does not animate');
 check(!pressable.includes('setTimeout'), 'onPress is never delayed by motion');
@@ -43,6 +46,15 @@ for (const root of ['app', 'components', 'features']) {
   };
   visit(root);
 }
+
+// 시트 3종(청약찾기 목록·미래 조건·뉴스 브리핑)이 한 제품처럼 뜨려면 이동 거리가 한 곳에서 와야 한다.
+const literalSheetTravel = sourceFiles
+  .filter((path) => /distance=\{24\}/.test(read(path)))
+  .map((path) => relative('.', path).replaceAll('\\', '/'));
+check(
+  literalSheetTravel.length === 0,
+  `sheet travel must come from travel.sheet: ${literalSheetTravel.join(', ')}`,
+);
 
 const rawPressableFiles = sourceFiles
   .filter((path) => /<Pressable\b/.test(read(path)))

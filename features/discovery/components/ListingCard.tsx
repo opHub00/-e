@@ -90,6 +90,8 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
         accessibilityLabel={saved ? '저장 취소' : '청약 저장'}
         onPress={onToggleSaved}
         hitSlop={10}
+        // 켜지는 순간은 Pop 이 맡는다. 눌림 scale 까지 겹치면 두 번 튄다.
+        pressedScale={1}
         style={styles.saveButton}
       >
         <Pop active={saved}>

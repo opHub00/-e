@@ -1,0 +1,47 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { colors } from '../design/tokens';
+import { duration } from '../design/motion';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import { dismissActiveFocus } from '../utils/webFocus';
+
+export default function RootLayout() {
+  const reducedMotion = useReducedMotion();
+  const [fontsLoaded] = useFonts({
+    ...MaterialIcons.font,
+    'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
+    'Pretendard-SemiBold': require('../assets/fonts/Pretendard-SemiBold.otf'),
+    'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
+  });
+
+  if (!fontsLoaded) return null;
+
+  return (
+    <>
+      <StatusBar style="dark" />
+      <Stack
+        screenListeners={{
+          blur: dismissActiveFocus,
+          beforeRemove: dismissActiveFocus,
+        }}
+        screenOptions={{
+          animation: reducedMotion ? 'none' : 'fade_from_bottom',
+          animationDuration: duration.screen,
+          headerShadowVisible: false,
+          headerTintColor: colors.primary,
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen name="intro" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="future" options={{ headerShown: false }} />
+        <Stack.Screen name="quiz" options={{ headerShown: false }} />
+        <Stack.Screen name="discovery/[id]" options={{ headerShown: false }} />
+      </Stack>
+    </>
+  );
+}

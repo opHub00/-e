@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>완판e - 단지 상세 정보</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#140067",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1c1b22",
+                    "on-tertiary-container": "#ffc69a",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e5e1eb",
+                    "surface": "#fcf8ff",
+                    "surface-bright": "#fcf8ff",
+                    "secondary-container": "#e2e1f2",
+                    "inverse-primary": "#c5c0ff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#e3dfff",
+                    "inverse-surface": "#312f37",
+                    "surface-container-high": "#ebe6f0",
+                    "on-secondary-container": "#636371",
+                    "on-primary-fixed-variant": "#3f35a3",
+                    "tertiary-container": "#8a4900",
+                    "secondary-fixed-dim": "#c5c5d5",
+                    "outline-variant": "#c8c4d5",
+                    "secondary-fixed": "#e2e1f2",
+                    "on-primary-container": "#d1ccff",
+                    "tertiary-fixed": "#ffdcc3",
+                    "surface-container-low": "#f6f2fc",
+                    "tertiary": "#683500",
+                    "surface-tint": "#584fbc",
+                    "secondary": "#5d5d6b",
+                    "on-background": "#1c1b22",
+                    "on-surface-variant": "#474553",
+                    "on-tertiary-fixed": "#2f1500",
+                    "inverse-on-surface": "#f3eff9",
+                    "surface-dim": "#dcd8e2",
+                    "surface-container": "#f0ecf6",
+                    "on-secondary-fixed": "#191b26",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb77d",
+                    "on-tertiary-fixed-variant": "#6e3900",
+                    "on-error": "#ffffff",
+                    "primary": "#3b309e",
+                    "error": "#ba1a1a",
+                    "outline": "#787584",
+                    "background": "#fcf8ff",
+                    "primary-fixed-dim": "#c5c0ff",
+                    "on-secondary-fixed-variant": "#454653",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#534ab7",
+                    "surface-container-highest": "#e5e1eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "container-padding": "20px",
+                    "gutter": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "label-sm": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-md": ["22px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "1.3", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bento-card:active {
+            transform: scale(0.98);
+        }
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 24px;
+            bottom: 0;
+            width: 2px;
+            background: #e5e1eb;
+        }
+        .timeline-item:last-child .timeline-line::before {
+            display: none;
+        }
+        .sticky-cta {
+            background: linear-gradient(to top, rgba(252, 248, 255, 1) 80%, rgba(252, 248, 255, 0) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- Top App Bar (Shared Component) -->
+<nav class="flex justify-between items-center w-full px-container-padding py-stack-sm z-50 fixed top-0 bg-surface dark:bg-background">
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant/50 p-2 rounded-full transition-colors">arrow_back</button>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">완판e</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden ring-2 ring-primary/10">
+<img class="w-full h-full object-cover" data-alt="A profile picture of a young professional in a minimalist setting, captured with soft-focus lighting and a modern tech-aesthetic. The background is a clean lavender hue consistent with a premium real estate app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBra3oCrp1F_eonj5gtc5gK0GGT58o3Tq_Gf7HWugs_7KfoAbJ21GJYJXokwF5-Jm2c94YnsuSSMHPFq3Z9gSOdl8aYqXwDODyI8EUtRnqV8wd5pmQLCygcC8NKfS7nWgDesJ6POLV0LrLn1bnwGMNArcUHU6yt82oW_Dl1j8F5wxSxfXczYKXoqZGZVt4LHQ4NKcAOiQ4Y1oWbyZQqijM5B5w2gFBP84eiPKcJ5bMSRr0rU3Ar6_M7"/>
+</div>
+</div>
+</nav>
+<main class="pt-20 pb-32 px-container-padding">
+<!-- Hero Section -->
+<section class="mb-stack-lg">
+<div class="relative w-full aspect-video rounded-xl overflow-hidden mb-stack-md">
+<img class="w-full h-full object-cover" data-alt="A sleek, futuristic architectural rendering of a modern apartment complex in Seoul at twilight. The building features large glass panels reflecting a warm orange sunset. The environment is lush with integrated vertical gardens, embodying a clean, high-end lifestyle consistent with Korean luxury real estate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWDmoScqipl6AkXD4rTz_RviNwmZp1aGSzZTyGu1Eqs_u2VON_m2Nu72y3pjhBxIzSKZymPQ7_CJ59CL9m7ZqD2Xojiv3fnn-S_hRXRUd2vFFZS3OpLH0Zhpk9gHkcFcWkQn2u_84M1LhID5FyYvBDTsLCWs2Xw9wm_aia4ltk0Ygxc7C_Z6TjlIiwmsqhgMZVCmpkLYtJrIfIYbiOGfKiBcXTsJNn4mwIgFchKRRK1PhJwPJMJ0R0"/>
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="bg-error text-white px-3 py-1 rounded-full text-label-sm font-label-sm shadow-md">접수 중</span>
+<span class="bg-[#2E7D32] text-white px-3 py-1 rounded-full text-label-sm font-label-sm shadow-md">내 자격 OK</span>
+</div>
+</div>
+<div class="space-y-1">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">메타스테이 용산 센트럴</h1>
+<p class="text-on-surface-variant font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">location_on</span> 서울특별시 용산구 한강로3가
+                </p>
+</div>
+</section>
+<!-- Summary Bento Grid -->
+<section class="grid grid-cols-2 gap-gutter mb-stack-lg">
+<div class="col-span-2 bento-card bg-surface-container p-stack-md rounded-xl border border-outline-variant/30">
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-1">분양가</p>
+<h2 class="text-headline-md font-headline-md text-[#FF5722]">8억 4,000 ~ 12억 1,000</h2>
+</div>
+<div class="bento-card bg-surface-container p-stack-md rounded-xl border border-outline-variant/30">
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-1">면적</p>
+<p class="text-body-lg font-body-lg text-on-surface">59㎡ ~ 102㎡</p>
+</div>
+<div class="bento-card bg-surface-container p-stack-md rounded-xl border border-outline-variant/30">
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-1">세대 수</p>
+<p class="text-body-lg font-body-lg text-on-surface">1,240세대</p>
+</div>
+</section>
+<!-- Easy View Card (쉽게 보기) -->
+<section class="mb-stack-lg">
+<div class="bg-secondary-container rounded-xl p-stack-lg relative overflow-hidden">
+<div class="flex items-center gap-2 mb-stack-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="text-headline-md font-headline-md text-on-secondary-container">어려운 용어, 쉽게 보기</h3>
+</div>
+<div class="space-y-4">
+<div class="flex gap-stack-md">
+<div class="bg-white/80 p-stack-sm rounded-lg flex-1">
+<span class="inline-block px-2 py-0.5 bg-primary/10 text-primary text-label-sm font-label-sm rounded mb-1">중도금 선납할인</span>
+<p class="text-on-surface font-body-md text-body-md">"미리 낼수록 깎아줘요"</p>
+</div>
+</div>
+<div class="flex gap-stack-md">
+<div class="bg-white/80 p-stack-sm rounded-lg flex-1">
+<span class="inline-block px-2 py-0.5 bg-primary/10 text-primary text-label-sm font-label-sm rounded mb-1">특공 (특별공급)</span>
+<p class="text-on-surface font-body-md text-body-md">"특별한 조건이 맞는 분들을 위한 당첨 기회예요"</p>
+</div>
+</div>
+</div>
+<!-- Mascot Speech Bubble -->
+<div class="mt-6 flex items-start gap-3">
+<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-primary/10">
+<img class="w-10 h-10 object-contain" data-alt="A friendly and witty cartoon tiger mascot with a playful expression, designed in a modern flat style. The tiger is looking towards the user with a helpful wink, reinforcing a trustworthy yet approachable brand identity for a Korean fintech app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiwh6BCrJHFdOm55onD3pDFakr5xuycDjUBPQ-Xs9p8fpFpAzxFl-dqTVX2E6TFOjA9L0AgG-AMLkXWt8QUL6wF930thbdi7d1rhVtMRO0l65WIeJUfXErpZlKdtm52uugJr1YcSRI2isaD1BRduoo8Yj86Mu9sX4s1QW9xA-G7nd252FkU05hvcTwMGG9RfVCEm3AE_3tWuFbA8676vcl-stx6rWAoOnlzcTRxyLrsiUabV-ZQLjJ"/>
+</div>
+<div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm flex-1">
+<p class="text-on-surface-variant text-label-md font-label-md">복잡한 공고문은 제가 다 읽어봤어요! 궁금한 건 언제든 물어보세요.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Schedule Timeline -->
+<section class="mb-stack-lg">
+<h3 class="text-headline-md font-headline-md mb-stack-md">청약 일정</h3>
+<div class="space-y-0">
+<!-- Timeline Item 1 -->
+<div class="timeline-item flex gap-4 relative pb-stack-lg">
+<div class="timeline-line shrink-0 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-primary-fixed-dim border-4 border-white shadow-sm z-10"></div>
+</div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-primary mb-0.5">2024.05.20</p>
+<h4 class="text-body-lg font-body-lg text-on-surface">특별공급 접수</h4>
+<p class="text-label-md font-label-md text-on-surface-variant">다자녀, 신혼부부 등 대상</p>
+</div>
+</div>
+<!-- Timeline Item 2 (Active) -->
+<div class="timeline-item flex gap-4 relative pb-stack-lg">
+<div class="timeline-line shrink-0 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-primary border-4 border-white shadow-md z-10 scale-125"></div>
+</div>
+<div class="flex-1 bg-surface-container-high p-stack-sm rounded-lg -mt-2">
+<p class="text-label-sm font-label-sm text-primary mb-0.5">오늘 05.21</p>
+<h4 class="text-body-lg font-body-lg text-on-surface font-bold">1순위 청약 접수</h4>
+<p class="text-label-md font-label-md text-on-surface-variant">오후 5시 30분 마감</p>
+</div>
+</div>
+<!-- Timeline Item 3 -->
+<div class="timeline-item flex gap-4 relative pb-stack-lg">
+<div class="timeline-line shrink-0 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-surface-dim border-4 border-white shadow-sm z-10"></div>
+</div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-outline mb-0.5">2024.05.22</p>
+<h4 class="text-body-lg font-body-lg text-on-surface-variant">2순위 청약 접수</h4>
+</div>
+</div>
+<!-- Timeline Item 4 -->
+<div class="timeline-item flex gap-4 relative pb-stack-lg">
+<div class="timeline-line shrink-0 flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-surface-dim border-4 border-white shadow-sm z-10"></div>
+</div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-outline mb-0.5">2024.05.29</p>
+<h4 class="text-body-lg font-body-lg text-on-surface-variant">당첨자 발표</h4>
+</div>
+</div>
+</div>
+</section>
+<!-- Location Preview (Custom Component) -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h3 class="text-headline-md font-headline-md">입지 환경</h3>
+<button class="text-primary text-label-md font-label-md">지도 보기</button>
+</div>
+<div class="rounded-xl overflow-hidden h-40 border border-outline-variant/30 relative">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist map rendering of the Yongsan district in Seoul. The map uses a soft color palette of grays and lavenders, highlighting key landmarks and public transportation routes near the apartment site with simple geometric icons." data-location="Seoul Yongsan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeJo93Pu2YsL3bCPOaI_oKz5zxiYD1bgGarQ3GWcGiuPbxJUPnnkv9ckkPl4MS9BhSyjQp45U2kjPIvYN3noFU9oi8BouDnsC_Nnu2f7ESq1vsK6eAkhMXEkWV8b0vmXGUW4i9ao4XzvbZS-QvzlolH-omBUesQHwHJONWxzx_36MEgHsWjJLDVnlCc5F4G4w5AG8It0q1S3Ntqmc3ozb0_L4otXbiVKeBARpuH6trFUhZmPpadY74"/>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom CTA -->
+<div class="fixed bottom-0 left-0 w-full px-container-padding pb-stack-lg pt-stack-md sticky-cta z-50">
+<button class="w-full bg-primary text-white py-4 rounded-xl font-label-md text-body-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+            AI에게 더 물어보기
+        </button>
+</div>
+<!-- Bottom Nav Bar (Shared Component - Hidden on focused detail screen as per instructions, but placeholder provided for reference) -->
+<!-- According to instructions: "exclude the navigation shell if the page intent is Task-Focused/Sub-page" -->
+<!-- We prioritize the CTA for the detail page. -->
+<script>
+        // Micro-interactions
+        document.querySelectorAll('.bento-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.97)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

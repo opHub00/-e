@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>30초 청약 퀴즈</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "background": "#fcf8ff",
+                            "inverse-on-surface": "#f3eff9",
+                            "surface-container-highest": "#e5e1eb",
+                            "secondary": "#5d5d6b",
+                            "on-tertiary-fixed": "#2f1500",
+                            "surface-container-low": "#f6f2fc",
+                            "surface": "#fcf8ff",
+                            "error-container": "#ffdad6",
+                            "surface-container": "#f0ecf6",
+                            "on-primary-fixed": "#140067",
+                            "outline-variant": "#c8c4d5",
+                            "surface-dim": "#dcd8e2",
+                            "tertiary-fixed": "#ffdcc3",
+                            "on-primary-container": "#d1ccff",
+                            "primary-fixed-dim": "#c5c0ff",
+                            "on-tertiary": "#ffffff",
+                            "on-background": "#1c1b22",
+                            "surface-container-high": "#ebe6f0",
+                            "tertiary": "#683500",
+                            "on-secondary-container": "#636371",
+                            "inverse-primary": "#c5c0ff",
+                            "tertiary-fixed-dim": "#ffb77d",
+                            "on-surface-variant": "#474553",
+                            "on-secondary-fixed-variant": "#454653",
+                            "on-secondary": "#ffffff",
+                            "on-primary-fixed-variant": "#3f35a3",
+                            "secondary-fixed-dim": "#c5c5d5",
+                            "inverse-surface": "#312f37",
+                            "tertiary-container": "#8a4900",
+                            "primary-fixed": "#e3dfff",
+                            "secondary-fixed": "#e2e1f2",
+                            "on-error-container": "#93000a",
+                            "on-secondary-fixed": "#191b26",
+                            "secondary-container": "#e2e1f2",
+                            "error": "#ba1a1a",
+                            "on-tertiary-container": "#ffc69a",
+                            "primary": "#3b309e",
+                            "on-surface": "#1c1b22",
+                            "on-primary": "#ffffff",
+                            "primary-container": "#534ab7",
+                            "surface-tint": "#584fbc",
+                            "surface-bright": "#fcf8ff",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e5e1eb",
+                            "on-error": "#ffffff",
+                            "outline": "#787584",
+                            "on-tertiary-fixed-variant": "#6e3900"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "stack-md": "16px",
+                            "stack-lg": "24px",
+                            "stack-sm": "8px",
+                            "base": "4px",
+                            "container-padding": "20px",
+                            "gutter": "16px"
+                    },
+                    "fontFamily": {
+                            "label-sm": [
+                                    "Be Vietnam Pro"
+                            ],
+                            "headline-lg-mobile": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "label-md": [
+                                    "Be Vietnam Pro"
+                            ],
+                            "headline-lg": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "body-lg": [
+                                    "Be Vietnam Pro"
+                            ],
+                            "body-md": [
+                                    "Be Vietnam Pro"
+                            ],
+                            "headline-md": [
+                                    "Plus Jakarta Sans"
+                            ]
+                    },
+                    "fontSize": {
+                            "label-sm": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "1.2",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-lg-mobile": [
+                                    "26px",
+                                    {
+                                            "lineHeight": "1.3",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "label-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "1.4",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "1.3",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "1.6",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "body-md": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "1.6",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "22px",
+                                    {
+                                            "lineHeight": "1.4",
+                                            "fontWeight": "700"
+                                    }
+                            ]
+                    }
+            },
+                },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bento-card {
+            box-shadow: 0 4px 6px -1px rgba(88, 79, 188, 0.05), 0 2px 4px -1px rgba(88, 79, 188, 0.03);
+            transition: all 0.2s ease-in-out;
+        }
+        .bento-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(88, 79, 188, 0.08), 0 4px 6px -2px rgba(88, 79, 188, 0.04);
+            transform: translateY(-2px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0 pt-16 font-body-md antialiased flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-surface text-primary dark:text-primary-fixed-dim font-headline-md text-headline-md flex justify-between items-center px-container-padding h-16 shadow-none md:max-w-3xl md:mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="account_circle">account_circle</span>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">완판e</span>
+</div>
+<button class="hover:opacity-80 active:scale-95 transition-transform text-on-surface-variant flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="w-full max-w-3xl px-container-padding py-stack-lg flex flex-col gap-stack-lg md:px-0">
+<!-- Header Section -->
+<section class="flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-stack-sm flex items-center gap-2">
+                    30초 청약 퀴즈 <span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="edit_square" style="font-variation-settings: 'FILL' 1;">edit_square</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">매일 30초 투자로 청약 고수가 되어보세요!</p>
+</div>
+<div class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center overflow-hidden border border-outline-variant shadow-sm shrink-0">
+<img class="w-full h-full object-cover" data-alt="A friendly, cute cartoon tiger mascot with a small speech bubble. The tiger is smiling brightly, rendered in a modern flat illustration style with simple shapes and soft purple and orange accents. Clean white background, conveying approachability and wit for a modern Korean fintech app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAreqEHw3QOCLiZaru2Hgczf0cfaMdjp8aQQ3reD10Cb3YqM-buq4S4s5RnZggp6yckSHvnnZrJQweuioTj26QmTZf5vNJR-kxJH7n2gtH1oCFoR-e6c26hTKA6esDseGda0I8bYbM9kilvLN4iwcDefca85pqscJdOMNgGDseH5W5nEY3C78FB-Nu5erhQTTN9b-dxdr9U7VbqETQb-UCua5GeYqopMBJ2SxQ0Zm-7RUJF4tsIieWW"/>
+</div>
+</section>
+<!-- Point Balance -->
+<section class="bg-surface-container-high rounded-xl p-4 flex justify-between items-center bento-card border border-surface-container-highest">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="monetization_on" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">내 포인트</p>
+<p class="font-headline-md text-headline-md text-primary font-bold">1,250P</p>
+</div>
+</div>
+<button class="font-label-md text-label-md text-primary bg-primary-fixed rounded-full px-4 py-2 hover:opacity-80 active:scale-95 transition-transform flex items-center gap-1">
+                스토어 <span class="material-symbols-outlined text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</button>
+</section>
+<!-- Today's Quiz Card (Bento Style) -->
+<section class="bg-[#EEEDFE] rounded-[24px] p-6 bento-card relative overflow-hidden border border-primary-fixed">
+<!-- Decorative Element -->
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-primary opacity-5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex justify-between items-start mb-6 relative z-10">
+<div class="bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1.5 rounded-full inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="timer">timer</span> 오늘의 퀴즈
+                </div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-primary">30초 후 보상</p>
+<p class="font-body-md text-body-md font-bold text-primary-container">Step 1/1</p>
+</div>
+</div>
+<div class="mb-8 relative z-10">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-snug">
+                    부모님과 함께 살고 있는데,<br/>
+<span class="text-primary">무주택 세대주</span>로 청약을<br/>
+                    준비할 수 있을까요?
+                </h2>
+</div>
+<div class="flex flex-col sm:flex-row gap-3 relative z-10">
+<button class="flex-1 bg-surface text-on-surface font-body-lg text-body-lg py-4 rounded-xl border border-outline-variant hover:border-primary hover:text-primary hover:bg-surface-container-low transition-colors active:scale-95 font-medium shadow-sm flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="close">close</span> 아니요, 불가능합니다
+                </button>
+<button class="flex-1 bg-primary text-on-primary font-body-lg text-body-lg py-4 rounded-xl hover:opacity-90 transition-opacity active:scale-[0.98] font-medium shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> 네, 가능합니다
+                </button>
+</div>
+</section>
+<!-- Previous Quizzes List -->
+<section class="mt-stack-sm">
+<div class="flex justify-between items-center mb-stack-md">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface">복습하기 좋은 지난 퀴즈</h3>
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary flex items-center">
+                    전체보기 <span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- List Item 1 -->
+<div class="bg-surface rounded-xl p-4 flex gap-4 items-center border border-surface-container-highest bento-card cursor-pointer group">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg text-primary group-hover:bg-primary-fixed transition-colors shrink-0">
+<span class="material-symbols-outlined" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm text-secondary">어제</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim bg-tertiary-fixed/20 px-2 py-0.5 rounded-full">정답</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate group-hover:text-primary transition-colors">청약통장 해지 후 재가입하면 납입 횟수는?</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors shrink-0" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<!-- List Item 2 -->
+<div class="bg-surface rounded-xl p-4 flex gap-4 items-center border border-surface-container-highest bento-card cursor-pointer group">
+<div class="w-12 h-12 bg-error-container/50 flex items-center justify-center rounded-lg text-error group-hover:bg-error-container transition-colors shrink-0">
+<span class="material-symbols-outlined" data-icon="cancel" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm text-secondary">2일 전</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="font-label-sm text-label-sm text-error bg-error-container/30 px-2 py-0.5 rounded-full">오답</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate group-hover:text-primary transition-colors">생애최초 특별공급 소득 기준은?</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors shrink-0" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<!-- List Item 3 -->
+<div class="bg-surface rounded-xl p-4 flex gap-4 items-center border border-surface-container-highest bento-card cursor-pointer group">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg text-primary group-hover:bg-primary-fixed transition-colors shrink-0">
+<span class="material-symbols-outlined" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm text-secondary">3일 전</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim bg-tertiary-fixed/20 px-2 py-0.5 rounded-full">정답</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate group-hover:text-primary transition-colors">민영주택 청약 예치금 기준일은 언제인가요?</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors shrink-0" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface dark:bg-surface border-t border-outline-variant shadow-sm flex justify-around items-center h-20 pb-safe px-2 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant hover:bg-surface-container-high active:scale-95 transition-all w-16 h-16 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant hover:bg-surface-container-high active:scale-95 transition-all w-16 h-16 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="search">search</span>
+<span class="font-label-sm text-label-sm">검색</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant hover:bg-surface-container-high active:scale-95 transition-all w-16 h-16 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm">추천</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant hover:bg-surface-container-high active:scale-95 transition-all w-16 h-16 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">상담</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 hover:bg-surface-container-high active:scale-95 transition-all w-16 h-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">마이</span>
+</a>
+</nav>
+</body></html>

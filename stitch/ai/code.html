@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>완판e - AI 상담</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#140067",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1c1b22",
+                    "on-tertiary-container": "#ffc69a",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e5e1eb",
+                    "surface": "#fcf8ff",
+                    "surface-bright": "#fcf8ff",
+                    "secondary-container": "#e2e1f2",
+                    "inverse-primary": "#c5c0ff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#e3dfff",
+                    "inverse-surface": "#312f37",
+                    "surface-container-high": "#ebe6f0",
+                    "on-secondary-container": "#636371",
+                    "on-primary-fixed-variant": "#3f35a3",
+                    "tertiary-container": "#8a4900",
+                    "secondary-fixed-dim": "#c5c5d5",
+                    "outline-variant": "#c8c4d5",
+                    "secondary-fixed": "#e2e1f2",
+                    "on-primary-container": "#d1ccff",
+                    "tertiary-fixed": "#ffdcc3",
+                    "surface-container-low": "#f6f2fc",
+                    "tertiary": "#683500",
+                    "surface-tint": "#584fbc",
+                    "secondary": "#5d5d6b",
+                    "on-background": "#1c1b22",
+                    "on-surface-variant": "#474553",
+                    "on-tertiary-fixed": "#2f1500",
+                    "inverse-on-surface": "#f3eff9",
+                    "surface-dim": "#dcd8e2",
+                    "surface-container": "#f0ecf6",
+                    "on-secondary-fixed": "#191b26",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb77d",
+                    "on-tertiary-fixed-variant": "#6e3900",
+                    "on-error": "#ffffff",
+                    "primary": "#3b309e",
+                    "error": "#ba1a1a",
+                    "outline": "#787584",
+                    "background": "#fcf8ff",
+                    "primary-fixed-dim": "#c5c0ff",
+                    "on-secondary-fixed-variant": "#454653",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#534ab7",
+                    "surface-container-highest": "#e5e1eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "container-padding": "20px",
+                    "gutter": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "label-sm": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-md": ["22px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "1.3", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .chat-bubble-ai::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: -8px;
+            width: 16px;
+            height: 16px;
+            background: inherit;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+        .chat-bubble-user::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            background: inherit;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+        .bento-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface flex justify-between items-center w-full px-container-padding py-stack-sm z-50 fixed top-0 left-0">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A profile picture of a cheerful person with a warm smile, set against a soft lavender studio background that matches the app's primary color palette. The lighting is bright and modern, creating a professional yet approachable fintech aesthetic consistent with a modern-flat design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY5Z99Yfx6GxVfSEsg_PMB-6JzElPows-HagCkjjnY56JgZ1rcGqQJqzmNdFER09L7gv1OqN3zj6NDWwYgcBtVnLZXbSCw3UnwSQAlbwLUSR3a8zqjFb2iww59yv-I72eyXheWNmB4C8s5nlaA6l0jNeW5KQkolNN45pf5rvhbnaug5T-4jJPw0pPigkp4L9jhd1kDsTOkE7r3FbIgbU8AS3LunnByQaDmge48YLqXWXrcJAKmyFuk"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">완판e</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-all active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</header>
+<!-- Main Chat Canvas -->
+<main class="flex-1 overflow-y-auto px-container-padding pt-20 pb-40 space-y-stack-lg">
+<!-- Date Header -->
+<div class="flex justify-center">
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full">2024년 5월 24일</span>
+</div>
+<!-- User Message -->
+<div class="flex justify-end bento-fade-in">
+<div class="max-w-[80%] bg-primary text-on-primary px-4 py-3 rounded-2xl rounded-tr-none relative chat-bubble-user">
+<p class="font-body-md text-body-md">1주택자도 이번 청약 신청할 수 있나요?</p>
+</div>
+</div>
+<!-- AI Bot Message -->
+<div class="flex items-start gap-3 bento-fade-in" style="animation-delay: 0.2s;">
+<!-- Mascot Tiger Icon -->
+<div class="w-10 h-10 flex-shrink-0 bg-secondary-container rounded-full flex items-center justify-center p-1 border border-outline-variant">
+<img class="w-full h-full object-contain" data-alt="A friendly and witty tiger mascot icon with a round, cute face and soft orange fur. The tiger is smiling warmly and wearing a small purple headset, symbolizing a helpful AI consultant. The art style is flat, modern, and high-legibility with clean outlines, set against a soft lavender background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMSGrvPYmS6Z-s0BJEQgz2KbmmYG4ka2AAP-xrD2XUugaA9n42TpaSqJSc3ApjqRjFckkX9e6lZqusPwEp43pPdimLES4MuX0hkZtU8gS2RlE8t9sWdlhF07cfkCXsFHNefnSEMDtTNgHDe9i5LxIN1J-jzs1_h5JOxir-bl0E0FTpF8XsqYVL4GDKkWn8Xj655JQH5ei97ViBlXoHbXXkEbWEV5uDYkgUjv3eKiBaJRV3d8UN1rSn"/>
+</div>
+<div class="flex flex-col gap-2 max-w-[85%]">
+<div class="bg-surface-container-highest text-on-surface px-4 py-3 rounded-2xl rounded-tl-none relative chat-bubble-ai">
+<p class="font-body-md text-body-md leading-relaxed">
+                        네, 가능해요! 다만 <span class="font-bold text-primary">'추첨제'</span> 물량을 노려야 해요.
+                    </p>
+<div class="mt-2 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/30 italic text-on-surface-variant text-label-md font-label-md">
+                        💡 추첨제란? 운으로 당첨자를 정하는 방식이라 유주택자에게도 기회가 있어요.
+                    </div>
+</div>
+<!-- Follow-up Chips -->
+<div class="flex flex-wrap gap-2 mt-2">
+<button class="bg-secondary-container text-on-secondary-container font-label-md text-label-md px-4 py-2 rounded-full border border-outline-variant/20 hover:bg-primary-container hover:text-on-primary-container transition-colors active:scale-95">
+                        추첨제 물량 확인하기
+                    </button>
+<button class="bg-surface-container-low text-primary font-label-md text-label-md px-4 py-2 rounded-full border border-outline-variant/30 hover:bg-surface-variant transition-colors active:scale-95">
+                        다른 단지도 궁금해요
+                    </button>
+<button class="bg-surface-container-low text-primary font-label-md text-label-md px-4 py-2 rounded-full border border-outline-variant/30 hover:bg-surface-variant transition-colors active:scale-95">
+                        가점 계산해줘
+                    </button>
+</div>
+</div>
+</div>
+<!-- Bento Suggestion Card (Contextual) -->
+<div class="bento-fade-in" style="animation-delay: 0.4s;">
+<div class="bg-white p-5 rounded-2xl border border-outline-variant/30 shadow-sm space-y-3">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md">맞춤형 추천 단지</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+<div class="min-w-[200px] bg-surface-container-low p-3 rounded-xl border border-outline-variant/20">
+<div class="w-full h-24 bg-cover bg-center rounded-lg mb-2" data-alt="A luxurious modern apartment complex with glass balconies and lush rooftop gardens at sunset. The architectural design is contemporary with warm lighting emanating from windows, set against a clear purple-tinted evening sky in Seoul. High-quality real estate photography style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCu1kbtB0-XOToGkZz4apvO8cuElB_CmfNPGdlsXY8BfREyVg7T72g8L3gcnc0sZtFRVPZqMcGl3fNnGkAAjhvkW4sCSVkAqMSeVtQbvKH_sPAQZWoHhmsxm-eFmuPTAiVJ_pHh105ku9JZO_Xr5bRyE4oXvmig4I2542Fg0F_gPXHK5HGT3zI6GiWcMBOHZ4cro_ubmT7xC3hK5XGlNb5bDPykanBnwIy3BTSx6TCO6WdvwRfZwj8X')"></div>
+<h4 class="font-label-md text-label-md text-on-surface truncate">힐스테이트 이편한세상</h4>
+<p class="font-label-sm text-label-sm text-tertiary">추첨제 30% 포함</p>
+</div>
+<div class="min-w-[200px] bg-surface-container-low p-3 rounded-xl border border-outline-variant/20">
+<div class="w-full h-24 bg-cover bg-center rounded-lg mb-2" data-alt="High-rise urban apartment buildings with a sleek white and gray facade. The scene is bright and airy, captured on a sunny morning with a few fluffy white clouds. The landscaping at the base is manicured with green trees and walking paths. Minimalist and professional aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbP4GSLt502k02O60iXuQx5Lzr1WSYSa0lI57ilzGPP5xj7E3NZSsMmB4xapl0k10YjHatwDQ_tdlHxVPoep45hrJUiJfO8U6byioAJ6UH1vfyddBkDJR-4LO8MknpeldSXBXI8b4A27ZHx_piPJtoMjWZsLhbR49XvVkJatBIJBrOrC9ULZJHpiacRoXcBepEj9sv9YhkVBmWSe4uVRVfwDfNl6M1AI494KZvJnbXrgnv38SxeecL')"></div>
+<h4 class="font-label-md text-label-md text-on-surface truncate">래미안 원베일리</h4>
+<p class="font-label-sm text-label-sm text-tertiary">잔여 세대 모집 중</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Input & Nav Bar Area -->
+<div class="fixed bottom-0 left-0 w-full z-50">
+<!-- Floating Input Bar -->
+<div class="px-container-padding pb-2">
+<div class="bg-surface-container-highest/80 backdrop-blur-lg border border-outline-variant/30 p-2 rounded-2xl flex items-center gap-2 shadow-lg mb-4">
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/60 font-body-md text-body-md px-3" placeholder="무엇이든 물어보세요" type="text"/>
+<button class="bg-primary text-on-primary w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="bg-surface border-t border-outline-variant/30 rounded-t-xl shadow-sm flex justify-around items-center px-2 pb-6 pt-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm mt-1">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-sm text-label-sm mt-1">찾기</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-sm text-label-sm mt-1">추천</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+<span class="font-label-sm text-label-sm mt-1">상담</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm mt-1">MY</span>
+</a>
+</nav>
+</div>
+<script>
+        // Simple input interaction
+        const input = document.querySelector('input');
+        const sendBtn = document.querySelector('button.bg-primary');
+
+        sendBtn.addEventListener('click', () => {
+            if (input.value.trim() !== "") {
+                console.log("Sending message:", input.value);
+                input.value = "";
+            }
+        });
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && input.value.trim() !== "") {
+                sendBtn.click();
+            }
+        });
+
+        // Horizontal scroll animation for chips
+        const scrollContainer = document.querySelector('.overflow-x-auto');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+        });
+        scrollContainer.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+        scrollContainer.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+        scrollContainer.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            scrollContainer.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+</body></html>

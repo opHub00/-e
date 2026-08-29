@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>완판e - 맞춤 추천 설정</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bento-card:active {
+            transform: scale(0.98);
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b309e !important;
+            box-shadow: 0 0 0 2px rgba(59, 48, 158, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e1eb;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#140067",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1c1b22",
+                    "on-tertiary-container": "#ffc69a",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e5e1eb",
+                    "surface": "#fcf8ff",
+                    "surface-bright": "#fcf8ff",
+                    "secondary-container": "#e2e1f2",
+                    "inverse-primary": "#c5c0ff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#e3dfff",
+                    "inverse-surface": "#312f37",
+                    "surface-container-high": "#ebe6f0",
+                    "on-secondary-container": "#636371",
+                    "on-primary-fixed-variant": "#3f35a3",
+                    "tertiary-container": "#8a4900",
+                    "secondary-fixed-dim": "#c5c5d5",
+                    "outline-variant": "#c8c4d5",
+                    "secondary-fixed": "#e2e1f2",
+                    "on-primary-container": "#d1ccff",
+                    "tertiary-fixed": "#ffdcc3",
+                    "surface-container-low": "#f6f2fc",
+                    "tertiary": "#683500",
+                    "surface-tint": "#584fbc",
+                    "secondary": "#5d5d6b",
+                    "on-background": "#1c1b22",
+                    "on-surface-variant": "#474553",
+                    "on-tertiary-fixed": "#2f1500",
+                    "inverse-on-surface": "#f3eff9",
+                    "surface-dim": "#dcd8e2",
+                    "surface-container": "#f0ecf6",
+                    "on-secondary-fixed": "#191b26",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb77d",
+                    "on-tertiary-fixed-variant": "#6e3900",
+                    "on-error": "#ffffff",
+                    "primary": "#3b309e",
+                    "error": "#ba1a1a",
+                    "outline": "#787584",
+                    "background": "#fcf8ff",
+                    "primary-fixed-dim": "#c5c0ff",
+                    "on-secondary-fixed-variant": "#454653",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#534ab7",
+                    "surface-container-highest": "#e5e1eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "container-padding": "20px",
+                    "gutter": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "label-sm": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-md": ["22px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "1.3", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col items-center">
+<!-- Top AppBar (Mobile Style Shell) -->
+<header class="bg-surface fixed top-0 w-full z-50 flex justify-between items-center px-container-padding py-stack-sm max-w-md mx-auto">
+<button class="p-2 hover:bg-surface-variant/50 rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-primary">완판e</span>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional high-quality profile avatar of a friendly young Korean professional, bright clean studio lighting, minimalist soft purple background, modern lifestyle photography style, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR3DH-4h3S_sdTSbnbvGa0pT9o-jLItL6oFAL5zchALi54NdnNV6J-3_EdKV_Y-kZR8dHSs-5qsjFKvhp9sEXF5A1kcthyCMXUjEZ2kEXNb2KiQdtP10xno84rH8hSZGfvTcbS5dAZjSj-IVVQCRivmTw6ynho3nwBRh4k892ptDVvx9nDt6OHqpmn3FJGO9Gfr9_UfsOCxY7WAxF9aksSR9xOuqystKLY2tIiYazhN17K5HTX4XSr"/>
+</div>
+</header>
+<!-- Progress Indicator -->
+<div class="fixed top-[56px] w-full max-w-md bg-surface z-40 px-container-padding pt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Step 1/4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">추천 엔진 설정 중</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/4 rounded-full transition-all duration-500"></div>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-md px-container-padding pt-32 pb-40 flex-grow">
+<!-- Headline -->
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-8 leading-tight">
+            지은님에 대해<br/>조금만 더 알려주세요!
+        </h1>
+<!-- Bento Grid Form Sections -->
+<div class="grid grid-cols-1 gap-gutter">
+<!-- Income Field -->
+<section class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 bento-card shadow-sm">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
+<label class="font-label-md text-label-md text-on-surface">연소득 (세전 기준이에요)</label>
+</div>
+<div class="relative">
+<input class="w-full bg-surface border-outline-variant border rounded-lg py-4 px-4 text-headline-md font-headline-md text-on-surface pr-12 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="예: 5,000" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 font-label-md text-on-surface-variant">만원</span>
+</div>
+</section>
+<!-- Family Counter -->
+<section class="bg-secondary-container p-6 rounded-xl bento-card border border-transparent">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary">groups</span>
+<h3 class="font-label-md text-label-md text-on-surface">함께 살 가족 수</h3>
+</div>
+<p class="text-label-sm text-on-secondary-container">본인 포함 인원수를 알려주세요</p>
+</div>
+<div class="flex items-center bg-surface rounded-full p-1 shadow-sm">
+<button class="w-10 h-10 flex items-center justify-center text-primary hover:bg-primary/5 rounded-full transition-colors" onclick="decrement('family-count')">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="w-12 text-center font-headline-md text-headline-md text-on-surface" id="family-count">1</span>
+<button class="w-10 h-10 flex items-center justify-center text-primary hover:bg-primary/5 rounded-full transition-colors" onclick="increment('family-count')">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Region Selector -->
+<section class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 bento-card shadow-sm">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<label class="font-label-md text-label-md text-on-surface">희망 지역 (최대 3개)</label>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="false">서울</button>
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="false">경기</button>
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="true">인천</button>
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="false">부산</button>
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="false">세종</button>
+<button class="chip-btn px-4 py-2 rounded-full border border-outline-variant bg-surface text-label-md transition-all active:scale-95" data-selected="false">대구</button>
+</div>
+</section>
+</div>
+<!-- Mascot Tip -->
+<div class="mt-12 flex items-end gap-4">
+<div class="flex-shrink-0 w-24 h-24 relative">
+<img class="w-full h-full object-contain" data-alt="A friendly, witty cartoon tiger mascot with soft orange and black stripes, wearing a tiny purple real estate agent vest. The character is smiling warmly and waving, styled in a modern flat Korean character design aesthetic with clean lines and high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtgSdTkjvJykB-tqgFwtkiTOD4utBg-qLvlcoZJW1ZjIzGuXnFJNU-du-P-_VUNQzYoQg1odJAaQyM3KyG4iz2VGrWzBfjc5CCJftiHLge7hAkza-VrpXUEDlu5uuOnxKM4ArKIvFT_X8Ci_MY4vjLAY_fVAYZvtZ9vBZQH_mXApVflHv_ofm52-iTI0atCdOHQKnWEGSn_P3hpvZ_vHS0-T4OBfE3i-aIIbtirfldARPOrDCHzHZG"/>
+</div>
+<div class="bg-primary-container text-on-primary-container p-4 rounded-t-2xl rounded-br-2xl text-label-md relative mb-4">
+                "연소득은 정확할수록 나에게 맞는 <br/>청약 당첨 확률이 올라가요! 흥!"
+                <div class="absolute -left-2 bottom-0 w-4 h-4 bg-primary-container transform -skew-x-12"></div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<footer class="fixed bottom-0 left-0 w-full max-w-md mx-auto p-container-padding bg-surface/80 backdrop-blur-md z-50">
+<button class="w-full bg-primary text-on-primary font-label-md text-headline-md py-4 rounded-xl shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            다음으로 넘어가기
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+<script>
+        function increment(id) {
+            const el = document.getElementById(id);
+            let val = parseInt(el.innerText);
+            el.innerText = val + 1;
+        }
+
+        function decrement(id) {
+            const el = document.getElementById(id);
+            let val = parseInt(el.innerText);
+            if (val > 1) el.innerText = val - 1;
+        }
+
+        // Chip selection logic
+        document.querySelectorAll('.chip-btn').forEach(btn => {
+            const updateStyles = () => {
+                const isSelected = btn.getAttribute('data-selected') === 'true';
+                if (isSelected) {
+                    btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+                    btn.classList.remove('bg-surface', 'text-on-surface', 'border-outline-variant');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+                    btn.classList.add('bg-surface', 'text-on-surface', 'border-outline-variant');
+                }
+            };
+
+            updateStyles();
+
+            btn.addEventListener('click', () => {
+                const isSelected = btn.getAttribute('data-selected') === 'true';
+                btn.setAttribute('data-selected', !isSelected);
+                updateStyles();
+            });
+        });
+
+        // Simple scroll reveal for the mascot
+        window.addEventListener('scroll', () => {
+            const mascot = document.querySelector('.mt-12');
+            const pos = mascot.getBoundingClientRect().top;
+            if (pos < window.innerHeight) {
+                mascot.style.opacity = '1';
+                mascot.style.transform = 'translateY(0)';
+            }
+        });
+        
+        // Initial state for mascot animation
+        const mascot = document.querySelector('.mt-12');
+        mascot.style.opacity = '0';
+        mascot.style.transform = 'translateY(20px)';
+        mascot.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+        setTimeout(() => {
+            mascot.style.opacity = '1';
+            mascot.style.transform = 'translateY(0)';
+        }, 300);
+    </script>
+</body></html>

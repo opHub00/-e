@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>완판e - 스마트한 내 집 마련 파트너</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      background-color: #fcf8ff;
+      color: #1c1b22;
+      -webkit-font-smoothing: antialiased;
+    }
+    .bento-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(200, 196, 213, 0.3);
+    }
+    .bento-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(59, 48, 158, 0.08);
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-primary-fixed": "#140067",
+                  "on-tertiary": "#ffffff",
+                  "on-secondary": "#ffffff",
+                  "on-surface": "#1c1b22",
+                  "on-tertiary-container": "#ffc69a",
+                  "error-container": "#ffdad6",
+                  "surface-variant": "#e5e1eb",
+                  "surface": "#fcf8ff",
+                  "surface-bright": "#fcf8ff",
+                  "secondary-container": "#e2e1f2",
+                  "inverse-primary": "#c5c0ff",
+                  "on-error-container": "#93000a",
+                  "primary-fixed": "#e3dfff",
+                  "inverse-surface": "#312f37",
+                  "surface-container-high": "#ebe6f0",
+                  "on-secondary-container": "#636371",
+                  "on-primary-fixed-variant": "#3f35a3",
+                  "tertiary-container": "#8a4900",
+                  "secondary-fixed-dim": "#c5c5d5",
+                  "outline-variant": "#c8c4d5",
+                  "secondary-fixed": "#e2e1f2",
+                  "on-primary-container": "#d1ccff",
+                  "tertiary-fixed": "#ffdcc3",
+                  "surface-container-low": "#f6f2fc",
+                  "tertiary": "#683500",
+                  "surface-tint": "#584fbc",
+                  "secondary": "#5d5d6b",
+                  "on-background": "#1c1b22",
+                  "on-surface-variant": "#474553",
+                  "on-tertiary-fixed": "#2f1500",
+                  "inverse-on-surface": "#f3eff9",
+                  "surface-dim": "#dcd8e2",
+                  "surface-container": "#f0ecf6",
+                  "on-secondary-fixed": "#191b26",
+                  "on-primary": "#ffffff",
+                  "tertiary-fixed-dim": "#ffb77d",
+                  "on-tertiary-fixed-variant": "#6e3900",
+                  "on-error": "#ffffff",
+                  "primary": "#3b309e",
+                  "error": "#ba1a1a",
+                  "outline": "#787584",
+                  "background": "#fcf8ff",
+                  "primary-fixed-dim": "#c5c0ff",
+                  "on-secondary-fixed-variant": "#454653",
+                  "surface-container-lowest": "#ffffff",
+                  "primary-container": "#534ab7",
+                  "surface-container-highest": "#e5e1eb"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "2xl": "1rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "stack-md": "16px",
+                  "stack-lg": "24px",
+                  "stack-sm": "8px",
+                  "container-padding": "20px",
+                  "gutter": "16px",
+                  "base": "4px"
+          },
+          "fontFamily": {
+                  "body-md": ["Be Vietnam Pro"],
+                  "label-md": ["Be Vietnam Pro"],
+                  "headline-md": ["Plus Jakarta Sans"],
+                  "body-lg": ["Be Vietnam Pro"],
+                  "label-sm": ["Be Vietnam Pro"],
+                  "headline-lg": ["Plus Jakarta Sans"],
+                  "headline-lg-mobile": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+                  "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                  "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                  "headline-md": ["22px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                  "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "500"}],
+                  "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                  "headline-lg": ["32px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "headline-lg-mobile": ["26px", {"lineHeight": "1.3", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface flex justify-between items-center px-container-padding py-stack-sm h-16">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container/30">
+<img class="w-full h-auto" data-alt="A profile portrait of a smiling young Korean professional against a soft pastel lavender background. The lighting is high-key and flattering, emphasizing a friendly and approachable personality. The image follows a modern, clean light-mode aesthetic with a shallow depth of field, focusing sharply on the face while the background remains a blur of soft colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk9BBh2m-N8aq5DD8oaDuWRIOm-dLdf2cZgMoFV0zQxnq_GmcFPuUgsKnuT39vaI2PqnKWQ_B_b5aVt2-Qj3QjAE8TxI2ygbn44Lara5T7ZVlz1Asc5Xe5rvYzkt8ojfajscXDSrGWUoC3KIlUTWHZbvbUTDG6EkwpzXuM50Xv5NzAddmr5WDmffyKfaN2Aps7prS6R1gL8-qCMyEr5o7uBsjhiGUlGLcrosP40TOkEKip07Z86RH9"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">완판e</h1>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-20 pb-32 px-container-padding max-w-2xl mx-auto">
+<!-- Greeting Section -->
+<section class="mb-stack-lg">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">
+        반가워요, 지민님! <br/>
+<span class="text-primary-container">오늘도 내 집 마련에</span><br/>
+        한 발짝 더 가까워져 봐요.
+      </h2>
+</section>
+<!-- Hero Card: Today's Recommendation -->
+<section class="mb-stack-lg">
+<div class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-outline-variant/30 transition-all duration-300 hover:shadow-md">
+<div class="relative h-64 w-full overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A cinematic, low-angle shot of a stunning modern apartment complex in Seoul at golden hour. The building features sleek glass facades and integrated vertical gardens. The sunlight creates a warm, hopeful glow across the architecture, conveying a premium and serene living environment. The overall mood is aspirational and high-end, fitting for a prestigious real estate platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvYBbuWN-Z9WlDnoqpk9xMwfdK_XJuaFadPCRc8aIxBG9QU_2H9qmFiTE_3_lnZjvlao1qToBLYJC3p3SGDPt0HN7Jlsa9T-hT3x8xpjqNola0kggBi6Z6uFXvPq60GNaaKwC4I1-WPzgtvOWkyNLagc13lQIpFRO_KA1Ks1axFkJbGjWFjUBKlqagnxA19gfrFQMSpdb1lOuTakamF0RkLx3d3lOJZx47sbOtR3InpJ1f1oi8jKD3"/>
+<div class="absolute top-4 left-4">
+<span class="bg-error px-3 py-1 rounded-full text-white font-label-sm text-label-sm shadow-lg">D-3 마감</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-4 text-white">
+<p class="font-label-md text-label-md opacity-90">힐스테이트 판교 엘포레</p>
+<p class="font-headline-md text-headline-md">11억 4,000만원 ~</p>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex items-start gap-3 bg-secondary-container/30 p-3 rounded-xl">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">stars</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-snug">
+              지민님의 <span class="font-bold text-primary">자격 3개 중 3개</span>를 모두 충족해요! 바로 도전해볼까요?
+            </p>
+</div>
+<button class="w-full bg-primary-container text-white py-4 rounded-xl font-label-md text-label-md hover:opacity-90 active:scale-[0.98] transition-all">
+            청약 신청하기
+          </button>
+</div>
+</div>
+</section>
+<!-- Bento Grid -->
+<section class="grid grid-cols-2 gap-gutter">
+<!-- Card 1: Calendar (Medium - Spans 2 columns on mobile) -->
+<div class="col-span-2 bento-card bg-white rounded-2xl p-5 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="calendar_month">calendar_month</span>
+<h3 class="font-label-md text-label-md text-on-surface">청약 캘린더</h3>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-xl">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">05.24 (금)</span>
+<span class="font-body-md text-body-md font-semibold">동탄역 롯데캐슬 줍줍</span>
+</div>
+<span class="text-tertiary font-label-sm text-label-sm px-2 py-1 bg-tertiary-fixed rounded-lg">당첨 발표</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-xl">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">05.28 (화)</span>
+<span class="font-body-md text-body-md font-semibold">래미안 원베일리</span>
+</div>
+<span class="text-primary-container font-label-sm text-label-sm px-2 py-1 bg-secondary-container rounded-lg">1순위 접수</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Points Calculator (Small) -->
+<div class="bento-card bg-secondary-container/40 rounded-2xl p-5 flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-primary-container w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-sm" data-icon="calculate" style="font-variation-settings: 'FILL' 1;">calculate</span>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">가점 계산기</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">내 점수는 몇 점?</p>
+</div>
+</div>
+<!-- Card 3: Homeless Period Checker (Small) -->
+<div class="bento-card bg-tertiary-fixed/30 rounded-2xl p-5 flex flex-col justify-between aspect-square border-tertiary-fixed/50">
+<span class="material-symbols-outlined text-tertiary w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-sm" data-icon="home_work" style="font-variation-settings: 'FILL' 1;">home_work</span>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">무주택 기간</h3>
+<p class="font-body-md text-body-md text-on-tertiary-fixed-variant mt-1">자격 유지 중이에요</p>
+</div>
+</div>
+<!-- Extra Tip Card (Mascot Integration) -->
+<div class="col-span-2 relative bg-primary text-white rounded-2xl p-5 overflow-hidden">
+<div class="relative z-10 flex flex-col gap-2 pr-24">
+<p class="font-label-md text-label-md opacity-80">어흥! 호랑이 팁</p>
+<p class="font-body-lg text-body-lg font-bold leading-tight">지민님, 생애최초 특별공급 <br/>조건이 완화된 거 아시나요?</p>
+<button class="mt-2 text-primary bg-white w-fit px-4 py-1.5 rounded-full font-label-sm text-label-sm">자세히 알아보기</button>
+</div>
+<!-- Mascot Placeholder -->
+<div class="absolute right-[-10px] bottom-[-20px] w-40 h-40 opacity-90 pointer-events-none">
+<img class="w-full h-full object-contain" data-alt="A friendly, minimalist 3D tiger mascot illustration. The tiger is rounded and cute, sitting in a thoughtful pose with a small lightbulb above its head. The style is clean 'Modern-Flat' with a limited color palette of orange, white, and dark stripes, designed to be approachable and encouraging for a fintech application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCILJvU_2Jrn6OlQdy2eorYLyYhDzxMwRXGGP3iwyQpFDw9T3GyPqJGnPuA47oTXGKyunTprsHY8MXqfmuSy1j85xMmoqUJg3zQWewj_m2dvNGz69Viu2QzEyfYTRgwR2eGt4r7G_3ukQcVpkySmAsqoNxSX2Ne6Hd69LU793hFqSZdWbsMFb68Xsm8J4HajEEvoZlH-UvzJQPdXAv0Mbvq2imX9PWl95Nd8Bk-tGTU7Uy1R7TdUIsc"/>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface border-t border-outline-variant/20 flex justify-around items-center px-2 pb-8 pt-3 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-primary px-4 py-1 rounded-full transition-all duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm mt-0.5">홈</span>
+</a>
+<!-- Search -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-sm text-label-sm mt-0.5">찾기</span>
+</a>
+<!-- Recommendation -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm mt-0.5">추천</span>
+</a>
+<!-- Counseling -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label-sm text-label-sm mt-0.5">상담</span>
+</a>
+<!-- My -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-0.5">MY</span>
+</a>
+</nav>
+<script>
+    // Simple micro-interaction for cards
+    document.querySelectorAll('.bento-card').forEach(card => {
+      card.addEventListener('mousedown', () => {
+        card.style.transform = 'scale(0.98)';
+      });
+      card.addEventListener('mouseup', () => {
+        card.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body></html>

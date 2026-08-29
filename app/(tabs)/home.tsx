@@ -1,0 +1,383 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MotionPressable } from '../../components/motion/MotionPressable';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Appear } from '../../components/motion/Appear';
+import { useCountUp } from '../../hooks/useCountUp';
+import { BrandMark } from '../../components/BrandMark';
+import { Disclaimer } from '../../components/Disclaimer';
+import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import {
+  calculatePreparationScore,
+  getRecommendedActions,
+  getStage,
+  MILESTONE_MONTHS,
+  simulateFuture,
+} from '../../domain/preparation';
+import { getLevel, XP_PER_QUIZ } from '../../domain/quiz';
+import {
+  formatPrice,
+  getListingRelevance,
+  RECRUITMENT_STATUS_LABEL,
+  sortListings,
+} from '../../features/discovery/domain';
+import { discoveryListings } from '../../features/discovery/mockListings';
+import type { DiscoveryListing } from '../../features/discovery/types';
+import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
+import { useUserStore } from '../../store/useUserStore';
+
+const GAUGE_SEGMENTS = 20;
+
+export default function HomeRoute() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const profile = useUserStore((state) => state.profile);
+  const xp = useUserStore((state) => state.xp);
+  const todayQuizDone = useUserStore((state) => state.todayQuizDone);
+  const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
+
+  const level = getLevel(xp);
+  const score = calculatePreparationScore(profile);
+  const stage = getStage(score);
+  const actions = getRecommendedActions(profile);
+  const inTwoYears = simulateFuture(profile, 2);
+  const delta = inTwoYears.preparationScore - score;
+
+  const savedListings = savedListingIds
+    .map((id) => discoveryListings.find((listing) => listing.id === id))
+    .filter((listing): listing is DiscoveryListing => Boolean(listing));
+
+  const suggested = sortListings(
+    discoveryListings.filter(
+      (listing) => listing.recruitmentStatus !== 'closed' && !savedListingIds.includes(listing.id),
+    ),
+    profile,
+    true,
+  ).slice(0, 2);
+
+  const watchlist = savedListings.length > 0 ? savedListings.slice(0, 3) : suggested;
+
+  const nextChange = !profile.hasSubscriptionAccount
+    ? '통장 확인'
+    : profile.accountMonths < MILESTONE_MONTHS
+      ? `${MILESTONE_MONTHS - profile.accountMonths}개월`
+      : '유지 중';
+
+  const profileLine = `${profile.region.replace('특별시', '')} · ${profile.age}세 · ${
+    profile.hasSubscriptionAccount ? `통장 ${profile.accountMonths}개월` : '통장 없음'
+  }`;
+
+  // 최초 등장·의미 있는 값 변경에서만 재생된다. 탭을 오갈 때마다 0부터 세지 않는다.
+  const animatedScore = useCountUp(score);
+  const filled = Math.round((animatedScore / 100) * GAUGE_SEGMENTS);
+
+  return (
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Monzo: 브랜드와 핵심 수치가 같은 컬러 surface 위에 있다. 헤더가 따로 떠 있지 않다. */}
+        <LinearGradient
+          colors={[colors.primaryContainer, colors.primary]}
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.band, { paddingTop: Math.max(insets.top, 12) + 8 }]}
+        >
+          <View style={styles.bandGlow} />
+
+          <View style={styles.brandRow}>
+            <BrandMark size={30} />
+            <Text style={styles.wordmark}>완판e</Text>
+            <View style={styles.spacer} />
+            <View style={styles.levelPill}>
+              <MaterialIcons name="bolt" size={13} color={colors.onPrimary} />
+              <Text style={styles.levelPillText}>
+                Lv.{level.level} · {xp} XP
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.bandLabel}>{profile.name}님의 청약 준비도</Text>
+
+          <View style={styles.scoreRow}>
+            <Text style={styles.score}>{animatedScore}</Text>
+            <Text style={styles.scoreUnit}>점</Text>
+            {delta > 0 ? (
+              <View style={styles.deltaChip}>
+                <MaterialIcons name="arrow-drop-up" size={17} color={colors.onPrimary} />
+                <Text style={styles.deltaText}>2년 뒤 +{delta}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.gauge}>
+            {Array.from({ length: GAUGE_SEGMENTS }, (_, i) => (
+              <View key={i} style={[styles.segment, i < filled && styles.segmentOn]} />
+            ))}
+          </View>
+
+          <View style={styles.bandFoot}>
+            <Text style={styles.stageText}>
+              {stage.emoji} {stage.label}
+            </Text>
+            <Text style={styles.profileText}>{profileLine}</Text>
+          </View>
+        </LinearGradient>
+
+        {/* Monzo: 밴드 아래는 하나의 연속 surface. 카드를 여러 장 띄우지 않는다. */}
+        <View style={styles.sheet}>
+          <Appear delay={140} distance={6} style={styles.statRow}>
+            <Stat label="다음 변화" value={nextChange} lead />
+            <View style={styles.statDivider} />
+            <Stat label="오늘 학습" value={todayQuizDone ? `+${XP_PER_QUIZ} XP` : '아직'} />
+            <View style={styles.statDivider} />
+            <Stat label="관심 청약" value={`${savedListings.length}곳`} />
+          </Appear>
+
+          <View style={styles.group}>
+            <View style={styles.groupHead}>
+              <Text style={styles.groupTitle}>
+                {savedListings.length > 0 ? '관심 청약' : '먼저 살펴볼 청약'}
+              </Text>
+              <MotionPressable
+                accessibilityRole="button"
+                onPress={() => router.push('/discovery')}
+                style={styles.moreLink}
+              >
+                <Text style={styles.moreLinkText}>전체 보기</Text>
+                <MaterialIcons name="chevron-right" size={15} color={colors.primary} />
+              </MotionPressable>
+            </View>
+
+            {watchlist.map((listing, index) => {
+              const relevance = getListingRelevance(profile, listing);
+              const open = listing.recruitmentStatus === 'open';
+              const priceLabel = formatPrice(listing.representativePrice).replace('억', '');
+              return (
+                <MotionPressable
+                  key={listing.id}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    router.push({ pathname: '/discovery/[id]', params: { id: listing.id } })
+                  }
+                  style={[
+                    styles.row,
+                    index > 0 && styles.rowDivider,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.rowTile,
+                      {
+                        backgroundColor:
+                          relevance.level === 'high' ? tint.purple.bg : colors.surfaceContainer,
+                      },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="apartment"
+                      size={17}
+                      color={relevance.level === 'high' ? colors.primary : colors.textSubtle}
+                    />
+                  </View>
+
+                  <View style={styles.rowCopy}>
+                    <Text style={styles.rowTitle} numberOfLines={1}>
+                      {listing.complexName}
+                    </Text>
+                    <View style={styles.rowMetaLine}>
+                      <View style={[styles.dot, open && styles.dotOpen]} />
+                      <Text style={styles.rowMeta}>
+                        {RECRUITMENT_STATUS_LABEL[listing.recruitmentStatus]} · {listing.district}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Monzo: 값은 우측 정렬, 단위는 숫자보다 작게. */}
+                  <Text style={styles.rowValue}>
+                    {priceLabel}
+                    <Text style={styles.rowValueUnit}>억</Text>
+                  </Text>
+                </MotionPressable>
+              );
+            })}
+          </View>
+
+          <View style={styles.group}>
+            <View style={styles.groupHead}>
+              <Text style={styles.groupTitleSub}>오늘 할 일</Text>
+            </View>
+
+            {actions.map((action, index) => (
+              <View key={action} style={[styles.todoRow, index > 0 && styles.rowDivider]}>
+                <View style={[styles.bullet, index === 0 && styles.bulletLead]} />
+                <Text
+                  style={[styles.todoText, index === 0 && styles.todoTextLead]}
+                  numberOfLines={2}
+                >
+                  {action}
+                </Text>
+              </View>
+            ))}
+
+            <View style={styles.footNote}>
+              <Disclaimer />
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+function Stat({ label, value, lead }: { label: string; value: string; lead?: boolean }) {
+  return (
+    <View style={styles.stat}>
+      <Text style={[styles.statLabel, lead && styles.statLabelLead]}>{label}</Text>
+      <Text style={[styles.statValue, lead && styles.statValueLead]} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+const SIDE = spacing.screen;
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, height: '100%', backgroundColor: colors.surface },
+  scroll: { paddingBottom: 24 },
+  spacer: { flex: 1 },
+
+  band: { paddingHorizontal: SIDE, paddingBottom: 30, overflow: 'hidden' },
+  bandGlow: {
+    pointerEvents: 'none',
+    position: 'absolute',
+    right: -60,
+    top: -70,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: 'rgba(255,255,255,0.09)',
+  },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  wordmark: {
+    ...type.title,
+    fontSize: 21,
+    lineHeight: 27,
+    color: colors.onPrimary,
+    letterSpacing: -0.5,
+  },
+  levelPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    height: 26,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    paddingHorizontal: 9,
+  },
+  levelPillText: { ...type.micro, color: colors.onPrimary },
+
+  bandLabel: { ...type.label, color: 'rgba(255,255,255,0.76)', marginTop: 22 },
+  scoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2, marginTop: 2 },
+  score: {
+    fontFamily: type.metric.fontFamily,
+    fontSize: 44,
+    lineHeight: 52,
+    color: colors.onPrimary,
+    letterSpacing: -1.8,
+  },
+  scoreUnit: { ...type.bodyLgStrong, color: 'rgba(255,255,255,0.7)', marginLeft: 2 },
+  deltaChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginLeft: 9,
+    height: 24,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    paddingRight: 9,
+    paddingLeft: 2,
+  },
+  deltaText: { ...type.micro, color: colors.onPrimary },
+
+  gauge: { flexDirection: 'row', gap: 2, marginTop: 14 },
+  segment: { flex: 1, height: 5, borderRadius: 1.5, backgroundColor: 'rgba(255,255,255,0.24)' },
+  segmentOn: { backgroundColor: colors.onPrimary },
+
+  bandFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  profileText: { ...type.micro, color: 'rgba(255,255,255,0.72)' },
+
+  sheet: {
+    marginTop: -18,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 4,
+  },
+
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    paddingHorizontal: SIDE,
+    paddingTop: 14,
+    paddingBottom: 15,
+  },
+  stat: { flex: 1, gap: 2 },
+  statLabel: { ...type.micro, color: colors.textSubtle },
+  statLabelLead: { color: colors.primary },
+  statValue: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.2 },
+  statValueLead: { ...type.cardTitle, color: colors.text, letterSpacing: -0.4 },
+  statDivider: { width: 1, backgroundColor: colors.hairline, marginHorizontal: 12 },
+
+  group: { borderTopWidth: 8, borderTopColor: colors.surfaceLow, paddingHorizontal: SIDE },
+  groupHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
+  groupTitleSub: { ...type.label, color: colors.textMuted, letterSpacing: 0.2 },
+  moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, paddingVertical: 4 },
+  moreLinkText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+
+  row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12 },
+  rowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  rowTile: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.cardSm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowCopy: { flex: 1, gap: 3 },
+  rowTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  rowMetaLine: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline },
+  dotOpen: { backgroundColor: colors.success },
+  rowMeta: { ...type.micro, color: colors.textSubtle },
+  rowValue: {
+    fontFamily: type.metric.fontFamily,
+    fontSize: 19,
+    lineHeight: 25,
+    color: colors.text,
+    letterSpacing: -0.5,
+  },
+  rowValueUnit: { ...type.label, color: colors.textSubtle },
+
+  todoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 11 },
+  bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline, marginTop: 8 },
+  bulletLead: { width: 6, height: 6, backgroundColor: colors.primary, marginTop: 7 },
+  todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: -0.2 },
+  todoTextLead: { ...type.bodySmStrong, color: colors.text },
+
+  footNote: { paddingTop: 14, paddingBottom: 6 },
+});

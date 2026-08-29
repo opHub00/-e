@@ -27,6 +27,7 @@ import {
   formatFutureAiContextForPrompt,
 } from '../../domain/futureAiContext';
 import { parseFutureScenario } from '../../domain/futureSimulation';
+import { hasCoreProfileForCalculations } from '../../features/profile/domain';
 import { getPersonalMessage } from '../../domain/quiz';
 import { Appear } from '../../components/motion/Appear';
 import { useUserStore } from '../../store/useUserStore';
@@ -104,10 +105,7 @@ export default function AiRoute() {
   const ctx = buildAiContext(profile, applicantProfile);
   const suggestions = getSuggestedQuestions(ctx);
   const selectedFutureScenario = parseFutureScenario(profile, futureScenario);
-  const canShareFutureContext =
-    applicantProfile.subscriptionAccount.hasAccount.status === 'known' &&
-    applicantProfile.housing.currentOwnership.status === 'known';
-  const promptContext = selectedFutureScenario && canShareFutureContext
+  const promptContext = selectedFutureScenario && hasCoreProfileForCalculations(applicantProfile)
     ? `${formatContextForPrompt(ctx)}\n\n${formatFutureAiContextForPrompt(
         buildFutureAiContext(profile, selectedFutureScenario),
       )}`

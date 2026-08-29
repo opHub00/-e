@@ -19,6 +19,7 @@ import {
   simulateFuture,
 } from '../../domain/preparation';
 import { XP_PER_QUIZ } from '../../domain/quiz';
+import { hasCoreProfileForCalculations } from '../../features/profile/domain';
 import { useNewsBriefing } from '../../features/news/useNewsBriefing';
 import type { RankedNews } from '../../features/news/useNewsBriefing';
 import { useUserStore } from '../../store/useUserStore';
@@ -284,10 +285,7 @@ export default function PreparationRoute() {
       <NewsImpactSheet
         visible={openedNews !== null}
         profile={profile}
-        aiAllowed={
-          applicantProfile.subscriptionAccount.hasAccount.status === 'known' &&
-          applicantProfile.housing.currentOwnership.status === 'known'
-        }
+        aiAllowed={hasCoreProfileForCalculations(applicantProfile)}
         article={openedNews?.article ?? null}
         relevance={openedNews?.relevance ?? null}
         onClose={() => setOpenedNews(null)}

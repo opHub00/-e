@@ -10,6 +10,7 @@ import {
   getBundleCompletion,
   getFeatureProfileRequirements,
   getKnownApplicantSignals,
+  hasCoreProfileForCalculations,
   knownField,
   migrateApplicantProfile,
   notApplicableField,
@@ -18,6 +19,7 @@ import {
   resolveFeaturePrompt,
   toDiscoveryUserProfile,
   toLegacyUserProfile,
+  unknownField,
 } from './domain.ts';
 
 let checks = 0;
@@ -147,6 +149,65 @@ eq(
   '자녀 출생연도 수가 자녀 수보다 적으면 family 일부 완료',
 );
 
+// Scenario B: bundle 을 채우고 돌아오면 같은 화면이 다시 묻지 않는다.
+const accountFilled = {
+  ...minimal,
+  subscriptionAccount: {
+    hasAccount: knownField(true),
+    accountMonths: knownField(30),
+    monthlyPayment: knownField(100_000),
+  },
+};
+eq(getFeatureProfileRequirements('future', accountFilled).missing, [], 'bundle 완료 뒤 Future 필수 항목 없음');
+eq(
+  resolveFeaturePrompt('future', accountFilled, createPromptFatigueState()),
+  null,
+  'bundle 완료 직후 fatigue 가 비어 있어도 다음 modal 을 띄우지 않는다',
+);
+eq(
+  resolveFeaturePrompt('future', accountFilled, recordBundleShown(createPromptFatigueState(), 'SUBSCRIPTION_ACCOUNT')),
+  null,
+  '완료 + 이미 표시한 세션에서도 재질문 없음',
+);
+
+// Scenario C: 한 기능에서 입력한 가족 정보를 다른 기능이 다시 묻지 않는다.
+const familyFilled = {
+  ...minimal,
+  family: {
+    marriageStatus: knownField<'single' | 'married'>('married'),
+    marriageYears: knownField(3),
+    childrenCount: knownField(1),
+    childBirthYears: knownField([2022]),
+  },
+};
+eq(getFeatureProfileRequirements('newlywed', familyFilled).missing, [], '가족 정보를 채우면 신혼 기능은 재요청 없음');
+eq(
+  getFeatureProfileRequirements('multi-child', familyFilled).missing,
+  ['HOUSEHOLD'],
+  '다른 기능은 아직 없는 bundle 만 요청하고 가족 정보는 재사용',
+);
+eq(
+  resolveFeaturePrompt('newlywed', familyFilled, createPromptFatigueState()),
+  null,
+  '이미 완료된 bundle 은 prompt 대상이 아니다',
+);
+
+// legacy adapter 의 unknown fallback 은 "단정하지 않는 쪽"으로 고정한다.
+const minimalLegacy = toLegacyUserProfile(minimal);
+eq(minimalLegacy.hasSubscriptionAccount, false, 'unknown 통장은 점수로 인정하지 않는다');
+eq(minimalLegacy.isNoHomeOwner, false, 'unknown 주택 상태를 무주택으로 단정하지 않는다');
+eq(minimalLegacy.occupation, 'etc', 'unknown 직업은 중립값으로 내려간다');
+check(
+  calculatePreparationScore(minimalLegacy) < calculatePreparationScore(toLegacyUserProfile(complete)),
+  'unknown 은 점수를 올려주지 않는다',
+);
+check(!hasCoreProfileForCalculations(minimal), '핵심 프로필 미입력은 계산값 공유 불가');
+check(hasCoreProfileForCalculations(complete), '통장·주택이 known 이면 계산값 공유 가능');
+check(
+  !hasCoreProfileForCalculations({ ...complete, housing: { ...complete.housing, currentOwnership: unknownField() } }),
+  '주택 상태만 빠져도 계산값을 공유하지 않는다',
+);
+
 const malformed = migrateApplicantProfile({ version: 2, basic: { age: 'wrong' } }, legacy);
 eq(malformed.basic.age, legacy.age, 'malformed V2는 안전한 fallback');
 const legacyStored = migrateApplicantProfile({ ...legacy }, { ...legacy, name: 'fallback' });
@@ -162,6 +223,13 @@ check(onboardingSource.includes('preferredRegions'), '최소 onboarding에 관�
 check(!onboardingSource.includes('draft.hasSubscriptionAccount'), 'onboarding에서 통장 상세 질문 제거');
 check(!onboardingSource.includes('draft.isNoHomeOwner'), 'onboarding에서 주택 상태 질문 제거');
 check(readFileSync('app/future.tsx', 'utf8').includes('<ProfilePromptSheet'), 'Future progressive prompt 연결');
+
+// 미입력을 "없음"으로 표시하는 화면이 남아 있으면 안 된다.
+for (const screen of ['app/(tabs)/home.tsx', 'app/(tabs)/preparation.tsx', 'app/future.tsx']) {
+  const source = readFileSync(screen, 'utf8');
+  if (!source.includes('통장 없음')) continue;
+  check(source.includes('accountKnown'), `${screen}: 통장 없음 표시에는 unknown 가드가 필요하다`);
+}
 check(readFileSync('app/(tabs)/more.tsx', 'utf8').includes("route: '/profile'"), '전체 탭에서 청약 프로필 진입');
 check(
   readFileSync('app/_layout.tsx', 'utf8').includes("Platform.OS !== 'web' && !profileHydrated"),

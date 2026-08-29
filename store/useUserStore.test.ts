@@ -60,6 +60,22 @@ firstRun.getState().setApplicantProfile(minimal);
 check(Boolean(persistedProfile), 'V2 profile 변경은 로컬 저장되어야 한다');
 check(firstRun.getState().profile.name === '민지', 'V2 변경은 legacy adapter에 즉시 반영되어야 한다');
 
+// bundle 입력 → 저장 → 새로고침(store recreate) 후에도 남아야 한다.
+firstRun.getState().setApplicantProfile({
+  ...minimal,
+  family: {
+    marriageStatus: { status: 'known', value: 'married' },
+    marriageYears: { status: 'known', value: 3 },
+    childrenCount: { status: 'known', value: 1 },
+    childBirthYears: { status: 'known', value: [2022] },
+  },
+  assets: { ...minimal.assets, vehicle: { status: 'not_applicable' } },
+});
+check(
+  firstRun.getState().applicantProfile.family.childBirthYears.status === 'known',
+  'bundle 입력이 store에 반영되어야 한다',
+);
+
 const firstPrompt = firstRun.getState().requestProfileBundle('future');
 check(firstPrompt === 'SUBSCRIPTION_ACCOUNT', 'feature 진입은 가장 먼저 필요한 bundle 하나만 반환해야 한다');
 check(firstRun.getState().requestProfileBundle('future') === null, '같은 세션에서 연속 prompt를 막아야 한다');
@@ -80,6 +96,20 @@ check(firstProfileHydration === duplicateProfileHydration, '동시 profile hydra
 await firstProfileHydration;
 check(profileReads === 2, 'store마다 profile storage를 한 번만 읽어야 한다');
 check(recreated.getState().applicantProfile.basic.name === '민지', 'store recreate 후 V2 profile 복원');
+const restoredFamily = recreated.getState().applicantProfile.family;
+check(
+  restoredFamily.childBirthYears.status === 'known' &&
+    JSON.stringify(restoredFamily.childBirthYears.value) === JSON.stringify([2022]),
+  'refresh 후에도 bundle 입력값이 유지되어야 한다',
+);
+check(
+  recreated.getState().applicantProfile.assets.vehicle.status === 'not_applicable',
+  'refresh 후에도 실제 없음(not_applicable)이 unknown으로 바뀌면 안 된다',
+);
+check(
+  recreated.getState().applicantProfile.subscriptionAccount.hasAccount.status === 'unknown',
+  'refresh 후에도 미입력은 unknown으로 남아야 한다',
+);
 check(recreated.getState().promptFatigue.automaticPromptUsed === false, 'fatigue guard는 세션마다 초기화');
 
 await recreated.getState().resetDemo();

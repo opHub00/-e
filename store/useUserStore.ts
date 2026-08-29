@@ -45,7 +45,10 @@ export type UserState = {
   /** 최초 사용자 intro 를 봤는지. 건너뛰기도 본 것으로 친다. */
   hasSeenIntro: boolean;
   introHydrated: boolean;
-  setProfile: (profile: UserProfile) => void;
+  /**
+   * V2 가 source of truth 다. legacy UserProfile 로 되쓰는 setter 는 두지 않는다.
+   * legacy 를 받아 V2 를 다시 만들면 가족·소득·자산처럼 legacy 에 없는 입력이 조용히 지워진다.
+   */
   setApplicantProfile: (profile: ApplicantProfileV2) => void;
   requestProfileBundle: (feature: ProfileFeature) => ProfileQuestionBundleId | null;
   dismissProfileBundle: (bundleId: ProfileQuestionBundleId) => void;
@@ -85,12 +88,6 @@ export function createUserState(
 
   return (set, get) => ({
     ...initialState,
-    setProfile: (profile) => {
-      const legacy = normalizeProfile(profile);
-      const applicantProfile = createApplicantProfileFromLegacy(legacy);
-      set({ applicantProfile, profile: legacy, profileHydrated: true });
-      persistApplicant(applicantProfile);
-    },
     setApplicantProfile: (input) => {
       const applicantProfile = migrateApplicantProfile(input, defaultProfile);
       set({

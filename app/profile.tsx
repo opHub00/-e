@@ -224,8 +224,10 @@ function BundleFields({
           <Field label="이름 또는 닉네임">
             <TextInput style={styles.input} value={profile.basic.name} onChangeText={(name) => set('basic', { ...profile.basic, name })} />
           </Field>
+          {/* 편집 중에는 하한을 걸지 않는다. 매 글자마다 15로 올려붙이면 27을 칠 수가 없다.
+              하한은 저장 시 migrateApplicantProfile 이 한 번만 적용한다. */}
           <Field label="나이">
-            <TextInput style={styles.input} value={String(profile.basic.age)} keyboardType="number-pad" maxLength={3} onChangeText={(value) => set('basic', { ...profile.basic, age: Math.min(99, Math.max(15, Number(value.replace(/[^0-9]/g, '')) || 15)) })} />
+            <TextInput style={styles.input} value={profile.basic.age > 0 ? String(profile.basic.age) : ''} keyboardType="number-pad" maxLength={3} placeholder="예: 27" placeholderTextColor={colors.outline} onChangeText={(value) => set('basic', { ...profile.basic, age: Math.min(99, Number(value.replace(/[^0-9]/g, '')) || 0) })} />
           </Field>
           <Field label="지금 하는 일">
             <ChoiceRow options={OCCUPATIONS} value={knownValue(profile.basic.occupation)} onChange={(occupation) => set('basic', { ...profile.basic, occupation: knownField(occupation) })} />

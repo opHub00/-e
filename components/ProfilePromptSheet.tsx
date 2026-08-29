@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { duration, travel } from '../design/motion';
 import { colors, radius, shadow, spacing, type } from '../design/tokens';
 import { PROFILE_BUNDLES, type ProfileQuestionBundleId } from '../features/profile/domain';
 import { Appear } from './motion/Appear';
@@ -18,7 +19,7 @@ export function ProfilePromptSheet({ bundleId, onEdit, onLater }: Props) {
   if (!bundle || !bundleId) return null;
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={() => onLater(bundleId)}>
+    <Modal visible transparent animationType="fade" onRequestClose={() => onLater(bundleId)}>
       <View style={styles.layer}>
         <Pressable
           accessibilityRole="button"
@@ -26,8 +27,11 @@ export function ProfilePromptSheet({ bundleId, onEdit, onLater }: Props) {
           style={styles.scrim}
           onPress={() => onLater(bundleId)}
         />
+        {/* 나머지 시트 3종과 같은 등장 값을 쓴다. 여기만 다르면 한 제품처럼 안 느껴진다. */}
         <Appear
           replayKey={bundleId}
+          distance={travel.sheet}
+          durationMs={duration.sheet}
           style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 12) + 12 }]}
         >
           <View style={styles.handle} />
@@ -63,7 +67,7 @@ export function ProfilePromptSheet({ bundleId, onEdit, onLater }: Props) {
 
 const styles = StyleSheet.create({
   layer: { flex: 1, justifyContent: 'flex-end' },
-  scrim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(19, 18, 31, 0.38)' },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(28,27,34,0.42)' },
   sheet: {
     borderTopLeftRadius: radius.bento,
     borderTopRightRadius: radius.bento,

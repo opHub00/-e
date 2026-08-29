@@ -145,7 +145,8 @@ export const PROFILE_BUNDLES: readonly ProfileQuestionBundle[] = [
   },
   {
     id: 'ASSETS',
-    title: '소득·자산 정보',
+    // 소득은 INCOME bundle 이 따로 묻는다. 제목에 소득을 넣으면 여기서 묻는 것처럼 읽힌다.
+    title: '자산 정보',
     description: '금융자산·부동산·차량·부채를 범위로 확인해요.',
     fields: ['financial', 'realEstate', 'vehicle', 'debt'],
     estimatedQuestionCount: 4,
@@ -359,6 +360,18 @@ export function migrateApplicantProfile(
   };
 }
 
+/**
+ * 기존 MVP 계산식(준비도·Future·Discovery relevance)에 넘기기 위한 compatibility adapter.
+ * 기존 계산식은 unknown 을 모르므로 여기서 한 번만 fallback 을 정한다.
+ *
+ * fallback 방향은 항상 "단정하지 않는 쪽"이다.
+ * - 통장 unknown  → hasSubscriptionAccount: false. 모르는 통장을 점수로 인정하지 않는다.
+ * - 주택 unknown  → isNoHomeOwner: false. 모르는 상태를 무주택이라고 주장하지 않는다.
+ * - 직업 unknown  → 'etc'. 학생 전용 가중치를 임의로 주지 않는다.
+ *
+ * 그래서 unknown 은 점수를 깎기만 하고 거짓을 표시하지는 않는다.
+ * 화면은 이 값을 "없음"으로 쓰지 말고 hasCoreProfileForCalculations 로 "확인 필요"를 구분한다.
+ */
 export function toLegacyUserProfile(profile: ApplicantProfileV2): UserProfile {
   const hasAccount = knownValue(profile.subscriptionAccount.hasAccount) === true;
   const ownership = knownValue(profile.housing.currentOwnership);
@@ -388,6 +401,20 @@ export function toDiscoveryUserProfile(profile: ApplicantProfileV2): UserProfile
 
 export function knownValue<T>(field: ProfileFieldState<T>): T | undefined {
   return field.status === 'known' ? field.value : undefined;
+}
+
+/**
+ * 준비도·미래 수치를 그대로 보여주거나 AI 설명 맥락에 넣어도 되는 최소 조건.
+ *
+ * 통장과 주택 상태가 unknown 이면 legacy adapter 가 false/0 으로 메운 값이고,
+ * 그 위에서 계산한 숫자는 "통장 없음 / 주택 보유"를 단정한 결과가 된다.
+ * 화면은 그 상태를 "확인 필요"로 표시하고, AI 에는 아예 넘기지 않는다.
+ */
+export function hasCoreProfileForCalculations(profile: ApplicantProfileV2): boolean {
+  return (
+    profile.subscriptionAccount.hasAccount.status === 'known' &&
+    profile.housing.currentOwnership.status === 'known'
+  );
 }
 
 export type BundleCompletion = 'complete' | 'partial' | 'missing';

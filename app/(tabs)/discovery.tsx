@@ -1,25 +1,38 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, spacing, tint, type } from '../../design/tokens';
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import {
   DEFAULT_DISCOVERY_FILTERS,
+  createDiscoveryFilters,
   formatHouseholdCount,
   formatPrice,
   formatRecruitmentSchedule,
   getListingRelevance,
   getVisibleListings,
-  hasListingCoordinates,
+  getMappableListings,
   hasListingPrice,
   RECRUITMENT_STATUS_LABEL,
+  searchListings,
+  toggleDiscoveryRegionSelection,
 } from '../../features/discovery/domain';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
-import type { DiscoveryFilters } from '../../features/discovery/types';
+import { DISCOVERY_REGIONS } from '../../features/discovery/regions';
+import type { DiscoveryFilters, DiscoveryRegion } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 import { Appear } from '../../components/motion/Appear';
 import { Pop } from '../../components/motion/Pop';
@@ -29,7 +42,6 @@ import { useUserStore } from '../../store/useUserStore';
 
 type ViewMode = 'map' | 'list';
 
-const REGION_CYCLE: DiscoveryFilters['region'][] = ['all', '서울', '경기', '인천'];
 const SUPPLY_CYCLE: DiscoveryFilters['supplyType'][] = [
   'all',
   '일반공급',
@@ -41,6 +53,7 @@ const SUPPLY_CYCLE: DiscoveryFilters['supplyType'][] = [
 export default function DiscoveryRoute() {
   const router = useRouter();
   const applicantProfile = useUserStore((state) => state.applicantProfile);
+  const profileHydrated = useUserStore((state) => state.profileHydrated);
   const profile = useMemo(() => toDiscoveryUserProfile(applicantProfile), [applicantProfile]);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const toggleSavedListing = useDiscoveryStore((state) => state.toggleSavedListing);
@@ -48,27 +61,39 @@ export default function DiscoveryRoute() {
   const { listings: discoveryListings } = dataset;
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [filters, setFilters] = useState<DiscoveryFilters>(DEFAULT_DISCOVERY_FILTERS);
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
+  const [query, setQuery] = useState('');
+  const [regionSheetOpen, setRegionSheetOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const visibleListings = useMemo(
+  useEffect(() => {
+    if (!profileHydrated || filtersInitialized) return;
+    setFilters(createDiscoveryFilters(applicantProfile.preferences.regions));
+    setFiltersInitialized(true);
+  }, [applicantProfile.preferences.regions, filtersInitialized, profileHydrated]);
+
+  const filteredListings = useMemo(
     () => getVisibleListings(discoveryListings, profile, filters),
     [discoveryListings, filters, profile],
   );
+  const visibleListings = useMemo(
+    () => searchListings(filteredListings, query),
+    [filteredListings, query],
+  );
+  const mapListings = useMemo(
+    () => getMappableListings(visibleListings),
+    [visibleListings],
+  );
   const selected =
-    visibleListings.find((listing) => listing.id === selectedId) ?? visibleListings[0] ?? null;
+    mapListings.find((listing) => listing.id === selectedId) ?? mapListings[0] ?? null;
   /** 지도에 실제로 찍히는 건수. 좌표가 없는 공고는 marker 가 없다. */
   const mappedCount = useMemo(
-    () => visibleListings.filter((listing) => hasListingCoordinates(listing)).length,
-    [visibleListings],
+    () => mapListings.length,
+    [mapListings],
   );
 
   const patchFilters = (next: Partial<DiscoveryFilters>) =>
     setFilters((current) => ({ ...current, ...next }));
-
-  const cycleRegion = () => {
-    const nextIndex = (REGION_CYCLE.indexOf(filters.region) + 1) % REGION_CYCLE.length;
-    patchFilters({ region: REGION_CYCLE[nextIndex] });
-  };
 
   const cycleSupply = () => {
     const nextIndex = (SUPPLY_CYCLE.indexOf(filters.supplyType) + 1) % SUPPLY_CYCLE.length;
@@ -77,7 +102,7 @@ export default function DiscoveryRoute() {
 
   const openListing = (id: string) => router.push({ pathname: '/discovery/[id]', params: { id } });
 
-  if (dataset.status === 'loading') {
+  if (dataset.status === 'loading' || !filtersInitialized) {
     return (
       <SafeAreaView style={[styles.safe, styles.stateScreen]} edges={['top']}>
         <Appear replayKey="discovery-loading" distance={0} style={styles.stateContent}>
@@ -123,10 +148,10 @@ export default function DiscoveryRoute() {
         onPress={() => patchFilters({ status: filters.status === 'upcoming' ? 'all' : 'upcoming' })}
       />
       <FilterChip
-        label={`지역 · ${filters.region === 'all' ? '전체' : filters.region}`}
-        icon="sync-alt"
-        active={filters.region !== 'all'}
-        onPress={cycleRegion}
+        label={`지역 · ${formatRegionFilterLabel(filters.regions)}`}
+        icon="place"
+        active={filters.regions.length > 0}
+        onPress={() => setRegionSheetOpen(true)}
       />
       <FilterChip
         label={`공급 · ${filters.supplyType === 'all' ? '전체' : filters.supplyType}`}
@@ -155,9 +180,16 @@ export default function DiscoveryRoute() {
               <View style={styles.searchBar}>
                 <MaterialIcons name="search" size={18} color={colors.textSubtle} />
                 <View style={styles.searchCopy}>
-                  <Text style={styles.searchTitle}>단지 · 지역 찾기</Text>
+                  <TextInput
+                    accessibilityLabel="전국 청약 검색"
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="단지 · 주소 · 시도 검색"
+                    placeholderTextColor={colors.textSubtle}
+                    style={styles.searchInput}
+                  />
                   <Text style={styles.searchSub}>
-                    {filters.region === 'all' ? '수도권 전체' : filters.region} · 공고 {visibleListings.length}건
+                    {formatRegionFilterLabel(filters.regions)} · 검색 결과 {visibleListings.length}건
                   </Text>
                 </View>
               </View>
@@ -181,7 +213,8 @@ export default function DiscoveryRoute() {
             ) : null}
             <DiscoveryMap
               fill
-              listings={visibleListings}
+              fitToMarkers={filters.regions.length > 0}
+              listings={mapListings}
               referenceListings={discoveryListings}
               selected={selected}
               getRelevance={(listing) => getListingRelevance(profile, listing)}
@@ -296,8 +329,16 @@ export default function DiscoveryRoute() {
             <View style={styles.sheet}>
               <View style={styles.sheetHandle} />
               <View style={styles.sheetEmpty}>
-                <MaterialIcons name="filter-alt-off" size={19} color={colors.primary} />
-                <Text style={styles.sheetEmptyText}>필터에 맞는 청약이 없어요</Text>
+                <MaterialIcons
+                  name={visibleListings.length > 0 ? 'location-off' : 'filter-alt-off'}
+                  size={19}
+                  color={colors.primary}
+                />
+                <Text style={styles.sheetEmptyText}>
+                  {visibleListings.length > 0
+                    ? `검색 결과 ${visibleListings.length}건은 목록에서 확인할 수 있어요`
+                    : '필터에 맞는 청약이 없어요'}
+                </Text>
               </View>
             </View>
           )}
@@ -310,9 +351,16 @@ export default function DiscoveryRoute() {
               <View style={styles.searchBar}>
                 <MaterialIcons name="search" size={18} color={colors.textSubtle} />
                 <View style={styles.searchCopy}>
-                  <Text style={styles.searchTitle}>단지 · 지역 찾기</Text>
+                  <TextInput
+                    accessibilityLabel="전국 청약 검색"
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="단지 · 주소 · 시도 검색"
+                    placeholderTextColor={colors.textSubtle}
+                    style={styles.searchInput}
+                  />
                   <Text style={styles.searchSub}>
-                    {filters.region === 'all' ? '수도권 전체' : filters.region} · 공고 {visibleListings.length}건
+                    {formatRegionFilterLabel(filters.regions)} · 검색 결과 {visibleListings.length}건
                   </Text>
                 </View>
               </View>
@@ -348,7 +396,10 @@ export default function DiscoveryRoute() {
                 <Text style={styles.emptyTitle}>필터에 맞는 청약이 없어요</Text>
                 <MotionPressable
                   accessibilityRole="button"
-                  onPress={() => setFilters(DEFAULT_DISCOVERY_FILTERS)}
+                  onPress={() => {
+                    setFilters(createDiscoveryFilters(applicantProfile.preferences.regions));
+                    setQuery('');
+                  }}
                   style={styles.resetButton}
                 >
                   <Text style={styles.resetText}>필터 초기화</Text>
@@ -358,7 +409,96 @@ export default function DiscoveryRoute() {
           </ScrollView>
         </Appear>
       )}
+      <RegionFilterSheet
+        visible={regionSheetOpen}
+        selectedRegions={filters.regions}
+        onChange={(regions) => patchFilters({ regions, personalizedOnly: false })}
+        onClose={() => setRegionSheetOpen(false)}
+      />
     </SafeAreaView>
+  );
+}
+
+function formatRegionFilterLabel(regions: readonly DiscoveryRegion[]): string {
+  if (regions.length === 0) return '전국';
+  if (regions.length === 1) return regions[0];
+  return `${regions.length}개 지역`;
+}
+
+function RegionFilterSheet({
+  visible,
+  selectedRegions,
+  onChange,
+  onClose,
+}: {
+  visible: boolean;
+  selectedRegions: DiscoveryRegion[];
+  onChange: (regions: DiscoveryRegion[]) => void;
+  onClose: () => void;
+}) {
+  const toggleRegion = (region: DiscoveryRegion) => {
+    const next = selectedRegions.includes(region)
+      ? selectedRegions.filter((item) => item !== region)
+      : toggleDiscoveryRegionSelection(selectedRegions, region);
+    onChange(next);
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.modalRoot}>
+        <MotionPressable
+          accessibilityRole="button"
+          accessibilityLabel="지역 선택 닫기"
+          onPress={onClose}
+          style={styles.modalBackdrop}
+        />
+        <Appear distance={travel.sheet} durationMs={duration.sheet} style={styles.regionSheet}>
+          <View style={styles.regionSheetHandle} />
+          <View style={styles.regionSheetHeader}>
+            <View style={styles.regionSheetCopy}>
+              <Text style={styles.regionSheetTitle}>관심 지역 선택</Text>
+              <Text style={styles.regionSheetBody}>여러 지역을 함께 선택할 수 있어요</Text>
+            </View>
+            <MotionPressable
+              accessibilityRole="button"
+              accessibilityLabel="지역 선택 완료"
+              onPress={onClose}
+              style={styles.regionDoneButton}
+            >
+              <Text style={styles.regionDoneText}>완료</Text>
+            </MotionPressable>
+          </View>
+          <ScrollView contentContainerStyle={styles.regionGrid}>
+            <MotionPressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: selectedRegions.length === 0 }}
+              onPress={() => onChange([])}
+              style={[styles.regionOption, selectedRegions.length === 0 && styles.regionOptionActive]}
+            >
+              <Text style={[styles.regionOptionText, selectedRegions.length === 0 && styles.regionOptionTextActive]}>
+                전국
+              </Text>
+            </MotionPressable>
+            {DISCOVERY_REGIONS.map((region) => {
+              const active = selectedRegions.includes(region);
+              return (
+                <MotionPressable
+                  key={region}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => toggleRegion(region)}
+                  style={[styles.regionOption, active && styles.regionOptionActive]}
+                >
+                  <Text style={[styles.regionOptionText, active && styles.regionOptionTextActive]}>
+                    {region}
+                  </Text>
+                </MotionPressable>
+              );
+            })}
+          </ScrollView>
+        </Appear>
+      </View>
+    </Modal>
   );
 }
 
@@ -457,7 +597,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   searchCopy: { flex: 1, gap: 1 },
-  searchTitle: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2, padding: 0 },
   searchSub: { ...type.micro, color: colors.textSubtle },
   headerIconButton: {
     width: 44,
@@ -614,4 +754,58 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   resetText: { ...type.label, color: colors.primary },
+  modalRoot: { flex: 1, justifyContent: 'flex-end' },
+  modalBackdrop: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(28,27,34,0.34)',
+  },
+  regionSheet: {
+    maxHeight: '76%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.screen,
+    paddingBottom: spacing.xl,
+    ...shadow.floating,
+  },
+  regionSheetHandle: {
+    alignSelf: 'center',
+    width: 34,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.surfaceHighest,
+    marginTop: 8,
+    marginBottom: spacing.md,
+  },
+  regionSheetHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  regionSheetCopy: { flex: 1, gap: 2 },
+  regionSheetTitle: { ...type.title, color: colors.text },
+  regionSheetBody: { ...type.caption, color: colors.textMuted },
+  regionDoneButton: {
+    minHeight: 40,
+    justifyContent: 'center',
+    borderRadius: radius.button,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+  },
+  regionDoneText: { ...type.label, color: colors.onPrimary },
+  regionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingTop: spacing.lg,
+  },
+  regionOption: {
+    width: '30%',
+    minWidth: 82,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.surfaceContainer,
+  },
+  regionOptionActive: { backgroundColor: colors.primary },
+  regionOptionText: { ...type.bodySmStrong, color: colors.textMuted },
+  regionOptionTextActive: { color: colors.onPrimary },
 });

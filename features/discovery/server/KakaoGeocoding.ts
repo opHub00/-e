@@ -1,3 +1,5 @@
+import { normalizeDiscoveryRegion } from '../regions.ts';
+
 export const KAKAO_ADDRESS_API = 'https://dapi.kakao.com/v2/local/search/address.json';
 const ADDRESS_KEY_VERSION = 'kakao-address-v2';
 
@@ -234,7 +236,7 @@ export async function enrichApplyHomeRecordsWithGeocodes(
   for (let index = 0; index < output.length; index += 1) {
     const record = output[index];
     const address = readText(record.HSSPLY_ADRES ?? record.address);
-    const region = normalizeCapitalRegion(record.SUBSCRPT_AREA_CODE_NM ?? address);
+    const region = normalizeDiscoveryRegion(record.SUBSCRPT_AREA_CODE_NM ?? address);
     if (!address || !region || hasCoordinates(record)) continue;
     const normalizedAddress = normalizeAddress(address);
     const addressKey = await createAddressKey(normalizedAddress);
@@ -355,22 +357,14 @@ function matchesRegion(
   document: Record<string, unknown>,
   matchedAddress: string | undefined,
 ): boolean {
-  const expected = normalizeCapitalRegion(expectedRegion);
+  const expected = normalizeDiscoveryRegion(expectedRegion);
   if (!expected) return true;
   const address = isRecord(document.address) ? document.address : {};
   const road = isRecord(document.road_address) ? document.road_address : {};
   const actualText = readText(
     road.region_1depth_name ?? address.region_1depth_name ?? matchedAddress,
   );
-  return !actualText || normalizeCapitalRegion(actualText) === expected;
-}
-
-function normalizeCapitalRegion(value: unknown): '서울' | '경기' | '인천' | null {
-  const text = readText(value);
-  if (text.includes('서울')) return '서울';
-  if (text.includes('경기')) return '경기';
-  if (text.includes('인천')) return '인천';
-  return null;
+  return !actualText || normalizeDiscoveryRegion(actualText) === expected;
 }
 
 function hasCoordinates(record: Record<string, unknown>): boolean {

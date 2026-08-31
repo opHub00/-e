@@ -116,6 +116,18 @@ const wrongRegion = new KakaoAddressGeocoder({
 });
 check((await wrongRegion.geocode({ address: '서울 강남구 1', region: '서울' })).status === 'ambiguous', '원래 지역과 현저히 다른 결과를 ambiguous로 처리해야 한다');
 
+const nationwideRegion = new KakaoAddressGeocoder({
+  apiKey: 'test-key',
+  fetcher: async () => kakaoResponse([{
+      x: '129.1604',
+      y: '35.1587',
+      address_type: 'ROAD_ADDR',
+      address: { address_name: '부산 해운대구 우동 1', region_1depth_name: '부산' },
+      road_address: { address_name: '부산 해운대구 해운대로 1', region_1depth_name: '부산' },
+  }]),
+});
+check((await nationwideRegion.geocode({ address: '부산 해운대구 해운대로 1', region: '부산광역시' })).status === 'resolved', '비수도권 시도도 동일한 지역 검증으로 지오코딩해야 한다');
+
 const regionOnly = new KakaoAddressGeocoder({
   apiKey: 'server-key',
   fetcher: async () => kakaoResponse([{ ...kakaoDocument, address_type: 'REGION' }]),

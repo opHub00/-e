@@ -97,6 +97,7 @@ function KakaoMapCanvas({
   selected,
   onSelect,
   fill,
+  fitToMarkers,
   appKey,
   ...fallbackProps
 }: DiscoveryMapProps & { appKey: string }) {
@@ -270,7 +271,7 @@ function KakaoMapCanvas({
 
     markersRef.current = entries;
     setInViewCount(mappableListings.length);
-    if (entries.length > 0) {
+    if (entries.length > 0 && fitToMarkers) {
       map.setBounds(bounds, fill ? 126 : 48, 48, fill ? 176 : 72, 48);
       if (containerRef.current) writeInteractionState(containerRef.current, map);
     }
@@ -282,7 +283,7 @@ function KakaoMapCanvas({
       });
       if (markersRef.current === entries) markersRef.current = [];
     };
-  }, [fill, mappableListings, onSelect, runtime]);
+  }, [fill, fitToMarkers, mappableListings, onSelect, runtime]);
 
   useEffect(() => {
     markersRef.current.forEach(({ listingId, marker }) => {

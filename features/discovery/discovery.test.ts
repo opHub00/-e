@@ -1,10 +1,14 @@
 import type { UserProfile } from '../../domain/types.ts';
 import {
   DEFAULT_DISCOVERY_FILTERS,
+  createDiscoveryFilters,
   filterListings,
+  getMappableListings,
   getListingRelevance,
   projectListingPin,
+  searchListings,
   sortListings,
+  toggleDiscoveryRegionSelection,
 } from './domain.ts';
 import { discoveryListings } from './mockListings.ts';
 
@@ -98,10 +102,43 @@ check(openOnly.every((listing) => listing.recruitmentStatus === 'open'), '모집
 const incheonOnly = filterListings(discoveryListings, seoulProfile, {
   ...DEFAULT_DISCOVERY_FILTERS,
   personalizedOnly: false,
-  region: '인천',
+  regions: ['인천'],
 });
 check(incheonOnly.length === 2, '인천 데모 공고는 2개여야 한다');
 check(incheonOnly.every((listing) => listing.region === '인천'), '지역 필터가 정확해야 한다');
+
+const nationwideFixture = [
+  ...discoveryListings,
+  { ...mapo, id: 'busan-test', complexName: '부산 바다 아파트', region: '부산' as const, address: '부산광역시 해운대구 우동 1' },
+  { ...mapo, id: 'jeju-test', complexName: '제주 드림', region: '제주' as const, address: '제주특별자치도 제주시 연동 1', latitude: null, longitude: null },
+];
+const allRegions = filterListings(nationwideFixture, seoulProfile, {
+  ...DEFAULT_DISCOVERY_FILTERS,
+  personalizedOnly: false,
+});
+check(allRegions.length === nationwideFixture.length, '지역 선택이 없으면 전국 결과를 유지해야 한다');
+const multiRegions = filterListings(nationwideFixture, seoulProfile, {
+  ...DEFAULT_DISCOVERY_FILTERS,
+  personalizedOnly: false,
+  regions: ['부산', '제주'],
+});
+check(multiRegions.map((listing) => listing.region).join(',') === '부산,제주', '복수 지역은 OR 조건으로 동작해야 한다');
+
+const profileDefaults = createDiscoveryFilters(['서울특별시', '경기도']);
+check(profileDefaults.regions.join(',') === '서울,경기', '프로필 관심지역을 최초 Discovery 필터로 정규화해야 한다');
+check(getListingRelevance({ ...seoulProfile, preferredRegions: ['서울특별시', '경기도'] }, discoveryListings.find((listing) => listing.region === '경기')!).score >= 4, '복수 프로필 관심지역을 relevance에 반영해야 한다');
+check(createDiscoveryFilters([]).regions.length === 0, '관심지역이 없으면 전국으로 시작해야 한다');
+const manuallyChanged = toggleDiscoveryRegionSelection(profileDefaults.regions, '부산');
+check(manuallyChanged.join(',') === '서울,부산,경기', '수동 선택은 현재 선택을 기준으로 반영해야 한다');
+check(profileDefaults.regions.join(',') === '서울,경기', '수동 선택은 프로필 기본 배열을 변경하지 않아야 한다');
+
+check(searchListings(nationwideFixture, '해운대').map((listing) => listing.id).join(',') === 'busan-test', '주소로 전국 검색해야 한다');
+check(searchListings(nationwideFixture, '부산').map((listing) => listing.id).join(',') === 'busan-test', '시도로 전국 검색해야 한다');
+check(searchListings(nationwideFixture, '제주 드림').map((listing) => listing.id).join(',') === 'jeju-test', '단지명으로 전국 검색해야 한다');
+check(searchListings(nationwideFixture, '없는 단지').length === 0, '검색 결과 없음은 빈 배열이어야 한다');
+check(filterListings([nationwideFixture.at(-1)!], seoulProfile, { ...DEFAULT_DISCOVERY_FILTERS, personalizedOnly: false }).length === 1, '미해결 좌표 공고도 목록 필터 결과에 남아야 한다');
+check(getMappableListings(nationwideFixture).every((listing) => listing.latitude !== null && listing.longitude !== null), '지도에는 좌표가 해결된 공고만 전달해야 한다');
+check(!getMappableListings(nationwideFixture).some((listing) => listing.id === 'jeju-test'), '미해결 좌표 공고는 지도 마커에서만 제외해야 한다');
 
 const publicUpcoming = filterListings(discoveryListings, seoulProfile, {
   ...DEFAULT_DISCOVERY_FILTERS,

@@ -9,6 +9,7 @@ import type {
   RecruitmentStatus,
   SupplyType,
 } from '../types.ts';
+import { DISCOVERY_REGIONS, normalizeDiscoveryRegion } from '../regions.ts';
 import type {
   ListingDataSource,
   ListingValidationIssue,
@@ -166,7 +167,7 @@ export function normalizeListingRecord(
   );
 
   if (!region) {
-    addIssue('region', 'unsupported-region', 'warning', '수도권 지역을 확인할 수 없어 제외했습니다.');
+    addIssue('region', 'unsupported-region', 'warning', '국내 시도 지역을 확인할 수 없어 제외했습니다.');
     return { listing: null, issues };
   }
 
@@ -384,7 +385,7 @@ export function validateListing(listing: unknown, recordIndex = 0): ListingValid
   }
   if (!readString(listing, ['id'])) error('id', 'id가 필요합니다.');
   if (!readString(listing, ['complexName'])) error('complexName', '공고명이 필요합니다.');
-  if (!['서울', '경기', '인천'].includes(String(listing.region))) error('region', '지원하지 않는 지역입니다.');
+  if (!DISCOVERY_REGIONS.includes(listing.region as DiscoveryRegion)) error('region', '지원하지 않는 지역입니다.');
   if (listing.latitude !== null && (!Number.isFinite(listing.latitude) || Number(listing.latitude) < -90 || Number(listing.latitude) > 90)) {
     error('latitude', '유효한 위도가 필요합니다.');
   }
@@ -479,16 +480,13 @@ function isValidDate(value: Date | undefined): value is Date {
 }
 
 function normalizeRegion(value: unknown): DiscoveryRegion | null {
-  const text = value === null || value === undefined ? '' : String(value).trim();
-  if (text.includes('서울')) return '서울';
-  if (text.includes('경기')) return '경기';
-  if (text.includes('인천')) return '인천';
-  return null;
+  return normalizeDiscoveryRegion(value);
 }
 
 function inferDistrict(address: string, region: DiscoveryRegion): string {
-  const normalized = address.replace(`${region}특별시`, '').replace(`${region}광역시`, '').replace(`${region}도`, '').trim();
-  return normalized.split(/\s+/)[0] || `${region} 지역`;
+  const tokens = address.normalize('NFKC').trim().split(/\s+/);
+  if (normalizeDiscoveryRegion(tokens[0]) === region) tokens.shift();
+  return tokens[0] || `${region} 지역`;
 }
 
 function normalizeCoordinate(value: unknown, min: number, max: number): number | null {

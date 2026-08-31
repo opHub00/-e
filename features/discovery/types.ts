@@ -1,4 +1,6 @@
-export type DiscoveryRegion = '서울' | '경기' | '인천';
+import type { DiscoveryRegion } from './regions.ts';
+
+export type { DiscoveryRegion } from './regions.ts';
 
 export type RecruitmentStatus = 'open' | 'upcoming' | 'closed' | 'unknown';
 
@@ -82,7 +84,8 @@ export type ListingRelevance = {
 export type DiscoveryFilters = {
   personalizedOnly: boolean;
   status: 'all' | Exclude<RecruitmentStatus, 'closed'>;
-  region: 'all' | DiscoveryRegion;
+  /** 빈 배열은 전국, 값이 있으면 복수 지역 OR 조건이다. */
+  regions: DiscoveryRegion[];
   supplyType: 'all' | SupplyType;
 };
 

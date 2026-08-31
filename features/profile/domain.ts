@@ -414,11 +414,14 @@ export function toLegacyUserProfile(profile: ApplicantProfileV2): UserProfile {
   };
 }
 
-/** 기존 Discovery relevance의 region 의미는 유지하고, 첫 관심지역만 adapter 입력으로 쓴다. */
-export function toDiscoveryUserProfile(profile: ApplicantProfileV2): UserProfile {
+/** Discovery relevance에는 기존 대표 region과 전체 관심지역을 함께 전달한다. */
+export function toDiscoveryUserProfile(
+  profile: ApplicantProfileV2,
+): UserProfile & { preferredRegions: string[] } {
   return {
     ...toLegacyUserProfile(profile),
     region: profile.preferences.regions[0] ?? profile.residence.currentRegion,
+    preferredRegions: [...profile.preferences.regions],
   };
 }
 

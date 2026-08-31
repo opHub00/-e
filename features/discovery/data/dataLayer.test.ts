@@ -63,7 +63,7 @@ check(Boolean(normalizedApi.listing), '유효한 OpenAPI fixture는 Listing으�
 if (!normalizedApi.listing) throw new Error('FAIL: OpenAPI fixture normalization');
 check(normalizedApi.listing.id === '20260001-2026000101', '공고 관리번호 조합으로 안정적인 id를 만들어야 한다');
 check(normalizedApi.listing.complexName === '테스트 센트럴', 'API 공고명을 내부 이름으로 매핑해야 한다');
-check(normalizedApi.listing.region === '서울' && normalizedApi.listing.district === '송파구', '주소에서 수도권 지역과 구를 보완해야 한다');
+check(normalizedApi.listing.region === '서울' && normalizedApi.listing.district === '송파구', '주소에서 시도와 시군구를 보완해야 한다');
 check(normalizedApi.listing.recruitmentStatus === 'upcoming', '접수일과 기준일로 모집예정을 계산해야 한다');
 check(normalizedApi.listing.housingType === '아파트', 'APT 값을 내부 주택 유형으로 매핑해야 한다');
 check(normalizedApi.listing.supplyType === '민간분양', '민영 값을 내부 공급 유형으로 매핑해야 한다');
@@ -101,15 +101,37 @@ check(malformed.issues.length >= 5, '보정된 필드는 validation issue로 기
 check(validateListing(malformed.listing).length === 0, '정규화 결과는 내부 Listing validation을 통과해야 한다');
 
 const unsupported = normalizeListingRecord({
-  HOUSE_NM: '부산 테스트',
-  HSSPLY_ADRES: '부산광역시 해운대구',
+  HOUSE_NM: '해외 테스트',
+  HSSPLY_ADRES: '지역 미상',
 }, {
   source: openApiSource,
   fetchedAt: referenceDate.toISOString(),
   referenceDate,
 });
-check(unsupported.listing === null, '현재 수도권 slice 밖의 공고는 UI에 전달하지 않아야 한다');
+check(unsupported.listing === null, '국내 시도를 판별할 수 없는 공고는 UI에 전달하지 않아야 한다');
 check(unsupported.issues.some((issue) => issue.code === 'unsupported-region'), '제외 이유를 validation issue로 남겨야 한다');
+
+const nationwideRegions = [
+  ['서울특별시', '서울'], ['부산광역시', '부산'], ['대구광역시', '대구'],
+  ['인천광역시', '인천'], ['광주광역시', '광주'], ['대전광역시', '대전'],
+  ['울산광역시', '울산'], ['세종특별자치시', '세종'], ['경기도', '경기'],
+  ['강원특별자치도', '강원'], ['충청북도', '충북'], ['충청남도', '충남'],
+  ['전북특별자치도', '전북'], ['전라남도', '전남'], ['경상북도', '경북'],
+  ['경상남도', '경남'], ['제주특별자치도', '제주'],
+] as const;
+nationwideRegions.forEach(([rawRegion, expectedRegion], index) => {
+  const normalized = normalizeListingRecord({
+    HOUSE_MANAGE_NO: `nationwide-${index}`,
+    HOUSE_NM: `${expectedRegion} 테스트`,
+    SUBSCRPT_AREA_CODE_NM: rawRegion,
+    HSSPLY_ADRES: `${rawRegion} 테스트시 테스트로 1`,
+  }, {
+    source: openApiSource,
+    fetchedAt: referenceDate.toISOString(),
+    referenceDate,
+  });
+  check(normalized.listing?.region === expectedRegion, `${rawRegion}을 ${expectedRegion}으로 정규화해야 한다`);
+});
 
 const mixedBatch = normalizeListingBatch([openApiFixture, openApiFixture, null, unsupported], {
   source: openApiSource,

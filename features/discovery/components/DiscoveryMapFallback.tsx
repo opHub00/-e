@@ -24,6 +24,8 @@ export type DiscoveryMapProps = {
   onToggleSaved: (listingId: string) => void;
   /** 지도 모드에서 화면을 가득 채운다. 카드형 박스 대신 전면 캔버스가 된다. */
   fill?: boolean;
+  /** 지역 필터가 있을 때만 기존 bounds 방식으로 카메라를 맞춘다. */
+  fitToMarkers?: boolean;
   fallbackLabel?: string;
 };
 
@@ -58,9 +60,7 @@ export function DiscoveryMapFallback({
       <View style={[styles.road, styles.roadOne]} />
       <View style={[styles.road, styles.roadTwo]} />
       <View style={[styles.road, styles.roadThree]} />
-      <Text style={[styles.mapLabel, styles.seoulLabel]}>서울</Text>
-      <Text style={[styles.mapLabel, styles.incheonLabel]}>인천</Text>
-      <Text style={[styles.mapLabel, styles.gyeonggiLabel]}>경기</Text>
+      <Text style={[styles.mapLabel, styles.nationwideLabel]}>전국 좌표 분포</Text>
 
       <View style={fill ? styles.demoBadgeFill : styles.demoBadge}>
         <MaterialIcons name="map" size={14} color={colors.primary} />
@@ -213,9 +213,7 @@ const styles = StyleSheet.create({
   roadTwo: { width: '70%', top: 224, right: -14, transform: [{ rotate: '-18deg' }] },
   roadThree: { width: '68%', top: 118, left: 98, transform: [{ rotate: '72deg' }] },
   mapLabel: { ...type.label, position: 'absolute', color: 'rgba(71,69,83,0.38)' },
-  seoulLabel: { top: 106, left: 162 },
-  incheonLabel: { top: 204, left: 28 },
-  gyeonggiLabel: { top: 44, right: 30 },
+  nationwideLabel: { top: 44, right: 30 },
   demoBadge: {
     position: 'absolute',
     top: 12,

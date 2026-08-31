@@ -6,13 +6,37 @@ import type {
   ListingRelevance,
   RecruitmentStatus,
 } from './types.ts';
+import {
+  DISCOVERY_REGIONS,
+  normalizeDiscoveryRegion,
+  normalizeDiscoveryRegions,
+} from './regions.ts';
 
 export const DEFAULT_DISCOVERY_FILTERS: DiscoveryFilters = {
   personalizedOnly: true,
   status: 'all',
-  region: 'all',
+  regions: [],
   supplyType: 'all',
 };
+
+type DiscoveryUserProfile = UserProfile & { preferredRegions?: readonly string[] };
+
+export function createDiscoveryFilters(preferredRegions: readonly string[]): DiscoveryFilters {
+  return {
+    ...DEFAULT_DISCOVERY_FILTERS,
+    regions: normalizeDiscoveryRegions(preferredRegions),
+  };
+}
+
+export function toggleDiscoveryRegionSelection(
+  selectedRegions: readonly DiscoveryRegion[],
+  region: DiscoveryRegion,
+): DiscoveryRegion[] {
+  const next = new Set(selectedRegions);
+  if (next.has(region)) next.delete(region);
+  else next.add(region);
+  return DISCOVERY_REGIONS.filter((item) => next.has(item));
+}
 
 const STATUS_PRIORITY: Record<RecruitmentStatus, number> = {
   open: 0,
@@ -52,26 +76,25 @@ export const RECRUITMENT_STATUS_LABEL: Record<RecruitmentStatus, string> = {
 };
 
 export function getProfileRegion(region: string): DiscoveryRegion | null {
-  if (region.includes('서울')) return '서울';
-  if (region.includes('경기')) return '경기';
-  if (region.includes('인천')) return '인천';
-  return null;
+  return normalizeDiscoveryRegion(region);
 }
 
 /**
  * 관심 순서를 돕는 데모 휴리스틱이다. 신청 가능 여부나 자격 충족 여부를 계산하지 않는다.
  */
 export function getListingRelevance(
-  profile: UserProfile,
+  profile: DiscoveryUserProfile,
   listing: DiscoveryListing,
 ): ListingRelevance {
   let score = 0;
   const reasons: string[] = [];
-  const profileRegion = getProfileRegion(profile.region);
+  const profileRegions = normalizeDiscoveryRegions(
+    profile.preferredRegions?.length ? profile.preferredRegions : [profile.region],
+  );
 
-  if (profileRegion === listing.region) {
+  if (profileRegions.includes(listing.region)) {
     score += 4;
-    reasons.push(`${profile.region || listing.region} 관심 지역과 가까워요`);
+    reasons.push(`${listing.region} 관심 지역과 가까워요`);
   } else if (listing.interestTags.includes('수도권 관심')) {
     score += 1;
     reasons.push('수도권에서 함께 살펴볼 만한 공고예요');
@@ -111,7 +134,7 @@ export function getListingRelevance(
 
 export function filterListings(
   listings: DiscoveryListing[],
-  profile: UserProfile,
+  profile: DiscoveryUserProfile,
   filters: DiscoveryFilters,
 ): DiscoveryListing[] {
   return listings.filter((listing) => {
@@ -119,15 +142,33 @@ export function filterListings(
       return false;
     }
     if (filters.status !== 'all' && listing.recruitmentStatus !== filters.status) return false;
-    if (filters.region !== 'all' && listing.region !== filters.region) return false;
+    if (filters.regions.length > 0 && !filters.regions.includes(listing.region)) return false;
     if (filters.supplyType !== 'all' && listing.supplyType !== filters.supplyType) return false;
     return true;
   });
 }
 
+export function searchListings(
+  listings: DiscoveryListing[],
+  query: string,
+): DiscoveryListing[] {
+  const needle = normalizeSearchText(query);
+  if (!needle) return listings;
+  return listings.filter((listing) => normalizeSearchText([
+    listing.complexName,
+    listing.address,
+    listing.region,
+    listing.district,
+  ].join(' ')).includes(needle));
+}
+
+function normalizeSearchText(value: string): string {
+  return value.normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase('ko-KR');
+}
+
 export function sortListings(
   listings: DiscoveryListing[],
-  profile: UserProfile,
+  profile: DiscoveryUserProfile,
   personalized: boolean,
 ): DiscoveryListing[] {
   return [...listings].sort((a, b) => {
@@ -146,7 +187,7 @@ export function sortListings(
 
 export function getVisibleListings(
   listings: DiscoveryListing[],
-  profile: UserProfile,
+  profile: DiscoveryUserProfile,
   filters: DiscoveryFilters,
 ) {
   return sortListings(filterListings(listings, profile, filters), profile, filters.personalizedOnly);
@@ -206,4 +247,8 @@ export function hasListingCoordinates(
   listing: DiscoveryListing,
 ): listing is DiscoveryListing & { latitude: number; longitude: number } {
   return Number.isFinite(listing.latitude) && Number.isFinite(listing.longitude);
+}
+
+export function getMappableListings(listings: DiscoveryListing[]): DiscoveryListing[] {
+  return listings.filter(hasListingCoordinates);
 }

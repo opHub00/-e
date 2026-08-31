@@ -11,6 +11,10 @@ import {
   SupabaseRestGeocodeCache,
   type GeocodeEnrichmentDiagnostics,
 } from '../../../features/discovery/server/KakaoGeocoding.ts';
+import {
+  DISCOVERY_REGIONS,
+  normalizeDiscoveryRegion,
+} from '../../../features/discovery/regions.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -123,6 +127,7 @@ Deno.serve(async (request: Request) => {
     range: { fromDate, toDate },
     operations: result.operations,
     geocoding,
+    analytics: buildAnalytics(records, geocoding),
   };
   if (new TextEncoder().encode(JSON.stringify(body)).byteLength > MAX_RESPONSE_BYTES) {
     console.error('listings provider error', {
@@ -166,6 +171,23 @@ function getKoreanDateRange(now: Date, days: number) {
   const from = new Date(`${toDate}T00:00:00.000Z`);
   from.setUTCDate(from.getUTCDate() - (days - 1));
   return { fromDate: from.toISOString().slice(0, 10), toDate };
+}
+
+function buildAnalytics(
+  records: readonly Readonly<Record<string, unknown>>[],
+  geocoding: GeocodeEnrichmentDiagnostics | { error: string },
+) {
+  const regionCounts = Object.fromEntries(DISCOVERY_REGIONS.map((region) => [region, 0])) as Record<string, number>;
+  records.forEach((record) => {
+    const region = normalizeDiscoveryRegion(record.SUBSCRPT_AREA_CODE_NM ?? record.HSSPLY_ADRES);
+    if (region) regionCounts[region] += 1;
+  });
+  return {
+    totalListings: records.length,
+    regionCounts,
+    mockCount: 0,
+    geocoding,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

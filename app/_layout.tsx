@@ -52,6 +52,7 @@ export default function RootLayout() {
         <Stack.Screen name="quiz" options={{ headerShown: false }} />
         <Stack.Screen name="profile" options={{ headerShown: false }} />
         <Stack.Screen name="discovery/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="eligibility/first-home" options={{ headerShown: false }} />
       </Stack>
     </>
   );

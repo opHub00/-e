@@ -102,6 +102,8 @@ const complete = {
     currentOwnership: knownField<'no-home' | 'owns-home'>('no-home'),
     previousOwnership: knownField(false),
     householdHasHome: knownField(false),
+    householdDisqualifyingPreviousOwnership: knownField(false),
+    hasSpecialSupplyRestriction: knownField(false),
   },
   household: { memberCount: knownField(2) },
   family: {
@@ -110,7 +112,11 @@ const complete = {
     childrenCount: knownField(0),
     childBirthYears: notApplicableField<number[]>(),
   },
-  income: { annualRange: knownField<'30m-50m'>('30m-50m') },
+  income: {
+    annualRange: knownField<'30m-50m'>('30m-50m'),
+    workOrBusinessIncomeEligible: knownField(true),
+    incomeTaxPaymentYears: knownField(5),
+  },
   assets: {
     financial: knownField<'10m-30m'>('10m-30m'),
     realEstate: notApplicableField<'under-10m'>(),
@@ -125,6 +131,11 @@ const futureMissing = getFeatureProfileRequirements('future', minimal);
 eq(futureMissing.missing, ['SUBSCRIPTION_ACCOUNT'], 'Future 필수 bundle 계산');
 const futureKnown = getFeatureProfileRequirements('future', complete);
 eq(futureKnown.missing, [], '입력한 정보는 다른 기능에서 재요청하지 않음');
+eq(
+  getFeatureProfileRequirements('first-home', minimal).missing,
+  ['HOUSING_HISTORY', 'SUBSCRIPTION_ACCOUNT', 'INCOME', 'ASSETS', 'HOUSEHOLD', 'FAMILY'],
+  '생애최초 feature requirement는 필요한 기존 bundle만 순서대로 계산',
+);
 
 const freshFatigue = createPromptFatigueState();
 eq(resolveFeaturePrompt('future', minimal, freshFatigue), 'SUBSCRIPTION_ACCOUNT', '핵심 bundle 하나만 선택');

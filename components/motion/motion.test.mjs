@@ -62,6 +62,7 @@ const rawPressableFiles = sourceFiles
 const intentionalRawPressables = new Set([
   'app/future.tsx',
   'components/NewsImpactSheet.tsx',
+  'components/ProfilePromptSheet.tsx',
   'features/discovery/components/DiscoveryMapFallback.tsx',
 ]);
 check(

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Appear } from '../components/motion/Appear';
@@ -8,8 +8,10 @@ import { ScreenEnter } from '../components/motion/ScreenEnter';
 import { useCountUp } from '../hooks/useCountUp';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
 import { NewsBriefingSection } from '../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../components/NewsImpactSheet';
+import { ProfilePromptSheet } from '../components/ProfilePromptSheet';
 import { duration, travel } from '../design/motion';
 import { colors, radius, spacing, tint, type } from '../design/tokens';
 import {
@@ -26,6 +28,8 @@ import {
 } from '../domain/futureSimulation';
 import { useNewsBriefing } from '../features/news/useNewsBriefing';
 import type { RankedNews } from '../features/news/useNewsBriefing';
+import { hasCoreProfileForCalculations } from '../features/profile/domain';
+import type { ProfileQuestionBundleId } from '../features/profile/domain';
 import { useUserStore } from '../store/useUserStore';
 import { dismissActiveFocus, focusWebElementOnNextFrame } from '../utils/webFocus';
 
@@ -80,6 +84,9 @@ export default function FutureRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const profile = useUserStore((s) => s.profile);
+  const applicantProfile = useUserStore((s) => s.applicantProfile);
+  const requestProfileBundle = useUserStore((s) => s.requestProfileBundle);
+  const dismissProfileBundle = useUserStore((s) => s.dismissProfileBundle);
 
   const [offsetMonths, setOffsetMonths] = useState<FutureMonthOffset>(24);
   const [scenarioId, setScenarioId] = useState<FutureScenarioId>('baseline');
@@ -90,6 +97,12 @@ export default function FutureRoute() {
   const railRef = useRef<ScrollView>(null);
   const { state: newsState, reload: reloadNews } = useNewsBriefing(profile, 1);
   const [openedNews, setOpenedNews] = useState<RankedNews | null>(null);
+  const [profilePrompt, setProfilePrompt] = useState<ProfileQuestionBundleId | null>(null);
+
+  useEffect(() => {
+    const bundleId = requestProfileBundle('future');
+    if (bundleId) setProfilePrompt(bundleId);
+  }, [requestProfileBundle]);
 
   const scenarios = createFutureScenarios(profile, customInput);
   const scenario = scenarios.find((item) => item.id === scenarioId) ?? scenarios[0];
@@ -101,6 +114,9 @@ export default function FutureRoute() {
   const baselinePoint = comparison.results.find((result) => result.scenario.id === 'baseline')!.point;
   const customPoint = comparison.results.find((result) => result.scenario.id === 'custom')!.point;
   const customScoreDelta = customPoint.preparationScore - baselinePoint.preparationScore;
+  // legacy adapter 가 unknown 을 false 로 메운 값이다. 그대로 쓰면 "해지"/"주택 보유"를 단정하게 된다.
+  const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
+  const housingKnown = applicantProfile.housing.currentOwnership.status === 'known';
   const customFeedbackLines: string[] = [];
 
   if (offsetMonths === 0) {
@@ -115,9 +131,9 @@ export default function FutureRoute() {
     }
     if (baselinePoint.hasSubscriptionAccount !== customPoint.hasSubscriptionAccount) {
       customFeedbackLines.push(
-        `청약통장 가정은 ${baselinePoint.hasSubscriptionAccount ? '유지' : '해지'} → ${
-          customPoint.hasSubscriptionAccount ? '유지' : '해지'
-        }로 달라져요.`,
+        `청약통장 가정은 ${
+          !accountKnown ? '확인 필요' : baselinePoint.hasSubscriptionAccount ? '유지' : '해지'
+        } → ${customPoint.hasSubscriptionAccount ? '유지' : '해지'}로 달라져요.`,
       );
     }
     if (baselinePoint.region !== customPoint.region) {
@@ -125,9 +141,9 @@ export default function FutureRoute() {
     }
     if (baselinePoint.isNoHomeOwner !== customPoint.isNoHomeOwner) {
       customFeedbackLines.push(
-        `주택 상태 가정은 ${baselinePoint.isNoHomeOwner ? '무주택' : '주택 보유'} → ${
-          customPoint.isNoHomeOwner ? '무주택' : '주택 보유'
-        }로 달라져요.`,
+        `주택 상태 가정은 ${
+          !housingKnown ? '확인 필요' : baselinePoint.isNoHomeOwner ? '무주택' : '주택 보유'
+        } → ${customPoint.isNoHomeOwner ? '무주택' : '주택 보유'}로 달라져요.`,
       );
     }
     if (customFeedbackLines.length === 0) {
@@ -292,7 +308,11 @@ export default function FutureRoute() {
             </Text>
             <Text style={styles.stateMeta}>
               {formatAge(future.age)} ·{' '}
-              {future.hasSubscriptionAccount ? `통장 ${future.accountMonths}개월` : '통장 없음'}
+              {!accountKnown
+                ? '통장 확인 필요'
+                : future.hasSubscriptionAccount
+                  ? `통장 ${future.accountMonths}개월`
+                  : '통장 없음'}
             </Text>
           </View>
         </View>
@@ -637,9 +657,21 @@ export default function FutureRoute() {
       <NewsImpactSheet
         visible={openedNews !== null}
         profile={profile}
+        aiAllowed={hasCoreProfileForCalculations(applicantProfile)}
         article={openedNews?.article ?? null}
         relevance={openedNews?.relevance ?? null}
         onClose={() => setOpenedNews(null)}
+      />
+      <ProfilePromptSheet
+        bundleId={profilePrompt}
+        onEdit={(bundleId) => {
+          setProfilePrompt(null);
+          router.push(`/profile?bundle=${bundleId}&returnTo=/future` as Href);
+        }}
+        onLater={(bundleId) => {
+          dismissProfileBundle(bundleId);
+          setProfilePrompt(null);
+        }}
       />
     </ScreenEnter>
   );

@@ -24,6 +24,7 @@ import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 import { Appear } from '../../components/motion/Appear';
 import { Pop } from '../../components/motion/Pop';
 import { duration, travel } from '../../design/motion';
+import { toDiscoveryUserProfile } from '../../features/profile/domain';
 import { useUserStore } from '../../store/useUserStore';
 
 type ViewMode = 'map' | 'list';
@@ -39,7 +40,8 @@ const SUPPLY_CYCLE: DiscoveryFilters['supplyType'][] = [
 
 export default function DiscoveryRoute() {
   const router = useRouter();
-  const profile = useUserStore((state) => state.profile);
+  const applicantProfile = useUserStore((state) => state.applicantProfile);
+  const profile = useMemo(() => toDiscoveryUserProfile(applicantProfile), [applicantProfile]);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const toggleSavedListing = useDiscoveryStore((state) => state.toggleSavedListing);
   const dataset = useListingDataset();

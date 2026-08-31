@@ -25,6 +25,7 @@ import { useListingDataset } from '../../features/discovery/data/useListingDatas
 import { getStoriesForListing } from '../../features/discovery/stories';
 import type { DiscoveryListing, ListingStory } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
+import { toDiscoveryUserProfile } from '../../features/profile/domain';
 import { useUserStore } from '../../store/useUserStore';
 
 type DetailTab = 'info' | 'conditions' | 'stories';
@@ -32,7 +33,8 @@ type DetailTab = 'info' | 'conditions' | 'stories';
 export default function DiscoveryDetailRoute() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const profile = useUserStore((state) => state.profile);
+  const applicantProfile = useUserStore((state) => state.applicantProfile);
+  const profile = useMemo(() => toDiscoveryUserProfile(applicantProfile), [applicantProfile]);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const toggleSavedListing = useDiscoveryStore((state) => state.toggleSavedListing);
   const dataset = useListingDataset();

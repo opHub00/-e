@@ -26,6 +26,15 @@ const CATEGORY_ORDER: CategoryName[] = ['내 청약', '청약 찾기', '준비�
 const FEATURES: FeatureItem[] = [
   {
     category: '내 청약',
+    title: '내 청약 프로필',
+    description: '입력한 정보와 더 확인할 항목을 관리해요',
+    icon: 'badge',
+    tone: 'purple',
+    route: '/profile' as Href,
+    keywords: ['프로필', '청약 여권', '정보', '완성도', '수정'],
+  },
+  {
+    category: '내 청약',
     title: '나의 대시보드',
     description: '준비도와 오늘 상태를 한눈에 봐요',
     icon: 'dashboard',

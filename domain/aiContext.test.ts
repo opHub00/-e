@@ -7,6 +7,7 @@ import {
 } from './aiContext.ts';
 import { calculatePreparationScore, getStage } from './preparation.ts';
 import type { UserProfile } from './types';
+import { createMinimalApplicantProfile, toLegacyUserProfile } from '../features/profile/domain.ts';
 
 let checks = 0;
 const ok = (cond: unknown, msg: string) => {
@@ -91,6 +92,26 @@ ok(
 ok(
   getSuggestedQuestions(ctx)[0].includes(`${base.accountMonths}개월`),
   '추천 질문에 실제 가입 개월 없음',
+);
+
+// Progressive Profile의 unknown은 false/0으로 AI context에 흘리지 않는다.
+const minimalApplicant = createMinimalApplicantProfile({
+  name: '민지',
+  age: 27,
+  currentRegion: '서울특별시',
+  preferredRegions: ['서울특별시'],
+});
+const minimalContext = buildAiContext(toLegacyUserProfile(minimalApplicant), minimalApplicant);
+const minimalPrompt = formatContextForPrompt(minimalContext);
+ok(minimalPrompt.includes('이름: 민지'), 'known 이름 유지');
+ok(minimalPrompt.includes('지역: 서울특별시'), 'known 지역 유지');
+ok(!minimalPrompt.includes('청약통장: 없음'), 'unknown 통장을 없음으로 변환하면 안 됨');
+ok(!minimalPrompt.includes('주택 보유:'), 'unknown 주택 상태를 false로 변환하면 안 됨');
+ok(!minimalPrompt.includes('완판e 준비도:'), 'unknown 기반 계산값은 AI context에서 제외');
+ok(!minimalPrompt.includes('미래 시뮬레이션 ('), 'unknown 기반 Future 숫자는 AI context에서 제외');
+ok(
+  getSuggestedQuestions(minimalContext)[0].includes('정보를 추가하면'),
+  'unknown 통장에는 보유/미보유를 단정하지 않는 질문',
 );
 
 console.log(`domain/aiContext: ${checks}개 검증 통과`);

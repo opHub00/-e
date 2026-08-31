@@ -292,6 +292,12 @@ function BundleFields({
           <Field label="현재 세대에 주택 보유자가 있나요?">
             <BooleanChoices value={profile.housing.householdHasHome} onChange={(householdHasHome) => set('housing', { ...profile.housing, householdHasHome })} />
           </Field>
+          <Field label="혼인 전 배우자 이력을 제외하고, 현재 세대원이 과거에 주택을 소유한 적이 있나요?">
+            <BooleanChoices value={profile.housing.householdDisqualifyingPreviousOwnership} onChange={(householdDisqualifyingPreviousOwnership) => set('housing', { ...profile.housing, householdDisqualifyingPreviousOwnership })} />
+          </Field>
+          <Field label="청약홈에서 특별공급 횟수 제한 대상 이력이 있다고 확인되나요?">
+            <BooleanChoices value={profile.housing.hasSpecialSupplyRestriction} onChange={(hasSpecialSupplyRestriction) => set('housing', { ...profile.housing, hasSpecialSupplyRestriction })} />
+          </Field>
         </>
       );
     case 'HOUSEHOLD':
@@ -331,12 +337,28 @@ function BundleFields({
         </>
       );
     }
-    case 'INCOME':
+    case 'INCOME': {
+      const eligibleActivity = knownValue(profile.income.workOrBusinessIncomeEligible);
       return (
-        <Field label="연 소득 범위">
-          <ChoiceRow options={INCOME_RANGES} value={knownValue(profile.income.annualRange)} onChange={(annualRange) => set('income', { annualRange: knownField(annualRange) })} />
-        </Field>
+        <>
+          <Field label="연 소득 범위">
+            <ChoiceRow options={INCOME_RANGES} value={knownValue(profile.income.annualRange)} onChange={(annualRange) => set('income', { ...profile.income, annualRange: knownField(annualRange) })} />
+          </Field>
+          <Field label="현재 근로자·자영업자이거나 최근 1년 안에 근로·사업소득세를 납부했나요?">
+            <BooleanChoices value={profile.income.workOrBusinessIncomeEligible} onChange={(workOrBusinessIncomeEligible) => set('income', {
+              ...profile.income,
+              workOrBusinessIncomeEligible,
+              incomeTaxPaymentYears: knownValue(workOrBusinessIncomeEligible) === false ? notApplicableField() : profile.income.incomeTaxPaymentYears.status === 'not_applicable' ? unknownField() : profile.income.incomeTaxPaymentYears,
+            })} />
+          </Field>
+          {eligibleActivity ? (
+            <Field label="근로·사업소득세를 납부한 기간은 통산 몇 년인가요?">
+              <TextInput style={styles.input} keyboardType="number-pad" value={knownValue(profile.income.incomeTaxPaymentYears)?.toString() ?? ''} placeholder="예: 5" placeholderTextColor={colors.outline} onChangeText={(value) => set('income', { ...profile.income, incomeTaxPaymentYears: numberField(value, 80) })} />
+            </Field>
+          ) : null}
+        </>
       );
+    }
     case 'ASSETS':
       return (
         <>

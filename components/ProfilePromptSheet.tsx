@@ -39,7 +39,7 @@ export function ProfilePromptSheet({ bundleId, onEdit, onLater }: Props) {
             <MaterialIcons name="badge" size={22} color={colors.primary} />
           </View>
           <Text style={styles.eyebrow}>왜 필요한가요?</Text>
-          <Text style={styles.title}>{bundle.title}를 확인하면 더 정확해져요</Text>
+          <Text style={styles.title}>{bundle.title}{objectParticle(bundle.title)} 확인하면 더 정확해져요</Text>
           <Text style={styles.body}>{bundle.reason}</Text>
           <View style={styles.countPill}>
             <MaterialIcons name="schedule" size={14} color={colors.textMuted} />
@@ -63,6 +63,12 @@ export function ProfilePromptSheet({ bundleId, onEdit, onLater }: Props) {
       </View>
     </Modal>
   );
+}
+
+function objectParticle(value: string) {
+  const last = value.charCodeAt(value.length - 1);
+  const hasFinalConsonant = last >= 0xac00 && last <= 0xd7a3 && (last - 0xac00) % 28 !== 0;
+  return hasFinalConsonant ? '을' : '를';
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -233,6 +234,31 @@ export default function PreparationRoute() {
           })}
 
           <Text style={styles.scopeNote}>시간이 쌓여 생기는 변화만 담았어요.</Text>
+        </View>
+
+        <SectionRule label="나에게 가능한 청약 경로" />
+        <View style={styles.eligibilityBlock}>
+          <Text style={styles.eligibilityIntro}>준비도와 별개로 공급유형의 기본조건을 확인해요.</Text>
+          <MotionPressable
+            accessibilityRole="button"
+            onPress={() => router.push('/eligibility/first-home' as Href)}
+            style={styles.eligibilityLead}
+          >
+            <View style={[styles.toolIcon, { backgroundColor: tint.green.bg }]}>
+              <MaterialIcons name="home-work" size={17} color={tint.green.fg} />
+            </View>
+            <View style={styles.eligibilityCopy}>
+              <Text style={styles.toolTitle}>생애최초 특별공급</Text>
+              <Text style={styles.eligibilityMeta}>조건 확인하기</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={18} color={colors.outline} />
+          </MotionPressable>
+          {['일반공급', '신혼부부', '청년'].map((label) => (
+            <View key={label} style={styles.eligibilityLater}>
+              <Text style={styles.eligibilityLaterTitle}>{label}</Text>
+              <Text style={styles.eligibilityLaterMeta}>준비 중</Text>
+            </View>
+          ))}
         </View>
 
         {/* Duolingo: 다음 구역은 라벨이 박힌 구분선으로 넘어간다. */}
@@ -498,6 +524,37 @@ const styles = StyleSheet.create({
   briefingHead: { paddingHorizontal: SIDE, marginTop: -8, marginBottom: 8 },
   briefingTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
   briefing: { paddingHorizontal: SIDE },
+  eligibilityBlock: {
+    marginHorizontal: SIDE,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingBottom: 4,
+  },
+  eligibilityIntro: { ...type.caption, color: colors.textMuted, lineHeight: 18, paddingVertical: 12 },
+  eligibilityLead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 58,
+    borderRadius: radius.cardSm,
+    backgroundColor: tint.green.bg,
+    paddingHorizontal: 10,
+  },
+  eligibilityCopy: { flex: 1 },
+  eligibilityMeta: { ...type.caption, color: tint.green.fg, marginTop: 1 },
+  eligibilityLater: {
+    minHeight: 45,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.hairline,
+    paddingHorizontal: 4,
+  },
+  eligibilityLaterTitle: { ...type.bodySm, color: colors.textMuted, flex: 1 },
+  eligibilityLaterMeta: { ...type.micro, color: colors.textSubtle },
   tools: {
     marginHorizontal: SIDE,
     borderRadius: radius.card,

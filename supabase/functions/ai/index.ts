@@ -4,7 +4,13 @@
 //   supabase secrets set GEMINI_API_KEY=...
 //   supabase functions deploy ai
 
-import { ELIGIBILITY_REPLY, isEligibilityQuestion } from './eligibility.ts';
+import {
+  ELIGIBILITY_REPLY,
+  formatEligibilityExplanationContext,
+  isEligibilityExplanationContext,
+  isEligibilityQuestion,
+  type EligibilityExplanationContext,
+} from './eligibility.ts';
 
 const MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
@@ -46,6 +52,17 @@ const SYSTEM_PROMPT = `당신은 청약 준비 앱 '완판e'의 설명 도우미
 - 전문 용어를 쓸 때는 바로 뒤에 한 줄로 풀어써요.
 - 마지막에 지금 해볼 만한 행동 하나를 제안해요.`;
 
+const ELIGIBILITY_EXPLANATION_RULES = `
+
+[생애최초 분석 설명 모드]
+- 아래 [확정된 분석 결과]는 앱의 deterministic rule engine이 만든 결과예요.
+- status와 각 check의 분류를 변경하거나 재판정하지 마세요.
+- 결과에 없는 조건, 숫자, 예외를 새로 만들지 마세요.
+- raw profile을 추측하지 마세요.
+- passedChecks, missingChecks, listingChecks, failedChecks를 사용자가 이해하기 쉽게 설명만 하세요.
+- needs_information은 탈락이 아니라 미확인 정보라고 분명히 말하세요.
+- needs_listing_confirmation은 모집공고 확인이 필요하다는 뜻으로만 설명하세요.`;
+
 type Turn = { role: 'user' | 'model'; text: string };
 
 /** 앱이 계산해서 보내는 학습 콘텐츠. 사용자 자유 입력이 아니다. */
@@ -68,6 +85,7 @@ Deno.serve(async (req: Request) => {
   let context = '';
   let history: Turn[] = [];
   let lesson: Lesson | null = null;
+  let eligibility: EligibilityExplanationContext | null = null;
   try {
     const body = await req.json();
     question = String(body.question ?? '').trim();
@@ -81,6 +99,12 @@ Deno.serve(async (req: Request) => {
         personal: String(body.lesson.personal ?? '').slice(0, 500),
       };
     }
+    if (body.eligibility !== undefined) {
+      if (!isEligibilityExplanationContext(body.eligibility)) {
+        return json({ error: '자격 분석 결과 형식이 올바르지 않아요.' }, 400);
+      }
+      eligibility = body.eligibility;
+    }
   } catch {
     return json({ error: '요청 형식을 읽을 수 없어요.' }, 400);
   }
@@ -91,13 +115,16 @@ Deno.serve(async (req: Request) => {
   // 자격 관련 질문은 Gemini 를 거치지 않고 고정 안내문으로 답한다.
   // 검사 대상은 사용자가 입력한 question 뿐이다.
   // lesson 은 앱이 만들어 보내는 학습 콘텐츠라 필터를 적용하지 않는다.
-  if (isEligibilityQuestion(question)) {
+  if (!eligibility && isEligibilityQuestion(question)) {
     return json({ answer: ELIGIBILITY_REPLY, blocked: 'eligibility' });
   }
 
   const lessonBlock = lesson?.question
     ? `\n\n[오늘의 학습]\n문항: ${lesson.question}\n정답: ${lesson.answer ? '맞아요' : '아니에요'}` +
       `\n앱이 준비한 해설: ${lesson.explanation}\n앱이 준비한 개인화 설명: ${lesson.personal}`
+    : '';
+  const eligibilityBlock = eligibility
+    ? `\n\n[확정된 분석 결과]\n${formatEligibilityExplanationContext(eligibility)}`
     : '';
 
   const contents = [
@@ -106,7 +133,7 @@ Deno.serve(async (req: Request) => {
       .map((t) => ({ role: t.role, parts: [{ text: String(t.text).slice(0, 2000) }] })),
     {
       role: 'user',
-      parts: [{ text: `[사용자 상태]\n${context}${lessonBlock}\n\n[질문]\n${question}` }],
+      parts: [{ text: `[사용자 상태]\n${context}${lessonBlock}${eligibilityBlock}\n\n[질문]\n${question}` }],
     },
   ];
 
@@ -115,7 +142,9 @@ Deno.serve(async (req: Request) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        systemInstruction: {
+          parts: [{ text: eligibility ? SYSTEM_PROMPT + ELIGIBILITY_EXPLANATION_RULES : SYSTEM_PROMPT }],
+        },
         contents,
         generationConfig: {
           temperature: 0.4,

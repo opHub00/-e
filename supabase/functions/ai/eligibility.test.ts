@@ -1,6 +1,11 @@
 // npm run test:edge
 // isEligibilityQuestion() 을 직접 호출해서 검증한다. 소스 문자열 검사가 아니다.
-import { ELIGIBILITY_REPLY, isEligibilityQuestion } from './eligibility.ts';
+import {
+  ELIGIBILITY_REPLY,
+  formatEligibilityExplanationContext,
+  isEligibilityExplanationContext,
+  isEligibilityQuestion,
+} from './eligibility.ts';
 import { quizzes } from '../../../data/quizzes.ts';
 import { QUIZ_EXPLAIN_PROMPT } from '../../../domain/quiz.ts';
 
@@ -90,6 +95,32 @@ for (const q of MUST_BLOCK_PARAPHRASE) {
 ok(
   ELIGIBILITY_REPLY.startsWith('정확한 자격은 해당 모집공고와 공식 기준 확인이 필요합니다'),
   '고정 안내문이 요구 문구와 다름',
+);
+
+const deterministicContext = {
+  feature: 'first_home_private_v1' as const,
+  status: 'needs_information' as const,
+  passedChecks: [{ id: 'scope', label: '지원 범위', reason: '민영주택 범위예요.' }],
+  missingChecks: [{ id: 'housing', label: '주택 이력', reason: '정보가 필요해요.' }],
+  listingChecks: [],
+  failedChecks: [],
+  actions: ['주택 이력 확인'],
+  ruleSetVersion: 'KR-FIRST-HOME-PRIVATE-2026.07.08-v1',
+  effectiveDate: '2026-07-08',
+};
+ok(isEligibilityExplanationContext(deterministicContext), '정상 structured result 허용');
+eq(
+  formatEligibilityExplanationContext(deterministicContext),
+  JSON.stringify(deterministicContext),
+  'AI eligibility context deterministic',
+);
+ok(
+  !isEligibilityExplanationContext({ ...deterministicContext, rawProfile: { name: '민지' } }),
+  'raw profile 추가 시 거부',
+);
+ok(
+  !isEligibilityExplanationContext({ ...deterministicContext, status: 'probably_yes' }),
+  '임의 status 거부',
 );
 
 console.log(`supabase/functions/ai: ${checks}개 검증 통과`);

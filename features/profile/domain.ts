@@ -37,6 +37,8 @@ export type ApplicantProfileV2 = {
     currentOwnership: ProfileFieldState<'no-home' | 'owns-home'>;
     previousOwnership: ProfileFieldState<boolean>;
     householdHasHome: ProfileFieldState<boolean>;
+    householdDisqualifyingPreviousOwnership: ProfileFieldState<boolean>;
+    hasSpecialSupplyRestriction: ProfileFieldState<boolean>;
   };
   household: { memberCount: ProfileFieldState<number> };
   family: {
@@ -45,7 +47,11 @@ export type ApplicantProfileV2 = {
     childrenCount: ProfileFieldState<number>;
     childBirthYears: ProfileFieldState<number[]>;
   };
-  income: { annualRange: ProfileFieldState<IncomeRange> };
+  income: {
+    annualRange: ProfileFieldState<IncomeRange>;
+    workOrBusinessIncomeEligible: ProfileFieldState<boolean>;
+    incomeTaxPaymentYears: ProfileFieldState<number>;
+  };
   assets: {
     financial: ProfileFieldState<AmountRange>;
     realEstate: ProfileFieldState<AmountRange>;
@@ -110,9 +116,9 @@ export const PROFILE_BUNDLES: readonly ProfileQuestionBundle[] = [
   {
     id: 'HOUSING_HISTORY',
     title: '주택 이력',
-    description: '현재와 과거의 주택 보유 상태를 확인해요.',
-    fields: ['currentOwnership', 'previousOwnership', 'householdHasHome'],
-    estimatedQuestionCount: 3,
+    description: '본인·세대의 주택 보유와 특별공급 이력을 확인해요.',
+    fields: ['currentOwnership', 'previousOwnership', 'householdHasHome', 'householdDisqualifyingPreviousOwnership', 'hasSpecialSupplyRestriction'],
+    estimatedQuestionCount: 5,
     reason: '일부 공급 유형은 본인과 세대의 주택 이력을 함께 확인해요.',
     benefit: '향후 생애최초·특별공급 분석에 재사용할 수 있어요.',
   },
@@ -137,11 +143,11 @@ export const PROFILE_BUNDLES: readonly ProfileQuestionBundle[] = [
   {
     id: 'INCOME',
     title: '소득',
-    description: '정확한 금액 대신 연 소득 범위로 확인해요.',
-    fields: ['annualRange'],
-    estimatedQuestionCount: 1,
-    reason: '일부 특별공급은 소득 범위를 확인해요.',
-    benefit: '향후 소득 기준이 있는 공고 분석을 준비할 수 있어요.',
+    description: '소득 범위와 근로·사업소득세 이력을 확인해요.',
+    fields: ['annualRange', 'workOrBusinessIncomeEligible', 'incomeTaxPaymentYears'],
+    estimatedQuestionCount: 3,
+    reason: '생애최초는 공고별 소득 기준과 근로·사업소득세 납부 이력을 함께 확인해요.',
+    benefit: '소득세 기본조건과 공고에서 확인할 소득 기준을 나눠 볼 수 있어요.',
   },
   {
     id: 'ASSETS',
@@ -183,7 +189,10 @@ const FEATURE_REQUIREMENTS: Record<
   future: { required: ['SUBSCRIPTION_ACCOUNT'], optional: ['BASIC', 'HOUSING_HISTORY'] },
   ai: { required: ['BASIC'], optional: ['RESIDENCE', 'SUBSCRIPTION_ACCOUNT', 'HOUSING_HISTORY'] },
   discovery: { required: ['RESIDENCE', 'PREFERENCES'], optional: ['HOUSING_HISTORY'] },
-  'first-home': { required: ['HOUSING_HISTORY'], optional: ['INCOME', 'ASSETS'] },
+  'first-home': {
+    required: ['HOUSING_HISTORY', 'SUBSCRIPTION_ACCOUNT', 'INCOME', 'ASSETS', 'HOUSEHOLD', 'FAMILY'],
+    optional: [],
+  },
   newlywed: { required: ['FAMILY'], optional: ['INCOME', 'ASSETS'] },
   'multi-child': { required: ['FAMILY', 'HOUSEHOLD'], optional: ['INCOME', 'ASSETS'] },
 };
@@ -246,6 +255,8 @@ export function createApplicantProfileFromLegacy(profile: UserProfile): Applican
       currentOwnership: knownField(profile.isNoHomeOwner ? 'no-home' : 'owns-home'),
       previousOwnership: unknownField(),
       householdHasHome: unknownField(),
+      householdDisqualifyingPreviousOwnership: unknownField(),
+      hasSpecialSupplyRestriction: unknownField(),
     },
     household: { memberCount: unknownField() },
     family: {
@@ -254,7 +265,11 @@ export function createApplicantProfileFromLegacy(profile: UserProfile): Applican
       childrenCount: unknownField(),
       childBirthYears: unknownField(),
     },
-    income: { annualRange: unknownField() },
+    income: {
+      annualRange: unknownField(),
+      workOrBusinessIncomeEligible: unknownField(),
+      incomeTaxPaymentYears: unknownField(),
+    },
     assets: {
       financial: unknownField(),
       realEstate: unknownField(),
@@ -296,6 +311,8 @@ export function createMinimalApplicantProfile(input: {
       currentOwnership: unknownField(),
       previousOwnership: unknownField(),
       householdHasHome: unknownField(),
+      householdDisqualifyingPreviousOwnership: unknownField(),
+      hasSpecialSupplyRestriction: unknownField(),
     },
   };
 }
@@ -342,6 +359,8 @@ export function migrateApplicantProfile(
       currentOwnership: readField(housing.currentOwnership, isOwnership),
       previousOwnership: readField(housing.previousOwnership, isBoolean),
       householdHasHome: readField(housing.householdHasHome, isBoolean),
+      householdDisqualifyingPreviousOwnership: readField(housing.householdDisqualifyingPreviousOwnership, isBoolean),
+      hasSpecialSupplyRestriction: readField(housing.hasSpecialSupplyRestriction, isBoolean),
     },
     household: { memberCount: readField(household.memberCount, isFiniteNumber) },
     family: {
@@ -350,7 +369,11 @@ export function migrateApplicantProfile(
       childrenCount: readField(family.childrenCount, isFiniteNumber),
       childBirthYears: readField(family.childBirthYears, isNumberArray),
     },
-    income: { annualRange: readField(income.annualRange, isIncomeRange) },
+    income: {
+      annualRange: readField(income.annualRange, isIncomeRange),
+      workOrBusinessIncomeEligible: readField(income.workOrBusinessIncomeEligible, isBoolean),
+      incomeTaxPaymentYears: readField(income.incomeTaxPaymentYears, isFiniteNumber),
+    },
     assets: {
       financial: readField(assets.financial, isAmountRange),
       realEstate: readField(assets.realEstate, isAmountRange),
@@ -446,6 +469,8 @@ export function getBundleProgress(
         known(profile.housing.currentOwnership),
         known(profile.housing.previousOwnership),
         known(profile.housing.householdHasHome),
+        known(profile.housing.householdDisqualifyingPreviousOwnership),
+        known(profile.housing.hasSpecialSupplyRestriction),
       ]);
     case 'HOUSEHOLD':
       return known(profile.household.memberCount) ? 1 : 0;
@@ -459,7 +484,11 @@ export function getBundleProgress(
       return ratio(answers);
     }
     case 'INCOME':
-      return known(profile.income.annualRange) ? 1 : 0;
+      return ratio([
+        known(profile.income.annualRange),
+        known(profile.income.workOrBusinessIncomeEligible),
+        known(profile.income.incomeTaxPaymentYears),
+      ]);
     case 'ASSETS':
       return ratio([
         known(profile.assets.financial),
@@ -527,12 +556,16 @@ export function getKnownApplicantSignals(profile: ApplicantProfileV2) {
     housingStatus: knownValue(profile.housing.currentOwnership),
     previousHomeOwnership: knownValue(profile.housing.previousOwnership),
     householdHasHome: knownValue(profile.housing.householdHasHome),
+    householdDisqualifyingPreviousHomeOwnership: knownValue(profile.housing.householdDisqualifyingPreviousOwnership),
+    hasSpecialSupplyRestriction: knownValue(profile.housing.hasSpecialSupplyRestriction),
     householdMemberCount: knownValue(profile.household.memberCount),
     marriageStatus: knownValue(profile.family.marriageStatus),
     marriageYears: knownValue(profile.family.marriageYears),
     childrenCount: knownValue(profile.family.childrenCount),
     childBirthYears: knownValue(profile.family.childBirthYears),
     incomeRange: knownValue(profile.income.annualRange),
+    workOrBusinessIncomeEligible: knownValue(profile.income.workOrBusinessIncomeEligible),
+    incomeTaxPaymentYears: knownValue(profile.income.incomeTaxPaymentYears),
     financialAssetRange: knownValue(profile.assets.financial),
     realEstateRange: knownValue(profile.assets.realEstate),
     vehicleRange: knownValue(profile.assets.vehicle),

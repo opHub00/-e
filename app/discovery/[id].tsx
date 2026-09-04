@@ -155,6 +155,20 @@ export default function DiscoveryDetailRoute() {
       </ScrollView>
 
       <View style={styles.footer}>
+        <MotionPressable
+          accessibilityRole="button"
+          onPress={() => router.push({
+            pathname: '/ai',
+            params: {
+              q: `${listing.complexName} 공고에서 접수 일정과 공식 모집공고를 확인할 때 주의할 점을 설명해 주세요. 자격 판정은 하지 마세요.`,
+              auto: '1',
+            },
+          })}
+          style={styles.aiLink}
+        >
+          <MaterialIcons name="auto-awesome" size={17} color={colors.primary} />
+          <Text style={styles.aiLinkText}>이 공고를 AI에게 물어보기</Text>
+        </MotionPressable>
         <PrimaryButton
           label={saved ? '저장됨 · 관심 청약에서 빼기' : '관심 청약으로 저장'}
           icon={saved ? 'bookmark' : 'bookmark-border'}
@@ -560,7 +574,9 @@ const styles = StyleSheet.create({
   storyLikes: { ...type.caption, color: colors.textMuted },
   demoNotice: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },
   demoNoticeText: { ...type.caption, color: colors.textMuted, flex: 1 },
-  footer: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm, paddingBottom: spacing.sm, borderTopWidth: 1, borderTopColor: colors.surfaceHigh, backgroundColor: colors.surface, ...shadow.floating },
+  footer: { gap: spacing.xs, paddingHorizontal: spacing.screen, paddingTop: spacing.sm, paddingBottom: spacing.sm, borderTopWidth: 1, borderTopColor: colors.surfaceHigh, backgroundColor: colors.surface, ...shadow.floating },
+  aiLink: { minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  aiLinkText: { ...type.label, color: colors.primary },
   notFound: { flex: 1, justifyContent: 'center', gap: spacing.md, padding: spacing.screen },
   notFoundTitle: { ...type.title, color: colors.text },
   notFoundBody: { ...type.body, color: colors.textMuted },

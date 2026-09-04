@@ -1,39 +1,16 @@
-# 완판e Portable Demo Setup
+# 완판e Demo / Web Deployment Setup
 
-이 ZIP에는 실제 `.env`, API key, secret이 들어 있지 않습니다. 새 노트북에서 아래 순서대로 설정합니다.
+## 1. 로컬 데모
 
-## 0. 준비 사항
-
-- Node.js `20.19.4+`, `22.13.0+`, 또는 `24.3.0+` (`22 LTS` 권장)
-- npm 및 인터넷 연결
-- 배포되어 있는 Supabase 프로젝트의 URL과 anon key
-- Kakao Maps JavaScript key
-
-Kakao Developers의 해당 앱에서 Web 사이트 도메인에 `http://localhost:8081`을 등록해야 지도가 표시됩니다.
-
-## 1. 의존성 설치
-
-ZIP을 푼 폴더에서 실행합니다.
+준비물은 Node.js 22 LTS, npm, 배포된 Supabase 프로젝트의 URL/anon key, Kakao Maps JavaScript key입니다.
 
 ```powershell
 npm install
-```
-
-## 2. `.env` 설정
-
-예시 파일을 복사합니다.
-
-```powershell
 Copy-Item .env.example .env
+npx expo start --web --port 8081
 ```
 
-macOS/Linux에서는 다음 명령을 사용합니다.
-
-```bash
-cp .env.example .env
-```
-
-생성된 `.env`에 아래 세 변수의 값을 입력합니다. 변수 이름은 그대로 두고 `=` 뒤에 각 값을 넣습니다.
+`.env`에는 아래 세 공개 클라이언트 설정만 입력합니다. 값이나 `.env` 파일은 커밋하지 않습니다.
 
 ```dotenv
 EXPO_PUBLIC_SUPABASE_URL=
@@ -41,28 +18,70 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 EXPO_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY=
 ```
 
-`EXPO_PUBLIC_*` 값은 웹 클라이언트 번들에 포함될 수 있는 공개 클라이언트 설정만 사용합니다. `.env`를 커밋하거나 공유하지 마세요.
+Kakao Developers → 내 애플리케이션 → 플랫폼 → Web 사이트 도메인에 로컬 시연 주소 `http://localhost:8081`을 등록합니다. Device Toolbar의 모바일/데스크톱 상태를 먼저 정한 뒤 새로고침해야 지도 lifecycle을 올바르게 확인할 수 있습니다.
 
-## 3. 웹 데모 실행
+## 2. 시연 전 초기화와 흐름
+
+`전체 → 데모 초기화`는 Intro, ApplicantProfile, 저장 공고 ID, 퀴즈/XP, prompt fatigue의 앱 로컬 상태를 초기화합니다. Supabase 데이터나 다른 사용자 데이터는 건드리지 않습니다.
+
+권장 흐름:
+
+```text
+Demo Reset → Intro → Onboarding(전국 17개 시도) → Home 실제 공고
+→ Profile → Preparation → Future → 생애최초 → 전국 Discovery
+→ Listing Detail → Save → Home → 새로고침 → 저장 유지 → AI
+```
+
+## 3. 정적 export
 
 ```powershell
-npx expo start --web --port 8081
+npx expo export --platform web
 ```
 
-브라우저가 자동으로 열리지 않으면 `http://localhost:8081`에 접속합니다. 환경변수를 바꾼 경우 Expo를 종료한 뒤 같은 명령으로 다시 시작합니다.
+출력은 `dist/`입니다. 배포 전 `/`, `/profile`, `/future`, `/eligibility/first-home`, `/discovery`, `/discovery/[id]` 결과가 빈 shell이 아니고 Expo root markup과 route bundle을 포함하는지 확인합니다. root `/`는 클라이언트 hydration 뒤 Intro/Onboarding 상태에 따라 이동합니다.
 
-## Supabase Edge Function용 서버 변수
+## 4. 추천 플랫폼: Vercel
 
-아래 변수는 현재 소스에서 Edge Function이 참조하지만, 새 노트북의 Expo `.env`에는 넣지 않습니다. 이미 배포된 Supabase 함수를 사용하는 데모라면 노트북에서 별도 설정할 필요가 없습니다.
+현재 구조에는 Vercel의 정적 output 배포가 가장 단순합니다. 저장소의 `vercel.json`은 build command, `dist` 출력 디렉터리, 임의의 공고 ID를 export된 `/discovery/[id]` route로 연결하는 rewrite만 고정합니다. 실제 계정 로그인이나 production 배포는 이 저장소 작업에 포함하지 않습니다.
 
-```dotenv
-GEMINI_API_KEY=
-NAVER_NEWS_CLIENT_ID=
-NAVER_NEWS_CLIENT_SECRET=
-DATA_GO_KR_SERVICE_KEY=
-KAKAO_REST_API_KEY=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
+Vercel 프로젝트 설정:
+
+1. 저장소 root를 프로젝트 root로 선택합니다.
+2. Build Command는 `npx expo export --platform web`, Output Directory는 `dist`를 사용합니다.
+3. 위 세 `EXPO_PUBLIC_*` 환경변수만 Production/Preview에 등록합니다.
+4. 첫 배포 URL이 정해지면 Kakao Web 사이트 도메인에 `https://<production-domain>`을 추가한 뒤 다시 배포합니다.
+
+`GEMINI_API_KEY`, `NAVER_NEWS_CLIENT_ID`, `NAVER_NEWS_CLIENT_SECRET`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`는 Vercel 환경변수에 넣지 않습니다.
+
+## 5. Supabase Edge Functions
+
+production 클라이언트는 `EXPO_PUBLIC_SUPABASE_URL`의 표준 endpoint를 anon key와 함께 호출합니다.
+
+| Function | Client route | 서버 secret |
+|---|---|---|
+| `listings` | `/functions/v1/listings` | `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY`, Supabase server vars |
+| `news` | `/functions/v1/news` | `NAVER_NEWS_CLIENT_ID`, `NAVER_NEWS_CLIENT_SECRET` |
+| `news-impact` | `/functions/v1/news-impact` | `GEMINI_API_KEY` |
+| `ai` | `/functions/v1/ai` | `GEMINI_API_KEY` |
+
+네 함수는 web client용 CORS/OPTIONS와 `authorization`, `apikey` header를 수용합니다. 서버 secret은 Supabase Dashboard/CLI에서만 관리합니다.
+
+```powershell
+supabase functions deploy listings
+supabase functions deploy news
+supabase functions deploy news-impact
+supabase functions deploy ai --no-verify-jwt
 ```
 
-`GEMINI_API_KEY`, `NAVER_NEWS_CLIENT_ID`, `NAVER_NEWS_CLIENT_SECRET`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY`는 Supabase 프로젝트의 Edge Function secret으로만 설정합니다. 배포된 Edge Function에서는 `SUPABASE_URL`과 `SUPABASE_SERVICE_ROLE_KEY`가 Supabase에 의해 제공됩니다.
+배포 정책의 JWT 설정은 현재 client 호출 방식과 프로젝트 정책을 함께 확인해 결정합니다. URL/anon key가 없거나 네트워크 요청이 실패하면 화면은 오류 또는 명시된 fallback을 표시해야 하며, secret을 클라이언트로 옮겨 해결하지 않습니다.
+
+## 6. 시연 전 검증
+
+```powershell
+npm test
+npx tsc --noEmit
+npx expo export --platform web
+git diff --check
+```
+
+`test:edge`의 Deno 다운로드/cache 실패는 TypeScript나 Edge 로직 실패와 구분해 기록합니다. 인터넷 연결이 가능한 환경에서는 dependency cache를 준비한 뒤 다시 실행합니다.

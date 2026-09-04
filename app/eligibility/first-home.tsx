@@ -185,6 +185,14 @@ export default function FirstHomeEligibilityRoute() {
             이 결과는 준비도 점수와 별개예요. 실제 신청 가능 여부는 모집공고와 청약홈에서 최종 확인해 주세요.
           </Text>
         </View>
+        <MotionPressable
+          accessibilityRole="button"
+          onPress={() => router.push('/discovery' as Href)}
+          style={styles.discoveryLink}
+        >
+          <Text style={styles.discoveryLinkText}>전국 실제 공고 둘러보기</Text>
+          <MaterialIcons name="arrow-forward" size={18} color={colors.primary} />
+        </MotionPressable>
       </ScrollView>
 
       <ProfilePromptSheet
@@ -258,4 +266,6 @@ const styles = StyleSheet.create({
   aiButtonText: { ...type.bodySmStrong, color: colors.onPrimary },
   notice: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },
   noticeText: { ...type.caption, color: colors.textMuted, flex: 1, lineHeight: 18 },
+  discoveryLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, borderRadius: radius.button, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.lavender },
+  discoveryLinkText: { ...type.bodySmStrong, color: colors.primary },
 });

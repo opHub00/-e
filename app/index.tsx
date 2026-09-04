@@ -20,9 +20,8 @@ import { colors, radius, size, spacing, tint, type } from '../design/tokens';
 import { LIMITS, validateNumberField } from '../domain/preparation';
 import type { FieldIssue } from '../domain/preparation';
 import { createMinimalApplicantProfile } from '../features/profile/domain';
+import { getRegionLabel, PROFILE_REGIONS } from '../features/discovery/regions';
 import { defaultProfile, shouldRedirectToIntro, useUserStore } from '../store/useUserStore';
-
-const REGION_CHOICES = ['서울특별시', '경기도', '인천광역시'];
 
 /** 숫자 입력은 편집 중 빈 문자열을 허용해야 해서 문자열로 들고 있는다. */
 type Draft = {
@@ -259,10 +258,10 @@ export default function OnboardingRoute() {
 
             <Field label="현재 거주지역">
               <View style={styles.chipRow}>
-                {REGION_CHOICES.map((region) => (
+                {PROFILE_REGIONS.map((region) => (
                   <Chip
                     key={region}
-                    label={region.replace('특별시', '').replace('광역시', '').replace('도', '')}
+                    label={getRegionLabel(region)}
                     active={draft.currentRegion === region}
                     onPress={() => patch({ currentRegion: region })}
                   />
@@ -272,12 +271,12 @@ export default function OnboardingRoute() {
 
             <Field label="관심지역 · 여러 곳 선택 가능">
               <View style={styles.chipRow}>
-                {REGION_CHOICES.map((region) => {
+                {PROFILE_REGIONS.map((region) => {
                   const active = draft.preferredRegions.includes(region);
                   return (
                     <Chip
                       key={region}
-                      label={region.replace('특별시', '').replace('광역시', '').replace('도', '')}
+                      label={getRegionLabel(region)}
                       active={active}
                       onPress={() =>
                         patch({

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
+  "framework": null,
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/discovery/:id",
+      "destination": "/discovery/[id]"
+    }
+  ]
+}

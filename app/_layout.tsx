@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import { colors } from '../design/tokens';
 import { duration } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useDiscoveryStore } from '../features/discovery/useDiscoveryStore';
 import { useUserStore } from '../store/useUserStore';
 import { dismissActiveFocus } from '../utils/webFocus';
 
@@ -14,6 +15,7 @@ export default function RootLayout() {
   const reducedMotion = useReducedMotion();
   const profileHydrated = useUserStore((state) => state.profileHydrated);
   const hydrateProfile = useUserStore((state) => state.hydrateProfile);
+  const hydrateSavedListings = useDiscoveryStore((state) => state.hydrateSavedListings);
   const [fontsLoaded] = useFonts({
     ...MaterialIcons.font,
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
@@ -23,7 +25,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     void hydrateProfile();
-  }, [hydrateProfile]);
+    void hydrateSavedListings();
+  }, [hydrateProfile, hydrateSavedListings]);
 
   // Static web render에서는 effect가 실행되지 않는다. web을 hydration gate로 막으면 모든 route가 빈 shell로 export된다.
   if (!fontsLoaded || (Platform.OS !== 'web' && !profileHydrated)) return null;

@@ -119,6 +119,9 @@ export default function DiscoveryRoute() {
         <Appear replayKey="discovery-error" distance={0} style={styles.stateContent}>
           <MaterialIcons name="error-outline" size={24} color={colors.warning} />
           <Text style={styles.stateText}>청약 공고를 불러오지 못했어요</Text>
+          <MotionPressable accessibilityRole="button" onPress={() => void dataset.retry()} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>다시 시도</Text>
+          </MotionPressable>
         </Appear>
       </SafeAreaView>
     );
@@ -562,6 +565,8 @@ const styles = StyleSheet.create({
   stateScreen: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
   stateContent: { alignItems: 'center', gap: spacing.sm },
   stateText: { ...type.bodySm, color: colors.textMuted },
+  retryButton: { marginTop: spacing.xs, borderRadius: radius.pill, backgroundColor: colors.primary, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  retryButtonText: { ...type.label, color: colors.onPrimary },
   fallbackNotice: {
     flexDirection: 'row',
     alignItems: 'center',

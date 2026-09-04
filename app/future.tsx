@@ -511,6 +511,18 @@ export default function FutureRoute() {
           <MaterialIcons name="chevron-right" size={20} color={colors.primary} />
         </MotionPressable>
 
+        <MotionPressable
+          accessibilityRole="button"
+          onPress={() => router.push('/eligibility/first-home' as Href)}
+          style={styles.eligibilityLink}
+        >
+          <View style={styles.eligibilityLinkCopy}>
+            <Text style={styles.eligibilityLinkTitle}>생애최초 기본조건 확인하기</Text>
+            <Text style={styles.eligibilityLinkNote}>미래 준비도와 별개로 현재 조건을 규칙으로 확인해요</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={colors.textMuted} />
+        </MotionPressable>
+
         <Text style={styles.disclaimer}>{simulation.disclaimer}</Text>
       </ScrollView>
 
@@ -1179,6 +1191,10 @@ const styles = StyleSheet.create({
   aiCopy: { flex: 1, gap: 2 },
   aiTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
   aiNote: { ...type.caption, color: colors.textSubtle },
+  eligibilityLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm, marginHorizontal: SIDE, borderRadius: radius.cardSm, paddingHorizontal: 13, paddingVertical: 11 },
+  eligibilityLinkCopy: { flex: 1, gap: 2 },
+  eligibilityLinkTitle: { ...type.bodySmStrong, color: colors.text },
+  eligibilityLinkNote: { ...type.caption, color: colors.textSubtle },
 
   disclaimer: {
     ...type.caption,

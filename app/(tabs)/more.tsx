@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
 import { useUserStore } from '../../store/useUserStore';
+import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 
 type CategoryName = '내 청약' | '청약 찾기' | '준비하기' | '배우기' | '상담';
 
@@ -102,6 +103,7 @@ export default function MoreRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const resetDemo = useUserStore((state) => state.resetDemo);
+  const clearSavedListings = useDiscoveryStore((state) => state.clearSavedListings);
   const [query, setQuery] = useState('');
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
@@ -119,7 +121,7 @@ export default function MoreRoute() {
   );
 
   const restart = async () => {
-    await resetDemo();
+    await Promise.all([resetDemo(), clearSavedListings()]);
     router.replace('/');
   };
 

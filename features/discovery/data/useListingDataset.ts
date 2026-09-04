@@ -110,12 +110,12 @@ function logListingLifecycle(message: string): void {
 
 const runtime = createListingDatasetRuntime(listingRepository, activeListingProvider.source);
 
-export function useListingDataset(): ListingDatasetSnapshot {
+export function useListingDataset(): ListingDatasetSnapshot & { retry: () => Promise<void> } {
   const value = useSyncExternalStore(
     runtime.subscribe,
     runtime.getSnapshot,
     runtime.getSnapshot,
   );
   useEffect(() => runtime.start(), []);
-  return value;
+  return { ...value, retry: runtime.load };
 }

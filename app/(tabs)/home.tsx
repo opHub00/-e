@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Appear } from '../../components/motion/Appear';
@@ -21,13 +21,13 @@ import { getLevel, XP_PER_QUIZ } from '../../domain/quiz';
 import {
   formatPrice,
   getListingRelevance,
+  hasListingPrice,
   RECRUITMENT_STATUS_LABEL,
-  sortListings,
 } from '../../features/discovery/domain';
-import { discoveryListings } from '../../features/discovery/mockListings';
-import type { DiscoveryListing } from '../../features/discovery/types';
+import { useListingDataset } from '../../features/discovery/data/useListingDataset';
+import { getHomeRecommendations, resolveSavedListings } from '../../features/discovery/homeListings';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
-import { toDiscoveryUserProfile } from '../../features/profile/domain';
+import { calculateProfileCompleteness, toDiscoveryUserProfile } from '../../features/profile/domain';
 import { useUserStore } from '../../store/useUserStore';
 
 const GAUGE_SEGMENTS = 20;
@@ -41,6 +41,7 @@ export default function HomeRoute() {
   const xp = useUserStore((state) => state.xp);
   const todayQuizDone = useUserStore((state) => state.todayQuizDone);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
+  const dataset = useListingDataset();
 
   const level = getLevel(xp);
   const score = calculatePreparationScore(profile);
@@ -52,17 +53,8 @@ export default function HomeRoute() {
   const inTwoYears = simulateFuture(profile, 2);
   const delta = inTwoYears.preparationScore - score;
 
-  const savedListings = savedListingIds
-    .map((id) => discoveryListings.find((listing) => listing.id === id))
-    .filter((listing): listing is DiscoveryListing => Boolean(listing));
-
-  const suggested = sortListings(
-    discoveryListings.filter(
-      (listing) => listing.recruitmentStatus !== 'closed' && !savedListingIds.includes(listing.id),
-    ),
-    discoveryProfile,
-    true,
-  ).slice(0, 2);
+  const savedListings = resolveSavedListings(dataset.listings, savedListingIds);
+  const suggested = getHomeRecommendations(dataset.listings, discoveryProfile, savedListingIds, 3);
 
   const watchlist = savedListings.length > 0 ? savedListings.slice(0, 3) : suggested;
 
@@ -74,13 +66,7 @@ export default function HomeRoute() {
       ? `${MILESTONE_MONTHS - profile.accountMonths}개월`
       : '유지 중';
 
-  const profileLine = `${profile.region.replace('특별시', '')} · ${profile.age}세 · ${
-    !accountKnown
-      ? '통장 확인 필요'
-      : profile.hasSubscriptionAccount
-        ? `통장 ${profile.accountMonths}개월`
-        : '통장 없음'
-  }`;
+  const profileCompleteness = calculateProfileCompleteness(applicantProfile);
 
   // 최초 등장·의미 있는 값 변경에서만 재생된다. 탭을 오갈 때마다 0부터 세지 않는다.
   const animatedScore = useCountUp(score);
@@ -133,7 +119,15 @@ export default function HomeRoute() {
             <Text style={styles.stageText}>
               {stage.emoji} {stage.label}
             </Text>
-            <Text style={styles.profileText}>{profileLine}</Text>
+            <MotionPressable
+              accessibilityRole="button"
+              accessibilityLabel={`내 청약 프로필 ${profileCompleteness}%`}
+              onPress={() => router.push('/profile')}
+              style={styles.profileEntry}
+            >
+              <Text style={styles.profileText}>내 청약 프로필 {profileCompleteness}%</Text>
+              <MaterialIcons name="chevron-right" size={14} color="rgba(255,255,255,0.8)" />
+            </MotionPressable>
           </View>
         </LinearGradient>
 
@@ -162,10 +156,37 @@ export default function HomeRoute() {
               </MotionPressable>
             </View>
 
-            {watchlist.map((listing, index) => {
+            <Text style={styles.listingContext}>
+              {dataset.isFallback
+                ? '실제 공고 연결에 실패해 데모 데이터 기준으로 보여드려요.'
+                : savedListings.length > 0
+                  ? '청약찾기와 같은 실제 공고 목록에서 저장한 항목이에요.'
+                  : '현재 확인된 프로필 정보 기준 · 자격 판정이 아닌 관심 순서예요.'}
+            </Text>
+
+            {dataset.status === 'loading' ? (
+              <View style={styles.listingState}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.listingStateText}>청약홈 실제 공고를 불러오는 중이에요</Text>
+              </View>
+            ) : dataset.status === 'error' ? (
+              <View style={styles.listingState}>
+                <MaterialIcons name="error-outline" size={18} color={colors.warning} />
+                <Text style={styles.listingStateText}>공고를 불러오지 못했어요.</Text>
+                <MotionPressable accessibilityRole="button" onPress={() => void dataset.retry()} style={styles.inlineRetry}>
+                  <Text style={styles.inlineRetryText}>다시 시도</Text>
+                </MotionPressable>
+              </View>
+            ) : watchlist.length === 0 ? (
+              <View style={styles.listingState}>
+                <Text style={styles.listingStateText}>현재 표시할 모집중·모집예정 공고가 없어요.</Text>
+              </View>
+            ) : watchlist.map((listing, index) => {
               const relevance = getListingRelevance(discoveryProfile, listing);
               const open = listing.recruitmentStatus === 'open';
-              const priceLabel = formatPrice(listing.representativePrice).replace('억', '');
+              const priceLabel = hasListingPrice(listing)
+                ? formatPrice(listing.representativePrice).replace('억', '')
+                : null;
               return (
                 <MotionPressable
                   key={listing.id}
@@ -208,8 +229,8 @@ export default function HomeRoute() {
 
                   {/* Monzo: 값은 우측 정렬, 단위는 숫자보다 작게. */}
                   <Text style={styles.rowValue}>
-                    {priceLabel}
-                    <Text style={styles.rowValueUnit}>억</Text>
+                    {priceLabel ?? '가격 확인'}
+                    {priceLabel ? <Text style={styles.rowValueUnit}>억</Text> : null}
                   </Text>
                 </MotionPressable>
               );
@@ -325,6 +346,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  profileEntry: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   profileText: { ...type.micro, color: 'rgba(255,255,255,0.72)' },
 
   sheet: {
@@ -361,6 +383,11 @@ const styles = StyleSheet.create({
   groupTitleSub: { ...type.label, color: colors.textMuted, letterSpacing: 0.2 },
   moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, paddingVertical: 4 },
   moreLinkText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+  listingContext: { ...type.micro, color: colors.textSubtle, paddingTop: 3, paddingBottom: 4 },
+  listingState: { minHeight: 74, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  listingStateText: { ...type.caption, color: colors.textMuted, flex: 1 },
+  inlineRetry: { borderRadius: radius.pill, backgroundColor: colors.lavender, paddingHorizontal: 10, paddingVertical: 6 },
+  inlineRetryText: { ...type.micro, color: colors.primary },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12 },
   rowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },

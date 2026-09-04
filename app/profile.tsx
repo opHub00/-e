@@ -25,8 +25,7 @@ import {
   type ProfileQuestionBundleId,
 } from '../features/profile/domain';
 import { useUserStore } from '../store/useUserStore';
-
-const REGIONS = ['서울특별시', '경기도', '인천광역시'];
+import { getRegionLabel, PROFILE_REGIONS } from '../features/discovery/regions';
 const OCCUPATIONS: Array<{ value: Occupation; label: string }> = [
   { value: 'student', label: '학생' },
   { value: 'worker', label: '직장인' },
@@ -83,7 +82,7 @@ export default function ApplicantProfileRoute() {
   };
 
   if (!bundle || !bundleId) {
-    return <ProfileOverview profile={applicantProfile} topInset={insets.top} onBack={close} onOpen={(id) => router.push(`/profile?bundle=${id}` as Href)} />;
+    return <ProfileOverview profile={applicantProfile} topInset={insets.top} onBack={close} onOpen={(id) => router.push(`/profile?bundle=${id}` as Href)} onContinue={() => router.push('/preparation' as Href)} />;
   }
 
   return (
@@ -131,11 +130,13 @@ function ProfileOverview({
   topInset,
   onBack,
   onOpen,
+  onContinue,
 }: {
   profile: ApplicantProfileV2;
   topInset: number;
   onBack: () => void;
   onOpen: (id: ProfileQuestionBundleId) => void;
+  onContinue: () => void;
 }) {
   const completeness = calculateProfileCompleteness(profile);
   const nextBundles = PROFILE_BUNDLES.filter((bundle) => getBundleCompletion(profile, bundle.id) !== 'complete').slice(0, 2);
@@ -197,6 +198,10 @@ function ProfileOverview({
             );
           })}
         </View>
+        <MotionPressable accessibilityRole="button" onPress={onContinue} style={styles.continueLink}>
+          <Text style={styles.continueLinkText}>준비 로드맵 이어보기</Text>
+          <MaterialIcons name="arrow-forward" size={18} color={colors.primary} />
+        </MotionPressable>
       </ScrollView>
     </ScreenEnter>
   );
@@ -237,16 +242,16 @@ function BundleFields({
     case 'RESIDENCE':
       return (
         <Field label="현재 거주지역">
-          <ChoiceRow options={REGIONS.map((value) => ({ value, label: shortRegion(value) }))} value={profile.residence.currentRegion} onChange={(currentRegion) => set('residence', { currentRegion })} />
+          <ChoiceRow options={PROFILE_REGIONS.map((value) => ({ value, label: getRegionLabel(value) }))} value={profile.residence.currentRegion} onChange={(currentRegion) => set('residence', { currentRegion })} />
         </Field>
       );
     case 'PREFERENCES':
       return (
         <Field label="관심지역 · 여러 곳 선택 가능">
           <View style={styles.choiceRow}>
-            {REGIONS.map((region) => {
+            {PROFILE_REGIONS.map((region) => {
               const active = profile.preferences.regions.includes(region);
-              return <ChoiceChip key={region} label={shortRegion(region)} active={active} onPress={() => set('preferences', { regions: active ? profile.preferences.regions.filter((item) => item !== region) : [...profile.preferences.regions, region] })} />;
+              return <ChoiceChip key={region} label={getRegionLabel(region)} active={active} onPress={() => set('preferences', { regions: active ? profile.preferences.regions.filter((item) => item !== region) : [...profile.preferences.regions, region] })} />;
             })}
           </View>
         </Field>
@@ -406,10 +411,6 @@ function isBundleId(value: string | undefined): value is ProfileQuestionBundleId
   return PROFILE_BUNDLES.some((bundle) => bundle.id === value);
 }
 
-function shortRegion(region: string) {
-  return region.replace('특별시', '').replace('광역시', '').replace('도', '');
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
@@ -430,6 +431,8 @@ const styles = StyleSheet.create({
   benefitTitle: { ...type.bodySmStrong, color: colors.text },
   benefitBody: { ...type.caption, color: colors.textMuted, lineHeight: 19, marginTop: 3 },
   list: { borderRadius: radius.card, backgroundColor: colors.surface, paddingHorizontal: spacing.md, ...shadow.card },
+  continueLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, borderRadius: radius.button, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.lavender },
+  continueLinkText: { ...type.bodySmStrong, color: colors.primary },
   row: { minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   rowBorder: { borderTopWidth: 1, borderTopColor: colors.hairline },
   rowIcon: { width: 36, height: 36, borderRadius: radius.cardSm, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },

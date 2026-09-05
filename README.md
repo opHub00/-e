@@ -27,6 +27,8 @@ git diff --check
 
 웹 정적 결과는 `dist/`에 생성됩니다. 로컬·배포 준비 절차는 [DEMO_SETUP.md](./DEMO_SETUP.md)를 참고하세요.
 
+Production 웹 데모: https://wanpan-e.vercel.app
+
 ## 클라이언트 환경변수
 
 `.env.example`을 `.env`로 복사하고 다음 공개 클라이언트 설정만 입력합니다.
@@ -38,6 +40,7 @@ EXPO_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY=
 ```
 
 `EXPO_PUBLIC_*` 값은 웹 번들에 포함됩니다. Gemini, Naver, 공공데이터, Kakao REST, Supabase service-role 키는 클라이언트 `.env`나 호스팅 변수에 넣지 않고 Supabase Edge Function secret으로만 관리합니다.
+Vercel 업로드에서는 `.vercelignore`가 모든 `.env` 계열 파일을 차단합니다.
 
 ## 데이터와 로컬 상태
 

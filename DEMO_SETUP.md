@@ -42,14 +42,14 @@ npx expo export --platform web
 
 ## 4. 추천 플랫폼: Vercel
 
-현재 구조에는 Vercel의 정적 output 배포가 가장 단순합니다. 저장소의 `vercel.json`은 build command, `dist` 출력 디렉터리, 임의의 공고 ID를 export된 `/discovery/[id]` route로 연결하는 rewrite만 고정합니다. 실제 계정 로그인이나 production 배포는 이 저장소 작업에 포함하지 않습니다.
+현재 production은 https://wanpan-e.vercel.app 에 배포되어 있습니다. 저장소의 `vercel.json`은 build command, `dist` 출력 디렉터리, 임의의 공고 ID를 export된 `/discovery/[id]` route로 연결하는 rewrite만 고정합니다. `.vercelignore`는 로컬 `.env`와 `.env.*` 파일이 원격 빌드에 업로드되지 않도록 차단합니다.
 
 Vercel 프로젝트 설정:
 
 1. 저장소 root를 프로젝트 root로 선택합니다.
 2. Build Command는 `npx expo export --platform web`, Output Directory는 `dist`를 사용합니다.
 3. 위 세 `EXPO_PUBLIC_*` 환경변수만 Production/Preview에 등록합니다.
-4. 첫 배포 URL이 정해지면 Kakao Web 사이트 도메인에 `https://<production-domain>`을 추가한 뒤 다시 배포합니다.
+4. Kakao Developers → 앱 → 플랫폼 키 → JavaScript 키 → JavaScript SDK 도메인에 `https://wanpan-e.vercel.app`을 등록하고, Device Toolbar 상태를 먼저 정한 뒤 페이지를 새로고침해 지도를 확인합니다. JavaScript SDK의 도메인 허용 목록 변경에는 앱 재배포가 필요하지 않습니다.
 
 `GEMINI_API_KEY`, `NAVER_NEWS_CLIENT_ID`, `NAVER_NEWS_CLIENT_SECRET`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`는 Vercel 환경변수에 넣지 않습니다.
 

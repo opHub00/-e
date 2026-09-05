@@ -1,0 +1,9 @@
+# Never upload local credentials or environment snapshots to Vercel builds.
+.env
+.env.*
+.vercel
+
+# Local-only output and diagnostics.
+*.log
+node_modules
+dist

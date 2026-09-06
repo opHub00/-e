@@ -33,11 +33,19 @@ Demo Reset → Intro → Onboarding(전국 17개 시도) → Home 실제 공고
 → Save → Home → 새로고침 → 저장 유지 → AI 설명
 ```
 
-Auth/cloud sync 시연은 guest Profile 입력과 공고 저장 후 `전체 → 로그인하고 이어보기`에서 이메일 계정을 만듭니다. 현재 프로젝트는 이메일 확인 후 로그인을 요구합니다. 최초 로그인은 local profile을 빈 cloud에 올리고, 다른 브라우저 로그인은 cloud profile과 저장 공고를 복원합니다. 서로 다른 확정 profile 값이 양쪽에 있으면 자동 덮어쓰기 대신 `이 기기 정보 사용` 또는 `클라우드 정보 사용`을 선택합니다.
+Auth/cloud sync 시연은 guest Profile 입력과 공고 저장 후 `전체 → 로그인하고 이어보기`에서 이메일 계정을 만듭니다. 금요일 데모의 production Auth는 이메일 확인을 요구하지 않는 시연용 정책이며, 가입 즉시 session을 발급하고 local→cloud 동기화 후 짧은 성공 안내와 함께 Home으로 이동합니다. 이메일 소유권을 검증하지 않으므로 일반 공개 운영 전에는 확인 메일 또는 검증된 custom SMTP 정책을 다시 적용해야 합니다. 최초 로그인은 local profile을 빈 cloud에 올리고, 다른 브라우저 로그인은 cloud profile과 저장 공고를 복원합니다. 서로 다른 확정 profile 값이 양쪽에 있으면 자동 덮어쓰기 대신 `이 기기 정보 사용` 또는 `클라우드 정보 사용`을 선택합니다.
 
 로그아웃은 계정의 cloud 데이터를 유지하지만 해당 브라우저의 profile·saved cache를 비웁니다. 따라서 공유 기기에서 다음 guest에게 이전 계정 정보가 노출되지 않습니다.
 
-## 3. 정적 export
+Profile의 전문용어 도움말은 답변을 바꾸지 않습니다. 판단하기 어려우면 `잘 모르겠어요`를 선택하며 기존 `unknown` 상태로 저장됩니다. AI 요청 중에는 진행 표시와 중복 제출 차단이 적용되고, timeout·429·일시적 서버 오류는 자동 재시도 없이 안전한 안내와 `다시 시도`를 제공합니다.
+
+## 3. PWA 설치 준비
+
+production export에는 web app manifest와 192/512 아이콘, standalone 시작 설정이 포함됩니다. 설치 이벤트를 제공하는 데스크톱/Android 브라우저에서는 `전체 → 앱처럼 사용하기`를 사용할 수 있습니다. iOS Safari는 공유 메뉴의 `홈 화면에 추가`를 사용합니다. 브라우저 정책에 따라 설치 항목이 즉시 보이지 않을 수 있습니다.
+
+이번 V1은 Service Worker와 offline cache를 등록하지 않습니다. 따라서 새 배포 JS와 ApplyHome·Supabase Edge·Kakao Map·News·AI 응답을 오래된 cache가 가로채지 않습니다. 설치 후에도 네트워크 연결은 필요합니다.
+
+## 4. 정적 export
 
 ```powershell
 npx expo export --platform web
@@ -45,7 +53,7 @@ npx expo export --platform web
 
 출력은 `dist/`입니다. 배포 전 `/`, `/profile`, `/future`, `/eligibility/first-home`, `/discovery`, `/discovery/[id]` 결과가 빈 shell이 아니고 Expo root markup과 route bundle을 포함하는지 확인합니다. root `/`는 클라이언트 hydration 뒤 Intro/Onboarding 상태에 따라 이동합니다.
 
-## 4. 추천 플랫폼: Vercel
+## 5. 추천 플랫폼: Vercel
 
 현재 production은 https://wanpan-e.vercel.app 에 배포되어 있습니다. 저장소의 `vercel.json`은 build command, `dist` 출력 디렉터리, 임의의 공고 ID를 export된 `/discovery/[id]` route로 연결하는 rewrite만 고정합니다. `.vercelignore`는 로컬 `.env`와 `.env.*` 파일이 원격 빌드에 업로드되지 않도록 차단합니다.
 
@@ -58,7 +66,7 @@ Vercel 프로젝트 설정:
 
 `GEMINI_API_KEY`, `NAVER_NEWS_CLIENT_ID`, `NAVER_NEWS_CLIENT_SECRET`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`는 Vercel 환경변수에 넣지 않습니다.
 
-## 5. Supabase Edge Functions
+## 6. Supabase Edge Functions
 
 production 클라이언트는 `EXPO_PUBLIC_SUPABASE_URL`의 표준 endpoint를 anon key와 함께 호출합니다.
 
@@ -82,7 +90,7 @@ supabase functions deploy ai --no-verify-jwt
 
 배포 정책의 JWT 설정은 현재 client 호출 방식과 프로젝트 정책을 함께 확인해 결정합니다. URL/anon key가 없거나 네트워크 요청이 실패하면 화면은 오류 또는 명시된 fallback을 표시해야 하며, secret을 클라이언트로 옮겨 해결하지 않습니다.
 
-## 6. 시연 전 검증
+## 7. 시연 전 검증
 
 ```powershell
 npm test

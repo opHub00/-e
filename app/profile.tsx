@@ -24,6 +24,7 @@ import {
   type ProfileFieldState,
   type ProfileQuestionBundleId,
 } from '../features/profile/domain';
+import { getProfileTermHelp, type ProfileTermId } from '../features/profile/terminology';
 import { useUserStore } from '../store/useUserStore';
 import { getRegionLabel, PROFILE_REGIONS } from '../features/discovery/regions';
 const OCCUPATIONS: Array<{ value: Occupation; label: string }> = [
@@ -258,23 +259,34 @@ function BundleFields({
       );
     case 'SUBSCRIPTION_ACCOUNT': {
       const hasAccount = knownValue(profile.subscriptionAccount.hasAccount);
-      const updateHasAccount = (value: boolean) => set('subscriptionAccount', value ? {
-        hasAccount: knownField(true),
-        accountMonths: profile.subscriptionAccount.accountMonths.status === 'not_applicable' ? unknownField() : profile.subscriptionAccount.accountMonths,
-        monthlyPayment: profile.subscriptionAccount.monthlyPayment.status === 'not_applicable' ? unknownField() : profile.subscriptionAccount.monthlyPayment,
-      } : {
-        hasAccount: knownField(false),
-        accountMonths: notApplicableField(),
-        monthlyPayment: notApplicableField(),
-      });
+      const updateHasAccount = (next: ProfileFieldState<boolean>) => {
+        const value = knownValue(next);
+        if (value === undefined) {
+          set('subscriptionAccount', {
+            hasAccount: unknownField(),
+            accountMonths: unknownField(),
+            monthlyPayment: unknownField(),
+          });
+          return;
+        }
+        set('subscriptionAccount', value ? {
+          hasAccount: knownField(true),
+          accountMonths: profile.subscriptionAccount.accountMonths.status === 'not_applicable' ? unknownField() : profile.subscriptionAccount.accountMonths,
+          monthlyPayment: profile.subscriptionAccount.monthlyPayment.status === 'not_applicable' ? unknownField() : profile.subscriptionAccount.monthlyPayment,
+        } : {
+          hasAccount: knownField(false),
+          accountMonths: notApplicableField(),
+          monthlyPayment: notApplicableField(),
+        });
+      };
       return (
         <>
           <Field label="청약통장이 있나요?">
-            <ChoiceRow options={[{ value: true, label: '있어요' }, { value: false, label: '없어요' }]} value={hasAccount} onChange={updateHasAccount} />
+            <BooleanChoices value={profile.subscriptionAccount.hasAccount} onChange={updateHasAccount} />
           </Field>
           {hasAccount ? (
             <>
-              <Field label="가입한 지 몇 개월 됐나요?">
+              <Field label="가입한 지 몇 개월 됐나요?" help="subscription-period">
                 <TextInput style={styles.input} keyboardType="number-pad" value={knownValue(profile.subscriptionAccount.accountMonths)?.toString() ?? ''} placeholder="예: 24" placeholderTextColor={colors.outline} onChangeText={(value) => set('subscriptionAccount', { ...profile.subscriptionAccount, accountMonths: numberField(value, 600) })} />
               </Field>
               <Field label="현재 월 납입액 (원)">
@@ -288,26 +300,26 @@ function BundleFields({
     case 'HOUSING_HISTORY':
       return (
         <>
-          <Field label="현재 본인 명의 주택이 있나요?">
-            <ChoiceRow options={[{ value: 'no-home' as const, label: '없어요' }, { value: 'owns-home' as const, label: '있어요' }]} value={knownValue(profile.housing.currentOwnership)} onChange={(currentOwnership) => set('housing', { ...profile.housing, currentOwnership: knownField(currentOwnership) })} />
+          <Field label="현재 본인 명의 주택이 있나요?" help="home-ownership">
+            <OwnershipChoices value={profile.housing.currentOwnership} onChange={(currentOwnership) => set('housing', { ...profile.housing, currentOwnership })} />
           </Field>
-          <Field label="과거에 주택을 소유한 적이 있나요?">
+          <Field label="과거에 주택을 소유한 적이 있나요?" help="previous-home-ownership">
             <BooleanChoices value={profile.housing.previousOwnership} onChange={(previousOwnership) => set('housing', { ...profile.housing, previousOwnership })} />
           </Field>
-          <Field label="현재 세대에 주택 보유자가 있나요?">
+          <Field label="현재 세대에 주택 보유자가 있나요?" help="household-home-ownership">
             <BooleanChoices value={profile.housing.householdHasHome} onChange={(householdHasHome) => set('housing', { ...profile.housing, householdHasHome })} />
           </Field>
-          <Field label="혼인 전 배우자 이력을 제외하고, 현재 세대원이 과거에 주택을 소유한 적이 있나요?">
+          <Field label="혼인 전 배우자 이력을 제외하고, 현재 세대원이 과거에 주택을 소유한 적이 있나요?" help="previous-home-ownership">
             <BooleanChoices value={profile.housing.householdDisqualifyingPreviousOwnership} onChange={(householdDisqualifyingPreviousOwnership) => set('housing', { ...profile.housing, householdDisqualifyingPreviousOwnership })} />
           </Field>
-          <Field label="청약홈에서 특별공급 횟수 제한 대상 이력이 있다고 확인되나요?">
+          <Field label="청약홈에서 특별공급 횟수 제한 대상 이력이 있다고 확인되나요?" help="special-supply-restriction">
             <BooleanChoices value={profile.housing.hasSpecialSupplyRestriction} onChange={(hasSpecialSupplyRestriction) => set('housing', { ...profile.housing, hasSpecialSupplyRestriction })} />
           </Field>
         </>
       );
     case 'HOUSEHOLD':
       return (
-        <Field label="현재 세대원은 모두 몇 명인가요?">
+        <Field label="현재 세대원은 모두 몇 명인가요?" help="household-member">
           <TextInput style={styles.input} keyboardType="number-pad" value={knownValue(profile.household.memberCount)?.toString() ?? ''} placeholder="본인 포함" placeholderTextColor={colors.outline} onChangeText={(value) => set('household', { memberCount: numberField(value, 20) })} />
         </Field>
       );
@@ -349,7 +361,7 @@ function BundleFields({
           <Field label="연 소득 범위">
             <ChoiceRow options={INCOME_RANGES} value={knownValue(profile.income.annualRange)} onChange={(annualRange) => set('income', { ...profile.income, annualRange: knownField(annualRange) })} />
           </Field>
-          <Field label="현재 근로자·자영업자이거나 최근 1년 안에 근로·사업소득세를 납부했나요?">
+          <Field label="현재 근로자·자영업자이거나 최근 1년 안에 근로·사업소득세를 납부했나요?" help="work-business-income">
             <BooleanChoices value={profile.income.workOrBusinessIncomeEligible} onChange={(workOrBusinessIncomeEligible) => set('income', {
               ...profile.income,
               workOrBusinessIncomeEligible,
@@ -357,7 +369,7 @@ function BundleFields({
             })} />
           </Field>
           {eligibleActivity ? (
-            <Field label="근로·사업소득세를 납부한 기간은 통산 몇 년인가요?">
+            <Field label="근로·사업소득세를 납부한 기간은 통산 몇 년인가요?" help="income-tax-period">
               <TextInput style={styles.input} keyboardType="number-pad" value={knownValue(profile.income.incomeTaxPaymentYears)?.toString() ?? ''} placeholder="예: 5" placeholderTextColor={colors.outline} onChangeText={(value) => set('income', { ...profile.income, incomeTaxPaymentYears: numberField(value, 80) })} />
             </Field>
           ) : null}
@@ -367,7 +379,7 @@ function BundleFields({
     case 'ASSETS':
       return (
         <>
-          <MoneyRangeField label="금융자산" value={profile.assets.financial} onChange={(financial) => set('assets', { ...profile.assets, financial })} />
+          <MoneyRangeField label="금융자산" help="asset-range" value={profile.assets.financial} onChange={(financial) => set('assets', { ...profile.assets, financial })} />
           <MoneyRangeField label="부동산" value={profile.assets.realEstate} onChange={(realEstate) => set('assets', { ...profile.assets, realEstate })} />
           <MoneyRangeField label="차량 가치" value={profile.assets.vehicle} onChange={(vehicle) => set('assets', { ...profile.assets, vehicle })} />
           <MoneyRangeField label="부채" value={profile.assets.debt} onChange={(debt) => set('assets', { ...profile.assets, debt })} />
@@ -376,10 +388,11 @@ function BundleFields({
   }
 }
 
-function MoneyRangeField({ label, value, onChange }: { label: string; value: ProfileFieldState<AmountRange>; onChange: (value: ProfileFieldState<AmountRange>) => void }) {
+function MoneyRangeField({ label, help, value, onChange }: { label: string; help?: ProfileTermId; value: ProfileFieldState<AmountRange>; onChange: (value: ProfileFieldState<AmountRange>) => void }) {
   return (
-    <Field label={label}>
+    <Field label={label} help={help}>
       <View style={styles.choiceRow}>
+        <ChoiceChip label="잘 모르겠어요" active={value.status === 'unknown'} onPress={() => onChange(unknownField())} />
         <ChoiceChip label="없음" active={value.status === 'not_applicable'} onPress={() => onChange(notApplicableField())} />
         {AMOUNT_RANGES.map((option) => <ChoiceChip key={option.value} label={option.label} active={knownValue(value) === option.value} onPress={() => onChange(knownField(option.value))} />)}
       </View>
@@ -388,7 +401,23 @@ function MoneyRangeField({ label, value, onChange }: { label: string; value: Pro
 }
 
 function BooleanChoices({ value, onChange }: { value: ProfileFieldState<boolean>; onChange: (value: ProfileFieldState<boolean>) => void }) {
-  return <ChoiceRow options={[{ value: false, label: '없어요' }, { value: true, label: '있어요' }]} value={knownValue(value)} onChange={(next) => onChange(knownField(next))} />;
+  return (
+    <View style={styles.choiceRow}>
+      <ChoiceChip label="없어요" active={knownValue(value) === false} onPress={() => onChange(knownField(false))} />
+      <ChoiceChip label="있어요" active={knownValue(value) === true} onPress={() => onChange(knownField(true))} />
+      <ChoiceChip label="잘 모르겠어요" active={value.status === 'unknown'} onPress={() => onChange(unknownField())} />
+    </View>
+  );
+}
+
+function OwnershipChoices({ value, onChange }: { value: ProfileFieldState<'no-home' | 'owns-home'>; onChange: (value: ProfileFieldState<'no-home' | 'owns-home'>) => void }) {
+  return (
+    <View style={styles.choiceRow}>
+      <ChoiceChip label="없어요" active={knownValue(value) === 'no-home'} onPress={() => onChange(knownField('no-home'))} />
+      <ChoiceChip label="있어요" active={knownValue(value) === 'owns-home'} onPress={() => onChange(knownField('owns-home'))} />
+      <ChoiceChip label="잘 모르겠어요" active={value.status === 'unknown'} onPress={() => onChange(unknownField())} />
+    </View>
+  );
 }
 
 function ChoiceRow<T extends string | boolean>({ options, value, onChange }: { options: Array<{ value: T; label: string }>; value: T | undefined; onChange: (value: T) => void }) {
@@ -403,8 +432,35 @@ function ChoiceChip({ label, active, onPress }: { label: string; active: boolean
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <View style={styles.field}><Text style={styles.fieldLabel}>{label}</Text>{children}</View>;
+function Field({ label, help, children }: { label: string; help?: ProfileTermId; children: React.ReactNode }) {
+  const [helpOpen, setHelpOpen] = useState(false);
+  const term = help ? getProfileTermHelp(help) : null;
+  return (
+    <View style={styles.field}>
+      <View style={styles.fieldHeading}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        {term ? (
+          <MotionPressable
+            accessibilityRole="button"
+            accessibilityLabel={`${term.title} 설명 ${helpOpen ? '닫기' : '보기'}`}
+            accessibilityState={{ expanded: helpOpen }}
+            onPress={() => setHelpOpen((current) => !current)}
+            style={styles.helpTrigger}
+          >
+            <MaterialIcons name="info-outline" size={15} color={colors.primary} />
+            <Text style={styles.helpTriggerText}>이게 뭐예요?</Text>
+          </MotionPressable>
+        ) : null}
+      </View>
+      {term && helpOpen ? (
+        <Appear distance={0} style={styles.helpCard}>
+          <Text style={styles.helpTitle}>{term.title}</Text>
+          <Text style={styles.helpBody}>{term.description}</Text>
+        </Appear>
+      ) : null}
+      {children}
+    </View>
+  );
 }
 
 function isBundleId(value: string | undefined): value is ProfileQuestionBundleId {
@@ -448,7 +504,13 @@ const styles = StyleSheet.create({
   questionHint: { ...type.caption, color: colors.textSubtle },
   fields: { gap: spacing.lg },
   field: { gap: 8 },
+  fieldHeading: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
   fieldLabel: { ...type.bodySmStrong, color: colors.text },
+  helpTrigger: { minHeight: 28, flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, borderRadius: radius.pill, backgroundColor: colors.lavender },
+  helpTriggerText: { ...type.micro, color: colors.primary },
+  helpCard: { marginTop: 2, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, borderWidth: 1, borderColor: colors.surfaceHigh, padding: 12, gap: 4 },
+  helpTitle: { ...type.bodySmStrong, color: colors.text },
+  helpBody: { ...type.caption, color: colors.textMuted, lineHeight: 19 },
   input: { ...type.bodyLg, minHeight: size.control, borderRadius: radius.button, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, paddingHorizontal: spacing.md, color: colors.text },
   choiceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   choice: { minHeight: size.touch, justifyContent: 'center', paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface },

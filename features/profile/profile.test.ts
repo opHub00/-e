@@ -21,6 +21,7 @@ import {
   toLegacyUserProfile,
   unknownField,
 } from './domain.ts';
+import { PROFILE_TERM_HELP, getProfileTermHelp } from './terminology.ts';
 
 let checks = 0;
 const check = (condition: unknown, message: string) => {
@@ -242,6 +243,12 @@ for (const screen of ['app/(tabs)/home.tsx', 'app/(tabs)/preparation.tsx', 'app/
   check(source.includes('accountKnown'), `${screen}: 통장 없음 표시에는 unknown 가드가 필요하다`);
 }
 check(readFileSync('app/(tabs)/more.tsx', 'utf8').includes("route: '/profile'"), '전체 탭에서 청약 프로필 진입');
+check(Object.keys(PROFILE_TERM_HELP).length === 9, '헷갈리는 용어만 제한적으로 도움말 제공');
+check(getProfileTermHelp('special-supply-restriction').description.includes('잘 모르겠어요'), '특별공급 제한 도움말에 unknown 선택 안내');
+check(unknownField<boolean>().status === 'unknown', '잘 모르겠어요는 기존 unknown semantics 유지');
+const profileEditorSource = readFileSync('app/profile.tsx', 'utf8');
+check(profileEditorSource.includes('잘 모르겠어요'), '프로필 질문에 잘 모르겠어요 UI 제공');
+check(profileEditorSource.includes('onPress={() => setHelpOpen'), '도움말 열기는 답변 setter와 분리');
 check(
   readFileSync('app/_layout.tsx', 'utf8').includes("Platform.OS !== 'web' && !profileHydrated"),
   'static web export를 profile hydration gate로 막지 않음',

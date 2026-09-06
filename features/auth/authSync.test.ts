@@ -16,6 +16,7 @@ import {
   signOutLocal,
   signUpWithPassword,
 } from './authClientAdapter.ts';
+import { AUTH_SUCCESS_ROUTE, shouldNavigateAfterSignUp } from './authUx.ts';
 import { shouldClearPrivateCacheForSession } from './authStorage.ts';
 
 let checks = 0;
@@ -206,6 +207,31 @@ check(
   signUpCall.options?.emailRedirectTo === 'https://wanpan-e.vercel.app/auth',
   'signup 확인 링크는 production origin의 auth route로 돌아와야 한다',
 );
+const immediateSessionClient = {
+  auth: {
+    signUp: async () => ({
+      data: { user: testSession.user, session: testSession },
+      error: null,
+    }),
+  },
+} as unknown as SupabaseClient;
+const immediateSignUp = await signUpWithPassword(
+  immediateSessionClient,
+  'qa@example.com',
+  'password-123',
+  'https://wanpan-e.vercel.app/auth',
+);
+check(!immediateSignUp.needsEmailConfirmation, '이메일 확인이 꺼진 signup은 즉시 session을 반환해야 한다');
+check(immediateSignUp.session?.user.id === 'user-1', '즉시 signup session을 후속 cloud sync에 전달해야 한다');
+check(
+  shouldNavigateAfterSignUp(immediateSignUp.needsEmailConfirmation),
+  '즉시 session signup은 성공 안내 뒤 Home으로 이동해야 한다',
+);
+check(
+  !shouldNavigateAfterSignUp(signUpResult.needsEmailConfirmation),
+  '이메일 확인 대기 signup은 Home으로 조기 이동하면 안 된다',
+);
+check(AUTH_SUCCESS_ROUTE === '/home', 'auth 성공 이동은 replace 가능한 Home route여야 한다');
 check(
   (await signInWithPassword(fakeClient, ' qa@example.com ', 'password-123')).user.id === 'user-1',
   'email/password login은 반환된 session을 전달해야 한다',

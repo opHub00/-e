@@ -17,6 +17,9 @@ Intro → 최소 Onboarding → Home → 청약 프로필 → Preparation → Fu
 - Personal Fit은 점수나 당첨 확률이 아니라 현재 확인된 신호, 부족한 Profile bundle, 다음 확인 행동을 보여주는 참고 분석입니다. Profile을 보완하고 Detail로 돌아오면 저장된 결과가 아니라 현재 Profile로 즉시 다시 계산합니다.
 - 앱은 guest-first입니다. 로그인 없이 기존 흐름을 모두 사용할 수 있고, 이메일 계정은 ApplicantProfile V2와 저장 공고를 다른 기기에서도 이어볼 때만 제안합니다.
 - 로그인 상태에서는 local cache를 즉시 갱신한 뒤 Supabase에 동기화합니다. 최초 로그인 시 profile은 unknown/응답값을 보존해 병합하고 확정값 충돌은 사용자가 선택하며, 저장 공고 ID는 합집합으로 병합합니다.
+- 금요일 데모 환경에서는 이메일 확인을 요구하지 않습니다. 회원가입 즉시 session과 cloud sync를 시작하고 짧은 성공 안내 뒤 Home으로 이동합니다. 이메일 소유권을 검증하지 않는 시연용 정책이므로 일반 공개 운영 전에는 확인 메일 또는 검증된 custom SMTP 정책을 다시 적용해야 합니다.
+- Profile의 혼동하기 쉬운 용어는 짧은 도움말을 제공하고, `잘 모르겠어요`는 기존 ApplicantProfile의 `unknown`으로 그대로 저장합니다.
+- AI 요청은 진행 상태를 표시하고 같은 요청의 연속 제출을 막습니다. timeout·429·일시적 서버 오류는 내부 오류를 노출하지 않고 다시 시도할 수 있게 안내하며 자동 재시도하지 않습니다.
 
 ## 실행과 검증
 
@@ -32,6 +35,8 @@ git diff --check
 웹 정적 결과는 `dist/`에 생성됩니다. 로컬·배포 준비 절차는 [DEMO_SETUP.md](./DEMO_SETUP.md)를 참고하세요.
 
 Production 웹 데모: https://wanpan-e.vercel.app
+
+웹 배포에는 standalone manifest와 192/512 아이콘이 포함됩니다. 지원 브라우저에서는 `전체 → 앱처럼 사용하기` 또는 브라우저 메뉴로 설치할 수 있습니다. Service Worker와 offline API cache는 사용하지 않으므로 ApplyHome·Kakao·News·AI 응답은 항상 기존 network 경로를 사용합니다.
 
 ## 클라이언트 환경변수
 

@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 
 type CategoryName = '내 청약' | '청약 찾기' | '준비하기' | '배우기' | '상담';
 
@@ -113,6 +114,7 @@ export default function MoreRoute() {
   const resetLocalDemoState = useAuthStore((state) => state.resetLocalDemoState);
   const restoreCloudAfterDemoReset = useAuthStore((state) => state.restoreCloudAfterDemoReset);
   const [query, setQuery] = useState('');
+  const { canInstall, install } = usePwaInstall();
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const visibleFeatures = useMemo(
@@ -245,6 +247,23 @@ export default function MoreRoute() {
           )}
         </View>
 
+        {canInstall ? (
+          <View style={styles.installSection}>
+            <View style={styles.installCard}>
+              <View style={styles.installIcon}>
+                <MaterialIcons name="install-mobile" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.rowCopy}>
+                <Text style={styles.accountTitle}>앱처럼 사용하기</Text>
+                <Text style={styles.accountStatus}>홈 화면에서 완판e를 바로 열 수 있어요.</Text>
+              </View>
+              <MotionPressable accessibilityRole="button" onPress={() => void install()} style={styles.installButton}>
+                <Text style={styles.installButtonText}>설치</Text>
+              </MotionPressable>
+            </View>
+          </View>
+        ) : null}
+
         {normalizedQuery && visibleFeatures.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>찾는 기능이 없어요</Text>
@@ -341,6 +360,11 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 88 },
 
   accountSection: { paddingHorizontal: SIDE, paddingTop: 18 },
+  installSection: { paddingHorizontal: SIDE, paddingTop: 10 },
+  installCard: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: radius.card, backgroundColor: colors.lavender, padding: 13 },
+  installIcon: { width: 36, height: 36, borderRadius: radius.cardSm, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+  installButton: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 13, borderRadius: radius.button, backgroundColor: colors.primary },
+  installButtonText: { ...type.label, color: colors.onPrimary },
   accountCard: {
     borderRadius: radius.card,
     backgroundColor: colors.surfaceLow,

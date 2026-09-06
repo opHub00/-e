@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MotionPressable } from '../components/motion/MotionPressable';
 import { ScreenEnter } from '../components/motion/ScreenEnter';
 import { colors, radius, shadow, size, spacing, tint, type } from '../design/tokens';
+import { duration } from '../design/motion';
+import { AUTH_SUCCESS_ROUTE, shouldNavigateAfterSignUp } from '../features/auth/authUx';
 import { useAuthStore } from '../features/auth/useAuthStore';
 
 type Mode = 'login' | 'signup';
@@ -25,6 +27,7 @@ export default function AuthRoute() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validation, setValidation] = useState<string | null>(null);
+  const [navigating, setNavigating] = useState(false);
   const signIn = useAuthStore((state) => state.signIn);
   const signUp = useAuthStore((state) => state.signUp);
   const submitting = useAuthStore((state) => state.submitting);
@@ -32,6 +35,7 @@ export default function AuthRoute() {
   const errorMessage = useAuthStore((state) => state.errorMessage);
   const noticeMessage = useAuthStore((state) => state.noticeMessage);
   const clearMessages = useAuthStore((state) => state.clearMessages);
+  const busy = submitting || navigating;
 
   const close = () => {
     clearMessages();
@@ -44,6 +48,7 @@ export default function AuthRoute() {
     clearMessages();
   };
   const submit = async () => {
+    if (busy) return;
     const normalizedEmail = email.trim();
     if (!normalizedEmail.includes('@')) {
       setValidation('이메일 주소를 확인해주세요.');
@@ -57,9 +62,18 @@ export default function AuthRoute() {
     try {
       if (mode === 'signup') {
         const needsConfirmation = await signUp(normalizedEmail, password);
-        if (needsConfirmation) setMode('login');
+        if (shouldNavigateAfterSignUp(needsConfirmation)) {
+          setNavigating(true);
+          await new Promise((resolve) => setTimeout(resolve, duration.major));
+          router.replace(AUTH_SUCCESS_ROUTE);
+        } else {
+          setMode('login');
+        }
       } else {
         await signIn(normalizedEmail, password);
+        setNavigating(true);
+        await new Promise((resolve) => setTimeout(resolve, duration.major));
+        router.replace(AUTH_SUCCESS_ROUTE);
       }
     } catch {
       // 사용자용 오류는 store에서 안전한 문구로 변환한다.
@@ -149,13 +163,13 @@ export default function AuthRoute() {
 
           <MotionPressable
             accessibilityRole="button"
-            accessibilityState={{ disabled: submitting }}
-            disabled={submitting}
+            accessibilityState={{ disabled: busy }}
+            disabled={busy}
             onPress={() => void submit()}
-            style={[styles.primary, submitting && styles.disabled]}
+            style={[styles.primary, busy && styles.disabled]}
           >
             <Text style={styles.primaryText}>
-              {submitting ? '안전하게 연결하는 중…' : mode === 'login' ? '로그인' : '계정 만들기'}
+              {navigating ? '홈으로 이동할게요…' : submitting ? '안전하게 연결하는 중…' : mode === 'login' ? '로그인' : '계정 만들기'}
             </Text>
           </MotionPressable>
 

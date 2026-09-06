@@ -331,7 +331,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         const session = await signInWithPassword(client, email, password);
         await processSession(session, true);
-        set({ noticeMessage: '로그인했어요.' });
+        set({ noticeMessage: '내 청약 프로필을 불러왔어요. 이어서 준비를 확인할게요.' });
       } catch (error) {
         const message = authErrorMessage(error);
         set({ errorMessage: message });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,6 +17,7 @@ import { BrandMark } from '../../components/BrandMark';
 import { IconChip } from '../../components/IconChip';
 import { quizzes } from '../../data/quizzes';
 import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
+import { duration, easing, useNative } from '../../design/motion';
 import {
   buildAiContext,
   formatContextForPrompt,
@@ -35,16 +36,24 @@ import {
   parseListingFitExplanationContext,
   type ListingFitExplanationContext,
 } from '../../features/listingFit/ai';
+import {
+  AI_REQUEST_TIMEOUT_MS,
+  buildAiRequestPayload,
+  buildAiRequestHistory,
+  canStartAiRequest,
+  getAiErrorMessage,
+  getAiLoadingMode,
+  type AiTurn,
+} from '../../features/ai/requestUx';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-type Turn = { role: 'user' | 'model'; text: string };
+type Turn = AiTurn;
 
 /** 앱이 만들어 보내는 학습 콘텐츠. 사용자 자유 입력이 아니라 자격 필터를 거치지 않는다. */
 type Lesson = { question: string; answer: boolean; explanation: string; personal: string };
-
-const REQUEST_TIMEOUT_MS = 15_000;
 
 async function askAi(
   question: string,
@@ -61,7 +70,7 @@ async function askAi(
 
   // AbortSignal.timeout 은 Hermes 에 없을 수 있어 controller 로 직접 건다.
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
 
   let res: Response;
   try {
@@ -72,27 +81,18 @@ async function askAi(
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         apikey: SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ question, context, history, lesson, listingFit }),
+      body: JSON.stringify(buildAiRequestPayload(question, context, history, lesson, listingFit)),
       signal: controller.signal,
     });
   } catch (e) {
-    if (controller.signal.aborted) {
-      throw new Error('응답이 15초 안에 오지 않았어요. 네트워크를 확인하고 다시 시도해 주세요.');
-    }
-    throw new Error('AI 서버에 연결하지 못했어요. 네트워크를 확인해 주세요.');
+    throw new Error(getAiErrorMessage(null, controller.signal.aborted));
   } finally {
     clearTimeout(timer);
   }
 
   const data = await res.json().catch(() => ({}) as { answer?: string; error?: string });
-  if (res.status === 429) {
-    throw new Error(data.error ?? '요청이 잠시 몰렸어요. 1분쯤 뒤에 다시 시도해 주세요.');
-  }
-  if (res.status === 503) {
-    throw new Error(data.error ?? 'AI가 잠시 붐비고 있어요. 잠시 후 다시 시도해 주세요.');
-  }
   if (!res.ok || !data.answer) {
-    throw new Error(data.error ?? 'AI 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');
+    throw new Error(getAiErrorMessage(res.status));
   }
   return data.answer;
 }
@@ -140,30 +140,34 @@ export default function AiRoute() {
   const [error, setError] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
+  const inFlightRef = useRef(false);
 
   const send = useCallback(
     /** baseTurns 를 주면 그 시점의 대화로 되감아 보낸다 (재시도용). */
     async (question: string, baseTurns?: Turn[]) => {
       const trimmed = question.trim();
-      if (!trimmed || loading) return;
+      if (!canStartAiRequest(trimmed, inFlightRef.current)) return;
+      inFlightRef.current = true;
 
       setInput('');
       setError(null);
       setLoading(true);
       // history 는 이번 질문을 뺀 지난 대화만 넘긴다.
-      const history = baseTurns ?? turns;
-      setTurns([...history, { role: 'user', text: trimmed }]);
+      const visibleTurns = baseTurns ?? turns;
+      const history = buildAiRequestHistory(visibleTurns);
+      setTurns([...visibleTurns, { role: 'user', text: trimmed }]);
 
       try {
         const answer = await askAi(trimmed, promptContext, history, lesson, listingFit);
-        setTurns([...history, { role: 'user', text: trimmed }, { role: 'model', text: answer }]);
+        setTurns([...visibleTurns, { role: 'user', text: trimmed }, { role: 'model', text: answer }]);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'AI 연결에 실패했어요.');
       } finally {
+        inFlightRef.current = false;
         setLoading(false);
       }
     },
-    [lesson, listingFit, loading, promptContext, turns],
+    [lesson, listingFit, promptContext, turns],
   );
 
   // 각 화면의 contextual CTA 는 질문을 들고 들어와 바로 전송한다.
@@ -196,6 +200,8 @@ export default function AiRoute() {
           <MotionPressable
             accessibilityRole="button"
             accessibilityLabel="대화 지우기"
+            accessibilityState={{ disabled: loading }}
+            disabled={loading}
             onPress={() => setTurns([])}
             style={styles.coachAction}
           >
@@ -282,13 +288,11 @@ export default function AiRoute() {
 
           {loading ? (
             <Appear distance={0} style={styles.loadingCard}>
-              <View style={styles.loadingIcon}>
-                <ActivityIndicator color={colors.primary} />
-              </View>
+              <View style={styles.loadingIcon}><AiThinkingIndicator /></View>
               <View style={styles.loadingCopy}>
-                <Text style={styles.loadingTitle}>내 상태에 맞추는 중</Text>
+                <Text style={styles.loadingTitle}>답변을 정리하고 있어요</Text>
                 <Text style={styles.loadingText} numberOfLines={2}>
-                  {profile.name}님 프로필과 질문을 함께 보고 있어요…
+                  현재 확인된 정보 안에서 쉽게 설명할게요.
                 </Text>
               </View>
             </Appear>
@@ -355,6 +359,37 @@ export default function AiRoute() {
           <Text style={styles.composerHint}>완판e는 자격·당첨 가능성을 판정하지 않아요</Text>
         </View>
       </KeyboardAvoidingView>
+    </View>
+  );
+}
+
+function AiThinkingIndicator() {
+  const reducedMotion = useReducedMotion();
+  const mode = getAiLoadingMode(reducedMotion);
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (mode === 'static') {
+      progress.setValue(0);
+      return;
+    }
+    const animation = Animated.loop(Animated.sequence([
+      Animated.timing(progress, { toValue: 1, duration: duration.content, easing: easing.enter, useNativeDriver: useNative }),
+      Animated.timing(progress, { toValue: 0, duration: duration.content, easing: easing.standard, useNativeDriver: useNative }),
+    ]));
+    animation.start();
+    return () => animation.stop();
+  }, [mode, progress]);
+
+  const animatedOpacity = progress.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] });
+  return (
+    <View accessibilityLabel="AI 답변 생성 중" style={styles.thinkingDots}>
+      {[0, 1, 2].map((index) => (
+        <Animated.View
+          key={index}
+          style={[styles.thinkingDot, mode === 'animated' && index === 1 ? { opacity: animatedOpacity } : null]}
+        />
+      ))}
     </View>
   );
 }
@@ -488,6 +523,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surface,
   },
+  thinkingDots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  thinkingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, opacity: 0.45 },
   loadingCopy: { flex: 1, gap: 2 },
   loadingTitle: { ...type.bodyStrong, color: colors.text },
   loadingText: { ...type.body, color: colors.textMuted, flex: 1 },

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -31,6 +31,10 @@ import { hasCoreProfileForCalculations } from '../../features/profile/domain';
 import { getPersonalMessage } from '../../domain/quiz';
 import { Appear } from '../../components/motion/Appear';
 import { useUserStore } from '../../store/useUserStore';
+import {
+  parseListingFitExplanationContext,
+  type ListingFitExplanationContext,
+} from '../../features/listingFit/ai';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -47,6 +51,7 @@ async function askAi(
   context: string,
   history: Turn[],
   lesson: Lesson | null,
+  listingFit: ListingFitExplanationContext | null,
 ): Promise<string> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
@@ -67,7 +72,7 @@ async function askAi(
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         apikey: SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ question, context, history, lesson }),
+      body: JSON.stringify({ question, context, history, lesson, listingFit }),
       signal: controller.signal,
     });
   } catch (e) {
@@ -93,11 +98,12 @@ async function askAi(
 }
 
 export default function AiRoute() {
-  const { q, auto, quizId, futureScenario } = useLocalSearchParams<{
+  const { q, auto, quizId, futureScenario, listingFit: listingFitParam } = useLocalSearchParams<{
     q?: string;
     auto?: string;
     quizId?: string;
     futureScenario?: string;
+    listingFit?: string;
   }>();
   const profile = useUserStore((s) => s.profile);
   const applicantProfile = useUserStore((s) => s.applicantProfile);
@@ -105,11 +111,17 @@ export default function AiRoute() {
   const ctx = buildAiContext(profile, applicantProfile);
   const suggestions = getSuggestedQuestions(ctx);
   const selectedFutureScenario = parseFutureScenario(profile, futureScenario);
-  const promptContext = selectedFutureScenario && hasCoreProfileForCalculations(applicantProfile)
-    ? `${formatContextForPrompt(ctx)}\n\n${formatFutureAiContextForPrompt(
-        buildFutureAiContext(profile, selectedFutureScenario),
-      )}`
-    : formatContextForPrompt(ctx);
+  const listingFit = useMemo(
+    () => parseListingFitExplanationContext(listingFitParam),
+    [listingFitParam],
+  );
+  const promptContext = listingFit
+    ? '공고별 개인 적합도 설명 요청이에요. 아래 structured result에 없는 사용자 정보를 추측하지 마세요.'
+    : selectedFutureScenario && hasCoreProfileForCalculations(applicantProfile)
+      ? `${formatContextForPrompt(ctx)}\n\n${formatFutureAiContextForPrompt(
+          buildFutureAiContext(profile, selectedFutureScenario),
+        )}`
+      : formatContextForPrompt(ctx);
 
   // Quiz 결과에서 넘어온 경우에만 학습 콘텐츠를 함께 보낸다.
   const quiz = quizId ? quizzes.find((item) => item.id === quizId) : undefined;
@@ -143,7 +155,7 @@ export default function AiRoute() {
       setTurns([...history, { role: 'user', text: trimmed }]);
 
       try {
-        const answer = await askAi(trimmed, promptContext, history, lesson);
+        const answer = await askAi(trimmed, promptContext, history, lesson, listingFit);
         setTurns([...history, { role: 'user', text: trimmed }, { role: 'model', text: answer }]);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'AI 연결에 실패했어요.');
@@ -151,7 +163,7 @@ export default function AiRoute() {
         setLoading(false);
       }
     },
-    [lesson, loading, promptContext, turns],
+    [lesson, listingFit, loading, promptContext, turns],
   );
 
   // 각 화면의 contextual CTA 는 질문을 들고 들어와 바로 전송한다.

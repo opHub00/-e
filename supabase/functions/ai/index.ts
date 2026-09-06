@@ -11,6 +11,13 @@ import {
   isEligibilityQuestion,
   type EligibilityExplanationContext,
 } from './eligibility.ts';
+import {
+  buildListingFitExplanationFallback,
+  formatListingFitExplanationContext,
+  isListingFitExplanationContext,
+  isSafeListingFitExplanation,
+  type ListingFitExplanationContext,
+} from '../../../features/listingFit/ai.ts';
 
 const MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
@@ -63,6 +70,19 @@ const ELIGIBILITY_EXPLANATION_RULES = `
 - needs_information은 탈락이 아니라 미확인 정보라고 분명히 말하세요.
 - needs_listing_confirmation은 모집공고 확인이 필요하다는 뜻으로만 설명하세요.`;
 
+const LISTING_FIT_EXPLANATION_RULES = `
+
+[공고별 개인 적합도 설명 모드]
+- 아래 [확정된 공고별 참고 분석]은 앱의 deterministic rule engine이 만든 결과예요.
+- status와 check status를 변경하거나 재판정하지 마세요.
+- Personal Fit은 당첨 가능성이나 최종 신청 자격이 아니에요.
+- 공고·프로필에서 제공되지 않은 조건, 점수, 확률, 경쟁률, 커트라인을 만들지 마세요.
+- needs_information은 탈락이 아니라 미입력 정보예요.
+- needs_listing_confirmation은 현재 데이터로 판단하지 않고 공고문에서 확인해야 한다는 뜻이에요.
+- listing, checks, missingBundles, actions, disclaimer만 쉬운 말로 설명하세요.
+- raw profile이나 숨겨진 식별자를 추측하지 마세요.
+- 사용자 이름은 제공되지 않으므로 이름을 추측하거나 이름으로 부르지 마세요.`;
+
 type Turn = { role: 'user' | 'model'; text: string };
 
 /** 앱이 계산해서 보내는 학습 콘텐츠. 사용자 자유 입력이 아니다. */
@@ -86,6 +106,7 @@ Deno.serve(async (req: Request) => {
   let history: Turn[] = [];
   let lesson: Lesson | null = null;
   let eligibility: EligibilityExplanationContext | null = null;
+  let listingFit: ListingFitExplanationContext | null = null;
   try {
     const body = await req.json();
     question = String(body.question ?? '').trim();
@@ -105,6 +126,15 @@ Deno.serve(async (req: Request) => {
       }
       eligibility = body.eligibility;
     }
+    if (body.listingFit !== undefined) {
+      if (!isListingFitExplanationContext(body.listingFit)) {
+        return json({ error: '공고별 참고 분석 결과 형식이 올바르지 않아요.' }, 400);
+      }
+      listingFit = body.listingFit;
+    }
+    if (eligibility && listingFit) {
+      return json({ error: '설명 컨텍스트는 한 번에 하나만 보낼 수 있어요.' }, 400);
+    }
   } catch {
     return json({ error: '요청 형식을 읽을 수 없어요.' }, 400);
   }
@@ -115,7 +145,7 @@ Deno.serve(async (req: Request) => {
   // 자격 관련 질문은 Gemini 를 거치지 않고 고정 안내문으로 답한다.
   // 검사 대상은 사용자가 입력한 question 뿐이다.
   // lesson 은 앱이 만들어 보내는 학습 콘텐츠라 필터를 적용하지 않는다.
-  if (!eligibility && isEligibilityQuestion(question)) {
+  if (!eligibility && !listingFit && isEligibilityQuestion(question)) {
     return json({ answer: ELIGIBILITY_REPLY, blocked: 'eligibility' });
   }
 
@@ -126,6 +156,9 @@ Deno.serve(async (req: Request) => {
   const eligibilityBlock = eligibility
     ? `\n\n[확정된 분석 결과]\n${formatEligibilityExplanationContext(eligibility)}`
     : '';
+  const listingFitBlock = listingFit
+    ? `\n\n[확정된 공고별 참고 분석]\n${formatListingFitExplanationContext(listingFit)}`
+    : '';
 
   const contents = [
     ...history
@@ -133,7 +166,7 @@ Deno.serve(async (req: Request) => {
       .map((t) => ({ role: t.role, parts: [{ text: String(t.text).slice(0, 2000) }] })),
     {
       role: 'user',
-      parts: [{ text: `[사용자 상태]\n${context}${lessonBlock}${eligibilityBlock}\n\n[질문]\n${question}` }],
+      parts: [{ text: `[사용자 상태]\n${context}${lessonBlock}${eligibilityBlock}${listingFitBlock}\n\n[질문]\n${question}` }],
     },
   ];
 
@@ -143,7 +176,13 @@ Deno.serve(async (req: Request) => {
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
         systemInstruction: {
-          parts: [{ text: eligibility ? SYSTEM_PROMPT + ELIGIBILITY_EXPLANATION_RULES : SYSTEM_PROMPT }],
+          parts: [{
+            text: eligibility
+              ? SYSTEM_PROMPT + ELIGIBILITY_EXPLANATION_RULES
+              : listingFit
+                ? SYSTEM_PROMPT + LISTING_FIT_EXPLANATION_RULES
+                : SYSTEM_PROMPT,
+          }],
         },
         contents,
         generationConfig: {
@@ -180,6 +219,9 @@ Deno.serve(async (req: Request) => {
     if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
       console.error('gemini finishReason', candidate.finishReason, data?.usageMetadata);
       return json({ error: '답변이 중간에 끊겼어요. 다시 시도해 주세요.' }, 502);
+    }
+    if (listingFit && !isSafeListingFitExplanation(answer, listingFit)) {
+      return json({ answer: buildListingFitExplanationFallback(listingFit), safeguarded: true });
     }
     return json({ answer });
   } catch (e) {

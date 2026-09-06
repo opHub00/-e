@@ -8,6 +8,12 @@ import {
 } from './eligibility.ts';
 import { quizzes } from '../../../data/quizzes.ts';
 import { QUIZ_EXPLAIN_PROMPT } from '../../../domain/quiz.ts';
+import {
+  buildListingFitExplanationFallback,
+  formatListingFitExplanationContext,
+  isListingFitExplanationContext,
+  isSafeListingFitExplanation,
+} from '../../../features/listingFit/ai.ts';
 
 let checks = 0;
 const ok = (cond: unknown, msg: string) => {
@@ -122,5 +128,37 @@ ok(
   !isEligibilityExplanationContext({ ...deterministicContext, status: 'probably_yes' }),
   '임의 status 거부',
 );
+
+const listingFitContext = {
+  feature: 'listing_personal_fit_v1' as const,
+  status: 'needs_information' as const,
+  summary: '정보를 더 채우면 이 공고와의 관련성을 더 정확히 볼 수 있어요.',
+  listing: {
+    name: '테스트 공고',
+    region: '서울',
+    housingType: '아파트',
+    supplyType: '민간분양',
+    recruitmentStatus: 'upcoming' as const,
+    recruitmentSchedule: '2026-09-10~2026-09-12',
+  },
+  checks: [{
+    key: 'preferred_region',
+    label: '관심지역',
+    status: 'needs_information' as const,
+    reason: '관심지역을 알려주세요.',
+    sources: ['profile' as const],
+  }],
+  missingBundles: ['PREFERENCES'],
+  actions: ['부족한 정보 채우기'],
+  ruleSetVersion: 'KR-LISTING-PERSONAL-FIT-2026.09.06-v1',
+  firstHomeRuleSetVersion: 'KR-FIRST-HOME-PRIVATE-2026.07.08-v1',
+  disclaimer: '최종 신청 자격은 모집공고문과 공식 기관에서 확인해 주세요.',
+};
+ok(isListingFitExplanationContext(listingFitContext), '정상 listing fit structured result 허용');
+eq(formatListingFitExplanationContext(listingFitContext), JSON.stringify(listingFitContext), 'listing fit context deterministic');
+ok(!isListingFitExplanationContext({ ...listingFitContext, rawProfile: { age: 31 } }), 'listing fit raw profile 추가 시 거부');
+ok(!isListingFitExplanationContext({ ...listingFitContext, status: 'high_probability' }), 'listing fit 임의 status 거부');
+ok(!isSafeListingFitExplanation('당첨 확률은 80%예요.', listingFitContext), 'listing fit 확률 생성 차단');
+ok(buildListingFitExplanationFallback(listingFitContext).includes(listingFitContext.summary), 'listing fit fallback은 deterministic summary 유지');
 
 console.log(`supabase/functions/ai: ${checks}개 검증 통과`);

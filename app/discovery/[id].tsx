@@ -6,6 +6,7 @@ import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, View } from '
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { Appear } from '../../components/motion/Appear';
 import { ScreenEnter } from '../../components/motion/ScreenEnter';
+import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconChip } from '../../components/IconChip';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -17,7 +18,6 @@ import {
   formatHouseholdCount,
   formatPrice,
   formatRecruitmentSchedule,
-  getListingRelevance,
   hasListingPrice,
   RECRUITMENT_STATUS_LABEL,
 } from '../../features/discovery/domain';
@@ -25,7 +25,16 @@ import { useListingDataset } from '../../features/discovery/data/useListingDatas
 import { getStoriesForListing } from '../../features/discovery/stories';
 import type { DiscoveryListing, ListingStory } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
-import { toDiscoveryUserProfile } from '../../features/profile/domain';
+import {
+  PROFILE_BUNDLES,
+  type ProfileQuestionBundleId,
+} from '../../features/profile/domain';
+import {
+  evaluateListingPersonalFit,
+  type ListingPersonalFitCheckStatus,
+  type ListingPersonalFitResult,
+} from '../../features/listingFit/personalFit';
+import { buildListingFitExplanationContext } from '../../features/listingFit/ai';
 import { useUserStore } from '../../store/useUserStore';
 
 type DetailTab = 'info' | 'conditions' | 'stories';
@@ -34,12 +43,13 @@ export default function DiscoveryDetailRoute() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const applicantProfile = useUserStore((state) => state.applicantProfile);
-  const profile = useMemo(() => toDiscoveryUserProfile(applicantProfile), [applicantProfile]);
+  const dismissProfileBundle = useUserStore((state) => state.dismissProfileBundle);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const toggleSavedListing = useDiscoveryStore((state) => state.toggleSavedListing);
   const dataset = useListingDataset();
   const { listings: discoveryListings } = dataset;
   const [tab, setTab] = useState<DetailTab>('info');
+  const [promptBundleId, setPromptBundleId] = useState<ProfileQuestionBundleId | null>(null);
   const listing = discoveryListings.find((item) => item.id === id);
 
   const goBack = () => {
@@ -48,6 +58,10 @@ export default function DiscoveryDetailRoute() {
   };
 
   const stories = useMemo(() => (listing ? getStoriesForListing(listing) : []), [listing]);
+  const personalFit = useMemo(
+    () => (listing ? evaluateListingPersonalFit(listing, applicantProfile) : null),
+    [applicantProfile, listing],
+  );
 
   if (dataset.status === 'loading') {
     return (
@@ -85,8 +99,28 @@ export default function DiscoveryDetailRoute() {
     );
   }
 
-  const relevance = getListingRelevance(profile, listing);
+  if (!personalFit) return null;
   const saved = savedListingIds.includes(listing.id);
+
+  const openProfilePrompt = () => setPromptBundleId(personalFit.missingBundles[0] ?? null);
+  const editProfileBundle = (bundleId: ProfileQuestionBundleId) => {
+    setPromptBundleId(null);
+    router.push({
+      pathname: '/profile',
+      params: { bundle: bundleId, returnTo: `/discovery/${listing.id}` },
+    });
+  };
+  const askAiAboutFit = () => {
+    const explanationContext = buildListingFitExplanationContext(listing, personalFit);
+    router.push({
+      pathname: '/ai',
+      params: {
+        q: `${listing.complexName} 공고가 현재 확인된 내 조건과 어떻게 맞는지 쉽게 설명해 주세요.`,
+        auto: '1',
+        listingFit: JSON.stringify(explanationContext),
+      },
+    });
+  };
 
   return (
     <ScreenEnter>
@@ -121,15 +155,9 @@ export default function DiscoveryDetailRoute() {
 
           <Text style={styles.detailName}>{listing.complexName}</Text>
           <Text style={styles.detailAddress}>{listing.address}</Text>
-
-          <View style={styles.detailRelevance}>
-            <MaterialIcons name="auto-awesome" size={14} color={colors.primary} />
-            <Text style={styles.detailRelevanceText}>{relevance.label}</Text>
-            <Text style={styles.detailRelevanceNote}>
-              내 설정과 공고 정보를 바탕으로 정리했어요
-            </Text>
-          </View>
         </View>
+
+        <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
 
         <View style={styles.tabs} accessibilityRole="tablist">
           <TabButton label="정보" icon="dashboard" active={tab === 'info'} onPress={() => setTab('info')} />
@@ -142,8 +170,6 @@ export default function DiscoveryDetailRoute() {
           {tab === 'info' ? <InformationTab listing={listing} /> : null}
           {tab === 'conditions' ? (
             <ConditionsTab
-              profileName={profile.name}
-              relevance={relevance}
               checkpoints={listing.checkpoints}
               interestTags={listing.interestTags}
             />
@@ -157,17 +183,11 @@ export default function DiscoveryDetailRoute() {
       <View style={styles.footer}>
         <MotionPressable
           accessibilityRole="button"
-          onPress={() => router.push({
-            pathname: '/ai',
-            params: {
-              q: `${listing.complexName} 공고에서 접수 일정과 공식 모집공고를 확인할 때 주의할 점을 설명해 주세요. 자격 판정은 하지 마세요.`,
-              auto: '1',
-            },
-          })}
+          onPress={askAiAboutFit}
           style={styles.aiLink}
         >
           <MaterialIcons name="auto-awesome" size={17} color={colors.primary} />
-          <Text style={styles.aiLinkText}>이 공고를 AI에게 물어보기</Text>
+          <Text style={styles.aiLinkText}>내 조건과 이 공고를 AI에게 설명 듣기</Text>
         </MotionPressable>
         <PrimaryButton
           label={saved ? '저장됨 · 관심 청약에서 빼기' : '관심 청약으로 저장'}
@@ -176,9 +196,112 @@ export default function DiscoveryDetailRoute() {
           onPress={() => toggleSavedListing(listing.id)}
         />
       </View>
+
+      <ProfilePromptSheet
+        bundleId={promptBundleId}
+        onEdit={editProfileBundle}
+        onLater={(bundleId) => {
+          dismissProfileBundle(bundleId);
+          setPromptBundleId(null);
+        }}
+      />
     </SafeAreaView>
     </ScreenEnter>
   );
+}
+
+function PersonalFitSection({
+  result,
+  onCompleteProfile,
+}: {
+  result: ListingPersonalFitResult;
+  onCompleteProfile: () => void;
+}) {
+  const statusView = getFitStatusView(result.status);
+  const nextBundle = PROFILE_BUNDLES.find((bundle) => bundle.id === result.missingBundles[0]);
+
+  return (
+    <View style={styles.fitCard}>
+      <View style={styles.fitTop}>
+        <View style={styles.fitHeading}>
+          <IconChip name="person-search" tone="purple" size="md" />
+          <View style={styles.fitHeadingCopy}>
+            <Text style={styles.fitEyebrow}>PERSONAL FIT · 참고 분석</Text>
+            <Text style={styles.fitTitle}>내 조건과 보기</Text>
+          </View>
+        </View>
+        <StatusPill label={statusView.label} tone={statusView.tone} />
+      </View>
+
+      <Text style={styles.fitSummary}>{result.summary}</Text>
+
+      <View style={styles.fitChecks}>
+        {result.checks.map((item) => {
+          const view = getCheckStatusView(item.status);
+          return (
+            <View key={item.key} style={styles.fitCheck}>
+              <View style={[styles.fitCheckIcon, { backgroundColor: view.background }]}>
+                <MaterialIcons name={view.icon} size={17} color={view.color} />
+              </View>
+              <View style={styles.fitCheckCopy}>
+                <View style={styles.fitCheckTitleRow}>
+                  <Text style={styles.fitCheckLabel}>{item.label}</Text>
+                  <Text style={[styles.fitCheckStatus, { color: view.color }]}>{view.label}</Text>
+                </View>
+                <Text style={styles.fitCheckReason}>{item.reason}</Text>
+              </View>
+            </View>
+          );
+        })}
+      </View>
+
+      {nextBundle ? (
+        <MotionPressable
+          accessibilityRole="button"
+          accessibilityLabel={`${nextBundle.title} 정보 채우기`}
+          onPress={onCompleteProfile}
+          style={styles.fitProfileButton}
+        >
+          <MaterialIcons name="add-circle-outline" size={18} color={colors.primary} />
+          <View style={styles.fitProfileCopy}>
+            <Text style={styles.fitProfileTitle}>{nextBundle.title} 정보 채우기</Text>
+            <Text style={styles.fitProfileBody}>한 묶음만 확인하고 이 공고로 바로 돌아와요.</Text>
+          </View>
+          <MaterialIcons name="arrow-forward" size={18} color={colors.primary} />
+        </MotionPressable>
+      ) : null}
+
+      <View style={styles.fitDisclaimer}>
+        <MaterialIcons name="info-outline" size={16} color={colors.textSubtle} />
+        <Text style={styles.fitDisclaimerText}>{result.disclaimer}</Text>
+      </View>
+    </View>
+  );
+}
+
+function getFitStatusView(status: ListingPersonalFitResult['status']) {
+  if (status === 'good_fit') return { label: '잘 맞는 편', tone: 'green' as const };
+  if (status === 'needs_information') return { label: '정보가 부족해요', tone: 'amber' as const };
+  if (status === 'limited_fit') return { label: '제한적이에요', tone: 'pink' as const };
+  return { label: '공고 확인 필요', tone: 'purple' as const };
+}
+
+function getCheckStatusView(status: ListingPersonalFitCheckStatus): {
+  label: string;
+  icon: React.ComponentProps<typeof MaterialIcons>['name'];
+  color: string;
+  background: string;
+} {
+  if (status === 'matched') {
+    return { label: '확인됨', icon: 'check-circle', color: tint.green.fg, background: tint.green.bg };
+  }
+  if (status === 'needs_information') {
+    return { label: '정보 부족', icon: 'help', color: tint.amber.fg, background: tint.amber.bg };
+  }
+  if (status === 'limited') {
+    return { label: '제한적', icon: 'remove-circle-outline', color: tint.pink.fg, background: tint.pink.bg };
+  }
+  return { label: '공고 확인', icon: 'description', color: tint.purple.fg, background: tint.purple.bg };
 }
 
 type FactRow = { label: string; value: string } | null;
@@ -280,39 +403,14 @@ function InformationTab({ listing }: { listing: DiscoveryListing }) {
 }
 
 function ConditionsTab({
-  profileName,
-  relevance,
   checkpoints,
   interestTags,
 }: {
-  profileName: string;
-  relevance: ReturnType<typeof getListingRelevance>;
   checkpoints: string[];
   interestTags: string[];
 }) {
   return (
     <View style={styles.tabContent}>
-      <View style={styles.relevanceHero}>
-        <View style={styles.relevanceTop}>
-          <IconChip name="auto-awesome" tone="purple" size="md" />
-          <StatusPill
-            label={relevance.label}
-            tone={relevance.level === 'high' ? 'green' : relevance.level === 'worth' ? 'purple' : 'amber'}
-          />
-        </View>
-        <Text style={styles.relevanceEyebrow}>FOR {profileName.toUpperCase()}</Text>
-        <Text style={styles.relevanceTitle}>내 조건과의 관련성</Text>
-        <Text style={styles.relevanceIntro}>자격 판정이 아니라 먼저 확인할 관심 순서를 설명해요.</Text>
-        <View style={styles.relevanceReasons}>
-          {relevance.reasons.map((reason) => (
-            <View key={reason} style={styles.relevanceReason}>
-              <MaterialIcons name="check-circle" size={18} color={colors.primary} />
-              <Text style={styles.relevanceReasonText}>{reason}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
       <SectionHeading eyebrow="CHECK FIRST" title="확인해야 할 조건" icon="rule" />
       <View style={styles.checkpointList}>
         {checkpoints.map((checkpoint, index) => (
@@ -490,9 +588,60 @@ const styles = StyleSheet.create({
   detailPlace: { ...type.micro, color: colors.textSubtle },
   detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: -0.5, marginTop: 6 },
   detailAddress: { ...type.caption, color: colors.textMuted },
-  detailRelevance: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8, flexWrap: 'wrap' },
-  detailRelevanceText: { ...type.label, color: colors.primary },
-  detailRelevanceNote: { ...type.micro, color: colors.textSubtle },
+
+  fitCard: {
+    gap: spacing.md,
+    borderRadius: radius.bento,
+    borderWidth: 1,
+    borderColor: colors.primaryFixed,
+    backgroundColor: colors.lavender,
+    padding: spacing.md,
+    ...shadow.card,
+  },
+  fitTop: { gap: spacing.sm },
+  fitHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  fitHeadingCopy: { flex: 1 },
+  fitEyebrow: { ...type.micro, color: colors.primary, letterSpacing: 0.5 },
+  fitTitle: { ...type.section, color: colors.text },
+  fitSummary: { ...type.body, color: colors.textMuted },
+  fitChecks: { gap: spacing.xs },
+  fitCheck: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.surface,
+    padding: 11,
+  },
+  fitCheckIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fitCheckCopy: { flex: 1, gap: 3 },
+  fitCheckTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  fitCheckLabel: { ...type.bodySmStrong, color: colors.text, flex: 1 },
+  fitCheckStatus: { ...type.micro },
+  fitCheckReason: { ...type.caption, color: colors.textMuted, lineHeight: 19 },
+  fitProfileButton: {
+    minHeight: size.touch,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.primaryFixed,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  fitProfileCopy: { flex: 1 },
+  fitProfileTitle: { ...type.bodySmStrong, color: colors.primary },
+  fitProfileBody: { ...type.caption, color: colors.textMuted },
+  fitDisclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
+  fitDisclaimerText: { ...type.caption, color: colors.textSubtle, flex: 1 },
 
   factGroup: {
     borderRadius: radius.cardSm,
@@ -525,14 +674,6 @@ const styles = StyleSheet.create({
   sourceLinks: { gap: spacing.sm },
   sourceLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.surface, paddingHorizontal: spacing.md },
   sourceLinkText: { ...type.bodyStrong, color: colors.primary, flex: 1 },
-  relevanceHero: { gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.lavender, padding: spacing.lg, ...shadow.card },
-  relevanceTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  relevanceEyebrow: { ...type.caption, color: colors.primary, marginTop: spacing.sm },
-  relevanceTitle: { ...type.headline, color: colors.text },
-  relevanceIntro: { ...type.body, color: colors.textMuted },
-  relevanceReasons: { gap: spacing.sm, marginTop: spacing.sm },
-  relevanceReason: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, borderRadius: radius.card, backgroundColor: colors.surface, padding: 12 },
-  relevanceReasonText: { ...type.body, color: colors.text, flex: 1 },
   checkpointList: { gap: spacing.sm },
   checkpointCard: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: 12 },
   checkpointNumber: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },

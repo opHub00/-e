@@ -29,7 +29,8 @@ Kakao Developers → 내 애플리케이션 → 플랫폼 → Web 사이트 도�
 ```text
 Demo Reset → Intro → Onboarding(전국 17개 시도) → Home 실제 공고
 → Profile → Preparation → Future → 생애최초 → 전국 Discovery
-→ Listing Detail → Save → Home → 새로고침 → 저장 유지 → AI
+→ Listing Detail → Personal Fit → 부족한 Profile bundle 입력 → Detail 복귀
+→ Save → Home → 새로고침 → 저장 유지 → AI 설명
 ```
 
 Auth/cloud sync 시연은 guest Profile 입력과 공고 저장 후 `전체 → 로그인하고 이어보기`에서 이메일 계정을 만듭니다. 현재 프로젝트는 이메일 확인 후 로그인을 요구합니다. 최초 로그인은 local profile을 빈 cloud에 올리고, 다른 브라우저 로그인은 cloud profile과 저장 공고를 복원합니다. 서로 다른 확정 profile 값이 양쪽에 있으면 자동 덮어쓰기 대신 `이 기기 정보 사용` 또는 `클라우드 정보 사용`을 선택합니다.

@@ -71,13 +71,17 @@ first.getState().toggleSavedListing('live-2');
 check(first.getState().savedListingIds.join(',') === 'live-2', '공고 저장이 store에 반영되어야 한다');
 check(JSON.stringify(persisted) === JSON.stringify(['live-2']), '공고 id만 storage에 저장해야 한다');
 
+await first.getState().replaceSavedListingIds(['live-1', 'live-1', ' stale-id ']);
+check(first.getState().savedListingIds.join(',') === 'live-1,stale-id', 'cloud restore도 id만 정규화해 local cache에 반영');
+check(JSON.stringify(persisted) === JSON.stringify(['live-1', 'stale-id']), 'cloud restore 결과는 refresh용 local cache에 저장');
+
 const recreated = createDiscoveryStore(storage);
 const hydration = recreated.getState().hydrateSavedListings();
 check(hydration === recreated.getState().hydrateSavedListings(), '동시 hydration은 같은 작업을 재사용해야 한다');
 await hydration;
-check(recreated.getState().savedListingIds.join(',') === 'live-2', 'store recreate/refresh 후 저장 id를 복원해야 한다');
-recreated.getState().toggleSavedListing('live-2');
-check(recreated.getState().savedListingIds.length === 0, 'unsave는 저장 id를 제거해야 한다');
+check(recreated.getState().savedListingIds.join(',') === 'live-1,stale-id', 'store recreate/refresh 후 저장 id를 복원해야 한다');
+recreated.getState().toggleSavedListing('live-1');
+check(recreated.getState().savedListingIds.join(',') === 'stale-id', 'unsave는 해당 저장 id만 제거해야 한다');
 
 persisted = ['live-0', 'missing-id', null, 'live-0'];
 const staleStore = createDiscoveryStore(storage);

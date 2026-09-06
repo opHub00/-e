@@ -13,13 +13,15 @@
     "test:discovery": "node --experimental-strip-types features/discovery/discovery.test.ts && node --experimental-strip-types features/discovery/hardening.test.ts && node --experimental-strip-types features/discovery/data/dataLayer.test.ts && node --experimental-strip-types features/discovery/data/applyHome.test.ts && node --experimental-strip-types features/discovery/data/runtimeData.test.ts && node --experimental-strip-types features/discovery/server/KakaoGeocoding.test.ts && node --experimental-strip-types features/discovery/components/kakaoMap.test.ts",
     "test:news": "node --experimental-strip-types features/news/news.test.ts",
     "test:profile": "node --experimental-strip-types features/profile/profile.test.ts && node --experimental-strip-types features/eligibility/firstHome.test.ts",
+    "test:auth": "node --experimental-strip-types features/auth/authSync.test.ts",
     "test:motion": "node components/motion/motion.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:motion && npm run test:edge"
+    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:edge"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "2.115.0",
     "expo": "~57.0.15",
     "expo-constants": "~57.0.13",
     "expo-font": "~57.0.1",

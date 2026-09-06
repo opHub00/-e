@@ -10,6 +10,7 @@ export type DiscoveryState = {
   savedListingIds: string[];
   savedListingsHydrated: boolean;
   toggleSavedListing: (listingId: string) => void;
+  replaceSavedListingIds: (listingIds: readonly string[]) => Promise<void>;
   hydrateSavedListings: () => Promise<void>;
   clearSavedListings: () => Promise<void>;
 };
@@ -33,6 +34,11 @@ export function createDiscoveryState(storage: SavedListingStorage): StateCreator
         persist(savedListingIds);
         return { savedListingIds, savedListingsHydrated: true };
       });
+    },
+    replaceSavedListingIds: async (listingIds) => {
+      const savedListingIds = normalizeSavedListingIds(listingIds);
+      await storage.write(savedListingIds);
+      set({ savedListingIds, savedListingsHydrated: true });
     },
     hydrateSavedListings: () => {
       if (get().savedListingsHydrated) return Promise.resolve();

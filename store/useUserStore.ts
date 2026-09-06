@@ -5,6 +5,7 @@ import { XP_PER_QUIZ } from '../domain/quiz.ts';
 import type { UserProfile } from '../domain/types.ts';
 import {
   createApplicantProfileFromLegacy,
+  createMinimalApplicantProfile,
   createPromptFatigueState,
   migrateApplicantProfile,
   recordBundleDismissed,
@@ -50,6 +51,10 @@ export type UserState = {
    * legacy 를 받아 V2 를 다시 만들면 가족·소득·자산처럼 legacy 에 없는 입력이 조용히 지워진다.
    */
   setApplicantProfile: (profile: ApplicantProfileV2) => void;
+  /** Cloud restore/merge 결과를 local cache와 memory에 함께 반영한다. */
+  restoreApplicantProfile: (profile: ApplicantProfileV2) => Promise<void>;
+  /** 로그아웃 시 공유 기기에 남을 수 있는 개인 profile cache를 제거한다. */
+  clearPrivateProfileCache: () => Promise<void>;
   requestProfileBundle: (feature: ProfileFeature) => ProfileQuestionBundleId | null;
   dismissProfileBundle: (bundleId: ProfileQuestionBundleId) => void;
   /** 발표 중 처음 상태로 되돌린다. intro 와 로컬 profile도 초기화한다. */
@@ -72,6 +77,13 @@ const initialState = {
   todayQuizDone: false,
 };
 
+const privateCacheClearedProfile = createMinimalApplicantProfile({
+  name: '완판이',
+  age: 22,
+  currentRegion: '서울특별시',
+  preferredRegions: ['서울특별시'],
+});
+
 export const shouldRedirectToIntro = (state: Pick<UserState, 'hasSeenIntro' | 'introHydrated'>) =>
   state.introHydrated && !state.hasSeenIntro;
 
@@ -86,16 +98,31 @@ export function createUserState(
     void applicantStore.write(profile).catch(() => undefined);
   };
 
+  const applicantState = (input: unknown) => {
+    const applicantProfile = migrateApplicantProfile(input, defaultProfile);
+    return {
+      applicantProfile,
+      profile: normalizeProfile(toLegacyUserProfile(applicantProfile)),
+      profileHydrated: true,
+    };
+  };
+
   return (set, get) => ({
     ...initialState,
     setApplicantProfile: (input) => {
-      const applicantProfile = migrateApplicantProfile(input, defaultProfile);
-      set({
-        applicantProfile,
-        profile: normalizeProfile(toLegacyUserProfile(applicantProfile)),
-        profileHydrated: true,
-      });
+      const next = applicantState(input);
+      const applicantProfile = next.applicantProfile;
+      set(next);
       persistApplicant(applicantProfile);
+    },
+    restoreApplicantProfile: async (input) => {
+      const next = applicantState(input);
+      await applicantStore.write(next.applicantProfile);
+      set(next);
+    },
+    clearPrivateProfileCache: async () => {
+      await applicantStore.clear().catch(() => undefined);
+      set(applicantState(privateCacheClearedProfile));
     },
     requestProfileBundle: (feature) => {
       const state = get();

@@ -9,6 +9,7 @@ import { duration } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useDiscoveryStore } from '../features/discovery/useDiscoveryStore';
 import { useUserStore } from '../store/useUserStore';
+import { useAuthStore } from '../features/auth/useAuthStore';
 import { dismissActiveFocus } from '../utils/webFocus';
 
 export default function RootLayout() {
@@ -16,6 +17,7 @@ export default function RootLayout() {
   const profileHydrated = useUserStore((state) => state.profileHydrated);
   const hydrateProfile = useUserStore((state) => state.hydrateProfile);
   const hydrateSavedListings = useDiscoveryStore((state) => state.hydrateSavedListings);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const [fontsLoaded] = useFonts({
     ...MaterialIcons.font,
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
@@ -24,9 +26,8 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    void hydrateProfile();
-    void hydrateSavedListings();
-  }, [hydrateProfile, hydrateSavedListings]);
+    void Promise.all([hydrateProfile(), hydrateSavedListings()]).then(() => initializeAuth());
+  }, [hydrateProfile, hydrateSavedListings, initializeAuth]);
 
   // Static web render에서는 effect가 실행되지 않는다. web을 hydration gate로 막으면 모든 route가 빈 shell로 export된다.
   if (!fontsLoaded || (Platform.OS !== 'web' && !profileHydrated)) return null;
@@ -54,6 +55,7 @@ export default function RootLayout() {
         <Stack.Screen name="future" options={{ headerShown: false }} />
         <Stack.Screen name="quiz" options={{ headerShown: false }} />
         <Stack.Screen name="profile" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="discovery/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="eligibility/first-home" options={{ headerShown: false }} />
       </Stack>

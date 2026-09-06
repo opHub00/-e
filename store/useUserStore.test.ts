@@ -112,6 +112,16 @@ check(
 );
 check(recreated.getState().promptFatigue.automaticPromptUsed === false, 'fatigue guard는 세션마다 초기화');
 
+await recreated.getState().clearPrivateProfileCache();
+check(persistedProfile === null, '로그아웃 privacy 정책은 profile local cache를 제거해야 한다');
+check(
+  recreated.getState().applicantProfile.basic.name === '완판이' &&
+    recreated.getState().applicantProfile.subscriptionAccount.hasAccount.status === 'unknown',
+  '로그아웃 뒤 이전 사용자의 개인 profile이 memory에 노출되면 안 된다',
+);
+
+recreated.getState().setApplicantProfile(minimal);
+
 await recreated.getState().resetDemo();
 check(persisted === false, '데모 초기화는 저장된 intro flag도 초기화해야 한다');
 check(persistedProfile === null, '데모 초기화는 저장된 profile도 초기화해야 한다');

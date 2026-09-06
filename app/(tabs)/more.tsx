@@ -7,8 +7,7 @@ import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
-import { useUserStore } from '../../store/useUserStore';
-import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
+import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 
 type CategoryName = '내 청약' | '청약 찾기' | '준비하기' | '배우기' | '상담';
 
@@ -102,8 +101,17 @@ const FEATURES: FeatureItem[] = [
 export default function MoreRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const resetDemo = useUserStore((state) => state.resetDemo);
-  const clearSavedListings = useDiscoveryStore((state) => state.clearSavedListings);
+  const session = useAuthStore((state) => state.session);
+  const email = useAuthStore((state) => state.email);
+  const syncStatus = useAuthStore((state) => state.syncStatus);
+  const syncError = useAuthStore((state) => state.errorMessage);
+  const profileConflict = useAuthStore((state) => state.profileConflict);
+  const submitting = useAuthStore((state) => state.submitting);
+  const signOut = useAuthStore((state) => state.signOut);
+  const retrySync = useAuthStore((state) => state.retrySync);
+  const resolveProfileConflict = useAuthStore((state) => state.resolveProfileConflict);
+  const resetLocalDemoState = useAuthStore((state) => state.resetLocalDemoState);
+  const restoreCloudAfterDemoReset = useAuthStore((state) => state.restoreCloudAfterDemoReset);
   const [query, setQuery] = useState('');
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
@@ -121,7 +129,7 @@ export default function MoreRoute() {
   );
 
   const restart = async () => {
-    await Promise.all([resetDemo(), clearSavedListings()]);
+    await resetLocalDemoState();
     router.replace('/');
   };
 
@@ -167,6 +175,76 @@ export default function MoreRoute() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.accountSection}>
+          {session ? (
+            <View style={styles.accountCard}>
+              <View style={styles.accountTop}>
+                <View style={styles.accountIcon}>
+                  <MaterialIcons name="cloud-done" size={18} color={colors.primary} />
+                </View>
+                <View style={styles.rowCopy}>
+                  <Text style={styles.accountTitle} numberOfLines={1}>{email ?? '완판e 계정'}</Text>
+                  <Text style={styles.accountStatus}>{syncStatusLabel(syncStatus)}</Text>
+                </View>
+                <MotionPressable
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: submitting }}
+                  disabled={submitting}
+                  onPress={() => void signOut().catch(() => undefined)}
+                  style={styles.logoutButton}
+                >
+                  <Text style={styles.logoutText}>로그아웃</Text>
+                </MotionPressable>
+              </View>
+              <Text style={styles.accountBody}>내 청약 분석과 기기 간 동기화를 위해 저장돼요.</Text>
+              {syncError ? <Text style={styles.syncError}>{syncError}</Text> : null}
+              {profileConflict ? (
+                <View style={styles.accountActions}>
+                  <MotionPressable
+                    accessibilityRole="button"
+                    onPress={() => void resolveProfileConflict('local')}
+                    style={styles.accountPrimaryAction}
+                  >
+                    <Text style={styles.accountPrimaryText}>이 기기 정보 사용</Text>
+                  </MotionPressable>
+                  <MotionPressable
+                    accessibilityRole="button"
+                    onPress={() => void resolveProfileConflict('cloud')}
+                    style={styles.accountSecondaryAction}
+                  >
+                    <Text style={styles.accountSecondaryText}>클라우드 정보 사용</Text>
+                  </MotionPressable>
+                </View>
+              ) : syncStatus === 'error' ? (
+                <MotionPressable accessibilityRole="button" onPress={() => void retrySync()} style={styles.inlineAction}>
+                  <Text style={styles.inlineActionText}>동기화 다시 시도</Text>
+                </MotionPressable>
+              ) : syncStatus === 'paused' ? (
+                <MotionPressable accessibilityRole="button" onPress={() => void restoreCloudAfterDemoReset()} style={styles.inlineAction}>
+                  <Text style={styles.inlineActionText}>클라우드 정보 복원</Text>
+                </MotionPressable>
+              ) : null}
+            </View>
+          ) : (
+            <MotionPressable
+              accessibilityRole="button"
+              onPress={() => router.push('/auth' as Href)}
+              style={styles.accountCard}
+            >
+              <View style={styles.accountTop}>
+                <View style={styles.accountIcon}>
+                  <MaterialIcons name="cloud-upload" size={18} color={colors.primary} />
+                </View>
+                <View style={styles.rowCopy}>
+                  <Text style={styles.accountTitle}>로그인하고 이어보기</Text>
+                  <Text style={styles.accountStatus}>다른 기기에서도 내 청약 프로필을 유지할 수 있어요.</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={19} color={colors.outline} />
+              </View>
+            </MotionPressable>
+          )}
+        </View>
+
         {normalizedQuery && visibleFeatures.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>찾는 기능이 없어요</Text>
@@ -216,6 +294,15 @@ export default function MoreRoute() {
 
 const SIDE = spacing.screen;
 
+function syncStatusLabel(status: CloudSyncStatus): string {
+  if (status === 'syncing') return '동기화 중…';
+  if (status === 'synced') return '동기화됨';
+  if (status === 'conflict') return '정보 선택 필요';
+  if (status === 'paused') return '데모 초기화 후 동기화 일시정지';
+  if (status === 'error') return '이 기기에 저장됨 · 동기화 재시도 필요';
+  return '이 기기에 안전하게 저장됨';
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, height: '100%', backgroundColor: colors.surface },
   spacer: { flex: 1 },
@@ -252,6 +339,49 @@ const styles = StyleSheet.create({
   searchInput: { ...type.bodySm, flex: 1, color: colors.text, padding: 0 },
 
   scroll: { paddingBottom: 88 },
+
+  accountSection: { paddingHorizontal: SIDE, paddingTop: 18 },
+  accountCard: {
+    borderRadius: radius.card,
+    backgroundColor: colors.surfaceLow,
+    padding: 15,
+    gap: 10,
+  },
+  accountTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+  accountIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.primaryFixed,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountTitle: { ...type.bodySmStrong, color: colors.text },
+  accountStatus: { ...type.caption, color: colors.textSubtle },
+  accountBody: { ...type.caption, color: colors.textMuted },
+  logoutButton: { minHeight: 36, justifyContent: 'center', paddingHorizontal: 8 },
+  logoutText: { ...type.label, color: colors.primary },
+  syncError: { ...type.caption, color: colors.error },
+  accountActions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  accountPrimaryAction: {
+    minHeight: 40,
+    justifyContent: 'center',
+    borderRadius: radius.button,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 13,
+  },
+  accountPrimaryText: { ...type.label, color: colors.onPrimary },
+  accountSecondaryAction: {
+    minHeight: 40,
+    justifyContent: 'center',
+    borderRadius: radius.button,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    paddingHorizontal: 13,
+  },
+  accountSecondaryText: { ...type.label, color: colors.primary },
+  inlineAction: { minHeight: 36, alignSelf: 'flex-start', justifyContent: 'center' },
+  inlineActionText: { ...type.label, color: colors.primary },
 
   section: { paddingHorizontal: SIDE, paddingTop: 18 },
   sectionLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 1, marginBottom: 2 },

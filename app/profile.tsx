@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   choiceText: { ...type.bodySmStrong, color: colors.textMuted },
   choiceTextActive: { color: colors.onPrimary },
   footer: { paddingHorizontal: spacing.screen, paddingTop: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.hairline, gap: 4 },
-  primary: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button, backgroundColor: colors.primary },
+  primary: { minHeight: size.control, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button, backgroundColor: colors.primary },
   primaryText: { ...type.bodyLgStrong, color: colors.onPrimary },
   later: { minHeight: 42, alignItems: 'center', justifyContent: 'center' },
   laterText: { ...type.bodySmStrong, color: colors.textMuted },

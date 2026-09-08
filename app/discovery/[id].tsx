@@ -878,7 +878,7 @@ const styles = StyleSheet.create({
   readonlyNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },
   readonlyText: { ...type.caption, color: colors.textMuted, flex: 1 },
   storyList: { gap: spacing.sm },
-  storyCard: { gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: spacing.md },
+  storyCard: { gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: spacing.md },
   storyTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
   avatarText: { ...type.label, color: colors.primary },

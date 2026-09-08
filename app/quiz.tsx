@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
 
   explainCard: {
     gap: spacing.md,
-    borderRadius: radius.bento,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.surfaceHigh,
     backgroundColor: colors.surface,

@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { duration, travel } from '../design/motion';
-import { colors, radius, shadow, spacing, tracking, type } from '../design/tokens';
+import { colors, radius, shadow, size, spacing, tracking, type } from '../design/tokens';
 import { PROFILE_BUNDLES, type ProfileQuestionBundleId } from '../features/profile/domain';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   countText: { ...type.caption, color: colors.textMuted },
   primary: {
-    minHeight: 52,
+    minHeight: size.control,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.button,

@@ -34,6 +34,12 @@ export type ListingGeocodeStatus =
   | 'ambiguous'
   | 'provider_error';
 
+export type ListingSourceIdentifiers = {
+  /** 한국부동산원 공고 join key. 화면 id를 역파싱하지 않는다. */
+  houseManageNo: string;
+  pblancNo: string;
+};
+
 /**
  * 앱 내부의 provider-independent 청약 모델.
  * 자격 충족·순위·가점·당첨 가능성을 판정할 수 있는 필드는 의도적으로 두지 않는다.
@@ -41,6 +47,7 @@ export type ListingGeocodeStatus =
 export type DiscoveryListing = {
   id: string;
   sourceType: ListingSourceType;
+  sourceIdentifiers?: ListingSourceIdentifiers;
   complexName: string;
   region: DiscoveryRegion;
   district: string;

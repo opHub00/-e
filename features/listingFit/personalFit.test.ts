@@ -216,4 +216,15 @@ const fallback = buildListingFitExplanationFallback(limitedContext);
 ok(fallback.includes(mismatch.summary), 'AI fallback은 deterministic summary 유지');
 ok(fallback.includes(mismatch.disclaimer), 'AI fallback에 공식 확인 disclaimer 유지');
 
+const competitionContext = buildListingFitExplanationContext(listing(), good, {
+  source: '한국부동산원 청약Home',
+  status: 'available',
+  rows: [{ scope: '084A · 1순위 · 해당지역', suppliedUnits: 20, applicants: 401, rate: '20.05 : 1' }],
+  disclaimer: '공식 접수 결과이며 당첨 확률이 아닙니다.',
+});
+ok(isListingFitExplanationContext(competitionContext), '검증된 공식 competition summary 허용');
+ok(isSafeListingFitExplanation('공식 경쟁률은 20.05 : 1이고 당첨 결과를 뜻하지 않아요.', competitionContext), '제공된 공식 경쟁률 설명 허용');
+ok(!isSafeListingFitExplanation('공식 경쟁률은 7.5 : 1이에요.', competitionContext), 'AI가 새 경쟁률을 만들지 못함');
+ok(!isSafeListingFitExplanation('20.05 : 1이니 당첨 가능성이 높아요.', competitionContext), 'AI가 경쟁률을 당첨 가능성으로 변환하지 못함');
+
 console.log(`features/listingFit: ${checks}개 검증 통과`);

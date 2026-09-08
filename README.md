@@ -20,7 +20,7 @@ Intro → 최소 Onboarding → Home → 청약 프로필 → Preparation → Fu
 - 금요일 데모 환경에서는 이메일 확인을 요구하지 않습니다. 회원가입 즉시 session과 cloud sync를 시작하고 짧은 성공 안내 뒤 Home으로 이동합니다. 이메일 소유권을 검증하지 않는 시연용 정책이므로 일반 공개 운영 전에는 확인 메일 또는 검증된 custom SMTP 정책을 다시 적용해야 합니다.
 - Profile의 혼동하기 쉬운 용어는 짧은 도움말을 제공하고, `잘 모르겠어요`는 기존 ApplicantProfile의 `unknown`으로 그대로 저장합니다.
 - AI 요청은 진행 상태를 표시하고 같은 요청의 연속 제출을 막습니다. timeout·429·일시적 서버 오류는 내부 오류를 노출하지 않고 다시 시도할 수 있게 안내하며 자동 재시도하지 않습니다.
-- 경쟁률은 아직 production 기능이 아닙니다. 공식 ApplyHome 경쟁률 API의 schema·join key는 확인했지만 현재 서비스 키의 별도 활용승인이 없어 실제 매칭률을 검증하지 못했습니다. 근거와 출시 조건은 [Competition Data Audit V1](./docs/competition-data-audit-v1/report-source.md)에 기록했습니다.
+- Competition Insight V1은 공식 ApplyHome 경쟁률 API를 공고 상세에서만 lazy 조회합니다. 접수 전·진행 중·미제공 상태를 숫자 없이 구분하고, 주택형·순위·거주범위별 공식 공급세대수/신청건수/경쟁률만 표시합니다. 전수 품질 측정과 제한은 [Competition Data Audit V1](./docs/competition-data-audit-v1/report-source.md)에 기록했습니다.
 
 ## 실행과 검증
 
@@ -77,7 +77,7 @@ Vercel 업로드에서는 `.vercelignore`가 모든 `.env` 계열 파일을 차�
 | `features/auth/` | 이메일 Auth, local/cloud merge, sync repository, session persistence |
 | `features/eligibility/` | 생애최초 deterministic rule engine 및 AI context |
 | `features/listingFit/` | 공고별 Personal Fit deterministic checks 및 AI 설명 계약 |
-| `features/competition/` | production 비연결 경쟁률 공식 schema 감사 adapter와 계약 테스트 |
+| `features/competition/` | 공식 경쟁정보 adapter/domain, lazy client, cache·AI 안전 계약 테스트 |
 | `features/discovery/` | 17개 시도, ApplyHome repository, saved persistence, Kakao map |
 | `features/news/` | Naver news 정규화, relevance, grounded impact context |
 | `domain/` | Preparation / Future / Quiz / AI context 순수 계산 |

@@ -1,8 +1,10 @@
 import {
   adaptCompetitionRows,
+  adaptSpecialSupplyRows,
   buildApplyHomeCompetitionJoinKey,
   calculateScopedCompetitionRate,
   deriveCompetitionStatus,
+  formatOfficialCompetitionRate,
 } from './auditAdapter.ts';
 
 let checks = 0;
@@ -28,6 +30,8 @@ check(aptRows.length === 1, '공식 APT 경쟁률 row를 하나의 주택형/순
 check(aptRows[0]?.applicants === 401, '문자열 접수건수를 정수로 파싱한다');
 check(aptRows[0]?.suppliedUnits === 20, '공식 공급세대수를 보존한다');
 check(aptRows[0]?.officialCompetitionRate === 20.05, '공식 경쟁률을 보존한다');
+check(aptRows[0]?.officialCompetitionRateLabel === '20.05', '공식 경쟁률 원문 표기도 보존한다');
+check(formatOfficialCompetitionRate(aptRows[0]!) === '20.05 : 1', '공식 숫자 경쟁률만 비율로 표시한다');
 check(aptRows[0]?.rankCode === 1 && aptRows[0]?.residenceCode === '01', '순위와 거주범위를 분리한다');
 
 const missingRate = adaptCompetitionRows('getAPTLttotPblancCmpet', [{
@@ -39,6 +43,12 @@ const missingRate = adaptCompetitionRows('getAPTLttotPblancCmpet', [{
   CMPET_RATE: '-',
 }]);
 check(missingRate[0]?.officialCompetitionRate === null, '공식 경쟁률 누락을 계산값으로 몰래 채우지 않는다');
+check(formatOfficialCompetitionRate(missingRate[0]!) === '공식 경쟁률 확인 필요', '비숫자 경쟁률을 임의 숫자로 바꾸지 않는다');
+const deficit = adaptCompetitionRows('getRemndrLttotPblancCmpet', [{
+  HOUSE_MANAGE_NO: '1', PBLANC_NO: '2', HOUSE_TY: '084A',
+  SUPLY_HSHLDCO: 114, REQ_CNT: 22, CMPET_RATE: '(△92)',
+}]);
+check(formatOfficialCompetitionRate(deficit[0]!) === '미달 92세대', '공식 미달 표기를 확률로 바꾸지 않는다');
 check(adaptCompetitionRows('getRemndrLttotPblancCmpet', [{ HOUSE_MANAGE_NO: '1' }]).length === 0, 'join key나 주택형이 없는 malformed row는 제외한다');
 check(adaptCompetitionRows('getRemndrLttotPblancCmpet', { data: [] }).length === 0, '잘못된 envelope는 안전하게 거부한다');
 
@@ -84,5 +94,18 @@ check(deriveCompetitionStatus('open', aptRows) === 'in_progress', '접수 중은
 check(deriveCompetitionStatus('closed', aptRows) === 'available', '접수 종료 후 공식 row가 있을 때만 available이다');
 check(deriveCompetitionStatus('closed', []) === 'not_available', '접수 종료 후 공식 row가 없으면 unavailable이다');
 check(deriveCompetitionStatus('unknown', aptRows) === 'not_available', '일정 상태 불명은 최종 경쟁률로 단정하지 않는다');
+
+const specialRows = adaptSpecialSupplyRows([{
+  HOUSE_MANAGE_NO: '1', PBLANC_NO: '2', HOUSE_TY: '084A', SUBSCRPT_RESULT_NM: '청약접수 종료',
+  MNYCH_HSHLDCO: 2, CRSPAREA_MNYCH_CNT: 3, CTPRVN_MNYCH_CNT: 1, ETC_AREA_MNYCH_CNT: 0,
+  NWWDS_NMTW_HSHLDCO: 0, CRSPAREA_NWWDS_NMTW_CNT: 0, CTPRVN_NWWDS_NMTW_CNT: 0, ETC_AREA_NWWDS_NMTW_CNT: 0,
+  LFE_FRST_HSHLDCO: 4, CRSPAREA_LFE_FRST_CNT: 12, CTPRVN_LFE_FRST_CNT: 0, ETC_AREA_LFE_FRST_CNT: 4,
+  OLD_PARNTS_SUPORT_HSHLDCO: 0, CRSPAREA_OPS_CNT: 0, CTPRVN_OPS_CNT: 0, ETC_AREA_OPS_CNT: 0,
+  NWBB_NWBBSHR_HSHLDCO: 0, CRSPAREA_NWBB_NWBBSHR_CNT: 0, CTPRVN_NWBB_NWBBSHR_CNT: 0, ETC_AREA_NWBB_NWBBSHR_CNT: 0,
+  YGMN_HSHLDCO: 0, CRSPAREA_YGMN_CNT: 0, CTPRVN_YGMN_CNT: 0, ETC_AREA_YGMN_CNT: 0,
+}]);
+check(specialRows.length === 2, '배정 또는 신청이 있는 특별공급 유형만 만든다');
+check(specialRows.find((row) => row.category === '다자녀')?.calculatedCompetitionRate === 2, '동일 특별공급 유형의 공식 건수만 합산한다');
+check(specialRows.find((row) => row.category === '생애최초')?.applicants === 16, '특별공급 지역별 신청건수를 보존 합산한다');
 
 console.log(`competition audit adapter checks passed: ${checks}`);

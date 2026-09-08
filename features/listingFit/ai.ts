@@ -1,4 +1,5 @@
 import type { DiscoveryListing } from '../discovery/types.ts';
+import type { CompetitionAiSummary } from '../competition/domain.ts';
 import type {
   ListingPersonalFitCheckStatus,
   ListingPersonalFitResult,
@@ -32,6 +33,8 @@ export type ListingFitExplanationContext = {
   ruleSetVersion: string;
   firstHomeRuleSetVersion: string;
   disclaimer: string;
+  /** V1 client 호환을 위해 optional이며, 새 Detail은 null 또는 검증된 summary를 보낸다. */
+  competition?: CompetitionAiSummary | null;
 };
 
 const CONTEXT_KEYS = [
@@ -45,6 +48,7 @@ const CONTEXT_KEYS = [
   'ruleSetVersion',
   'firstHomeRuleSetVersion',
   'disclaimer',
+  'competition',
 ] as const;
 
 const LISTING_KEYS = [
@@ -86,6 +90,7 @@ const RECRUITMENT_STATUSES: DiscoveryListing['recruitmentStatus'][] = [
 export function buildListingFitExplanationContext(
   listing: DiscoveryListing,
   result: ListingPersonalFitResult,
+  competition: CompetitionAiSummary | null = null,
 ): ListingFitExplanationContext {
   return {
     feature: 'listing_personal_fit_v1',
@@ -111,6 +116,7 @@ export function buildListingFitExplanationContext(
     ruleSetVersion: result.metadata.ruleSetVersion,
     firstHomeRuleSetVersion: result.metadata.firstHomeRuleSetVersion,
     disclaimer: result.disclaimer,
+    competition,
   };
 }
 
@@ -125,6 +131,7 @@ export function isListingFitExplanationContext(value: unknown): value is Listing
   if (!Array.isArray(value.checks) || value.checks.length > 12 || !value.checks.every(isCheck)) return false;
   if (!isShortStringArray(value.missingBundles, 9, 60)) return false;
   if (!isShortStringArray(value.actions, 6, 120)) return false;
+  if (value.competition !== undefined && value.competition !== null && !isCompetitionSummary(value.competition)) return false;
   return true;
 }
 
@@ -152,7 +159,9 @@ export function isSafeListingFitExplanation(
   const text = explanation.trim();
   if (!text || text.length > 2_000) return false;
   if (/[가-힣]{2,4}님/.test(text)) return false;
-  if (/\d+(?:\.\d+)?\s*(?:%|점)|당첨\s*(?:확률|가능성)|합격\s*확률|승산|커트라인|경쟁률/.test(text)) return false;
+  if (/\d+(?:\.\d+)?\s*(?:%|점)|당첨\s*(?:확률|가능성)|합격\s*확률|승산|커트라인/.test(text)) return false;
+  if (!context.competition && /경쟁률/.test(text)) return false;
+  if (context.competition && hasUnapprovedCompetitionRate(text, context.competition)) return false;
   if (/(?:신청|청약)\s*(?:자격|가능 여부).*(?:확정|충족|가능)|자격이\s*(?:됩니다|있습니다|없습니다)/.test(text)) return false;
   if (context.status === 'limited_fit' && /(?:아주|매우|충분히)?\s*잘\s*맞|좋은\s*선택|유리/.test(text)) return false;
   if (context.status === 'needs_information' && /모든\s*(?:정보|조건).*(?:확인|충족)|추가\s*정보가\s*필요\s*없/.test(text)) return false;
@@ -200,6 +209,29 @@ function isCheck(value: unknown): value is ListingFitExplanationCheck {
     && value.sources.length > 0
     && value.sources.length <= 4
     && value.sources.every((source) => SOURCES.includes(source as ListingPersonalFitSource));
+}
+
+function isCompetitionSummary(value: unknown): value is CompetitionAiSummary {
+  if (!isRecord(value) || hasUnexpectedKeys(value, ['source', 'status', 'rows', 'disclaimer'])) return false;
+  if (value.source !== '한국부동산원 청약Home' || value.status !== 'available') return false;
+  if (!isShortString(value.disclaimer, 300) || !Array.isArray(value.rows) || value.rows.length > 8) return false;
+  return value.rows.every((row) => isRecord(row)
+    && !hasUnexpectedKeys(row, ['scope', 'suppliedUnits', 'applicants', 'rate'])
+    && isShortString(row.scope, 120)
+    && Number.isInteger(row.suppliedUnits) && Number(row.suppliedUnits) >= 0
+    && Number.isInteger(row.applicants) && Number(row.applicants) >= 0
+    && isShortString(row.rate, 80));
+}
+
+function hasUnapprovedCompetitionRate(text: string, competition: CompetitionAiSummary): boolean {
+  const canonical = (value: string) => value.replaceAll(',', '').replace(/\s+/g, '').replace('대', ':');
+  const allowed = new Set(competition.rows.flatMap((row) => {
+    const match = row.rate.match(/[\d,]+(?:\.\d+)?\s*(?::|대)\s*1/);
+    return match ? [canonical(match[0])] : [];
+  }));
+  const mentioned = [...text.matchAll(/[\d,]+(?:\.\d+)?\s*(?::|대)\s*1/g)]
+    .map((match) => canonical(match[0]));
+  return mentioned.some((rate) => !allowed.has(rate));
 }
 
 function hasUnexpectedKeys(value: Record<string, unknown>, allowed: readonly string[]): boolean {

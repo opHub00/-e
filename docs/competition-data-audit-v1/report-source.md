@@ -4,13 +4,13 @@
 - 대상: 완판e `feature/competition-insight-v1`
 - audience: 제품·개발·시연 운영 담당자
 - 범위: 공식 경쟁률 source, ApplyHome operation/schema, 현재 production 90일 공고의 join 가능성, 안전한 후속 구현 조건
-- 결론: **공식 데이터는 제공되지만 현재 완판e 키로는 경쟁률 서비스가 승인되지 않았다. 이번 branch에서는 UI·Edge·DB·AI 연결을 출시하지 않는다.**
+- 결론: **2026-09-08 활용신청 반영 후 공식 API 접근과 167건 전수 측정에 성공했다. 종료 공고 매칭률 90.60%, HTTP 성공률 100%, p95 126ms여서 보수적인 lazy-load Competition Insight 구현을 feature branch에서 진행한다.**
 
 ## Executive answer
 
 한국부동산원은 공공데이터포털에서 청약Home 경쟁률 및 특별공급 신청현황 API를 공식 제공한다. APT, 오피스텔 계열, 공공지원 민간임대, 취소후재공급, 잔여세대, 임의공급을 분리된 operation으로 조회할 수 있고 APT 당첨가점과 특별공급 신청현황도 제공한다. 공식 설명은 은행 전산 사정으로 접수건수가 이후 일부 변동될 수 있으며 청약Home 최종정보와 차이가 날 수 있다고 명시한다. [공공데이터포털 서비스](https://www.data.go.kr/data/15098905/openapi.do), [한국부동산원 기술문서](https://www.reb.or.kr/reb/na/ntt/selectNttInfo.do?mi=10251&bbsId=1268&nttSn=82345)
 
-하지만 현재 `DATA_GO_KR_SERVICE_KEY`는 기존 분양정보 서비스에는 HTTP 200을 반환하고 경쟁률 서비스에는 HTTP 401, body code `-401`을 반환했다. 비밀값은 출력하거나 저장하지 않았다. 따라서 official schema만으로 화면을 만들 수는 있어도 실제 응답·매칭률·업데이트 시점·결측 패턴을 검증하지 못해 금요일 시연 production에 켤 근거가 부족하다.
+활용신청 반영 후 현재 `DATA_GO_KR_SERVICE_KEY`로 APT 일반, 잔여세대, APT 특별공급 endpoint가 모두 HTTP 200을 반환했다. 비밀값은 출력하거나 저장하지 않았다. 현재 production 90일 공고 167건을 공식 두 식별자로 전수 조회했으며 136건에서 경쟁률 행을 찾았다. 접수 전·진행 중을 제외한 종료 공고는 135/149건이 매칭됐다.
 
 ## 1. 현재 완판e 데이터 경로 감사
 
@@ -93,24 +93,27 @@ APT에 한해 주택형·거주범위별 `LWET_SCORE`, `TOP_SCORE`, `AVRG_SCORE`
 
 ## 6. Live smoke와 데이터 품질
 
-동일 로컬 secret을 사용해 다음을 확인했다.
+활용신청 반영 뒤 동일 로컬 secret으로 재측정했다. API key 값은 출력하거나 문서에 저장하지 않았다.
 
-| 요청 | 결과 |
+| 측정 | 결과 |
 |---|---|
-| 기존 `ApplyhomeInfoDetailSvc` 1건 | HTTP 200 |
-| APT 경쟁률 서울 종료 공고 | HTTP 401, code `-401` |
-| APT 경쟁률 경기 종료 공고 | HTTP 401, code `-401` |
-| APT 경쟁률 비수도권 종료 공고 | HTTP 401, code `-401` |
-| 잔여세대 경쟁률 종료 공고 | HTTP 401, code `-401` |
+| 현재 90일 listings | 167건 (APT 84, 잔여세대 83) |
+| 공식 identifier | 167/167, 100% |
+| competition HTTP 성공 | 167/167, 100% |
+| 전체 공고 매칭 | 136/167, 81.44% |
+| 종료 공고 매칭 | 135/149, 90.60% |
+| APT 일반 매칭 | 63/84, 75.00% |
+| 잔여세대 매칭 | 73/83, 87.95% |
+| APT 특별공급 전체 매칭 | 58/84, 69.05% |
+| APT 특별공급 종료 공고 매칭 | 57/68, 83.82% |
+| 일반/잔여 API latency | mean 98.2ms, p50 104ms, p95 126ms, max 168ms |
+| 특별공급 API latency | mean 94.4ms, p50 91ms, p95 120ms, max 146ms |
 
-오류 메시지는 인증키가 이 서비스에 유효하지 않다는 뜻이다. 요청 URL/operation은 공식 Swagger와 일치하고 같은 키가 분양정보 서비스에는 성공하므로, 가장 유력한 원인은 별도 서비스 활용신청이 되지 않은 상태다.
+일반/잔여 응답은 총 1,640행이었다. `HOUSE_MANAGE_NO`, `PBLANC_NO`, `HOUSE_TY`, `SUPLY_HSHLDCO`, `REQ_CNT`, `CMPET_RATE` 결측은 모두 0건이고 공식 identifier 불일치도 0건이다. 특별공급 334개 원본 주택형 행도 identifier, 주택형, 총 특별공급 세대수, 결과명 결측이 0건이었다.
 
-- 90일 listings: 167
-- 공식 identifier 보유: 167 (100%)
-- 실제 competition 응답 매칭 검증: **0건 검증 / 167건, 매칭률 산출 불가**
-- 최종 경쟁률 available/in-progress/unavailable 실제 분포: **산출 불가**
+일정별로는 종료 149건 중 135건, 진행 중 7건 중 1건, 접수 전 11건 중 0건이 매칭됐다. 접수 전 0건은 정상적인 상태로 보고 숫자를 표시하지 않는다. 종료 공고 14건은 공식 endpoint가 빈 결과를 반환하므로 `데이터 미제공`으로 처리한다.
 
-`0% match`라고 표현하지 않는다. API가 공고를 못 찾은 것이 아니라 인증 단계에서 모든 요청이 거부됐기 때문이다.
+`CMPET_RATE`는 숫자만 오는 필드가 아니다. 1,640행 중 숫자 359행, `-` 522행, 미달 표기 756행, 기타 3행이었다. 78.11%가 비숫자이므로 원문을 숫자로 coercion하지 않는다. UI는 숫자 공식값만 `n : 1`, 신청 0건은 `신청 없음`, 공식 미달 표기는 `미달 n세대`, 그 외에는 `공식 경쟁률 확인 필요`로 표시한다.
 
 ## 7. 감사용 domain/adapter
 
@@ -125,35 +128,33 @@ APT에 한해 주택형·거주범위별 `LWET_SCORE`, `TOP_SCORE`, `AVRG_SCORE`
 
 이는 향후 구현의 contract test용이며 Listing Detail, AI, Edge, Supabase DB에는 연결하지 않았다.
 
-## 8. 안전한 후속 구현안
+## 8. Competition Insight V1 구현 범위
 
-접근 승인을 받은 뒤 다음 순서로 진행한다.
+feature branch에는 다음 보수적 구조를 적용한다.
 
-1. production secret으로 167개 공식 identifier를 provider operation별 조회해 실제 match/결측/필드 형식을 기록한다.
-2. `DiscoveryListing`에 역파싱이 아닌 `sourceIdentifiers`를 추가하되 기존 normalization 의미는 바꾸지 않는다.
-3. Detail에서만 lazy 호출하는 별도 `competition` Edge Function을 둔다. Discovery 초기 fetch에는 포함하지 않는다.
-4. cache key는 `operation + HOUSE_MANAGE_NO + PBLANC_NO + variant filter`로 만든다.
-5. 단일-flight/dedup과 서버 cache를 적용한다. 제안 TTL은 접수 전 12시간, 접수 중 10분, 종료 후 무응답 6시간, 확정 응답 7일이며 실제 API 갱신 관찰 후 조정한다.
-6. upstream 장애 시 마지막 공식 cache에 수집 시각을 표시하거나 “공식 데이터에서 확인할 수 없음”을 보여준다. stale 숫자를 최신값처럼 표시하지 않는다.
-7. UI는 Personal Fit과 독립된 `청약 경쟁 정보` section으로 두고, 숫자와 기준 범위를 그대로 표시한다. 높음/보통/낮음, 당첨확률, AI 추정은 만들지 않는다.
-8. AI에는 검증된 공식 row와 source metadata만 전달하고 확률 변환을 금지한다.
+1. `DiscoveryListing.sourceIdentifiers`에 `HOUSE_MANAGE_NO`, `PBLANC_NO`를 별도 보존한다. 화면 id 역파싱과 단지명 fuzzy join은 사용하지 않는다.
+2. Detail의 종료 공고에서만 별도 `competition` Edge Function을 lazy 호출한다. Discovery 초기 로드, 접수 전, 접수 중에는 외부 competition 요청을 만들지 않는다.
+3. cache key는 `sourceType + HOUSE_MANAGE_NO + PBLANC_NO`다. 서버 cache는 공식 행 10분, 빈 응답 5분이며 anon/authenticated에는 table 권한이 없다.
+4. client와 Edge isolate에서 동일 공고 동시 요청을 single-flight로 합친다. cache 장애 시에도 공식 upstream 조회는 fail-open하고 기존 Detail은 유지한다.
+5. UI는 Personal Fit과 독립된 `청약 경쟁 정보` section이다. APT 일반은 주택형·순위·거주범위, 잔여세대는 주택형, 특별공급은 주택형·유형 범위를 보존한다.
+6. APT 특별공급은 동일 주택형·동일 유형의 공식 배정세대수와 지역별 신청건수만 합산해 계산한다. 기관추천처럼 필드 의미가 다른 유형은 V1 계산에서 제외한다.
+7. 높음/보통/낮음, 전체 합산 경쟁률, 당첨확률, 가짜 커트라인은 만들지 않는다.
+8. AI에는 최대 8개의 검증된 범위·공식 숫자만 전달하고 listing id와 raw profile은 보내지 않는다. 허용되지 않은 새 경쟁률이나 확률 문구는 validator가 거부한다.
 
 ## 9. 출시 판단
 
-**HOLD**
+**FEATURE IMPLEMENTATION GO / PRODUCTION은 검증 완료 전 HOLD**
 
-- 공식 data grounding: schema 수준에서는 충족
-- 실제 API reliability: 미검증
-- 현재 키 접근: 실패
-- 90일 actual match rate: 미검증
-- cache/load: 설계만 존재
-- UI/browser QA: 미구현이므로 해당 없음
-
-따라서 feature branch만 push하고 master merge, Supabase migration/function deploy, Vercel production deploy, production tag는 하지 않는다. 기존 금요일 시연 production을 그대로 유지한다.
+- 공식 data grounding: 충족
+- live transport reliability: 251회 전수 호출(일반/잔여 167 + 특별공급 84) 모두 성공
+- 종료 공고 match: 일반/잔여 90.60%, APT 특별공급 83.82%
+- 핵심 field 결측 및 join mismatch: 0
+- cache/load: 별도 lazy Edge + server/client dedup으로 구현
+- production: remote migration, Edge smoke, 전체 regression, browser QA가 끝나기 전까지 기존 배포 유지
 
 ## 10. 다음 단계
 
-사용자 계정에서 공공데이터포털의 [청약홈 경쟁률 및 특별공급 신청현황 서비스](https://www.data.go.kr/data/15098905/openapi.do)에 현재 사용 중인 키로 활용신청을 완료한다. 자동승인 상태가 API에 반영된 뒤 live coverage audit을 다시 실행하고, match rate와 update latency가 안전할 때만 Competition Insight 구현을 시작한다.
+새 cache migration과 `competition` Edge를 staging 성격으로 먼저 적용하고, hit/miss·빈 응답·upstream 실패를 smoke한다. 그 뒤 feature preview에서 390×844 및 desktop Detail QA와 기존 production 회귀를 모두 통과한 경우에만 master/production 배포를 검토한다.
 
 ## Source ledger
 

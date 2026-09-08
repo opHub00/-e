@@ -77,9 +77,11 @@ const LISTING_FIT_EXPLANATION_RULES = `
 - status와 check status를 변경하거나 재판정하지 마세요.
 - Personal Fit은 당첨 가능성이나 최종 신청 자격이 아니에요.
 - 공고·프로필에서 제공되지 않은 조건, 점수, 확률, 경쟁률, 커트라인을 만들지 마세요.
+- competition이 있으면 그 안의 공식 공급세대수·신청건수·경쟁률만 그대로 설명하세요.
+- 경쟁률을 당첨 확률, 승산, 높음/보통/낮음 같은 임의 평가로 바꾸지 마세요.
 - needs_information은 탈락이 아니라 미입력 정보예요.
 - needs_listing_confirmation은 현재 데이터로 판단하지 않고 공고문에서 확인해야 한다는 뜻이에요.
-- listing, checks, missingBundles, actions, disclaimer만 쉬운 말로 설명하세요.
+- listing, checks, missingBundles, actions, disclaimer와 제공된 competition만 쉬운 말로 설명하세요.
 - raw profile이나 숨겨진 식별자를 추측하지 마세요.
 - 사용자 이름은 제공되지 않으므로 이름을 추측하거나 이름으로 부르지 마세요.`;
 

@@ -207,6 +207,8 @@ export function normalizeListingRecord(
   }
 
   const sourceType = normalizeSourceType(input, context.source);
+  const houseManageNo = readString(input, ['HOUSE_MANAGE_NO', 'houseManageNo']);
+  const pblancNo = readString(input, ['PBLANC_NO', 'pblancNo', 'announcementNumber']);
   const providerIdPrefix = sourceType === 'applyhome-apt'
     ? 'apt'
     : sourceType === 'applyhome-remnant'
@@ -214,8 +216,8 @@ export function normalizeListingRecord(
       : '';
   const idSeed = [
     providerIdPrefix,
-    readString(input, ['id', 'HOUSE_MANAGE_NO', 'houseManageNo']),
-    readString(input, ['PBLANC_NO', 'pblancNo', 'announcementNumber']),
+    readString(input, ['id']) || houseManageNo,
+    pblancNo,
   ]
     .filter(Boolean)
     .join('-');
@@ -252,6 +254,9 @@ export function normalizeListingRecord(
   const listing: Listing = {
     id: normalizeId(idSeed || `${safeName}-${safeAddress}-${startDate}`),
     sourceType,
+    sourceIdentifiers: houseManageNo && pblancNo
+      ? { houseManageNo, pblancNo }
+      : undefined,
     complexName: safeName,
     region,
     district:

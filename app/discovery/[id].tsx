@@ -36,6 +36,12 @@ import {
 } from '../../features/listingFit/personalFit';
 import { buildListingFitExplanationContext } from '../../features/listingFit/ai';
 import { useUserStore } from '../../store/useUserStore';
+import { formatOfficialCompetitionRate } from '../../features/competition/auditAdapter';
+import { buildCompetitionAiSummary } from '../../features/competition/domain';
+import {
+  useListingCompetition,
+  type ListingCompetitionSnapshot,
+} from '../../features/competition/useListingCompetition';
 
 type DetailTab = 'info' | 'conditions' | 'stories';
 
@@ -51,6 +57,7 @@ export default function DiscoveryDetailRoute() {
   const [tab, setTab] = useState<DetailTab>('info');
   const [promptBundleId, setPromptBundleId] = useState<ProfileQuestionBundleId | null>(null);
   const listing = discoveryListings.find((item) => item.id === id);
+  const competitionState = useListingCompetition(listing);
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -111,7 +118,11 @@ export default function DiscoveryDetailRoute() {
     });
   };
   const askAiAboutFit = () => {
-    const explanationContext = buildListingFitExplanationContext(listing, personalFit);
+    const explanationContext = buildListingFitExplanationContext(
+      listing,
+      personalFit,
+      buildCompetitionAiSummary(competitionState.competition),
+    );
     router.push({
       pathname: '/ai',
       params: {
@@ -158,6 +169,8 @@ export default function DiscoveryDetailRoute() {
         </View>
 
         <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
+
+        <CompetitionSection snapshot={competitionState} />
 
         <View style={styles.tabs} accessibilityRole="tablist">
           <TabButton label="정보" icon="dashboard" active={tab === 'info'} onPress={() => setTab('info')} />
@@ -207,6 +220,123 @@ export default function DiscoveryDetailRoute() {
       />
     </SafeAreaView>
     </ScreenEnter>
+  );
+}
+
+function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot }) {
+  const [expanded, setExpanded] = useState(false);
+  const competition = snapshot.competition;
+  const generalRows = competition?.generalRows ?? [];
+  const specialRows = competition?.specialSupplyRows ?? [];
+  const generalLimit = expanded ? 30 : 6;
+  const specialLimit = expanded ? 20 : 4;
+
+  return (
+    <View style={styles.competitionCard}>
+      <View style={styles.competitionHeading}>
+        <IconChip name="groups" tone="green" size="md" />
+        <View style={styles.competitionHeadingCopy}>
+          <Text style={styles.competitionEyebrow}>OFFICIAL DATA · 참고 정보</Text>
+          <Text style={styles.competitionTitle}>청약 경쟁 정보</Text>
+        </View>
+        {snapshot.status === 'available' ? <StatusPill label="공식 데이터" tone="green" /> : null}
+      </View>
+
+      {snapshot.requestStatus === 'loading' ? (
+        <View style={styles.competitionStateRow}>
+          <ActivityIndicator color={colors.primary} />
+          <Text style={styles.competitionStateText}>청약Home 공식 접수 결과를 확인하고 있어요.</Text>
+        </View>
+      ) : snapshot.requestStatus === 'error' ? (
+        <View style={styles.competitionStateBlock}>
+          <Text style={styles.competitionStateTitle}>공식 경쟁정보를 잠시 확인할 수 없어요</Text>
+          <Text style={styles.competitionStateText}>내 조건 분석과 공고 정보는 그대로 볼 수 있어요.</Text>
+          <MotionPressable accessibilityRole="button" onPress={snapshot.retry} style={styles.competitionRetry}>
+            <MaterialIcons name="refresh" size={17} color={colors.primary} />
+            <Text style={styles.competitionRetryText}>다시 확인하기</Text>
+          </MotionPressable>
+        </View>
+      ) : snapshot.status === 'not_started' ? (
+        <Text style={styles.competitionStateText}>아직 접수 전이에요. 접수 결과가 공개되면 확인할 수 있어요.</Text>
+      ) : snapshot.status === 'in_progress' ? (
+        <Text style={styles.competitionStateText}>접수가 진행 중이에요. 최종 경쟁률은 접수 종료 후 확인해 주세요.</Text>
+      ) : snapshot.status === 'not_available' ? (
+        <Text style={styles.competitionStateText}>현재 공식 데이터에서 이 공고의 경쟁률을 확인할 수 없어요.</Text>
+      ) : competition ? (
+        <>
+          {generalRows.length > 0 ? (
+            <View style={styles.competitionGroup}>
+              <Text style={styles.competitionGroupTitle}>
+                {competition.identifier.sourceType === 'apt' ? '일반공급' : '잔여세대'} · 주택형별 공식 결과
+              </Text>
+              {generalRows.slice(0, generalLimit).map((row, index) => (
+                <View
+                  key={`${row.operation}-${row.housingType}-${row.rankCode ?? 'none'}-${row.residenceCode ?? row.remnantAnnouncementTypeCode ?? index}`}
+                  style={[styles.competitionRow, index > 0 && styles.competitionRowDivider]}
+                >
+                  <View style={styles.competitionRowCopy}>
+                    <Text style={styles.competitionRowTitle}>
+                      {[row.housingType, row.rankCode ? `${row.rankCode}순위` : null, row.residenceName]
+                        .filter(Boolean).join(' · ')}
+                    </Text>
+                    <Text style={styles.competitionRowMeta}>
+                      공급 {row.suppliedUnits?.toLocaleString('ko-KR') ?? '확인 필요'}세대 · 신청 {row.applicants?.toLocaleString('ko-KR') ?? '확인 필요'}건
+                    </Text>
+                  </View>
+                  <Text style={styles.competitionRate}>{formatOfficialCompetitionRate(row)}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {specialRows.length > 0 ? (
+            <View style={styles.competitionGroup}>
+              <Text style={styles.competitionGroupTitle}>특별공급 · 공식 세대수와 신청건수</Text>
+              {specialRows.slice(0, specialLimit).map((row, index) => (
+                <View
+                  key={`${row.housingType}-${row.category}-${index}`}
+                  style={[styles.competitionRow, index > 0 && styles.competitionRowDivider]}
+                >
+                  <View style={styles.competitionRowCopy}>
+                    <Text style={styles.competitionRowTitle}>{row.housingType} · {row.category}</Text>
+                    <Text style={styles.competitionRowMeta}>
+                      배정 {row.suppliedUnits.toLocaleString('ko-KR')}세대 · 신청 {row.applicants.toLocaleString('ko-KR')}건
+                    </Text>
+                  </View>
+                  <Text style={styles.competitionRate}>
+                    {row.calculatedCompetitionRate === null
+                      ? '계산 불가'
+                      : `${row.calculatedCompetitionRate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })} : 1`}
+                  </Text>
+                </View>
+              ))}
+              <Text style={styles.competitionCalculatedNote}>특별공급 비율은 같은 주택형·유형의 공식 배정세대수와 신청건수로 계산했어요.</Text>
+            </View>
+          ) : null}
+
+          {generalRows.length > 6 || specialRows.length > 4 ? (
+            <MotionPressable
+              accessibilityRole="button"
+              onPress={() => setExpanded((value) => !value)}
+              style={styles.competitionExpand}
+            >
+              <Text style={styles.competitionExpandText}>{expanded ? '간단히 보기' : '기준별 결과 더 보기'}</Text>
+              <MaterialIcons name={expanded ? 'expand-less' : 'expand-more'} size={19} color={colors.primary} />
+            </MotionPressable>
+          ) : null}
+
+          {competition.source.partial ? (
+            <Text style={styles.competitionPartial}>일부 공식 항목은 일시적으로 불러오지 못했어요.</Text>
+          ) : null}
+          <Text style={styles.competitionSource}>
+            출처: {competition.source.provider} · {new Date(competition.source.fetchedAt).toLocaleString('ko-KR')}
+          </Text>
+          <Text style={styles.competitionDisclaimer}>
+            공식 접수 결과를 기준별로 정리한 참고 정보예요. 경쟁률은 당첨 확률이 아니며 최종 정보는 청약Home에서 확인해 주세요.
+          </Text>
+        </>
+      ) : null}
+    </View>
   );
 }
 
@@ -642,6 +772,63 @@ const styles = StyleSheet.create({
   fitProfileBody: { ...type.caption, color: colors.textMuted },
   fitDisclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
   fitDisclaimerText: { ...type.caption, color: colors.textSubtle, flex: 1 },
+
+  competitionCard: {
+    gap: spacing.md,
+    borderRadius: radius.bento,
+    borderWidth: 1,
+    borderColor: tint.green.bg,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    ...shadow.card,
+  },
+  competitionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  competitionHeadingCopy: { flex: 1 },
+  competitionEyebrow: { ...type.micro, color: tint.green.fg, letterSpacing: 0.5 },
+  competitionTitle: { ...type.section, color: colors.text },
+  competitionStateRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  competitionStateBlock: { gap: spacing.xs },
+  competitionStateTitle: { ...type.bodySmStrong, color: colors.text },
+  competitionStateText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
+  competitionRetry: {
+    minHeight: size.touch,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.lavender,
+    marginTop: spacing.xs,
+  },
+  competitionRetryText: { ...type.label, color: colors.primary },
+  competitionGroup: {
+    borderRadius: radius.cardSm,
+    borderWidth: 1,
+    borderColor: colors.surfaceHigh,
+    paddingHorizontal: 12,
+    paddingBottom: 2,
+  },
+  competitionGroupTitle: { ...type.micro, color: colors.textSubtle, paddingTop: 11, paddingBottom: 4 },
+  competitionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 10 },
+  competitionRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  competitionRowCopy: { flex: 1, gap: 2 },
+  competitionRowTitle: { ...type.bodySmStrong, color: colors.text },
+  competitionRowMeta: { ...type.caption, color: colors.textMuted },
+  competitionRate: { ...type.bodySmStrong, color: tint.green.fg, textAlign: 'right' },
+  competitionCalculatedNote: { ...type.caption, color: colors.textSubtle, paddingVertical: 9 },
+  competitionExpand: {
+    minHeight: size.touch,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.surfaceLow,
+  },
+  competitionExpandText: { ...type.label, color: colors.primary },
+  competitionPartial: { ...type.caption, color: tint.amber.fg },
+  competitionSource: { ...type.caption, color: colors.textSubtle },
+  competitionDisclaimer: { ...type.caption, color: colors.textMuted, lineHeight: 19 },
 
   factGroup: {
     borderRadius: radius.cardSm,

@@ -38,6 +38,8 @@ check(Boolean(apt.listing && remnant.listing), 'APT와 잔여세대 fixture를 �
 if (!apt.listing || !remnant.listing) throw new Error('FAIL: fixture normalization');
 check(apt.listing.sourceType === 'applyhome-apt', 'APT 출처 타입을 보존해야 한다');
 check(remnant.listing.sourceType === 'applyhome-remnant', '잔여세대 출처 타입을 보존해야 한다');
+check(apt.listing.sourceIdentifiers?.houseManageNo === applyHomeAptFixture.HOUSE_MANAGE_NO, '공식 주택관리번호를 별도 보존해야 한다');
+check(apt.listing.sourceIdentifiers?.pblancNo === applyHomeAptFixture.PBLANC_NO, '공식 공고번호를 별도 보존해야 한다');
 check(apt.listing.id.startsWith('apt-'), 'APT id에 출처 prefix가 있어야 한다');
 check(remnant.listing.id.startsWith('remndr-'), '잔여세대 id에 출처 prefix가 있어야 한다');
 check(apt.listing.id !== remnant.listing.id, '동일 관리번호여도 APT와 잔여세대 id가 충돌하지 않아야 한다');

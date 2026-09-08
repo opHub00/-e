@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   backGhost: { width: size.iconButton },
   headerTitle: { ...type.bodyLgStrong, color: colors.text },
   scroll: { padding: spacing.screen, paddingBottom: 52, gap: spacing.md },
-  resultCard: { flexDirection: 'row', gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, padding: spacing.md, ...shadow.card },
+  resultCard: { flexDirection: 'row', gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, padding: spacing.md },
   resultIcon: { width: 42, height: 42, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   resultEyebrow: { ...type.micro },
   resultTitle: { ...type.title, color: colors.text, marginTop: 2, letterSpacing: tracking.tight },

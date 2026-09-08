@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { Pop } from '../../../components/motion/Pop';
-import { colors, radius, tint, type } from '../../../design/tokens';
+import { colors, radius, tint, tracking, type } from '../../../design/tokens';
 import {
   formatHouseholdCount,
   formatPrice,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     marginRight: -4,
   },
 
-  name: { ...type.cardTitle, color: colors.text, letterSpacing: -0.3, lineHeight: 23 },
+  name: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug, lineHeight: 23 },
 
   facts: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
   factItem: { flexDirection: 'row', alignItems: 'center' },

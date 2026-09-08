@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     ...shadow.floating,
   },
   item: { paddingTop: 2 },
-  label: { ...type.caption, fontFamily: type.label.fontFamily, fontSize: 10, lineHeight: 14 },
+  label: { ...type.micro },
   iconWrap: {
     width: 42,
     height: 30,

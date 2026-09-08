@@ -15,8 +15,9 @@
     "test:profile": "node --experimental-strip-types features/profile/profile.test.ts && node --experimental-strip-types features/eligibility/firstHome.test.ts && node --experimental-strip-types features/listingFit/personalFit.test.ts",
     "test:auth": "node --experimental-strip-types features/auth/authSync.test.ts",
     "test:motion": "node components/motion/motion.test.mjs",
+    "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:edge"
+    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

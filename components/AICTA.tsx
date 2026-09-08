@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadow, spacing, type } from '../design/tokens';
+import { colors, radius, spacing, type } from '../design/tokens';
 import { IconChip } from './IconChip';
 import { MotionPressable } from './motion/MotionPressable';
 
@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lavender,
     padding: spacing.md,
     overflow: 'hidden',
-    ...shadow.card,
   },
   copy: { flex: 1, gap: 3 },
   eyebrow: { ...type.caption, color: colors.primary },

@@ -14,7 +14,7 @@ import { NewsBriefingSection } from '../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../components/NewsImpactSheet';
 import { ProfilePromptSheet } from '../components/ProfilePromptSheet';
 import { duration, travel } from '../design/motion';
-import { colors, radius, spacing, tint, tracking, type } from '../design/tokens';
+import { colors, numeric, radius, spacing, tint, tracking, type } from '../design/tokens';
 import {
   FUTURE_TIMELINE_MONTHS,
   compareFutureScenarios,
@@ -839,6 +839,7 @@ const styles = StyleSheet.create({
   transition: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, marginTop: 8 },
   fromBlock: { alignItems: 'flex-start' },
   fromValue: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 28,
     lineHeight: 34,
@@ -848,6 +849,7 @@ const styles = StyleSheet.create({
   fromCaption: { ...type.micro, color: colors.textSubtle },
   toBlock: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
   toValue: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 52,
     lineHeight: 58,
@@ -931,7 +933,7 @@ const styles = StyleSheet.create({
   compareNameActive: { color: colors.text },
   compareNums: { ...type.bodySmStrong, color: colors.textSubtle },
   compareArrow: { color: colors.outline },
-  compareScore: { fontFamily: type.metric.fontFamily, fontSize: 17, color: colors.text },
+  compareScore: { ...numeric, fontFamily: type.metric.fontFamily, fontSize: 17, color: colors.text },
   compareScoreActive: { color: colors.primary },
   compareDelta: { ...type.micro, color: colors.success },
   barTrack: {

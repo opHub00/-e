@@ -13,7 +13,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
 import { duration } from '../../design/motion';
-import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
+import { colors, numeric, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
   formatPrice,
@@ -720,7 +720,6 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryFixed,
     backgroundColor: colors.lavender,
     padding: spacing.md,
-    ...shadow.card,
   },
   fitTop: { gap: spacing.sm },
   fitHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -774,7 +773,6 @@ const styles = StyleSheet.create({
     borderColor: tint.green.bg,
     backgroundColor: colors.surface,
     padding: spacing.md,
-    ...shadow.card,
   },
   competitionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   competitionHeadingCopy: { flex: 1 },
@@ -797,18 +795,17 @@ const styles = StyleSheet.create({
   competitionRetryText: { ...type.label, color: colors.primary },
   competitionGroup: {
     borderRadius: radius.cardSm,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceLow,
     paddingHorizontal: 12,
     paddingBottom: 2,
   },
   competitionGroupTitle: { ...type.micro, color: colors.textSubtle, paddingTop: 11, paddingBottom: 4 },
   competitionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 10 },
-  competitionRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  competitionRowDivider: { borderTopWidth: 1, borderTopColor: colors.surfaceHigh },
   competitionRowCopy: { flex: 1, gap: 2 },
   competitionRowTitle: { ...type.bodySmStrong, color: colors.text },
   competitionRowMeta: { ...type.caption, color: colors.textMuted },
-  competitionRate: { ...type.bodySmStrong, color: tint.green.fg, textAlign: 'right' },
+  competitionRate: { ...type.bodySmStrong, ...numeric, color: tint.green.fg, textAlign: 'right' },
   competitionCalculatedNote: { ...type.caption, color: colors.textSubtle, paddingVertical: 9 },
   competitionExpand: {
     minHeight: size.touch,
@@ -826,8 +823,7 @@ const styles = StyleSheet.create({
 
   factGroup: {
     borderRadius: radius.cardSm,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceLow,
     paddingHorizontal: 14,
     paddingTop: 11,
     paddingBottom: 2,
@@ -840,9 +836,9 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingVertical: 11,
   },
-  factRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  factRowDivider: { borderTopWidth: 1, borderTopColor: colors.surfaceHigh },
   factRowLabel: { ...type.bodySm, color: colors.textSubtle },
-  factRowValue: { ...type.bodySmStrong, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: tracking.normal },
+  factRowValue: { ...type.bodySmStrong, ...numeric, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: tracking.normal },
   tabs: { flexDirection: 'row', gap: spacing.xs, borderRadius: radius.card, backgroundColor: colors.surfaceContainer, padding: spacing.xs },
   tabButton: { flex: 1, minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, borderRadius: radius.cardSm },
   tabButtonActive: { backgroundColor: colors.primary, ...shadow.card },

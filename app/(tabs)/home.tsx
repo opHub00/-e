@@ -9,7 +9,7 @@ import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
 import { Disclaimer } from '../../components/Disclaimer';
 import { stagger, travel } from '../../design/motion';
-import { colors, overlay, radius, spacing, tint, tracking, type } from '../../design/tokens';
+import { colors, numeric, overlay, radius, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
   getRecommendedActions,
@@ -67,6 +67,27 @@ export default function HomeRoute() {
       : '유지 중';
 
   const profileCompleteness = calculateProfileCompleteness(applicantProfile);
+
+  /**
+   * getRecommendedActions 는 통장 / 납입 / 무주택·학습 순서로 3개를 돌려준다.
+   * 문구를 파싱하지 않고 같은 프로필 상태로 목적지를 정한다.
+   * 새 도메인 규칙을 만들지 않고 기존 route 만 쓴다.
+   */
+  const todos = actions.map((action, index) => {
+    const target =
+      index === 0
+        ? !accountKnown || !profile.hasSubscriptionAccount
+          ? { href: '/profile' as const, label: '청약 프로필' }
+          : { href: '/preparation' as const, label: '준비 로드맵' }
+        : index === 1
+          ? profile.monthlyPayment <= 0
+            ? { href: '/profile' as const, label: '청약 프로필' }
+            : { href: '/future' as const, label: '미래의 나' }
+          : profile.isNoHomeOwner
+            ? { href: '/quiz' as const, label: '오늘의 퀴즈' }
+            : { href: '/profile' as const, label: '청약 프로필' };
+    return { action, ...target };
+  });
 
   // 최초 등장·의미 있는 값 변경에서만 재생된다. 탭을 오갈 때마다 0부터 세지 않는다.
   const animatedScore = useCountUp(score);
@@ -242,8 +263,14 @@ export default function HomeRoute() {
               <Text style={styles.groupTitleSub}>오늘 할 일</Text>
             </View>
 
-            {actions.map((action, index) => (
-              <View key={action} style={[styles.todoRow, index > 0 && styles.rowDivider]}>
+            {todos.map(({ action, href, label }, index) => (
+              <MotionPressable
+                key={action}
+                accessibilityRole="button"
+                accessibilityLabel={`${action} ${label}(으)로 이동`}
+                onPress={() => router.push(href)}
+                style={[styles.todoRow, index > 0 && styles.rowDivider]}
+              >
                 <View style={[styles.bullet, index === 0 && styles.bulletLead]} />
                 <Text
                   style={[styles.todoText, index === 0 && styles.todoTextLead]}
@@ -251,7 +278,8 @@ export default function HomeRoute() {
                 >
                   {action}
                 </Text>
-              </View>
+                <MaterialIcons name="chevron-right" size={16} color={colors.outline} style={styles.todoChevron} />
+              </MotionPressable>
             ))}
 
             <View style={styles.footNote}>
@@ -315,6 +343,7 @@ const styles = StyleSheet.create({
   bandLabel: { ...type.label, color: 'rgba(255,255,255,0.76)', marginTop: 22 },
   scoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2, marginTop: 2 },
   score: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 44,
     lineHeight: 52,
@@ -405,6 +434,7 @@ const styles = StyleSheet.create({
   dotOpen: { backgroundColor: colors.success },
   rowMeta: { ...type.micro, color: colors.textSubtle },
   rowValue: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 19,
     lineHeight: 25,
@@ -413,7 +443,16 @@ const styles = StyleSheet.create({
   },
   rowValueUnit: { ...type.label, color: colors.textSubtle },
 
-  todoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 11 },
+  todoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    paddingVertical: 11,
+    // 두 줄짜리 항목이 있어도 한 줄짜리가 최소 터치 영역 아래로 내려가지 않게 한다.
+    minHeight: size.touch,
+  },
+  /** 본문 첫 줄에 맞춘다. bodySm lineHeight(21) 와 아이콘(16) 의 차이 절반. */
+  todoChevron: { marginTop: 3 },
   bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline, marginTop: 8 },
   bulletLead: { width: 6, height: 6, backgroundColor: colors.primary, marginTop: 7 },
   todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: tracking.normal },

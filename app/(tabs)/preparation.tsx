@@ -14,7 +14,6 @@ import { stagger, travel } from '../../design/motion';
 import { colors, overlay, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
-  getRecommendedActions,
   getStage,
   MILESTONE_MONTHS,
   simulateFuture,
@@ -51,9 +50,6 @@ export default function PreparationRoute() {
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
   const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
-  const actions = accountKnown
-    ? getRecommendedActions(profile)
-    : ['청약통장 정보를 확인하면 준비도를 더 정확하게 볼 수 있어요.', ...getRecommendedActions(profile).slice(1)];
   const inOne = simulateFuture(profile, 1);
   const inTwo = simulateFuture(profile, 2);
   const inFive = simulateFuture(profile, 5);
@@ -293,19 +289,6 @@ export default function PreparationRoute() {
           />
         </View>
 
-        <SectionRule label="준비 체크리스트" />
-        <View style={styles.checkList}>
-          {actions.map((action, index) => (
-            <View key={action} style={styles.checkRow}>
-              <View style={[styles.checkBox, index === 0 && styles.checkBoxLead]}>
-                <Text style={[styles.checkIndex, index === 0 && styles.checkIndexLead]}>
-                  {index + 1}
-                </Text>
-              </View>
-              <Text style={[styles.checkText, index === 0 && styles.checkTextLead]}>{action}</Text>
-            </View>
-          ))}
-        </View>
       </ScrollView>
 
       <NewsImpactSheet
@@ -574,20 +557,4 @@ const styles = StyleSheet.create({
   toolTitle: { ...type.bodySmStrong, color: colors.text, flex: 1, letterSpacing: tracking.normal },
   toolMeta: { ...type.micro, color: colors.textSubtle },
 
-  checkList: { gap: 10, paddingHorizontal: SIDE },
-  checkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  checkBox: {
-    width: 19,
-    height: 19,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceHigh,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  checkBoxLead: { backgroundColor: colors.primaryFixed },
-  checkIndex: { ...type.micro, color: colors.textSubtle },
-  checkIndexLead: { color: colors.primary },
-  checkText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: tracking.normal },
-  checkTextLead: { ...type.bodySmStrong, color: colors.text },
 });

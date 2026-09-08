@@ -105,6 +105,12 @@ export const size = {
 } as const;
 
 /**
+ * 자릿수가 바뀌어도 폭이 흔들리지 않는 숫자.
+ * 카운트업 숫자와 세로로 줄 맞춤이 필요한 표에만 쓴다. 모든 숫자에 붙이지 않는다.
+ */
+export const numeric: { fontVariant: ['tabular-nums'] } = { fontVariant: ['tabular-nums'] };
+
+/**
  * 글자 크기 구간별 광학 보정값. 화면에서 임의의 letterSpacing 을 만들지 않는다.
  * 큰 글자일수록 더 좁혀야 같은 밀도로 보인다.
  */

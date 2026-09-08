@@ -267,9 +267,7 @@ export default function AiRoute() {
                   <IconChip name="auto-awesome" tone="purple" />
                   <Text style={styles.answerLabel}>완판e의 설명</Text>
                 </View>
-                <View style={styles.answerBody}>
-                  <Text style={styles.answerText}>{t.text}</Text>
-                </View>
+                <Text style={styles.answerText}>{t.text}</Text>
               </Appear>
             ),
           )}
@@ -431,7 +429,6 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceHigh,
     backgroundColor: colors.surface,
     padding: 12,
-    ...shadow.card,
   },
   suggestChipPrimary: { backgroundColor: colors.lavender, borderColor: colors.primaryFixed },
   suggestNumber: {
@@ -460,33 +457,32 @@ const styles = StyleSheet.create({
   questionText: { ...type.body, color: colors.onPrimary },
 
   answer: {
-    borderRadius: radius.bento,
-    backgroundColor: colors.lavender,
-    borderWidth: 1,
-    borderColor: colors.primaryFixed,
-    padding: spacing.md,
-    gap: spacing.md,
-    ...shadow.card,
-  },
-  answerHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  answerLabel: { ...type.cardTitle, color: colors.text },
-  answerBody: {
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.surfaceHigh,
     padding: spacing.md,
+    gap: spacing.md,
   },
+  answerHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.hairline,
+  },
+  answerLabel: { ...type.cardTitle, color: colors.text },
   answerText: { ...type.body, color: colors.text },
   loadingCard: {
     minHeight: 88,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderRadius: radius.bento,
-    backgroundColor: colors.lavender,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.primaryFixed,
+    borderColor: colors.surfaceHigh,
     padding: spacing.md,
   },
   loadingIcon: {
@@ -495,7 +491,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.lavender,
   },
   thinkingDots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   thinkingDot: { width: 6, height: 6, borderRadius: radius.pill, backgroundColor: colors.primary, opacity: 0.45 },

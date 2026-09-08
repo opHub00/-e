@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, shadow, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, spacing, tint, tracking, type } from '../../design/tokens';
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import {
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   searchCopy: { flex: 1, gap: 1 },
-  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2, padding: 0 },
+  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal, padding: 0 },
   searchSub: { ...type.micro, color: colors.textSubtle },
   headerIconButton: {
     width: 44,
@@ -701,7 +701,7 @@ const styles = StyleSheet.create({
   sheetName: {
     ...type.section,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
     lineHeight: 26,
     marginTop: 8,
   },
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
   sheetFacts: { flexDirection: 'row', gap: 22, marginTop: 12 },
   factCol: { gap: 2 },
   factLabel: { ...type.micro, color: colors.textSubtle },
-  factValue: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  factValue: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
 
   sheetFoot: {
     flexDirection: 'row',
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   relevance: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  relevanceText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+  relevanceText: { ...type.label, color: colors.primary, letterSpacing: tracking.normal },
   detailCta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 18,
   },
-  detailCtaText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  detailCtaText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
   provenance: { ...type.micro, color: colors.textSubtle, marginTop: 9 },
 
   sheetEmpty: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: 10 },

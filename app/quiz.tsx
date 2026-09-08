@@ -102,7 +102,6 @@ export default function QuizRoute() {
           </View>
 
           <View style={styles.questionCard}>
-            <View style={styles.questionGlow} />
             <View style={styles.questionTop}>
               <IconChip name="quiz" tone="purple" size="md" />
               <Text style={styles.questionNumber}>오늘의 문제</Text>
@@ -273,7 +272,7 @@ const styles = StyleSheet.create({
   progressRing: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
@@ -292,15 +291,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     overflow: 'hidden',
     ...shadow.card,
-  },
-  questionGlow: {
-    position: 'absolute',
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(83,74,183,0.07)',
-    right: -70,
-    top: -80,
   },
   questionTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   questionNumber: { ...type.label, color: colors.primary },
@@ -343,7 +333,7 @@ const styles = StyleSheet.create({
   resultIcon: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.onPrimary,

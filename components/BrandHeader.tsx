@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BrandMark } from './BrandMark';
-import { colors, spacing, type } from '../design/tokens';
+import { colors, spacing, tracking, type } from '../design/tokens';
 
 type Props = {
   /** brand = 홈. 워드마크까지 노출해 제품을 인식시킨다. compact = 그 외 탭. */
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   headerBrand: { gap: 9, paddingBottom: 8 },
   /** Stitch headline-md 와 같은 급. 기존 16px 워드마크는 제품 대비 약했다. */
-  wordmark: { ...type.title, fontSize: 22, lineHeight: 28, color: colors.primary, letterSpacing: -0.6 },
-  title: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  wordmark: { ...type.title, fontSize: 22, lineHeight: 28, color: colors.primary, letterSpacing: tracking.tight },
+  title: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   spacer: { flex: 1 },
 });

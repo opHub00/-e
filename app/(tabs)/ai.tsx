@@ -16,7 +16,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { BrandMark } from '../../components/BrandMark';
 import { IconChip } from '../../components/IconChip';
 import { quizzes } from '../../data/quizzes';
-import { colors, radius, shadow, size, spacing, type } from '../../design/tokens';
+import { colors, radius, shadow, size, spacing, tracking, type } from '../../design/tokens';
 import { duration, easing, useNative } from '../../design/motion';
 import {
   buildAiContext,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.hairline,
   },
   coachCopy: { flex: 1, gap: 1 },
-  coachName: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  coachName: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   coachCtx: { ...type.micro, color: colors.textSubtle },
   coachAction: {
     width: 32,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
 
   suggestBlock: { flex: 1, gap: spacing.sm },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  suggestLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  suggestLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   suggestChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   suggestNumber: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceLow,
@@ -492,13 +492,13 @@ const styles = StyleSheet.create({
   loadingIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
   },
   thinkingDots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  thinkingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, opacity: 0.45 },
+  thinkingDot: { width: 6, height: 6, borderRadius: radius.pill, backgroundColor: colors.primary, opacity: 0.45 },
   loadingCopy: { flex: 1, gap: 2 },
   loadingTitle: { ...type.bodyStrong, color: colors.text },
   loadingText: { ...type.body, color: colors.textMuted, flex: 1 },

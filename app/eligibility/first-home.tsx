@@ -9,7 +9,7 @@ import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { Appear } from '../../components/motion/Appear';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { ScreenEnter } from '../../components/motion/ScreenEnter';
-import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   buildFirstHomeAiContext,
   evaluateFirstHomeEligibility,
@@ -234,18 +234,18 @@ const styles = StyleSheet.create({
   headerTitle: { ...type.bodyLgStrong, color: colors.text },
   scroll: { padding: spacing.screen, paddingBottom: 52, gap: spacing.md },
   resultCard: { flexDirection: 'row', gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, padding: spacing.md, ...shadow.card },
-  resultIcon: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
-  resultEyebrow: { ...type.micro, letterSpacing: 0.5 },
-  resultTitle: { ...type.title, color: colors.text, marginTop: 2, letterSpacing: -0.5 },
+  resultIcon: { width: 42, height: 42, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  resultEyebrow: { ...type.micro },
+  resultTitle: { ...type.title, color: colors.text, marginTop: 2, letterSpacing: tracking.tight },
   resultBody: { ...type.bodySm, color: colors.textMuted, lineHeight: 21, marginTop: 5 },
   progressNote: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 3 },
   progressStrong: { ...type.bodySmStrong, color: colors.text },
   progressText: { ...type.bodySm, color: colors.textMuted },
-  sectionTitle: { ...type.bodyLgStrong, color: colors.text, marginTop: spacing.xs, letterSpacing: -0.3 },
+  sectionTitle: { ...type.bodyLgStrong, color: colors.text, marginTop: spacing.xs, letterSpacing: tracking.snug },
   checkList: { borderRadius: radius.card, backgroundColor: colors.surface, paddingHorizontal: spacing.md, ...shadow.card },
   checkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, paddingVertical: 13 },
   checkBorder: { borderTopWidth: 1, borderTopColor: colors.hairline },
-  checkIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  checkIcon: { width: 28, height: 28, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   checkLabel: { ...type.bodySmStrong, color: colors.text },
   checkReason: { ...type.caption, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
   actionList: { borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, overflow: 'hidden' },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   actionTextLead: { ...type.bodySmStrong, color: colors.text },
   aiCard: { borderRadius: radius.bento, backgroundColor: colors.lavender, borderWidth: 1, borderColor: colors.primaryFixed, padding: spacing.md, gap: spacing.sm },
   aiHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  aiIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  aiIcon: { width: 36, height: 36, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
   aiTitle: { ...type.bodySmStrong, color: colors.text },
   aiBody: { ...type.caption, color: colors.textMuted, marginTop: 2 },
   aiAnswer: { ...type.bodySm, color: colors.text, lineHeight: 21, borderRadius: radius.cardSm, backgroundColor: colors.surface, padding: 12 },

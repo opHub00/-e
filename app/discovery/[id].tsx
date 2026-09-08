@@ -13,7 +13,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
 import { duration } from '../../design/motion';
-import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
   formatPrice,
@@ -236,7 +236,7 @@ function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot
       <View style={styles.competitionHeading}>
         <IconChip name="groups" tone="green" size="md" />
         <View style={styles.competitionHeadingCopy}>
-          <Text style={styles.competitionEyebrow}>OFFICIAL DATA · 참고 정보</Text>
+          <Text style={styles.competitionEyebrow}>공식 자료 · 참고 정보</Text>
           <Text style={styles.competitionTitle}>청약 경쟁 정보</Text>
         </View>
         {snapshot.status === 'available' ? <StatusPill label="공식 데이터" tone="green" /> : null}
@@ -356,7 +356,7 @@ function PersonalFitSection({
         <View style={styles.fitHeading}>
           <IconChip name="person-search" tone="purple" size="md" />
           <View style={styles.fitHeadingCopy}>
-            <Text style={styles.fitEyebrow}>PERSONAL FIT · 참고 분석</Text>
+            <Text style={styles.fitEyebrow}>내 조건 기준 · 참고 분석</Text>
             <Text style={styles.fitTitle}>내 조건과 보기</Text>
           </View>
         </View>
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
   detailStatusTextOpen: { color: tint.green.fg },
   detailStatusTextSoon: { color: tint.amber.fg },
   detailPlace: { ...type.micro, color: colors.textSubtle },
-  detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: -0.5, marginTop: 6 },
+  detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: tracking.tight, marginTop: 6 },
   detailAddress: { ...type.caption, color: colors.textMuted },
 
   fitCard: {
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
   fitTop: { gap: spacing.sm },
   fitHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   fitHeadingCopy: { flex: 1 },
-  fitEyebrow: { ...type.micro, color: colors.primary, letterSpacing: 0.5 },
+  fitEyebrow: { ...type.micro, color: colors.primary },
   fitTitle: { ...type.section, color: colors.text },
   fitSummary: { ...type.body, color: colors.textMuted },
   fitChecks: { gap: spacing.xs },
@@ -735,12 +735,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radius.cardSm,
     backgroundColor: colors.surface,
-    padding: 11,
+    padding: 12,
   },
   fitCheckIcon: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   },
   competitionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   competitionHeadingCopy: { flex: 1 },
-  competitionEyebrow: { ...type.micro, color: tint.green.fg, letterSpacing: 0.5 },
+  competitionEyebrow: { ...type.micro, color: tint.green.fg },
   competitionTitle: { ...type.section, color: colors.text },
   competitionStateRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   competitionStateBlock: { gap: spacing.xs },
@@ -832,7 +832,7 @@ const styles = StyleSheet.create({
     paddingTop: 11,
     paddingBottom: 2,
   },
-  factGroupLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.6, marginBottom: 2 },
+  factGroupLabel: { ...type.micro, color: colors.textSubtle, marginBottom: 2 },
   factRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
   },
   factRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
   factRowLabel: { ...type.bodySm, color: colors.textSubtle },
-  factRowValue: { ...type.bodySmStrong, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: -0.2 },
+  factRowValue: { ...type.bodySmStrong, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: tracking.normal },
   tabs: { flexDirection: 'row', gap: spacing.xs, borderRadius: radius.card, backgroundColor: colors.surfaceContainer, padding: spacing.xs },
   tabButton: { flex: 1, minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, borderRadius: radius.cardSm },
   tabButtonActive: { backgroundColor: colors.primary, ...shadow.card },
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   sourceLinkText: { ...type.bodyStrong, color: colors.primary, flex: 1 },
   checkpointList: { gap: spacing.sm },
   checkpointCard: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: 12 },
-  checkpointNumber: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
+  checkpointNumber: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
   checkpointNumberText: { ...type.label, color: colors.primary },
   checkpointText: { ...type.bodyStrong, color: colors.text, flex: 1 },
   tagCard: { gap: spacing.sm, borderRadius: radius.card, backgroundColor: colors.surfaceLow, padding: spacing.md },
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
   storyList: { gap: spacing.sm },
   storyCard: { gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: spacing.md, ...shadow.card },
   storyTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
+  avatar: { width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
   avatarText: { ...type.label, color: colors.primary },
   authorCopy: { flex: 1 },
   author: { ...type.label, color: colors.text },

@@ -18,7 +18,6 @@ export function AICTA({ title, description, onPress }: Props) {
       onPress={onPress}
       style={styles.card}
     >
-      <View style={styles.glow} />
       <IconChip name="auto-awesome" tone="purple" size="md" />
       <View style={styles.copy}>
         <Text style={styles.eyebrow}>완판e AI</Text>
@@ -46,15 +45,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...shadow.card,
   },
-  glow: {
-    position: 'absolute',
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    right: -44,
-    top: -58,
-    backgroundColor: 'rgba(83,74,183,0.08)',
-  },
   copy: { flex: 1, gap: 3 },
   eyebrow: { ...type.caption, color: colors.primary },
   title: { ...type.cardTitle, color: colors.text },
@@ -63,7 +53,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,

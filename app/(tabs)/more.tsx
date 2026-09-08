@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.hairline,
   },
   headRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   resetChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   accountCard: {
     borderRadius: radius.card,
     backgroundColor: colors.surfaceLow,
-    padding: 15,
+    padding: spacing.md,
     gap: 10,
   },
   accountTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   inlineActionText: { ...type.label, color: colors.primary },
 
   section: { paddingHorizontal: SIDE, paddingTop: 18 },
-  sectionLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 1, marginBottom: 2 },
+  sectionLabel: { ...type.micro, color: colors.textSubtle, marginBottom: 2 },
 
   /* Airbnb Help list row: 카드가 아니라 divider 로 나뉜 행. */
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowCopy: { flex: 1, gap: 2 },
-  rowTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  rowTitle: { ...type.rowTitle, color: colors.text },
   rowBody: { ...type.caption, color: colors.textSubtle },
 
   empty: { paddingHorizontal: SIDE, paddingTop: 28, gap: 4 },

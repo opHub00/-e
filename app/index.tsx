@@ -17,7 +17,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { BrandMark } from '../components/BrandMark';
-import { colors, radius, size, spacing, tint, type } from '../design/tokens';
+import { colors, overlay, radius, size, spacing, tint, tracking, type } from '../design/tokens';
 import { LIMITS, validateNumberField } from '../domain/preparation';
 import type { FieldIssue } from '../domain/preparation';
 import { createMinimalApplicantProfile } from '../features/profile/domain';
@@ -132,7 +132,6 @@ export default function OnboardingRoute() {
             style={[styles.introBand, { paddingTop: Math.max(insets.top, 12) + 14 }]}
           >
             <View style={styles.glowA} />
-            <View style={styles.glowB} />
 
             <View style={styles.introBrand}>
               <BrandMark size={32} />
@@ -354,18 +353,8 @@ const styles = StyleSheet.create({
     top: -80,
     width: 220,
     height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  glowB: {
-    pointerEvents: 'none',
-    position: 'absolute',
-    left: -50,
-    bottom: -60,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: radius.pill,
+    backgroundColor: overlay.glow,
   },
   introBrand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   introWordmark: {
@@ -373,14 +362,14 @@ const styles = StyleSheet.create({
     fontSize: 21,
     lineHeight: 27,
     color: colors.onPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
   },
   introTitle: {
     fontFamily: type.metric.fontFamily,
     fontSize: 30,
     lineHeight: 42,
     color: colors.onPrimary,
-    letterSpacing: -0.9,
+    letterSpacing: tracking.headline,
     marginTop: 26,
   },
   introTitleAccent: { color: colors.primaryFixed },
@@ -396,7 +385,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     marginTop: 22,
   },
-  introReassuranceText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  introReassuranceText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
 
   introSheet: {
     flex: 1,
@@ -407,7 +396,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIDE,
     paddingTop: 20,
   },
-  introSheetHead: { ...type.label, color: colors.textMuted, letterSpacing: 0.2, marginBottom: 4 },
+  introSheetHead: { ...type.label, color: colors.textMuted, marginBottom: 4 },
   valueRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
   valueRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
   valueIcon: {
@@ -418,7 +407,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   valueCopy: { flex: 1, gap: 2 },
-  valueTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  valueTitle: { ...type.rowTitle, color: colors.text },
   valueBody: { ...type.caption, color: colors.textSubtle },
 
   introFooter: {
@@ -438,7 +427,7 @@ const styles = StyleSheet.create({
   },
   setupTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   backButtonGhost: { width: size.iconButton },
-  stepCount: { ...type.micro, color: colors.textSubtle, letterSpacing: 1.2 },
+  stepCount: { ...type.micro, color: colors.textSubtle },
   progressTrack: {
     height: 6,
     borderRadius: 3,
@@ -464,12 +453,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepBannerCopy: { flex: 1, gap: 2 },
-  stepBannerTitle: { ...type.cardTitle, letterSpacing: -0.3 },
+  stepBannerTitle: { ...type.cardTitle, letterSpacing: tracking.snug },
   stepBannerBody: { ...type.caption, color: colors.textMuted },
 
   fields: { gap: 18 },
   field: { gap: 7 },
-  fieldLabel: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  fieldLabel: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   input: {
     ...type.bodyLg,
     minHeight: size.control,
@@ -516,5 +505,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   ctaDisabled: { backgroundColor: colors.outline },
-  ctaText: { ...type.bodyLgStrong, color: colors.onPrimary, letterSpacing: -0.3 },
+  ctaText: { ...type.bodyLgStrong, color: colors.onPrimary, letterSpacing: tracking.snug },
 });

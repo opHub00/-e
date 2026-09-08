@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackButton } from '../components/BackButton';
 import { MotionPressable } from '../components/motion/MotionPressable';
 import { ScreenEnter } from '../components/motion/ScreenEnter';
-import { colors, radius, shadow, size, spacing, tint, type } from '../design/tokens';
+import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../design/tokens';
 import { duration } from '../design/motion';
 import { AUTH_SUCCESS_ROUTE, shouldNavigateAfterSignUp } from '../features/auth/authUx';
 import { useAuthStore } from '../features/auth/useAuthStore';
@@ -220,13 +220,13 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 52,
     height: 52,
-    borderRadius: 18,
+    borderRadius: radius.card,
     backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 18,
   },
-  title: { ...type.page, color: colors.text, letterSpacing: -0.7, marginBottom: 9 },
+  title: { ...type.page, color: colors.text, letterSpacing: tracking.tight, marginBottom: 9 },
   subtitle: { ...type.body, color: colors.textMuted, marginBottom: 24 },
   segment: {
     flexDirection: 'row',
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainer,
     marginBottom: 22,
   },
-  modeButton: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 9 },
+  modeButton: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button },
   modeButtonActive: { backgroundColor: colors.surface, ...shadow.card },
   modeText: { ...type.bodySmStrong, color: colors.textSubtle },
   modeTextActive: { color: colors.primary },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 9,
     backgroundColor: tint.green.bg,
-    padding: 14,
+    padding: spacing.md,
     borderRadius: radius.cardSm,
     marginTop: 18,
   },

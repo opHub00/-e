@@ -105,6 +105,25 @@ export const size = {
 } as const;
 
 /**
+ * 글자 크기 구간별 광학 보정값. 화면에서 임의의 letterSpacing 을 만들지 않는다.
+ * 큰 글자일수록 더 좁혀야 같은 밀도로 보인다.
+ */
+export const tracking = {
+  /** 40px 이상 큰 숫자. */
+  display: -2,
+  /** 24~32px 헤드라인. */
+  headline: -0.9,
+  /** 17~22px 제목·워드마크. */
+  tight: -0.5,
+  /** 14~16px 행 제목·강조 라벨. */
+  snug: -0.3,
+  /** 본문·보조 텍스트. */
+  normal: -0.2,
+  /** 11px 축약 라벨. type.micro 에 이미 포함되어 있다. */
+  wide: 0.5,
+} as const;
+
+/**
  * DESIGN_SYSTEM.md 타이포 스케일. 화면에서는 이 값을 spread 해서 쓴다.
  * 여기 없는 크기가 필요하면 화면에서 덮어쓰지 말고 스케일에 단계를 추가한다.
  */
@@ -127,8 +146,13 @@ export const type = {
   /** 촘촘한 대시보드 본문. */
   bodySm: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21 },
   bodySmStrong: { fontFamily: fonts.semibold, fontSize: 14, lineHeight: 21 },
+  /**
+   * 목록 행 제목. 홈·전체·준비·미래의 divider 행이 공유한다.
+   * bodySmStrong 을 15px 로 덮어쓰던 하이브리드를 정식 단계로 올린 것이다.
+   */
+  rowTitle: { fontFamily: fonts.semibold, fontSize: 15, lineHeight: 21, letterSpacing: -0.3 },
   label: { fontFamily: fonts.semibold, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 18 },
-  /** eyebrow / 축약 라벨. 대문자 트래킹과 함께 쓴다. */
-  micro: { fontFamily: fonts.semibold, fontSize: 11, lineHeight: 15 },
+  /** 축약 라벨. 작은 글씨가 뭉치지 않도록 tracking.wide 를 포함한다. */
+  micro: { fontFamily: fonts.semibold, fontSize: 11, lineHeight: 15, letterSpacing: 0.5 },
 } as const;

@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { BrandMark } from '../components/BrandMark';
-import { colors, radius, size, spacing, tint, type } from '../design/tokens';
+import { colors, radius, size, spacing, tint, tracking, type } from '../design/tokens';
 import { duration, easing, travel } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useUserStore } from '../store/useUserStore';
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIDE,
     paddingBottom: 8,
   },
-  wordmark: { ...type.bodyLgStrong, color: colors.primary, letterSpacing: -0.3 },
+  wordmark: { ...type.bodyLgStrong, color: colors.primary, letterSpacing: tracking.snug },
   skip: { paddingVertical: 6, paddingHorizontal: 6 },
   skipText: { ...type.label, color: colors.textSubtle },
 
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     lineHeight: 34,
     color: colors.text,
-    letterSpacing: -0.6,
+    letterSpacing: tracking.tight,
     ...({ wordBreak: 'keep-all' } as object),
   },
   body: { ...type.bodySm, color: colors.textMuted, lineHeight: 23 },
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     fontSize: 56,
     lineHeight: 62,
     color: colors.primary,
-    letterSpacing: -2.4,
+    letterSpacing: tracking.display,
   },
   gaugeUnit: { ...type.title, color: colors.textSubtle },
   gaugeTrack: {
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   timelineDot: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.pill,
     borderWidth: 4,
     borderColor: colors.primary,
     backgroundColor: colors.surface,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   pinSelected: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     borderColor: colors.onPrimary,
     borderWidth: 2,
@@ -514,6 +514,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   ctaQuiet: { backgroundColor: colors.lavender },
-  ctaText: { ...type.bodyLgStrong, color: colors.onPrimary, letterSpacing: -0.3 },
+  ctaText: { ...type.bodyLgStrong, color: colors.onPrimary, letterSpacing: tracking.snug },
   ctaTextQuiet: { color: colors.primary },
 });

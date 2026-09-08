@@ -11,7 +11,7 @@ import { Appear } from '../../components/motion/Appear';
 import { NewsBriefingSection } from '../../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../../components/NewsImpactSheet';
 import { stagger, travel } from '../../design/motion';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, overlay, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
   getRecommendedActions,
@@ -375,8 +375,8 @@ const styles = StyleSheet.create({
     top: -70,
     width: 190,
     height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    borderRadius: radius.pill,
+    backgroundColor: overlay.glow,
   },
   bandTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   bandTitle: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     lineHeight: 26,
     color: colors.onPrimary,
-    letterSpacing: -0.4,
+    letterSpacing: tracking.snug,
   },
   bandStep: {
     height: 26,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 29,
     color: colors.onPrimary,
-    letterSpacing: -0.6,
+    letterSpacing: tracking.tight,
     flex: 1,
   },
   bandScore: { flexDirection: 'row', alignItems: 'baseline', gap: 1 },
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 36,
     color: colors.onPrimary,
-    letterSpacing: -1,
+    letterSpacing: tracking.headline,
   },
   bandScoreUnit: { ...type.label, color: 'rgba(255,255,255,0.7)' },
   bandTrack: {
@@ -438,11 +438,11 @@ const styles = StyleSheet.create({
 
   rail: { width: 30, alignItems: 'center' },
   dotSlot: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
-  dotLip: { borderRadius: 12, backgroundColor: LIP, paddingBottom: 3 },
+  dotLip: { borderRadius: radius.pill, backgroundColor: LIP, paddingBottom: 3 },
   dotDone: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
   dotHalo: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: radius.pill,
     backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   dotCurrent: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.pill,
     borderWidth: 5,
     borderColor: colors.primary,
     backgroundColor: colors.surface,
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryFixed,
     backgroundColor: colors.surface,
   },
-  dotFar: { width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: colors.surfaceHighest },
+  dotFar: { width: 10, height: 10, borderRadius: radius.pill, borderWidth: 2, borderColor: colors.surfaceHighest },
 
   line: { flex: 1, width: 3, borderRadius: 2, backgroundColor: colors.primary, marginVertical: 3 },
   lineAhead: { backgroundColor: colors.primaryFixed },
@@ -492,24 +492,24 @@ const styles = StyleSheet.create({
   },
 
   bodyTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  when: { ...type.micro, color: colors.textMuted, letterSpacing: 0.4 },
-  whenCurrent: { ...type.label, color: colors.primary, letterSpacing: 0 },
+  when: { ...type.micro, color: colors.textMuted },
+  whenCurrent: { ...type.label, color: colors.primary },
   whenLater: { color: colors.textSubtle },
 
-  score: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.3 },
+  score: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: tracking.snug },
   scoreCurrent: {
     fontFamily: type.metric.fontFamily,
     fontSize: 24,
     lineHeight: 30,
     color: colors.primary,
-    letterSpacing: -0.9,
+    letterSpacing: tracking.headline,
   },
-  scoreNext: { ...type.cardTitle, color: colors.text, letterSpacing: -0.4 },
+  scoreNext: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug },
   scoreLater: { ...type.bodySmStrong, color: colors.textSubtle },
   scoreUnit: { ...type.micro, color: colors.textSubtle },
 
-  title: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
-  titleCurrent: { ...type.cardTitle, fontSize: 18, lineHeight: 26, color: colors.text, letterSpacing: -0.5 },
+  title: { ...type.rowTitle, color: colors.text },
+  titleCurrent: { ...type.cardTitle, fontSize: 18, lineHeight: 26, color: colors.text, letterSpacing: tracking.tight },
   titleDone: { ...type.bodySm, color: colors.textSubtle },
   titleLater: { ...type.bodySm, color: colors.textSubtle },
   text: { ...type.caption, color: colors.textSubtle },
@@ -519,10 +519,10 @@ const styles = StyleSheet.create({
 
   rule: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: SIDE, paddingVertical: 18 },
   ruleLine: { flex: 1, height: 1, backgroundColor: colors.surfaceHigh },
-  ruleLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.8 },
+  ruleLabel: { ...type.micro, color: colors.textSubtle },
 
   briefingHead: { paddingHorizontal: SIDE, marginTop: -8, marginBottom: 8 },
-  briefingTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
+  briefingTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   briefing: { paddingHorizontal: SIDE },
   eligibilityBlock: {
     marginHorizontal: SIDE,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toolTitle: { ...type.bodySmStrong, color: colors.text, flex: 1, letterSpacing: -0.2 },
+  toolTitle: { ...type.bodySmStrong, color: colors.text, flex: 1, letterSpacing: tracking.normal },
   toolMeta: { ...type.micro, color: colors.textSubtle },
 
   checkList: { gap: 10, paddingHorizontal: SIDE },
@@ -588,6 +588,6 @@ const styles = StyleSheet.create({
   checkBoxLead: { backgroundColor: colors.primaryFixed },
   checkIndex: { ...type.micro, color: colors.textSubtle },
   checkIndexLead: { color: colors.primary },
-  checkText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: -0.2 },
+  checkText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: tracking.normal },
   checkTextLead: { ...type.bodySmStrong, color: colors.text },
 });

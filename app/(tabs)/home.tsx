@@ -9,7 +9,7 @@ import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
 import { Disclaimer } from '../../components/Disclaimer';
 import { stagger, travel } from '../../design/motion';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, overlay, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
   getRecommendedActions,
@@ -290,8 +290,8 @@ const styles = StyleSheet.create({
     top: -70,
     width: 190,
     height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    borderRadius: radius.pill,
+    backgroundColor: overlay.glow,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   wordmark: {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
     lineHeight: 27,
     color: colors.onPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
   },
   levelPill: {
     flexDirection: 'row',
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 44,
     lineHeight: 52,
     color: colors.onPrimary,
-    letterSpacing: -1.8,
+    letterSpacing: tracking.display,
   },
   scoreUnit: { ...type.bodyLgStrong, color: 'rgba(255,255,255,0.7)', marginLeft: 2 },
   deltaChip: {
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
   profileEntry: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   profileText: { ...type.micro, color: 'rgba(255,255,255,0.72)' },
 
@@ -367,8 +367,8 @@ const styles = StyleSheet.create({
   stat: { flex: 1, gap: 2 },
   statLabel: { ...type.micro, color: colors.textSubtle },
   statLabelLead: { color: colors.primary },
-  statValue: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.2 },
-  statValueLead: { ...type.cardTitle, color: colors.text, letterSpacing: -0.4 },
+  statValue: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: tracking.normal },
+  statValueLead: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug },
   statDivider: { width: 1, backgroundColor: colors.hairline, marginHorizontal: 12 },
 
   group: { borderTopWidth: 8, borderTopColor: colors.surfaceLow, paddingHorizontal: SIDE },
@@ -379,10 +379,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 4,
   },
-  groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
-  groupTitleSub: { ...type.label, color: colors.textMuted, letterSpacing: 0.2 },
+  groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
+  groupTitleSub: { ...type.label, color: colors.textMuted },
   moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, paddingVertical: 4 },
-  moreLinkText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+  moreLinkText: { ...type.label, color: colors.primary, letterSpacing: tracking.normal },
   listingContext: { ...type.micro, color: colors.textSubtle, paddingTop: 3, paddingBottom: 4 },
   listingState: { minHeight: 74, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   listingStateText: { ...type.caption, color: colors.textMuted, flex: 1 },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowCopy: { flex: 1, gap: 3 },
-  rowTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  rowTitle: { ...type.rowTitle, color: colors.text },
   rowMetaLine: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline },
   dotOpen: { backgroundColor: colors.success },
@@ -409,14 +409,14 @@ const styles = StyleSheet.create({
     fontSize: 19,
     lineHeight: 25,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
   },
   rowValueUnit: { ...type.label, color: colors.textSubtle },
 
   todoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 11 },
   bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline, marginTop: 8 },
   bulletLead: { width: 6, height: 6, backgroundColor: colors.primary, marginTop: 7 },
-  todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: -0.2 },
+  todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: tracking.normal },
   todoTextLead: { ...type.bodySmStrong, color: colors.text },
 
   footNote: { paddingTop: 14, paddingBottom: 6 },

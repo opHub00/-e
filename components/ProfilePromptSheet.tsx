@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { duration, travel } from '../design/motion';
-import { colors, radius, shadow, spacing, type } from '../design/tokens';
+import { colors, radius, shadow, spacing, tracking, type } from '../design/tokens';
 import { PROFILE_BUNDLES, type ProfileQuestionBundleId } from '../features/profile/domain';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
@@ -94,13 +94,13 @@ const styles = StyleSheet.create({
   icon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.lavender,
   },
-  eyebrow: { ...type.micro, color: colors.primary, letterSpacing: 0.5 },
-  title: { ...type.title, color: colors.text, letterSpacing: -0.5 },
+  eyebrow: { ...type.micro, color: colors.primary },
+  title: { ...type.title, color: colors.text, letterSpacing: tracking.tight },
   body: { ...type.bodySm, color: colors.textMuted, lineHeight: 22 },
   countPill: {
     alignSelf: 'flex-start',

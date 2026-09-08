@@ -2,7 +2,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
-import { colors, radius, tint, type } from '../design/tokens';
+import { colors, radius, tint, tracking, type } from '../design/tokens';
 import type { NewsBriefingState, RankedNews } from '../features/news/useNewsBriefing';
 import type { NewsTopic } from '../features/news/types';
 
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   levelChipText: { ...type.micro, color: colors.textSubtle },
   levelChipTextHigh: { color: colors.primary },
 
-  featuredTitle: { ...type.cardTitle, color: colors.text, letterSpacing: -0.3, lineHeight: 23 },
+  featuredTitle: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug, lineHeight: 23 },
   featuredSource: { ...type.caption, color: colors.textSubtle },
 
   reasonBox: {
@@ -275,12 +275,12 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     marginTop: 2,
   },
-  featuredCtaText: { ...type.bodySmStrong, color: colors.primary, letterSpacing: -0.2 },
+  featuredCtaText: { ...type.bodySmStrong, color: colors.primary, letterSpacing: tracking.normal },
 
   restList: { paddingHorizontal: 2 },
   restRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11 },
   restDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
   restCopy: { flex: 1, gap: 3 },
-  restTitle: { ...type.bodySm, color: colors.text, lineHeight: 20, letterSpacing: -0.2 },
+  restTitle: { ...type.bodySm, color: colors.text, lineHeight: 20, letterSpacing: tracking.normal },
   restMeta: { ...type.micro, color: colors.textSubtle },
 });

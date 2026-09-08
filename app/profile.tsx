@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
   statusDone: { color: tint.green.fg },
   editorScroll: { padding: spacing.screen, paddingBottom: 28, gap: spacing.md },
   reasonCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, borderRadius: radius.card, backgroundColor: colors.lavender, padding: spacing.md },
-  reasonIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  reasonIcon: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
   reasonTitle: { ...type.bodySmStrong, color: colors.primary },
   reasonBody: { ...type.caption, color: colors.textMuted, lineHeight: 19, marginTop: 3 },
   questionHint: { ...type.caption, color: colors.textSubtle },

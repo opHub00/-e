@@ -14,7 +14,7 @@ import { NewsBriefingSection } from '../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../components/NewsImpactSheet';
 import { ProfilePromptSheet } from '../components/ProfilePromptSheet';
 import { duration, travel } from '../design/motion';
-import { colors, radius, spacing, tint, type } from '../design/tokens';
+import { colors, radius, spacing, tint, tracking, type } from '../design/tokens';
 import {
   FUTURE_TIMELINE_MONTHS,
   compareFutureScenarios,
@@ -766,7 +766,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIDE,
     paddingBottom: 10,
   },
-  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   headChip: {
     height: 24,
     justifyContent: 'center',
@@ -811,7 +811,7 @@ const styles = StyleSheet.create({
   railDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.pill,
     borderWidth: 2.5,
     borderColor: colors.surfaceHigh,
     backgroundColor: colors.surface,
@@ -820,7 +820,7 @@ const styles = StyleSheet.create({
   railDotActive: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: radius.pill,
     borderWidth: 6,
     borderColor: colors.primary,
     backgroundColor: colors.surface,
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 34,
     color: colors.textSubtle,
-    letterSpacing: -1,
+    letterSpacing: tracking.headline,
   },
   fromCaption: { ...type.micro, color: colors.textSubtle },
   toBlock: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
     fontSize: 52,
     lineHeight: 58,
     color: colors.primary,
-    letterSpacing: -2.2,
+    letterSpacing: tracking.display,
   },
   toUnit: { ...type.title, color: colors.primary },
   deltaChip: {
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 12,
   },
-  stageText: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  stageText: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   stateMeta: { ...type.micro, color: colors.textMuted },
 
   /* 3. 마일스톤 */
@@ -890,8 +890,8 @@ const styles = StyleSheet.create({
   },
   milestoneBar: { width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: colors.primary },
   milestoneCopy: { flex: 1, gap: 2 },
-  milestoneLabel: { ...type.micro, color: colors.primary, letterSpacing: 0.6 },
-  milestoneTitle: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  milestoneLabel: { ...type.micro, color: colors.primary },
+  milestoneTitle: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   milestoneDetail: { ...type.caption, color: colors.textMuted },
   milestoneValue: { flexDirection: 'row', alignItems: 'baseline', gap: 1 },
   milestoneValueNum: {
@@ -899,7 +899,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 30,
     color: colors.primary,
-    letterSpacing: -0.8,
+    letterSpacing: tracking.headline,
   },
   milestoneValueUnit: { ...type.micro, color: colors.primary },
 
@@ -912,7 +912,7 @@ const styles = StyleSheet.create({
     paddingTop: 22,
     paddingBottom: 8,
   },
-  sectionLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
+  sectionLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   sectionNote: { ...type.micro, color: colors.textSubtle },
 
   /* 4. 비교 막대 */
@@ -927,7 +927,7 @@ const styles = StyleSheet.create({
   },
   compareRowActive: { borderColor: colors.primary, backgroundColor: colors.surfaceLow },
   compareTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  compareName: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.2 },
+  compareName: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: tracking.normal },
   compareNameActive: { color: colors.text },
   compareNums: { ...type.bodySmStrong, color: colors.textSubtle },
   compareArrow: { color: colors.outline },
@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceLow,
     paddingHorizontal: 13,
   },
-  tweakToggleText: { ...type.bodySmStrong, color: colors.primary, letterSpacing: -0.2 },
+  tweakToggleText: { ...type.bodySmStrong, color: colors.primary, letterSpacing: tracking.normal },
   feedback: {
     marginTop: 8,
     marginHorizontal: SIDE,
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
   },
   feedbackInSheet: { marginHorizontal: 0, marginTop: 6 },
   feedbackHeading: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  feedbackTitle: { ...type.bodySmStrong, color: colors.primary, letterSpacing: -0.2 },
+  feedbackTitle: { ...type.bodySmStrong, color: colors.primary, letterSpacing: tracking.normal },
   feedbackLine: { ...type.caption, color: colors.textMuted, paddingLeft: 25 },
 
   sheetLayer: { flex: 1, justifyContent: 'flex-end' },
@@ -1011,12 +1011,12 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   sheetHeaderCopy: { flex: 1, gap: 2 },
-  sheetTitle: { ...type.title, color: colors.text, letterSpacing: -0.4 },
+  sheetTitle: { ...type.title, color: colors.text, letterSpacing: tracking.snug },
   sheetDescription: { ...type.caption, color: colors.textMuted },
   sheetClose: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceContainer,
@@ -1063,7 +1063,7 @@ const styles = StyleSheet.create({
   stepperButton: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
 
   /* 6. 변화 */
   changeGroup: { paddingHorizontal: SIDE },
-  changeGroupLabel: { ...type.micro, color: colors.primary, letterSpacing: 0.6, marginBottom: 4 },
+  changeGroupLabel: { ...type.micro, color: colors.primary, marginBottom: 4 },
   changeRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12 },
   changeDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
   changeAccent: {
@@ -1109,7 +1109,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryFixed,
   },
   changeCopy: { flex: 1, gap: 3 },
-  changeTitle: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  changeTitle: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   changeValues: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   changeBefore: { ...type.caption, color: colors.textSubtle },
   changeAfter: { ...type.bodySmStrong, color: colors.primary },
@@ -1133,7 +1133,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     gap: 7,
   },
-  infoGroupLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.4 },
+  infoGroupLabel: { ...type.micro, color: colors.textSubtle },
   infoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   infoTitle: { ...type.caption, color: colors.textMuted, flex: 1 },
   infoValues: { ...type.caption, color: colors.textSubtle },
@@ -1173,7 +1173,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryFixed,
   },
   aiCopy: { flex: 1, gap: 2 },
-  aiTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  aiTitle: { ...type.rowTitle, color: colors.text },
   aiNote: { ...type.caption, color: colors.textSubtle },
   eligibilityLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm, marginHorizontal: SIDE, borderRadius: radius.cardSm, paddingHorizontal: 13, paddingVertical: 11 },
   eligibilityLinkCopy: { flex: 1, gap: 2 },

@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { BackButton } from '../components/BackButton';
 import { Appear } from '../components/motion/Appear';
 import { MotionPressable } from '../components/motion/MotionPressable';
 import { ScreenEnter } from '../components/motion/ScreenEnter';
@@ -192,14 +193,7 @@ export default function OnboardingRoute() {
     <ScreenEnter style={styles.screen}>
       <View style={[styles.setupHead, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
         <View style={styles.setupTopRow}>
-          <MotionPressable
-            accessibilityRole="button"
-            accessibilityLabel="이전"
-            onPress={() => setStep('intro')}
-            style={styles.backButton}
-          >
-            <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-          </MotionPressable>
+          <BackButton onPress={() => setStep('intro')} accessibilityLabel="이전" />
           <Text style={styles.stepCount}>STEP 1 / 1</Text>
           <View style={styles.backButtonGhost} />
         </View>
@@ -443,15 +437,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   setupTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceContainer,
-  },
-  backButtonGhost: { width: 36, height: 36 },
+  backButtonGhost: { width: size.iconButton },
   stepCount: { ...type.micro, color: colors.textSubtle, letterSpacing: 1.2 },
   progressTrack: {
     height: 6,
@@ -524,9 +510,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
-    height: 54,
-    borderRadius: 14,
+    gap: spacing.sm,
+    height: size.control,
+    borderRadius: radius.button,
     backgroundColor: colors.primary,
   },
   ctaDisabled: { backgroundColor: colors.outline },

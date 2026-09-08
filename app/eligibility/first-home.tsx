@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackButton } from '../../components/BackButton';
 import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { Appear } from '../../components/motion/Appear';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -97,9 +98,7 @@ export default function FirstHomeEligibilityRoute() {
   return (
     <ScreenEnter style={styles.screen}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
-        <MotionPressable accessibilityRole="button" accessibilityLabel="뒤로" onPress={() => router.back()} style={styles.back}>
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </MotionPressable>
+        <BackButton onPress={() => router.back()} accessibilityLabel="뒤로" />
         <Text style={styles.headerTitle}>생애최초 특별공급</Text>
         <View style={styles.backGhost} />
       </View>
@@ -231,8 +230,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
   },
-  back: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceContainer },
-  backGhost: { width: 36, height: 36 },
+  backGhost: { width: size.iconButton },
   headerTitle: { ...type.bodyLgStrong, color: colors.text },
   scroll: { padding: spacing.screen, paddingBottom: 52, gap: spacing.md },
   resultCard: { flexDirection: 'row', gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, padding: spacing.md, ...shadow.card },

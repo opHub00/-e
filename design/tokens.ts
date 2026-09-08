@@ -96,6 +96,8 @@ export const fonts = {
 /** 최소 터치 영역·컨트롤 높이. 화면에서 숫자를 직접 쓰지 않는다. */
 export const size = {
   touch: 44,
+  /** 원형 아이콘 버튼의 시각 크기. 터치 영역은 hitSlop 으로 touch 까지 넓힌다. */
+  iconButton: 36,
   control: 52,
   choice: 132,
   bar: 8,

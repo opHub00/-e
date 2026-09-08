@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { duration, travel } from '../design/motion';
-import { colors, radius, spacing, tint, type } from '../design/tokens';
+import { colors, radius, size, spacing, tint, type } from '../design/tokens';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
 import { buildNewsImpactContext, createNewsImpactFallback } from '../features/news/ai';
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    height: 50,
-    borderRadius: 14,
+    gap: spacing.sm,
+    height: size.control,
+    borderRadius: radius.button,
     backgroundColor: colors.primary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
-  originalCtaText: { ...type.bodySmStrong, fontSize: 15, color: colors.onPrimary },
+  originalCtaText: { ...type.bodyLgStrong, color: colors.onPrimary },
 });

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackButton } from '../components/BackButton';
 import { Appear } from '../components/motion/Appear';
 import { AnimatedBar } from '../components/motion/AnimatedBar';
 import { MotionPressable } from '../components/motion/MotionPressable';
@@ -197,14 +198,7 @@ export default function FutureRoute() {
   return (
     <ScreenEnter style={styles.screen}>
       <View style={[styles.head, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
-        <MotionPressable
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          onPress={goBack}
-          style={styles.backButton}
-        >
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </MotionPressable>
+        <BackButton onPress={goBack} accessibilityLabel="뒤로" />
         <Text style={styles.headTitle}>미래 시뮬레이션</Text>
         <View style={styles.spacer} />
         <View style={styles.headChip}>
@@ -556,7 +550,6 @@ export default function FutureRoute() {
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
               <View style={styles.sheetHeaderCopy}>
-                <Text style={styles.sheetEyebrow}>CUSTOM SCENARIO</Text>
                 <Text style={styles.sheetTitle}>미래 조건 바꿔보기</Text>
                 <Text style={styles.sheetDescription}>공식 자격이 아닌 준비도 변화만 비교해요.</Text>
               </View>
@@ -772,14 +765,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: SIDE,
     paddingBottom: 10,
-  },
-  backButton: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceContainer,
   },
   headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
   headChip: {
@@ -1026,7 +1011,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   sheetHeaderCopy: { flex: 1, gap: 2 },
-  sheetEyebrow: { ...type.micro, color: colors.primary, letterSpacing: 0.7 },
   sheetTitle: { ...type.title, color: colors.text, letterSpacing: -0.4 },
   sheetDescription: { ...type.caption, color: colors.textMuted },
   sheetClose: {

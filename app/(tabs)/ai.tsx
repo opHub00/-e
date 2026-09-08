@@ -16,7 +16,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { BrandMark } from '../../components/BrandMark';
 import { IconChip } from '../../components/IconChip';
 import { quizzes } from '../../data/quizzes';
-import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, size, spacing, type } from '../../design/tokens';
 import { duration, easing, useNative } from '../../design/motion';
 import {
   buildAiContext,
@@ -229,10 +229,7 @@ export default function AiRoute() {
           {turns.length === 0 && !loading ? (
             <Appear replayKey="ai-empty" style={styles.suggestBlock}>
               <View style={styles.sectionHeading}>
-                <View>
-                  <Text style={styles.sectionEyebrow}>START HERE</Text>
-                  <Text style={styles.suggestLabel}>지금 이런 설명이 도움 돼요</Text>
-                </View>
+                <Text style={styles.suggestLabel}>지금 이런 설명이 도움 돼요</Text>
               </View>
               {suggestions.map((s, index) => (
                 <MotionPressable
@@ -268,19 +265,10 @@ export default function AiRoute() {
               <Appear key={`${i}-a`} style={styles.answer}>
                 <View style={styles.answerHeading}>
                   <IconChip name="auto-awesome" tone="purple" />
-                  <View>
-                    <Text style={styles.answerEyebrow}>FOR {profile.name.toUpperCase()}</Text>
-                    <Text style={styles.answerLabel}>완판e의 설명</Text>
-                  </View>
+                  <Text style={styles.answerLabel}>완판e의 설명</Text>
                 </View>
                 <View style={styles.answerBody}>
                   <Text style={styles.answerText}>{t.text}</Text>
-                </View>
-                <View style={styles.answerNote}>
-                  <MaterialIcons name="lightbulb" size={14} color={tint.amber.fg} />
-                  <Text style={styles.answerNoteText}>
-                    자격·당첨 가능성은 판정하지 않아요. 공식 공고 기준을 함께 확인해 주세요.
-                  </Text>
                 </View>
               </Appear>
             ),
@@ -356,7 +344,6 @@ export default function AiRoute() {
               <MaterialIcons name="arrow-upward" size={22} color={colors.onPrimary} />
             </MotionPressable>
           </View>
-          <Text style={styles.composerHint}>완판e는 자격·당첨 가능성을 판정하지 않아요</Text>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -428,23 +415,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
   },
   coachBadgeText: { ...type.micro, color: colors.primary },
-  answerNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 7,
-    marginTop: 10,
-    borderRadius: radius.cardSm,
-    backgroundColor: tint.amber.bg,
-    paddingHorizontal: 11,
-    paddingVertical: 9,
-  },
-  answerNoteText: { ...type.caption, color: tint.amber.fg, flex: 1, lineHeight: 18 },
   scroll: { paddingHorizontal: spacing.screen, gap: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.lg },
 
 
   suggestBlock: { flex: 1, gap: spacing.sm },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  sectionEyebrow: { ...type.caption, color: colors.primary },
   suggestLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
   suggestChip: {
     flexDirection: 'row',
@@ -494,7 +469,6 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   answerHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  answerEyebrow: { ...type.caption, color: colors.primary },
   answerLabel: { ...type.cardTitle, color: colors.text },
   answerBody: {
     borderRadius: radius.card,
@@ -603,5 +577,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   sendDisabled: { opacity: 0.4 },
-  composerHint: { ...type.caption, color: colors.textMuted, textAlign: 'center', fontSize: 10 },
 });

@@ -89,7 +89,7 @@ export default function QuizRoute() {
     return (
       <ScreenEnter>
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <ScreenHeader title="오늘의 퀴즈" eyebrow="LEARN" onBack={goHome} />
+        <ScreenHeader title="오늘의 퀴즈" onBack={goHome} />
         <View style={styles.screen}>
           <View style={styles.quizMeta}>
             <View style={styles.quizMetaCopy}>
@@ -105,7 +105,7 @@ export default function QuizRoute() {
             <View style={styles.questionGlow} />
             <View style={styles.questionTop}>
               <IconChip name="quiz" tone="purple" size="md" />
-              <Text style={styles.questionNumber}>QUESTION 01</Text>
+              <Text style={styles.questionNumber}>오늘의 문제</Text>
             </View>
             <Text style={styles.question}>{quiz.question}</Text>
             <View style={styles.answerHint}>
@@ -136,7 +136,7 @@ export default function QuizRoute() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader title="오늘의 배움" eyebrow="RESULT" onBack={goHome} />
+      <ScreenHeader title="오늘의 배움" onBack={goHome} />
       <ScrollView contentContainerStyle={styles.resultScreen} showsVerticalScrollIndicator={false}>
         <Animated.View
           style={{
@@ -188,10 +188,7 @@ export default function QuizRoute() {
         <Appear delay={stagger.short} style={styles.personalCard}>
           <View style={styles.personalTop}>
             <IconChip name="person-pin" tone="purple" size="md" />
-            <View style={styles.personalHeading}>
-              <Text style={styles.personalEyebrow}>PERSONAL TAKEAWAY</Text>
-              <Text style={styles.personalLabel}>그래서 나에게는?</Text>
-            </View>
+            <Text style={styles.personalLabel}>그래서 나에게는?</Text>
           </View>
           <Text style={styles.personalBody}>{getPersonalMessage(quiz, profile)}</Text>
           <View style={styles.personalFoot}>
@@ -375,8 +372,6 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   personalTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  personalHeading: { gap: 2 },
-  personalEyebrow: { ...type.caption, color: colors.primary },
   personalLabel: { ...type.title, color: colors.text },
   personalBody: { ...type.bodyLgStrong, color: colors.text },
   personalFoot: {

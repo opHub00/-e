@@ -74,7 +74,7 @@ export default function DiscoveryDetailRoute() {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <Stack.Screen options={{ headerShown: false }} />
-        <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+        <ScreenHeader title="청약 상세" onBack={goBack} />
         <View style={styles.notFound}>
           <ActivityIndicator color={colors.primary} />
           <Text style={styles.notFoundBody}>청약홈 실제 공고를 불러오는 중이에요</Text>
@@ -87,7 +87,7 @@ export default function DiscoveryDetailRoute() {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <Stack.Screen options={{ headerShown: false }} />
-        <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+        <ScreenHeader title="청약 상세" onBack={goBack} />
         <View style={styles.notFound}>
           <IconChip name="search-off" tone="pink" size="md" />
           <Text style={styles.notFoundTitle}>청약 공고를 찾지 못했어요</Text>
@@ -137,7 +137,7 @@ export default function DiscoveryDetailRoute() {
     <ScreenEnter>
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+      <ScreenHeader title="청약 상세" onBack={goBack} />
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.detailHead}>
@@ -541,7 +541,7 @@ function ConditionsTab({
 }) {
   return (
     <View style={styles.tabContent}>
-      <SectionHeading eyebrow="CHECK FIRST" title="확인해야 할 조건" icon="rule" />
+      <SectionHeading title="확인해야 할 조건" icon="rule" />
       <View style={styles.checkpointList}>
         {checkpoints.map((checkpoint, index) => (
           <View key={checkpoint} style={styles.checkpointCard}>
@@ -605,7 +605,6 @@ function StoriesTab({
       <View style={styles.storyHero}>
         <IconChip name="forum" tone="purple" size="md" />
         <View style={styles.storyHeroCopy}>
-          <Text style={styles.storyEyebrow}>LISTING STORIES · DEMO</Text>
           <Text style={styles.storyTitle}>{listingName} 이야기</Text>
           <Text style={styles.storyIntro}>이 청약을 저장한 사람들이 무엇을 확인하는지 가볍게 둘러봐요.</Text>
         </View>
@@ -613,7 +612,7 @@ function StoriesTab({
 
       <View style={styles.readonlyNote}>
         <MaterialIcons name="lock-outline" size={17} color={colors.primary} />
-        <Text style={styles.readonlyText}>V1은 읽기 전용 Mock이에요. 게시·댓글·서버 기능은 없어요.</Text>
+        <Text style={styles.readonlyText}>지금은 읽기만 가능해요.</Text>
       </View>
 
       <View style={styles.storyList}>
@@ -643,21 +642,16 @@ function StoriesTab({
 }
 
 function SectionHeading({
-  eyebrow,
   title,
   icon,
 }: {
-  eyebrow: string;
   title: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
 }) {
   return (
     <View style={styles.sectionHeading}>
       <IconChip name={icon} tone="purple" />
-      <View>
-        <Text style={styles.sectionEyebrow}>{eyebrow}</Text>
-        <Text style={styles.sectionTitle}>{title}</Text>
-      </View>
+      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 }
@@ -856,7 +850,6 @@ const styles = StyleSheet.create({
   tabTextActive: { color: colors.onPrimary },
   tabContent: { gap: spacing.md },
   sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  sectionEyebrow: { ...type.caption, color: colors.primary },
   sectionTitle: { ...type.title, color: colors.text },
   sourceLinks: { gap: spacing.sm },
   sourceLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.surface, paddingHorizontal: spacing.md },
@@ -884,7 +877,6 @@ const styles = StyleSheet.create({
   emptyStoriesBody: { ...type.caption, color: colors.textSubtle, textAlign: 'center', lineHeight: 19 },
   storyHero: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.lavender, padding: spacing.lg },
   storyHeroCopy: { flex: 1, gap: spacing.xs },
-  storyEyebrow: { ...type.caption, color: colors.primary },
   storyTitle: { ...type.title, color: colors.text },
   storyIntro: { ...type.body, color: colors.textMuted },
   readonlyNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },

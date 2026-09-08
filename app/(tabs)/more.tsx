@@ -149,7 +149,7 @@ export default function MoreRoute() {
             style={styles.resetChip}
           >
             <MaterialIcons name="restart-alt" size={14} color={colors.textMuted} />
-            <Text style={styles.resetChipText}>데모 초기화</Text>
+            <Text style={styles.resetChipText}>처음부터 다시</Text>
           </MotionPressable>
         </View>
 
@@ -317,7 +317,7 @@ function syncStatusLabel(status: CloudSyncStatus): string {
   if (status === 'syncing') return '동기화 중…';
   if (status === 'synced') return '동기화됨';
   if (status === 'conflict') return '정보 선택 필요';
-  if (status === 'paused') return '데모 초기화 후 동기화 일시정지';
+  if (status === 'paused') return '초기화 후 동기화 일시정지';
   if (status === 'error') return '이 기기에 저장됨 · 동기화 재시도 필요';
   return '이 기기에 안전하게 저장됨';
 }

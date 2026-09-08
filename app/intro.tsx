@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { BrandMark } from '../components/BrandMark';
-import { colors, radius, spacing, tint, type } from '../design/tokens';
+import { colors, radius, size, spacing, tint, type } from '../design/tokens';
 import { duration, easing, travel } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useUserStore } from '../store/useUserStore';
@@ -508,9 +508,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    height: 52,
-    borderRadius: 14,
+    gap: spacing.sm,
+    height: size.control,
+    borderRadius: radius.button,
     backgroundColor: colors.primary,
   },
   ctaQuiet: { backgroundColor: colors.lavender },

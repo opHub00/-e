@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackButton } from '../components/BackButton';
 import { MotionPressable } from '../components/motion/MotionPressable';
 import { ScreenEnter } from '../components/motion/ScreenEnter';
 import { colors, radius, shadow, size, spacing, tint, type } from '../design/tokens';
@@ -83,14 +84,7 @@ export default function AuthRoute() {
   return (
     <ScreenEnter style={styles.screen}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
-        <MotionPressable
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          onPress={close}
-          style={styles.back}
-        >
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </MotionPressable>
+        <BackButton onPress={close} accessibilityLabel="뒤로" />
         <Text style={styles.headerTitle}>계정</Text>
         <View style={styles.backGhost} />
       </View>
@@ -220,8 +214,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
   },
-  back: { width: size.touch, height: size.touch, justifyContent: 'center' },
-  backGhost: { width: size.touch },
+  backGhost: { width: size.iconButton },
   headerTitle: { ...type.bodyLgStrong, flex: 1, textAlign: 'center', color: colors.text },
   scroll: { width: '100%', maxWidth: 520, alignSelf: 'center', padding: spacing.screen, paddingTop: 34 },
   iconWrap: {

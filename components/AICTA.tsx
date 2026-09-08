@@ -21,7 +21,7 @@ export function AICTA({ title, description, onPress }: Props) {
       <View style={styles.glow} />
       <IconChip name="auto-awesome" tone="purple" size="md" />
       <View style={styles.copy}>
-        <Text style={styles.eyebrow}>WANPAN AI</Text>
+        <Text style={styles.eyebrow}>완판e AI</Text>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
       </View>

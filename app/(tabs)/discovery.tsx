@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { WanpanCard } from '../../components/WanpanCard';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, shadow, spacing, tint, tracking, type } from '../../design/tokens';
@@ -394,7 +395,7 @@ export default function DiscoveryRoute() {
               />
             ))}
             {visibleListings.length === 0 ? (
-              <View style={styles.emptyCard}>
+              <WanpanCard style={styles.emptyCard}>
                 <MaterialIcons name="filter-alt-off" size={26} color={colors.primary} />
                 <Text style={styles.emptyTitle}>필터에 맞는 청약이 없어요</Text>
                 <MotionPressable
@@ -407,7 +408,7 @@ export default function DiscoveryRoute() {
                 >
                   <Text style={styles.resetText}>필터 초기화</Text>
                 </MotionPressable>
-              </View>
+              </WanpanCard>
             ) : null}
           </ScrollView>
         </Appear>
@@ -742,15 +743,7 @@ const styles = StyleSheet.create({
   listStage: { flex: 1 },
   listBody: { paddingHorizontal: spacing.screen, paddingBottom: spacing.xl, gap: spacing.sm },
 
-  emptyCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
-  },
+  emptyCard: { alignItems: 'center', gap: spacing.sm, padding: spacing.lg },
   emptyTitle: { ...type.bodySmStrong, color: colors.text },
   resetButton: {
     borderRadius: radius.pill,

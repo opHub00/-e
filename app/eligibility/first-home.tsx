@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WanpanCard } from '../../components/WanpanCard';
 import { BackButton } from '../../components/BackButton';
 import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { Appear } from '../../components/motion/Appear';
@@ -159,7 +160,7 @@ export default function FirstHomeEligibilityRoute() {
         ) : null}
 
         <SectionTitle label="AI에게 쉽게 설명받기" />
-        <View style={styles.aiCard}>
+        <WanpanCard tone="lavender" style={styles.aiCard}>
           <View style={styles.aiHead}>
             <View style={styles.aiIcon}>
               <MaterialIcons name="auto-awesome" size={18} color={colors.primary} />
@@ -176,7 +177,7 @@ export default function FirstHomeEligibilityRoute() {
           <MotionPressable accessibilityRole="button" onPress={() => void explain()} style={styles.aiButton}>
             {aiState === 'loading' ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={styles.aiButtonText}>{aiState === 'done' ? '다시 설명받기' : '결과 쉽게 설명받기'}</Text>}
           </MotionPressable>
-        </View>
+        </WanpanCard>
 
         <View style={styles.notice}>
           <MaterialIcons name="verified-user" size={16} color={colors.textMuted} />
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
   actionLead: { borderTopWidth: 0, backgroundColor: colors.lavender },
   actionText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
   actionTextLead: { ...type.bodySmStrong, color: colors.text },
-  aiCard: { borderRadius: radius.bento, backgroundColor: colors.lavender, borderWidth: 1, borderColor: colors.primaryFixed, padding: spacing.md, gap: spacing.sm },
+  aiCard: { gap: spacing.sm },
   aiHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   aiIcon: { width: 36, height: 36, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
   aiTitle: { ...type.bodySmStrong, color: colors.text },

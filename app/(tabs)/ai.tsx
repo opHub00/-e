@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   loadingText: { ...type.body, color: colors.textMuted, flex: 1 },
 
   errorCard: {
-    borderRadius: radius.bento,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: '#F4C7C3',
     backgroundColor: '#FFF6F5',

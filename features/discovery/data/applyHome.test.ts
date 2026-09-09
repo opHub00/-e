@@ -45,7 +45,11 @@ check(remnant.listing.id.startsWith('remndr-'), '잔여세대 id에 출처 prefi
 check(apt.listing.id !== remnant.listing.id, '동일 관리번호여도 APT와 잔여세대 id가 충돌하지 않아야 한다');
 check(apt.listing.announcementDate === '2026-08-20', 'APT 공고일을 매핑해야 한다');
 check(apt.listing.recruitmentStartDate === '2026-09-01', 'APT RCEPT_BGNDE를 접수 시작일로 매핑해야 한다');
+check(apt.listing.officialSchedule?.specialSupply?.startDate === '2026-08-31', 'APT 특별공급 접수일을 보존해야 한다');
+check(apt.listing.officialSchedule?.priorityApplications.length === 3, 'APT 순위·지역별 접수일을 보존해야 한다');
+check(apt.listing.officialSchedule?.priorityApplications[0]?.scope === 'same-area', '순위 접수 지역 구분을 보존해야 한다');
 check(remnant.listing.recruitmentStartDate === '2026-08-28', '잔여세대 SUBSCRPT_RCEPT_BGNDE를 매핑해야 한다');
+check(remnant.listing.officialSchedule === undefined, '공식 세부 일정이 없는 공고에 값을 만들지 않아야 한다');
 check(apt.listing.announcementUrl?.startsWith('https://www.applyhome.co.kr/') === true, '공식 공고 URL을 보존해야 한다');
 check(apt.listing.latitude === null && apt.listing.longitude === null, '좌표가 없으면 null을 유지해야 한다');
 check(apt.listing.representativePrice === null, '상세 API에 없는 가격을 만들어내지 않아야 한다');

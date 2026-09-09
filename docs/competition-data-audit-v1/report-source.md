@@ -143,18 +143,21 @@ feature branch에는 다음 보수적 구조를 적용한다.
 
 ## 9. 출시 판단
 
-**FEATURE IMPLEMENTATION GO / PRODUCTION은 검증 완료 전 HOLD**
+**FEATURE IMPLEMENTATION GO / PRODUCTION PROMOTION GO**
 
 - 공식 data grounding: 충족
 - live transport reliability: 251회 전수 호출(일반/잔여 167 + 특별공급 84) 모두 성공
 - 종료 공고 match: 일반/잔여 90.60%, APT 특별공급 83.82%
 - 핵심 field 결측 및 join mismatch: 0
 - cache/load: 별도 lazy Edge + server/client dedup으로 구현
-- production: remote migration, Edge smoke, 전체 regression, browser QA가 끝나기 전까지 기존 배포 유지
+- backend readiness: remote migration 적용, Edge live smoke와 20개 동시 cold 요청의 cross-isolate dedup 확인
+- validation: 전체 test/typecheck/export/diff check 통과
+- browser QA: 보호된 feature preview의 390×844/desktop Detail에서 공식 데이터 있음·없음, 접수 전·진행 중, direct route, 저장 persistence, Detail→AI를 확인
+- production regression: 기존 배포에서 ApplyHome Discovery, Kakao 지도 타일·marker·drag를 확인하고 runtime error/warning이 없음을 확인
 
 ## 10. 다음 단계
 
-새 cache migration과 `competition` Edge를 staging 성격으로 먼저 적용하고, hit/miss·빈 응답·upstream 실패를 smoke한다. 그 뒤 feature preview에서 390×844 및 desktop Detail QA와 기존 production 회귀를 모두 통과한 경우에만 master/production 배포를 검토한다.
+production 승격 후 공식 경쟁률 있음·없음 공고의 direct route와 기존 Home/Discovery/News/AI 회귀를 한 번 더 확인한다. 금요일 시연 중에는 cache hit/error 비율을 관찰하고, 공식 upstream 장애 시 기존 Detail을 유지하는 fail-open 경로를 우선한다.
 
 ## Source ledger
 

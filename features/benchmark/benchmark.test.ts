@@ -71,6 +71,7 @@ assert.equal(sparse.isSparse, true);
 assert.equal(sparse.summary, '비교할 정보가 아직 부족해요.');
 assert.equal(sparse.primaryAction?.bundleId, 'SUBSCRIPTION_ACCOUNT');
 assert.ok(sparse.comparison.missingData.includes('청약통장'));
+assert.equal(sparse.comparison.dimensions.find((item) => item.id === 'housing')?.detail, '주택 이력 항목이 아직 입력되지 않았어요.');
 assert.ok(sparse.comparison.dimensions.every((item) => item.status !== ('not-ready' as BenchmarkDimensionStatus)));
 
 const partialProfile = completeProfile();

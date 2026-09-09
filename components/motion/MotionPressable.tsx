@@ -74,13 +74,22 @@ export function MotionPressable({
   };
 
   // 포인터가 있는 환경에서만 의미가 있다. 터치에는 hover 상태가 없다.
+  const animateHover = (toValue: 0 | 1) => {
+    Animated.timing(hover, {
+      toValue,
+      duration: duration.micro,
+      easing: easing.enter,
+      useNativeDriver: useNative,
+    }).start();
+  };
+
   const handleHoverIn: NonNullable<PressableProps['onHoverIn']> = (event) => {
-    if (!disabled) hover.setValue(1);
+    if (!disabled) animateHover(1);
     onHoverIn?.(event);
   };
 
   const handleHoverOut: NonNullable<PressableProps['onHoverOut']> = (event) => {
-    if (!disabled) hover.setValue(0);
+    if (!disabled) animateHover(0);
     onHoverOut?.(event);
   };
 

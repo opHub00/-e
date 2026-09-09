@@ -71,4 +71,36 @@ check(
   `unexpected raw Pressable migration gap: ${rawPressableFiles.join(', ')}`,
 );
 
+// 목록 등장은 AppearItem 이 항목 수를 제한한다.
+// map 안에서 Appear 에 index 로 delay 를 직접 계산하면 긴 목록 전체가 계단이 된다.
+const manualListStagger = sourceFiles
+  .map((path) => relative('.', path).replaceAll('\\', '/'))
+  // 계단을 실제로 계산하는 곳은 primitive 하나뿐이어야 한다.
+  .filter((path) => path !== 'components/motion/AppearItem.tsx')
+  .filter((path) => /delay=\{\s*index\s*\*/.test(read(path)));
+check(
+  manualListStagger.length === 0,
+  `list stagger must go through AppearItem: ${manualListStagger.join(', ')}`,
+);
+
+const appearItem = read('components/motion/AppearItem.tsx');
+check(
+  /index >= listReveal\.count/.test(appearItem),
+  'AppearItem caps how many items animate',
+);
+check(
+  /return <>\{children\}<\/>/.test(appearItem),
+  'AppearItem renders later items without an Animated.View',
+);
+
+// hover 는 포인터 환경 전용이다. 터치에서 상태가 남으면 안 된다.
+check(
+  /const HOVERABLE = Platform\.OS === 'web'/.test(pressable),
+  'hover feedback is web only',
+);
+check(
+  !/scale: hover/.test(pressable),
+  'hover never changes scale, only opacity',
+);
+
 console.log(`components/motion: ${checks} checks passed`);

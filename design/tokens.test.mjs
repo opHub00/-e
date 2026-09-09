@@ -43,7 +43,7 @@ const jsxText = (text) =>
 
 // 2. 내부 구현 용어 노출. 사용자 문구에 개발 용어를 쓰지 않는다.
 {
-  const banned = /(Mock|mock 데이터|읽기 전용 Mock|서버 기능은 없|데모 초기화)/;
+  const banned = /(Mock|mock 데이터|읽기 전용 Mock|서버 기능은 없|데모 초기화|\bV1\b)/i;
   const offenders = [];
   for (const { path, text } of sources) {
     for (const node of jsxText(text)) {

@@ -49,6 +49,9 @@ export function NewlywedDashboard() {
             <Text style={styles.eyebrow}>신혼 청약 준비 현황</Text>
             <Text style={styles.heroTitle}>{model.confirmedCount} / {model.informationItemCount}개 정보 영역 확인</Text>
             <Text style={styles.heroBody}>이 수치는 자격 점수가 아니라 프로필 정보 확인 현황이에요. 실제 신청 조건은 공고문 기준으로 확인해야 해요.</Text>
+            <View style={styles.heroAction}>
+              <PrimaryButton label="내 신혼 청약 조건 보기" onPress={() => router.push('/eligibility/newlywed' as Href)} />
+            </View>
           </WanpanCard>
           </Appear>
 
@@ -175,6 +178,8 @@ const styles = StyleSheet.create({
   eyebrow: { ...type.label, color: colors.primary },
   heroTitle: { ...type.title, color: colors.text, marginTop: spacing.xs },
   heroBody: { ...type.bodySm, color: colors.textMuted, marginTop: spacing.sm },
+  /** 설명 문단과 CTA 가 붙어 있으면 버튼이 문장의 일부처럼 보인다. */
+  heroAction: { marginTop: spacing.md },
   sectionTitle: { marginHorizontal: spacing.screen, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionTitleCompact: { marginHorizontal: 0, flex: 1 },
   sectionText: { ...type.section, color: colors.text },

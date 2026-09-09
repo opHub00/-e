@@ -242,6 +242,7 @@ export default function PreparationRoute() {
           <Text style={styles.eligibilityIntro}>준비도와 별개로 공급유형의 기본조건을 확인해요.</Text>
           <MotionPressable
             accessibilityRole="button"
+            accessibilityLabel="생애최초 특별공급 조건 확인하기"
             onPress={() => router.push('/eligibility/first-home' as Href)}
             style={styles.eligibilityLead}
           >
@@ -254,7 +255,22 @@ export default function PreparationRoute() {
             </View>
             <MaterialIcons name="chevron-right" size={18} color={colors.outline} />
           </MotionPressable>
-          {['일반공급', '신혼부부', '청년'].map((label) => (
+          <MotionPressable
+            accessibilityRole="button"
+            accessibilityLabel="신혼부부 특별공급 조건 확인하기"
+            onPress={() => router.push('/eligibility/newlywed' as Href)}
+            style={styles.eligibilityLead}
+          >
+            <View style={[styles.toolIcon, { backgroundColor: tint.purple.bg }]}>
+              <MaterialIcons name="favorite-border" size={17} color={tint.purple.fg} />
+            </View>
+            <View style={styles.eligibilityCopy}>
+              <Text style={styles.toolTitle}>신혼부부 특별공급</Text>
+              <Text style={styles.eligibilityMeta}>조건 확인하기</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={18} color={colors.outline} />
+          </MotionPressable>
+          {['일반공급', '청년'].map((label) => (
             <View key={label} style={styles.eligibilityLater}>
               <Text style={styles.eligibilityLaterTitle}>{label}</Text>
               <Text style={styles.eligibilityLaterMeta}>준비 중</Text>

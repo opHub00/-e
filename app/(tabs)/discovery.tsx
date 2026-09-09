@@ -36,6 +36,7 @@ import { DISCOVERY_REGIONS } from '../../features/discovery/regions';
 import type { DiscoveryFilters, DiscoveryRegion } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { Pop } from '../../components/motion/Pop';
 import { duration, travel } from '../../design/motion';
 import { toDiscoveryUserProfile } from '../../features/profile/domain';
@@ -384,15 +385,16 @@ export default function DiscoveryRoute() {
             contentContainerStyle={styles.listBody}
             showsVerticalScrollIndicator={false}
           >
-            {visibleListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                relevance={getListingRelevance(profile, listing)}
-                saved={savedListingIds.includes(listing.id)}
-                onToggleSaved={() => toggleSavedListing(listing.id)}
-                onOpen={() => openListing(listing.id)}
-              />
+            {visibleListings.map((listing, index) => (
+              <AppearItem key={listing.id} index={index}>
+                <ListingCard
+                  listing={listing}
+                  relevance={getListingRelevance(profile, listing)}
+                  saved={savedListingIds.includes(listing.id)}
+                  onToggleSaved={() => toggleSavedListing(listing.id)}
+                  onOpen={() => openListing(listing.id)}
+                />
+              </AppearItem>
             ))}
             {visibleListings.length === 0 ? (
               <WanpanCard style={styles.emptyCard}>

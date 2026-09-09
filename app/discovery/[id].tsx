@@ -12,7 +12,7 @@ import { IconChip } from '../../components/IconChip';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
-import { duration } from '../../design/motion';
+import { duration, stagger, travel } from '../../design/motion';
 import { colors, numeric, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
@@ -168,9 +168,13 @@ export default function DiscoveryDetailRoute() {
           <Text style={styles.detailAddress}>{listing.address}</Text>
         </View>
 
-        <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
+        <Appear delay={stagger.short} distance={travel.content}>
+          <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
+        </Appear>
 
-        <CompetitionSection snapshot={competitionState} />
+        <Appear delay={stagger.normal} distance={travel.content}>
+          <CompetitionSection snapshot={competitionState} />
+        </Appear>
 
         <View style={styles.tabs} accessibilityRole="tablist">
           <TabButton label="정보" icon="dashboard" active={tab === 'info'} onPress={() => setTab('info')} />
@@ -242,6 +246,7 @@ function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot
         {snapshot.status === 'available' ? <StatusPill label="공식 데이터" tone="green" /> : null}
       </View>
 
+      <Appear replayKey={`${snapshot.requestStatus}:${snapshot.status}`} distance={0} durationMs={duration.content}>
       {snapshot.requestStatus === 'loading' ? (
         <View style={styles.competitionStateRow}>
           <ActivityIndicator color={colors.primary} />
@@ -336,6 +341,7 @@ function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot
           </Text>
         </>
       ) : null}
+      </Appear>
     </View>
   );
 }

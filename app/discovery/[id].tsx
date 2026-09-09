@@ -12,8 +12,8 @@ import { IconChip } from '../../components/IconChip';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { StatusPill } from '../../components/StatusPill';
-import { duration } from '../../design/motion';
-import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
+import { duration, stagger, travel } from '../../design/motion';
+import { colors, numeric, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   formatHouseholdCount,
   formatPrice,
@@ -74,7 +74,7 @@ export default function DiscoveryDetailRoute() {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <Stack.Screen options={{ headerShown: false }} />
-        <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+        <ScreenHeader title="청약 상세" onBack={goBack} />
         <View style={styles.notFound}>
           <ActivityIndicator color={colors.primary} />
           <Text style={styles.notFoundBody}>청약홈 실제 공고를 불러오는 중이에요</Text>
@@ -87,7 +87,7 @@ export default function DiscoveryDetailRoute() {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <Stack.Screen options={{ headerShown: false }} />
-        <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+        <ScreenHeader title="청약 상세" onBack={goBack} />
         <View style={styles.notFound}>
           <IconChip name="search-off" tone="pink" size="md" />
           <Text style={styles.notFoundTitle}>청약 공고를 찾지 못했어요</Text>
@@ -137,7 +137,7 @@ export default function DiscoveryDetailRoute() {
     <ScreenEnter>
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title="청약 상세" eyebrow="DISCOVERY" onBack={goBack} />
+      <ScreenHeader title="청약 상세" onBack={goBack} />
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.detailHead}>
@@ -168,9 +168,13 @@ export default function DiscoveryDetailRoute() {
           <Text style={styles.detailAddress}>{listing.address}</Text>
         </View>
 
-        <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
+        <Appear delay={stagger.short} distance={travel.content}>
+          <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
+        </Appear>
 
-        <CompetitionSection snapshot={competitionState} />
+        <Appear delay={stagger.normal} distance={travel.content}>
+          <CompetitionSection snapshot={competitionState} />
+        </Appear>
 
         <View style={styles.tabs} accessibilityRole="tablist">
           <TabButton label="정보" icon="dashboard" active={tab === 'info'} onPress={() => setTab('info')} />
@@ -236,12 +240,13 @@ function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot
       <View style={styles.competitionHeading}>
         <IconChip name="groups" tone="green" size="md" />
         <View style={styles.competitionHeadingCopy}>
-          <Text style={styles.competitionEyebrow}>OFFICIAL DATA · 참고 정보</Text>
+          <Text style={styles.competitionEyebrow}>공식 자료 · 참고 정보</Text>
           <Text style={styles.competitionTitle}>청약 경쟁 정보</Text>
         </View>
         {snapshot.status === 'available' ? <StatusPill label="공식 데이터" tone="green" /> : null}
       </View>
 
+      <Appear replayKey={`${snapshot.requestStatus}:${snapshot.status}`} distance={0} durationMs={duration.content}>
       {snapshot.requestStatus === 'loading' ? (
         <View style={styles.competitionStateRow}>
           <ActivityIndicator color={colors.primary} />
@@ -336,6 +341,7 @@ function CompetitionSection({ snapshot }: { snapshot: ListingCompetitionSnapshot
           </Text>
         </>
       ) : null}
+      </Appear>
     </View>
   );
 }
@@ -356,7 +362,7 @@ function PersonalFitSection({
         <View style={styles.fitHeading}>
           <IconChip name="person-search" tone="purple" size="md" />
           <View style={styles.fitHeadingCopy}>
-            <Text style={styles.fitEyebrow}>PERSONAL FIT · 참고 분석</Text>
+            <Text style={styles.fitEyebrow}>내 조건 기준 · 참고 분석</Text>
             <Text style={styles.fitTitle}>내 조건과 보기</Text>
           </View>
         </View>
@@ -541,7 +547,7 @@ function ConditionsTab({
 }) {
   return (
     <View style={styles.tabContent}>
-      <SectionHeading eyebrow="CHECK FIRST" title="확인해야 할 조건" icon="rule" />
+      <SectionHeading title="확인해야 할 조건" icon="rule" />
       <View style={styles.checkpointList}>
         {checkpoints.map((checkpoint, index) => (
           <View key={checkpoint} style={styles.checkpointCard}>
@@ -605,7 +611,6 @@ function StoriesTab({
       <View style={styles.storyHero}>
         <IconChip name="forum" tone="purple" size="md" />
         <View style={styles.storyHeroCopy}>
-          <Text style={styles.storyEyebrow}>LISTING STORIES · DEMO</Text>
           <Text style={styles.storyTitle}>{listingName} 이야기</Text>
           <Text style={styles.storyIntro}>이 청약을 저장한 사람들이 무엇을 확인하는지 가볍게 둘러봐요.</Text>
         </View>
@@ -613,7 +618,7 @@ function StoriesTab({
 
       <View style={styles.readonlyNote}>
         <MaterialIcons name="lock-outline" size={17} color={colors.primary} />
-        <Text style={styles.readonlyText}>V1은 읽기 전용 Mock이에요. 게시·댓글·서버 기능은 없어요.</Text>
+        <Text style={styles.readonlyText}>지금은 읽기만 가능해요.</Text>
       </View>
 
       <View style={styles.storyList}>
@@ -643,21 +648,16 @@ function StoriesTab({
 }
 
 function SectionHeading({
-  eyebrow,
   title,
   icon,
 }: {
-  eyebrow: string;
   title: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
 }) {
   return (
     <View style={styles.sectionHeading}>
       <IconChip name={icon} tone="purple" />
-      <View>
-        <Text style={styles.sectionEyebrow}>{eyebrow}</Text>
-        <Text style={styles.sectionTitle}>{title}</Text>
-      </View>
+      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 }
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
   detailStatusTextOpen: { color: tint.green.fg },
   detailStatusTextSoon: { color: tint.amber.fg },
   detailPlace: { ...type.micro, color: colors.textSubtle },
-  detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: -0.5, marginTop: 6 },
+  detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: tracking.tight, marginTop: 6 },
   detailAddress: { ...type.caption, color: colors.textMuted },
 
   fitCard: {
@@ -726,12 +726,11 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryFixed,
     backgroundColor: colors.lavender,
     padding: spacing.md,
-    ...shadow.card,
   },
   fitTop: { gap: spacing.sm },
   fitHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   fitHeadingCopy: { flex: 1 },
-  fitEyebrow: { ...type.micro, color: colors.primary, letterSpacing: 0.5 },
+  fitEyebrow: { ...type.micro, color: colors.primary },
   fitTitle: { ...type.section, color: colors.text },
   fitSummary: { ...type.body, color: colors.textMuted },
   fitChecks: { gap: spacing.xs },
@@ -741,12 +740,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radius.cardSm,
     backgroundColor: colors.surface,
-    padding: 11,
+    padding: 12,
   },
   fitCheckIcon: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -780,11 +779,10 @@ const styles = StyleSheet.create({
     borderColor: tint.green.bg,
     backgroundColor: colors.surface,
     padding: spacing.md,
-    ...shadow.card,
   },
   competitionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   competitionHeadingCopy: { flex: 1 },
-  competitionEyebrow: { ...type.micro, color: tint.green.fg, letterSpacing: 0.5 },
+  competitionEyebrow: { ...type.micro, color: tint.green.fg },
   competitionTitle: { ...type.section, color: colors.text },
   competitionStateRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   competitionStateBlock: { gap: spacing.xs },
@@ -803,18 +801,17 @@ const styles = StyleSheet.create({
   competitionRetryText: { ...type.label, color: colors.primary },
   competitionGroup: {
     borderRadius: radius.cardSm,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceLow,
     paddingHorizontal: 12,
     paddingBottom: 2,
   },
   competitionGroupTitle: { ...type.micro, color: colors.textSubtle, paddingTop: 11, paddingBottom: 4 },
   competitionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 10 },
-  competitionRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  competitionRowDivider: { borderTopWidth: 1, borderTopColor: colors.surfaceHigh },
   competitionRowCopy: { flex: 1, gap: 2 },
   competitionRowTitle: { ...type.bodySmStrong, color: colors.text },
   competitionRowMeta: { ...type.caption, color: colors.textMuted },
-  competitionRate: { ...type.bodySmStrong, color: tint.green.fg, textAlign: 'right' },
+  competitionRate: { ...type.bodySmStrong, ...numeric, color: tint.green.fg, textAlign: 'right' },
   competitionCalculatedNote: { ...type.caption, color: colors.textSubtle, paddingVertical: 9 },
   competitionExpand: {
     minHeight: size.touch,
@@ -832,13 +829,12 @@ const styles = StyleSheet.create({
 
   factGroup: {
     borderRadius: radius.cardSm,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceLow,
     paddingHorizontal: 14,
     paddingTop: 11,
     paddingBottom: 2,
   },
-  factGroupLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.6, marginBottom: 2 },
+  factGroupLabel: { ...type.micro, color: colors.textSubtle, marginBottom: 2 },
   factRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -846,9 +842,9 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingVertical: 11,
   },
-  factRowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  factRowDivider: { borderTopWidth: 1, borderTopColor: colors.surfaceHigh },
   factRowLabel: { ...type.bodySm, color: colors.textSubtle },
-  factRowValue: { ...type.bodySmStrong, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: -0.2 },
+  factRowValue: { ...type.bodySmStrong, ...numeric, color: colors.text, flex: 1, textAlign: 'right', letterSpacing: tracking.normal },
   tabs: { flexDirection: 'row', gap: spacing.xs, borderRadius: radius.card, backgroundColor: colors.surfaceContainer, padding: spacing.xs },
   tabButton: { flex: 1, minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, borderRadius: radius.cardSm },
   tabButtonActive: { backgroundColor: colors.primary, ...shadow.card },
@@ -856,14 +852,13 @@ const styles = StyleSheet.create({
   tabTextActive: { color: colors.onPrimary },
   tabContent: { gap: spacing.md },
   sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  sectionEyebrow: { ...type.caption, color: colors.primary },
   sectionTitle: { ...type.title, color: colors.text },
   sourceLinks: { gap: spacing.sm },
   sourceLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.surface, paddingHorizontal: spacing.md },
   sourceLinkText: { ...type.bodyStrong, color: colors.primary, flex: 1 },
   checkpointList: { gap: spacing.sm },
   checkpointCard: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: 12 },
-  checkpointNumber: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
+  checkpointNumber: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
   checkpointNumberText: { ...type.label, color: colors.primary },
   checkpointText: { ...type.bodyStrong, color: colors.text, flex: 1 },
   tagCard: { gap: spacing.sm, borderRadius: radius.card, backgroundColor: colors.surfaceLow, padding: spacing.md },
@@ -884,15 +879,14 @@ const styles = StyleSheet.create({
   emptyStoriesBody: { ...type.caption, color: colors.textSubtle, textAlign: 'center', lineHeight: 19 },
   storyHero: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.primaryFixed, backgroundColor: colors.lavender, padding: spacing.lg },
   storyHeroCopy: { flex: 1, gap: spacing.xs },
-  storyEyebrow: { ...type.caption, color: colors.primary },
   storyTitle: { ...type.title, color: colors.text },
   storyIntro: { ...type.body, color: colors.textMuted },
   readonlyNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },
   readonlyText: { ...type.caption, color: colors.textMuted, flex: 1 },
   storyList: { gap: spacing.sm },
-  storyCard: { gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: spacing.md, ...shadow.card },
+  storyCard: { gap: spacing.sm, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, padding: spacing.md },
   storyTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
+  avatar: { width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lavender },
   avatarText: { ...type.label, color: colors.primary },
   authorCopy: { flex: 1 },
   author: { ...type.label, color: colors.text },

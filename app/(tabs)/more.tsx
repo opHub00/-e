@@ -3,10 +3,12 @@ import { useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { travel } from '../../design/motion';
+import { colors, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 
@@ -149,7 +151,7 @@ export default function MoreRoute() {
             style={styles.resetChip}
           >
             <MaterialIcons name="restart-alt" size={14} color={colors.textMuted} />
-            <Text style={styles.resetChipText}>데모 초기화</Text>
+            <Text style={styles.resetChipText}>처음부터 다시</Text>
           </MotionPressable>
         </View>
 
@@ -271,11 +273,16 @@ export default function MoreRoute() {
           </View>
         ) : null}
 
-        {CATEGORY_ORDER.map((category) => {
+        {CATEGORY_ORDER.map((category, sectionIndex) => {
           const items = visibleFeatures.filter((feature) => feature.category === category);
           if (items.length === 0) return null;
           return (
-            <View key={category} style={styles.section}>
+            <AppearItem
+              key={category}
+              index={sectionIndex}
+              distance={travel.content}
+              style={styles.section}
+            >
               <Text style={styles.sectionLabel}>{category}</Text>
               {items.map((feature, index) => (
                 <MotionPressable
@@ -299,7 +306,7 @@ export default function MoreRoute() {
                   <MaterialIcons name="chevron-right" size={19} color={colors.outline} />
                 </MotionPressable>
               ))}
-            </View>
+            </AppearItem>
           );
         })}
 
@@ -317,7 +324,7 @@ function syncStatusLabel(status: CloudSyncStatus): string {
   if (status === 'syncing') return '동기화 중…';
   if (status === 'synced') return '동기화됨';
   if (status === 'conflict') return '정보 선택 필요';
-  if (status === 'paused') return '데모 초기화 후 동기화 일시정지';
+  if (status === 'paused') return '초기화 후 동기화 일시정지';
   if (status === 'error') return '이 기기에 저장됨 · 동기화 재시도 필요';
   return '이 기기에 안전하게 저장됨';
 }
@@ -334,7 +341,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.hairline,
   },
   headRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   resetChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -368,7 +375,7 @@ const styles = StyleSheet.create({
   accountCard: {
     borderRadius: radius.card,
     backgroundColor: colors.surfaceLow,
-    padding: 15,
+    padding: spacing.md,
     gap: 10,
   },
   accountTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
@@ -408,7 +415,7 @@ const styles = StyleSheet.create({
   inlineActionText: { ...type.label, color: colors.primary },
 
   section: { paddingHorizontal: SIDE, paddingTop: 18 },
-  sectionLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 1, marginBottom: 2 },
+  sectionLabel: { ...type.micro, color: colors.textSubtle, marginBottom: 2 },
 
   /* Airbnb Help list row: 카드가 아니라 divider 로 나뉜 행. */
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
@@ -421,7 +428,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowCopy: { flex: 1, gap: 2 },
-  rowTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  rowTitle: { ...type.rowTitle, color: colors.text },
   rowBody: { ...type.caption, color: colors.textSubtle },
 
   empty: { paddingHorizontal: SIDE, paddingTop: 28, gap: 4 },

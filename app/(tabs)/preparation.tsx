@@ -7,14 +7,16 @@ import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
+import { CalendarEntry } from '../../components/calendar/CalendarEntry';
+import { PreparationAreaNav } from '../../components/newlywed/PreparationAreaNav';
+import { AnimatedBar } from '../../components/motion/AnimatedBar';
 import { Appear } from '../../components/motion/Appear';
 import { NewsBriefingSection } from '../../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../../components/NewsImpactSheet';
 import { stagger, travel } from '../../design/motion';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, overlay, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
-  getRecommendedActions,
   getStage,
   MILESTONE_MONTHS,
   simulateFuture,
@@ -51,9 +53,6 @@ export default function PreparationRoute() {
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
   const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
-  const actions = accountKnown
-    ? getRecommendedActions(profile)
-    : ['청약통장 정보를 확인하면 준비도를 더 정확하게 볼 수 있어요.', ...getRecommendedActions(profile).slice(1)];
   const inOne = simulateFuture(profile, 1);
   const inTwo = simulateFuture(profile, 2);
   const inFive = simulateFuture(profile, 5);
@@ -154,12 +153,14 @@ export default function PreparationRoute() {
             </View>
           </View>
           <View style={styles.bandTrack}>
-            <View style={[styles.bandFill, { width: `${(doneCount / nodes.length) * 100}%` }]} />
+            <AnimatedBar ratio={doneCount / nodes.length} style={styles.bandFill} />
           </View>
         </View>
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <PreparationAreaNav active="general" />
+        <CalendarEntry />
         {/* 타임라인 캔버스: 카드가 아니라 배경 tint 위에 경로가 놓인다. */}
         <View style={styles.canvas}>
           {nodes.map((node, index) => {
@@ -293,19 +294,6 @@ export default function PreparationRoute() {
           />
         </View>
 
-        <SectionRule label="준비 체크리스트" />
-        <View style={styles.checkList}>
-          {actions.map((action, index) => (
-            <View key={action} style={styles.checkRow}>
-              <View style={[styles.checkBox, index === 0 && styles.checkBoxLead]}>
-                <Text style={[styles.checkIndex, index === 0 && styles.checkIndexLead]}>
-                  {index + 1}
-                </Text>
-              </View>
-              <Text style={[styles.checkText, index === 0 && styles.checkTextLead]}>{action}</Text>
-            </View>
-          ))}
-        </View>
       </ScrollView>
 
       <NewsImpactSheet
@@ -375,8 +363,8 @@ const styles = StyleSheet.create({
     top: -70,
     width: 190,
     height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    borderRadius: radius.pill,
+    backgroundColor: overlay.glow,
   },
   bandTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   bandTitle: {
@@ -384,7 +372,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     lineHeight: 26,
     color: colors.onPrimary,
-    letterSpacing: -0.4,
+    letterSpacing: tracking.snug,
   },
   bandStep: {
     height: 26,
@@ -402,7 +390,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 29,
     color: colors.onPrimary,
-    letterSpacing: -0.6,
+    letterSpacing: tracking.tight,
     flex: 1,
   },
   bandScore: { flexDirection: 'row', alignItems: 'baseline', gap: 1 },
@@ -411,7 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 36,
     color: colors.onPrimary,
-    letterSpacing: -1,
+    letterSpacing: tracking.headline,
   },
   bandScoreUnit: { ...type.label, color: 'rgba(255,255,255,0.7)' },
   bandTrack: {
@@ -438,11 +426,11 @@ const styles = StyleSheet.create({
 
   rail: { width: 30, alignItems: 'center' },
   dotSlot: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
-  dotLip: { borderRadius: 12, backgroundColor: LIP, paddingBottom: 3 },
+  dotLip: { borderRadius: radius.pill, backgroundColor: LIP, paddingBottom: 3 },
   dotDone: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -450,7 +438,7 @@ const styles = StyleSheet.create({
   dotHalo: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: radius.pill,
     backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
@@ -458,7 +446,7 @@ const styles = StyleSheet.create({
   dotCurrent: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.pill,
     borderWidth: 5,
     borderColor: colors.primary,
     backgroundColor: colors.surface,
@@ -471,7 +459,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryFixed,
     backgroundColor: colors.surface,
   },
-  dotFar: { width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: colors.surfaceHighest },
+  dotFar: { width: 10, height: 10, borderRadius: radius.pill, borderWidth: 2, borderColor: colors.surfaceHighest },
 
   line: { flex: 1, width: 3, borderRadius: 2, backgroundColor: colors.primary, marginVertical: 3 },
   lineAhead: { backgroundColor: colors.primaryFixed },
@@ -492,24 +480,24 @@ const styles = StyleSheet.create({
   },
 
   bodyTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  when: { ...type.micro, color: colors.textMuted, letterSpacing: 0.4 },
-  whenCurrent: { ...type.label, color: colors.primary, letterSpacing: 0 },
+  when: { ...type.micro, color: colors.textMuted },
+  whenCurrent: { ...type.label, color: colors.primary },
   whenLater: { color: colors.textSubtle },
 
-  score: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.3 },
+  score: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: tracking.snug },
   scoreCurrent: {
     fontFamily: type.metric.fontFamily,
     fontSize: 24,
     lineHeight: 30,
     color: colors.primary,
-    letterSpacing: -0.9,
+    letterSpacing: tracking.headline,
   },
-  scoreNext: { ...type.cardTitle, color: colors.text, letterSpacing: -0.4 },
+  scoreNext: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug },
   scoreLater: { ...type.bodySmStrong, color: colors.textSubtle },
   scoreUnit: { ...type.micro, color: colors.textSubtle },
 
-  title: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
-  titleCurrent: { ...type.cardTitle, fontSize: 18, lineHeight: 26, color: colors.text, letterSpacing: -0.5 },
+  title: { ...type.rowTitle, color: colors.text },
+  titleCurrent: { ...type.cardTitle, fontSize: 18, lineHeight: 26, color: colors.text, letterSpacing: tracking.tight },
   titleDone: { ...type.bodySm, color: colors.textSubtle },
   titleLater: { ...type.bodySm, color: colors.textSubtle },
   text: { ...type.caption, color: colors.textSubtle },
@@ -519,10 +507,10 @@ const styles = StyleSheet.create({
 
   rule: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: SIDE, paddingVertical: 18 },
   ruleLine: { flex: 1, height: 1, backgroundColor: colors.surfaceHigh },
-  ruleLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.8 },
+  ruleLabel: { ...type.micro, color: colors.textSubtle },
 
   briefingHead: { paddingHorizontal: SIDE, marginTop: -8, marginBottom: 8 },
-  briefingTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
+  briefingTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   briefing: { paddingHorizontal: SIDE },
   eligibilityBlock: {
     marginHorizontal: SIDE,
@@ -571,23 +559,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toolTitle: { ...type.bodySmStrong, color: colors.text, flex: 1, letterSpacing: -0.2 },
+  toolTitle: { ...type.bodySmStrong, color: colors.text, flex: 1, letterSpacing: tracking.normal },
   toolMeta: { ...type.micro, color: colors.textSubtle },
 
-  checkList: { gap: 10, paddingHorizontal: SIDE },
-  checkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  checkBox: {
-    width: 19,
-    height: 19,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceHigh,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  checkBoxLead: { backgroundColor: colors.primaryFixed },
-  checkIndex: { ...type.micro, color: colors.textSubtle },
-  checkIndexLead: { color: colors.primary },
-  checkText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: -0.2 },
-  checkTextLead: { ...type.bodySmStrong, color: colors.text },
 });

@@ -9,14 +9,15 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test:domain": "node --experimental-strip-types domain/preparation.test.ts && node --experimental-strip-types domain/futureSimulation.test.ts && node --experimental-strip-types domain/quiz.test.ts && node --experimental-strip-types domain/aiContext.test.ts && node --experimental-strip-types domain/regression.test.ts && node --experimental-strip-types store/useUserStore.test.ts && node --experimental-strip-types features/ai/requestUx.test.ts && node --experimental-strip-types features/pwa/manifest.test.ts",
+    "test:domain": "node --experimental-strip-types domain/preparation.test.ts && node --experimental-strip-types domain/futureSimulation.test.ts && node --experimental-strip-types domain/quiz.test.ts && node --experimental-strip-types domain/aiContext.test.ts && node --experimental-strip-types domain/regression.test.ts && node --experimental-strip-types store/useUserStore.test.ts && node --experimental-strip-types features/ai/requestUx.test.ts && node --experimental-strip-types features/pwa/manifest.test.ts && node --experimental-strip-types features/calendar/calendar.test.ts",
     "test:discovery": "node --experimental-strip-types features/discovery/discovery.test.ts && node --experimental-strip-types features/discovery/hardening.test.ts && node --experimental-strip-types features/discovery/data/dataLayer.test.ts && node --experimental-strip-types features/discovery/data/applyHome.test.ts && node --experimental-strip-types features/discovery/data/runtimeData.test.ts && node --experimental-strip-types features/discovery/server/KakaoGeocoding.test.ts && node --experimental-strip-types features/discovery/components/kakaoMap.test.ts && node --experimental-strip-types features/competition/auditAdapter.test.ts && node --experimental-strip-types features/competition/domain.test.ts && node --experimental-strip-types features/competition/client.test.ts",
     "test:news": "node --experimental-strip-types features/news/news.test.ts",
-    "test:profile": "node --experimental-strip-types features/profile/profile.test.ts && node --experimental-strip-types features/eligibility/firstHome.test.ts && node --experimental-strip-types features/listingFit/personalFit.test.ts",
+    "test:profile": "node --experimental-strip-types features/profile/profile.test.ts && node --experimental-strip-types features/eligibility/firstHome.test.ts && node --experimental-strip-types features/listingFit/personalFit.test.ts && node --experimental-strip-types features/newlywed/newlywed.test.ts",
     "test:auth": "node --experimental-strip-types features/auth/authSync.test.ts",
     "test:motion": "node components/motion/motion.test.mjs",
+    "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:edge"
+    "test": "npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadow, spacing, type } from '../design/tokens';
+import { colors, radius, spacing, type } from '../design/tokens';
 import { IconChip } from './IconChip';
 import { MotionPressable } from './motion/MotionPressable';
 
@@ -18,10 +18,9 @@ export function AICTA({ title, description, onPress }: Props) {
       onPress={onPress}
       style={styles.card}
     >
-      <View style={styles.glow} />
       <IconChip name="auto-awesome" tone="purple" size="md" />
       <View style={styles.copy}>
-        <Text style={styles.eyebrow}>WANPAN AI</Text>
+        <Text style={styles.eyebrow}>완판e AI</Text>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
       </View>
@@ -44,16 +43,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lavender,
     padding: spacing.md,
     overflow: 'hidden',
-    ...shadow.card,
-  },
-  glow: {
-    position: 'absolute',
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    right: -44,
-    top: -58,
-    backgroundColor: 'rgba(83,74,183,0.08)',
   },
   copy: { flex: 1, gap: 3 },
   eyebrow: { ...type.caption, color: colors.primary },
@@ -63,7 +52,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,

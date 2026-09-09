@@ -11,9 +11,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { WanpanCard } from '../../components/WanpanCard';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, shadow, spacing, tint, type } from '../../design/tokens';
+import { colors, radius, shadow, spacing, tint, tracking, type } from '../../design/tokens';
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import {
@@ -35,6 +36,7 @@ import { DISCOVERY_REGIONS } from '../../features/discovery/regions';
 import type { DiscoveryFilters, DiscoveryRegion } from '../../features/discovery/types';
 import { useDiscoveryStore } from '../../features/discovery/useDiscoveryStore';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { Pop } from '../../components/motion/Pop';
 import { duration, travel } from '../../design/motion';
 import { toDiscoveryUserProfile } from '../../features/profile/domain';
@@ -383,18 +385,19 @@ export default function DiscoveryRoute() {
             contentContainerStyle={styles.listBody}
             showsVerticalScrollIndicator={false}
           >
-            {visibleListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                relevance={getListingRelevance(profile, listing)}
-                saved={savedListingIds.includes(listing.id)}
-                onToggleSaved={() => toggleSavedListing(listing.id)}
-                onOpen={() => openListing(listing.id)}
-              />
+            {visibleListings.map((listing, index) => (
+              <AppearItem key={listing.id} index={index}>
+                <ListingCard
+                  listing={listing}
+                  relevance={getListingRelevance(profile, listing)}
+                  saved={savedListingIds.includes(listing.id)}
+                  onToggleSaved={() => toggleSavedListing(listing.id)}
+                  onOpen={() => openListing(listing.id)}
+                />
+              </AppearItem>
             ))}
             {visibleListings.length === 0 ? (
-              <View style={styles.emptyCard}>
+              <WanpanCard style={styles.emptyCard}>
                 <MaterialIcons name="filter-alt-off" size={26} color={colors.primary} />
                 <Text style={styles.emptyTitle}>필터에 맞는 청약이 없어요</Text>
                 <MotionPressable
@@ -407,7 +410,7 @@ export default function DiscoveryRoute() {
                 >
                   <Text style={styles.resetText}>필터 초기화</Text>
                 </MotionPressable>
-              </View>
+              </WanpanCard>
             ) : null}
           </ScrollView>
         </Appear>
@@ -602,7 +605,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   searchCopy: { flex: 1, gap: 1 },
-  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2, padding: 0 },
+  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal, padding: 0 },
   searchSub: { ...type.micro, color: colors.textSubtle },
   headerIconButton: {
     width: 44,
@@ -701,7 +704,7 @@ const styles = StyleSheet.create({
   sheetName: {
     ...type.section,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
     lineHeight: 26,
     marginTop: 8,
   },
@@ -710,7 +713,7 @@ const styles = StyleSheet.create({
   sheetFacts: { flexDirection: 'row', gap: 22, marginTop: 12 },
   factCol: { gap: 2 },
   factLabel: { ...type.micro, color: colors.textSubtle },
-  factValue: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  factValue: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
 
   sheetFoot: {
     flexDirection: 'row',
@@ -722,7 +725,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   relevance: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  relevanceText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+  relevanceText: { ...type.label, color: colors.primary, letterSpacing: tracking.normal },
   detailCta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -732,7 +735,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 18,
   },
-  detailCtaText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  detailCtaText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
   provenance: { ...type.micro, color: colors.textSubtle, marginTop: 9 },
 
   sheetEmpty: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: 10 },
@@ -742,15 +745,7 @@ const styles = StyleSheet.create({
   listStage: { flex: 1 },
   listBody: { paddingHorizontal: spacing.screen, paddingBottom: spacing.xl, gap: spacing.sm },
 
-  emptyCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.surfaceHigh,
-  },
+  emptyCard: { alignItems: 'center', gap: spacing.sm, padding: spacing.lg },
   emptyTitle: { ...type.bodySmStrong, color: colors.text },
   resetButton: {
     borderRadius: radius.pill,

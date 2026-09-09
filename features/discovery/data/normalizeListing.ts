@@ -5,6 +5,8 @@ import type {
   ListingImagePlaceholder,
   ListingInterestTag,
   ListingGeocodeStatus,
+  ListingOfficialSchedule,
+  ListingPriorityApplication,
   ListingSourceType,
   RecruitmentStatus,
   SupplyType,
@@ -298,6 +300,7 @@ export function normalizeListingRecord(
       'contractEndDate',
       addIssue,
     ),
+    officialSchedule: normalizeOfficialSchedule(input, addIssue),
     announcementUrl: readUrl(
       input,
       ['announcementUrl', 'PBLANC_URL'],
@@ -430,6 +433,57 @@ function readDate(
     addIssue(field, 'invalid-value', 'warning', `${field} 날짜 형식을 확인할 수 없습니다.`);
   }
   return normalized;
+}
+
+function readOptionalDate(
+  record: RawListingRecord,
+  aliases: readonly string[],
+  field: string,
+  addIssue: AddIssue,
+): string | null {
+  const raw = readValue(record, aliases);
+  if (raw === null || raw === undefined || String(raw).trim() === '') return null;
+  const normalized = normalizeListingDate(raw);
+  if (!normalized) {
+    addIssue(field, 'invalid-value', 'warning', `${field} 날짜 형식을 확인할 수 없습니다.`);
+  }
+  return normalized;
+}
+
+function normalizeOfficialSchedule(
+  record: RawListingRecord,
+  addIssue: AddIssue,
+): ListingOfficialSchedule | undefined {
+  const specialStart = readOptionalDate(record, ['SPSPLY_RCEPT_BGNDE'], 'specialSupplyStartDate', addIssue);
+  const specialEnd = readOptionalDate(record, ['SPSPLY_RCEPT_ENDDE'], 'specialSupplyEndDate', addIssue);
+  const priorityApplications: ListingPriorityApplication[] = [];
+
+  const addPriority = (
+    rank: 1 | 2,
+    scope: ListingPriorityApplication['scope'],
+    startAliases: readonly string[],
+    endAliases: readonly string[],
+  ) => {
+    const prefix = `rank${rank}.${scope}`;
+    const startDate = readOptionalDate(record, startAliases, `${prefix}.startDate`, addIssue);
+    const endDate = readOptionalDate(record, endAliases, `${prefix}.endDate`, addIssue);
+    if (startDate || endDate) priorityApplications.push({ rank, scope, startDate, endDate });
+  };
+
+  addPriority(1, 'same-area', ['GNRL_RNK1_CRSPAREA_RCPTDE'], ['GNRL_RNK1_CRSPAREA_ENDDE']);
+  addPriority(1, 'other-gyeonggi', ['GNRL_RNK1_ETC_GG_RCPTDE'], ['GNRL_RNK1_ETC_GG_ENDDE']);
+  addPriority(1, 'other-area', ['GNRL_RNK1_ETC_AREA_RCPTDE'], ['GNRL_RNK1_ETC_AREA_ENDDE']);
+  addPriority(2, 'same-area', ['GNRL_RNK2_CRSPAREA_RCPTDE'], ['GNRL_RNK2_CRSPAREA_ENDDE']);
+  addPriority(2, 'other-gyeonggi', ['GNRL_RNK2_ETC_GG_RCPTDE'], ['GNRL_RNK2_ETC_GG_ENDDE']);
+  addPriority(2, 'other-area', ['GNRL_RNK2_ETC_AREA_RCPTDE'], ['GNRL_RNK2_ETC_AREA_ENDDE']);
+
+  if (!specialStart && !specialEnd && priorityApplications.length === 0) return undefined;
+  return {
+    specialSupply: specialStart || specialEnd
+      ? { startDate: specialStart, endDate: specialEnd }
+      : undefined,
+    priorityApplications,
+  };
 }
 
 function readUrl(

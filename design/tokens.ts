@@ -51,6 +51,11 @@ export const tint = {
   amber: { bg: '#FFDCC3', fg: '#8A4900' },
   pink: { bg: '#FFDAD6', fg: '#93000A' },
   green: { bg: '#D6EFE0', fg: '#2E7D55' },
+  /**
+   * 판정이 아니라 "지금 할 일이 없다"는 뜻의 쉬는 상태.
+   * 준비 현황처럼 합격/불합격으로 읽히면 안 되는 곳에서 green 대신 쓴다.
+   */
+  neutral: { bg: '#F0ECF6', fg: '#474553' },
 } as const;
 
 /** purple gradient 카드 위에 얹는 반투명 레이어. */
@@ -96,10 +101,37 @@ export const fonts = {
 /** 최소 터치 영역·컨트롤 높이. 화면에서 숫자를 직접 쓰지 않는다. */
 export const size = {
   touch: 44,
+  /** 원형 아이콘 버튼의 시각 크기. 터치 영역은 hitSlop 으로 touch 까지 넓힌다. */
+  iconButton: 36,
   control: 52,
   choice: 132,
   bar: 8,
   inputMax: 120,
+} as const;
+
+/**
+ * 자릿수가 바뀌어도 폭이 흔들리지 않는 숫자.
+ * 카운트업 숫자와 세로로 줄 맞춤이 필요한 표에만 쓴다. 모든 숫자에 붙이지 않는다.
+ */
+export const numeric: { fontVariant: ['tabular-nums'] } = { fontVariant: ['tabular-nums'] };
+
+/**
+ * 글자 크기 구간별 광학 보정값. 화면에서 임의의 letterSpacing 을 만들지 않는다.
+ * 큰 글자일수록 더 좁혀야 같은 밀도로 보인다.
+ */
+export const tracking = {
+  /** 40px 이상 큰 숫자. */
+  display: -2,
+  /** 24~32px 헤드라인. */
+  headline: -0.9,
+  /** 17~22px 제목·워드마크. */
+  tight: -0.5,
+  /** 14~16px 행 제목·강조 라벨. */
+  snug: -0.3,
+  /** 본문·보조 텍스트. */
+  normal: -0.2,
+  /** 11px 축약 라벨. type.micro 에 이미 포함되어 있다. */
+  wide: 0.5,
 } as const;
 
 /**
@@ -125,8 +157,13 @@ export const type = {
   /** 촘촘한 대시보드 본문. */
   bodySm: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21 },
   bodySmStrong: { fontFamily: fonts.semibold, fontSize: 14, lineHeight: 21 },
+  /**
+   * 목록 행 제목. 홈·전체·준비·미래의 divider 행이 공유한다.
+   * bodySmStrong 을 15px 로 덮어쓰던 하이브리드를 정식 단계로 올린 것이다.
+   */
+  rowTitle: { fontFamily: fonts.semibold, fontSize: 15, lineHeight: 21, letterSpacing: -0.3 },
   label: { fontFamily: fonts.semibold, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 18 },
-  /** eyebrow / 축약 라벨. 대문자 트래킹과 함께 쓴다. */
-  micro: { fontFamily: fonts.semibold, fontSize: 11, lineHeight: 15 },
+  /** 축약 라벨. 작은 글씨가 뭉치지 않도록 tracking.wide 를 포함한다. */
+  micro: { fontFamily: fonts.semibold, fontSize: 11, lineHeight: 15, letterSpacing: 0.5 },
 } as const;

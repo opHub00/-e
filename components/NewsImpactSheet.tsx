@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { duration, travel } from '../design/motion';
-import { colors, radius, spacing, tint, type } from '../design/tokens';
+import { colors, radius, size, spacing, tint, tracking, type } from '../design/tokens';
 import { Appear } from './motion/Appear';
 import { MotionPressable } from './motion/MotionPressable';
 import { buildNewsImpactContext, createNewsImpactFallback } from '../features/news/ai';
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 10,
   },
-  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  headTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   closeButton: {
     width: 30,
     height: 30,
@@ -306,8 +306,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 6,
   },
-  articleLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.6 },
-  articleTitle: { ...type.cardTitle, color: colors.text, letterSpacing: -0.3 },
+  articleLabel: { ...type.micro, color: colors.textSubtle },
+  articleTitle: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug },
   articleMeta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   articleSummary: { ...type.caption, color: colors.textMuted, lineHeight: 19, marginTop: 2 },
   articleSource: { ...type.caption, color: colors.textMuted },
@@ -337,8 +337,8 @@ const styles = StyleSheet.create({
   aiBody: { flex: 1, gap: 6 },
   aiTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   aiTagText: { ...type.micro, color: colors.primary },
-  aiHeadline: { ...type.cardTitle, color: colors.text, letterSpacing: -0.3, marginBottom: 4 },
-  blockLabel: { ...type.micro, color: colors.textSubtle, letterSpacing: 0.4, marginTop: 8 },
+  aiHeadline: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug, marginBottom: 4 },
+  blockLabel: { ...type.micro, color: colors.textSubtle, marginTop: 8 },
   blockBody: { ...type.bodySm, color: colors.textMuted, lineHeight: 22 },
   sourceNote: { ...type.caption, color: colors.textSubtle, marginTop: 4 },
 
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     gap: 3,
   },
-  actionLabel: { ...type.micro, color: colors.primary, letterSpacing: 0.4 },
+  actionLabel: { ...type.micro, color: colors.primary },
   actionBody: { ...type.bodySmStrong, color: colors.text, lineHeight: 21 },
 
   cautionBox: {
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    height: 50,
-    borderRadius: 14,
+    gap: spacing.sm,
+    height: size.control,
+    borderRadius: radius.button,
     backgroundColor: colors.primary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
-  originalCtaText: { ...type.bodySmStrong, fontSize: 15, color: colors.onPrimary },
+  originalCtaText: { ...type.bodyLgStrong, color: colors.onPrimary },
 });

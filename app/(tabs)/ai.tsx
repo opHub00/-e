@@ -16,8 +16,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { BrandMark } from '../../components/BrandMark';
 import { IconChip } from '../../components/IconChip';
 import { quizzes } from '../../data/quizzes';
-import { colors, radius, shadow, size, spacing, tint, type } from '../../design/tokens';
-import { duration, easing, useNative } from '../../design/motion';
+import { colors, radius, shadow, size, spacing, tracking, type } from '../../design/tokens';
+import { duration, easing, travel, useNative } from '../../design/motion';
 import {
   buildAiContext,
   formatContextForPrompt,
@@ -31,6 +31,7 @@ import { parseFutureScenario } from '../../domain/futureSimulation';
 import { hasCoreProfileForCalculations } from '../../features/profile/domain';
 import { getPersonalMessage } from '../../domain/quiz';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { useUserStore } from '../../store/useUserStore';
 import {
   parseListingFitExplanationContext,
@@ -229,14 +230,11 @@ export default function AiRoute() {
           {turns.length === 0 && !loading ? (
             <Appear replayKey="ai-empty" style={styles.suggestBlock}>
               <View style={styles.sectionHeading}>
-                <View>
-                  <Text style={styles.sectionEyebrow}>START HERE</Text>
-                  <Text style={styles.suggestLabel}>지금 이런 설명이 도움 돼요</Text>
-                </View>
+                <Text style={styles.suggestLabel}>지금 이런 설명이 도움 돼요</Text>
               </View>
               {suggestions.map((s, index) => (
+                <AppearItem key={s} index={index} distance={travel.content}>
                 <MotionPressable
-                  key={s}
                   accessibilityRole="button"
                   onPress={() => void send(s)}
                   style={[
@@ -252,36 +250,26 @@ export default function AiRoute() {
                   <Text style={styles.suggestText}>{s}</Text>
                   <MaterialIcons name="arrow-forward" size={19} color={colors.primary} />
                 </MotionPressable>
+                </AppearItem>
               ))}
             </Appear>
           ) : null}
 
           {turns.map((t, i) =>
             t.role === 'user' ? (
-              <View key={`${i}-q`} style={styles.questionWrap}>
+              <Appear key={`${i}-q`} distance={travel.content} style={styles.questionWrap}>
                 <Text style={styles.turnEyebrow}>내 질문</Text>
                 <View style={styles.question}>
                   <Text style={styles.questionText}>{t.text}</Text>
                 </View>
-              </View>
+              </Appear>
             ) : (
               <Appear key={`${i}-a`} style={styles.answer}>
                 <View style={styles.answerHeading}>
                   <IconChip name="auto-awesome" tone="purple" />
-                  <View>
-                    <Text style={styles.answerEyebrow}>FOR {profile.name.toUpperCase()}</Text>
-                    <Text style={styles.answerLabel}>완판e의 설명</Text>
-                  </View>
+                  <Text style={styles.answerLabel}>완판e의 설명</Text>
                 </View>
-                <View style={styles.answerBody}>
-                  <Text style={styles.answerText}>{t.text}</Text>
-                </View>
-                <View style={styles.answerNote}>
-                  <MaterialIcons name="lightbulb" size={14} color={tint.amber.fg} />
-                  <Text style={styles.answerNoteText}>
-                    자격·당첨 가능성은 판정하지 않아요. 공식 공고 기준을 함께 확인해 주세요.
-                  </Text>
-                </View>
+                <Text style={styles.answerText}>{t.text}</Text>
               </Appear>
             ),
           )}
@@ -356,7 +344,6 @@ export default function AiRoute() {
               <MaterialIcons name="arrow-upward" size={22} color={colors.onPrimary} />
             </MotionPressable>
           </View>
-          <Text style={styles.composerHint}>완판e는 자격·당첨 가능성을 판정하지 않아요</Text>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -408,7 +395,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.hairline,
   },
   coachCopy: { flex: 1, gap: 1 },
-  coachName: { ...type.bodySmStrong, color: colors.text, letterSpacing: -0.2 },
+  coachName: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
   coachCtx: { ...type.micro, color: colors.textSubtle },
   coachAction: {
     width: 32,
@@ -428,24 +415,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
   },
   coachBadgeText: { ...type.micro, color: colors.primary },
-  answerNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 7,
-    marginTop: 10,
-    borderRadius: radius.cardSm,
-    backgroundColor: tint.amber.bg,
-    paddingHorizontal: 11,
-    paddingVertical: 9,
-  },
-  answerNoteText: { ...type.caption, color: tint.amber.fg, flex: 1, lineHeight: 18 },
   scroll: { paddingHorizontal: spacing.screen, gap: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.lg },
 
 
   suggestBlock: { flex: 1, gap: spacing.sm },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  sectionEyebrow: { ...type.caption, color: colors.primary },
-  suggestLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.3 },
+  suggestLabel: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   suggestChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -456,13 +431,12 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceHigh,
     backgroundColor: colors.surface,
     padding: 12,
-    ...shadow.card,
   },
   suggestChipPrimary: { backgroundColor: colors.lavender, borderColor: colors.primaryFixed },
   suggestNumber: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceLow,
@@ -485,52 +459,50 @@ const styles = StyleSheet.create({
   questionText: { ...type.body, color: colors.onPrimary },
 
   answer: {
-    borderRadius: radius.bento,
-    backgroundColor: colors.lavender,
-    borderWidth: 1,
-    borderColor: colors.primaryFixed,
-    padding: spacing.md,
-    gap: spacing.md,
-    ...shadow.card,
-  },
-  answerHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  answerEyebrow: { ...type.caption, color: colors.primary },
-  answerLabel: { ...type.cardTitle, color: colors.text },
-  answerBody: {
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.surfaceHigh,
     padding: spacing.md,
+    gap: spacing.md,
   },
+  answerHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.hairline,
+  },
+  answerLabel: { ...type.cardTitle, color: colors.text },
   answerText: { ...type.body, color: colors.text },
   loadingCard: {
     minHeight: 88,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderRadius: radius.bento,
-    backgroundColor: colors.lavender,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.primaryFixed,
+    borderColor: colors.surfaceHigh,
     padding: spacing.md,
   },
   loadingIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.lavender,
   },
   thinkingDots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  thinkingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, opacity: 0.45 },
+  thinkingDot: { width: 6, height: 6, borderRadius: radius.pill, backgroundColor: colors.primary, opacity: 0.45 },
   loadingCopy: { flex: 1, gap: 2 },
   loadingTitle: { ...type.bodyStrong, color: colors.text },
   loadingText: { ...type.body, color: colors.textMuted, flex: 1 },
 
   errorCard: {
-    borderRadius: radius.bento,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: '#F4C7C3',
     backgroundColor: '#FFF6F5',
@@ -603,5 +575,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   sendDisabled: { opacity: 0.4 },
-  composerHint: { ...type.caption, color: colors.textMuted, textAlign: 'center', fontSize: 10 },
 });

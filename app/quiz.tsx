@@ -20,7 +20,7 @@ import {
   getTodayQuiz,
 } from '../domain/quiz';
 import { Appear } from '../components/motion/Appear';
-import { duration, easing, stagger, useNative } from '../design/motion';
+import { duration, easing, scale, stagger, useNative } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useUserStore } from '../store/useUserStore';
 
@@ -89,7 +89,7 @@ export default function QuizRoute() {
     return (
       <ScreenEnter>
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <ScreenHeader title="오늘의 퀴즈" eyebrow="LEARN" onBack={goHome} />
+        <ScreenHeader title="오늘의 퀴즈" onBack={goHome} />
         <View style={styles.screen}>
           <View style={styles.quizMeta}>
             <View style={styles.quizMetaCopy}>
@@ -102,10 +102,9 @@ export default function QuizRoute() {
           </View>
 
           <View style={styles.questionCard}>
-            <View style={styles.questionGlow} />
             <View style={styles.questionTop}>
               <IconChip name="quiz" tone="purple" size="md" />
-              <Text style={styles.questionNumber}>QUESTION 01</Text>
+              <Text style={styles.questionNumber}>오늘의 문제</Text>
             </View>
             <Text style={styles.question}>{quiz.question}</Text>
             <View style={styles.answerHint}>
@@ -136,7 +135,7 @@ export default function QuizRoute() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader title="오늘의 배움" eyebrow="RESULT" onBack={goHome} />
+      <ScreenHeader title="오늘의 배움" onBack={goHome} />
       <ScrollView contentContainerStyle={styles.resultScreen} showsVerticalScrollIndicator={false}>
         <Animated.View
           style={{
@@ -188,10 +187,7 @@ export default function QuizRoute() {
         <Appear delay={stagger.short} style={styles.personalCard}>
           <View style={styles.personalTop}>
             <IconChip name="person-pin" tone="purple" size="md" />
-            <View style={styles.personalHeading}>
-              <Text style={styles.personalEyebrow}>PERSONAL TAKEAWAY</Text>
-              <Text style={styles.personalLabel}>그래서 나에게는?</Text>
-            </View>
+            <Text style={styles.personalLabel}>그래서 나에게는?</Text>
           </View>
           <Text style={styles.personalBody}>{getPersonalMessage(quiz, profile)}</Text>
           <View style={styles.personalFoot}>
@@ -253,6 +249,7 @@ function Choice({ mark, label, onPress }: { mark: string; label: string; onPress
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      pressedScale={scale.selection}
       style={styles.choice}
     >
       <Text style={styles.choiceMark}>{mark}</Text>
@@ -276,7 +273,7 @@ const styles = StyleSheet.create({
   progressRing: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
@@ -294,16 +291,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lavender,
     padding: spacing.lg,
     overflow: 'hidden',
-    ...shadow.card,
-  },
-  questionGlow: {
-    position: 'absolute',
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(83,74,183,0.07)',
-    right: -70,
-    top: -80,
   },
   questionTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   questionNumber: { ...type.label, color: colors.primary },
@@ -346,7 +333,7 @@ const styles = StyleSheet.create({
   resultIcon: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.onPrimary,
@@ -372,11 +359,8 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryFixed,
     padding: spacing.lg,
     gap: spacing.md,
-    ...shadow.card,
   },
   personalTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  personalHeading: { gap: 2 },
-  personalEyebrow: { ...type.caption, color: colors.primary },
   personalLabel: { ...type.title, color: colors.text },
   personalBody: { ...type.bodyLgStrong, color: colors.text },
   personalFoot: {
@@ -393,7 +377,7 @@ const styles = StyleSheet.create({
 
   explainCard: {
     gap: spacing.md,
-    borderRadius: radius.bento,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.surfaceHigh,
     backgroundColor: colors.surface,

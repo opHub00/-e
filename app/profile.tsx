@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackButton } from '../components/BackButton';
 import { AnimatedBar } from '../components/motion/AnimatedBar';
 import { Appear } from '../components/motion/Appear';
 import { MotionPressable } from '../components/motion/MotionPressable';
@@ -89,9 +90,7 @@ export default function ApplicantProfileRoute() {
   return (
     <ScreenEnter style={styles.screen}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
-        <MotionPressable accessibilityRole="button" accessibilityLabel="뒤로" onPress={close} style={styles.back}>
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </MotionPressable>
+        <BackButton onPress={close} accessibilityLabel="뒤로" />
         <Text style={styles.headerTitle}>{bundle.title}</Text>
         <View style={styles.backGhost} />
       </View>
@@ -144,19 +143,14 @@ function ProfileOverview({
   return (
     <ScreenEnter style={styles.screen}>
       <View style={[styles.header, { paddingTop: Math.max(topInset, 12) + 8 }]}>
-        <MotionPressable accessibilityRole="button" accessibilityLabel="뒤로" onPress={onBack} style={styles.back}>
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </MotionPressable>
+        <BackButton onPress={onBack} accessibilityLabel="뒤로" />
         <Text style={styles.headerTitle}>내 청약 프로필</Text>
         <View style={styles.backGhost} />
       </View>
       <ScrollView contentContainerStyle={styles.overviewScroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <View style={styles.heroTop}>
-            <View>
-              <Text style={styles.heroEyebrow}>PROFILE COMPLETENESS</Text>
-              <Text style={styles.heroTitle}>프로필 완성도</Text>
-            </View>
+            <Text style={styles.heroTitle}>프로필 완성도</Text>
             <Text style={styles.heroMetric}>{completeness}%</Text>
           </View>
           <View style={styles.track}>
@@ -471,13 +465,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.screen, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.hairline },
-  back: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceContainer },
-  backGhost: { width: 36, height: 36 },
+  backGhost: { width: size.iconButton },
   headerTitle: { ...type.bodyLgStrong, color: colors.text },
   overviewScroll: { padding: spacing.screen, paddingBottom: 44, gap: spacing.md },
   hero: { borderRadius: radius.bento, backgroundColor: colors.primary, padding: spacing.lg, gap: spacing.sm, ...shadow.card },
   heroTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  heroEyebrow: { ...type.micro, color: 'rgba(255,255,255,0.68)', letterSpacing: 0.8 },
   heroTitle: { ...type.title, color: colors.onPrimary, marginTop: 3 },
   heroMetric: { fontFamily: type.metric.fontFamily, fontSize: 38, lineHeight: 42, color: colors.onPrimary },
   track: { height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.22)', overflow: 'hidden' },
@@ -498,7 +490,7 @@ const styles = StyleSheet.create({
   statusDone: { color: tint.green.fg },
   editorScroll: { padding: spacing.screen, paddingBottom: 28, gap: spacing.md },
   reasonCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, borderRadius: radius.card, backgroundColor: colors.lavender, padding: spacing.md },
-  reasonIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  reasonIcon: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
   reasonTitle: { ...type.bodySmStrong, color: colors.primary },
   reasonBody: { ...type.caption, color: colors.textMuted, lineHeight: 19, marginTop: 3 },
   questionHint: { ...type.caption, color: colors.textSubtle },
@@ -518,7 +510,7 @@ const styles = StyleSheet.create({
   choiceText: { ...type.bodySmStrong, color: colors.textMuted },
   choiceTextActive: { color: colors.onPrimary },
   footer: { paddingHorizontal: spacing.screen, paddingTop: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.hairline, gap: 4 },
-  primary: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button, backgroundColor: colors.primary },
+  primary: { minHeight: size.control, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button, backgroundColor: colors.primary },
   primaryText: { ...type.bodyLgStrong, color: colors.onPrimary },
   later: { minHeight: 42, alignItems: 'center', justifyContent: 'center' },
   laterText: { ...type.bodySmStrong, color: colors.textMuted },

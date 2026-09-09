@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { StatusPill } from '../../../components/StatusPill';
-import { colors, radius, shadow, size, spacing, type } from '../../../design/tokens';
+import { colors, radius, shadow, size, spacing, tracking, type } from '../../../design/tokens';
 import {
   formatPrice,
   formatRecruitmentSchedule,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     }),
   },
   pinText: { ...type.micro, color: colors.textMuted },
-  pinTextActive: { ...type.label, color: colors.onPrimary, letterSpacing: -0.2 },
+  pinTextActive: { ...type.label, color: colors.onPrimary, letterSpacing: tracking.normal },
   sheet: {
     position: 'absolute',
     left: 12,

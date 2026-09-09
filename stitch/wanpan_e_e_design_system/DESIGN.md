@@ -1,3 +1,12 @@
+<!--
+  DUPLICATE — 정본이 아닙니다.
+
+  이 파일은 Stitch raw export 에 포함된 사본이며
+  reference/stitch/STITCH_DESIGN_ORIGINAL.md 와 byte 단위로 동일합니다.
+  design/tokens.ts 가 인용하는 정본은 reference/stitch/ 쪽입니다.
+  내용을 고쳐야 하면 reference/stitch/STITCH_DESIGN_ORIGINAL.md 를 고치세요.
+-->
+
 ---
 name: Wanpan-e (완판e) Design System
 colors:

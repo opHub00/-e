@@ -5,11 +5,12 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
 import { Disclaimer } from '../../components/Disclaimer';
 import { stagger, travel } from '../../design/motion';
-import { colors, radius, spacing, tint, type } from '../../design/tokens';
+import { colors, numeric, overlay, radius, size, spacing, tint, tracking, type } from '../../design/tokens';
 import {
   calculatePreparationScore,
   getRecommendedActions,
@@ -17,7 +18,7 @@ import {
   MILESTONE_MONTHS,
   simulateFuture,
 } from '../../domain/preparation';
-import { getLevel, XP_PER_QUIZ } from '../../domain/quiz';
+import { XP_PER_QUIZ } from '../../domain/quiz';
 import {
   formatPrice,
   getListingRelevance,
@@ -38,12 +39,10 @@ export default function HomeRoute() {
   const profile = useUserStore((state) => state.profile);
   const applicantProfile = useUserStore((state) => state.applicantProfile);
   const discoveryProfile = toDiscoveryUserProfile(applicantProfile);
-  const xp = useUserStore((state) => state.xp);
   const todayQuizDone = useUserStore((state) => state.todayQuizDone);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const dataset = useListingDataset();
 
-  const level = getLevel(xp);
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
   const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
@@ -68,6 +67,27 @@ export default function HomeRoute() {
 
   const profileCompleteness = calculateProfileCompleteness(applicantProfile);
 
+  /**
+   * getRecommendedActions 는 통장 / 납입 / 무주택·학습 순서로 3개를 돌려준다.
+   * 문구를 파싱하지 않고 같은 프로필 상태로 목적지를 정한다.
+   * 새 도메인 규칙을 만들지 않고 기존 route 만 쓴다.
+   */
+  const todos = actions.map((action, index) => {
+    const target =
+      index === 0
+        ? !accountKnown || !profile.hasSubscriptionAccount
+          ? { href: '/profile' as const, label: '청약 프로필' }
+          : { href: '/preparation' as const, label: '준비 로드맵' }
+        : index === 1
+          ? profile.monthlyPayment <= 0
+            ? { href: '/profile' as const, label: '청약 프로필' }
+            : { href: '/future' as const, label: '미래의 나' }
+          : profile.isNoHomeOwner
+            ? { href: '/quiz' as const, label: '오늘의 퀴즈' }
+            : { href: '/profile' as const, label: '청약 프로필' };
+    return { action, ...target };
+  });
+
   // 최초 등장·의미 있는 값 변경에서만 재생된다. 탭을 오갈 때마다 0부터 세지 않는다.
   const animatedScore = useCountUp(score);
   const filled = Math.round((animatedScore / 100) * GAUGE_SEGMENTS);
@@ -87,13 +107,6 @@ export default function HomeRoute() {
           <View style={styles.brandRow}>
             <BrandMark size={30} />
             <Text style={styles.wordmark}>완판e</Text>
-            <View style={styles.spacer} />
-            <View style={styles.levelPill}>
-              <MaterialIcons name="bolt" size={13} color={colors.onPrimary} />
-              <Text style={styles.levelPillText}>
-                Lv.{level.level} · {xp} XP
-              </Text>
-            </View>
           </View>
 
           <Text style={styles.bandLabel}>{profile.name}님의 청약 준비도</Text>
@@ -133,7 +146,7 @@ export default function HomeRoute() {
 
         {/* Monzo: 밴드 아래는 하나의 연속 surface. 카드를 여러 장 띄우지 않는다. */}
         <View style={styles.sheet}>
-          <Appear delay={stagger.normal} distance={travel.content} style={styles.statRow}>
+          <Appear delay={stagger.short} distance={travel.content} style={styles.statRow}>
             <Stat label="다음 변화" value={nextChange} lead />
             <View style={styles.statDivider} />
             <Stat label="오늘 학습" value={todayQuizDone ? `+${XP_PER_QUIZ} XP` : '아직'} />
@@ -141,7 +154,7 @@ export default function HomeRoute() {
             <Stat label="관심 청약" value={`${savedListings.length}곳`} />
           </Appear>
 
-          <View style={styles.group}>
+          <Appear delay={stagger.normal} distance={travel.content} style={styles.group}>
             <View style={styles.groupHead}>
               <Text style={styles.groupTitle}>
                 {savedListings.length > 0 ? '관심 청약' : '먼저 살펴볼 청약'}
@@ -188,8 +201,8 @@ export default function HomeRoute() {
                 ? formatPrice(listing.representativePrice).replace('억', '')
                 : null;
               return (
+                <AppearItem key={listing.id} index={index} distance={travel.content}>
                 <MotionPressable
-                  key={listing.id}
                   accessibilityRole="button"
                   onPress={() =>
                     router.push({ pathname: '/discovery/[id]', params: { id: listing.id } })
@@ -233,17 +246,28 @@ export default function HomeRoute() {
                     {priceLabel ? <Text style={styles.rowValueUnit}>억</Text> : null}
                   </Text>
                 </MotionPressable>
+                </AppearItem>
               );
             })}
-          </View>
+          </Appear>
 
-          <View style={styles.group}>
+          <Appear
+            delay={stagger.normal + stagger.short}
+            distance={travel.content}
+            style={styles.group}
+          >
             <View style={styles.groupHead}>
               <Text style={styles.groupTitleSub}>오늘 할 일</Text>
             </View>
 
-            {actions.map((action, index) => (
-              <View key={action} style={[styles.todoRow, index > 0 && styles.rowDivider]}>
+            {todos.map(({ action, href, label }, index) => (
+              <AppearItem key={action} index={index} distance={travel.content}>
+              <MotionPressable
+                accessibilityRole="button"
+                accessibilityLabel={`${action} ${label}(으)로 이동`}
+                onPress={() => router.push(href)}
+                style={[styles.todoRow, index > 0 && styles.rowDivider]}
+              >
                 <View style={[styles.bullet, index === 0 && styles.bulletLead]} />
                 <Text
                   style={[styles.todoText, index === 0 && styles.todoTextLead]}
@@ -251,13 +275,15 @@ export default function HomeRoute() {
                 >
                   {action}
                 </Text>
-              </View>
+                <MaterialIcons name="chevron-right" size={16} color={colors.outline} style={styles.todoChevron} />
+              </MotionPressable>
+              </AppearItem>
             ))}
 
             <View style={styles.footNote}>
               <Disclaimer />
             </View>
-          </View>
+          </Appear>
         </View>
       </ScrollView>
     </View>
@@ -280,7 +306,6 @@ const SIDE = spacing.screen;
 const styles = StyleSheet.create({
   screen: { flex: 1, height: '100%', backgroundColor: colors.surface },
   scroll: { paddingBottom: 24 },
-  spacer: { flex: 1 },
 
   band: { paddingHorizontal: SIDE, paddingBottom: 30, overflow: 'hidden' },
   bandGlow: {
@@ -290,8 +315,8 @@ const styles = StyleSheet.create({
     top: -70,
     width: 190,
     height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    borderRadius: radius.pill,
+    backgroundColor: overlay.glow,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   wordmark: {
@@ -299,27 +324,17 @@ const styles = StyleSheet.create({
     fontSize: 21,
     lineHeight: 27,
     color: colors.onPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
   },
-  levelPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    height: 26,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    paddingHorizontal: 9,
-  },
-  levelPillText: { ...type.micro, color: colors.onPrimary },
-
   bandLabel: { ...type.label, color: 'rgba(255,255,255,0.76)', marginTop: 22 },
   scoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2, marginTop: 2 },
   score: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 44,
     lineHeight: 52,
     color: colors.onPrimary,
-    letterSpacing: -1.8,
+    letterSpacing: tracking.display,
   },
   scoreUnit: { ...type.bodyLgStrong, color: 'rgba(255,255,255,0.7)', marginLeft: 2 },
   deltaChip: {
@@ -345,7 +360,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: -0.2 },
+  stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
   profileEntry: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   profileText: { ...type.micro, color: 'rgba(255,255,255,0.72)' },
 
@@ -367,8 +382,8 @@ const styles = StyleSheet.create({
   stat: { flex: 1, gap: 2 },
   statLabel: { ...type.micro, color: colors.textSubtle },
   statLabelLead: { color: colors.primary },
-  statValue: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: -0.2 },
-  statValueLead: { ...type.cardTitle, color: colors.text, letterSpacing: -0.4 },
+  statValue: { ...type.bodySmStrong, color: colors.textMuted, letterSpacing: tracking.normal },
+  statValueLead: { ...type.cardTitle, color: colors.text, letterSpacing: tracking.snug },
   statDivider: { width: 1, backgroundColor: colors.hairline, marginHorizontal: 12 },
 
   group: { borderTopWidth: 8, borderTopColor: colors.surfaceLow, paddingHorizontal: SIDE },
@@ -379,10 +394,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 4,
   },
-  groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: -0.35 },
-  groupTitleSub: { ...type.label, color: colors.textMuted, letterSpacing: 0.2 },
+  groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
+  groupTitleSub: { ...type.label, color: colors.textMuted },
   moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, paddingVertical: 4 },
-  moreLinkText: { ...type.label, color: colors.primary, letterSpacing: -0.2 },
+  moreLinkText: { ...type.label, color: colors.primary, letterSpacing: tracking.normal },
   listingContext: { ...type.micro, color: colors.textSubtle, paddingTop: 3, paddingBottom: 4 },
   listingState: { minHeight: 74, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   listingStateText: { ...type.caption, color: colors.textMuted, flex: 1 },
@@ -399,24 +414,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowCopy: { flex: 1, gap: 3 },
-  rowTitle: { ...type.bodySmStrong, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+  rowTitle: { ...type.rowTitle, color: colors.text },
   rowMetaLine: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline },
   dotOpen: { backgroundColor: colors.success },
   rowMeta: { ...type.micro, color: colors.textSubtle },
   rowValue: {
+    ...numeric,
     fontFamily: type.metric.fontFamily,
     fontSize: 19,
     lineHeight: 25,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: tracking.tight,
   },
   rowValueUnit: { ...type.label, color: colors.textSubtle },
 
-  todoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 11 },
+  todoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    paddingVertical: 11,
+    // 두 줄짜리 항목이 있어도 한 줄짜리가 최소 터치 영역 아래로 내려가지 않게 한다.
+    minHeight: size.touch,
+  },
+  /** 본문 첫 줄에 맞춘다. bodySm lineHeight(21) 와 아이콘(16) 의 차이 절반. */
+  todoChevron: { marginTop: 3 },
   bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.outline, marginTop: 8 },
   bulletLead: { width: 6, height: 6, backgroundColor: colors.primary, marginTop: 7 },
-  todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: -0.2 },
+  todoText: { ...type.bodySm, color: colors.textSubtle, flex: 1, letterSpacing: tracking.normal },
   todoTextLead: { ...type.bodySmStrong, color: colors.text },
 
   footNote: { paddingTop: 14, paddingBottom: 6 },

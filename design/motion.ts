@@ -34,6 +34,13 @@ export const easing = {
 /** 순차 등장 간격. 카드가 줄줄이 튀지 않도록 항목 수를 제한해서 쓴다. */
 export const stagger = { short: 60, normal: 120 } as const;
 
+/**
+ * 목록 등장 규칙.
+ * 첫 화면에 보이는 만큼만 계단을 두고, 그 뒤 항목은 애니메이션 없이 그린다.
+ * 스크롤로 들어오는 항목까지 움직이면 긴 목록에서 산만하고 느려진다.
+ */
+export const listReveal = { count: 5, step: stagger.short } as const;
+
 /** 등장 시 기본 이동 거리. sheet 는 "떠오른다" 정도지 아래에서 날아오지 않는다. */
 export const travel = { sm: 8, md: 14, content: 6, screen: 5, stack: 10, sheet: 24 } as const;
 

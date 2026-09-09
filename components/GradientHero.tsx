@@ -15,7 +15,6 @@ export function GradientHero({ children, compact }: Props) {
       style={[styles.hero, compact && styles.compact]}
     >
       <View style={styles.glowLarge} />
-      <View style={styles.glowSmall} />
       <View style={styles.content}>{children}</View>
     </LinearGradient>
   );
@@ -35,18 +34,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 220,
     height: 220,
-    borderRadius: 110,
+    borderRadius: radius.pill,
     backgroundColor: overlay.glow,
     right: -72,
     top: -92,
-  },
-  glowSmall: {
-    position: 'absolute',
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: overlay.glowInner,
-    left: -24,
-    bottom: -34,
   },
 });

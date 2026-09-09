@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius, shadow, spacing, type } from '../../design/tokens';
 import { MotionPressable } from '../motion/MotionPressable';
 
-type Props = { active: 'general' | 'newlywed' };
+type Props = { active: 'general' | 'newlywed' | 'benchmark' };
 
 export function PreparationAreaNav({ active }: Props) {
   const router = useRouter();
@@ -12,6 +12,7 @@ export function PreparationAreaNav({ active }: Props) {
     <View accessibilityRole="tablist" style={styles.wrap}>
       <AreaTab label="전체 준비" selected={active === 'general'} onPress={() => router.replace('/preparation' as Href)} />
       <AreaTab label="신혼 청약" selected={active === 'newlywed'} onPress={() => router.push('/newlywed' as Href)} />
+      <AreaTab label="비교" selected={active === 'benchmark'} onPress={() => router.push('/benchmark' as Href)} />
     </View>
   );
 }

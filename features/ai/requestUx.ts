@@ -21,6 +21,7 @@ export function buildAiRequestPayload(
   history: AiTurn[],
   lesson: unknown | null,
   listingFit: unknown | null,
+  benchmark: unknown | null = null,
 ) {
   return {
     question,
@@ -28,6 +29,7 @@ export function buildAiRequestPayload(
     history,
     ...(lesson ? { lesson } : {}),
     ...(listingFit ? { listingFit } : {}),
+    ...(benchmark ? { benchmark } : {}),
   };
 }
 

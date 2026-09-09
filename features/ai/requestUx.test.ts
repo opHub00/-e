@@ -33,9 +33,14 @@ check(compact.every((turn) => turn.text.length <= AI_HISTORY_TEXT_LIMIT), 'histo
 const plainPayload = buildAiRequestPayload('질문', '상태', [], null, null);
 check(!('lesson' in plainPayload), '일반 AI 요청은 null lesson을 보내지 않는다');
 check(!('listingFit' in plainPayload), '일반 AI 요청은 null listingFit을 보내지 않는다');
+check(!('benchmark' in plainPayload), '일반 AI 요청은 null benchmark를 보내지 않는다');
 check(
   'listingFit' in buildAiRequestPayload('질문', '상태', [], null, { status: 'needs_information' }),
   'Personal Fit context는 있을 때만 전송한다',
+);
+check(
+  'benchmark' in buildAiRequestPayload('질문', '상태', [], null, null, { feature: 'peer_preparation_benchmark_v1' }),
+  'Benchmark context는 있을 때만 전송한다',
 );
 
 console.log(`features/ai/requestUx: ${checks}개 검증 통과`);

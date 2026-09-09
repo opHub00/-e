@@ -14,6 +14,12 @@ import {
   isListingFitExplanationContext,
   isSafeListingFitExplanation,
 } from '../../../features/listingFit/ai.ts';
+import {
+  buildBenchmarkExplanationFallback,
+  formatBenchmarkExplanationContext,
+  isBenchmarkExplanationContext,
+  isSafeBenchmarkExplanation,
+} from '../../../features/benchmark/ai.ts';
 
 let checks = 0;
 const ok = (cond: unknown, msg: string) => {
@@ -160,5 +166,42 @@ ok(!isListingFitExplanationContext({ ...listingFitContext, rawProfile: { age: 31
 ok(!isListingFitExplanationContext({ ...listingFitContext, status: 'high_probability' }), 'listing fit 임의 status 거부');
 ok(!isSafeListingFitExplanation('당첨 확률은 80%예요.', listingFitContext), 'listing fit 확률 생성 차단');
 ok(buildListingFitExplanationFallback(listingFitContext).includes(listingFitContext.summary), 'listing fit fallback은 deterministic summary 유지');
+
+const benchmarkContext = {
+  feature: 'peer_preparation_benchmark_v1' as const,
+  summary: '확인된 준비 정보와 더 채울 항목을 나눠 봤어요.',
+  dimensions: [
+    ['account', '청약통장', 'well-prepared', '통장 정보가 확인됐어요.'],
+    ['housing', '주택 이력', 'information-needed', '주택 이력을 알려주세요.'],
+    ['location', '거주·관심지역', 'well-prepared', '지역 정보가 확인됐어요.'],
+    ['family', '가족·혼인 정보', 'information-needed', '가족 정보를 알려주세요.'],
+    ['income', '소득 정보', 'information-needed', '소득 정보를 알려주세요.'],
+    ['assets', '자산 정보', 'information-needed', '자산 정보를 알려주세요.'],
+    ['first-home', '생애최초 준비', 'listing-confirmation', '공고별 확인이 필요해요.'],
+    ['newlywed', '신혼 준비', 'listing-confirmation', '공고별 확인이 필요해요.'],
+  ].map(([id, title, status, detail]) => ({
+    id,
+    title,
+    status: status as 'well-prepared' | 'information-needed' | 'listing-confirmation',
+    detail,
+    source: 'profile' as const,
+  })),
+  missingData: ['주택 이력', '가족 정보', '소득', '자산 정보'],
+  actions: ['주택 이력 확인하기'],
+  officialSource: {
+    institution: '한국부동산원 청약Home',
+    checkedAt: '2026-09-09',
+    dataRange: '전체 가입현황 · 통장별 가입현황 · 가입기간별 가입현황',
+    limitation: '이 자료만으로 연령·지역·당첨자를 결합한 또래 평균은 만들 수 없어요.',
+  },
+  disclaimer: '미입력 정보는 낮은 점수로 계산하지 않아요.',
+};
+ok(isBenchmarkExplanationContext(benchmarkContext), '정상 benchmark structured result 허용');
+eq(formatBenchmarkExplanationContext(benchmarkContext), JSON.stringify(benchmarkContext), 'benchmark context deterministic');
+ok(!isBenchmarkExplanationContext({ ...benchmarkContext, rawProfile: { age: 31 } }), 'benchmark raw profile 추가 시 거부');
+ok(!isSafeBenchmarkExplanation('30대 평균보다 상위 20%예요.', benchmarkContext), 'benchmark 가짜 또래 평균 차단');
+ok(!isSafeBenchmarkExplanation('당첨 확률은 70%예요.', benchmarkContext), 'benchmark 확률 생성 차단');
+ok(!isSafeBenchmarkExplanation('정보 부족이라 뒤처졌어요.', benchmarkContext), 'benchmark unknown 감점 표현 차단');
+ok(buildBenchmarkExplanationFallback(benchmarkContext).includes(benchmarkContext.disclaimer), 'benchmark fallback은 deterministic disclaimer 유지');
 
 console.log(`supabase/functions/ai: ${checks}개 검증 통과`);

@@ -47,6 +47,10 @@ import {
   type AiTurn,
 } from '../../features/ai/requestUx';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import {
+  parseBenchmarkExplanationContext,
+  type BenchmarkExplanationContext,
+} from '../../features/benchmark/ai';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -62,6 +66,7 @@ async function askAi(
   history: Turn[],
   lesson: Lesson | null,
   listingFit: ListingFitExplanationContext | null,
+  benchmark: BenchmarkExplanationContext | null,
 ): Promise<string> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
@@ -82,7 +87,7 @@ async function askAi(
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         apikey: SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify(buildAiRequestPayload(question, context, history, lesson, listingFit)),
+      body: JSON.stringify(buildAiRequestPayload(question, context, history, lesson, listingFit, benchmark)),
       signal: controller.signal,
     });
   } catch (e) {
@@ -99,12 +104,13 @@ async function askAi(
 }
 
 export default function AiRoute() {
-  const { q, auto, quizId, futureScenario, listingFit: listingFitParam } = useLocalSearchParams<{
+  const { q, auto, quizId, futureScenario, listingFit: listingFitParam, benchmark: benchmarkParam } = useLocalSearchParams<{
     q?: string;
     auto?: string;
     quizId?: string;
     futureScenario?: string;
     listingFit?: string;
+    benchmark?: string;
   }>();
   const profile = useUserStore((s) => s.profile);
   const applicantProfile = useUserStore((s) => s.applicantProfile);
@@ -116,8 +122,14 @@ export default function AiRoute() {
     () => parseListingFitExplanationContext(listingFitParam),
     [listingFitParam],
   );
+  const benchmark = useMemo(
+    () => listingFit ? null : parseBenchmarkExplanationContext(benchmarkParam),
+    [benchmarkParam, listingFit],
+  );
   const promptContext = listingFit
     ? '공고별 개인 적합도 설명 요청이에요. 아래 structured result에 없는 사용자 정보를 추측하지 마세요.'
+    : benchmark
+      ? '준비 비교 설명 요청이에요. 아래 structured result만 설명하고 사용자 프로필이나 또래 평균을 추측하지 마세요.'
     : selectedFutureScenario && hasCoreProfileForCalculations(applicantProfile)
       ? `${formatContextForPrompt(ctx)}\n\n${formatFutureAiContextForPrompt(
           buildFutureAiContext(profile, selectedFutureScenario),
@@ -159,7 +171,7 @@ export default function AiRoute() {
       setTurns([...visibleTurns, { role: 'user', text: trimmed }]);
 
       try {
-        const answer = await askAi(trimmed, promptContext, history, lesson, listingFit);
+        const answer = await askAi(trimmed, promptContext, history, lesson, listingFit, benchmark);
         setTurns([...visibleTurns, { role: 'user', text: trimmed }, { role: 'model', text: answer }]);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'AI 연결에 실패했어요.');
@@ -168,7 +180,7 @@ export default function AiRoute() {
         setLoading(false);
       }
     },
-    [lesson, listingFit, promptContext, turns],
+    [benchmark, lesson, listingFit, promptContext, turns],
   );
 
   // 각 화면의 contextual CTA 는 질문을 들고 들어와 바로 전송한다.

@@ -17,7 +17,7 @@ import {
   MILESTONE_MONTHS,
   simulateFuture,
 } from '../../domain/preparation';
-import { getLevel, XP_PER_QUIZ } from '../../domain/quiz';
+import { XP_PER_QUIZ } from '../../domain/quiz';
 import {
   formatPrice,
   getListingRelevance,
@@ -38,12 +38,10 @@ export default function HomeRoute() {
   const profile = useUserStore((state) => state.profile);
   const applicantProfile = useUserStore((state) => state.applicantProfile);
   const discoveryProfile = toDiscoveryUserProfile(applicantProfile);
-  const xp = useUserStore((state) => state.xp);
   const todayQuizDone = useUserStore((state) => state.todayQuizDone);
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const dataset = useListingDataset();
 
-  const level = getLevel(xp);
   const score = calculatePreparationScore(profile);
   const stage = getStage(score);
   const accountKnown = applicantProfile.subscriptionAccount.hasAccount.status === 'known';
@@ -108,13 +106,6 @@ export default function HomeRoute() {
           <View style={styles.brandRow}>
             <BrandMark size={30} />
             <Text style={styles.wordmark}>완판e</Text>
-            <View style={styles.spacer} />
-            <View style={styles.levelPill}>
-              <MaterialIcons name="bolt" size={13} color={colors.onPrimary} />
-              <Text style={styles.levelPillText}>
-                Lv.{level.level} · {xp} XP
-              </Text>
-            </View>
           </View>
 
           <Text style={styles.bandLabel}>{profile.name}님의 청약 준비도</Text>
@@ -308,7 +299,6 @@ const SIDE = spacing.screen;
 const styles = StyleSheet.create({
   screen: { flex: 1, height: '100%', backgroundColor: colors.surface },
   scroll: { paddingBottom: 24 },
-  spacer: { flex: 1 },
 
   band: { paddingHorizontal: SIDE, paddingBottom: 30, overflow: 'hidden' },
   bandGlow: {
@@ -329,17 +319,6 @@ const styles = StyleSheet.create({
     color: colors.onPrimary,
     letterSpacing: tracking.tight,
   },
-  levelPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    height: 26,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    paddingHorizontal: 9,
-  },
-  levelPillText: { ...type.micro, color: colors.onPrimary },
-
   bandLabel: { ...type.label, color: 'rgba(255,255,255,0.76)', marginTop: 22 },
   scoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2, marginTop: 2 },
   score: {

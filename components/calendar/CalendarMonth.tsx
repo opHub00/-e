@@ -68,6 +68,7 @@ export function CalendarMonth({
               accessibilityRole="button"
               accessibilityLabel={describeDay(day, count)}
               accessibilityState={{ selected }}
+              aria-pressed={selected}
               onPress={() => onSelect(day.date)}
               style={styles.dayCell}
             >

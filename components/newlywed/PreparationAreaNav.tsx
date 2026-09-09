@@ -1,7 +1,7 @@
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, spacing, type } from '../../design/tokens';
+import { colors, radius, shadow, spacing, type } from '../../design/tokens';
 import { MotionPressable } from '../motion/MotionPressable';
 
 type Props = { active: 'general' | 'newlywed' };
@@ -21,6 +21,7 @@ function AreaTab({ label, selected, onPress }: { label: string; selected: boolea
     <MotionPressable
       accessibilityRole="tab"
       accessibilityState={{ selected }}
+      hitSlop={{ top: spacing.xs, bottom: spacing.xs }}
       onPress={onPress}
       style={[styles.tab, selected && styles.selected]}
     >
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   tab: { flex: 1, minHeight: 36, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button },
-  selected: { backgroundColor: colors.surface },
-  label: { ...type.bodySmStrong, color: colors.textMuted },
+  selected: { backgroundColor: colors.surface, ...shadow.card },
+  label: { ...type.bodySmStrong, color: colors.textSubtle },
   selectedLabel: { color: colors.primary },
 });

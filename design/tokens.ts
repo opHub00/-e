@@ -51,6 +51,11 @@ export const tint = {
   amber: { bg: '#FFDCC3', fg: '#8A4900' },
   pink: { bg: '#FFDAD6', fg: '#93000A' },
   green: { bg: '#D6EFE0', fg: '#2E7D55' },
+  /**
+   * 판정이 아니라 "지금 할 일이 없다"는 뜻의 쉬는 상태.
+   * 준비 현황처럼 합격/불합격으로 읽히면 안 되는 곳에서 green 대신 쓴다.
+   */
+  neutral: { bg: '#F0ECF6', fg: '#474553' },
 } as const;
 
 /** purple gradient 카드 위에 얹는 반투명 레이어. */

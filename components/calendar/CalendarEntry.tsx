@@ -25,7 +25,7 @@ export function CalendarEntry() {
 
 const styles = StyleSheet.create({
   card: { marginHorizontal: spacing.screen, marginTop: spacing.lg, padding: 0 },
-  row: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md },
+  row: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md },
   copy: { flex: 1 },
   title: { ...type.rowTitle, color: colors.text },
   body: { ...type.caption, color: colors.textMuted, marginTop: 2 },

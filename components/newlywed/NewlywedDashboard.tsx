@@ -4,12 +4,15 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { stagger, travel } from '../../design/motion';
 import { colors, spacing, type } from '../../design/tokens';
 import { getDdayLabel, getKoreanToday, parseDateOnly } from '../../features/calendar/domain';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
 import { buildNewlywedDashboard, type NewlywedChecklistStatus } from '../../features/newlywed/domain';
 import { useUserStore } from '../../store/useUserStore';
+import { Appear } from '../motion/Appear';
 import { MotionPressable } from '../motion/MotionPressable';
+import { ScreenEnter } from '../motion/ScreenEnter';
 import { PrimaryButton } from '../PrimaryButton';
 import { ScreenHeader } from '../ScreenHeader';
 import { StatusPill } from '../StatusPill';
@@ -17,7 +20,7 @@ import { WanpanCard } from '../WanpanCard';
 import { PreparationAreaNav } from './PreparationAreaNav';
 
 const CHECK_STATUS: Record<NewlywedChecklistStatus, { label: string; tone: React.ComponentProps<typeof StatusPill>['tone'] }> = {
-  confirmed: { label: '정보 확인 완료', tone: 'green' },
+  confirmed: { label: '정보 확인 완료', tone: 'neutral' },
   'information-needed': { label: '정보 필요', tone: 'amber' },
   'notice-check': { label: '공고별 확인 필요', tone: 'purple' },
 };
@@ -34,19 +37,22 @@ export function NewlywedDashboard() {
   const goBack = () => router.canGoBack() ? router.back() : router.replace('/preparation' as Href);
 
   return (
+    <ScreenEnter>
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title="신혼 청약 관리" onBack={goBack} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <PreparationAreaNav active="newlywed" />
 
+          <Appear delay={stagger.short} distance={travel.content}>
           <WanpanCard tone="lavender" style={styles.hero}>
             <Text style={styles.eyebrow}>신혼 청약 준비 현황</Text>
             <Text style={styles.heroTitle}>{model.confirmedCount} / {model.informationItemCount}개 정보 영역 확인</Text>
             <Text style={styles.heroBody}>이 수치는 자격 점수가 아니라 프로필 정보 확인 현황이에요. 실제 신청 조건은 공고문 기준으로 확인해야 해요.</Text>
           </WanpanCard>
+          </Appear>
 
-          <SectionTitle title="자격·조건 체크" description="저장된 정보의 확인 여부만 표시해요." />
+          <SectionTitle title="조건별 준비 상황" description="저장된 정보의 확인 여부만 표시해요. 자격 판정이 아니에요." />
           <WanpanCard style={styles.cardList}>
             {model.checklist.map((item, index) => {
               const status = CHECK_STATUS[item.status];
@@ -138,6 +144,7 @@ export function NewlywedDashboard() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ScreenEnter>
   );
 }
 

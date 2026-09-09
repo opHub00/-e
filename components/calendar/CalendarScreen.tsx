@@ -6,6 +6,9 @@ import { PrimaryButton } from '../PrimaryButton';
 import { ScreenHeader } from '../ScreenHeader';
 import { WanpanCard } from '../WanpanCard';
 import { MotionPressable } from '../motion/MotionPressable';
+import { Appear } from '../motion/Appear';
+import { ScreenEnter } from '../motion/ScreenEnter';
+import { stagger, travel } from '../../design/motion';
 import { colors, radius, spacing, type } from '../../design/tokens';
 import { useCalendar } from '../../features/calendar/useCalendar';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
@@ -21,6 +24,7 @@ export function CalendarScreen() {
   const goBack = () => router.canGoBack() ? router.back() : router.replace('/preparation' as Href);
 
   return (
+    <ScreenEnter>
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title="청약 캘린더" onBack={goBack} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -50,6 +54,7 @@ export function CalendarScreen() {
           ) : (
             <>
               {dataset.isFallback ? <Text style={styles.notice}>현재는 예시 공고 일정이 표시되고 있어요.</Text> : null}
+              <Appear delay={stagger.short} distance={travel.content}>
               <WanpanCard>
                 <CalendarMonth
                   monthId={calendar.monthId}
@@ -68,11 +73,13 @@ export function CalendarScreen() {
                   onOpenListing={(listingId) => router.push(`/discovery/${listingId}` as Href)}
                 />
               </WanpanCard>
+              </Appear>
             </>
           )}
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ScreenEnter>
   );
 }
 

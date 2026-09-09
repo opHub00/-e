@@ -21,6 +21,7 @@ function AreaTab({ label, selected, onPress }: { label: string; selected: boolea
     <MotionPressable
       accessibilityRole="tab"
       accessibilityState={{ selected }}
+      aria-selected={selected}
       hitSlop={{ top: spacing.xs, bottom: spacing.xs }}
       onPress={onPress}
       style={[styles.tab, selected && styles.selected]}
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.screen,
     marginTop: spacing.lg,
   },
-  tab: { flex: 1, minHeight: 36, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button },
+  tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radius.button },
   selected: { backgroundColor: colors.surface, ...shadow.card },
   label: { ...type.bodySmStrong, color: colors.textSubtle },
   selectedLabel: { color: colors.primary },

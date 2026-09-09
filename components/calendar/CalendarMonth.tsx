@@ -1,8 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius, size, spacing, type } from '../../design/tokens';
 import type { CalendarDay } from '../../features/calendar/calendarModel';
 import { getMonthLabel } from '../../features/calendar/domain';
+import { MotionPressable } from '../motion/MotionPressable';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -30,16 +31,16 @@ export function CalendarMonth({
   return (
     <View>
       <View style={styles.monthHead}>
-        <Pressable accessibilityRole="button" accessibilityLabel="이전 달" hitSlop={4} onPress={onPrevious} style={styles.iconButton}>
+        <MotionPressable accessibilityRole="button" accessibilityLabel="이전 달" hitSlop={4} onPress={onPrevious} style={styles.iconButton}>
           <MaterialIcons name="chevron-left" size={22} color={colors.text} />
-        </Pressable>
+        </MotionPressable>
         <Text style={styles.monthLabel}>{getMonthLabel(monthId)}</Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="다음 달" hitSlop={4} onPress={onNext} style={styles.iconButton}>
+        <MotionPressable accessibilityRole="button" accessibilityLabel="다음 달" hitSlop={4} onPress={onNext} style={styles.iconButton}>
           <MaterialIcons name="chevron-right" size={22} color={colors.text} />
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="오늘로 이동" onPress={onToday} style={styles.todayButton}>
+        </MotionPressable>
+        <MotionPressable accessibilityRole="button" accessibilityLabel="오늘로 이동" onPress={onToday} style={styles.todayButton}>
           <Text style={styles.todayText}>오늘</Text>
-        </Pressable>
+        </MotionPressable>
       </View>
 
       <View style={styles.weekRow}>
@@ -50,7 +51,7 @@ export function CalendarMonth({
           const selected = day.date === selectedDate;
           const count = eventCounts.get(day.date) ?? 0;
           return (
-            <Pressable
+            <MotionPressable
               key={day.date}
               accessibilityRole="button"
               accessibilityLabel={`${day.date}${count ? `, 일정 ${count}개` : ''}`}
@@ -67,7 +68,7 @@ export function CalendarMonth({
                 ]}>{day.day}</Text>
               </View>
               <View style={[styles.indicator, day.hasEvents && styles.indicatorVisible]} />
-            </Pressable>
+            </MotionPressable>
           );
         })}
       </View>

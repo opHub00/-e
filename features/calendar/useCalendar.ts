@@ -20,6 +20,10 @@ export function useCalendar(
     [allEvents, filter, savedListingIds],
   );
   const grouped = useMemo(() => groupCalendarEvents(events), [events]);
+  const eventCounts = useMemo(
+    () => new Map([...grouped].map(([date, dayEvents]) => [date, dayEvents.length])),
+    [grouped],
+  );
   const days = useMemo(
     () => buildMonthGrid(monthId, new Set(grouped.keys()), today),
     [grouped, monthId, today],
@@ -48,6 +52,7 @@ export function useCalendar(
     filter,
     setFilter,
     days,
+    eventCounts,
     selectedEvents: grouped.get(selectedDate) ?? [],
     changeMonth,
     selectDate,

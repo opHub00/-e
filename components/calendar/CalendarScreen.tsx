@@ -1,6 +1,5 @@
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../PrimaryButton';
@@ -19,16 +18,6 @@ export function CalendarScreen() {
   const dataset = useListingDataset();
   const savedListingIds = useDiscoveryStore((state) => state.savedListingIds);
   const calendar = useCalendar(dataset.listings, savedListingIds);
-  const eventCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    calendar.days.forEach((day) => {
-      if (day.hasEvents) counts.set(day.date, 0);
-    });
-    // 선택 화면의 indicator 접근성에는 월 전체 개수가 필요해 event model을 한 번 더 세지 않고
-    // 현재 선택일만 정확한 개수로 보강한다. 나머지는 indicator 존재를 1개로 전달한다.
-    counts.forEach((_, date) => counts.set(date, date === calendar.selectedDate ? calendar.selectedEvents.length : 1));
-    return counts;
-  }, [calendar.days, calendar.selectedDate, calendar.selectedEvents.length]);
   const goBack = () => router.canGoBack() ? router.back() : router.replace('/preparation' as Href);
 
   return (
@@ -66,7 +55,7 @@ export function CalendarScreen() {
                   monthId={calendar.monthId}
                   days={calendar.days}
                   selectedDate={calendar.selectedDate}
-                  eventCounts={eventCounts}
+                  eventCounts={calendar.eventCounts}
                   onPrevious={() => calendar.changeMonth(-1)}
                   onNext={() => calendar.changeMonth(1)}
                   onToday={calendar.goToday}

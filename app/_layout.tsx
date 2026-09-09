@@ -57,6 +57,7 @@ export default function RootLayout() {
         <Stack.Screen name="profile" options={{ headerShown: false }} />
         <Stack.Screen name="calendar" options={{ headerShown: false }} />
         <Stack.Screen name="newlywed" options={{ headerShown: false }} />
+        <Stack.Screen name="benchmark" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="discovery/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="eligibility/first-home" options={{ headerShown: false }} />

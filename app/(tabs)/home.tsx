@@ -5,6 +5,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
 import { Disclaimer } from '../../components/Disclaimer';
@@ -154,7 +155,7 @@ export default function HomeRoute() {
 
         {/* Monzo: 밴드 아래는 하나의 연속 surface. 카드를 여러 장 띄우지 않는다. */}
         <View style={styles.sheet}>
-          <Appear delay={stagger.normal} distance={travel.content} style={styles.statRow}>
+          <Appear delay={stagger.short} distance={travel.content} style={styles.statRow}>
             <Stat label="다음 변화" value={nextChange} lead />
             <View style={styles.statDivider} />
             <Stat label="오늘 학습" value={todayQuizDone ? `+${XP_PER_QUIZ} XP` : '아직'} />
@@ -162,7 +163,7 @@ export default function HomeRoute() {
             <Stat label="관심 청약" value={`${savedListings.length}곳`} />
           </Appear>
 
-          <View style={styles.group}>
+          <Appear delay={stagger.normal} distance={travel.content} style={styles.group}>
             <View style={styles.groupHead}>
               <Text style={styles.groupTitle}>
                 {savedListings.length > 0 ? '관심 청약' : '먼저 살펴볼 청약'}
@@ -209,8 +210,8 @@ export default function HomeRoute() {
                 ? formatPrice(listing.representativePrice).replace('억', '')
                 : null;
               return (
+                <AppearItem key={listing.id} index={index} distance={travel.content}>
                 <MotionPressable
-                  key={listing.id}
                   accessibilityRole="button"
                   onPress={() =>
                     router.push({ pathname: '/discovery/[id]', params: { id: listing.id } })
@@ -254,18 +255,23 @@ export default function HomeRoute() {
                     {priceLabel ? <Text style={styles.rowValueUnit}>억</Text> : null}
                   </Text>
                 </MotionPressable>
+                </AppearItem>
               );
             })}
-          </View>
+          </Appear>
 
-          <View style={styles.group}>
+          <Appear
+            delay={stagger.normal + stagger.short}
+            distance={travel.content}
+            style={styles.group}
+          >
             <View style={styles.groupHead}>
               <Text style={styles.groupTitleSub}>오늘 할 일</Text>
             </View>
 
             {todos.map(({ action, href, label }, index) => (
+              <AppearItem key={action} index={index} distance={travel.content}>
               <MotionPressable
-                key={action}
                 accessibilityRole="button"
                 accessibilityLabel={`${action} ${label}(으)로 이동`}
                 onPress={() => router.push(href)}
@@ -280,12 +286,13 @@ export default function HomeRoute() {
                 </Text>
                 <MaterialIcons name="chevron-right" size={16} color={colors.outline} style={styles.todoChevron} />
               </MotionPressable>
+              </AppearItem>
             ))}
 
             <View style={styles.footNote}>
               <Disclaimer />
             </View>
-          </View>
+          </Appear>
         </View>
       </ScrollView>
     </View>

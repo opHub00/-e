@@ -1,10 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable } from 'react-native';
+import { Animated, Platform, Pressable } from 'react-native';
 import type { GestureResponderEvent, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { duration, easing, scale, useNative } from '../../design/motion';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/**
+ * hover 는 포인터가 있는 환경에서만 의미가 있다.
+ * 터치 기기에서 hover 를 전제하면 눌렀다 뗀 뒤 상태가 남는다.
+ */
+const HOVERABLE = Platform.OS === 'web';
 
 /**
  * style 은 함수 형태를 받지 않는다.
@@ -26,16 +32,22 @@ export function MotionPressable({
   disabled,
   onPressIn,
   onPressOut,
+  onHoverIn,
+  onHoverOut,
   pressedScale = scale.pressed,
   style,
   ...props
 }: Props) {
   const reduced = useReducedMotion();
   const pressed = useRef(new Animated.Value(0)).current;
+  const hover = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (disabled) pressed.setValue(0);
-  }, [disabled, pressed]);
+    if (disabled) {
+      pressed.setValue(0);
+      hover.setValue(0);
+    }
+  }, [disabled, hover, pressed]);
 
   const animate = (toValue: 0 | 1) => {
     Animated.timing(pressed, {
@@ -61,10 +73,25 @@ export function MotionPressable({
     onPressOut?.(event);
   };
 
+  // 포인터가 있는 환경에서만 의미가 있다. 터치에는 hover 상태가 없다.
+  const handleHoverIn: NonNullable<PressableProps['onHoverIn']> = (event) => {
+    if (!disabled) hover.setValue(1);
+    onHoverIn?.(event);
+  };
+
+  const handleHoverOut: NonNullable<PressableProps['onHoverOut']> = (event) => {
+    if (!disabled) hover.setValue(0);
+    onHoverOut?.(event);
+  };
+
   const feedbackStyle = disabled
     ? undefined
     : {
-        opacity: pressed.interpolate({ inputRange: [0, 1], outputRange: [1, 0.96] }),
+        // 눌림과 hover 를 곱해서 겹칠 때도 값이 한 번만 적용되게 한다.
+        opacity: Animated.multiply(
+          pressed.interpolate({ inputRange: [0, 1], outputRange: [1, 0.96] }),
+          hover.interpolate({ inputRange: [0, 1], outputRange: [1, 0.92] }),
+        ),
         transform: reduced
           ? []
           : [
@@ -83,6 +110,8 @@ export function MotionPressable({
       disabled={disabled}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      onHoverIn={HOVERABLE ? handleHoverIn : undefined}
+      onHoverOut={HOVERABLE ? handleHoverOut : undefined}
       style={[style, feedbackStyle]}
     />
   );

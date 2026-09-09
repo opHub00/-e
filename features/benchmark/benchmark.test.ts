@@ -88,6 +88,7 @@ partialProfile.assets = {
 const partial = buildPeerBenchmark(partialProfile);
 assert.equal(partial.comparison.dimensions.find((item) => item.id === 'account')?.status, 'checking');
 assert.equal(partial.comparison.dimensions.find((item) => item.id === 'assets')?.status, 'checking');
+assert.equal(partial.comparison.dimensions.find((item) => item.id === 'assets')?.detail, '일부 정보만 확인됐어요.');
 assert.notEqual(partial.comparison.dimensions.find((item) => item.id === 'account')?.status, 'information-needed', 'partial은 낮은 점수나 missing으로 취급하지 않는다');
 
 assert.equal(OFFICIAL_BENCHMARK_METADATA.institution, '한국부동산원 청약Home');

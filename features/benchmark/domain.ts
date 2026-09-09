@@ -259,7 +259,7 @@ function bundleDimension(
     completion === 'complete'
       ? completeDetail
       : completion === 'partial'
-        ? `${title}가 일부만 확인됐어요.`
+        ? '일부 정보만 확인됐어요.'
         : `${title}가 아직 입력되지 않았어요.`,
     completion === 'complete'
       ? 'well-prepared'

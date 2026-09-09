@@ -3,9 +3,11 @@ import { useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
+import { travel } from '../../design/motion';
 import { colors, radius, spacing, tint, tracking, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
@@ -271,11 +273,16 @@ export default function MoreRoute() {
           </View>
         ) : null}
 
-        {CATEGORY_ORDER.map((category) => {
+        {CATEGORY_ORDER.map((category, sectionIndex) => {
           const items = visibleFeatures.filter((feature) => feature.category === category);
           if (items.length === 0) return null;
           return (
-            <View key={category} style={styles.section}>
+            <AppearItem
+              key={category}
+              index={sectionIndex}
+              distance={travel.content}
+              style={styles.section}
+            >
               <Text style={styles.sectionLabel}>{category}</Text>
               {items.map((feature, index) => (
                 <MotionPressable
@@ -299,7 +306,7 @@ export default function MoreRoute() {
                   <MaterialIcons name="chevron-right" size={19} color={colors.outline} />
                 </MotionPressable>
               ))}
-            </View>
+            </AppearItem>
           );
         })}
 

@@ -7,6 +7,7 @@ import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
+import { AnimatedBar } from '../../components/motion/AnimatedBar';
 import { Appear } from '../../components/motion/Appear';
 import { NewsBriefingSection } from '../../components/NewsBriefingSection';
 import { NewsImpactSheet } from '../../components/NewsImpactSheet';
@@ -150,7 +151,7 @@ export default function PreparationRoute() {
             </View>
           </View>
           <View style={styles.bandTrack}>
-            <View style={[styles.bandFill, { width: `${(doneCount / nodes.length) * 100}%` }]} />
+            <AnimatedBar ratio={doneCount / nodes.length} style={styles.bandFill} />
           </View>
         </View>
       </LinearGradient>

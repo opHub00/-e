@@ -17,7 +17,7 @@ import { BrandMark } from '../../components/BrandMark';
 import { IconChip } from '../../components/IconChip';
 import { quizzes } from '../../data/quizzes';
 import { colors, radius, shadow, size, spacing, tracking, type } from '../../design/tokens';
-import { duration, easing, useNative } from '../../design/motion';
+import { duration, easing, travel, useNative } from '../../design/motion';
 import {
   buildAiContext,
   formatContextForPrompt,
@@ -31,6 +31,7 @@ import { parseFutureScenario } from '../../domain/futureSimulation';
 import { hasCoreProfileForCalculations } from '../../features/profile/domain';
 import { getPersonalMessage } from '../../domain/quiz';
 import { Appear } from '../../components/motion/Appear';
+import { AppearItem } from '../../components/motion/AppearItem';
 import { useUserStore } from '../../store/useUserStore';
 import {
   parseListingFitExplanationContext,
@@ -232,8 +233,8 @@ export default function AiRoute() {
                 <Text style={styles.suggestLabel}>지금 이런 설명이 도움 돼요</Text>
               </View>
               {suggestions.map((s, index) => (
+                <AppearItem key={s} index={index} distance={travel.content}>
                 <MotionPressable
-                  key={s}
                   accessibilityRole="button"
                   onPress={() => void send(s)}
                   style={[
@@ -249,18 +250,19 @@ export default function AiRoute() {
                   <Text style={styles.suggestText}>{s}</Text>
                   <MaterialIcons name="arrow-forward" size={19} color={colors.primary} />
                 </MotionPressable>
+                </AppearItem>
               ))}
             </Appear>
           ) : null}
 
           {turns.map((t, i) =>
             t.role === 'user' ? (
-              <View key={`${i}-q`} style={styles.questionWrap}>
+              <Appear key={`${i}-q`} distance={travel.content} style={styles.questionWrap}>
                 <Text style={styles.turnEyebrow}>내 질문</Text>
                 <View style={styles.question}>
                   <Text style={styles.questionText}>{t.text}</Text>
                 </View>
-              </View>
+              </Appear>
             ) : (
               <Appear key={`${i}-a`} style={styles.answer}>
                 <View style={styles.answerHeading}>

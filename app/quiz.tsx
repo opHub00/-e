@@ -20,7 +20,7 @@ import {
   getTodayQuiz,
 } from '../domain/quiz';
 import { Appear } from '../components/motion/Appear';
-import { duration, easing, stagger, useNative } from '../design/motion';
+import { duration, easing, scale, stagger, useNative } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useUserStore } from '../store/useUserStore';
 
@@ -249,6 +249,7 @@ function Choice({ mark, label, onPress }: { mark: string; label: string; onPress
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      pressedScale={scale.selection}
       style={styles.choice}
     >
       <Text style={styles.choiceMark}>{mark}</Text>

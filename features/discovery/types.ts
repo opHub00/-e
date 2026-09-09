@@ -40,6 +40,22 @@ export type ListingSourceIdentifiers = {
   pblancNo: string;
 };
 
+export type ListingScheduleDateRange = {
+  startDate: string | null;
+  endDate: string | null;
+};
+
+export type ListingPriorityApplication = ListingScheduleDateRange & {
+  rank: 1 | 2;
+  scope: 'same-area' | 'other-gyeonggi' | 'other-area';
+};
+
+/** 청약홈 APT 공고가 제공하는 구조화된 접수 일정. 없는 날짜는 추정하지 않는다. */
+export type ListingOfficialSchedule = {
+  specialSupply?: ListingScheduleDateRange;
+  priorityApplications: ListingPriorityApplication[];
+};
+
 /**
  * 앱 내부의 provider-independent 청약 모델.
  * 자격 충족·순위·가점·당첨 가능성을 판정할 수 있는 필드는 의도적으로 두지 않는다.
@@ -64,6 +80,7 @@ export type DiscoveryListing = {
   winnerAnnouncementDate: string | null;
   contractStartDate: string | null;
   contractEndDate: string | null;
+  officialSchedule?: ListingOfficialSchedule;
   announcementUrl: string | null;
   homepageUrl: string | null;
   housingType: HousingType;

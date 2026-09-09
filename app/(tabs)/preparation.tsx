@@ -7,6 +7,8 @@ import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
+import { CalendarEntry } from '../../components/calendar/CalendarEntry';
+import { PreparationAreaNav } from '../../components/newlywed/PreparationAreaNav';
 import { AnimatedBar } from '../../components/motion/AnimatedBar';
 import { Appear } from '../../components/motion/Appear';
 import { NewsBriefingSection } from '../../components/NewsBriefingSection';
@@ -157,6 +159,8 @@ export default function PreparationRoute() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <PreparationAreaNav active="general" />
+        <CalendarEntry />
         {/* 타임라인 캔버스: 카드가 아니라 배경 tint 위에 경로가 놓인다. */}
         <View style={styles.canvas}>
           {nodes.map((node, index) => {

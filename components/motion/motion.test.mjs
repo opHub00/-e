@@ -14,6 +14,7 @@ const appear = read('components/motion/Appear.tsx');
 const screenEnter = read('components/motion/ScreenEnter.tsx');
 const reduced = read('hooks/useReducedMotion.ts');
 const rootLayout = read('app/_layout.tsx');
+const rootHtml = read('app/+html.tsx');
 const tabsLayout = read('app/(tabs)/_layout.tsx');
 const entrance = read('components/BrandEntrance.tsx');
 const map = read('features/discovery/components/DiscoveryMap.web.tsx');
@@ -135,6 +136,12 @@ check(
 check(
   /chooseBrandEntranceVariant\(/.test(entrance) && /const elapsedMs = brandEntranceElapsedMs\(\);/.test(entrance),
   'brand entrance shortens itself when the cover has already been up',
+);
+check(
+  /BRAND_ENTRANCE_MAX_MS/.test(rootHtml) &&
+    /setTimeout\(function\(\)\{d\.removeAttribute/.test(rootHtml) &&
+    !/\},2500\)/.test(rootHtml),
+  'pre-paint cover shares the 1200ms entrance budget',
 );
 check(
   /transform: minimal\s*\?\s*\[\]/.test(entrance) && /minimal \? null :/.test(entrance),

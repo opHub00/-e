@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 import {
   BRAND_ENTRANCE_ATTR,
   BRAND_ENTRANCE_KEY,
+  BRAND_ENTRANCE_MAX_MS,
 } from '../features/brandEntrance/session';
 import { colors } from '../design/tokens';
 
@@ -36,7 +37,7 @@ if(sessionStorage.getItem(${JSON.stringify(BRAND_ENTRANCE_KEY)})!==null)return;
 var d=document.documentElement;
 d.setAttribute(${JSON.stringify(BRAND_ENTRANCE_ATTR)},"pending");
 window.__wanpaneEntranceStart=Date.now();
-setTimeout(function(){d.removeAttribute(${JSON.stringify(BRAND_ENTRANCE_ATTR)});},2500);
+setTimeout(function(){d.removeAttribute(${JSON.stringify(BRAND_ENTRANCE_ATTR)});},${BRAND_ENTRANCE_MAX_MS});
 })();`;
 
 export default function Root({ children }: PropsWithChildren) {

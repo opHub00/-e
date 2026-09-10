@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { usePathname } from 'expo-router';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -28,7 +28,7 @@ export function PwaInstallRecommendation() {
       visible
     >
       <View style={styles.stage}>
-        <Pressable
+        <MotionPressable
           accessibilityLabel="앱 설치 추천 닫기"
           accessibilityRole="button"
           onPress={recommendation.dismiss}

@@ -429,12 +429,18 @@ const styles = StyleSheet.create({
 
 
   /* tinted 캔버스 위에 경로를 놓아 배경이 composition 의 일부가 되게 한다. */
+  /**
+   * 로드맵 구역.
+   *
+   * 예전에는 marginTop: -16 으로 보라 밴드 아래에 파고드는 sheet 였다.
+   * 영역 전환과 캘린더 진입이 위에 들어오면서 그 음수 마진이 밴드가 아니라
+   * 캘린더 카드를 16px 덮어 글자가 잘렸다. 음수 마진을 걷어내고 일반 흐름으로 되돌린다.
+   *
+   * 흰 배경 위 흰 캔버스라 표면이 보이지 않던 것도 함께 정리한다.
+   * 타임라인은 카드가 아니라 한 덩어리 구역이라는 것이 Preparation 의 정체성이다.
+   */
   canvas: {
-    marginTop: -16,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 22,
+    marginTop: spacing.lg,
     paddingBottom: 16,
     paddingHorizontal: SIDE,
   },

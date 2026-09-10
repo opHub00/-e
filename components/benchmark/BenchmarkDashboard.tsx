@@ -82,31 +82,32 @@ export function BenchmarkDashboard() {
               title="내 정보 비교"
               description="점수나 순위 대신, 준비 영역별 확인 상태를 보여줘요."
             />
-            <WanpanCard style={styles.cardList}>
-              {result.comparison.dimensions.map((item, index) => {
+            {/* 비교 화면이라 목록이 아니라 격자로 늘어놓는다.
+                영역별 상태를 한눈에 훑는 것이 이 화면의 목적이다. */}
+            <View style={styles.matrix}>
+              {result.comparison.dimensions.map((item) => {
                 const status = STATUS[item.status];
                 const actionable = item.status === 'information-needed' && item.bundleId;
                 return (
-                  <View key={item.id} style={[styles.dimensionRow, index > 0 && styles.rowBorder]}>
-                    <View style={styles.dimensionHead}>
-                      <Text style={styles.rowTitle}>{item.title}</Text>
-                      <StatusPill label={status.label} tone={status.tone} />
-                    </View>
-                    <Text style={styles.rowBody}>{item.detail}</Text>
+                  <View key={item.id} style={styles.tile}>
+                    <StatusPill label={status.label} tone={status.tone} />
+                    <Text style={styles.tileTitle} numberOfLines={2}>{item.title}</Text>
+                    <Text style={styles.tileBody} numberOfLines={3}>{item.detail}</Text>
                     {actionable ? (
                       <MotionPressable
                         accessibilityRole="button"
+                        accessibilityLabel={`${item.title} 부족한 정보 채우기`}
                         onPress={() => setPromptBundleId(item.bundleId!)}
-                        style={styles.textButton}
+                        style={styles.tileAction}
                       >
-                        <Text style={styles.textButtonLabel}>부족한 정보 채우기</Text>
-                        <MaterialIcons name="arrow-forward" size={16} color={colors.primary} />
+                        <Text style={styles.textButtonLabel}>정보 채우기</Text>
+                        <MaterialIcons name="arrow-forward" size={15} color={colors.primary} />
                       </MotionPressable>
                     ) : null}
                   </View>
                 );
               })}
-            </WanpanCard>
+            </View>
 
             <SectionTitle
               title="완판e 준비 기준"
@@ -199,6 +200,27 @@ const styles = StyleSheet.create({
   sectionTitle: { marginHorizontal: spacing.screen, marginTop: spacing.md },
   sectionText: { ...type.section, color: colors.text },
   sectionDescription: { ...type.caption, color: colors.textSubtle, marginTop: 2 },
+  /** 준비 영역 비교 격자. 좁은 화면에서도 2열을 유지한다. */
+  matrix: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginHorizontal: spacing.screen,
+  },
+  tile: {
+    // gap(8) 을 뺀 절반. 2열이 정확히 들어맞는다.
+    width: '48.5%',
+    minHeight: 148,
+    gap: spacing.xs,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.surfaceHigh,
+    backgroundColor: colors.surface,
+    padding: 12,
+  },
+  tileTitle: { ...type.rowTitle, color: colors.text, marginTop: 2 },
+  tileBody: { ...type.caption, color: colors.textMuted, lineHeight: 18, flex: 1 },
+  tileAction: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   cardList: { marginHorizontal: spacing.screen, paddingVertical: 0 },
   sectionCard: { marginHorizontal: spacing.screen },
   dimensionRow: { minHeight: 96, paddingVertical: spacing.md },

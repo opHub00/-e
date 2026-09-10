@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { stagger, travel } from '../../design/motion';
-import { colors, spacing, type } from '../../design/tokens';
+import { colors, numeric, spacing, tracking, type } from '../../design/tokens';
 import { getDdayLabel, getKoreanToday, parseDateOnly } from '../../features/calendar/domain';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
 import { buildNewlywedDashboard, type NewlywedChecklistStatus } from '../../features/newlywed/domain';
@@ -47,7 +47,21 @@ export function NewlywedDashboard() {
           <Appear delay={stagger.short} distance={travel.content}>
           <WanpanCard tone="lavender" style={styles.hero}>
             <Text style={styles.eyebrow}>신혼 청약 준비 현황</Text>
-            <Text style={styles.heroTitle}>{model.confirmedCount} / {model.informationItemCount}개 정보 영역 확인</Text>
+            {/* 관리 화면이라 '어디까지 왔는지'가 먼저 보여야 한다.
+                숫자를 문장에 묻지 않고 눈금으로 세운다. */}
+            <View style={styles.meterRow}>
+              <Text style={styles.meterValue}>{model.confirmedCount}</Text>
+              <Text style={styles.meterTotal}>/ {model.informationItemCount}</Text>
+              <Text style={styles.meterUnit}>개 정보 영역 확인</Text>
+            </View>
+            <View style={styles.meterTrack} accessibilityRole="progressbar">
+              {Array.from({ length: model.informationItemCount }, (_, i) => (
+                <View
+                  key={i}
+                  style={[styles.meterTick, i < model.confirmedCount && styles.meterTickOn]}
+                />
+              ))}
+            </View>
             <Text style={styles.heroBody}>이 수치는 자격 점수가 아니라 프로필 정보 확인 현황이에요. 실제 신청 조건은 공고문 기준으로 확인해야 해요.</Text>
             <View style={styles.heroAction}>
               <PrimaryButton label="내 신혼 청약 조건 보기" onPress={() => router.push('/eligibility/newlywed' as Href)} />
@@ -177,6 +191,14 @@ const styles = StyleSheet.create({
   hero: { marginHorizontal: spacing.screen, marginTop: spacing.lg },
   eyebrow: { ...type.label, color: colors.primary },
   heroTitle: { ...type.title, color: colors.text, marginTop: spacing.xs },
+  meterRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs, marginTop: spacing.xs },
+  meterValue: { ...type.metric, ...numeric, color: colors.primary, letterSpacing: tracking.display },
+  meterTotal: { ...type.title, ...numeric, color: colors.textSubtle },
+  meterUnit: { ...type.bodySm, color: colors.textMuted },
+  /** 영역 수만큼 눈금을 두어 '몇 칸 남았는지'가 바로 보이게 한다. */
+  meterTrack: { flexDirection: 'row', gap: 3, marginTop: spacing.sm },
+  meterTick: { flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.primaryFixed },
+  meterTickOn: { backgroundColor: colors.primary },
   heroBody: { ...type.bodySm, color: colors.textMuted, marginTop: spacing.sm },
   /** 설명 문단과 CTA 가 붙어 있으면 버튼이 문장의 일부처럼 보인다. */
   heroAction: { marginTop: spacing.md },

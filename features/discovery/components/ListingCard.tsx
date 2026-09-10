@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { Pop } from '../../../components/motion/Pop';
 import { colors, radius, tint, tracking, type } from '../../../design/tokens';
+import { ListingVisualPreview } from '../../listingVisual/ListingVisualPreview';
 import {
   formatHouseholdCount,
   formatPrice,
@@ -63,6 +64,8 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
           </Text>
           <View style={styles.spacer} />
         </View>
+
+        <ListingVisualPreview listing={listing} />
 
         <Text style={styles.name} numberOfLines={2}>
           {listing.complexName}

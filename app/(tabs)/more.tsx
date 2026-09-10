@@ -116,7 +116,7 @@ export default function MoreRoute() {
   const resetLocalDemoState = useAuthStore((state) => state.resetLocalDemoState);
   const restoreCloudAfterDemoReset = useAuthStore((state) => state.restoreCloudAfterDemoReset);
   const [query, setQuery] = useState('');
-  const { canInstall, install } = usePwaInstall();
+  const { canInstall, install, installMode, showIosInstructions } = usePwaInstall();
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const visibleFeatures = useMemo(
@@ -259,10 +259,21 @@ export default function MoreRoute() {
                 <Text style={styles.accountTitle}>앱처럼 사용하기</Text>
                 <Text style={styles.accountStatus}>홈 화면에서 완판e를 바로 열 수 있어요.</Text>
               </View>
-              <MotionPressable accessibilityRole="button" onPress={() => void install()} style={styles.installButton}>
-                <Text style={styles.installButtonText}>설치</Text>
+              <MotionPressable
+                accessibilityRole="button"
+                accessibilityLabel={installMode === 'ios-safari' ? 'iPhone 홈 화면 설치 안내 보기' : '완판e 앱 설치'}
+                onPress={() => void install()}
+                style={styles.installButton}
+              >
+                <Text style={styles.installButtonText}>{installMode === 'ios-safari' ? '설치 안내' : '설치'}</Text>
               </MotionPressable>
             </View>
+            {showIosInstructions ? (
+              <View accessibilityLiveRegion="polite" style={styles.iosInstallHelp}>
+                <MaterialIcons name="ios-share" size={18} color={colors.primary} />
+                <Text style={styles.iosInstallText}>Safari의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택해 주세요.</Text>
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -367,11 +378,22 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 88 },
 
   accountSection: { paddingHorizontal: SIDE, paddingTop: 18 },
-  installSection: { paddingHorizontal: SIDE, paddingTop: 10 },
+  installSection: { paddingHorizontal: SIDE, paddingTop: 10, gap: spacing.sm },
   installCard: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: radius.card, backgroundColor: colors.lavender, padding: 13 },
   installIcon: { width: 36, height: 36, borderRadius: radius.cardSm, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   installButton: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 13, borderRadius: radius.button, backgroundColor: colors.primary },
   installButtonText: { ...type.label, color: colors.onPrimary },
+  iosInstallHelp: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.surfaceLow,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  iosInstallText: { ...type.bodySm, color: colors.textMuted, flex: 1, lineHeight: 20 },
   accountCard: {
     borderRadius: radius.card,
     backgroundColor: colors.surfaceLow,

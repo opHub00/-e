@@ -6,6 +6,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WanpanCard } from '../../components/WanpanCard';
 import { BackButton } from '../../components/BackButton';
+import { PrimaryButton } from '../../components/PrimaryButton';
 import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { StatusPill } from '../../components/StatusPill';
 import { Appear } from '../../components/motion/Appear';
@@ -148,7 +149,13 @@ export default function FirstHomeEligibilityRoute() {
           <Text style={styles.progressText}> · {unresolvedCount}개는 정보 또는 공고 확인이 필요해요</Text>
         </View>
 
-        {/* 채울 정보가 있을 때만 보여준다. 이미 충분하면 자리를 차지하지 않는다. */}
+        {/* 채울 정보가 있을 때만 보여준다. 이미 충분하면 자리를 차지하지 않는다.
+            요구하기 전에 무엇을 얻는지 먼저 말한다. */}
+        {result.missingBundles.length > 0 ? (
+          <Text style={styles.ctaValue}>
+            정보를 채우면 공고에서 따로 확인할 조건이 줄어들어요.
+          </Text>
+        ) : null}
         {result.missingBundles.length > 0 ? (
           <MotionPressable
             accessibilityRole="button"
@@ -215,9 +222,11 @@ export default function FirstHomeEligibilityRoute() {
           {aiState === 'error' ? (
             <Text style={styles.aiError}>설명은 지금 불러오지 못했어요. 위의 조건 분석 결과는 그대로 확인할 수 있어요.</Text>
           ) : null}
-          <MotionPressable accessibilityRole="button" onPress={() => void explain()} style={styles.aiButton}>
-            {aiState === 'loading' ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={styles.aiButtonText}>{aiState === 'done' ? '다시 설명받기' : '결과 쉽게 설명받기'}</Text>}
-          </MotionPressable>
+          <PrimaryButton
+            label={aiState === 'done' ? '다시 설명받기' : '결과 쉽게 설명받기'}
+            loading={aiState === 'loading'}
+            onPress={() => void explain()}
+          />
         </WanpanCard>
 
         <View style={styles.notice}>
@@ -308,6 +317,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lavender,
     paddingHorizontal: spacing.md,
   },
+  /** CTA 바로 위 한 줄. 요구 전에 얻는 것을 말한다. */
+  ctaValue: { ...type.bodySm, color: colors.textMuted, paddingHorizontal: 3, marginBottom: -4 },
   fillCtaText: { ...type.bodySmStrong, color: colors.primary, flex: 1 },
   progressNote: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 3 },
   progressStrong: { ...type.bodySmStrong, color: colors.text },

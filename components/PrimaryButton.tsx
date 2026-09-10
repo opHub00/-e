@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, size, spacing, type } from '../design/tokens';
 import { MotionPressable } from './motion/MotionPressable';
 
@@ -8,27 +8,43 @@ type Props = {
   onPress: () => void;
   variant?: 'primary' | 'soft';
   disabled?: boolean;
+  /** 진행 중. 라벨 자리를 그대로 두고 그 위에 표시해 폭이 흔들리지 않는다. */
+  loading?: boolean;
   icon?: React.ComponentProps<typeof MaterialIcons>['name'];
 };
 
-export function PrimaryButton({ label, onPress, variant = 'primary', disabled, icon }: Props) {
+export function PrimaryButton({ label, onPress, variant = 'primary', disabled, loading, icon }: Props) {
   const soft = variant === 'soft';
+  const blocked = disabled || loading;
+  const fg = soft ? colors.primary : colors.onPrimary;
+
   return (
     <MotionPressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: !!disabled }}
-      disabled={disabled}
+      accessibilityState={{ disabled: !!blocked, busy: !!loading }}
+      accessibilityLabel={loading ? `${label} 진행 중` : undefined}
+      disabled={blocked}
       onPress={onPress}
       style={[
         styles.button,
         soft && styles.soft,
-        disabled && styles.disabled,
+        disabled && !loading && styles.disabled,
       ]}
     >
-      {icon ? (
-        <MaterialIcons name={icon} size={20} color={soft ? colors.primary : colors.onPrimary} />
+      {/*
+        진행 중에도 라벨을 지우지 않는다.
+        지우면 버튼이 스피너 폭으로 줄었다가 되돌아오며 레이아웃이 튄다.
+        투명하게 두어 폭을 유지하고 스피너를 그 위에 겹친다.
+      */}
+      <View style={[styles.content, loading && styles.contentHidden]}>
+        {icon ? <MaterialIcons name={icon} size={20} color={fg} /> : null}
+        <Text style={[styles.label, soft && styles.softLabel]}>{label}</Text>
+      </View>
+      {loading ? (
+        <View style={styles.spinner} pointerEvents="none">
+          <ActivityIndicator color={fg} />
+        </View>
       ) : null}
-      <Text style={[styles.label, soft && styles.softLabel]}>{label}</Text>
     </MotionPressable>
   );
 }
@@ -40,10 +56,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
     paddingHorizontal: spacing.lg,
   },
+  content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  /** 폭은 유지하고 보이지만 않게 한다. */
+  contentHidden: { opacity: 0 },
+  spinner: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   soft: { backgroundColor: colors.lavender },
   disabled: { opacity: 0.4 },
   label: { ...type.bodyLgStrong, color: colors.onPrimary, textAlign: 'center' },

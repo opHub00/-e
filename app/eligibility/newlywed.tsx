@@ -8,6 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { TermHelp, type TermHelpContent } from '../../components/TermHelp';
 import { WanpanCard } from '../../components/WanpanCard';
 import { BackButton } from '../../components/BackButton';
+import { PrimaryButton } from '../../components/PrimaryButton';
 import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
 import { Appear } from '../../components/motion/Appear';
 import { AppearItem } from '../../components/motion/AppearItem';
@@ -208,6 +209,9 @@ export default function NewlywedEligibilityRoute() {
         {result.actions.length > 0 ? (
           <>
             <SectionTitle label="다음에 할 일" />
+            <Text style={styles.ctaValue}>
+              정보를 채우면 공고에서 따로 확인할 조건이 줄어들어요.
+            </Text>
             <View style={styles.actionList}>
               {result.actions.map((action, index) => (
                 <MotionPressable
@@ -277,9 +281,11 @@ export default function NewlywedEligibilityRoute() {
           </View>
           {aiFallback ? <Text style={styles.aiBody}>AI 연결 대신 현재 결과로 기본 설명을 준비했어요.</Text> : null}
           {aiState === 'done' ? <Text style={styles.aiAnswer}>{aiAnswer}</Text> : null}
-          <MotionPressable accessibilityRole="button" disabled={aiState === 'loading'} accessibilityState={{ disabled: aiState === 'loading', busy: aiState === 'loading' }} onPress={() => void explain()} style={styles.aiButton}>
-            {aiState === 'loading' ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={styles.aiButtonText}>{aiState === 'done' ? '다시 설명받기' : '결과 쉽게 설명받기'}</Text>}
-          </MotionPressable>
+          <PrimaryButton
+            label={aiState === 'done' ? '다시 설명받기' : '결과 쉽게 설명받기'}
+            loading={aiState === 'loading'}
+            onPress={() => void explain()}
+          />
         </WanpanCard>
 
         <View style={styles.notice}>
@@ -380,6 +386,8 @@ const styles = StyleSheet.create({
   checkIcon: { width: 28, height: 28, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   checkLabel: { ...type.bodySmStrong, color: colors.text },
   checkReason: { ...type.caption, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
+  /** 액션 목록 위 한 줄. 요구 전에 얻는 것을 말한다. */
+  ctaValue: { ...type.bodySm, color: colors.textMuted, paddingHorizontal: 3, marginBottom: -4 },
   actionList: { borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, overflow: 'hidden' },
   actionRow: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, borderTopWidth: 1, borderTopColor: colors.hairline },
   actionLead: { borderTopWidth: 0, backgroundColor: colors.lavender },

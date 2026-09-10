@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Platform, Pressable } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Platform, Pressable, StyleSheet } from 'react-native';
 import type { GestureResponderEvent, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { duration, easing, scale, useNative } from '../../design/motion';
+import { colors } from '../../design/tokens';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -34,6 +35,8 @@ export function MotionPressable({
   onPressOut,
   onHoverIn,
   onHoverOut,
+  onFocus,
+  onBlur,
   pressedScale = scale.pressed,
   style,
   ...props
@@ -41,11 +44,14 @@ export function MotionPressable({
   const reduced = useReducedMotion();
   const pressed = useRef(new Animated.Value(0)).current;
   const hover = useRef(new Animated.Value(0)).current;
+  // 키보드로 이동했을 때 지금 어디에 있는지 보이게 한다. 마우스 클릭에는 켜지 않는다.
+  const [keyboardFocus, setKeyboardFocus] = useState(false);
 
   useEffect(() => {
     if (disabled) {
       pressed.setValue(0);
       hover.setValue(0);
+      setKeyboardFocus(false);
     }
   }, [disabled, hover, pressed]);
 
@@ -93,6 +99,23 @@ export function MotionPressable({
     onHoverOut?.(event);
   };
 
+  /**
+   * 키보드 focus 만 링을 보여준다.
+   * :focus-visible 과 같은 기준이라 마우스로 눌렀을 때는 켜지지 않는다.
+   */
+  const handleFocus: NonNullable<PressableProps['onFocus']> = (event) => {
+    if (HOVERABLE && !disabled) {
+      const node = event?.target as unknown as { matches?: (s: string) => boolean } | undefined;
+      setKeyboardFocus(node?.matches?.(':focus-visible') ?? false);
+    }
+    onFocus?.(event);
+  };
+
+  const handleBlur: NonNullable<PressableProps['onBlur']> = (event) => {
+    setKeyboardFocus(false);
+    onBlur?.(event);
+  };
+
   const feedbackStyle = disabled
     ? undefined
     : {
@@ -121,7 +144,14 @@ export function MotionPressable({
       onPressOut={handlePressOut}
       onHoverIn={HOVERABLE ? handleHoverIn : undefined}
       onHoverOut={HOVERABLE ? handleHoverOut : undefined}
-      style={[style, feedbackStyle]}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      style={[style, feedbackStyle, keyboardFocus && styles.focusRing]}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  /** 키보드 이동 표시. 브랜드 보라를 쓰고 레이아웃을 밀지 않도록 outline 으로만 그린다. */
+  focusRing: { outlineWidth: 2, outlineStyle: "solid", outlineColor: colors.primary, outlineOffset: 2 },
+});

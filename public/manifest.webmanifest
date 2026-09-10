@@ -1,5 +1,5 @@
 {
-  "name": "완판e — 청약 준비",
+  "name": "완판e",
   "short_name": "완판e",
   "description": "내 청약 준비와 실제 공고를 한 흐름에서 확인해요.",
   "id": "/",
@@ -13,16 +13,22 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icons/wanpane-192.svg",
+      "src": "/icons/wanpane-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/wanpane-512.svg",
+      "src": "/icons/wanpane-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/wanpane-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

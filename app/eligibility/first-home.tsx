@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WanpanCard } from '../../components/WanpanCard';
 import { BackButton } from '../../components/BackButton';
 import { ProfilePromptSheet } from '../../components/ProfilePromptSheet';
+import { StatusPill } from '../../components/StatusPill';
 import { Appear } from '../../components/motion/Appear';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { ScreenEnter } from '../../components/motion/ScreenEnter';
@@ -24,11 +25,24 @@ import { useUserStore } from '../../store/useUserStore';
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
+/**
+ * 조건 분석은 합격/불합격이 아니다.
+ * green 은 합격, pink 는 탈락처럼 읽히므로 결과 요약에는 쓰지 않는다.
+ * 사용자가 실제로 움직여야 하는 '정보 필요'에만 amber 로 시선을 남긴다.
+ */
 const STATUS_TONE: Record<FirstHomeEligibilityStatus, keyof typeof tint> = {
-  likely_eligible: 'green',
+  likely_eligible: 'neutral',
   needs_information: 'amber',
   needs_listing_confirmation: 'purple',
-  not_eligible: 'pink',
+  not_eligible: 'neutral',
+};
+
+/** 결과 pill 문구. 제목보다 짧게 상태만 말한다. 판정 어휘를 쓰지 않는다. */
+const STATUS_PILL: Record<FirstHomeEligibilityStatus, string> = {
+  likely_eligible: '입력 기준 확인',
+  needs_information: '정보 필요',
+  needs_listing_confirmation: '공고 확인',
+  not_eligible: '조건 불충족',
 };
 
 const CHECK_ICON: Record<EligibilityCheckStatus, React.ComponentProps<typeof MaterialIcons>['name']> = {
@@ -48,7 +62,6 @@ export default function FirstHomeEligibilityRoute() {
   const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [aiAnswer, setAiAnswer] = useState('');
   const result = useMemo(() => evaluateFirstHomeEligibility(applicantProfile), [applicantProfile]);
-  const tone = tint[STATUS_TONE[result.status]];
   const metCount = result.checks.filter((item) => item.status === 'met').length;
   const unresolvedCount = result.checks.length - metCount;
 
@@ -105,13 +118,18 @@ export default function FirstHomeEligibilityRoute() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Appear style={[styles.resultCard, { backgroundColor: tone.bg, borderColor: tone.fg }]}>
-          <View style={[styles.resultIcon, { backgroundColor: colors.surface }]}>
-            <MaterialIcons name={result.status === 'not_eligible' ? 'priority-high' : 'fact-check'} size={22} color={tone.fg} />
+        {/* 프레임은 상태와 무관하게 고정한다. 상태는 pill 하나로만 전달한다.
+            아이콘이 왼쪽에 서는 가로 구성은 이 화면의 고유한 형태라 유지한다. */}
+        <Appear replayKey={result.status} style={styles.resultCard}>
+          <View style={styles.resultIcon}>
+            <MaterialIcons name="fact-check" size={22} color={colors.primary} />
           </View>
           <View style={styles.flex}>
-            <Text style={[styles.resultEyebrow, { color: tone.fg }]}>현재 확인 결과</Text>
+            <Text style={styles.resultEyebrow}>현재 확인 결과</Text>
             <Text style={styles.resultTitle}>{result.title}</Text>
+            <View style={styles.resultPill}>
+              <StatusPill label={STATUS_PILL[result.status]} tone={STATUS_TONE[result.status]} />
+            </View>
             <Text style={styles.resultBody}>{result.summary}</Text>
           </View>
         </Appear>
@@ -211,11 +229,11 @@ function SectionTitle({ label }: { label: string }) {
   return <Text style={styles.sectionTitle}>{label}</Text>;
 }
 
+/** 행 단위도 같은 원칙. 확인된 항목은 쉬는 색, 손댈 항목만 눈에 띄게 둔다. */
 function checkStatusTone(status: EligibilityCheckStatus) {
-  if (status === 'met') return tint.green;
   if (status === 'needs_information') return tint.amber;
   if (status === 'needs_listing_confirmation') return tint.purple;
-  return tint.pink;
+  return tint.neutral;
 }
 
 const styles = StyleSheet.create({
@@ -234,9 +252,25 @@ const styles = StyleSheet.create({
   backGhost: { width: size.iconButton },
   headerTitle: { ...type.bodyLgStrong, color: colors.text },
   scroll: { padding: spacing.screen, paddingBottom: 52, gap: spacing.md },
-  resultCard: { flexDirection: 'row', gap: spacing.sm, borderRadius: radius.bento, borderWidth: 1, padding: spacing.md },
-  resultIcon: { width: 42, height: 42, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  resultEyebrow: { ...type.micro },
+  resultCard: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    borderRadius: radius.bento,
+    borderWidth: 1,
+    borderColor: colors.primaryFixed,
+    backgroundColor: colors.lavender,
+    padding: spacing.md,
+  },
+  resultIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  resultEyebrow: { ...type.micro, color: colors.primary },
+  resultPill: { alignSelf: 'flex-start', marginTop: spacing.xs },
   resultTitle: { ...type.title, color: colors.text, marginTop: 2, letterSpacing: tracking.tight },
   resultBody: { ...type.bodySm, color: colors.textMuted, lineHeight: 21, marginTop: 5 },
   progressNote: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 3 },

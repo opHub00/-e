@@ -14,7 +14,9 @@ const appear = read('components/motion/Appear.tsx');
 const screenEnter = read('components/motion/ScreenEnter.tsx');
 const reduced = read('hooks/useReducedMotion.ts');
 const rootLayout = read('app/_layout.tsx');
+const rootHtml = read('app/+html.tsx');
 const tabsLayout = read('app/(tabs)/_layout.tsx');
+const entrance = read('components/BrandEntrance.tsx');
 const map = read('features/discovery/components/DiscoveryMap.web.tsx');
 const loader = read('features/discovery/components/kakaoMapsLoader.ts');
 
@@ -102,5 +104,68 @@ check(
   !/scale: hover/.test(pressable),
   'hover never changes scale, only opacity',
 );
+
+// 브랜드 인트로는 앱이 열리는 순간에만 돈다. 계약이 조용히 풀리면 사용 흐름을 막는다.
+check(
+  /pointerEvents="none"/.test(entrance),
+  'brand entrance never intercepts touches or navigation',
+);
+check(
+  /accessibilityElementsHidden/.test(entrance) && /no-hide-descendants/.test(entrance),
+  'brand entrance stays out of the accessibility tree',
+);
+check(
+  /if \(phase !== 'playing'\) return null/.test(entrance),
+  'brand entrance unmounts instead of leaving an invisible overlay',
+);
+check(
+  /const failsafe = setTimeout\(/.test(entrance) && /clearTimeout\(failsafe\)/.test(entrance),
+  'brand entrance is torn down by time even if the animation is interrupted',
+);
+// 문서 표식이 남으면 첫 paint 를 덮은 판이 그대로 화면에 남는다.
+check(
+  (entrance.match(/clearBrandEntranceCover\(\)/g) ?? []).length >= 4,
+  'brand entrance clears the pre-paint cover on every exit path',
+);
+// 표식은 앱 컨테이너 위에 그려진다. 재생 중에 들고 있으면 로고까지 가린다.
+check(
+  entrance.indexOf('clearBrandEntranceCover();') < entrance.indexOf('const settle = Animated.sequence'),
+  'brand entrance drops the cover as soon as the overlay is on screen',
+);
+// 하이드레이션이 느려도 총 길이가 상한을 넘지 않게 예산으로 버전을 고른다.
+check(
+  /chooseBrandEntranceVariant\(/.test(entrance) && /const elapsedMs = brandEntranceElapsedMs\(\);/.test(entrance),
+  'brand entrance shortens itself when the cover has already been up',
+);
+check(
+  /BRAND_ENTRANCE_MAX_MS/.test(rootHtml) &&
+    /setTimeout\(function\(\)\{d\.removeAttribute/.test(rootHtml) &&
+    !/\},2500\)/.test(rootHtml),
+  'pre-paint cover shares the 1200ms entrance budget',
+);
+check(
+  /transform: minimal\s*\?\s*\[\]/.test(entrance) && /minimal \? null :/.test(entrance),
+  'brand entrance drops travel, scale and sweep in its minimal variant',
+);
+// reduced motion 은 예산과 무관하게 언제나 minimal 로 떨어져야 한다.
+{
+  const session = read('features/brandEntrance/session.ts');
+  check(
+    /if \(!input\.reduced && budget >= input\.fullMs\) return 'full';/.test(session),
+    'reduced motion never reaches the full brand entrance variant',
+  );
+}
+// 인트로는 데이터를 기다리는 splash 가 아니다. 로딩 상태를 읽으면 안 된다.
+check(
+  !/useUserStore|useDiscoveryStore|useAuthStore|fetch\(/.test(entrance),
+  'brand entrance never waits on app data',
+);
+// 길이는 800~1200ms 안에 있어야 한다. "열린다"가 아니라 "기다린다"가 되면 실패다.
+{
+  const total = /const FULL_MS = TIMELINE\.hold \+ TIMELINE\.exit;/.test(entrance);
+  const major = Number(motion.match(/major:\s*(\d+)/)?.[1] ?? 0);
+  const content = Number(motion.match(/content:\s*(\d+)/)?.[1] ?? 0);
+  check(total && major + content >= 800 && major + content <= 1200, 'brand entrance runs 800~1200ms');
+}
 
 console.log(`components/motion: ${checks} checks passed`);

@@ -144,6 +144,12 @@ check(
   'pre-paint cover shares the 1200ms entrance budget',
 );
 check(
+  /body::after/.test(rootHtml) &&
+    /content:"완판e"/.test(rootHtml) &&
+    /data:image\/svg\+xml/.test(rootHtml),
+  'pre-paint cover remains a branded entrance when hydration uses the full budget',
+);
+check(
   /transform: minimal\s*\?\s*\[\]/.test(entrance) && /minimal \? null :/.test(entrance),
   'brand entrance drops travel, scale and sweep in its minimal variant',
 );

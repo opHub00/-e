@@ -7,6 +7,16 @@ import {
 } from '../features/brandEntrance/session';
 import { colors } from '../design/tokens';
 
+const ENTRANCE_MARK = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<defs><linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${colors.primaryContainer}"/><stop offset="1" stop-color="${colors.primary}"/></linearGradient></defs>
+<rect width="32" height="32" rx="10" fill="url(#m)"/>
+<circle cx="9.2" cy="10.2" r="3.4" fill="${colors.onPrimary}"/><circle cx="22.8" cy="10.2" r="3.4" fill="${colors.onPrimary}"/>
+<circle cx="16" cy="18" r="8.2" fill="${colors.onPrimary}"/>
+<rect x="13.9" y="11.4" width="1.6" height="3.4" rx=".8" fill="${colors.primary}"/><rect x="16.5" y="11.4" width="1.6" height="3.4" rx=".8" fill="${colors.primary}"/>
+<circle cx="12.9" cy="17.6" r="1.45" fill="${colors.primary}"/><circle cx="19.1" cy="17.6" r="1.45" fill="${colors.primary}"/>
+<path d="M13.4 21.2Q16 23.4 18.6 21.2" fill="none" stroke="${colors.primary}" stroke-width="1.5" stroke-linecap="round"/>
+</svg>`);
+
 /**
  * manifest 의 background_color 와 같은 값을 문서에도 깔아 둔다.
  * PWA cold start 에서 splash 가 사라진 뒤 RN Web 스타일이 붙기 전까지
@@ -24,6 +34,11 @@ const ENTRANCE_CSS = [
   `html[${BRAND_ENTRANCE_ATTR}="pending"] body::before{`,
   'content:"";position:fixed;inset:0;pointer-events:none;z-index:9;',
   `background-color:${colors.background};}`,
+  `html[${BRAND_ENTRANCE_ATTR}="pending"] body::after{`,
+  'content:"완판e";position:fixed;left:50%;top:50%;width:128px;padding-top:80px;',
+  'transform:translate(-50%,-50%);pointer-events:none;z-index:9;text-align:center;',
+  'font-family:Pretendard-SemiBold,Arial,sans-serif;font-size:24px;font-weight:700;line-height:30px;',
+  `letter-spacing:-0.6px;color:${colors.primary};background:url("data:image/svg+xml,${ENTRANCE_MARK}") center top/64px 64px no-repeat;}`,
 ].join('');
 
 /**

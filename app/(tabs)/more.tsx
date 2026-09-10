@@ -2,13 +2,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppearItem } from '../../components/motion/AppearItem';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandMark } from '../../components/BrandMark';
 import { travel } from '../../design/motion';
-import { colors, radius, spacing, tint, tracking, type } from '../../design/tokens';
+import { colors, radius, size, spacing, tint, tracking, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 
@@ -116,7 +116,7 @@ export default function MoreRoute() {
   const resetLocalDemoState = useAuthStore((state) => state.resetLocalDemoState);
   const restoreCloudAfterDemoReset = useAuthStore((state) => state.restoreCloudAfterDemoReset);
   const [query, setQuery] = useState('');
-  const { canInstall, install, installMode, showIosInstructions } = usePwaInstall();
+  const { canInstall, install, installing, installMode, showIosInstructions } = usePwaInstall();
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const visibleFeatures = useMemo(
@@ -261,11 +261,21 @@ export default function MoreRoute() {
               </View>
               <MotionPressable
                 accessibilityRole="button"
-                accessibilityLabel={installMode === 'ios-safari' ? 'iPhone 홈 화면 설치 안내 보기' : '완판e 앱 설치'}
+                accessibilityLabel={installing ? '완판e 앱 설치 진행 중' : installMode === 'ios-safari' ? 'iPhone 홈 화면 설치 안내 보기' : '완판e 앱 설치'}
+                accessibilityState={{ disabled: installing, busy: installing }}
+                aria-busy={installing}
+                disabled={installing}
                 onPress={() => void install()}
                 style={styles.installButton}
               >
-                <Text style={styles.installButtonText}>{installMode === 'ios-safari' ? '설치 안내' : '설치'}</Text>
+                <Text style={[styles.installButtonText, installing && styles.installButtonTextHidden]}>
+                  {installMode === 'ios-safari' ? '설치 안내' : '설치'}
+                </Text>
+                {installing ? (
+                  <View pointerEvents="none" style={styles.installSpinner}>
+                    <ActivityIndicator color={colors.onPrimary} size="small" />
+                  </View>
+                ) : null}
               </MotionPressable>
             </View>
             {showIosInstructions ? (
@@ -381,8 +391,10 @@ const styles = StyleSheet.create({
   installSection: { paddingHorizontal: SIDE, paddingTop: 10, gap: spacing.sm },
   installCard: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: radius.card, backgroundColor: colors.lavender, padding: 13 },
   installIcon: { width: 36, height: 36, borderRadius: radius.cardSm, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
-  installButton: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 13, borderRadius: radius.button, backgroundColor: colors.primary },
+  installButton: { minHeight: size.touch, justifyContent: 'center', paddingHorizontal: 13, borderRadius: radius.button, backgroundColor: colors.primary },
   installButtonText: { ...type.label, color: colors.onPrimary },
+  installButtonTextHidden: { opacity: 0 },
+  installSpinner: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   iosInstallHelp: {
     minHeight: 48,
     flexDirection: 'row',

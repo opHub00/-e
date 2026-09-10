@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { detectPwaInstallPlatform, isStandaloneDisplay } from '../features/pwa/platform';
 
@@ -15,6 +15,8 @@ const PROMPT_READY_EVENT = 'wanpane:installpromptready';
 
 export function usePwaInstall() {
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
+  const installInFlight = useRef(false);
+  const [installing, setInstalling] = useState(false);
   const [standalone, setStandalone] = useState(false);
   const [showIosInstructions, setShowIosInstructions] = useState(false);
   const [platform, setPlatform] = useState<'standalone' | 'native' | 'ios-safari' | 'unavailable'>('unavailable');
@@ -68,11 +70,13 @@ export function usePwaInstall() {
   }, []);
 
   const install = useCallback(async () => {
-    if (standalone) return false;
+    if (installInFlight.current || standalone) return false;
     if (!promptEvent) {
       if (platform === 'ios-safari') setShowIosInstructions(true);
       return false;
     }
+    installInFlight.current = true;
+    setInstalling(true);
     try {
       await promptEvent.prompt();
       const choice = await promptEvent.userChoice;
@@ -83,12 +87,16 @@ export function usePwaInstall() {
       (window as PwaWindow).__wanpaneInstallPrompt = null;
       setPromptEvent(null);
       return false;
+    } finally {
+      installInFlight.current = false;
+      setInstalling(false);
     }
   }, [platform, promptEvent, standalone]);
 
   return {
     canInstall: !standalone && (promptEvent !== null || platform === 'ios-safari'),
     install,
+    installing,
     installMode: platform,
     showIosInstructions,
   };

@@ -22,6 +22,7 @@ export function PrimaryButton({ label, onPress, variant = 'primary', disabled, l
     <MotionPressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!blocked, busy: !!loading }}
+      aria-busy={!!loading}
       accessibilityLabel={loading ? `${label} 진행 중` : undefined}
       disabled={blocked}
       onPress={onPress}

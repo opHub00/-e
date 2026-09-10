@@ -13,6 +13,8 @@ const html = readFileSync('app/+html.tsx', 'utf8');
 const serviceWorker = readFileSync('public/service-worker.js', 'utf8');
 const registration = readFileSync('public/pwa-register.js', 'utf8');
 const offline = readFileSync('public/offline.html', 'utf8');
+const installHook = readFileSync('hooks/usePwaInstall.ts', 'utf8');
+const moreRoute = readFileSync('app/(tabs)/more.tsx', 'utf8');
 
 check(manifest.name === '완판e', 'PWA name');
 check(manifest.short_name === '완판e', 'PWA short name');
@@ -41,6 +43,12 @@ check(!serviceWorker.includes('kakao.com'), 'Kakao 요청 cache 금지');
 check(offline.includes('인터넷 연결을 확인해 주세요'), 'offline 안내 제목');
 check(offline.includes('청약 공고와 AI 기능은'), 'offline network requirement 안내');
 check(offline.includes('location.reload()'), 'offline 다시 시도');
+check(installHook.includes('installInFlight.current || standalone'), '설치 요청 single-flight guard');
+check(installHook.includes('setInstalling(true)') && installHook.includes('setInstalling(false)'), '설치 busy lifecycle');
+check(moreRoute.includes('accessibilityState={{ disabled: installing, busy: installing }}'), '설치 CTA disabled/busy 접근성');
+check(moreRoute.includes('aria-busy={installing}'), '설치 CTA web busy 접근성');
+check(moreRoute.includes('minHeight: size.touch'), '설치 CTA 44pt touch target');
+check(moreRoute.includes('installButtonTextHidden') && moreRoute.includes('installSpinner'), '설치 중 CTA 폭 유지');
 
 check(isStandaloneDisplay({ displayModeStandalone: true, navigatorStandalone: false }), 'display-mode standalone 감지');
 check(isStandaloneDisplay({ displayModeStandalone: false, navigatorStandalone: true }), 'iOS standalone 감지');

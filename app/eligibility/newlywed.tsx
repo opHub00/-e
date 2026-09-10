@@ -83,7 +83,6 @@ export default function NewlywedEligibilityRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const applicantProfile = useUserStore((state) => state.applicantProfile);
-  const profileHydrated = useUserStore((state) => state.profileHydrated);
   const requestProfileBundle = useUserStore((state) => state.requestProfileBundle);
   const dismissProfileBundle = useUserStore((state) => state.dismissProfileBundle);
   const [profilePrompt, setProfilePrompt] = useState<ProfileQuestionBundleId | null>(null);
@@ -127,11 +126,15 @@ export default function NewlywedEligibilityRoute() {
     return () => { generation.current += 1; pending.current?.abort(); };
   }, [result]);
 
-  useEffect(() => {
-    if (!profileHydrated) return;
-    const bundleId = requestProfileBundle('newlywed');
+  /**
+   * 진입하자마자 시트를 띄우지 않는다. 결과를 먼저 보여준다.
+   * fatigue 는 실제로 보여준 순간에만 기록되어야 하므로 여기서 호출한다.
+   * 사용자가 직접 누른 경우에는 fatigue 로 막지 않고 미입력 묶음으로 대신 연다.
+   */
+  const openMissingPrompt = () => {
+    const bundleId = requestProfileBundle('newlywed') ?? result.missingBundles[0];
     if (bundleId) setProfilePrompt(bundleId);
-  }, [profileHydrated, requestProfileBundle]);
+  };
 
   const openBundle = (bundleId: ProfileQuestionBundleId) => {
     setProfilePrompt(null);
@@ -210,7 +213,9 @@ export default function NewlywedEligibilityRoute() {
                 <MotionPressable
                   key={action.id}
                   accessibilityRole="button"
-                  onPress={() => handleAction(action)}
+                  accessibilityLabel={action.label}
+                  // 첫 항목만 시트로 연다. 무엇을 왜 묻는지 보고 나서 입력으로 들어가게 한다.
+                  onPress={() => (index === 0 && action.bundleId ? openMissingPrompt() : handleAction(action))}
                   style={[styles.actionRow, index === 0 && styles.actionLead]}
                 >
                   <MaterialIcons name={action.bundleId ? 'edit-note' : 'arrow-forward'} size={19} color={index === 0 ? colors.primary : colors.textMuted} />

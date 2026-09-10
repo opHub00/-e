@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WanpanCard } from '../../components/WanpanCard';
@@ -65,10 +65,19 @@ export default function FirstHomeEligibilityRoute() {
   const metCount = result.checks.filter((item) => item.status === 'met').length;
   const unresolvedCount = result.checks.length - metCount;
 
-  useEffect(() => {
-    const bundleId = requestProfileBundle('first-home');
+  /**
+   * 진입하자마자 시트를 띄우지 않는다.
+   * 결과를 먼저 보여주고, 사용자가 눌렀을 때만 연다.
+   *
+   * fatigue 는 "실제로 보여준 순간"에만 기록되어야 하므로
+   * requestProfileBundle 도 여기서 호출한다. 자동 호출은 보여주지도 않고
+   * 예산만 깎았다. 사용자가 직접 요청한 경우에는 fatigue 로 막지 않고
+   * 가장 우선순위가 높은 미입력 묶음으로 대신 연다.
+   */
+  const openMissingPrompt = () => {
+    const bundleId = requestProfileBundle('first-home') ?? result.missingBundles[0];
     if (bundleId) setProfilePrompt(bundleId);
-  }, [requestProfileBundle]);
+  };
 
   const openBundle = (bundleId: ProfileQuestionBundleId) => {
     setProfilePrompt(null);
@@ -138,6 +147,20 @@ export default function FirstHomeEligibilityRoute() {
           <Text style={styles.progressStrong}>{result.checks.length}개 조건 중 {metCount}개 확인</Text>
           <Text style={styles.progressText}> · {unresolvedCount}개는 정보 또는 공고 확인이 필요해요</Text>
         </View>
+
+        {/* 채울 정보가 있을 때만 보여준다. 이미 충분하면 자리를 차지하지 않는다. */}
+        {result.missingBundles.length > 0 ? (
+          <MotionPressable
+            accessibilityRole="button"
+            accessibilityLabel={`부족한 정보 ${result.missingBundles.length}개 채우기`}
+            onPress={openMissingPrompt}
+            style={styles.fillCta}
+          >
+            <MaterialIcons name="edit-note" size={19} color={colors.primary} />
+            <Text style={styles.fillCtaText}>부족한 정보 {result.missingBundles.length}개 채우기</Text>
+            <MaterialIcons name="chevron-right" size={18} color={colors.primary} />
+          </MotionPressable>
+        ) : null}
 
         <SectionTitle label="조건별 확인" />
         <View style={styles.checkList}>
@@ -273,6 +296,19 @@ const styles = StyleSheet.create({
   resultPill: { alignSelf: 'flex-start', marginTop: spacing.xs },
   resultTitle: { ...type.title, color: colors.text, marginTop: 2, letterSpacing: tracking.tight },
   resultBody: { ...type.bodySm, color: colors.textMuted, lineHeight: 21, marginTop: 5 },
+  /** 결과 바로 아래의 단일 행동. 조건 목록 아래 액션 목록과 역할이 겹치지 않게 형태를 다르게 둔다. */
+  fillCta: {
+    minHeight: size.touch,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.button,
+    borderWidth: 1,
+    borderColor: colors.primaryFixed,
+    backgroundColor: colors.lavender,
+    paddingHorizontal: spacing.md,
+  },
+  fillCtaText: { ...type.bodySmStrong, color: colors.primary, flex: 1 },
   progressNote: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 3 },
   progressStrong: { ...type.bodySmStrong, color: colors.text },
   progressText: { ...type.bodySm, color: colors.textMuted },

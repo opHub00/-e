@@ -11,6 +11,8 @@ import {
   RECRUITMENT_STATUS_LABEL,
 } from '../domain';
 import type { DiscoveryListing, ListingRelevance } from '../types';
+import { ListingVisualFrame } from './ListingVisualFrame';
+import { resolveListingVisual } from './listingVisual';
 
 type Props = {
   listing: DiscoveryListing;
@@ -30,9 +32,15 @@ const STATUS_STYLE: Record<
   unknown: { bg: colors.surfaceContainer, fg: colors.textSubtle },
 };
 
+/** 목록은 훑는 화면이다. 세로를 늘리지 않도록 왼쪽에 고정 폭 한 칸만 둔다. */
+const THUMB = 96;
+
 /**
  * 실제 공고는 가격이 없는 경우가 많다.
  * 값이 없는 필드는 자리표시자 없이 통째로 빼고 있는 정보만 촘촘히 보여준다.
+ *
+ * 주택 유형은 왼쪽 칸의 아이콘이 대신하므로 사실 목록에서는 뺀다.
+ * 같은 정보를 두 번 쓰면 좁은 오른쪽 칸이 금방 찬다.
  */
 export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }: Props) {
   const status = STATUS_STYLE[listing.recruitmentStatus];
@@ -40,7 +48,6 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
   const facts = [
     schedule || null,
     listing.householdCount !== null ? formatHouseholdCount(listing.householdCount) : null,
-    listing.housingType,
     hasListingPrice(listing) ? formatPrice(listing.representativePrice) : null,
   ].filter((value): value is string => Boolean(value));
 
@@ -52,36 +59,46 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
         onPress={onOpen}
         style={styles.row}
       >
-        <View style={styles.top}>
-          <View style={[styles.statusChip, { backgroundColor: status.bg }]}> 
-            <Text style={[styles.statusText, { color: status.fg }]}> 
-              {RECRUITMENT_STATUS_LABEL[listing.recruitmentStatus]}
+        <ListingVisualFrame
+          visual={resolveListingVisual(listing)}
+          housingType={listing.housingType}
+          variant="thumbnail"
+          placeLabel={listing.district}
+          style={styles.thumb}
+        />
+
+        <View style={styles.body}>
+          <View style={styles.top}>
+            <View style={[styles.statusChip, { backgroundColor: status.bg }]}>
+              <Text style={[styles.statusText, { color: status.fg }]}>
+                {RECRUITMENT_STATUS_LABEL[listing.recruitmentStatus]}
+              </Text>
+            </View>
+            {/* 자치구는 왼쪽 칸이 들고 있다. 같은 자리에서 두 번 읽히지 않게 시도만 남긴다. */}
+            <Text style={styles.place} numberOfLines={1}>
+              {listing.region}
             </Text>
           </View>
-          <Text style={styles.place}>
-            {listing.region} · {listing.district}
+
+          <Text style={styles.name} numberOfLines={2}>
+            {listing.complexName}
           </Text>
-          <View style={styles.spacer} />
-        </View>
 
-        <Text style={styles.name} numberOfLines={2}>
-          {listing.complexName}
-        </Text>
+          {facts.length > 0 ? (
+            <View style={styles.facts}>
+              {facts.map((fact, index) => (
+                <View key={fact} style={styles.factItem}>
+                  {index > 0 ? <View style={styles.factDot} /> : null}
+                  <Text style={styles.factText}>{fact}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
-        {facts.length > 0 ? (
-          <View style={styles.facts}>
-            {facts.map((fact, index) => (
-              <View key={fact} style={styles.factItem}>
-                {index > 0 ? <View style={styles.factDot} /> : null}
-                <Text style={styles.factText}>{fact}</Text>
-              </View>
-            ))}
+          <View style={styles.relevance}>
+            <MaterialIcons name="auto-awesome" size={13} color={colors.primary} />
+            <Text style={styles.relevanceText}>{relevance.label}</Text>
           </View>
-        ) : null}
-
-        <View style={styles.relevance}>
-          <MaterialIcons name="auto-awesome" size={13} color={colors.primary} />
-          <Text style={styles.relevanceText}>{relevance.label}</Text>
         </View>
       </MotionPressable>
 
@@ -109,15 +126,20 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
 const styles = StyleSheet.create({
   wrapper: { position: 'relative' },
   row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
     backgroundColor: colors.surface,
     borderRadius: radius.cardSm,
     borderWidth: 1,
     borderColor: colors.surfaceHigh,
-    paddingLeft: 14,
+    paddingLeft: 12,
     paddingRight: 46,
     paddingVertical: 12,
-    gap: 6,
   },
+  /** 고정 크기라 이미지가 오든 안 오든 카드 높이가 같다. */
+  thumb: { width: THUMB, height: THUMB },
+  body: { flex: 1, minWidth: 0, gap: 6 },
   spacer: { flex: 1 },
 
   top: { flexDirection: 'row', alignItems: 'center', gap: 7 },
@@ -128,7 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   statusText: { ...type.micro },
-  place: { ...type.micro, color: colors.textSubtle },
+  place: { ...type.micro, color: colors.textSubtle, flexShrink: 1 },
   saveButton: {
     position: 'absolute',
     top: 10,

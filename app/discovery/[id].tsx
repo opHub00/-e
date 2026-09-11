@@ -42,6 +42,7 @@ import {
   useListingCompetition,
   type ListingCompetitionSnapshot,
 } from '../../features/competition/useListingCompetition';
+import { ListingVisualPreview } from '../../features/listingVisual/ListingVisualPreview';
 
 type DetailTab = 'info' | 'conditions' | 'stories';
 
@@ -167,6 +168,8 @@ export default function DiscoveryDetailRoute() {
           <Text style={styles.detailName}>{listing.complexName}</Text>
           <Text style={styles.detailAddress}>{listing.address}</Text>
         </View>
+
+        <ListingVisualPreview listing={listing} variant="hero" />
 
         <Appear delay={stagger.short} distance={travel.content}>
           <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />

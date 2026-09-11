@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { BrandEntrance } from '../components/BrandEntrance';
+import { PwaInstallRecommendation } from '../features/pwa/PwaInstallRecommendation';
 import { colors } from '../design/tokens';
 import { duration } from '../design/motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
@@ -65,6 +66,7 @@ export default function RootLayout() {
         <Stack.Screen name="eligibility/newlywed" options={{ headerShown: false }} />
       </Stack>
       <BrandEntrance />
+      <PwaInstallRecommendation />
     </>
   );
 }

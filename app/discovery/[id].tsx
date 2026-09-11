@@ -21,6 +21,7 @@ import {
   hasListingPrice,
   RECRUITMENT_STATUS_LABEL,
 } from '../../features/discovery/domain';
+import { ListingDetailHero } from '../../features/discovery/components/ListingDetailHero';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
 import { getStoriesForListing } from '../../features/discovery/stories';
 import type { DiscoveryListing, ListingStory } from '../../features/discovery/types';
@@ -140,6 +141,8 @@ export default function DiscoveryDetailRoute() {
       <ScreenHeader title="청약 상세" onBack={goBack} />
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <ListingDetailHero listing={listing} />
+
         <View style={styles.detailHead}>
           <View style={styles.detailTopRow}>
             <View
@@ -159,13 +162,10 @@ export default function DiscoveryDetailRoute() {
                 {RECRUITMENT_STATUS_LABEL[listing.recruitmentStatus]}
               </Text>
             </View>
-            <Text style={styles.detailPlace}>
-              {listing.region} · {listing.district}
-            </Text>
           </View>
 
           <Text style={styles.detailName}>{listing.complexName}</Text>
-          <Text style={styles.detailAddress}>{listing.address}</Text>
+          <KeyFacts listing={listing} />
         </View>
 
         <Appear delay={stagger.short} distance={travel.content}>
@@ -224,6 +224,37 @@ export default function DiscoveryDetailRoute() {
       />
     </SafeAreaView>
     </ScreenEnter>
+  );
+}
+
+/**
+ * 첫 화면에서 바로 판단에 쓰이는 값들.
+ *
+ * 목록 카드는 가운뎃점으로 이어 붙여 훑기 좋게 만들지만,
+ * 상세는 하나씩 짚어 보는 화면이라 이름표를 붙여 나눠 세운다.
+ * 값이 없는 항목은 자리표시자 없이 통째로 뺀다.
+ */
+function KeyFacts({ listing }: { listing: DiscoveryListing }) {
+  const schedule = formatRecruitmentSchedule(listing);
+  const items = [
+    schedule ? { label: '접수 일정', value: schedule } : null,
+    listing.householdCount !== null
+      ? { label: '공급 세대', value: formatHouseholdCount(listing.householdCount) }
+      : null,
+    { label: '주택 유형', value: listing.housingType },
+  ].filter((item): item is { label: string; value: string } => item !== null);
+
+  return (
+    <View style={styles.keyFacts}>
+      {items.map((item) => (
+        <View key={item.label} style={styles.keyFact}>
+          <Text style={styles.keyFactLabel}>{item.label}</Text>
+          <Text style={styles.keyFactValue} numberOfLines={1}>
+            {item.value}
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -715,9 +746,11 @@ const styles = StyleSheet.create({
   detailStatusText: { ...type.micro, color: colors.textSubtle },
   detailStatusTextOpen: { color: tint.green.fg },
   detailStatusTextSoon: { color: tint.amber.fg },
-  detailPlace: { ...type.micro, color: colors.textSubtle },
   detailName: { ...type.page, fontSize: 22, lineHeight: 30, color: colors.text, letterSpacing: tracking.tight, marginTop: 6 },
-  detailAddress: { ...type.caption, color: colors.textMuted },
+  keyFacts: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg, marginTop: 10 },
+  keyFact: { gap: 2, minWidth: 0 },
+  keyFactLabel: { ...type.micro, color: colors.textSubtle },
+  keyFactValue: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal },
 
   fitCard: {
     gap: spacing.md,

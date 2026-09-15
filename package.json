@@ -18,9 +18,11 @@
     "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
     "test": "npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
-    "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts",
+    "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts",
     "test:assessment-db": "node --experimental-strip-types scripts/check-assessment-migration.mjs",
-    "export:assessment-reference": "node --experimental-strip-types scripts/export-assessment-reference.mjs"
+    "export:assessment-reference": "node --experimental-strip-types scripts/export-assessment-reference.mjs",
+    "assessment:rules": "node --experimental-strip-types scripts/assessment-rules.mjs",
+    "test:assessment-import-db": "node --experimental-strip-types scripts/check-assessment-import.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

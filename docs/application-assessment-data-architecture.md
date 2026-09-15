@@ -153,7 +153,7 @@ npm run export:assessment-reference -- .cache/samdo-reference.json
 
 UTF-8 파일 생성만 수행하며 기존 파일을 덮어쓰지 않는다. 실제 관리번호 binding은 포함하지 않는다.
 서버 import 도구는 payload.rule_set을 삽입한 뒤, payload.rules의 각 row를 삽입하고 반환된 rule UUID로 evidence를 삽입해야 한다.
-동일 transaction에서 rule_key manifest의 완전성을 검사하고 실패 시 rollback한다. 현재 실제 import writer/승인 API는 후속 범위다.
+동일 transaction에서 rule_key manifest의 완전성을 검사하고 실패 시 rollback한다. 후속 phase에 추가된 실제 import/승인 도구는 [import lifecycle](./assessment-rule-import-lifecycle.md)을 따른다.
 이 구조는 AI extractor도 같은 JSON 계약을 출력하도록 만들 수 있다. AI 결과는 **미승인 상태에서만** 저장한다.
 
 ## 10. Migration 적용과 rollback

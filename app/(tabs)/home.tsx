@@ -8,6 +8,7 @@ import { Appear } from '../../components/motion/Appear';
 import { AppearItem } from '../../components/motion/AppearItem';
 import { useCountUp } from '../../hooks/useCountUp';
 import { BrandMark } from '../../components/BrandMark';
+import { CoreJourney } from '../../features/applicationAssessment/CoreJourney';
 import { Disclaimer } from '../../components/Disclaimer';
 import { stagger, travel } from '../../design/motion';
 import { colors, numeric, overlay, radius, size, spacing, tint, tracking, type } from '../../design/tokens';
@@ -146,6 +147,7 @@ export default function HomeRoute() {
 
         {/* Monzo: 밴드 아래는 하나의 연속 surface. 카드를 여러 장 띄우지 않는다. */}
         <View style={styles.sheet}>
+          <CoreJourney />
           <Appear delay={stagger.short} distance={travel.content} style={styles.statRow}>
             <Stat label="다음 변화" value={nextChange} lead />
             <View style={styles.statDivider} />

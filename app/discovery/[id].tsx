@@ -168,6 +168,12 @@ export default function DiscoveryDetailRoute() {
           <KeyFacts listing={listing} />
         </View>
 
+        <PrimaryButton
+          label="내 조건으로 판정하기"
+          icon="fact-check"
+          onPress={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
+        />
+
         <Appear delay={stagger.short} distance={travel.content}>
           <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
         </Appear>

@@ -122,6 +122,13 @@ export default function AppTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="assessment"
+        options={{
+          title: '맞춤판정',
+          tabBarIcon: ({ focused }) => <TabIcon name="fact-check" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="preparation"
         options={{
           title: '준비',
@@ -131,6 +138,7 @@ export default function AppTabsLayout() {
       <Tabs.Screen
         name="ai"
         options={{
+          href: null,
           title: 'AI',
           tabBarIcon: ({ focused }) => <TabIcon name="auto-awesome" focused={focused} />,
         }}

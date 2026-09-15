@@ -168,9 +168,12 @@ glow 는 밴드당 1개, `overlay.glow` 토큰을 쓴다. 하드코딩 rgba 를 
 
 실제 탭 구성이다.
 
-| 홈 | 청약찾기 | 준비 | AI | 전체 |
+| 홈 | 청약찾기 | 맞춤판정 | 준비 | 전체 |
 |---|---|---|---|---|
-| `home` | `discovery` | `preparation` | `ai` | `more` |
+| `home` | `discovery` | `assessment` | `preparation` | `more` |
+
+AI 상담은 기존 `/ai` 경로와 전체 메뉴·문맥별 CTA에서 유지한다.
+홈의 핵심 진입은 청약찾기 → 청약 맞춤판정 → 준비하기의 같은 위계로 표현한다.
 
 ## Copy
 

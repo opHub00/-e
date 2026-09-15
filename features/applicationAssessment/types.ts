@@ -1,0 +1,117 @@
+import type { ApplicantProfileV2 } from '../profile/domain.ts';
+
+export type SupplyType = 'youth' | 'newlywed' | 'firstHome';
+export type Stage = 'PRIORITY' | 'GENERAL' | 'LOTTERY';
+export type Status = 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_MORE_INFORMATION';
+export type Scalar = string | number | boolean;
+export type Child = { birthDate?: string; unborn: boolean };
+
+/** Additional exact, announcement-date inputs. Existing profile stays the source of truth. */
+export type AssessmentInput = {
+  profile: ApplicantProfileV2;
+  details: Partial<{
+    birthDate: string;
+    marriageDate: string;
+    familyCategory: 'married' | 'engaged' | 'singleParent';
+    spouse: { birthDate?: string };
+    children: Child[];
+    householdMembers: { birthDate?: string; relationship: string }[];
+    currentResidence: string;
+    residenceStartDate: string;
+    overseasStayHistory: { startDate: string; endDate?: string }[];
+    housingOwnershipHistory: { acquiredAt: string; disposedAt?: string }[];
+    housingDisposalDates: string[];
+    noHomeSince: string;
+    subscriptionAccountOpenedAt: string;
+    recognizedPaymentCount: number;
+    recognizedDepositAmount: number;
+    monthlyIncome: number;
+    spouseIncome: number;
+    householdIncome: number;
+    dualIncome: boolean;
+    earnedIncome: number;
+    businessIncome: number;
+    totalAssets: number;
+    parentAssets: number;
+    workStartedAt: string;
+    youthPriorityTarget: boolean;
+    newlywedPriorityTarget: boolean;
+    specialSupplyHistory: boolean;
+    reWinningRestriction: boolean;
+    specialExceptions: string[];
+  }>;
+};
+
+export type Evidence = {
+  id: string;
+  source: string;
+  section: string;
+  label: string;
+  url?: string;
+  page?: number;
+};
+export type Expression =
+  | { all: Expression[] }
+  | { any: Expression[] }
+  | { fact: string; op: 'eq' | 'gte' | 'lte'; value: Scalar | { parameter: string } };
+export type ConditionRule = {
+  id: string;
+  label: string;
+  expression: Expression;
+  evidence: Evidence;
+  documents: string[];
+  onFailure?: 'REVIEW';
+};
+export type ScoreRule = {
+  id: string;
+  label: string;
+  fact: string;
+  /** null means the announcement's scoring table has not been verified. */
+  bands: { min?: number; max?: number; points: number }[] | null;
+  evidence: Evidence;
+};
+export type SupplyRule = {
+  type: SupplyType;
+  eligibility: ConditionRule[];
+  /** Ordered stages: a missing earlier stage must never fall through. */
+  stages: { stage: Stage; conditions: ConditionRule[]; scores: ScoreRule[] | null }[];
+};
+export type AnnouncementRules = {
+  id: string;
+  version: string;
+  listingId: string;
+  title: string;
+  verification: 'REFERENCE_ONLY' | 'VERIFIED';
+  announcementDate: string | null;
+  parameters: Record<string, Scalar | null>;
+  supplies: SupplyRule[];
+};
+export type ConditionResult = {
+  ruleId: string;
+  evidenceId: string;
+  label: string;
+  outcome: 'PASS' | 'FAIL' | 'UNKNOWN';
+  inputs: Record<string, Scalar | null>;
+  missing: string[];
+};
+export type ApplicationAssessmentResult = {
+  rulesId: string;
+  rulesVersion: string;
+  listingId: string;
+  supplyType: SupplyType;
+  status: Status;
+  eligible: boolean | null;
+  stage: Stage | null;
+  stageExplanation: string;
+  inputDates: Record<string, string>;
+  score?: { total: number; max: number; breakdown: { ruleId: string; evidenceId: string; label: string; input: number; points: number; max: number; appliedBand: { min?: number; max?: number } }[] };
+  scoring: 'AVAILABLE' | 'NOT_APPLICABLE' | 'PENDING';
+  satisfiedConditions: ConditionResult[];
+  failedConditions: ConditionResult[];
+  unknownConditions: ConditionResult[];
+  stageConditions: ConditionResult[];
+  warnings: string[];
+  requiredDocuments: string[];
+  evidence: Evidence[];
+  missingInformation: string[];
+};

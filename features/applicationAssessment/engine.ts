@@ -43,10 +43,14 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
   if (!base.length) missing.push('rule:eligibility');
   const warnings: string[] = [];
   const bound = rules.listingId === listingId;
-  const verified = rules.verification === 'VERIFIED' && validDate(rules.announcementDate ?? undefined) && bound;
+  // Legacy engineering fixtures keep their behavior without inventing official provenance.
+  const sourceStatus = rules.sourceStatus ?? (rules.verification === 'REFERENCE_ONLY' ? 'REFERENCE' : undefined);
+  const reviewed = sourceStatus ? sourceStatus !== 'REFERENCE' : rules.verification === 'VERIFIED';
+  const verified = reviewed && validDate(rules.announcementDate ?? undefined) && bound;
   if (!verified) missing.push('rule:verifiedAnnouncement');
   if (!bound) warnings.push('선택한 공고와 판정 규칙이 일치하지 않아요. 다른 공고의 규칙을 적용할 수 없어요.');
-  if (rules.verification === 'REFERENCE_ONLY') warnings.push('공고 원문과 기준표를 확인하기 전이에요. 실제 신청 가능 여부·단계·점수는 아직 확정할 수 없어요.');
+  if (sourceStatus === 'REFERENCE') warnings.push('공고 원문과 기준표를 확인하기 전이에요. 실제 신청 가능 여부·단계·점수는 아직 확정할 수 없어요.');
+  if (sourceStatus === 'DRAFT_SOURCE_VERIFIED') warnings.push('제공된 모집공고 검토본을 기준으로 계산한 예상 결과입니다. 최종 공고 게시 후 기준이 달라질 수 있습니다.');
   if (facts.overseasClear !== true) warnings.push('해외 체류 이력이 있거나 확인 전이면 연속거주기간을 별도로 확인해야 해요.');
   if (facts.exceptionsClear !== true) warnings.push('특례 적용 여부는 증빙과 공고 조항을 함께 확인해야 해요.');
   if (input.details.housingDisposalDates?.some(date => !validDate(date) || (input.details.noHomeSince && date > input.details.noHomeSince))) {
@@ -68,7 +72,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
     if (!selected) { status = 'NEEDS_MORE_INFORMATION'; missing.push('rule:stage'); }
   }
   let score: ApplicationAssessmentResult['score'];
-  const noScoring = supply.stages.every(s => s.scores === null);
+  const noScoring = selected ? selected.scores === null : supply.stages.every(s => s.scores === null);
   let scoring: ApplicationAssessmentResult['scoring'] = noScoring ? 'NOT_APPLICABLE' : 'PENDING';
   if (selected?.scores) {
     if (!selected.scores.length) missing.push('rule:score:empty');
@@ -89,7 +93,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
   if (!verified || missing.some(m => m.startsWith('review:')) || (status === 'ELIGIBLE' && missing.length)) status = 'NEEDS_MORE_INFORMATION';
   if (!verified || missing.includes('input:noHomeMonths')) { score = undefined; scoring = noScoring ? 'NOT_APPLICABLE' : 'PENDING'; }
   return {
-    rulesId: rules.id, rulesVersion: rules.version, listingId, supplyType: supply.type, status,
+    rulesId: rules.id, rulesVersion: rules.version, sourceStatus, provenance: rules.provenance, listingId, supplyType: supply.type, status,
     eligible: status === 'NEEDS_MORE_INFORMATION' ? null : status === 'ELIGIBLE',
     stage: verified ? selected?.stage ?? null : null, score, scoring,
     stageExplanation: !verified ? '공고 기준이 확인되면 신청 가능한 공급단계를 구분할 수 있어요.'

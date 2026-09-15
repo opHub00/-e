@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +12,8 @@ import { useListingDataset } from '../discovery/data/useListingDataset';
 import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
 import { FORM_FIELDS, parseForm } from './form';
-import { REFERENCE_LISTING_ID, rulesForListing, samdoReferenceRules, SUPPLY_LABELS } from './referenceRules';
+import { REFERENCE_LISTING_ID, samdoReferenceRules, SUPPLY_LABELS } from './referenceRules';
+import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
 import type { ApplicationAssessmentResult, SupplyType } from './types';
 
@@ -34,16 +35,21 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const [supply, setSupply] = useState<SupplyType>('youth');
   const [step, setStep] = useState(0);
   const [raw, setRaw] = useState<Record<string, string>>({});
-  const [snapshot, setSnapshot] = useState<{ result: ApplicationAssessmentResult; profile: typeof profile } | null>(null);
+  const [snapshot, setSnapshot] = useState<{ result: ApplicationAssessmentResult; profile: typeof profile; rulesId: string } | null>(null);
   // 입력하는 도중에는 형식 오류를 띄우지 않는다. 칸을 떠났거나 판정을 눌렀을 때만 알린다.
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [attempted, setAttempted] = useState(false);
   const scroll = useRef<ScrollView>(null);
-  const rules = rulesForListing(selected);
+  const ruleLoad = useAssessmentRules(selected);
+  const rules = ruleLoad.rules;
+  const catalog = useAssessmentCatalog();
+  useEffect(() => {
+    if (rules && !rules.supplies.some(s => s.type === supply)) setSupply(rules.supplies[0].type);
+  }, [rules, supply]);
   const selectedListing = dataset.listings.find(l => l.id === selected);
   const title = rules?.title ?? selectedListing?.complexName;
   const parsed = parseForm(raw, supply);
-  const result = snapshot?.profile === profile ? snapshot.result : null;
+  const result = snapshot?.profile === profile && snapshot.rulesId === rules?.id ? snapshot.result : null;
   const update = (key: string, value: string) => { setRaw(p => ({ ...p, [key]: value })); setSnapshot(null); };
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
   const resetAnswers = () => { setRaw({}); setSnapshot(null); setTouched({}); setAttempted(false); };
@@ -57,8 +63,9 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const calculate = () => {
     if (!rules || !hydrated) return;
     if (parsed.errors.length) { setAttempted(true); return; }
-    const assessment = assessApplication(rules, { profile, details: parsed.details }, selected).find(r => r.supplyType === supply)!;
-    setSnapshot({ result: assessment, profile }); move(3);
+    const assessment = assessApplication(rules, { profile, details: parsed.details }, selected).find(r => r.supplyType === supply);
+    if (!assessment) return;
+    setSnapshot({ result: assessment, profile, rulesId: rules.id }); move(3);
   };
   const editProfile = () => router.push('/profile');
 
@@ -70,12 +77,19 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       {step === 0 ? <>
         <Text style={styles.body}>신청 조건과 공급단계, 필요한 준비를 함께 확인해요.</Text>
         <Choice label={`${samdoReferenceRules.title} · 원문 확인 전`} selected={selected === REFERENCE_LISTING_ID} onPress={() => choose(REFERENCE_LISTING_ID)} />
-        {selected && selected !== REFERENCE_LISTING_ID ? <WanpanCard style={styles.stack}>
+        {catalog.items.map(item => <Choice key={item.id} label={`${item.title} · ${SOURCE_LABELS[item.sourceStatus]}`} selected={selected === `announcement:${item.id}`} onPress={() => choose(`announcement:${item.id}`)} />)}
+        {catalog.status === 'LOADING' ? <Text style={styles.body}>등록된 공고 목록을 불러오고 있어요.</Text> : null}
+        {catalog.status === 'ERROR' ? <PrimaryButton label="공고 목록을 불러오지 못했어요 · 다시 시도" variant="soft" onPress={catalog.retry} /> : null}
+        {catalog.nextCursor && catalog.status === 'AVAILABLE' ? <PrimaryButton label="공고 더 보기" variant="soft" onPress={catalog.more} /> : null}
+        {rules && selected !== REFERENCE_LISTING_ID && !selected.startsWith('announcement:') ? <WanpanCard style={styles.stack}><Text style={styles.title}>{rules.title}</Text><Text style={styles.body}>{SOURCE_LABELS[rules.sourceStatus ?? 'REFERENCE']} · 상세에서 선택한 공고</Text></WanpanCard> : null}
+        {ruleLoad.state.status === 'LOADING' ? <Text style={styles.body}>선택한 공고의 판정 기준을 불러오고 있어요.</Text> : null}
+        {selected && !['AVAILABLE', 'LOADING', 'RULE_NOT_AVAILABLE'].includes(ruleLoad.state.status) ? <WanpanCard style={styles.stack}><Text style={styles.body}>판정 기준을 불러오거나 확인하지 못했어요. 잠시 후 다시 시도해 주세요.</Text><PrimaryButton label="판정 기준 다시 불러오기" variant="soft" onPress={ruleLoad.retry} /></WanpanCard> : null}
+        {selected && selected !== REFERENCE_LISTING_ID && ruleLoad.state.status === 'RULE_NOT_AVAILABLE' ? <WanpanCard style={styles.stack}>
           <Text style={styles.title}>{title ?? (dataset.status === 'loading' ? '선택한 공고를 불러오는 중이에요' : '선택한 공고를 확인할 수 없어요')}</Text>
           <Text style={styles.body}>이 공고의 판정 규칙은 아직 준비 중이에요. 원문과 기준을 확인한 뒤 판정을 제공할 수 있어요.</Text>
           <PrimaryButton label="공고 목록 확인하기" variant="soft" onPress={() => router.push('/discovery')} />
         </WanpanCard> : null}
-        {rules ? <WanpanCard style={styles.stack}><Text style={styles.title}>공고 원문 확인 전이에요</Text><Text style={styles.body}>지금은 삼도이동 공고에 필요한 조건과 서류를 확인할 수 있어요. 정확한 기준일·금액·배점표가 확인되기 전에는 신청 가능 여부와 점수를 확정하지 않아요.</Text></WanpanCard> : null}
+        {rules?.verification === 'REFERENCE_ONLY' ? <WanpanCard style={styles.stack}><Text style={styles.title}>공고 원문 확인 전이에요</Text><Text style={styles.body}>공고에 필요한 조건과 서류를 확인할 수 있어요. 정확한 기준일·금액·배점표가 확인되기 전에는 신청 가능 여부와 점수를 확정하지 않아요.</Text></WanpanCard> : null}
         <PrimaryButton label="내 정보 확인하기" disabled={!rules || !hydrated} onPress={() => move(1)} />
         {!selected ? <Text style={styles.body}>위에서 공고를 선택하면 다음 단계로 넘어갈 수 있어요.</Text> : null}
         {!hydrated ? <Text style={styles.body}>저장한 프로필을 불러오고 있어요.</Text> : null}
@@ -83,7 +97,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       {step === 1 ? <>
         <Text style={styles.strong}>{title}</Text>
         <Text style={styles.title}>확인할 공급유형</Text>
-        {(Object.keys(SUPPLY_LABELS) as SupplyType[]).map(key => <Choice key={key} label={SUPPLY_LABELS[key]} selected={key === supply} onPress={() => { setSupply(key); resetAnswers(); }} />)}
+        {(rules?.supplies.map(s => s.type) ?? []).map(key => <Choice key={key} label={SUPPLY_LABELS[key]} selected={key === supply} onPress={() => { setSupply(key); resetAnswers(); }} />)}
         <WanpanCard style={styles.stack}>
           <Text style={styles.title}>{profile.basic.name}님의 저장된 정보</Text>
           {[

@@ -3,6 +3,7 @@ import type { ApplicantProfileV2 } from '../profile/domain.ts';
 export type SupplyType = 'youth' | 'newlywed' | 'firstHome';
 export type Stage = 'PRIORITY' | 'GENERAL' | 'LOTTERY';
 export type Status = 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_MORE_INFORMATION';
+export type RuleSourceStatus = 'REFERENCE' | 'DRAFT_SOURCE_VERIFIED' | 'OFFICIAL_VERIFIED';
 export type Scalar = string | number | boolean;
 export type Child = { birthDate?: string; unborn: boolean };
 
@@ -49,6 +50,10 @@ export type Evidence = {
   label: string;
   url?: string;
   page?: number;
+  documentId?: string;
+  tableLabel?: string;
+  textExcerpt?: string;
+  locator?: Record<string, unknown>;
 };
 export type Expression =
   | { all: Expression[] }
@@ -82,6 +87,9 @@ export type AnnouncementRules = {
   listingId: string;
   title: string;
   verification: 'REFERENCE_ONLY' | 'VERIFIED';
+  /** Explicit provenance takes precedence over the legacy static fixture flag. */
+  sourceStatus?: RuleSourceStatus;
+  provenance?: { announcementId: string; documentId: string | null; schemaVersion: number };
   announcementDate: string | null;
   parameters: Record<string, Scalar | null>;
   supplies: SupplyRule[];
@@ -97,6 +105,8 @@ export type ConditionResult = {
 export type ApplicationAssessmentResult = {
   rulesId: string;
   rulesVersion: string;
+  sourceStatus?: RuleSourceStatus;
+  provenance?: AnnouncementRules['provenance'];
   listingId: string;
   supplyType: SupplyType;
   status: Status;

@@ -35,7 +35,7 @@ export function AssessmentResult({ result, onEditProfile, onEditAnswers }: Props
       <Text style={styles.title}>{SUPPLY_LABELS[result.supplyType]}</Text>
       <Text style={styles.body}>{result.stage ? STAGE_LABELS[result.stage] : '공급단계 확인 전'}</Text>
       <Text style={styles.body}>{result.stageExplanation}</Text>
-      {result.score ? <Text style={styles.heading}>예상 {result.score.total} / {result.score.max}점</Text> : <Text style={styles.body}>{result.scoring === 'NOT_APPLICABLE' ? '이 유형은 가점 대신 공급단계와 추첨으로 선정돼요. 점수가 없는 것이 정상이에요.' : '필요한 정보와 배점표가 확인되면 점수를 보여드려요.'}</Text>}
+      {result.score ? <Text style={styles.heading}>예상 {result.score.total} / {result.score.max}점</Text> : <Text style={styles.body}>{result.scoring === 'NOT_APPLICABLE' ? result.supplyType === 'firstHome' ? '이 유형은 가점 대신 공급단계와 추첨으로 선정돼요. 점수가 없는 것이 정상이에요.' : '이 공급단계는 가점 없이 추첨으로 선정돼요.' : '필요한 정보와 배점표가 확인되면 점수를 보여드려요.'}</Text>}
     </WanpanCard>
     {groups.answers.length + groups.profile.length > 0 ? <WanpanCard style={styles.stack}>
       <Text style={styles.title}>내가 채우면 되는 정보</Text>
@@ -69,7 +69,7 @@ export function AssessmentResult({ result, onEditProfile, onEditAnswers }: Props
       {expanded ? <>
         {Object.entries(result.inputDates).map(([key, value]) => <Text key={key} style={styles.body}>{FACT_LABELS[key] ?? key}: {value}</Text>)}
         {[...result.satisfiedConditions, ...result.failedConditions, ...result.unknownConditions, ...result.stageConditions].map(c => <ConditionEvidence key={c.ruleId} condition={c} />)}
-        {result.evidence.map(e => <View key={e.id}><Text style={styles.strong}>{e.label}</Text><Text style={styles.body}>{e.source} · {e.section}{e.page ? ` · ${e.page}쪽` : ''}</Text><Text selectable style={styles.caption}>{e.id}</Text></View>)}
+        {result.evidence.map(e => <View key={e.id}><Text style={styles.strong}>{e.label}</Text><Text style={styles.body}>{e.source} · {e.section}{e.tableLabel ? ` · ${e.tableLabel}` : ''}{e.page ? ` · ${e.page}쪽` : ''}</Text><Text selectable style={styles.caption}>{e.id}</Text></View>)}
         <Text selectable style={styles.caption}>규칙 버전: {result.rulesVersion}</Text>
       </> : null}
     </WanpanCard>

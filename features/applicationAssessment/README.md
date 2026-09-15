@@ -4,12 +4,13 @@
 
 공고별 자격 → 공급유형 → 순서가 있는 공급단계 → 해당 유형의 가점 → 경고·서류·근거를 계산한다.
 `assessApplication(rules, { profile, details }, listingId)`는 I/O, AI, 현재 시각에 의존하지 않는 순수 함수다.
-AI API, DB 변경, 신규 사용자 스토어, 배포는 포함하지 않는다.
+AI API와 신규 사용자 스토어는 사용하지 않는다. DB 읽기 기반은 `data/`에 추가했으며 운영 DB 적용과 배포는 별도다.
+상세 설계/등록 절차는 [Rule DB 구조](../../docs/application-assessment-data-architecture.md)를 따른다.
 
 **삼도이동 1지구의 공식 입주자모집공고 원문은 저장소에 없었다.**
 `samdoReferenceRules`는 사용자 요구에 따른 구조 참조이며, 법적 기준의 전사본이 아니다.
 공고일, 금액 한도, 인정기간 기준, 배점은 `null`, 검증 상태는 `REFERENCE_ONLY`다.
-따라서 실제 화면에서는 항상 `NEEDS_MORE_INFORMATION`, `eligible: null`, `stage: null`이며 점수를 표시하지 않는다.
+따라서 이 참조 공고를 선택하면 `NEEDS_MORE_INFORMATION`, `eligible: null`, `stage: null`이며 점수를 표시하지 않는다. DB에 별도로 승인된 규칙은 해당 버전의 실제 입력조건에 따라 판정한다.
 생애최초는 정보가 부족해도 가점이 없는 구조(`NOT_APPLICABLE`)를 유지한다.
 실제 공고를 찾거나 이름이 같다는 이유로 이 참조 규칙을 적용하지 않는다.
 
@@ -19,7 +20,8 @@ AI API, DB 변경, 신규 사용자 스토어, 배포는 포함하지 않는다.
 | --- | --- |
 | `types.ts` | 공고 규칙, 조건식, 입력, 공급유형, 결과, 증빙 메타데이터 |
 | `facts.ts` | ApplicantProfileV2 어댑터, 정확한 날짜·수치 검증, 기준일 계산 |
-| `referenceRules.ts` | 삼도이동 구조 참조, 명시적 listing ID 등록 |
+| `referenceRules.ts` | 삼도이동 구조 참조, 테스트 호환 registry |
+| `data/` | Static/Database RuleRepository, Supabase RPC adapter, schema codec/validation, 비동기 조회 hook |
 | `engine.ts` | 3값 조건 평가, 단계 선택, 점수 breakdown, 근거·서류·누락정보 |
 | `form.ts` | 추가 질문 정의, 입력 검증, 사용자용 누락정보 문구 |
 | `AssessmentScreen.tsx` | 공고 → 기존 정보 → 추가 질문 → 결과 흐름 |
@@ -59,13 +61,13 @@ AI API, DB 변경, 신규 사용자 스토어, 배포는 포함하지 않는다.
 3. 현재 우선공급 `youthPriorityTarget` / `newlywedPriorityTarget` 확인값을 실제 대상 조건식으로 교체. 지금의 확인 질문만으로 운영용 우선공급을 승인하면 안 된다.
 4. 가구원수·맞벌이별 소득 기준표, 자산의 합산범위, 근로/세금 인정방식, 태아·한부모 자녀 기준, 무주택 기산일·해외 체류 예외 전사.
 5. 실제 배점표와 동점자 처리, 단계별 잔여물량 이월 등을 검토. 현재 단계는 입력조건상의 첫 해당 단계이며 당첨 확률·잔여물량 배정 계산이 아니다.
-6. 각 규칙의 원문 section/page/url 등록, 명시적 실제 listing ID 매핑, 실제 사례 회귀테스트 후 VERIFIED로 변경.
-7. AI가 향후 Rules JSON을 만들더라도 수신 스키마 검증·버전·출처 검토·승인 과정을 거친다. 현재 엔진은 신뢰된 정적 TS 규칙만 받으며 외부 JSON API는 없다.
+6. 각 규칙의 원문 section/page/url 등록, 명시적 실제 listing ID 매핑, 실제 사례 회귀테스트 후 출처에 맞게 DRAFT_SOURCE_VERIFIED 또는 OFFICIAL_VERIFIED 버전을 새로 등록·승인.
+7. AI가 향후 Rules JSON을 만들더라도 수신 스키마 검증·버전·출처 검토·승인 과정을 거친다. DB 규칙은 codec 검증 후 기존 순수 엔진으로 전달한다. 기존 static fixture는 테스트 및 명시적 reference 선택에만 사용하며 DB 오류 fallback이 아니다.
 8. 기존 범위형 프로필에서 정밀 날짜·금액·세대 이력 프로필로 확장할 때 어댑터와 기존 저장·클라우드 마이그레이션을 함께 검토한다.
 
 ## 검증
 
-`npm run test:assessment` — 합성 규칙에 대한 21개 테스트. 테스트용 금액·배점은 실제 삼도이동 수치가 아니며 런타임 모듈에서 import하지 않는다.
+`npm run test:assessment` — 기존 23개 엔진/UX 계약 테스트와 DB repository 테스트. 테스트용 금액·배점은 실제 삼도이동 수치가 아니며 런타임 모듈에서 import하지 않는다.
 기존 `npm test`에 포함했다. 새 라이브러리나 lockfile 변경은 없다.
 
 ## Claude UX QA 집중 범위

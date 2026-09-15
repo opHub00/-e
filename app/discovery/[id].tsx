@@ -21,6 +21,7 @@ import {
   hasListingPrice,
   RECRUITMENT_STATUS_LABEL,
 } from '../../features/discovery/domain';
+import { rulesForListing } from '../../features/applicationAssessment/referenceRules';
 import { ListingDetailHero } from '../../features/discovery/components/ListingDetailHero';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
 import { getStoriesForListing } from '../../features/discovery/stories';
@@ -168,11 +169,24 @@ export default function DiscoveryDetailRoute() {
           <KeyFacts listing={listing} />
         </View>
 
-        <PrimaryButton
-          label="내 조건으로 판정하기"
-          icon="fact-check"
-          onPress={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
-        />
+        {/*
+          판정 규칙이 등록된 공고에서만 주 행동으로 연다.
+          규칙이 없는 공고에서 누르면 준비 중 화면과 비활성 버튼만 나와 막다른 길이 된다.
+        */}
+        {rulesForListing(listing.id) ? (
+          <PrimaryButton
+            label="내 조건으로 판정하기"
+            icon="fact-check"
+            onPress={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
+          />
+        ) : (
+          <View style={styles.assessmentPending}>
+            <MaterialIcons name="fact-check" size={18} color={colors.textSubtle} />
+            <Text style={styles.assessmentPendingText}>
+              이 공고의 맞춤판정은 준비 중이에요. 공고 기준을 확인한 뒤 열려요.
+            </Text>
+          </View>
+        )}
 
         <Appear delay={stagger.short} distance={travel.content}>
           <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />
@@ -735,6 +749,16 @@ function TabButton({
 }
 
 const styles = StyleSheet.create({
+  assessmentPending: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.cardSm,
+    backgroundColor: colors.surfaceLow,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+  },
+  assessmentPendingText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
   safe: { flex: 1, height: '100%', backgroundColor: colors.background },
   container: { paddingHorizontal: spacing.screen, paddingBottom: spacing.lg, gap: spacing.lg },
 

@@ -73,3 +73,29 @@ export function missingLabel(key: string): string {
   if (key.startsWith('rule:')) return '공고의 자격·소득·자산 기준 확인';
   return FACT_LABELS[key.slice(6)] ?? '추가 입력정보 확인';
 }
+
+/** 프로필 화면에서만 고칠 수 있는 판정 입력. 추가 질문 화면에는 이 항목들이 없다. */
+const PROFILE_FACTS = new Set([
+  'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome', 'householdNeverOwned',
+  'noSpecialRestriction', 'hasAccount', 'incomeTaxPaymentYears', 'workOrBusinessIncome',
+]);
+
+export type MissingInformationGroups = { answers: string[]; profile: string[]; announcement: string[] };
+
+/**
+ * 누락정보를 "어디서 해결하는가"로 나눈다.
+ *
+ * 공고 기준이 없어 생긴 항목을 사용자 입력 목록에 섞으면,
+ * 아무리 입력해도 풀리지 않는 칸을 채우려고 같은 질문을 되풀이하게 된다.
+ * 판정 로직은 건드리지 않고 표시용으로만 나눈다.
+ */
+export function groupMissingInformation(keys: string[]): MissingInformationGroups {
+  const groups: MissingInformationGroups = { answers: [], profile: [], announcement: [] };
+  for (const key of keys) {
+    const bucket = !key.startsWith('input:') ? groups.announcement
+      : PROFILE_FACTS.has(key.slice(6)) ? groups.profile : groups.answers;
+    const label = missingLabel(key);
+    if (!bucket.includes(label)) bucket.push(label);
+  }
+  return groups;
+}

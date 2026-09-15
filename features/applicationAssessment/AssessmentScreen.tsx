@@ -35,6 +35,9 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const [step, setStep] = useState(0);
   const [raw, setRaw] = useState<Record<string, string>>({});
   const [snapshot, setSnapshot] = useState<{ result: ApplicationAssessmentResult; profile: typeof profile } | null>(null);
+  // 입력하는 도중에는 형식 오류를 띄우지 않는다. 칸을 떠났거나 판정을 눌렀을 때만 알린다.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [attempted, setAttempted] = useState(false);
   const scroll = useRef<ScrollView>(null);
   const rules = rulesForListing(selected);
   const selectedListing = dataset.listings.find(l => l.id === selected);
@@ -43,9 +46,17 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const result = snapshot?.profile === profile ? snapshot.result : null;
   const update = (key: string, value: string) => { setRaw(p => ({ ...p, [key]: value })); setSnapshot(null); };
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
-  const choose = (id: string) => { setSelected(id); setRaw({}); setSnapshot(null); };
+  const resetAnswers = () => { setRaw({}); setSnapshot(null); setTouched({}); setAttempted(false); };
+  const choose = (id: string) => { setSelected(id); resetAnswers(); };
+  /** 오류는 해당 칸 바로 아래에 붙인다. 목록 맨 끝에 모으면 3화면 위의 칸을 찾아 올라가야 한다. */
+  const fieldError = (key: string, label: string) => {
+    if (!touched[key] && !attempted) return null;
+    const error = parseForm({ [key]: raw[key] ?? '' }, supply).errors[0];
+    return error ? error.replace(`${label}: `, '') : null;
+  };
   const calculate = () => {
-    if (!rules || !hydrated || parsed.errors.length) return;
+    if (!rules || !hydrated) return;
+    if (parsed.errors.length) { setAttempted(true); return; }
     const assessment = assessApplication(rules, { profile, details: parsed.details }, selected).find(r => r.supplyType === supply)!;
     setSnapshot({ result: assessment, profile }); move(3);
   };
@@ -66,12 +77,13 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         </WanpanCard> : null}
         {rules ? <WanpanCard style={styles.stack}><Text style={styles.title}>공고 원문 확인 전이에요</Text><Text style={styles.body}>지금은 삼도이동 공고에 필요한 조건과 서류를 확인할 수 있어요. 정확한 기준일·금액·배점표가 확인되기 전에는 신청 가능 여부와 점수를 확정하지 않아요.</Text></WanpanCard> : null}
         <PrimaryButton label="내 정보 확인하기" disabled={!rules || !hydrated} onPress={() => move(1)} />
+        {!selected ? <Text style={styles.body}>위에서 공고를 선택하면 다음 단계로 넘어갈 수 있어요.</Text> : null}
         {!hydrated ? <Text style={styles.body}>저장한 프로필을 불러오고 있어요.</Text> : null}
       </> : null}
       {step === 1 ? <>
         <Text style={styles.strong}>{title}</Text>
         <Text style={styles.title}>확인할 공급유형</Text>
-        {(Object.keys(SUPPLY_LABELS) as SupplyType[]).map(key => <Choice key={key} label={SUPPLY_LABELS[key]} selected={key === supply} onPress={() => { setSupply(key); setRaw({}); setSnapshot(null); }} />)}
+        {(Object.keys(SUPPLY_LABELS) as SupplyType[]).map(key => <Choice key={key} label={SUPPLY_LABELS[key]} selected={key === supply} onPress={() => { setSupply(key); resetAnswers(); }} />)}
         <WanpanCard style={styles.stack}>
           <Text style={styles.title}>{profile.basic.name}님의 저장된 정보</Text>
           {[
@@ -101,25 +113,33 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         {supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.title}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}
         {FORM_FIELDS.filter(f => !f.supplies || f.supplies.includes(supply)).map(field => <WanpanCard key={field.key} style={styles.stack}>
           <Text style={styles.strong}>{field.label}</Text>
-          {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <TextInput
-            accessibilityLabel={field.label} value={raw[field.key] ?? ''} onChangeText={value => update(field.key, value)}
-            placeholder={field.kind === 'date' ? 'YYYY-MM-DD' : field.kind === 'children' ? '2020-01-01, 2023-01-01 또는 없음' : '모르면 비워 두세요'}
-            placeholderTextColor={colors.textSubtle} keyboardType={field.kind === 'number' ? 'numeric' : 'default'} autoCapitalize="none" style={styles.input}
-          />}
+          {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <>
+            <TextInput
+              accessibilityLabel={field.label} value={raw[field.key] ?? ''} onChangeText={value => update(field.key, value)}
+              onBlur={() => setTouched(current => ({ ...current, [field.key]: true }))}
+              placeholder={field.kind === 'date' ? 'YYYY-MM-DD' : field.kind === 'children' ? '2020-01-01, 2023-01-01 또는 없음' : '모르면 비워 두세요'}
+              placeholderTextColor={colors.textSubtle} keyboardType={field.kind === 'number' ? 'numeric' : 'default'} autoCapitalize="none"
+              style={[styles.input, fieldError(field.key, field.label) ? styles.inputError : null]}
+            />
+            {fieldError(field.key, field.label) ? <Text accessibilityRole="alert" style={styles.error}>{fieldError(field.key, field.label)}</Text> : null}
+          </>}
         </WanpanCard>)}
         <WanpanCard style={styles.stack}><Text style={styles.strong}>거주기간 중 해외 체류 이력이 있나요?</Text><BooleanChoices value={raw.overseas} onChange={v => update('overseas', v)} /><Text style={styles.body}>이력이 있으면 공고의 연속거주 인정 기준을 추가로 확인해요.</Text></WanpanCard>
         <WanpanCard style={styles.stack}><Text style={styles.strong}>태아 인정 등 별도 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
-        {parsed.errors.map(error => <Text key={error} accessibilityRole="alert" style={styles.error}>{error}</Text>)}
-        <PrimaryButton label="내 조건으로 판정하기" disabled={parsed.errors.length > 0 || !hydrated} onPress={calculate} />
+        {attempted && parsed.errors.length ? <Text accessibilityRole="alert" style={styles.error}>입력 형식을 확인할 항목이 {parsed.errors.length}개 있어요. 안내가 표시된 칸을 고쳐 주세요.</Text> : null}
+        <PrimaryButton label="내 조건으로 판정하기" disabled={!hydrated} onPress={calculate} />
         <PrimaryButton label="유형·프로필 다시 확인" variant="soft" onPress={() => move(1)} />
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
-        {result ? <AssessmentResult result={result} /> : <Text style={styles.body}>프로필이 변경됐어요. 새 정보로 다시 판정해 주세요.</Text>}
-        <Text style={styles.notice}>입력한 정보를 기준으로 한 예상 판정이며, 최종 자격은 사업주체/청약기관 심사를 통해 확정됩니다.</Text>
-        <PrimaryButton label="부족한 정보 확인·다시 판정" onPress={() => move(2)} />
+        {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} /> : <>
+          <Text style={styles.body}>프로필이 변경됐어요. 새 정보로 다시 판정해 주세요.</Text>
+          <PrimaryButton label="새 정보로 다시 판정하기" onPress={calculate} />
+        </>}
+        <Text style={styles.notice}>입력한 정보를 기준으로 한 예상 판정이며, 최종 자격은 사업주체 및 청약기관 심사를 통해 확정됩니다.</Text>
+        {/* 확인 필요 결과에서 다시 판정을 첫 행동으로 두면, 공고 기준이 없는 동안 같은 입력을 되풀이하게 된다. 누락 항목별 수정은 결과 카드 안에 있다. */}
+        <PrimaryButton label="준비 단계로 이어가기" onPress={() => router.push('/preparation')} />
         <PrimaryButton label="다른 공급유형 확인하기" variant="soft" onPress={() => move(1)} />
-        <PrimaryButton label="준비 단계로 이어가기" variant="soft" onPress={() => router.push('/preparation')} />
       </> : null}
     </ScrollView>
   </SafeAreaView>;
@@ -139,5 +159,6 @@ const styles = StyleSheet.create({
   choice: { minHeight: size.touch, borderRadius: radius.button, borderWidth: 1, borderColor: colors.outline, padding: spacing.sm, justifyContent: 'center' },
   selected: { backgroundColor: colors.lavender, borderColor: colors.primary }, selectedText: { color: colors.primary },
   input: { ...type.body, color: colors.text, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.button, minHeight: size.control, padding: spacing.sm },
-  error: { ...type.body, color: colors.error }, notice: { ...type.bodySm, color: colors.textMuted },
+  inputError: { borderColor: colors.error },
+  error: { ...type.bodySm, color: colors.error }, notice: { ...type.bodySm, color: colors.textMuted },
 });

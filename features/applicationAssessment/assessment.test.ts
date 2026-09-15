@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { createMinimalApplicantProfile, knownField } from '../profile/domain.ts';
 import { assessApplication } from './engine.ts';
 import { completedMonths } from './facts.ts';
-import { parseForm } from './form.ts';
+import { groupMissingInformation, parseForm } from './form.ts';
 import { samdoReferenceRules, rulesForListing } from './referenceRules.ts';
 import type { AnnouncementRules, AssessmentInput, SupplyType } from './types.ts';
 
@@ -180,4 +180,22 @@ test('주택 처분일 이후 무주택기간 불일치와 미래 자녀 날짜'
 test('우선공급 조건은 공급유형 간 재사용하지 않음', () => {
   const input = applicant('newlywed'); delete input.details.newlywedPriorityTarget;
   assert.equal(run('newlywed', input).stage, null);
+});
+
+test('누락정보는 해결할 수 있는 곳별로 나눈다', () => {
+  const groups = groupMissingInformation([
+    'input:age', 'input:maritalStatus', 'rule:verifiedAnnouncement', 'rule:youth.income', 'review:youth.exceptions', 'input:age',
+  ]);
+  assert.deepEqual(groups.answers, ['생년월일']);
+  assert.deepEqual(groups.profile, ['혼인 여부']);
+  assert.ok(groups.announcement.includes('공고 원문·기준일·규칙 검증'));
+  assert.ok(groups.announcement.includes('특례 관련 공고 조항·증빙 확인'));
+});
+test('참조 규칙 결과의 공고 쪽 확인 항목은 사용자 입력 목록에 섞이지 않음', () => {
+  const ANNOUNCEMENT_ONLY = ['공고 원문·기준일·규칙 검증', '공고의 자격·소득·자산 기준 확인', '공고의 항목별 배점표 확인', '공급단계 기준 확인', '특례 관련 공고 조항·증빙 확인'];
+  for (const result of assessApplication(samdoReferenceRules, applicant('youth'))) {
+    const groups = groupMissingInformation(result.missingInformation);
+    assert.ok(groups.announcement.length > 0);
+    assert.ok(![...groups.answers, ...groups.profile].some(label => ANNOUNCEMENT_ONLY.includes(label)));
+  }
 });

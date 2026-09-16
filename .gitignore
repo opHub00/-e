@@ -65,3 +65,7 @@ Thumbs.db
 *.zip
 
 .vercel
+
+# Private announcement originals stay in local source storage, outside the app bundle.
+/source/*.hwp
+/source/*.hwpx

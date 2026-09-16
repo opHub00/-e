@@ -1,5 +1,6 @@
 import type { ProfileFieldState } from '../profile/domain.ts';
 import type { AssessmentInput, Scalar } from './types.ts';
+import { noHomeDuration, withinYears } from './dateFacts.ts';
 
 export function validDate(value: string | undefined): value is string {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -17,7 +18,7 @@ export function completedMonths(start: string | undefined, end: string | null): 
 const known = <T>(field: ProfileFieldState<T>): T | undefined => field.status === 'known' ? field.value : undefined;
 const inverse = (value: boolean | undefined) => value === undefined ? undefined : !value;
 
-export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null): Record<string, Scalar | undefined> {
+export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
   const p = input.profile;
   const d = input.details;
   const months = (date: string | undefined) => completedMonths(date, asOf);
@@ -27,13 +28,38 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
   const childAges = children?.filter(c => !c.unborn).map(c => months(c.birthDate));
   const validChildren = childAges?.every(age => age !== undefined);
   const ownership = known(p.housing.currentOwnership);
+  const duration = noHomeDuration({ birthDate:d.birthDate, firstMarriageDate:d.firstMarriageDate, everMarried:d.everMarried, disposalDates:d.housingDisposalDates },asOf);
+  const householdSize = d.incomeHouseholdSize;
+  const incomeSize = Number.isInteger(householdSize) && householdSize! >= 1 ? Math.max(3,householdSize!) : undefined;
+  const incomeThreshold = (name: string) => incomeSize === undefined ? undefined : parameters[`income.${incomeSize}.${name}`];
+  const low = incomeThreshold(d.dualIncome ? '80' : '70'), mid = incomeThreshold(d.dualIncome ? '110' : '100');
+  const cutoff = parameters['exceptions.childbirthAfter'];
+  const childbirthClear = typeof cutoff === 'string' && children && validChildren ? !children.some(c => c.unborn || c.birthDate! >= cutoff) : undefined;
+  const minorAgeYears = typeof parameters['children.minorAgeYears'] === 'number' ? parameters['children.minorAgeYears'] : 18;
   const facts: Record<string, Scalar | undefined> = {
     age: birthMonths === undefined ? undefined : Math.floor(birthMonths / 12),
+    accountKindEligible: d.accountKindEligible,
+    firstRank: d.firstRank,
+    isHouseholdHead:d.isHouseholdHead,
+    householdNoWinningFiveYears:d.householdNoWinningFiveYears,
+    incomeHouseholdSize: incomeSize,
+    householdMemberCount: known(p.household.memberCount),
+    plannedMarriageWithinDeadline:d.plannedMarriageWithinDeadline,
+    singleParentQualified:d.singleParentQualified,
+    unmarriedChildInHousehold:d.unmarriedChildInHousehold,
+    marriageWithin2Years: withinYears(d.marriageDate,asOf,2),
+    marriageWithin7Years: withinYears(d.marriageDate,asOf,7),
+    hasChildUnder7: validChildren ? children!.some(c => c.unborn) || childAges!.some(a => a! < 84) : undefined,
+    hasChildUnder3: validChildren ? children!.some(c => c.unborn) || childAges!.some(a => a! < 36) : undefined,
+    childbirthClear,
+    householdIncomeScoreTier: d.dualIncome !== undefined && typeof d.householdIncome === 'number' && d.householdIncome >= 0 && typeof low === 'number' && typeof mid === 'number' ? (d.householdIncome <= low ? 0 : d.householdIncome <= mid ? 1 : 2) : undefined,
+    // -1 is an explicit not-applicable sentinel, distinct from a valid period under one month.
+    calculatedNoHomeMonths: duration && !(known(p.housing.householdDisqualifyingPreviousOwnership) === true && !d.housingDisposalDates?.length) ? (duration.applicable ? duration.months : -1) : undefined,
     maritalStatus: known(p.family.marriageStatus),
     familyCategory: d.familyCategory ?? (known(p.family.marriageStatus) === 'married' ? 'married' : undefined),
     marriageMonths: months(d.marriageDate),
     hasChildren: children ? children.length > 0 : undefined,
-    minorChildren: validChildren ? childAges!.filter(age => age! < 18 * 12).length : undefined,
+    minorChildren: validChildren ? childAges!.filter(age => age! < minorAgeYears * 12).length + (parameters['children.includeUnborn'] === true ? children!.filter(c => c.unborn).length : 0) : undefined,
     youngestChildMonths: validChildren && childAges!.length ? Math.min(...childAges as number[]) : undefined,
     noHome: ownership === undefined ? undefined : ownership === 'no-home',
     neverOwned: inverse(known(p.housing.previousOwnership)),
@@ -66,8 +92,9 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
   };
   // Never coerce negative values, fractions in counts, NaN, or infinity into eligibility.
   for (const [key, value] of Object.entries(facts)) {
-    if (typeof value === 'number' && (!Number.isFinite(value) || value < 0 ||
-      (['recognizedPaymentCount', 'incomeTaxPaymentYears'].includes(key) && !Number.isInteger(value)))) facts[key] = undefined;
+    if (typeof value === 'number' && (!Number.isFinite(value) || (value < 0 && !(key === 'calculatedNoHomeMonths' && value === -1)) ||
+      (['recognizedPaymentCount', 'incomeTaxPaymentYears','householdMemberCount','incomeHouseholdSize'].includes(key) && !Number.isSafeInteger(value)) ||
+      (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','totalAssets','parentAssets','recognizedDepositAmount'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
   }
   return facts;
 }

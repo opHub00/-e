@@ -12,6 +12,16 @@ export type AssessmentInput = {
   profile: ApplicantProfileV2;
   details: Partial<{
     birthDate: string;
+    firstMarriageDate: string;
+    everMarried: boolean;
+    accountKindEligible: boolean;
+    firstRank: boolean;
+    isHouseholdHead: boolean;
+    householdNoWinningFiveYears: boolean;
+    incomeHouseholdSize: number;
+    plannedMarriageWithinDeadline: boolean;
+    singleParentQualified: boolean;
+    unmarriedChildInHousehold: boolean;
     marriageDate: string;
     familyCategory: 'married' | 'engaged' | 'singleParent';
     spouse: { birthDate?: string };
@@ -113,6 +123,7 @@ export type ApplicationAssessmentResult = {
   eligible: boolean | null;
   stage: Stage | null;
   stageExplanation: string;
+  regionalPriority?: { status: 'LOCAL' | 'REMAINDER_ONLY' | 'NEEDS_REVIEW'; label: string };
   inputDates: Record<string, string>;
   score?: { total: number; max: number; breakdown: { ruleId: string; evidenceId: string; label: string; input: number; points: number; max: number; appliedBand: { min?: number; max?: number } }[] };
   scoring: 'AVAILABLE' | 'NOT_APPLICABLE' | 'PENDING';

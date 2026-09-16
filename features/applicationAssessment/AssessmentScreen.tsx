@@ -106,6 +106,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
             ['세대 부적격 과거 주택소유', profile.housing.householdDisqualifyingPreviousOwnership], ['특별공급 제한', profile.housing.hasSpecialSupplyRestriction],
             ['청약통장 보유', profile.subscriptionAccount.hasAccount], ['근로·사업소득 요건', profile.income.workOrBusinessIncomeEligible],
             ['소득세 납부기간(년)', profile.income.incomeTaxPaymentYears],
+            ['세대원 수', profile.household.memberCount],
           ].map(([label, field]) => <Text key={label as string} style={styles.body}>{label as string}: {profileValue(field as ProfileFieldState<unknown>)}</Text>)}
           <PrimaryButton label="프로필 확인·수정" variant="soft" onPress={editProfile} />
         </WanpanCard>
@@ -125,7 +126,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
           <Choice label="확인 전" selected={!raw.currentResidence} onPress={() => update('currentResidence', '')} />
         </WanpanCard>
         {supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.title}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}
-        {FORM_FIELDS.filter(f => !f.supplies || f.supplies.includes(supply)).map(field => <WanpanCard key={field.key} style={styles.stack}>
+        {FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key))).map(field => <WanpanCard key={field.key} style={styles.stack}>
           <Text style={styles.strong}>{field.label}</Text>
           {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <>
             <TextInput
@@ -139,7 +140,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
           </>}
         </WanpanCard>)}
         <WanpanCard style={styles.stack}><Text style={styles.strong}>거주기간 중 해외 체류 이력이 있나요?</Text><BooleanChoices value={raw.overseas} onChange={v => update('overseas', v)} /><Text style={styles.body}>이력이 있으면 공고의 연속거주 인정 기준을 추가로 확인해요.</Text></WanpanCard>
-        <WanpanCard style={styles.stack}><Text style={styles.strong}>태아 인정 등 별도 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
+        <WanpanCard style={styles.stack}><Text style={styles.strong}>출산 완화·태아·입양·배우자 주택이력·재혼·군인 등 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
         {attempted && parsed.errors.length ? <Text accessibilityRole="alert" style={styles.error}>입력 형식을 확인할 항목이 {parsed.errors.length}개 있어요. 안내가 표시된 칸을 고쳐 주세요.</Text> : null}
         <PrimaryButton label="내 조건으로 판정하기" disabled={!hydrated} onPress={calculate} />
         <PrimaryButton label="유형·프로필 다시 확인" variant="soft" onPress={() => move(1)} />

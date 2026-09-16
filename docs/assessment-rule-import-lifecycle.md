@@ -2,6 +2,8 @@
 
 ## 구현 상태와 제한
 
+**후속 업데이트:** 사용자 제공 HWP를 확보하여 삼도이동 package와 실제 규칙 검증을 추가했다. 아래 원문 부재 설명은 `5f9d4a8` 시점의 기록이다. 현재 상태는 [삼도이동 명세](./samdo-assessment-rule-spec.md)와 [원문 상태](./samdo-assessment-source-status.md)를 따른다.
+
 - 시작 HEAD `b5b64ae`, `feature/assessment-rule-db`, clean. 작업 브랜치 `feature/assessment-rule-import`.
 - 기존 schema/순수 evaluator/RuleRepository/Claude UX를 유지한다. 앱 코드와 runtime fixture는 변경하지 않는다.
 - 이번 도구는 Node 서버용이며 새로운 의존성을 추가하지 않는다. 이미 설치된 Supabase JS를 재사용한다.

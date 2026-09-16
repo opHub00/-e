@@ -2,15 +2,26 @@ import { validDate } from './facts.ts';
 import type { AssessmentInput, SupplyType } from './types.ts';
 
 type Details = AssessmentInput['details'];
-export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children'; supplies?: SupplyType[] };
+export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children' | 'dates'; supplies?: SupplyType[] };
 export const FORM_FIELDS: FormField[] = [
-  { key: 'birthDate', label: '생년월일', kind: 'date', supplies: ['youth'] },
+  { key: 'birthDate', label: '생년월일', kind: 'date' },
+  { key: 'accountKindEligible', label: '통장이 주택청약종합저축 또는 청약저축인가요?', kind: 'boolean' },
+  { key: 'firstRank', label: '청약통장 순위확인서에서 1순위인가요?', kind: 'boolean', supplies: ['firstHome'] },
+  { key: 'isHouseholdHead', label: '공고일 현재 세대주인가요?', kind:'boolean', supplies:['firstHome'] },
+  { key: 'householdNoWinningFiveYears', label: '세대원 전원이 과거 5년 이내 다른 주택의 당첨 이력이 없나요?', kind:'boolean', supplies:['firstHome'] },
+  { key: 'incomeHouseholdSize', label: '공고 소득 산정 가구원수(태아·직계존속 인정기준 확인)', kind: 'number', supplies: ['newlywed','firstHome'] },
+  { key: 'everMarried', label: '과거를 포함해 혼인한 적이 있나요?', kind: 'boolean', supplies:['newlywed'] },
+  { key: 'firstMarriageDate', label: '최초 혼인신고일(혼인 이력이 있을 때)', kind:'date', supplies:['newlywed'] },
+  { key: 'housingDisposalDates', label:'세대원 주택처분일(쉼표로 구분, 이력이 없으면 없음)', kind:'dates', supplies:['newlywed'] },
+  { key: 'plannedMarriageWithinDeadline', label:'예비신혼부부: 공고일부터 1년 이내 또는 앞선 입주일까지 혼인 증명이 가능한가요?', kind:'boolean', supplies:['newlywed'] },
+  { key: 'singleParentQualified', label:'한부모: 공고의 한부모가족 자격과 자녀 등재 요건을 충족하나요?', kind:'boolean', supplies:['newlywed'] },
+  { key: 'unmarriedChildInHousehold', label:'혼인 중이 아니라면 동일 등본에 미혼 자녀가 있나요?', kind:'boolean', supplies:['firstHome'] },
   { key: 'marriageDate', label: '혼인신고일(신혼부부 해당 시)', kind: 'date', supplies: ['newlywed'] },
-  { key: 'children', label: '출생 자녀 생년월일(쉼표로 구분, 없으면 없음)', kind: 'children', supplies: ['newlywed', 'firstHome'] },
+  { key: 'children', label: '출생 자녀 생년월일(쉼표로 구분, 없으면 없음)', kind: 'children' },
   { key: 'residenceStartDate', label: '제주 연속거주 시작일', kind: 'date' },
   { key: 'subscriptionAccountOpenedAt', label: '청약통장 가입일', kind: 'date' },
   { key: 'recognizedPaymentCount', label: '납입인정횟수(회)', kind: 'number' },
-  { key: 'recognizedDepositAmount', label: '납입인정금액(원)', kind: 'number', supplies: ['firstHome'] },
+  { key: 'recognizedDepositAmount', label: '선납금을 포함한 저축액(원)', kind: 'number', supplies: ['firstHome'] },
   { key: 'monthlyIncome', label: '본인 월평균소득(원)', kind: 'number', supplies: ['youth'] },
   { key: 'householdIncome', label: '세대 월평균소득(원)', kind: 'number', supplies: ['newlywed', 'firstHome'] },
   { key: 'dualIncome', label: '맞벌이인가요?', kind: 'boolean', supplies: ['newlywed', 'firstHome'] },
@@ -35,14 +46,14 @@ export function parseForm(raw: Record<string, string>, supply: SupplyType): { de
       parsed = value;
     } else if (field.kind === 'number') {
       const number = Number(value.replaceAll(',', ''));
-      if (!/^\d+(,\d{3})*(\.\d+)?$/.test(value) || !Number.isFinite(number) || (field.key === 'recognizedPaymentCount' && !Number.isInteger(number))) {
+      if (!/^\d+(,\d{3})*(\.\d+)?$/.test(value) || !Number.isFinite(number) || (['recognizedPaymentCount','incomeHouseholdSize'].includes(field.key) && !Number.isInteger(number))) {
         errors.push(`${field.label}: 0 이상의 올바른 숫자를 입력해 주세요.`); continue;
       }
       parsed = number;
-    } else if (field.kind === 'children') {
+    } else if (field.kind === 'children' || field.kind === 'dates') {
       const dates = value === '없음' ? [] : value.split(',').map(s => s.trim());
-      if (dates.some(date => !validDate(date))) { errors.push('자녀 생년월일을 확인해 주세요.'); continue; }
-      parsed = dates.map(birthDate => ({ birthDate, unborn: false }));
+      if (dates.some(date => !validDate(date))) { errors.push(`${field.label}: 날짜를 확인해 주세요.`); continue; }
+      parsed = field.kind === 'dates' ? dates : dates.map(birthDate => ({ birthDate, unborn: false }));
     } else {
       if (!['yes', 'no'].includes(value)) { errors.push(`${field.label}: 응답을 다시 확인해 주세요.`); continue; }
       parsed = value === 'yes';
@@ -58,6 +69,9 @@ export function parseForm(raw: Record<string, string>, supply: SupplyType): { de
 }
 
 export const FACT_LABELS: Record<string, string> = {
+  householdMemberCount:'세대원 수', marriageWithin2Years:'혼인기간 2년 이내', marriageWithin7Years:'혼인기간 7년 이내',
+  hasChildUnder7:'만 7세 미만 자녀', hasChildUnder3:'만 3세 미만 자녀', childbirthClear:'출산가구 완화 해당 여부',
+  calculatedNoHomeMonths:'생년월일·최초 혼인일·세대 주택처분일', householdIncomeScoreTier:'가구원수·맞벌이 여부별 소득구간',
   age: '생년월일', maritalStatus: '혼인 여부', familyCategory: '가족 유형', marriageMonths: '혼인신고일', hasChildren: '자녀 여부', minorChildren: '자녀 생년월일', youngestChildMonths: '가장 어린 자녀 생년월일',
   noHome: '현재 주택소유', neverOwned: '과거 주택소유', householdNoHome: '세대 주택소유', householdNeverOwned: '세대 과거 주택소유',
   noSpecialRestriction: '특별공급 제한', noSpecialSupplyHistory: '특별공급 당첨 이력', noReWinningRestriction: '재당첨 제한',
@@ -76,6 +90,7 @@ export function missingLabel(key: string): string {
 
 /** 프로필 화면에서만 고칠 수 있는 판정 입력. 추가 질문 화면에는 이 항목들이 없다. */
 const PROFILE_FACTS = new Set([
+  'householdMemberCount',
   'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome', 'householdNeverOwned',
   'noSpecialRestriction', 'hasAccount', 'incomeTaxPaymentYears', 'workOrBusinessIncome',
 ]);

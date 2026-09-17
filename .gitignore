@@ -72,3 +72,7 @@ Thumbs.db
 
 # Local acquisition state, immutable documents and extraction manifests (not app assets).
 .ingestion/
+
+# Local Python parser bytecode.
+__pycache__/
+*.pyc

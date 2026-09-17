@@ -13,6 +13,8 @@ export function documentFormat(bytes: Uint8Array): { extension: string; mimeType
 }
 export async function storeDocument(store: LocalIngestionStore, bytes: Uint8Array, now: string, sourceUrl: string | null, headers = new Headers()): Promise<LocalDocument> {
   if (!bytes.length || bytes.length > 50_000_000) throw new Error('INVALID_DOCUMENT_SIZE');
+  const contentType = headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+  if (contentType === 'text/html' || contentType === 'application/xhtml+xml' || contentType === 'application/json') throw new Error('UNSUPPORTED_DOCUMENT_CONTENT');
   const format = documentFormat(bytes), digest = sha256(bytes), localPath = `blobs/${digest}.${format.extension}`;
   await store.immutable(localPath, bytes);
   return { sourceUrl, localPath, sha256: digest, size: bytes.length, mimeType: format.mimeType, retrievedAt: now,

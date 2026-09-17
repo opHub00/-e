@@ -17,7 +17,7 @@
     "test:motion": "node components/motion/motion.test.mjs",
     "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:ingestion && npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
+    "test": "npm run test:extraction && npm run test:ingestion && npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
     "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts",
     "test:assessment-db": "node --experimental-strip-types scripts/check-assessment-migration.mjs",
     "export:assessment-reference": "node --experimental-strip-types scripts/export-assessment-reference.mjs",
@@ -25,7 +25,11 @@
     "test:assessment-import-db": "node --experimental-strip-types scripts/check-assessment-import.mjs",
     "test:assessment-samdo-db": "node --experimental-strip-types scripts/check-samdo-lifecycle.mjs",
     "ingest:announcements": "node --env-file-if-exists=.env --experimental-strip-types scripts/ingest-announcements.mjs",
-    "test:ingestion": "node --experimental-strip-types --test features/announcementIngestion/server/ingestion.test.ts"
+    "test:ingestion": "node --experimental-strip-types --test features/announcementIngestion/server/ingestion.test.ts",
+    "parse:announcement": "node --experimental-strip-types scripts/parse-announcement.mjs",
+    "extract:announcement": "node --experimental-strip-types scripts/parse-announcement.mjs --extract",
+    "test:extraction": "node --experimental-strip-types --test features/ruleExtraction/server/extraction.test.ts",
+    "test:parsers": "node scripts/test-parsers.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

@@ -11,3 +11,6 @@ test-results/
 playwright-report/
 coverage/
 .ingestion/
+.cache/
+__pycache__/
+*.pyc

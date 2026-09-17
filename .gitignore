@@ -69,3 +69,6 @@ Thumbs.db
 # Private announcement originals stay in local source storage, outside the app bundle.
 /source/*.hwp
 /source/*.hwpx
+
+# Local acquisition state, immutable documents and extraction manifests (not app assets).
+.ingestion/

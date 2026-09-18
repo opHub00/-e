@@ -32,6 +32,8 @@
     "test:parsers": "node scripts/test-parsers.mjs",
     "test:semantic": "node --experimental-strip-types --test features/ruleExtraction/server/semantic.test.ts",
     "benchmark:samdo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/benchmark-samdo-extraction.mjs",
+    "benchmark:samdo:resume": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/resume-samdo-extraction.mjs",
+    "benchmark:samdo:evaluate-v2": "node --experimental-strip-types scripts/evaluate-samdo-v2.mjs",
     "benchmark:samdo:finalize": "node --experimental-strip-types scripts/finalize-samdo-benchmark.mjs"
   },
   "dependencies": {

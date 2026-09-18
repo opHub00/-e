@@ -23,7 +23,7 @@ function validateCandidatePackage(raw: unknown, d: ParsedDocument) { validateCan
 async function candidate(d = document()) {
   const p = await new MockRuleExtractor().extract({ manifest, document: d });
   p.candidateRules.push({ candidateRuleId: 'c1', ruleKey: 'income', supplyType: 'YOUTH', stage: 'COMMON', category: 'incomeThreshold',
-    condition: { input: 'incomePercentage', operator: 'lte', value: 130, values: [] }, score: null, maxScore: null, requiredInputs: ['incomePercentage'], evidence: [blockEvidence(d,0)], confidence: 'HIGH', confidenceReason: 'Explicit text', reviewStatus: 'REVIEW_REQUIRED' });
+    condition: { input: 'incomePercentage', operator: 'lte', value: 130, values: [] }, score: null, maxScore: null, requiredInputs: ['incomePercentage'], relatedExceptionRuleKeys:[], evidence: [blockEvidence(d,0)], confidence: 'HIGH', confidenceReason: 'Explicit text', reviewStatus: 'REVIEW_REQUIRED' });
   return p;
 }
 test('grounded candidate accepted, inclusive operator preserved', async () => { const p = await candidate(); validateCandidatePackage(p, document()); assert.equal(p.candidateRules[0].condition.operator, 'lte'); });

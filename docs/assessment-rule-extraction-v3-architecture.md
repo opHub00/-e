@@ -100,6 +100,8 @@ retry가 전체 benchmark budget을 소진하지 않는다.
 
 실제 provider 호출 전 `npm run plan:samdo:v3`로 plan-only artifact를 생성한다. 출력에는 task, scope, stage, input chars, table/block/fact 수, 예상 binding 수, schema bytes가 포함된다. provider 호출 수는 0이다.
 
+`runV3BindingBenchmark`는 기존 provider adapter를 최소 schema로 호출하는 명시적 진입점이다. 기본 실행 경로와 CLI는 plan-only이며 이 함수가 자동 호출되지는 않는다. task별 응답 검증과 RuleBuilder를 거치고, 429 또는 다른 task 실패가 발생해도 이미 성공한 결과를 보존한다. oracle과 DB lifecycle 의존성은 없다.
+
 - `PLAN_A_16`: 숫자·연산자·표·세 공급유형 핵심 category를 확인하는 16-call safety plan
 - `PLAN_B_24`: 공급단계와 무주택기간까지 확장한 24-call benchmark plan
 

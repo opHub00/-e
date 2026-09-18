@@ -40,6 +40,7 @@ export const V3_TASKS:SemanticTask[]=[
 
 export type TaskSource={sourceId:string;text:string;kind:'BLOCK'|'CELL';tableId:string|null;excerpted:boolean};
 export type SemanticTaskInput={task:SemanticTask;facts:ExtractedFact[];sources:TaskSource[];inputChars:number;tableCount:number;blockCount:number;schemaBytes:number};
+export function providerTaskPayload(input:SemanticTaskInput){return {promptVersion:'assessment-rule-extraction-v3',taskName:input.task.name,scope:input.task.scope,allowedRoles:input.task.allowedRoles,expectedBindings:input.task.expectedBindings,facts:input.facts.map(fact=>({factId:fact.factId,type:fact.type,rawValue:fact.rawValue,unit:fact.unit,sourceId:fact.sourceId})),sources:input.sources};}
 export function buildTaskInput(document:ParsedDocument,facts:ExtractedFact[],task:SemanticTask):SemanticTaskInput {
   const matches=(text:string)=>task.keywords.some(keyword=>text.includes(keyword));
   const excerpt=(text:string)=>{if(text.length<=1200)return {text,excerpted:false};const positions=task.keywords.map(k=>text.indexOf(k)).filter(i=>i>=0),center=positions.length?Math.min(...positions):0,start=Math.max(0,center-300);return {text:text.slice(start,start+1200),excerpted:true};};
@@ -51,5 +52,5 @@ export function buildTaskInput(document:ParsedDocument,facts:ExtractedFact[],tas
   const unique=[...new Map(sources.map(source=>[source.sourceId,source])).values()].sort((a,b)=>relevance(b)-relevance(a)||a.sourceId.localeCompare(b.sourceId)).slice(0,6);
   const sourceIds=new Set(unique.map(source=>source.sourceId));
   const selectedFacts=facts.filter(fact=>sourceIds.has(fact.sourceId)).slice(0,12);
-  return {task,facts:selectedFacts,sources:unique,inputChars:JSON.stringify({facts:selectedFacts.map(f=>({factId:f.factId,type:f.type,unit:f.unit,sourceId:f.sourceId})),sources:unique}).length,tableCount:new Set(unique.flatMap(s=>s.tableId?[s.tableId]:[])).size,blockCount:unique.filter(s=>s.kind==='BLOCK').length,schemaBytes:0};
+  const input={task,facts:selectedFacts,sources:unique,inputChars:0,tableCount:new Set(unique.flatMap(s=>s.tableId?[s.tableId]:[])).size,blockCount:unique.filter(s=>s.kind==='BLOCK').length,schemaBytes:0};input.inputChars=JSON.stringify(providerTaskPayload(input)).length;return input;
 }

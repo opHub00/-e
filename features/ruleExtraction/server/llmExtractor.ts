@@ -18,7 +18,7 @@ export function acceptWire(raw:unknown,base:CandidateRulePackage,d:ParsedDocumen
       try{const item={...object(rawItem)};
         if(kind==='conflicts')item.alternatives=array(item.alternatives,30).map(a=>({...object(a),evidence:hydrateEvidence(object(a).evidence,d,allowed)}));
         else item.evidence=hydrateEvidence(item.evidence,d,allowed);
-        if(kind==='candidateRules'){string(item.candidateRuleId);item.candidateRuleId=`${label}:${i}`;item.ruleKey=`${label}:${string(item.ruleKey,180)}`;}
+        if(kind==='candidateRules'){string(item.candidateRuleId);item.candidateRuleId=`${label}:${i}`;item.ruleKey=`${label}:${i}:${string(item.ruleKey,160)}`;}
         const probe={...base,candidateRules:[],unresolvedItems:[],conflicts:[],extractionWarnings:[],[kind]:[item]};
         validateCandidatePackage(probe,d,base.announcement);(accepted[kind] as unknown[]).push(item);
       }catch(error){rejected.push({batch:label,kind,reason:error instanceof Error?error.message:'INVALID_CANDIDATE',raw:rawItem});}
@@ -47,7 +47,10 @@ export class LLMRuleExtractor implements RuleExtractor {
     const base=emptyCandidate(manifest,d);const index=sourceIndex(d);
     await this.record('input-provenance',{document:d.sha256,parserVersion:d.parserVersion,promptVersion:SEMANTIC_PROMPT_VERSION,indexHash:createHash('sha256').update(JSON.stringify(index)).digest('hex'),oracleRead:false});
     const discovered=await this.provider.generate('pass1',DISCOVERY_PROMPT,index,DISCOVERY_SCHEMA);await this.record('pass1-raw',discovered);
-    const selection=validateSelection(discovered,d),batches=semanticBatches(d,selection);await this.record('selected-contexts',batches);
+    const selection=validateSelection(discovered,d),batches=semanticBatches(d,selection);
+    // Persist provenance and exposure sizes, never the original source context sent to the provider.
+    await this.record('selected-contexts',batches.map(b=>({group:b.group,tableIds:b.tableIds,blockIds:b.blockIds,oversized:b.oversized,
+      contextCharacters:JSON.stringify(b.context).length,contextHash:createHash('sha256').update(JSON.stringify(b.context)).digest('hex')})));
     const packages=[base],rejected:RejectedCandidate[]=[],failedCalls:unknown[]=[],skipped:unknown[]=[],repeats:Record<string,number>={};let rawRuleCount=0;
     for(const [i,batch] of batches.entries()){
       const label=`${batch.group}-${i}`;

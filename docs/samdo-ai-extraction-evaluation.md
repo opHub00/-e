@@ -160,3 +160,117 @@ Git에서 제외된 `.ingestion/announcements/{samdoId}/extraction/samdo-ai-v1-f
 - 기존 extraction 33개, Python parser 14개, ingestion 33개, assessment 138개 보존.
 - 전체 회귀와 web export는 최종 코드 변경 후 재실행한다.
 - 원격 Supabase write, import/review/approve/activate, human-verified Samdo rule 변경 없음.
+
+---
+
+## Benchmark v2 — selection, scheduling, exception integrity 개선
+
+### 결론
+
+v2는 COMMON 호출 독점과 HIGH confidence 예외 누락은 완화했지만, **admin review 단계로 진행할 기준은 아직 충족하지 못했다.** 모든 공급유형 호출은 round-robin 첫 회차에서 실제 시도됐으나 `INCOMPLETE_OUTPUT`으로 후보를 회수하지 못했다. 남은 5회 축소 재시도도 provider의 HTTP 429/400으로 실패했다. Oracle을 이용한 output 보정이나 추가 호출은 하지 않았다.
+
+### 적용한 개선
+
+- Pass 1 selection cap: COMMON 8 tables/30 blocks, YOUTH 10/50, NEWLYWED 10/60, FIRST_TIME 8/50, EXCEPTIONS 8/60.
+- deterministic heading/keyword bias로 청년 표7·8, 신혼 표9·10, 생애최초, 해외체류·특례 문맥을 우선했다.
+- 실행 순서를 COMMON → YOUTH → NEWLYWED → FIRST_TIME → EXCEPTIONS round-robin으로 변경했다.
+- 전체 16회 중 discovery 1, semantic 13, retry reserve 2로 분리했다.
+- transient retry는 run 전체 최대 2회, 연속 오류 circuit breaker는 3회로 제한했다.
+- `단/다만/제외/예외/배우자/혼인 전/해외체류/생업/출산/특례`가 있으면 앞 1개·뒤 2개 block과 표를 함께 유지했다.
+- 예외 문맥에서 qualifier/unresolved를 내지 않은 rule은 `EXCEPTION_DROPPED`로 차단한다.
+- 예외·복수 block·table warning 문맥의 `HIGH`는 host가 `MEDIUM`으로 낮춘다.
+- COMMON stage 추론을 차단했고, v2에서 발견된 EXCEPTIONS→PRIORITY 오류도 이후 `EXCEPTION_STAGE_MISMATCH`로 차단한다.
+- candidate 간 `relatedExceptionRuleKeys`를 지원하며 rejected exception 관계는 제거한다.
+
+### Pass 1과 plan-only
+
+실제 v2 Pass 1은 COMMON 표를 149개 선택했지만 deterministic policy가 8개로 제한했다. v1은 120개가 그대로 batch로 넘어갔다.
+
+| 항목 | v1 | v2 |
+|---|---:|---:|
+| 모델이 선택한 COMMON tables | 120 | 149 |
+| policy 이후 COMMON tables | 120 | 8 |
+| 실행 예정 COMMON batches | COMMON 우선 전체 | 2 |
+| 공급유형 최소 실행 슬롯 | 없음 | 청년 3 / 신혼 3 / 생애최초 3 |
+| retry reserve | semantic과 공유 | 2 |
+
+14,000-character plan-only 결과는 총 33개 고유 table, 1,492개 block, duplicate context ratio 37.1%, exception marker coverage 205/325(63.1%)였다. schedule은 `COMMON-0, YOUTH-0, NEWLYWED-0, FIRST_TIME-0, EXCEPTIONS-0` 순으로 첫 회차 coverage를 보장했다. 네트워크 호출과 Oracle 입력은 0이었다.
+
+### 호출·토큰·비용
+
+v2 본 실행 11회와 승인 한도 내 축소 재시도 5회를 합쳐 정확히 16회에서 종료했다.
+
+| 결과 | 횟수 |
+|---|---:|
+| OK | 4 |
+| INCOMPLETE_OUTPUT | 4 |
+| HTTP 429 | 6 |
+| HTTP 400 | 2 |
+
+| 사용량 | v2 |
+|---|---:|
+| input tokens | 98,168 |
+| output tokens | 85,510 |
+| thinking tokens | 12,537 |
+| total tokens | 196,215 |
+| estimated cost | US$0.2745679 |
+
+HTTP 400 두 건은 축소 재시도에 넣은 JSON Schema `maxItems`가 Gemini 지원 subset과 맞지 않은 것으로 추정한다. 응답 body를 저장하지 않았으므로 확정 원인으로 단정하지 않는다. 해당 keyword는 코드에서 제거했다. API key, 전체 원문 context, Oracle은 provider artifact에 기록하지 않았다.
+
+### Candidate와 Oracle 결과
+
+성공 응답은 Pass 1, COMMON 2개, EXCEPTIONS 1개다. 최초 relation cleanup 버그로 탈락했던 COMMON-0 raw 응답은 API 재호출 없이 현재 validator로 다시 검증해 27개를 회수했다. 기존 29개와 병합한 최종 후보는 56개다.
+
+| 지표 | v2 결과 |
+|---|---:|
+| validator accepted candidates | 56 |
+| validator evidence grounding | 56 / 56 = 100% |
+| human Oracle rules | 75 |
+| exact rule recall | 5 / 75 = 6.7% |
+| semantic correspondence precision | 5 / 56 = 8.9% |
+| mapped numeric accuracy | 3 / 3 = 100% |
+| mapped operator accuracy | 14 / 14 = 100% |
+| score accuracy | 0 / 0 = N/A |
+| stage accuracy | 0 / 0 = N/A |
+| strict Oracle evidence match | 5 / 14 = 35.7% |
+| confirmed hallucination | 0 |
+| conflict/unresolved recall | 2 / 7 = 28.6% |
+| HIGH-confidence critical errors | 0 |
+| manually confirmed critical errors | 11 |
+
+Strict Oracle evidence는 candidate가 동일 규칙의 다른 유효 문단을 인용한 경우도 mismatch로 센다. 따라서 source grounding 100%와 Oracle locator match 35.7%를 구분해야 한다.
+
+11개 critical error는 EXCEPTIONS batch의 혼인·출산·배우자 특례를 모두 `PRIORITY` stage로 지정한 오류다. host가 전부 `MEDIUM`으로 낮췄기 때문에 HIGH-confidence critical error는 0이지만, 당시 validator는 stage 오류를 허용했다. 이후 validator 회귀 테스트와 함께 차단했다.
+
+### 공급유형과 예외 보존
+
+| Scope | 실제 호출 | 후보 회수 | 결과 |
+|---|---:|---:|---|
+| COMMON | 예 | 예 | 2 batch + offline recovery |
+| YOUTH | 예 | 아니오 | INCOMPLETE_OUTPUT/429/400 |
+| NEWLYWED | 예 | 아니오 | INCOMPLETE_OUTPUT/429/400 |
+| FIRST_TIME | 예 | 아니오 | INCOMPLETE_OUTPUT/429 |
+| EXCEPTIONS | 예 | 예 | 1 batch |
+
+예외 보존은 2/3(66.7%)이다.
+
+- 해외체류: 90일·183일 조건과 생업 목적 예외가 후보로 보존되고 relation으로 연결됐다.
+- 배우자 혼인 전 이력: 별도 exception 후보로 보존됐다.
+- 무주택 scope: 생애최초 배우자 예외와 청년 applicant scope 일부는 남았지만 예비신혼 scope 관계가 완전하지 않아 PARTIAL이다.
+
+### v1 대비
+
+| 지표 | v1 | v2 |
+|---|---:|---:|
+| calls | 16 | 16 |
+| total tokens | 51,699 | 196,215 |
+| estimated cost | US$0.0384315 | US$0.2745679 |
+| candidates | 17 | 56 |
+| recall | 0% | 6.7% |
+| correspondence precision | 0% | 8.9% |
+| validator grounding | 100% | 100% |
+| conflict recall | 0% | 28.6% |
+| HIGH-confidence critical errors | 6 | 0 |
+| confirmed hallucination | 0 | 0 |
+
+Selection fairness와 exception safety는 개선됐다. 그러나 공급유형 단위 출력 크기와 provider 안정성이 새 병목으로 드러났다. 다음 benchmark 전에는 큰 공급표를 eligibility/stage/score 하위 task로 나누고, 각 응답 candidate 수를 prompt 수준에서 제한하며, Gemini가 실제 지원하는 structured-output schema subset만 사용해야 한다. 자동 import, DB handoff, admin review로 진행하지 않는다.

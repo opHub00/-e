@@ -1,0 +1,49 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { GeminiStructuredProvider,mapUsage,providerConfig,type ProviderConfig } from './geminiProvider.ts';
+import { acceptWire,emptyCandidate,mergeCandidates,LLMRuleExtractor } from './llmExtractor.ts';
+import { evaluateOracle,type OracleRule } from './oracleEvaluation.ts';
+import type { ParsedDocument } from './parsedDocument.ts';
+import type { Manifest } from '../../announcementIngestion/server/model.ts';
+import { blockEvidence,type CandidateRule } from './candidate.ts';
+import { validateSelection,semanticBatches } from './semanticContext.ts';
+const config:ProviderConfig={model:'gemini-2.5-pro',apiKey:'test-secret',maxCalls:3,maxOutputTokens:1000,thinkingBudget:128,timeoutMs:100,inputUsdPerMillion:1.25,outputUsdPerMillion:10,maxEstimatedUsd:1};
+const response=(text='{"ok":true}')=>new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text}]}}],usageMetadata:{promptTokenCount:100,candidatesTokenCount:20,thoughtsTokenCount:10,totalTokenCount:130}}));
+test('structured provider mapping and key only in header',async()=>{const p=new GeminiStructuredProvider(config,async(_url,init)=>{const body=JSON.parse(init!.body as string);assert.equal(body.generationConfig.responseMimeType,'application/json');assert.deepEqual(body.generationConfig.responseJsonSchema,{type:'object'});assert.ok(!(init!.body as string).includes(config.apiKey));return response();});assert.deepEqual(await p.generate('test','system',{}, {type:'object'}),{ok:true});assert.equal(p.usage[0].totalTokens,130);});
+test('token accounting includes thinking, does not call missing usage zero',()=>{assert.equal(mapUsage({promptTokenCount:100,candidatesTokenCount:20,thoughtsTokenCount:10,totalTokenCount:130},config).estimatedUsd,0.000425);assert.equal(mapUsage(null,config).estimatedUsd,null);});
+test('retry at most once for transient status',async()=>{let calls=0;const p=new GeminiStructuredProvider(config,async()=>++calls===1?new Response('',{status:503}):response());await p.generate('test','s',{},{});assert.equal(calls,2);assert.equal(p.usage[0].status,'HTTP_503');assert.equal(p.usage[1].attempt,1);});
+test('invalid JSON is recorded without automatic semantic repair',async()=>{const p=new GeminiStructuredProvider(config,async()=>response('not json'));await assert.rejects(()=>p.generate('test','s',{},{}),/INVALID_JSON/);assert.equal(p.usage.length,1);assert.equal(p.usage[0].outputTokens,20);});
+test('authorization failure no retry',async()=>{const p=new GeminiStructuredProvider(config,async()=>new Response('',{status:403}));await assert.rejects(()=>p.generate('test','s',{},{}),/HTTP_403/);assert.equal(p.usage.length,1);});
+test('timeout does not silently retry a possibly billed request',async()=>{const p=new GeminiStructuredProvider(config,async()=>{throw new Error('secret remote text');});await assert.rejects(()=>p.generate('test','s',{},{}),/NETWORK_OR_TIMEOUT/);assert.equal(p.usage.length,1);});
+test('budget refuses extra calls',async()=>{const p=new GeminiStructuredProvider({...config,maxCalls:1},async()=>response());await p.generate('test','s',{},{});await assert.rejects(()=>p.generate('test','s',{},{}),/AI_BUDGET_EXHAUSTED/);});
+test('environment requires explicit model',()=>{assert.throws(()=>providerConfig({GEMINI_API_KEY:'a',NODE_ENV:'test'}));});
+const text='소득 130% 이하 2026-09-14 기준. '.repeat(10);
+const doc:ParsedDocument={schemaVersion:1,documentId:'sha256:'+'a'.repeat(64),sha256:'a'.repeat(64),mimeType:'application/pdf',parserVersion:'document-parser-v1',status:'PARSED',pages:1,blocks:[{id:'b000000',text,type:'paragraph',sectionPath:[],sourceLocator:{kind:'PDF_BBOX',pageNumber:1,bbox:[0,0,100,100]}}],tables:[],metadata:{},quality:{textBlockCount:1,tableCount:0,characterCount:text.length,emptyBlockRatio:0,replacementCharacterCount:0,suspiciousEncoding:false,parserWarnings:[],extractionAllowed:true}};
+const manifest={canonicalId:'b'.repeat(64),announcement:{title:'test',announcementDate:'2026-09-14'}} as Manifest;
+const rule:CandidateRule={candidateRuleId:'c1',supplyType:'YOUTH',stage:'COMMON',category:'incomeThreshold',ruleKey:'income',condition:{input:'incomePercent',operator:'lte',value:130,values:[]},score:null,maxScore:null,requiredInputs:['incomePercent'],evidence:[blockEvidence(doc,0)],confidence:'HIGH',confidenceReason:'direct text',reviewStatus:'REVIEW_REQUIRED'};
+const pack=()=>({...emptyCandidate(manifest,doc),candidateRules:[structuredClone(rule)]});
+const oracle:OracleRule[]=[{id:'o1',supplyType:'YOUTH',label:'income',atoms:[{key:'income',value:130,operator:'lte',stage:'COMMON',score:null,maxScore:null,evidenceBlockIds:['b000000']}]}];
+const alignment=[{oracleRuleId:'o1',atomKey:'income',candidateId:'c1',scopeVerified:true,notes:'synthetic alignment'}];
+test('candidate exact semantic duplicate merge preserves provenance',()=>{const a=pack(),b=pack();b.candidateRules[0].candidateRuleId='c2';const merged=mergeCandidates([a,b]);assert.equal(merged.result.candidateRules.length,1);assert.equal(merged.duplicates.length,1);});
+test('differing thresholds never deduplicate',()=>{const a=pack(),b=pack();b.candidateRules[0].condition.value=140;assert.equal(mergeCandidates([a,b]).result.candidateRules.length,2);});
+test('invalid schema candidate retained in rejected report',()=>{const bad={...rule,evidence:[{blockId:'b000000',snippet:'130% 미만'}]};const out=acceptWire({candidateRules:[bad],unresolvedItems:[],conflicts:[],extractionWarnings:[]},emptyCandidate(manifest,doc),doc,{group:'YOUTH',tableIds:[],blockIds:['b000000'],context:{},oversized:false},'batch');assert.equal(out.accepted.candidateRules.length,0);assert.equal(out.rejected[0].reason,'UNGROUNDED_EVIDENCE_TEXT');assert.deepEqual(out.rejected[0].raw,bad);});
+test('evidence outside selected context rejected even if document contains it',()=>{const wire={...rule,evidence:[{blockId:'b000000',snippet:'130% 이하'}]};const out=acceptWire({candidateRules:[wire],unresolvedItems:[],conflicts:[],extractionWarnings:[]},emptyCandidate(manifest,doc),doc,{group:'YOUTH',tableIds:[],blockIds:[],context:{},oversized:false},'batch');assert.equal(out.rejected[0].reason,'EVIDENCE_OUTSIDE_SELECTED_CONTEXT');});
+test('oracle exact classification and metric denominators',()=>{const r=evaluateOracle(pack(),oracle,alignment,[],[]);assert.equal(r.ruleRows[0].category,'EXACT_MATCH');assert.equal(r.metrics.numericAccuracy.ratio,1);assert.equal(r.metrics.conflictRecall.ratio,null);assert.equal(r.acceptance.automaticApproval,false);});
+for(const [name,change,expected] of [
+ ['wrong numeric',(r:CandidateRule)=>r.condition.value=140,'WRONG_VALUE'],
+ ['wrong operator',(r:CandidateRule)=>r.condition.operator='lt','WRONG_OPERATOR'],
+ ['wrong stage',(r:CandidateRule)=>r.stage='PRIORITY','WRONG_STAGE'],
+ ['evidence mismatch',(r:CandidateRule)=>r.evidence[0].blockId='b000001','EVIDENCE_MISMATCH'],
+] as const)test(name,()=>{const p=pack();change(p.candidateRules[0]);assert.ok(evaluateOracle(p,oracle,alignment,[],[]).atomRows[0].categories.includes(expected));});
+test('wrong score classification',()=>{const o=structuredClone(oracle);o[0].atoms[0].score=3;o[0].atoms[0].maxScore=9;assert.ok(evaluateOracle(pack(),o,alignment,[],[]).atomRows[0].categories.includes('WRONG_SCORE'));});
+test('ambiguous matching is never counted exact',()=>{const r=evaluateOracle(pack(),oracle,[{...alignment[0],scopeVerified:false}],[],[]);assert.equal(r.metrics.ruleRecall.correct,0);assert.equal(r.metrics.numericAccuracy.total,0);});
+test('unknown extra is not automatically hallucination',()=>{const r=evaluateOracle(pack(),oracle,[],[],[]);assert.equal(r.extraRows[0].category,'NEEDS_HUMAN_REVIEW');assert.equal(r.metrics.hallucinationCount,0);assert.equal(r.metrics.unreviewedExtras,1);});
+test('reviewed unsupported extra counts hallucination',()=>{const r=evaluateOracle(pack(),oracle,[],[{candidateId:'c1',sourceSupported:false,critical:true,notes:'invented'}],[]);assert.equal(r.metrics.hallucinationCount,1);});
+test('conflict recall includes unknowns in denominator',()=>{const p=pack();p.unresolvedItems.push({type:'REVIEW_MEMO',description:'review needed',evidence:[blockEvidence(doc,0)]});const r=evaluateOracle(p,oracle,alignment,[],[{id:'a',description:'a',detected:true,candidateIssueIndexes:[0],notes:'a'},{id:'b',description:'b',detected:null,candidateIssueIndexes:[],notes:'b'}]);assert.equal(r.metrics.conflictRecall.ratio,.5);assert.equal(r.metrics.unreviewedConflicts,1);assert.equal(r.potentialFalseConfidence.length,1);});
+test('discovery rejects invented table IDs',()=>{assert.throws(()=>validateSelection({groups:[{group:'YOUTH',tableIds:['unknown'],blockIds:[]}]},doc));});
+test('deterministic batch budget keeps oversized source untruncated',()=>{const b=semanticBatches(doc,[{group:'YOUTH',tableIds:[],blockIds:['b000000']}],20);assert.equal(b[0].oversized,true);assert.ok(JSON.stringify(b[0].context).includes(text));});
+test('two-pass extraction keeps raw/rejected artifacts and completes before oracle',async()=>{
+ const artifacts=new Map<string,any>();let calls=0;
+ const extractor=new LLMRuleExtractor({generate:async(label)=>{calls++;if(label==='pass1')return {groups:['COMMON','YOUTH','NEWLYWED','FIRST_TIME','EXCEPTIONS'].map(group=>({group,tableIds:[],blockIds:group==='YOUTH'?['b000000']:[]}))};return {candidateRules:[{...rule,evidence:[{blockId:'b000000',snippet:'130% 이하'}]},{...rule,evidence:[]}],unresolvedItems:[],conflicts:[],extractionWarnings:[]};}},async(name,value)=>{artifacts.set(name,value);});
+ const result=await extractor.extract({manifest,document:doc});assert.equal(calls,2);assert.equal(result.candidateRules.length,1);assert.equal(result.sourceStatus,'REFERENCE');assert.equal(artifacts.get('samdo-ai-validation-v1').rejectedCandidates.length,1);assert.equal(artifacts.get('extraction-complete').oracleRead,false);assert.ok(artifacts.has('YOUTH-0-raw'));
+});

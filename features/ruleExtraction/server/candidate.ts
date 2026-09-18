@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { array, exact, integer, object, string, validateParsedDocument, type ParsedDocument, type SourceLocator } from './parsedDocument.ts';
 
 export const PROMPT_VERSION = 'assessment-rule-extraction-v1';
+export const SEMANTIC_PROMPT_VERSION = 'assessment-rule-extraction-v2';
 export const SUPPLIES = ['YOUTH','NEWLYWED','FIRST_TIME','NEWBORN','GENERAL','INSTITUTIONAL'] as const;
 export const KINDS = ['eligibility','age','maritalStatus','housingOwnership','region','residenceDuration','subscriptionAccount','paymentCount','savingsAmount','incomeThreshold','assetThreshold','stage','score','lottery','supplyPercentage','exception'] as const;
 export type Evidence = { documentId: string; blockId: string | null; tableId: string | null; row: number | null; column: number | null; snippet: string; locator: SourceLocator };
@@ -14,7 +15,7 @@ export type CandidateRule = {
 export const ISSUE_TYPES = ['CONFLICTING_VALUES','MISSING_CONTEXT','UNCLEAR_TABLE_STRUCTURE','DRAFT_NOTE','REVIEW_MEMO','UNSUPPORTED_EXCEPTION','AMBIGUOUS_REGION_MAPPING','AMBIGUOUS_HOUSING_MANAGEMENT_NUMBER','AMBIGUOUS_THRESHOLD','OVERSIZED_CONTEXT'] as const;
 export type UnresolvedItem = { type: typeof ISSUE_TYPES[number]; description: string; evidence: Evidence[] };
 export type CandidateRulePackage = {
-  schemaVersion: 1; promptVersion: typeof PROMPT_VERSION; sourceStatus: 'REFERENCE'; reviewStatus: 'REVIEW_REQUIRED';
+  schemaVersion: 1; promptVersion: typeof PROMPT_VERSION | typeof SEMANTIC_PROMPT_VERSION; sourceStatus: 'REFERENCE'; reviewStatus: 'REVIEW_REQUIRED';
   announcement: { canonicalId: string; title: string; announcementDate: string };
   document: { documentId: string; sha256: string; parserVersion: string };
   candidateRules: CandidateRule[]; unresolvedItems: UnresolvedItem[];
@@ -45,7 +46,7 @@ export function validateCandidatePackage(raw: unknown, doc: ParsedDocument, expe
   validateParsedDocument(doc);
   if (!doc.quality.extractionAllowed) throw new Error('DOCUMENT_QUALITY_GATE');
   const p = object(raw); exact(p, ['schemaVersion','promptVersion','sourceStatus','reviewStatus','announcement','document','candidateRules','unresolvedItems','conflicts','extractionWarnings']);
-  if (p.schemaVersion !== 1 || p.promptVersion !== PROMPT_VERSION || p.sourceStatus !== 'REFERENCE' || p.reviewStatus !== 'REVIEW_REQUIRED') throw new Error('CANDIDATE_ONLY');
+  if (p.schemaVersion !== 1 || ![PROMPT_VERSION,SEMANTIC_PROMPT_VERSION].includes(p.promptVersion as typeof PROMPT_VERSION) || p.sourceStatus !== 'REFERENCE' || p.reviewStatus !== 'REVIEW_REQUIRED') throw new Error('CANDIDATE_ONLY');
   const a = object(p.announcement); exact(a, ['canonicalId','title','announcementDate']);
   if (!isDeepStrictEqual(a, expectedAnnouncement)) throw new Error('ANNOUNCEMENT_CONTEXT_MISMATCH');
   if (!/^[a-f0-9]{64}$/.test(string(a.canonicalId)) || !/^\d{4}-\d{2}-\d{2}$/.test(string(a.announcementDate)) || new Date(a.announcementDate as string).toISOString().slice(0,10) !== a.announcementDate) throw new Error('INVALID_ANNOUNCEMENT'); string(a.title);

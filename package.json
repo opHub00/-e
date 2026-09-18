@@ -17,7 +17,7 @@
     "test:motion": "node components/motion/motion.test.mjs",
     "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
-    "test": "npm run test:extraction && npm run test:ingestion && npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
+    "test": "npm run test:semantic && npm run test:extraction && npm run test:ingestion && npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
     "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts",
     "test:assessment-db": "node --experimental-strip-types scripts/check-assessment-migration.mjs",
     "export:assessment-reference": "node --experimental-strip-types scripts/export-assessment-reference.mjs",
@@ -29,7 +29,9 @@
     "parse:announcement": "node --experimental-strip-types scripts/parse-announcement.mjs",
     "extract:announcement": "node --experimental-strip-types scripts/parse-announcement.mjs --extract",
     "test:extraction": "node --experimental-strip-types --test features/ruleExtraction/server/extraction.test.ts",
-    "test:parsers": "node scripts/test-parsers.mjs"
+    "test:parsers": "node scripts/test-parsers.mjs",
+    "test:semantic": "node --experimental-strip-types --test features/ruleExtraction/server/semantic.test.ts",
+    "benchmark:samdo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/benchmark-samdo-extraction.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

@@ -80,6 +80,13 @@ function compatible(fact:ExtractedFact,contract:FactContract,task:SemanticTask){
   if(contract.requiredTerms.length&&!includesAny(fact.contextText,contract.requiredTerms)&&!contract.preferredTables.some(table=>fact.tableIdentities.includes(table)))return false;
   return true;
 }
+export function assertRoleFactContract(role:string,boundFacts:ExtractedFact[],task:SemanticTask):void{
+  const contract=factContractForRole(role);
+  for(const fact of boundFacts){
+    if(!compatible(fact,contract,task))throw new Error(`ROLE_FACT_CONTRACT_VIOLATION:${role}:${fact.factId}`);
+    if(contract.requiresOperator&&numericTypes.has(fact.type)&&fact.operator===null)throw new Error(`ROLE_FACT_OPERATOR_MISSING:${role}:${fact.factId}`);
+  }
+}
 function rank(fact:ExtractedFact,contract:FactContract,task:SemanticTask):RankedFact{
   let score=100;const reasons=['TYPE_UNIT_MATCH'];
   if(scopeCompatible(task,fact)){score+=40;reasons.push('SUPPLY_SCOPE_MATCH');}

@@ -40,6 +40,8 @@
     "plan:samdo:v3": "node --experimental-strip-types scripts/plan-samdo-extraction-v3.mjs",
     "score:samdo:v4": "node --experimental-strip-types scripts/score-samdo-retrieval-v4.mjs",
     "benchmark:samdo:v3": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/benchmark-samdo-extraction-v3.mjs",
+    "benchmark:samdo:v4": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/benchmark-samdo-extraction-v4.mjs",
+    "benchmark:samdo:evaluate-v4": "node --experimental-strip-types scripts/evaluate-samdo-v4.mjs",
     "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs"
   },
   "dependencies": {

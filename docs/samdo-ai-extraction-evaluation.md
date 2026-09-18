@@ -372,3 +372,92 @@ benchmark artifact는 실행 당시 accepted 20개를 그대로 보존했다. �
 | core coverage | 없음 | 세 유형 output 회수 실패 | 세 유형 모두 실패 |
 
 v3는 schema 크기와 token 비용을 크게 줄였고 locator 및 silent-drop 안전성은 유지했다. 그러나 context/fact selection precision과 semantic binding validation이 충분하지 않았다. PLAN_B_24를 실행하지 않는다. 다음 benchmark 전에는 semantic task별 deterministic candidate fact를 더 좁히고, source-fact 일치 검증을 유지하며, 공급유형 round-robin과 429 cooldown을 offline/provider fixture로 검증해야 한다.
+
+---
+
+## Benchmark v4 — role-aware fact retrieval, PLAN_A_16
+
+### 결론
+
+v4 fact retrieval은 실행 직전에도 critical fact 41/41, wrong top-ranked fact 0, missing-operator fallback 0을 유지했다. 실제 `gemini-2.5-flash` semantic binding은 v3보다 크게 개선됐지만 **SEMANTIC_READY, PROVIDER_STABLE, ADMIN_REVIEW_READY는 모두 NO**다. PLAN_B_24도 실행하지 않는다.
+
+Oracle target precision은 57/74(77.0%), recall은 28/75(37.3%), semantic evidence support는 60/74(81.1%)로 올랐다. 반면 critical numeric 37/46(80.4%), operator 35/46(76.1%), scope 66/71(93.0%)은 필수 100% 기준에 못 미쳤다. score rule은 생성되지 않아 0/8 coverage이고, 의미가 틀린 target candidate 11건과 HIGH-confidence critical error 14건이 남았다.
+
+### 실행과 provider
+
+PLAN_A는 `YOUTH → NEWLYWED → FIRST_TIME → COMMON`으로 시작해 공급유형별 task를 round-robin 배치했다. 16 semantic task와 전역 retry 2회를 합쳐 hard cap 18회에서 종료했다.
+
+| 항목 | v4 |
+|---|---:|
+| model | gemini-2.5-flash |
+| HTTP calls | 18 |
+| successful | 11 |
+| HTTP 429 | 3 |
+| HTTP 503 | 2 |
+| INCOMPLETE_OUTPUT | 2 |
+| retry calls | 2 |
+| input tokens | 63,675 |
+| output tokens | 8,361 |
+| thinking tokens | 12,241 |
+| total tokens | 84,277 |
+| estimated cost | US$0.0706075 |
+
+Task status는 SUCCESS 11, FAILED 1, SKIPPED 3, INCOMPLETE 1이다. `newlywed.financial`은 503 재시도 후 실패했고 `firstTime.financial`, `youth.assets`, `newlywed.exceptions`는 429로 건너뛰었다. `youth.score`는 축소 재시도 후에도 INCOMPLETE_OUTPUT이었다. 공급유형 starvation은 없었지만 provider는 안정적이지 않았다.
+
+### 정직한 metric과 coverage
+
+모든 지표는 numerator, denominator, 평가 coverage, methodology를 artifact에 기록한다. 측정하지 못한 score fidelity는 null이며 100%로 표시하지 않는다.
+
+| 지표 | 결과 | 평가 coverage |
+|---|---:|---:|
+| Oracle target precision | 57/74 = 77.0% | 74/74 |
+| Oracle target recall | 28/75 = 37.3% | 28/75 |
+| source-supported extras | 3 | 전체 candidate 분류 |
+| unverified extras | 3 | 전체 candidate 분류 |
+| confirmed semantic hallucination | 11 | 전체 candidate 분류 |
+| numeric fidelity | 37/46 = 80.4% | critical atoms 27/37 |
+| operator fidelity | 35/46 = 76.1% | critical atoms 27/37 |
+| score fidelity | NOT_MEASURED | score roles 0/8 |
+| stage fidelity | 20/20 = 100% | stage roles 12/15 |
+| scope fidelity | 66/71 = 93.0% | 71/71 |
+| locator validity | 74/74 = 100% | 74/74 |
+| semantic evidence support | 60/74 = 81.1% | 74/74 |
+| Oracle preferred evidence match | 0/57 = 0% | 57/57 |
+| exception preservation | 6/8 = 75% | 8/8 |
+| exception relation accuracy | 3/8 = 37.5% | 8/8 |
+| conflict recall | 5/7 = 71.4% | 7/7 |
+| HIGH-confidence critical errors | 14 | 전체 candidate 분류 |
+
+Preferred evidence 0/57은 locator가 유효하지 않다는 의미가 아니다. 생성 candidate는 주로 table-cell locator를 사용했지만 human oracle은 paragraph locator를 선호했다. 현재 비교기는 정확히 같은 HWP paragraph index 교집합만 인정한다. 두 위치가 같은 표를 가리키는지 검토하기 전에는 성공으로 승격하지 않는다.
+
+### 공급유형 core coverage
+
+- YOUTH: age, housing, subscription, income, stages는 MATCHED. marital과 score는 REVIEW_REQUIRED, assets는 provider 429로 MISSING.
+- NEWLYWED: applicant types, housing, subscription은 MATCHED. stages와 score는 REVIEW_REQUIRED, income/assets는 503 task 실패로 MISSING.
+- FIRST_TIME: housing, subscription, 600만원, tax, stages는 MATCHED. scoreless는 REVIEW_REQUIRED, income/assets는 provider 429로 MISSING.
+
+생애최초 score rule은 생성되지 않았다. scoreless binding은 있었지만 RuleBuilder가 review 가능한 scoreless 결과로 완성하지 못해 MATCHED로 승격하지 않았다.
+
+### Exception과 conflict
+
+해외체류, 청년 applicant scope, 예비신혼 future household, 출산 특례는 relation이 생성됐다. 생업 목적과 배우자 혼인 전 이력은 unresolved로 보존됐다. 배우자 혼인 전 주택소유와 중복청약 배우자 예외는 MISSING이므로 silent-drop 기준을 통과하지 못했다. 지역우선 기준일 및 관리번호-지구 mapping도 여전히 탐지하지 못했다.
+
+### v1 / v2 / v3 / v4 비교
+
+| 지표 | v1 | v2 | v3 | v4 |
+|---|---:|---:|---:|---:|
+| HTTP calls | 16 | 16 | 9 | 18 |
+| total tokens | 51,699 | 196,215 | 34,419 | 84,277 |
+| estimated cost | $0.0384 | $0.2746 | $0.0276 | $0.0706 |
+| rules/candidates | 17 | 56 | 20 | 74 |
+| target precision | 0% | 8.9% | 0% | 77.0% |
+| target recall | 0% | 6.7% | 0% | 37.3% |
+| numeric fidelity | N/A | 3/3 | 0/6 | 37/46 |
+| operator fidelity | N/A | 14/14 | 0/6 | 35/46 |
+| locator validity | 100% | 100% | 100% | 100% |
+| semantic support | 미측정 | 부분 측정 | 0% | 81.1% |
+| exception preservation | 0% | 66.7% | 100% unresolved | 75% |
+| conflict recall | 0% | 28.6% | 71.4% | 71.4% |
+| HIGH critical errors | 6 | 0 | 4 | 14 |
+
+v4는 “틀린 후보를 먼저 제거한다”는 retrieval 방향이 유효함을 보여줬다. 동시에 role contract가 아직 중복·인접 조건을 충분히 구분하지 못하고, score binding과 exception relation이 완성되지 않았으며, table-cell과 human preferred paragraph 간 provenance 연결도 부족함을 드러냈다. 다음 단계는 PLAN_B 확대가 아니라 PLAN_A의 role cardinality, stage별 score task 분해, scope contract 강화, 429/503 대응을 먼저 수정하는 것이다.

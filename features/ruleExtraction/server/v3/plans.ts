@@ -3,7 +3,9 @@ import type { ExtractedFact } from './facts.ts';
 import { GEMINI_SAFE_BINDING_SCHEMA } from './contract.ts';
 import { buildTaskInput,V3_TASKS,type SemanticTaskInput } from './tasks.ts';
 
-export const PLAN_A_16=['common.regionPriority','youth.coreEligibility','youth.income','youth.assets','youth.stages','youth.score','youth.exceptions','newlywed.coreEligibility','newlywed.financial','newlywed.stages','newlywed.score','newlywed.exceptions','firstTime.coreEligibility','firstTime.financial','firstTime.stages','firstTime.exceptions'] as const;
+// Round-robin ordering prevents one supply type from consuming the provider window
+// before the other types have received a representative semantic attempt.
+export const PLAN_A_16=['youth.coreEligibility','newlywed.coreEligibility','firstTime.coreEligibility','common.regionPriority','youth.income','newlywed.financial','firstTime.financial','youth.assets','newlywed.stages','firstTime.stages','youth.stages','newlywed.score','firstTime.exceptions','youth.score','newlywed.exceptions','youth.exceptions'] as const;
 export const PLAN_B_24=[...PLAN_A_16,'youth.basicEligibility','youth.subscription','newlywed.applicantEligibility','newlywed.subscription','newlywed.homelessDuration','firstTime.subscriptionSavings','firstTime.taxHistory','firstTime.income'] as const;
 export type PlanRow={taskName:string;scope:string;stage:string;inputChars:number;tableCount:number;blockCount:number;factCount:number;factsAvailable:number;factsAfterTypeFilter:number;factsAfterContextFilter:number;factsSelected:number;sourcesAvailable:number;sourcesSelected:number;droppedFactCount:number;truncated:boolean;expectedBindings:{min:number;max:number};estimatedOutputSchemaSize:number;status:'READY'|'NO_CONTEXT'|'NOT_READY_MISSING_FACT'|'NOT_READY_MISSING_OPERATOR'};
 export function buildCallPlan(document:ParsedDocument,facts:ExtractedFact[],plan:'PLAN_A_16'|'PLAN_B_24'):{name:string;rows:PlanRow[];inputs:SemanticTaskInput[]} {

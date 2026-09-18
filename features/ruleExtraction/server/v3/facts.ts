@@ -125,7 +125,7 @@ function extractSource(source:Source,tableIdentities:TableIdentity[]):ExtractedF
 }
 function make(source:Source,type:FactType,rawValue:string,normalizedValue:number|string|boolean,unit:string,operator:FactOperator,start:number,tableIdentities:TableIdentity[]):ExtractedFact {
   const local=contextWindow(source.text,start,rawValue.length),contextText=`${source.contextSeed}\n${local}`.trim();
-  const scopes=[/청년 특별공급/u.test(source.contextSeed)?'YOUTH':null,/신혼부부 특별공급/u.test(source.contextSeed)?'NEWLYWED':null,/생애최초 특별공급/u.test(source.contextSeed)?'FIRST_TIME':null].filter((value):value is SupplyScope=>value!==null);
+  const scopes=[/청년 특별공급/u.test(contextText)?'YOUTH':null,/신혼부부 특별공급/u.test(contextText)?'NEWLYWED':null,/생애최초 특별공급/u.test(contextText)?'FIRST_TIME':null].filter((value):value is SupplyScope=>value!==null);
   return {factId:id(source.sourceId,type,start,rawValue),type,rawValue,normalizedValue,unit,operator,bindingStatus:'BOUND',sourceId:source.sourceId,sourceLocator:source.locator,tableId:source.tableId,row:source.row,column:source.column,surroundingBlockIds:[...source.blockIds],characterOffset:start,contextText,localContextText:local,primarySupplyScope:source.primarySupplyScope??(scopes.length===1?scopes[0]:null),contextTags:tagsFor(contextText,tableIdentities),applicantScopes:scopesFor(contextText),tableIdentities:[...tableIdentities],range:null};
 }
 

@@ -1,5 +1,6 @@
 import type { ParsedDocument } from '../parsedDocument.ts';
 import type { ExtractedFact } from './facts.ts';
+import { retrieveTaskCandidates,type SelectionTelemetry } from '../v4/retrieval.ts';
 
 export type V3Stage='COMMON'|'PRIORITY'|'GENERAL'|'LOTTERY';
 export type TaskStatus='SUCCESS'|'INCOMPLETE'|'FAILED'|'SKIPPED';
@@ -8,6 +9,7 @@ const task=(name:string,scope:SemanticTask['scope'],stage:V3Stage,keywords:strin
 export const V3_TASKS:SemanticTask[]=[
  task('common.regionPriority','COMMON','COMMON',['지역우선','해당지역','제주특별자치도'],['COMMON.REGION.RESIDENCE_MIN','COMMON.REGION.PRIORITY_RATIO']),
  task('youth.basicEligibility','YOUTH','COMMON',['청년','만 19세','39세','혼인 중이 아님','무주택'],['YOUTH.AGE_MIN','YOUTH.AGE_MAX','YOUTH.UNMARRIED','YOUTH.NEVER_OWNED_HOME']),
+ task('youth.coreEligibility','YOUTH','COMMON',['청년','만 19세','39세','혼인 중이 아님','무주택','청약','6개월','6회'],['YOUTH.AGE_MIN','YOUTH.AGE_MAX','YOUTH.UNMARRIED','YOUTH.NEVER_OWNED_HOME','YOUTH.ACCOUNT_MONTHS_MIN','YOUTH.PAYMENT_COUNT_MIN']),
  task('youth.subscription','YOUTH','COMMON',['청년','청약','6개월','6회'],['YOUTH.ACCOUNT_MONTHS_MIN','YOUTH.PAYMENT_COUNT_MIN']),
  task('youth.income','YOUTH','COMMON',['청년','소득','140%'],['YOUTH.INCOME_LIMIT']),
  task('youth.assets','YOUTH','COMMON',['청년','자산','부모','276백만원','1,034백만원'],['YOUTH.APPLICANT_ASSET_LIMIT','YOUTH.PARENT_ASSET_LIMIT']),
@@ -19,6 +21,7 @@ export const V3_TASKS:SemanticTask[]=[
  task('newlywed.applicantTypes','NEWLYWED','COMMON',['신혼부부','예비신혼','한부모'],['NEWLYWED.APPLICANT_TYPE','NEWLYWED.MARRIAGE_YEARS_MAX','NEWLYWED.CHILD_AGE_MAX']),
  task('newlywed.basicEligibility','NEWLYWED','COMMON',['신혼부부','무주택세대구성원'],['NEWLYWED.HOUSEHOLD_HOMELESS']),
  task('newlywed.applicantEligibility','NEWLYWED','COMMON',['신혼부부','예비신혼부부','한부모가족','무주택세대구성원','혼인기간'],['NEWLYWED.APPLICANT_TYPE','NEWLYWED.MARRIAGE_YEARS_MAX','NEWLYWED.CHILD_AGE_MAX','NEWLYWED.HOUSEHOLD_HOMELESS']),
+ task('newlywed.coreEligibility','NEWLYWED','COMMON',['신혼부부','예비신혼부부','한부모가족','무주택세대구성원','혼인기간','청약','6개월','6회'],['NEWLYWED.APPLICANT_TYPE','NEWLYWED.MARRIAGE_YEARS_MAX','NEWLYWED.CHILD_AGE_MAX','NEWLYWED.HOUSEHOLD_HOMELESS','NEWLYWED.ACCOUNT_MONTHS_MIN','NEWLYWED.PAYMENT_COUNT_MIN']),
  task('newlywed.subscription','NEWLYWED','COMMON',['신혼부부','청약','6개월','6회'],['NEWLYWED.ACCOUNT_MONTHS_MIN','NEWLYWED.PAYMENT_COUNT_MIN']),
  task('newlywed.income','NEWLYWED','COMMON',['신혼부부','소득','외벌이','맞벌이'],['NEWLYWED.INCOME.SINGLE_LIMIT','NEWLYWED.INCOME.DUAL_LIMIT']),
  task('newlywed.assets','NEWLYWED','COMMON',['신혼부부','자산','362백만원'],['NEWLYWED.ASSET_LIMIT']),
@@ -31,6 +34,7 @@ export const V3_TASKS:SemanticTask[]=[
  task('newlywed.homelessDuration','NEWLYWED','GENERAL',['무주택기간','만 30세','혼인신고일','주택처분'],['NEWLYWED.HOMELESS_DURATION.START','NEWLYWED.HOMELESS_DURATION.RESET']),
  task('newlywed.exceptions','NEWLYWED','COMMON',['신혼부부','단,','다만','예외','특례','배우자'],['NEWLYWED.EXCEPTION']),
  task('firstTime.basicEligibility','FIRST_TIME','COMMON',['생애최초','주택소유','혼인 중','미혼 자녀','1인 가구'],['FIRST_TIME.NEVER_OWNED_HOME','FIRST_TIME.FAMILY_REQUIRED']),
+ task('firstTime.coreEligibility','FIRST_TIME','COMMON',['생애최초','주택소유','혼인 중','미혼 자녀','1인 가구','1순위','6개월','6회','600만원','저축액','소득세','5년'],['FIRST_TIME.NEVER_OWNED_HOME','FIRST_TIME.FAMILY_REQUIRED','FIRST_TIME.ACCOUNT_MONTHS_MIN','FIRST_TIME.PAYMENT_COUNT_MIN','FIRST_TIME.SAVINGS_MIN','FIRST_TIME.TAX_YEARS_MIN']),
  task('firstTime.subscription','FIRST_TIME','COMMON',['생애최초','1순위','6개월','6회'],['FIRST_TIME.ACCOUNT_MONTHS_MIN','FIRST_TIME.PAYMENT_COUNT_MIN']),
  task('firstTime.savings','FIRST_TIME','COMMON',['생애최초','600만원','저축액'],['FIRST_TIME.SAVINGS_MIN']),
  task('firstTime.subscriptionSavings','FIRST_TIME','COMMON',['생애최초','1순위','6개월','6회','600만원','저축액'],['FIRST_TIME.ACCOUNT_MONTHS_MIN','FIRST_TIME.PAYMENT_COUNT_MIN','FIRST_TIME.SAVINGS_MIN']),
@@ -46,20 +50,10 @@ export const V3_TASKS:SemanticTask[]=[
 ];
 
 export type TaskSource={sourceId:string;text:string;kind:'BLOCK'|'CELL';tableId:string|null;excerpted:boolean};
-export type SemanticTaskInput={task:SemanticTask;facts:ExtractedFact[];sources:TaskSource[];inputChars:number;tableCount:number;blockCount:number;schemaBytes:number};
-export function providerTaskPayload(input:SemanticTaskInput){return {promptVersion:'assessment-rule-extraction-v3',taskName:input.task.name,scope:input.task.scope,allowedRoles:input.task.allowedRoles,expectedBindings:input.task.expectedBindings,facts:input.facts.map(fact=>({factId:fact.factId,type:fact.type,rawValue:fact.rawValue,unit:fact.unit,sourceId:fact.sourceId})),sources:input.sources};}
+export type SemanticTaskInput={task:SemanticTask;facts:ExtractedFact[];sources:TaskSource[];inputChars:number;tableCount:number;blockCount:number;schemaBytes:number;selection:SelectionTelemetry};
+export function providerTaskPayload(input:SemanticTaskInput){return {promptVersion:'assessment-rule-extraction-v3',taskName:input.task.name,scope:input.task.scope,allowedRoles:input.task.allowedRoles,expectedBindings:input.task.expectedBindings,facts:input.facts.map(fact=>({factId:fact.factId,type:fact.type,rawValue:fact.rawValue,unit:fact.unit,sourceId:fact.sourceId,contextTags:fact.contextTags,tableIdentities:fact.tableIdentities})),sources:input.sources};}
 export function buildTaskInput(document:ParsedDocument,facts:ExtractedFact[],task:SemanticTask):SemanticTaskInput {
-  const scopeAnchors:Record<SemanticTask['scope'],string[]|null>={COMMON:null,YOUTH:['청년 특별공급','청년'],NEWLYWED:['신혼부부 특별공급','신혼부부'],FIRST_TIME:['생애최초 특별공급','생애최초']};
-  const matches=(text:string)=>task.keywords.some(keyword=>text.includes(keyword))&&(!scopeAnchors[task.scope]||scopeAnchors[task.scope]!.some(anchor=>text.includes(anchor)));
-  const excerpt=(text:string)=>{if(text.length<=1200)return {text,excerpted:false};const candidates=task.keywords.map(keyword=>({keyword,index:text.indexOf(keyword)})).filter(item=>item.index>=0).sort((a,b)=>b.keyword.length-a.keyword.length||a.index-b.index),center=candidates[0]?.index??0,start=Math.max(0,center-300);return {text:text.slice(start,start+1200),excerpted:true};};
-  const factRelevant=(fact:ExtractedFact)=>{const roles=task.allowedRoles.join('|');switch(fact.type){case 'AGE':return /AGE/.test(roles);case 'MONEY':return /ASSET|SAVINGS|INCOME|SCORE/.test(roles);case 'PERCENT':return /INCOME|SUPPLY_RATIO|SCORE/.test(roles);case 'DURATION_MONTHS':return /ACCOUNT|DURATION|SCORE/.test(roles);case 'DURATION_YEARS':return /MARRIAGE|TAX|HOMELESS|RESIDENCE|DURATION|SCORE/.test(roles);case 'COUNT':return /PAYMENT|CHILD|SCORE/.test(roles);case 'SCORE':return /SCORE/.test(roles);case 'BOOLEAN_PHRASE':return /ELIGIBILITY|APPLICANT|UNMARRIED|OWNED|HOMELESS|SCORELESS|LOTTERY/.test(roles);case 'DATE':return /DATE/.test(roles);case 'RATIO':return /RATIO|SCORE/.test(roles);}};
-  const sources:TaskSource[]=[];
-  for(const table of document.tables)for(const row of table.rows)for(const cell of row){const nearby=cell.blockIds.map(id=>document.blocks.find(b=>b.id===id)?.sectionPath.join(' ')??'').join(' '),full=`${nearby} ${cell.text}`;if(matches(full)){const part=excerpt(cell.text);sources.push({sourceId:`cell:${table.id}:${cell.row}:${cell.column}`,text:part.text,kind:'CELL',tableId:table.id,excerpted:part.excerpted});}}
-  for(const block of document.blocks){const full=`${block.sectionPath.join(' ')} ${block.text}`;if(matches(full)){const part=excerpt(block.text);sources.push({sourceId:block.id,text:part.text,kind:'BLOCK',tableId:block.sourceLocator.tableId??null,excerpted:part.excerpted});}}
-  const factCount=new Map<string,number>();for(const fact of facts)factCount.set(fact.sourceId,(factCount.get(fact.sourceId)??0)+1);
-  const relevance=(source:TaskSource)=>task.keywords.reduce((score,keyword)=>score+(source.text.includes(keyword)?20+keyword.length:0),0)+Math.min(factCount.get(source.sourceId)??0,10);
-  const unique=[...new Map(sources.map(source=>[source.sourceId,source])).values()].sort((a,b)=>relevance(b)-relevance(a)||a.sourceId.localeCompare(b.sourceId)).slice(0,6);
-  const sourceIds=new Set(unique.map(source=>source.sourceId)),sourceText=new Map(unique.map(source=>[source.sourceId,source.text]));
-  const selectedFacts=facts.filter(fact=>sourceIds.has(fact.sourceId)&&factRelevant(fact)&&(sourceText.get(fact.sourceId)?.includes(fact.rawValue)??false)).slice(0,12);
-  const input={task,facts:selectedFacts,sources:unique,inputChars:0,tableCount:new Set(unique.flatMap(s=>s.tableId?[s.tableId]:[])).size,blockCount:unique.filter(s=>s.kind==='BLOCK').length,schemaBytes:0};input.inputChars=JSON.stringify(providerTaskPayload(input)).length;return input;
+  const retrieved=retrieveTaskCandidates(document,facts,task);
+  const input:SemanticTaskInput={task,facts:retrieved.facts,sources:retrieved.sources,inputChars:0,tableCount:new Set(retrieved.sources.flatMap(source=>source.tableId?[source.tableId]:[])).size,blockCount:retrieved.sources.filter(source=>source.kind==='BLOCK').length,schemaBytes:0,selection:retrieved.telemetry};
+  input.inputChars=JSON.stringify(providerTaskPayload(input)).length;return input;
 }

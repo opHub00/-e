@@ -54,7 +54,7 @@ function extractSource(source:Source):ExtractedFact[] {
     if(explicit&&/^\s*(?:또는|및|\/)?\s*(?:이상|이하|초과|미만)/u.test(source.text.slice((match.index??0)+match[0].length)))fact.bindingStatus='AMBIGUOUS_OPERATOR_BINDING';
     facts.push(fact);
   }
-  for (const [phrase,value] of [['혼인 중이 아님',false],['무주택자',true],['무주택세대구성원',true],['추첨',true],['예비신혼부부',true],['한부모가족',true],['1인 가구 신청 불가',true],['해외체류',true],['배우자 혼인 전',true],['출산특례',true]] as const) {
+  for (const [phrase,value] of [['혼인 중이 아님',false],['무주택자',true],['무주택세대구성원',true],['우선공급',true],['일반공급',true],['추첨공급',true],['추첨',true],['1단계',true],['2단계',true],['3단계',true],['가점 없음',true],['예비신혼부부',true],['한부모가족',true],['1인 가구 신청 불가',true],['해외체류',true],['배우자 혼인 전',true],['출산특례',true]] as const) {
     let start=source.text.indexOf(phrase); while(start>=0){facts.push(make(source,'BOOLEAN_PHRASE',phrase,value,'BOOLEAN',null,start));start=source.text.indexOf(phrase,start+phrase.length);}
   }
   return facts;

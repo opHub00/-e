@@ -36,7 +36,9 @@
     "benchmark:samdo:resume": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/resume-samdo-extraction.mjs",
     "benchmark:samdo:evaluate-v2": "node --experimental-strip-types scripts/evaluate-samdo-v2.mjs",
     "benchmark:samdo:finalize": "node --experimental-strip-types scripts/finalize-samdo-benchmark.mjs",
-    "plan:samdo:v3": "node --experimental-strip-types scripts/plan-samdo-extraction-v3.mjs"
+    "plan:samdo:v3": "node --experimental-strip-types scripts/plan-samdo-extraction-v3.mjs",
+    "benchmark:samdo:v3": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --experimental-strip-types scripts/benchmark-samdo-extraction-v3.mjs",
+    "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

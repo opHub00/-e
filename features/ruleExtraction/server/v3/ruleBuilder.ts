@@ -21,9 +21,10 @@ export function buildCandidateRules(document:ParsedDocument,task:SemanticTask,bi
   const confidence=deriveHostConfidence(document,binding,bound),point=bound.find(f=>f.type==='SCORE'&&f.unit==='POINT'),max=bound.find(f=>f.type==='SCORE'&&f.unit==='MAX_POINT'),isScore=binding.semanticRole.includes('SCORE')&&!binding.semanticRole.includes('SCORELESS');
   if(isScore&&(!point||!max))return {rules:[],unresolved:[`SCORE_POINT_AND_MAX_FACT_REQUIRED:${binding.bindingId}`]};
   const nonScore=bound.filter(f=>f.type!=='SCORE'),thresholdFacts=isScore&&nonScore.length?nonScore:bound.filter(f=>!(f.type==='SCORE'&&f.unit==='MAX_POINT'));
+  const stage=task.stageByRole?.[binding.semanticRole]??task.stage;
   const rules=thresholdFacts.map((fact,index):CandidateRule=>{
     const supplyType=task.scope==='COMMON'?'GENERAL':task.scope;
-    return {candidateRuleId:`v3:${task.name}:${binding.bindingId}:${index}`,supplyType,stage:task.stage,category:category(binding.semanticRole),ruleKey:`${binding.semanticRole.toLowerCase()}.${fact.factId}`,
+    return {candidateRuleId:`v3:${task.name}:${binding.bindingId}:${index}`,supplyType,stage,category:category(binding.semanticRole),ruleKey:`${binding.semanticRole.toLowerCase()}.${fact.factId}`,
       condition:{input:input(binding.semanticRole,fact),operator:fact.operator??'eq',value:fact.normalizedValue,values:[]},score:isScore?Number(point?.normalizedValue??fact.normalizedValue):null,maxScore:isScore?Number(max?.normalizedValue??point?.normalizedValue??fact.normalizedValue):null,
       requiredInputs:[input(binding.semanticRole,fact)],relatedExceptionRuleKeys:[],evidence:[evidence(document,fact)],confidence:confidence.level==='REVIEW_REQUIRED'?'LOW':confidence.level,confidenceReason:confidence.reason,reviewStatus:'REVIEW_REQUIRED'};});
   return {rules,unresolved:[]};

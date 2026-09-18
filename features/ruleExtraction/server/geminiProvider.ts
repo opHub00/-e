@@ -41,7 +41,7 @@ export class GeminiStructuredProvider implements StructuredProvider {
       this.usage.push(row);await this.persist(this.usage);
       try {
         const res=await this.request(`https://generativelanguage.googleapis.com/v1beta/models/${c.model}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':c.apiKey},body:serialized,signal:AbortSignal.timeout(c.timeoutMs)});
-        if(!res.ok){row.status=`HTTP_${res.status}`;if(res.status===429||res.status===503){this.consecutiveTransientErrors++;if(this.consecutiveTransientErrors>=c.transientCircuitThreshold)this.circuitOpen=true;if(attempt===0&&!this.circuitOpen&&this.retryCalls<c.maxRetryCalls){this.retryCalls++;await new Promise(r=>setTimeout(r,1000));continue;}}throw new Error(row.status);}
+        if(!res.ok){row.status=`HTTP_${res.status}`;if(res.status===429){throw new Error(row.status);}if(res.status===503){this.consecutiveTransientErrors++;if(this.consecutiveTransientErrors>=c.transientCircuitThreshold)this.circuitOpen=true;if(attempt===0&&!this.circuitOpen&&this.retryCalls<c.maxRetryCalls){this.retryCalls++;await new Promise(r=>setTimeout(r,1000));continue;}}throw new Error(row.status);}
         const data:any=await res.json();Object.assign(row,mapUsage(data.usageMetadata,c));
         const candidate=data.candidates?.[0];if(candidate?.finishReason!=='STOP'){row.status='INCOMPLETE_OUTPUT';throw new Error(row.status);}
         const answer=candidate.content?.parts?.filter((p:any)=>!p.thought).map((p:any)=>p.text??'').join('');

@@ -35,6 +35,7 @@ export function validateBindingResponse(raw:unknown,facts:ExtractedFact[],source
     const bindingId=string(b.bindingId,100),semanticRole=string(b.semanticRole,160);if(ids.has(bindingId))throw new Error('DUPLICATE_BINDING');ids.add(bindingId);if(!allowedRoles.has(semanticRole))throw new Error('UNKNOWN_SEMANTIC_ROLE');
     const boundFacts=array(b.factIds,12).map(v=>string(v,100)),boundSources=array(b.sourceIds,20).map(v=>string(v,100)),qualifiers=array(b.qualifierSourceIds,20).map(v=>string(v,100));
     if(!boundFacts.length&&!boundSources.length)throw new Error('EMPTY_BINDING');if(boundFacts.some(id=>!factIds.has(id)))throw new Error('UNKNOWN_FACT_ID');if([...boundSources,...qualifiers].some(id=>!sourceIds.has(id)))throw new Error('UNKNOWN_SOURCE_ID');
+    const declaredSources=new Set([...boundSources,...qualifiers]);if(boundFacts.some(id=>!declaredSources.has(facts.find(fact=>fact.factId===id)!.sourceId)))throw new Error('FACT_SOURCE_NOT_DECLARED');
     return {bindingId,semanticRole,factIds:boundFacts,sourceIds:boundSources,qualifierSourceIds:qualifiers};});
   const unresolved=array(root.unresolved,20).map(value=>{const u=object(value);exact(u,['reason','sourceIds']);const sources=array(u.sourceIds,20).map(v=>string(v,100));if(sources.some(id=>!sourceIds.has(id)))throw new Error('UNKNOWN_SOURCE_ID');return {reason:string(u.reason,1000),sourceIds:sources};});
   return {bindings,unresolved};

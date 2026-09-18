@@ -274,3 +274,101 @@ Strict Oracle evidence는 candidate가 동일 규칙의 다른 유효 문단을 
 | confirmed hallucination | 0 | 0 |
 
 Selection fairness와 exception safety는 개선됐다. 그러나 공급유형 단위 출력 크기와 provider 안정성이 새 병목으로 드러났다. 다음 benchmark 전에는 큰 공급표를 eligibility/stage/score 하위 task로 나누고, 각 응답 candidate 수를 prompt 수준에서 제한하며, Gemini가 실제 지원하는 structured-output schema subset만 사용해야 한다. 자동 import, DB handoff, admin review로 진행하지 않는다.
+
+---
+
+## Benchmark v3 — deterministic fact binding, PLAN_A_16
+
+### 결론
+
+`gemini-2.5-flash` 실제 실행에서 minimal schema 자체는 안정적으로 동작했지만, **ADMIN_REVIEW_READY는 NO**다. 숫자와 연산자가 LLM literal에서 생성되지는 않았으나 모델이 잘못된 deterministic fact를 semantic role에 연결했다. 청년 기본 소득 task는 출산가구 완화에 쓰인 10%·20% fact를 `YOUTH.INCOME_LIMIT`로 분류했다. 잘못된 fact를 손실 없이 보존하는 것만으로는 올바른 규칙이 되지 않는다.
+
+### 실행 계획과 provider 결과
+
+실행 당시 PLAN_A는 청년 6개, 신혼 5개, 생애최초 5개 작업이었다. 모든 task는 plan-only에서 READY였고 입력은 4,540–9,155자, 표 2–6개, block 0–4개, fact 7–12개였다. 모델 output에는 semantic role과 fact/source ID만 허용했다.
+
+| 결과 | 값 |
+|---|---:|
+| semantic tasks | 16 |
+| 실제 network calls | 9 |
+| OK | 6 |
+| HTTP 429 | 3 |
+| circuit에서 차단된 task | 7 |
+| retry calls | 0 |
+| input tokens | 26,564 |
+| output tokens | 2,156 |
+| thinking tokens | 5,699 |
+| total tokens | 34,419 |
+| estimated cost | US$0.0276067 |
+
+task 결과는 SUCCESS 4, INCOMPLETE 2, SKIPPED 3, FAILED 7이다. 청년 6개는 응답을 받았지만 신혼의 첫 3개가 연속 429였고, 당시 global circuit breaker가 이후 신혼 2개와 생애최초 5개를 원격 호출 전에 차단했다. 이는 semantic 품질과 별개의 scheduler/provider 실패다.
+
+실행 후 PLAN_A 순서를 공급유형 round-robin으로 바꿨고, HTTP 429가 global circuit을 열지 않도록 수정했다. 429 task 다음에는 5초 backoff를 적용한다. 이 수정은 v3 결과를 바꾸기 위한 재호출에 사용하지 않았다.
+
+### Candidate와 Oracle 결과
+
+모든 provider 호출이 끝나고 `benchmark-complete.json`이 생성된 다음 별도 offline process가 75개 human-verified rule을 처음 읽었다. Oracle은 prompt, plan, binding context에 포함하지 않았다.
+
+| 지표 | v3 결과 |
+|---|---:|
+| semantic bindings | 18 |
+| RuleBuilder rules | 20 |
+| 실행 당시 validator accepted / rejected | 20 / 0 |
+| Oracle target precision | 0 / 20 = 0% |
+| Oracle target recall | 0 / 75 = 0% |
+| source-supported extra | 0 |
+| confirmed semantic hallucination | 20 |
+| numeric fidelity | 0 / 6 = 0% |
+| operator fidelity | 0 / 6 = 0% |
+| score fidelity | 0 / 0 = N/A |
+| Oracle stage fidelity | 0 / 0 = N/A |
+| host stage assignment integrity | 11 / 11 = 100% |
+| evidence locator validity | 20 / 20 = 100% |
+| semantic evidence support | 0 / 20 = 0% |
+| Oracle preferred evidence match | 0 / 20 = 0% |
+| conflict/unresolved recall | 5 / 7 = 71.4% |
+| exception preservation | 6 / 6 = 100% unresolved, silent drop 0 |
+| HIGH-confidence critical errors | 4 |
+
+`confirmed semantic hallucination`은 원문에 숫자가 없다는 뜻이 아니다. fact는 실제 원문에서 왔지만 semantic role과 맞지 않았다. 예를 들어 `10%`, `20%`는 원문 값이지만 청년 기본 소득상한은 아니다. 이 구분이 locator validity 100%와 semantic support 0%가 동시에 나온 이유다.
+
+### 공급유형 결과
+
+| 공급유형 | 호출 결과 | core coverage |
+|---|---|---:|
+| YOUTH | 4 SUCCESS, 2 INCOMPLETE | 실패 |
+| NEWLYWED | 3 HTTP 429, 2 circuit 차단 | 실패 |
+| FIRST_TIME | 5 circuit 차단 | 실패 |
+
+청년에서도 subscription/assets는 올바른 fact가 task context에 들어오지 않아 unresolved가 됐다. score 응답은 5개 binding을 만들었지만 point와 max-point fact가 한 binding에 함께 없어서 RuleBuilder가 rule 생성을 거부했다. 신혼과 생애최초는 semantic 품질을 측정할 provider output 자체가 없다.
+
+### 안전장치에서 발견된 결함
+
+실행 당시 binding validator는 `factId`와 `sourceId`가 각각 존재하는지만 검사했고, fact의 실제 source가 모델이 선언한 source 목록에 포함되는지는 확인하지 않았다. 이 때문에 `youth.stages`에서 다른 source의 `출산특례`, `예비신혼부부`, `우선공급` fact를 stage role에 연결한 응답이 통과했다.
+
+benchmark artifact는 실행 당시 accepted 20개를 그대로 보존했다. 이후 validator에 `FACT_SOURCE_NOT_DECLARED`를 추가하고 회귀 테스트를 만들었다. Oracle 값을 이용해 후보를 보정하거나 결과를 재계산하지 않았다.
+
+### Exception과 conflict
+
+해외체류, 배우자 혼인 전 이력, 청년 무주택 scope, 예비신혼 scope, 출산특례, 중복청약 배우자 예외는 모두 unresolved로 남아 silent drop은 0이다. relation이 생성된 항목은 없으므로 이는 해석 성공이 아니라 안전한 보존이다. 알려진 7개 검토대상 중 review memo, 출산 완화, 배우자 이력, 해외체류, 기타 특례 5개가 표시됐다. 지역우선 기준일과 관리번호-지구 mapping은 탐지하지 못했다.
+
+### v1 / v2 / v3 비교
+
+| 지표 | v1 | v2 | v3 |
+|---|---:|---:|---:|
+| network calls | 16 | 16 | 9 |
+| total tokens | 51,699 | 196,215 | 34,419 |
+| estimated cost | US$0.0384315 | US$0.2745679 | US$0.0276067 |
+| candidates/rules | 17 | 56 | 20 |
+| precision | 0% | 8.9% | 0% |
+| recall | 0% | 6.7% | 0% |
+| numeric fidelity | N/A | 100% (3/3) | 0% (0/6) |
+| operator fidelity | N/A | 100% (14/14) | 0% (0/6) |
+| locator validity | 100% | 100% | 100% |
+| semantic support / preferred evidence | 미측정 | 35.7% preferred | 0% / 0% |
+| exception preservation | 0% | 66.7% | 100% unresolved |
+| conflict recall | 0% | 28.6% | 71.4% |
+| HIGH critical errors | 6 | 0 | 4 |
+| core coverage | 없음 | 세 유형 output 회수 실패 | 세 유형 모두 실패 |
+
+v3는 schema 크기와 token 비용을 크게 줄였고 locator 및 silent-drop 안전성은 유지했다. 그러나 context/fact selection precision과 semantic binding validation이 충분하지 않았다. PLAN_B_24를 실행하지 않는다. 다음 benchmark 전에는 semantic task별 deterministic candidate fact를 더 좁히고, source-fact 일치 검증을 유지하며, 공급유형 round-robin과 429 cooldown을 offline/provider fixture로 검증해야 한다.

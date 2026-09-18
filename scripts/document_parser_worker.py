@@ -88,8 +88,13 @@ class Builder:
 
 
 def parse_hwp(data, b):
-    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / '.cache/hwp-parser'))
-    import olefile
+    try:
+        import olefile
+    except ImportError:
+        # The repo-local cache is an offline fallback. Prefer the pinned server
+        # environment so a stale or partially-created cache cannot shadow it.
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / '.cache/hwp-parser'))
+        import olefile
     if not data.startswith(bytes.fromhex('d0cf11e0a1b11ae1')):
         raise ParseFailure('INVALID_HWP_SIGNATURE')
     metadata = {'pagesStable': False, 'memoAnchors': [], 'parserLibrary': 'olefile ' + olefile.__version__}

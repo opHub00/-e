@@ -109,8 +109,14 @@ export function AssessmentResult({ result, onEditProfile, onEditAnswers }: Props
   </View>;
 }
 
+/**
+ * `accessibilityState={{ expanded }}` alone does not reach the DOM on react-native-web,
+ * so the pressable renders without `aria-expanded` and a screen reader cannot tell an
+ * open section from a closed one. `aria-expanded` is passed explicitly for web, the same
+ * way PrimaryButton already has to pass `aria-busy`; the native prop stays for iOS/Android.
+ */
 function Disclosure({ expanded, onPress, label }: { expanded: boolean; onPress: () => void; label: string }) {
-  return <MotionPressable accessibilityRole="button" accessibilityState={{ expanded }} onPress={onPress} style={styles.toggle}><Text style={styles.link}>{label}</Text></MotionPressable>;
+  return <MotionPressable accessibilityRole="button" accessibilityState={{ expanded }} aria-expanded={expanded} onPress={onPress} style={styles.toggle}><Text style={styles.link}>{label}</Text></MotionPressable>;
 }
 
 /** 근거는 사람이 읽는 이름부터 보여준다. 원문 발췌와 내부 식별자는 한 단계 더 들어가야 나온다. */

@@ -76,7 +76,7 @@ deterministic consultation engine과 연결된 공고 기반 상담의 presentat
 첫 화면 3개: `내가 신청 가능해?` · `필요한 서류는?` · `예외조건 알려줘`
 결과 후: `왜 9점이야?` · `필요한 서류는?`
 
-`options`가 있는 질문은 **칩으로 답한다**(만 19~39세 / 만 40세 이상 / 만 19세 미만). 없으면 질문 자체가 칩이 된다. 화면은 최대 **3개**까지만 렌더링한다(`slice(0, 3)`).
+`interaction: ASK`인 추천 질문만 전송 chip으로 표시한다. 판정에 필요한 `interaction: ANSWER` 질문은 prompt로 표시하고, option이 있으면 answer chip을 제공한다. 자유 입력 질문은 `답변 입력`으로 composer에 focus를 옮기며 질문 문장을 사용자 답변으로 전송하지 않는다. 화면은 최대 **3개**까지만 렌더링한다.
 
 ## 5. Missing info
 
@@ -84,7 +84,7 @@ deterministic consultation engine과 연결된 공고 기반 상담의 presentat
 
 ## 6. 프로필 재사용
 
-`reusedProfileFacts`가 오면 "프로필의 공고 기준일 거주지(제주특별자치도), 현재 주택소유 여부(무주택)을(를) 사용했어요."로 표시하고 `OPEN_PROFILE` 액션으로 수정 경로를 연다. 이미 아는 것을 다시 묻지 않는다는 느낌이 핵심이다.
+`reusedProfileFacts`는 `사용 중인 내 정보 보기` disclosure 안에 표시한다. fact별 presentation mapper가 `noHome=true`를 `현재 주택 상태: 무주택`, `neverOwned=true`를 `과거 주택소유 이력: 없음`처럼 의미대로 변환한다. generic boolean 예/아니오 변환은 사용하지 않는다.
 
 ## 7. 판정 연결
 
@@ -92,7 +92,7 @@ deterministic consultation engine과 연결된 공고 기반 상담의 presentat
 
 ## 8. WHY
 
-`왜 9점이야?` → **결론 카드 → 핵심 이유 문장 → 근거 접힘**. 근거를 열면 원문 발췌가 나오고, 내부 `근거 ID`는 그 안에서만 보인다.
+`왜 9점이야?` → **결론 카드 → 핵심 이유 문장 → 근거 접힘**. 근거는 관련도가 높은 최대 5건이며 원문 발췌를 보여준다. 내부 `근거 ID`는 사용자 화면에 표시하지 않는다.
 
 ## 9. Unresolved
 
@@ -123,7 +123,7 @@ engine이 모르는 것을 오류로 그리지 않는다. `unresolved`는 회색
 | `assessment.supplyType` / `stage` | | 카드 행 |
 | `assessment.scoring` / `score` | | `scoreLabel()` — 무가점 처리 |
 | `assessment.blocking` / `pending` | | "충족하지 못한 / 확인이 필요한 항목 N개" |
-| `suggestedQuestions[].options` | | 칩. 없으면 질문 자체가 칩 |
+| `suggestedQuestions[].interaction` / `options` | | 추천 질문 전송과 실제 답변 입력을 구분 |
 | `actions[].kind` | | `OPEN_ASSESSMENT` / `OPEN_PROFILE` / `OPEN_PREPARATION` / `ANSWER` |
 | `evidenceRefs[]` | | 접히는 근거. `label`·`section`·`textExcerpt` 사용 |
 | `unresolved[]` | | 확인 필요 박스 |

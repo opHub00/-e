@@ -11,6 +11,7 @@ import {
   type ConsultationAction, type ConsultationEngine, type ConsultationQuestion, type ConsultationSession, type ConsultationTurn,
 } from './contract';
 import type { Evidence } from '../applicationAssessment/types';
+import { SUPPLY_LABELS } from '../applicationAssessment/referenceRules';
 
 type Props = {
   engine: ConsultationEngine;
@@ -28,6 +29,7 @@ export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssess
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const scroll = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     let live = true;
@@ -37,6 +39,8 @@ export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssess
 
   const turns = session ? [...session.turns, ...pending] : [];
   const last = [...turns].reverse().find(t => t.role === 'assistant');
+  const activeSupplyType = last?.activeSupplyType ?? session?.activeSupplyType;
+  const answerQuestion = last?.suggestedQuestions?.find(question => question.interaction === 'ANSWER' && !question.options?.length);
 
   const send = useCallback(async (text: string, answering?: { questionKey: string; value: string }) => {
     const trimmed = text.trim();
@@ -64,7 +68,10 @@ export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssess
       <ScreenHeader title="AI 청약 상담" onBack={onBack} />
       {/* 어떤 공고를 근거로 답하는지와 그 문서의 상태를 대화 내내 고정해 둔다. */}
       <View style={styles.contextBar}>
-        <Text style={styles.contextTitle} numberOfLines={1}>{session?.announcementTitle ?? '공고를 불러오는 중이에요'}</Text>
+        <View style={styles.contextCopy}>
+          <Text style={styles.contextTitle} numberOfLines={1}>{session?.announcementTitle ?? '공고를 불러오는 중이에요'}</Text>
+          {activeSupplyType ? <Text style={styles.contextSupply}>{SUPPLY_LABELS[activeSupplyType]} 상담</Text> : null}
+        </View>
         <View style={styles.badge}><Text style={styles.badgeText}>{SOURCE_BADGE[sourceStatus]}</Text></View>
       </View>
 
@@ -85,14 +92,15 @@ export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssess
           {/* 추천 질문은 입력창 바로 위에 둔다. 키보드가 올라와도 같이 따라 올라온다. */}
           {last?.suggestedQuestions?.length ? (
             <View style={styles.chips}>
-              {last.suggestedQuestions.slice(0, 3).map(q => <QuestionChips key={q.key} question={q} disabled={busy} onSend={send} />)}
+              {last.suggestedQuestions.slice(0, 3).map(q => <QuestionChips key={q.key} question={q} disabled={busy} onSend={send} onFocus={() => inputRef.current?.focus()} />)}
             </View>
           ) : null}
           <View style={styles.composer}>
             <TextInput
+              ref={inputRef}
               accessibilityLabel="상담 질문 입력"
               style={styles.input} value={input} onChangeText={setInput} multiline maxLength={500}
-              placeholder="이 공고에 대해 물어보세요" placeholderTextColor={colors.outline}
+              placeholder={answerQuestion?.prompt ?? '이 공고에 대해 물어보세요'} placeholderTextColor={colors.outline}
               editable={!busy} onSubmitEditing={() => void send(input)}
             />
             <MotionPressable
@@ -110,9 +118,19 @@ export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssess
 }
 
 /** A question becomes taps when the engine supplies options, and a prompt chip otherwise. */
-function QuestionChips({ question, disabled, onSend }: { question: ConsultationQuestion; disabled: boolean; onSend: (text: string, answering?: { questionKey: string; value: string }) => void }) {
-  if (!question.options?.length) {
+function QuestionChips({ question, disabled, onSend, onFocus }: { question: ConsultationQuestion; disabled: boolean; onSend: (text: string, answering?: { questionKey: string; value: string }) => void; onFocus: () => void }) {
+  if (question.interaction === 'ASK') {
     return <Chip label={question.prompt} disabled={disabled} onPress={() => onSend(question.prompt)} />;
+  }
+  if (!question.options?.length) {
+    return (
+      <View style={styles.questionBlock}>
+        <Text style={styles.questionPrompt}>{question.prompt}</Text>
+        <MotionPressable accessibilityRole="button" disabled={disabled} onPress={onFocus} style={styles.answerFocus}>
+          <Text style={styles.answerFocusText}>답변 입력</Text>
+        </MotionPressable>
+      </View>
+    );
   }
   return (
     <View style={styles.questionBlock}>
@@ -140,12 +158,7 @@ function AssistantTurn({ turn, onAct }: { turn: ConsultationTurn; onAct: (action
       {/* 결론 카드를 문장보다 먼저 둔다. 상담사가 고객과 볼 때 답이 맨 위에 있어야 한다. */}
       {turn.assessment ? <ConsultationResultCard assessment={turn.assessment} /> : null}
       <Text style={styles.message}>{turn.message}</Text>
-      {turn.reusedProfileFacts?.length ? (
-        <View style={styles.reused}>
-          <MaterialIcons name="person-outline" size={15} color={colors.textMuted} />
-          <Text style={styles.reusedText}>프로필의 {turn.reusedProfileFacts.join(', ')}을(를) 사용했어요.</Text>
-        </View>
-      ) : null}
+      {turn.reusedProfileFacts?.length ? <ProfileFactsDisclosure facts={turn.reusedProfileFacts} /> : null}
       {/* 모른다는 답을 오류처럼 보이지 않게 한다. 확인이 필요한 항목으로 말한다. */}
       {turn.unresolved?.length ? (
         <View style={styles.unresolved}>
@@ -167,6 +180,19 @@ function AssistantTurn({ turn, onAct }: { turn: ConsultationTurn; onAct: (action
   );
 }
 
+function ProfileFactsDisclosure({ facts }: { facts: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={styles.reused}>
+      <MotionPressable accessibilityRole="button" accessibilityState={{ expanded: open }} onPress={() => setOpen(value => !value)} style={styles.profileToggle}>
+        <MaterialIcons name="person-outline" size={15} color={colors.textMuted} />
+        <Text style={styles.reusedText}>사용 중인 내 정보 {open ? '접기' : '보기'}</Text>
+      </MotionPressable>
+      {open ? facts.map(fact => <Text key={fact} style={styles.profileFact}>• {fact}</Text>) : null}
+    </View>
+  );
+}
+
 /** 근거는 대화에 길게 쏟지 않는다. 열어야 원문이 나오고, 내부 ID는 그 안에서만 보인다. */
 function EvidenceDisclosure({ evidence }: { evidence: Evidence[] }) {
   const [open, setOpen] = useState(false);
@@ -183,7 +209,6 @@ function EvidenceDisclosure({ evidence }: { evidence: Evidence[] }) {
           <Text style={styles.evidenceLabel}>{e.label}</Text>
           <Text style={styles.evidenceWhere}>{[e.source, e.section, e.tableLabel].filter(Boolean).join(' · ')}</Text>
           {e.textExcerpt ? <Text selectable style={styles.excerpt}>{e.textExcerpt}</Text> : null}
-          <Text selectable style={styles.evidenceId}>근거 ID: {e.id}</Text>
         </View>
       )) : null}
     </View>
@@ -193,7 +218,9 @@ function EvidenceDisclosure({ evidence }: { evidence: Evidence[] }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background }, flex: { flex: 1 },
   contextBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.screen, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.surfaceHigh },
-  contextTitle: { ...type.bodyStrong, color: colors.text, flex: 1 },
+  contextCopy: { flex: 1, gap: 2 },
+  contextTitle: { ...type.bodyStrong, color: colors.text },
+  contextSupply: { ...type.caption, color: colors.textMuted },
   badge: { borderRadius: radius.pill, borderWidth: 1, borderColor: colors.primary, paddingHorizontal: spacing.sm, paddingVertical: 2 },
   badgeText: { ...type.caption, color: colors.primary },
   scroll: { width: '100%', maxWidth: 720, alignSelf: 'center', padding: spacing.screen, paddingBottom: spacing.lg, gap: spacing.md },
@@ -202,8 +229,10 @@ const styles = StyleSheet.create({
   userBubble: { ...type.body, color: colors.onPrimary, backgroundColor: colors.primary, borderRadius: radius.card, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, maxWidth: '88%', overflow: 'hidden' },
   turn: { gap: spacing.sm },
   message: { ...type.body, color: colors.text },
-  reused: { flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start' },
+  reused: { gap: spacing.xs, alignItems: 'flex-start' },
+  profileToggle: { minHeight: size.touch, flexDirection: 'row', gap: spacing.xs, alignItems: 'center' },
   reusedText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
+  profileFact: { ...type.bodySm, color: colors.textMuted, paddingLeft: spacing.sm },
   unresolved: { backgroundColor: colors.surfaceLow, borderRadius: radius.cardSm, padding: spacing.sm, gap: spacing.xs },
   unresolvedTitle: { ...type.bodySmStrong, color: colors.text },
   unresolvedItem: { ...type.bodySm, color: colors.textMuted },
@@ -214,7 +243,6 @@ const styles = StyleSheet.create({
   evidenceLabel: { ...type.bodyStrong, color: colors.text },
   evidenceWhere: { ...type.bodySm, color: colors.textMuted },
   excerpt: { ...type.bodySm, color: colors.textMuted, borderLeftWidth: 2, borderLeftColor: colors.outline, paddingLeft: spacing.sm, marginTop: spacing.xs },
-  evidenceId: { ...type.caption, color: colors.textSubtle, marginTop: spacing.xs },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   action: { minHeight: size.touch, justifyContent: 'center', borderRadius: radius.button, borderWidth: 1, borderColor: colors.primary, paddingHorizontal: spacing.md },
   actionText: { ...type.bodyStrong, color: colors.primary },
@@ -223,6 +251,8 @@ const styles = StyleSheet.create({
   chips: { gap: spacing.sm, width: '100%', maxWidth: 720, alignSelf: 'center' },
   questionBlock: { gap: spacing.xs },
   questionPrompt: { ...type.bodySm, color: colors.textMuted },
+  answerFocus: { alignSelf: 'flex-start', minHeight: size.touch, justifyContent: 'center' },
+  answerFocusText: { ...type.bodySmStrong, color: colors.primary },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { minHeight: size.touch, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1, borderColor: colors.outline, backgroundColor: colors.surface, paddingHorizontal: spacing.md },
   chipText: { ...type.bodySm, color: colors.text },

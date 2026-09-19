@@ -91,10 +91,10 @@ test('unresolved spouse pre-marriage exception is review-required instead of gue
   assert.match(result.response.message, /추가로 대조|임의 판정하지 않습니다/);
 });
 
-test('Samdo response displays the draft-source notice once', async () => {
+test('Samdo domain response leaves the one-time draft-source notice to the session UI', async () => {
   const result = await new ApplicationAssessmentConsultationEngine({ rules }).sendMessage(session('newlywed'), '신청 가능해요?');
   assert.equal(result.response.sourceStatus, 'DRAFT_SOURCE_VERIFIED');
-  assert.equal(result.response.message.match(/제공된 모집공고 검토본을 기준으로/g)?.length, 1);
+  assert.equal(result.response.message.includes('제공된 모집공고 검토본을 기준으로'), false);
 });
 
 test('multi-turn answers merge into one session and eventually reach eligible', async () => {
@@ -169,4 +169,83 @@ test('announcement-side missing rules are review actions and never user question
   assert.equal(result.response.resolution, 'REVIEW_REQUIRED');
   assert.equal(result.response.suggestedQuestions.length, 0);
   assert.ok(result.response.actions.some(action => action.type === 'REVIEW_ANNOUNCEMENT'));
+});
+
+test('requirement questions never become applicant numeric facts', async () => {
+  const interpreter = new DeterministicConsultationInterpreter();
+  const paymentQuestion = await interpreter.interpret({ message: '24회 이상이면 몇 점이야?' });
+  const ageQuestion = await interpreter.interpret({ message: '35살 이하여야 하나요?' });
+  const accountQuestion = await interpreter.interpret({ message: '통장 6개월 넘으면 되나요?' });
+  assert.equal(paymentQuestion.updates.some(item => item.field === 'recognizedPaymentCount'), false);
+  assert.equal(ageQuestion.updates.some(item => item.field === 'declaredAgeYears'), false);
+  assert.equal(accountQuestion.updates.some(item => item.field === 'subscriptionDurationMonths'), false);
+  assert.equal(paymentQuestion.intent, 'CHECK_SCORE');
+  assert.equal(ageQuestion.intent, 'CHECK_REQUIREMENT');
+});
+
+test('explicit assertions update facts and mixed questions keep only the applicant clause', async () => {
+  const interpreter = new DeterministicConsultationInterpreter();
+  const payment = await interpreter.interpret({ message: '저 24회 넣었어요' });
+  const age = await interpreter.interpret({ message: '저 35살이에요' });
+  const mixed = await interpreter.interpret({ message: '나는 31살인데 39살까지 가능한가요?' });
+  assert.deepEqual(payment.updates.filter(item => item.field === 'recognizedPaymentCount'), [{ field: 'recognizedPaymentCount', value: 24 }]);
+  assert.deepEqual(age.updates.filter(item => item.field === 'declaredAgeYears'), [{ field: 'declaredAgeYears', value: 35 }]);
+  assert.deepEqual(mixed.updates.filter(item => item.field === 'declaredAgeYears'), [{ field: 'declaredAgeYears', value: 31 }]);
+});
+
+test('natural child absence is accepted but hypothetical child questions are not facts', async () => {
+  const interpreter = new DeterministicConsultationInterpreter();
+  for (const message of ['자녀 없어', '아이 없습니다', '애 없어', '임신 아님', '태아 없음']) {
+    const interpreted = await interpreter.interpret({ message });
+    assert.ok(interpreted.updates.some(item => item.field === 'childbirthClear' && item.value === true), message);
+  }
+  for (const message of ['자녀 있으면?', '아이 있으면 유리해?']) {
+    const interpreted = await interpreter.interpret({ message });
+    assert.equal(interpreted.updates.some(item => item.field === 'childbirthClear'), false, message);
+  }
+});
+
+test('natural why-result phrases are recognized without changing facts', async () => {
+  const interpreter = new DeterministicConsultationInterpreter();
+  for (const message of ['왜 안돼?', '왜 안 되나요?', '왜 신청 못 해?', '왜 탈락?', '왜 어려워?', '왜 안되는 거야?']) {
+    const interpreted = await interpreter.interpret({ message });
+    assert.equal(interpreted.intent, 'WHY_RESULT', message);
+    assert.deepEqual(interpreted.updates, [], message);
+  }
+});
+
+test('unknown answer defers the current missing field and advances to another question', async () => {
+  const applicant = samdoApplicant('youth');
+  delete applicant.details.birthDate;
+  delete applicant.details.subscriptionAccountOpenedAt;
+  delete applicant.details.recognizedPaymentCount;
+  const engine = new ApplicationAssessmentConsultationEngine({ rules });
+  const first = await engine.sendMessage(session('youth', applicant), '나 이거 넣을 수 있어?');
+  const before = first.response.suggestedQuestions[0].key;
+  const second = await engine.sendMessage(first.session, '잘 모르겠어');
+  assert.ok(second.session.deferredFields.includes(before));
+  assert.notEqual(second.response.suggestedQuestions[0]?.key, before);
+  assert.ok(second.response.unresolvedItems?.length);
+});
+
+test('positive overseas duration is preserved as review input instead of guessed dates', async () => {
+  const interpreted = await new DeterministicConsultationInterpreter().interpret({ message: '해외에 6개월 있었어' });
+  assert.ok(interpreted.updates.some(item => item.field === 'specialException' && item.value.includes('6개월')));
+  assert.equal(interpreted.updates.some(item => item.field === 'overseasClear'), false);
+});
+
+test('evidence is relevant, deduplicated and capped at five', async () => {
+  const result = await new ApplicationAssessmentConsultationEngine({ rules }).sendMessage(session('youth'), '필요한 서류와 공고 근거 보여줘');
+  assert.ok(result.response.evidenceRefs.length <= 5);
+  const locations = result.response.evidenceRefs.map(item => `${item.section}|${item.tableLabel ?? ''}`);
+  assert.equal(new Set(locations).size, locations.length);
+});
+
+test('supply type changes are announced once and use the selected deterministic result', async () => {
+  const result = await new ApplicationAssessmentConsultationEngine({ rules }).sendMessage(session('youth'), '생애최초는 몇 점이야?');
+  assert.equal(result.session.supplyType, 'firstHome');
+  assert.equal(result.response.supplyType, 'firstHome');
+  assert.match(result.response.contextTransition ?? '', /생애최초 특별공급 기준/);
+  assert.match(result.response.message, /생애최초 특별공급 기준으로 볼게요/);
+  assert.equal(result.response.score, undefined);
 });

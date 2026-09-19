@@ -25,6 +25,7 @@ export function createConsultationSession(input: {
     collectedAnswers: structuredClone(input.collectedAnswers ?? {}),
     lastAssessmentResult: null,
     missingFields: [],
+    deferredFields: [],
     conversationTurns: [],
   };
 }

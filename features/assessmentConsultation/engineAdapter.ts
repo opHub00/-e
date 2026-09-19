@@ -26,20 +26,32 @@ type Input = {
   seed?: AssessmentConsultationSeed | null;
 };
 
-const PROFILE_FACT_LABELS: Record<string, string> = {
-  maritalStatus: '혼인정보', noHome: '현재 주택소유', neverOwned: '과거 주택소유',
-  householdNoHome: '세대 주택소유', householdNeverOwned: '세대 과거 주택소유',
-  noSpecialRestriction: '특별공급 제한', hasAccount: '청약통장 보유',
-  incomeTaxPaymentYears: '소득세 납부기간', workOrBusinessIncome: '근로·사업소득 요건',
-  householdMemberCount: '세대원 수',
-};
-
 let turnSequence = 0;
 const turnId = () => `consultation-${++turnSequence}`;
 const unique = <T,>(items: T[]) => [...new Set(items)];
 const displayValue = (value: Scalar | null) => value === null ? '확인 전'
   : typeof value === 'boolean' ? (value ? '예' : '아니요')
   : ({ single: '미혼', married: '기혼', 'no-home': '무주택', 'owns-home': '주택 보유' }[String(value)] ?? String(value));
+
+/** Fact values use engine semantics, so inverse booleans need fact-specific wording. */
+export function formatProfileFact(key: string, value: Scalar | null): { label: string; valueText: string } | null {
+  const inverse: Record<string, { label: string; yes: string; no: string }> = {
+    noHome: { label: '현재 주택 상태', yes: '무주택', no: '주택 보유' },
+    neverOwned: { label: '과거 주택소유 이력', yes: '없음', no: '있음' },
+    householdNoHome: { label: '세대 주택 상태', yes: '무주택', no: '주택 보유' },
+    householdNeverOwned: { label: '세대 과거 주택소유 이력', yes: '없음', no: '있음' },
+    noSpecialRestriction: { label: '특별공급 제한', yes: '없음', no: '있음' },
+  };
+  const direct: Record<string, string> = {
+    maritalStatus: '혼인정보', hasAccount: '청약통장 보유', incomeTaxPaymentYears: '소득세 납부기간',
+    workOrBusinessIncome: '근로·사업소득 요건', householdMemberCount: '세대원 수',
+  };
+  if (inverse[key] && typeof value === 'boolean') return { label: inverse[key].label, valueText: value ? inverse[key].yes : inverse[key].no };
+  if (!direct[key]) return null;
+  if (key === 'hasAccount' && typeof value === 'boolean') return { label: direct[key], valueText: value ? '있음' : '없음' };
+  if (key === 'workOrBusinessIncome' && typeof value === 'boolean') return { label: direct[key], valueText: value ? '충족' : '미충족' };
+  return { label: direct[key], valueText: displayValue(value) };
+}
 
 export function mapAssessmentToUi(result: ApplicationAssessmentResult): ConsultationAssessment {
   const groups = groupMissingInformation(result.missingInformation);
@@ -64,7 +76,7 @@ function toEvidence(refs: ConsultationEvidenceRef[]): Evidence[] {
 }
 
 function toQuestion(question: DomainResponse['suggestedQuestions'][number]): ConsultationQuestion {
-  return { key: question.key, prompt: question.prompt, source: question.target };
+  return { key: question.key, prompt: question.prompt, source: question.target, interaction: 'ANSWER', options: question.options };
 }
 
 function mapActions(actions: DomainAction[], result: ApplicationAssessmentResult | null): ConsultationAction[] {
@@ -95,7 +107,9 @@ function reusedProfileFacts(result: ApplicationAssessmentResult | null, profile:
   if (knownValue(profile.household.memberCount) !== undefined) knownProfileFacts.add('householdMemberCount');
   return unique(inputs
     .filter(([key, value]) => knownProfileFacts.has(key) && value !== null)
-    .map(([key, value]) => `${PROFILE_FACT_LABELS[key]}(${displayValue(value)})`))
+    .map(([key, value]) => formatProfileFact(key, value))
+    .filter((item): item is { label: string; valueText: string } => item !== null)
+    .map(item => `${item.label}: ${item.valueText}`))
     .slice(0, 4);
 }
 
@@ -106,14 +120,17 @@ export function mapConsultationResultToUiContract(input: {
 }): ConsultationTurn {
   const groups = input.result ? groupMissingInformation(input.result.missingInformation) : { answers: [], profile: [], announcement: [] };
   const unresolved = input.response.resolution === 'REVIEW_REQUIRED'
-    ? unique([...groups.announcement, ...(input.result?.missingInformation.filter(item => item.startsWith('review:')).map(missingLabel) ?? [])])
+    ? unique([...groups.announcement, ...(input.result?.missingInformation.filter(item => item.startsWith('review:')).map(missingLabel) ?? []), ...(input.response.unresolvedItems ?? [])])
     : input.response.resolution === 'CONSULTATION_UNSUPPORTED'
       ? ['이 공고에 사용할 판정 규칙이 등록되지 않았습니다.']
       : input.response.resolution === 'INTERPRETATION_FAILED'
         ? ['질문에서 판정에 사용할 정보를 안전하게 구조화하지 못했습니다.']
-        : [];
+        : input.response.unresolvedItems ?? [];
   return {
     id: turnId(), role: 'assistant', message: input.response.message,
+    summary: input.response.summary, reason: input.response.reason, nextStep: input.response.nextStep,
+    activeSupplyType: input.response.supplyType ?? undefined,
+    contextTransition: input.response.contextTransition,
     assessment: input.result ? mapAssessmentToUi(input.result) : undefined,
     suggestedQuestions: input.response.suggestedQuestions.slice(0, 3).map(toQuestion),
     actions: mapActions(input.response.actions, input.result),
@@ -130,10 +147,11 @@ function initialTurn(input: Input, seededFrom?: 'ASSESSMENT_RESULT'): Consultati
       message: '방금 본 판정 결과와 입력한 정보를 그대로 이어받았어요. 결과의 이유, 가점, 공고 근거를 물어보세요.',
       assessment: mapAssessmentToUi(input.seed.result),
       suggestedQuestions: [
-        { key: 'why', prompt: input.seed.result.score ? `왜 ${input.seed.result.score.total}점이에요?` : '왜 이 공급단계예요?', source: 'ANSWER' },
-        { key: 'evidence', prompt: '공고 근거 보여줘', source: 'ANSWER' },
-        { key: 'documents', prompt: '필요한 서류는?', source: 'ANSWER' },
+        { key: 'why', prompt: input.seed.result.score ? `왜 ${input.seed.result.score.total}점이에요?` : '왜 이 공급단계예요?', source: 'ANSWER', interaction: 'ASK' },
+        { key: 'evidence', prompt: '공고 근거 보여줘', source: 'ANSWER', interaction: 'ASK' },
+        { key: 'documents', prompt: '필요한 서류는?', source: 'ANSWER', interaction: 'ASK' },
       ],
+      activeSupplyType: input.seed.supplyType,
       actions: [{ kind: 'OPEN_ASSESSMENT', label: '맞춤판정 자세히 보기' }],
       reusedProfileFacts: reusedProfileFacts(input.seed.result, input.seed.profile),
     };
@@ -142,10 +160,11 @@ function initialTurn(input: Input, seededFrom?: 'ASSESSMENT_RESULT'): Consultati
     id: turnId(), role: 'assistant',
     message: '이 공고의 등록된 판정 규칙을 기준으로 신청 가능 여부, 공급단계, 가점과 근거를 확인해 드릴게요.',
     suggestedQuestions: [
-      { key: 'eligibility', prompt: '내가 신청 가능해?', source: 'ANSWER' },
-      { key: 'score', prompt: '가점과 공급단계 알려줘', source: 'ANSWER' },
-      { key: 'documents', prompt: '필요한 서류는?', source: 'ANSWER' },
+      { key: 'eligibility', prompt: '내가 신청 가능해?', source: 'ANSWER', interaction: 'ASK' },
+      { key: 'score', prompt: '가점과 공급단계 알려줘', source: 'ANSWER', interaction: 'ASK' },
+      { key: 'documents', prompt: '필요한 서류는?', source: 'ANSWER', interaction: 'ASK' },
     ],
+    activeSupplyType: input.rules.supplies[0]?.type,
   };
 }
 
@@ -171,6 +190,7 @@ export function createAssessmentConsultationUiEngine(input: Input): Consultation
         announcementTitle: input.rules.title,
         listingId: input.listingId,
         sourceStatus: input.rules.sourceStatus ?? 'REFERENCE',
+        activeSupplyType: supplyType ?? undefined,
         seededFrom,
         turns: [initialTurn(input, seededFrom)],
       };

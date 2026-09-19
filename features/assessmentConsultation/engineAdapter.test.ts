@@ -5,7 +5,7 @@ import { assessApplication } from '../applicationAssessment/engine.ts';
 import { validateImportPackage } from '../applicationAssessment/server/importPackage.ts';
 import { samdoApplicant } from '../applicationAssessment/server/samdoProfiles.test-data.ts';
 import { createMinimalApplicantProfile } from '../profile/domain.ts';
-import { createAssessmentConsultationUiEngine, mapAssessmentToUi } from './engineAdapter.ts';
+import { createAssessmentConsultationUiEngine, formatProfileFact, mapAssessmentToUi } from './engineAdapter.ts';
 import { clearAssessmentConsultationSeedsForTest, readAssessmentConsultationSeed, registerAssessmentConsultationSeed } from './seedStore.ts';
 
 const pkg = JSON.parse(readFileSync(new URL('../../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url), 'utf8'));
@@ -102,4 +102,21 @@ test('unresolved exception is presented as review-required without a guessed ver
   assert.equal(turn.assessment?.status, 'NEEDS_MORE_INFORMATION');
   assert.ok(turn.unresolved?.length);
   assert.match(turn.message, /임의 판정하지 않습니다|추가로 대조/);
+});
+
+test('inverse profile facts preserve their real meaning in presentation', () => {
+  assert.deepEqual(formatProfileFact('noHome', true), { label: '현재 주택 상태', valueText: '무주택' });
+  assert.deepEqual(formatProfileFact('neverOwned', true), { label: '과거 주택소유 이력', valueText: '없음' });
+  assert.deepEqual(formatProfileFact('noSpecialRestriction', true), { label: '특별공급 제한', valueText: '없음' });
+  assert.deepEqual(formatProfileFact('householdNoHome', true), { label: '세대 주택 상태', valueText: '무주택' });
+});
+
+test('missing questions are answer prompts while starter suggestions remain ask actions', async () => {
+  const applicant = samdoApplicant('youth');
+  delete applicant.details.birthDate;
+  const engine = createAssessmentConsultationUiEngine({ rules, listingId: rules.listingId, profile: applicant.profile });
+  const session = await engine.start({ listingId: rules.listingId });
+  assert.equal(session.turns[0].suggestedQuestions?.[0].interaction, 'ASK');
+  const turn = await engine.ask({ session, message: '나 이거 넣을 수 있어?' });
+  assert.equal(turn.suggestedQuestions?.[0].interaction, 'ANSWER');
 });

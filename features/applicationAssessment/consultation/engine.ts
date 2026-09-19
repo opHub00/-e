@@ -1,6 +1,6 @@
 import { assessApplication } from '../engine.ts';
-import { buildConsultationResponse, unsupportedConsultationResponse } from './answerBuilder.ts';
-import { decodeConsultationInterpretation, DeterministicConsultationInterpreter } from './interpreter.ts';
+import { buildConsultationResponse, selectMissingQuestions, unsupportedConsultationResponse } from './answerBuilder.ts';
+import { decodeConsultationInterpretation, DeterministicConsultationInterpreter, isUnknownConsultationAnswer } from './interpreter.ts';
 import { appendTurn, applyConsultationUpdates, assessmentInputFromSession } from './session.ts';
 import type {
   ConsultationEngineOptions,
@@ -42,6 +42,12 @@ export class ApplicationAssessmentConsultationEngine {
 
     if (!this.rules) return this.complete(withUser, unsupportedConsultationResponse(intent, 'NO_RULES'));
     const updated = applyConsultationUpdates(withUser, interpretation.updates, this.rules);
+    if (isUnknownConsultationAnswer(message) && interpretation.updates.length === 0) {
+      const currentMissing = updated.lastAssessmentResult?.missingInformation ?? updated.missingFields;
+      const currentQuestion = selectMissingQuestions(currentMissing, updated.deferredFields)[0];
+      if (currentQuestion) updated.deferredFields = [...new Set([...updated.deferredFields, currentQuestion.key])];
+    }
+    const previousSupply = updated.supplyType;
     updated.supplyType = interpretation.supplyType ?? updated.supplyType;
     if (!updated.supplyType) return this.complete(updated, unsupportedConsultationResponse(intent, 'NO_SUPPLY'));
 
@@ -50,7 +56,13 @@ export class ApplicationAssessmentConsultationEngine {
     if (!result) return this.complete(updated, unsupportedConsultationResponse(intent, 'NO_SUPPLY'));
     updated.lastAssessmentResult = structuredClone(result);
     updated.missingFields = [...result.missingInformation];
-    const response = buildConsultationResponse({ intent, result, evidenceRequested: interpretation.evidenceRequested, userMessage: message });
+    const transition = interpretation.supplyType && interpretation.supplyType !== previousSupply
+      ? `${interpretation.supplyType === 'youth' ? '청년' : interpretation.supplyType === 'newlywed' ? '신혼부부' : '생애최초'} 특별공급 기준으로 볼게요.`
+      : undefined;
+    const response = buildConsultationResponse({
+      intent, result, evidenceRequested: interpretation.evidenceRequested, userMessage: message,
+      deferredFields: updated.deferredFields, contextTransition: transition,
+    });
     return this.complete(updated, response);
   }
 

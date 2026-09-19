@@ -1,5 +1,5 @@
 import { groupMissingInformation, missingLabel } from '../form.ts';
-import type { ApplicationAssessmentResult, RuleSourceStatus, SupplyType } from '../types.ts';
+import type { ApplicationAssessmentResult, SupplyType } from '../types.ts';
 import type {
   ConsultationAction,
   ConsultationEvidenceRef,
@@ -13,12 +13,6 @@ const SUPPLY_LABEL: Record<SupplyType, string> = {
   youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급',
 };
 const STAGE_LABEL = { PRIORITY: '우선공급', GENERAL: '일반공급', LOTTERY: '추첨공급' } as const;
-const SOURCE_NOTICE: Record<RuleSourceStatus, string> = {
-  REFERENCE: '참고 기준으로만 안내하며, 공고 원문 검증 전에는 판정을 확정할 수 없습니다.',
-  DRAFT_SOURCE_VERIFIED: '제공된 모집공고 검토본을 기준으로 계산한 예상 결과입니다. 최종 공고 게시 후 기준이 달라질 수 있습니다.',
-  OFFICIAL_VERIFIED: '공식 공고 기준으로 계산한 예상 결과이며, 최종 자격은 사업주체·청약기관 심사에서 확정됩니다.',
-};
-
 const PROFILE_FACTS = new Set([
   'householdMemberCount', 'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome',
   'householdNeverOwned', 'noSpecialRestriction', 'hasAccount', 'incomeTaxPaymentYears',
@@ -47,6 +41,22 @@ const QUESTION_BY_FACT: Record<string, string> = {
   householdNeverOwned: '세대구성원의 과거 주택 소유 이력을 프로필에서 확인해 주세요.',
   specialExceptions: '적용 가능성이 있는 특례 내용을 알려주세요.',
   exceptionsClear: '배우자 이력·출산·해외체류 등 특례 적용 가능성이 있는지 알려주세요.',
+  childbirthClear: '현재 자녀·태아·입양 자녀가 있나요?',
+};
+
+const OPTIONS_BY_FACT: Partial<Record<string, { label: string; value: string }[]>> = {
+  overseasClear: [
+    { label: '해외체류 없음', value: '해외체류 이력이 없어요' },
+    { label: '해외체류 있음', value: '해외체류 이력이 있지만 정확한 기간은 확인이 필요해요' },
+  ],
+  dualIncome: [
+    { label: '외벌이', value: '외벌이예요' },
+    { label: '맞벌이', value: '맞벌이예요' },
+  ],
+  childbirthClear: [
+    { label: '없어요', value: '자녀 없어' },
+    { label: '있어요', value: '자녀 또는 태아가 있어요' },
+  ],
 };
 
 const PRIORITY = [
@@ -62,9 +72,10 @@ function priorityOf(key: string): number {
   return index === -1 ? PRIORITY.length : index;
 }
 
-export function selectMissingQuestions(keys: string[]): ConsultationMissingQuestion[] {
+export function selectMissingQuestions(keys: string[], excluded: readonly string[] = []): ConsultationMissingQuestion[] {
+  const excludedSet = new Set(excluded);
   return [...new Set(keys)]
-    .filter(key => key.startsWith('input:'))
+    .filter(key => key.startsWith('input:') && !excludedSet.has(key))
     .sort((a, b) => priorityOf(a) - priorityOf(b))
     .map(key => {
       const fact = key.slice(6);
@@ -72,6 +83,7 @@ export function selectMissingQuestions(keys: string[]): ConsultationMissingQuest
         key,
         prompt: QUESTION_BY_FACT[fact] ?? `${missingLabel(key)} 정보를 알려주세요.`,
         target: PROFILE_FACTS.has(fact) ? 'PROFILE' as const : 'ANSWER' as const,
+        options: OPTIONS_BY_FACT[fact],
       };
     })
     .filter((question, index, all) => all.findIndex(item => item.prompt === question.prompt) === index)
@@ -88,17 +100,33 @@ function messageKeywords(message: string): string[] {
 }
 
 function evidenceRefs(result: ApplicationAssessmentResult, intent: ConsultationIntent, message: string): ConsultationEvidenceRef[] {
-  const ids = new Set<string>();
-  if (intent === 'CHECK_SCORE' || intent === 'WHY_RESULT') result.score?.breakdown.forEach(item => ids.add(item.evidenceId));
-  if (intent === 'CHECK_STAGE') result.stageConditions.forEach(item => ids.add(item.evidenceId));
-  if (intent === 'CHECK_EXCEPTION') result.unknownConditions.forEach(item => ids.add(item.evidenceId));
-  if (intent === 'CHECK_DOCUMENTS') result.evidence.forEach(item => ids.add(item.id));
+  const ids: string[] = [];
+  const add = (id: string) => { if (!ids.includes(id)) ids.push(id); };
+  if (intent === 'CHECK_SCORE' || intent === 'WHY_RESULT') result.score?.breakdown.forEach(item => add(item.evidenceId));
+  if (intent === 'CHECK_STAGE') result.stageConditions.forEach(item => add(item.evidenceId));
+  if (intent === 'CHECK_EXCEPTION') result.unknownConditions.forEach(item => add(item.evidenceId));
+  if (intent === 'CHECK_DOCUMENTS') result.evidence.forEach(item => add(item.id));
   if (intent === 'CHECK_REQUIREMENT' || intent === 'CHECK_EXCEPTION') {
     const keywords = messageKeywords(message);
-    result.evidence.filter(item => keywords.some(keyword => `${item.label} ${item.section} ${item.tableLabel ?? ''} ${item.textExcerpt ?? ''}`.includes(keyword))).forEach(item => ids.add(item.id));
+    result.evidence.filter(item => keywords.some(keyword => `${item.label} ${item.section} ${item.tableLabel ?? ''} ${item.textExcerpt ?? ''}`.includes(keyword))).forEach(item => add(item.id));
   }
-  if (!ids.size) [...result.failedConditions, ...result.unknownConditions, ...result.satisfiedConditions].slice(0, 4).forEach(item => ids.add(item.evidenceId));
-  return result.evidence.filter(item => ids.has(item.id)).map(({ id, ...item }) => ({ evidenceId: id, ...item }));
+  if (!ids.length) [...result.failedConditions, ...result.unknownConditions, ...result.satisfiedConditions].forEach(item => add(item.evidenceId));
+  const byId = new Map(result.evidence.map(item => [item.id, item]));
+  const seenLocations = new Set<string>(), seenExcerpts = new Set<string>();
+  const refs: ConsultationEvidenceRef[] = [];
+  for (const id of ids) {
+    const item = byId.get(id);
+    if (!item) continue;
+    const location = `${item.section ?? ''}|${item.tableLabel ?? ''}`;
+    const excerpt = item.textExcerpt?.trim() ?? '';
+    if ((location !== '|' && seenLocations.has(location)) || (excerpt && seenExcerpts.has(excerpt))) continue;
+    if (location !== '|') seenLocations.add(location);
+    if (excerpt) seenExcerpts.add(excerpt);
+    const { id: evidenceId, ...rest } = item;
+    refs.push({ evidenceId, ...rest });
+    if (refs.length === 5) break;
+  }
+  return refs;
 }
 
 function conditionSummary(result: ApplicationAssessmentResult): string[] {
@@ -121,10 +149,6 @@ function conclusion(result: ApplicationAssessmentResult): string {
   return `현재 입력만으로는 ${supply} 판정을 마칠 수 없습니다.`;
 }
 
-function sourceNotice(status: RuleSourceStatus | undefined): string {
-  return status ? SOURCE_NOTICE[status] : '공고 출처 상태를 확인할 수 없어 판정을 확정하지 않습니다.';
-}
-
 function resolutionFor(result: ApplicationAssessmentResult): ConsultationResolution {
   const grouped = groupMissingInformation(result.missingInformation);
   if (grouped.announcement.length || result.missingInformation.some(item => item.startsWith('review:'))) return 'REVIEW_REQUIRED';
@@ -145,10 +169,18 @@ export function buildConsultationResponse(input: {
   result: ApplicationAssessmentResult;
   evidenceRequested: boolean;
   userMessage: string;
+  deferredFields?: string[];
+  contextTransition?: string;
 }): ConsultationResponse {
   const { result, intent } = input;
-  const questions = selectMissingQuestions(result.missingInformation);
-  const sections: string[] = [conclusion(result)];
+  const blockerKeys = [...result.failedConditions, ...result.unknownConditions]
+    .flatMap(condition => Object.entries(condition.inputs))
+    .filter(([, value]) => value === null)
+    .map(([key]) => `input:${key}`);
+  const questions = selectMissingQuestions([...blockerKeys, ...result.missingInformation], input.deferredFields);
+  const summary = conclusion(result);
+  const sections: string[] = input.contextTransition ? [input.contextTransition, summary] : [summary];
+  let reason: string | undefined;
   if (intent === 'CHECK_SCORE' || (intent === 'WHY_RESULT' && result.score)) sections.push(scoreSummary(result));
   if (intent === 'CHECK_STAGE' || intent === 'CHECK_ELIGIBILITY' || intent === 'WHY_RESULT') {
     if (result.stage) sections.push(`공급단계는 ${STAGE_LABEL[result.stage]}입니다. ${result.stageExplanation}`);
@@ -165,24 +197,29 @@ export function buildConsultationResponse(input: {
     const reasons = relevant.length
       ? relevant.map(item => `${item.label}: ${item.outcome === 'PASS' ? '충족' : item.outcome === 'FAIL' ? '미충족' : '확인 필요'}`)
       : conditionSummary(result);
-    if (reasons.length) sections.push(`핵심 이유: ${reasons.join(', ')}`);
+    if (reasons.length) {
+      reason = reasons.join(', ');
+      sections.push(`핵심 이유: ${reason}`);
+    }
   }
   if (intent === 'CHECK_EXCEPTION') {
     sections.push(resolutionFor(result) === 'REVIEW_REQUIRED'
       ? '이 항목은 현재 검토본의 특례 조항과 증빙을 추가로 대조해야 합니다. 일반 기준으로 임의 판정하지 않습니다.'
       : '입력한 예외 조건을 포함해 기존 판정 규칙으로 다시 확인했습니다.');
   }
-  if (questions.length) sections.push(`다음 확인사항: ${questions.map(item => item.prompt).join(' ')}`);
+  const nextStep = questions.length ? questions.map(item => item.prompt).join(' ') : undefined;
+  if (nextStep) sections.push(`다음 확인사항: ${nextStep}`);
   const refs = evidenceRefs(result, intent, input.userMessage);
   if ((input.evidenceRequested || intent === 'WHY_RESULT') && refs.length) {
     const labels = refs.slice(0, 3).map(item => [item.section, item.tableLabel ?? item.label].filter(Boolean).join(' · '));
     sections.push(`판정근거: ${labels.join(', ')}`);
   }
-  sections.push(sourceNotice(result.sourceStatus));
   return {
-    message: sections.join('\n'), intent, resolution: resolutionFor(result), assessmentStatus: result.status,
+    message: sections.join('\n'), summary, reason, nextStep, intent, resolution: resolutionFor(result), assessmentStatus: result.status,
     supplyType: result.supplyType, stage: result.stage, score: result.score, suggestedQuestions: questions,
     actions: actionsFor(result, questions), evidenceRefs: refs, sourceStatus: result.sourceStatus ?? null,
+    unresolvedItems: (input.deferredFields ?? []).map(missingLabel),
+    contextTransition: input.contextTransition,
   };
 }
 

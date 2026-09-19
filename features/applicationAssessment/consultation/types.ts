@@ -49,6 +49,8 @@ export type ConsultationSession = {
   collectedAnswers: ConsultationCollectedAnswers;
   lastAssessmentResult: ApplicationAssessmentResult | null;
   missingFields: string[];
+  /** Missing answers the user explicitly said they cannot confirm in this session. */
+  deferredFields: string[];
   conversationTurns: ConsultationTurn[];
 };
 
@@ -103,6 +105,7 @@ export type ConsultationMissingQuestion = {
   key: string;
   prompt: string;
   target: 'ANSWER' | 'PROFILE';
+  options?: { label: string; value: string }[];
 };
 
 export type ConsultationAction =
@@ -118,6 +121,10 @@ export type ConsultationEvidenceRef = Omit<Evidence, 'id'> & {
 
 export type ConsultationResponse = {
   message: string;
+  /** Optional presentation hierarchy; `message` remains the backwards-compatible rendering. */
+  summary?: string;
+  reason?: string;
+  nextStep?: string;
   intent: ConsultationIntent;
   resolution: ConsultationResolution;
   assessmentStatus: Status | null;
@@ -128,6 +135,8 @@ export type ConsultationResponse = {
   actions: ConsultationAction[];
   evidenceRefs: ConsultationEvidenceRef[];
   sourceStatus: RuleSourceStatus | null;
+  unresolvedItems?: string[];
+  contextTransition?: string;
 };
 
 export type ConsultationSendResult = {

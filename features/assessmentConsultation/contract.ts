@@ -25,6 +25,8 @@ export type ConsultationQuestion = {
   prompt: string;
   /** Where the answer would normally live, so the UI can say it already knows. */
   source: 'ANSWER' | 'PROFILE';
+  /** ASK is a suggested prompt; ANSWER is information the current assessment needs. */
+  interaction: 'ASK' | 'ANSWER';
   options?: { label: string; value: string }[];
 };
 
@@ -44,6 +46,11 @@ export type ConsultationTurn = {
   id: string;
   role: ConsultationRole;
   message: string;
+  summary?: string;
+  reason?: string;
+  nextStep?: string;
+  activeSupplyType?: SupplyType;
+  contextTransition?: string;
   /** Present once the engine has enough to run the deterministic rules. */
   assessment?: ConsultationAssessment;
   suggestedQuestions?: ConsultationQuestion[];
@@ -62,6 +69,7 @@ export type ConsultationSession = {
   announcementTitle: string;
   listingId: string;
   sourceStatus: RuleSourceStatus;
+  activeSupplyType?: SupplyType;
   seededFrom?: 'ASSESSMENT_RESULT';
   turns: ConsultationTurn[];
 };

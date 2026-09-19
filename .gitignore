@@ -76,3 +76,6 @@ Thumbs.db
 # Local Python parser bytecode.
 __pycache__/
 *.pyc
+
+# Playwright browser-run output (traces, screenshots).
+e2e/.artifacts/

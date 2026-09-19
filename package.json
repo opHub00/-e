@@ -18,7 +18,7 @@
     "test:tokens": "node design/tokens.test.mjs",
     "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
     "test": "npm run test:semantic && npm run test:extraction-v3 && npm run test:extraction-v4 && npm run test:extraction-v4-1 && npm run test:extraction && npm run test:ingestion && npm run test:assessment && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:edge",
-    "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts",
+    "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/consultation.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:mobile": "playwright test --project=mobile-390x844",
     "test:e2e:desktop": "playwright test --project=desktop-1440x900",

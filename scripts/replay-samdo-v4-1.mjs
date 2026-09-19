@@ -1,0 +1,20 @@
+import { existsSync } from 'node:fs';
+import { mkdir,readFile,writeFile } from 'node:fs/promises';
+import { dirname,join } from 'node:path';
+import { extractFacts } from '../features/ruleExtraction/server/v3/facts.ts';
+import { buildFrozenBenchmarkPack } from '../features/ruleExtraction/server/v4_1/benchmarkPack.ts';
+import { replayV41 } from '../features/ruleExtraction/server/v4_1/replay.ts';
+
+const root='.ingestion/announcements/990b2823e0ddc98fe7222815b6c844131bda6e9c1deac50c6de253eb0dbe524f';
+const documentPath=join(root,'parsed/bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763/document-parser-v1/document.json');
+const artifactDir=join(root,'extraction/samdo-ai-v4-plan-a16');
+for(const path of [documentPath,join(artifactDir,'samdo-v4-bindings.json'),join(artifactDir,'samdo-v4-rules.json'),join(artifactDir,'samdo-v4-oracle-comparison.json')])if(!existsSync(path))throw new Error(`MISSING_V4_ARTIFACT:${path}`);
+const document=JSON.parse(await readFile(documentPath,'utf8'));
+const bindings=JSON.parse(await readFile(join(artifactDir,'samdo-v4-bindings.json'),'utf8'));
+const rules=JSON.parse(await readFile(join(artifactDir,'samdo-v4-rules.json'),'utf8'));
+const comparison=JSON.parse(await readFile(join(artifactDir,'samdo-v4-oracle-comparison.json'),'utf8'));
+const facts=extractFacts(document),replay=replayV41(document,facts,bindings.responses,rules.rules,comparison.highConfidenceCriticalErrors);
+const pack=buildFrozenBenchmarkPack(document,facts),outDir=join(root,'extraction/samdo-v4-1-offline');await mkdir(outDir,{recursive:true});
+await writeFile(join(outDir,'samdo-v4-1-replay.json'),`${JSON.stringify(replay,null,2)}\n`);
+await writeFile(join(outDir,'samdo-v4-1-frozen-pack.json'),`${JSON.stringify(pack,null,2)}\n`);
+console.log(JSON.stringify({replay:{existingRules:replay.existingRules,accepted:replay.accepted,reviewRequired:replay.reviewRequired,rejected:replay.rejected,highCriticalErrorsHandled:replay.highCriticalErrorsHandled,highCriticalErrorsRemaining:replay.highCriticalErrorsRemaining,taxonomy:replay.taxonomy,ready:replay.ready},pack:{hash:pack.hash,tasks:pack.tasks.length,small:pack.profiles.SMALL.length,full:pack.profiles.FULL_PLAN_A.length}},null,2));

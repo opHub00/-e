@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { createMinimalApplicantProfile, knownField } from '../profile/domain.ts';
 import { assessApplication } from './engine.ts';
 import { completedMonths } from './facts.ts';
-import { groupMissingInformation, parseForm } from './form.ts';
+import { FORM_FIELDS, FORM_GROUPS, groupMissingInformation, koreanMoneyHint, parseForm } from './form.ts';
 import { samdoReferenceRules, rulesForListing } from './referenceRules.ts';
 import type { AnnouncementRules, AssessmentInput, SupplyType } from './types.ts';
 
@@ -180,6 +180,23 @@ test('주택 처분일 이후 무주택기간 불일치와 미래 자녀 날짜'
 test('우선공급 조건은 공급유형 간 재사용하지 않음', () => {
   const input = applicant('newlywed'); delete input.details.newlywedPriorityTarget;
   assert.equal(run('newlywed', input).stage, null);
+});
+
+test('금액 입력은 억·만 단위로 되읽어 준다', () => {
+  assert.equal(koreanMoneyHint('362000000'), '3억 6,200만원');
+  assert.equal(koreanMoneyHint('6000000'), '600만원');
+  assert.equal(koreanMoneyHint('5,338,708'), '533만 8,708원');
+  // 계산에 쓰는 값은 원 단위 그대로다. 되읽기는 표시 전용이라 형식이 어긋나면 아무것도 말하지 않는다.
+  assert.equal(koreanMoneyHint('0'), null);
+  assert.equal(koreanMoneyHint('삼억'), null);
+  assert.equal(koreanMoneyHint(undefined), null);
+});
+
+test('모든 추가 질문은 화면에 표시할 묶음을 가진다', () => {
+  for (const field of FORM_FIELDS) assert.ok(FORM_GROUPS.includes(field.group), field.key);
+  // 금액 칸에만 되읽기를 붙인다. 납입횟수·가구원수는 금액이 아니다.
+  assert.deepEqual(FORM_FIELDS.filter(f => f.money).map(f => f.key).sort(),
+    ['householdIncome', 'monthlyIncome', 'parentAssets', 'recognizedDepositAmount', 'totalAssets']);
 });
 
 test('누락정보는 해결할 수 있는 곳별로 나눈다', () => {

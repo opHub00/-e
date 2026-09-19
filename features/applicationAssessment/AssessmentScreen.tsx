@@ -11,7 +11,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { useListingDataset } from '../discovery/data/useListingDataset';
 import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
-import { FORM_FIELDS, parseForm } from './form';
+import { FORM_FIELDS, FORM_GROUP_HINTS, FORM_GROUP_LABELS, FORM_GROUPS, koreanMoneyHint, parseForm } from './form';
 import { REFERENCE_LISTING_ID, samdoReferenceRules, SUPPLY_LABELS } from './referenceRules';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
@@ -49,6 +49,8 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const selectedListing = dataset.listings.find(l => l.id === selected);
   const title = rules?.title ?? selectedListing?.complexName;
   const parsed = parseForm(raw, supply);
+  // 공고가 무주택기간을 직접 계산해 주면 해당 입력칸은 묻지 않는다. 기존 노출 규칙을 그대로 유지한다.
+  const visibleFields = FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key)));
   const result = snapshot?.profile === profile && snapshot.rulesId === rules?.id ? snapshot.result : null;
   const update = (key: string, value: string) => { setRaw(p => ({ ...p, [key]: value })); setSnapshot(null); };
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
@@ -116,31 +118,47 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       </> : null}
       {step === 2 ? <>
         <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
-        <Text style={styles.body}>공고 기준일의 정보를 입력해 주세요. 추가 입력은 이 화면에서만 사용해요. 우선공급 대상·무주택 시작일은 공고를 확인한 경우에만 답해 주세요.</Text>
-        <WanpanCard style={styles.stack}>
-          <Text style={styles.title}>공고 기준일에 제주에 거주했나요?</Text>
-          <Text style={styles.body}>현재 프로필 거주지: {profile.residence.currentRegion}</Text>
-          {profile.residence.currentRegion !== '제주특별자치도' ? <Choice label={`프로필 거주지와 같아요 (${profile.residence.currentRegion})`} selected={raw.currentResidence === profile.residence.currentRegion} onPress={() => update('currentResidence', profile.residence.currentRegion)} /> : null}
-          <Choice label="제주특별자치도" selected={raw.currentResidence === '제주특별자치도'} onPress={() => update('currentResidence', '제주특별자치도')} />
-          <Choice label="제주 외 지역" selected={raw.currentResidence === '기타'} onPress={() => update('currentResidence', '기타')} />
-          <Choice label="확인 전" selected={!raw.currentResidence} onPress={() => update('currentResidence', '')} />
-        </WanpanCard>
-        {supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.title}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}
-        {FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key))).map(field => <WanpanCard key={field.key} style={styles.stack}>
-          <Text style={styles.strong}>{field.label}</Text>
-          {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <>
-            <TextInput
-              accessibilityLabel={field.label} value={raw[field.key] ?? ''} onChangeText={value => update(field.key, value)}
-              onBlur={() => setTouched(current => ({ ...current, [field.key]: true }))}
-              placeholder={field.kind === 'date' ? 'YYYY-MM-DD' : field.kind === 'children' ? '2020-01-01, 2023-01-01 또는 없음' : '모르면 비워 두세요'}
-              placeholderTextColor={colors.textSubtle} keyboardType={field.kind === 'number' ? 'numeric' : 'default'} autoCapitalize="none"
-              style={[styles.input, fieldError(field.key, field.label) ? styles.inputError : null]}
-            />
-            {fieldError(field.key, field.label) ? <Text accessibilityRole="alert" style={styles.error}>{fieldError(field.key, field.label)}</Text> : null}
-          </>}
-        </WanpanCard>)}
-        <WanpanCard style={styles.stack}><Text style={styles.strong}>거주기간 중 해외 체류 이력이 있나요?</Text><BooleanChoices value={raw.overseas} onChange={v => update('overseas', v)} /><Text style={styles.body}>이력이 있으면 공고의 연속거주 인정 기준을 추가로 확인해요.</Text></WanpanCard>
-        <WanpanCard style={styles.stack}><Text style={styles.strong}>출산 완화·태아·입양·배우자 주택이력·재혼·군인 등 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
+        <Text style={styles.body}>공고 기준일의 정보를 입력해 주세요. 추가 입력은 이 화면에서만 사용해요. 모르는 항목은 비워 두셔도 판정할 수 있어요.</Text>
+        {FORM_GROUPS.map(group => {
+          const fields = visibleFields.filter(f => f.group === group);
+          const extras = group === 'residence' || (group === 'family' && supply === 'newlywed');
+          if (!fields.length && !extras) return null;
+          return <View key={group} style={styles.section}>
+            {/* 묶음 제목을 heading으로 노출해 스크린리더에서 건너뛰며 읽을 수 있게 한다. */}
+            <Text accessibilityRole="header" style={styles.title}>{FORM_GROUP_LABELS[group]}</Text>
+            {FORM_GROUP_HINTS[group] ? <Text style={styles.body}>{FORM_GROUP_HINTS[group]}</Text> : null}
+            {group === 'residence' ? <WanpanCard style={styles.stack}>
+              <Text style={styles.strong}>공고 기준일에 제주에 거주했나요?</Text>
+              <Text style={styles.body}>현재 프로필 거주지: {profile.residence.currentRegion}</Text>
+              {profile.residence.currentRegion !== '제주특별자치도' ? <Choice label={`프로필 거주지와 같아요 (${profile.residence.currentRegion})`} selected={raw.currentResidence === profile.residence.currentRegion} onPress={() => update('currentResidence', profile.residence.currentRegion)} /> : null}
+              <Choice label="제주특별자치도" selected={raw.currentResidence === '제주특별자치도'} onPress={() => update('currentResidence', '제주특별자치도')} />
+              <Choice label="제주 외 지역" selected={raw.currentResidence === '기타'} onPress={() => update('currentResidence', '기타')} />
+              <Choice label="확인 전" selected={!raw.currentResidence} onPress={() => update('currentResidence', '')} />
+            </WanpanCard> : null}
+            {group === 'family' && supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.strong}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}
+            {fields.map(field => <WanpanCard key={field.key} style={styles.stack}>
+              <Text style={styles.strong}>{field.label}</Text>
+              {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <>
+                <TextInput
+                  accessibilityLabel={field.label} value={raw[field.key] ?? ''} onChangeText={value => update(field.key, value)}
+                  onBlur={() => setTouched(current => ({ ...current, [field.key]: true }))}
+                  placeholder={field.kind === 'date' ? 'YYYY-MM-DD (예: 1994-03-07)' : field.kind === 'children' ? '2020-01-01, 2023-01-01 또는 없음' : field.money ? '원 단위로 입력 (예: 362000000)' : '모르면 비워 두세요'}
+                  placeholderTextColor={colors.textSubtle} keyboardType={field.kind === 'number' ? 'numeric' : 'default'} autoCapitalize="none"
+                  inputMode={field.kind === 'number' ? 'numeric' : undefined}
+                  style={[styles.input, fieldError(field.key, field.label) ? styles.inputError : null]}
+                />
+                {/* 금액은 원 단위로 계산한다. 0의 개수를 눈으로 세지 않도록 입력값을 억·만 단위로 되읽어 준다. */}
+                {field.money && koreanMoneyHint(raw[field.key]) ? <Text style={styles.hint}>입력한 금액: {koreanMoneyHint(raw[field.key])}</Text> : null}
+                {fieldError(field.key, field.label) ? <Text accessibilityRole="alert" style={styles.error}>{fieldError(field.key, field.label)}</Text> : null}
+              </>}
+            </WanpanCard>)}
+          </View>;
+        })}
+        <View style={styles.section}>
+          <Text accessibilityRole="header" style={styles.title}>해외체류·특례</Text>
+          <WanpanCard style={styles.stack}><Text style={styles.strong}>거주기간 중 해외 체류 이력이 있나요?</Text><BooleanChoices value={raw.overseas} onChange={v => update('overseas', v)} /><Text style={styles.body}>이력이 있으면 공고의 연속거주 인정 기준을 추가로 확인해요.</Text></WanpanCard>
+          <WanpanCard style={styles.stack}><Text style={styles.strong}>출산 완화·태아·입양·배우자 주택이력·재혼·군인 등 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
+        </View>
         {attempted && parsed.errors.length ? <Text accessibilityRole="alert" style={styles.error}>입력 형식을 확인할 항목이 {parsed.errors.length}개 있어요. 안내가 표시된 칸을 고쳐 주세요.</Text> : null}
         <PrimaryButton label="내 조건으로 판정하기" disabled={!hydrated} onPress={calculate} />
         <PrimaryButton label="유형·프로필 다시 확인" variant="soft" onPress={() => move(1)} />
@@ -170,7 +188,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', padding: spacing.screen, paddingBottom: spacing.xl, gap: spacing.md },
   heading: { ...type.page, color: colors.text }, title: { ...type.section, color: colors.text }, strong: { ...type.bodyStrong, color: colors.text }, body: { ...type.body, color: colors.textMuted },
-  stack: { gap: spacing.sm }, choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  stack: { gap: spacing.sm }, section: { gap: spacing.sm }, hint: { ...type.bodySm, color: colors.textMuted }, choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   choice: { minHeight: size.touch, borderRadius: radius.button, borderWidth: 1, borderColor: colors.outline, padding: spacing.sm, justifyContent: 'center' },
   selected: { backgroundColor: colors.lavender, borderColor: colors.primary }, selectedText: { color: colors.primary },
   input: { ...type.body, color: colors.text, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.button, minHeight: size.control, padding: spacing.sm },

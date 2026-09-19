@@ -1,0 +1,393 @@
+<title>Rule 검수 콘솔</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#FCF8FF; --surface:#FFFFFF; --surface-low:#F6F2FC; --surface-high:#EBE6F0;
+  --line:#C8C4D5; --hairline:#F1EDF6;
+  --ink:#1C1B22; --ink-muted:#474553; --ink-subtle:#7A7786;
+  --accent:#3B309E; --accent-soft:#EEEDFE; --on-accent:#FFFFFF;
+  --critical:#BA1A1A; --critical-soft:#FFDAD6;
+  --caution:#C96A24; --caution-soft:#FFDCC3;
+  --clear:#2E7D55; --clear-soft:#D6EFE0;
+  --shadow:0 1px 2px rgba(28,27,34,.06), 0 8px 24px -16px rgba(59,48,158,.28);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#14131A; --surface:#1D1B25; --surface-low:#23212C; --surface-high:#2E2B39;
+  --line:#413D50; --hairline:#2A2734;
+  --ink:#ECE8F4; --ink-muted:#B6B1C4; --ink-subtle:#847F94;
+  --accent:#BFB6FF; --accent-soft:#2A2550; --on-accent:#1C1B22;
+  --critical:#FFB4AB; --critical-soft:#4A1512;
+  --caution:#FFB77C; --caution-soft:#4A2B0E;
+  --clear:#7DD7A6; --clear-soft:#123A27;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --ground:#14131A; --surface:#1D1B25; --surface-low:#23212C; --surface-high:#2E2B39;
+  --line:#413D50; --hairline:#2A2734;
+  --ink:#ECE8F4; --ink-muted:#B6B1C4; --ink-subtle:#847F94;
+  --accent:#BFB6FF; --accent-soft:#2A2550; --on-accent:#1C1B22;
+  --critical:#FFB4AB; --critical-soft:#4A1512;
+  --caution:#FFB77C; --caution-soft:#4A2B0E;
+  --clear:#7DD7A6; --clear-soft:#123A27;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:20px}
+
+/* ---- banner ---- */
+.banner{display:flex;gap:12px;align-items:flex-start;background:var(--critical-soft);
+  border:1px solid var(--critical);border-radius:12px;padding:12px 16px}
+.banner strong{color:var(--critical);display:block}
+.banner p{margin:2px 0 0;color:var(--ink-muted);font-size:13px}
+
+/* ---- header ---- */
+.head{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between;
+  border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-subtle);margin:0 0 6px}
+h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--ink-muted);font-size:13px}
+.state{display:inline-flex;align-items:center;gap:7px;background:var(--caution-soft);color:var(--caution);
+  border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* ---- triage ---- */
+.triage{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+.tri{background:var(--surface);border:1px solid var(--surface-high);border-radius:12px;
+  padding:13px 15px;display:flex;flex-direction:column;gap:3px;text-align:left;
+  cursor:pointer;font:inherit;color:inherit;border-left-width:4px;transition:border-color .15s,background .15s}
+.tri:hover{background:var(--surface-low)}
+.tri[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tri .n{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.tri .l{font-size:12px;color:var(--ink-muted)}
+.tri.c1{border-left-color:var(--critical)} .tri.c1 .n{color:var(--critical)}
+.tri.c2{border-left-color:var(--caution)}  .tri.c2 .n{color:var(--caution)}
+.tri.c3{border-left-color:var(--clear)}    .tri.c3 .n{color:var(--clear)}
+.tri.c0{border-left-color:var(--line)}
+
+/* ---- bulk ---- */
+.bulk{background:var(--surface);border:1px solid var(--surface-high);border-radius:12px;
+  padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.bulk-why{font-size:12.5px;color:var(--ink-muted);max-width:62ch}
+.bulk-why b{color:var(--critical);font-weight:600}
+button{font:inherit;cursor:pointer}
+.btn{border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);transition:background .15s}
+.btn:hover:not(:disabled){background:var(--surface-low)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn-primary:hover:not(:disabled){filter:brightness(1.08)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ---- split ---- */
+.split{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:920px){.split{grid-template-columns:1fr}}
+
+.group{margin:0 0 6px}
+.group h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-subtle);
+  margin:16px 0 7px;font-weight:600}
+.group h2:first-child{margin-top:0}
+.list{display:flex;flex-direction:column;gap:7px}
+.row{width:100%;text-align:left;background:var(--surface);border:1px solid var(--surface-high);
+  border-left:4px solid var(--line);border-radius:10px;padding:10px 13px;display:flex;
+  flex-direction:column;gap:3px;color:inherit;transition:background .15s,border-color .15s}
+.row:hover{background:var(--surface-low)}
+.row[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.row.s1{border-left-color:var(--critical)} .row.s2{border-left-color:var(--caution)} .row.s3{border-left-color:var(--clear)}
+.row .t{font-size:13.5px;font-weight:600;line-height:1.4}
+.row .m{font-size:11.5px;color:var(--ink-subtle);display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.sev{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.sev.s1{background:var(--critical-soft);color:var(--critical)}
+.sev.s2{background:var(--caution-soft);color:var(--caution)}
+.sev.s3{background:var(--clear-soft);color:var(--clear)}
+.verdict{font-size:11px;font-weight:600;color:var(--accent)}
+
+/* ---- card ---- */
+.card{background:var(--surface);border:1px solid var(--surface-high);border-radius:14px;
+  box-shadow:var(--shadow);overflow:hidden;position:sticky;top:20px}
+.card-top{padding:16px 18px;border-bottom:1px solid var(--hairline);display:flex;
+  flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.card-top h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.scope{font-size:12px;color:var(--ink-subtle)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hairline)}
+@media(max-width:700px){.cols{grid-template-columns:1fr}}
+.col{background:var(--surface);padding:15px 18px}
+.col h4{margin:0 0 9px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-subtle);font-weight:600}
+.quote{font-size:13px;line-height:1.75;color:var(--ink-muted);margin:0 0 9px;
+  border-left:2px solid var(--line);padding-left:11px;white-space:pre-wrap}
+.quote mark{background:var(--caution-soft);color:var(--caution);font-weight:600;
+  padding:0 2px;border-radius:2px;text-decoration:underline;text-decoration-style:wavy;text-underline-offset:3px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:13px}
+dt{color:var(--ink-subtle)}
+dd{margin:0;font-weight:500}
+dd.warn{color:var(--caution);font-weight:600}
+
+.flags{padding:13px 18px;border-top:1px solid var(--hairline);background:var(--caution-soft)}
+.flags h4{margin:0 0 5px;font-size:12px;font-weight:700;color:var(--caution)}
+.flags ul{margin:0;padding-left:17px;font-size:12.5px;color:var(--ink-muted)}
+.flags li{margin:2px 0}
+.flags.none{background:var(--clear-soft)} .flags.none h4{color:var(--clear)}
+
+.prov{padding:12px 18px;border-top:1px solid var(--hairline);display:grid;
+  grid-template-columns:auto 1fr;gap:3px 14px;font-size:11.5px;color:var(--ink-subtle)}
+.prov b{font-weight:500;color:var(--ink-subtle)}
+.prov span{word-break:break-all}
+
+.actions{padding:14px 18px;border-top:1px solid var(--hairline);display:flex;
+  flex-direction:column;gap:10px;background:var(--surface-low)}
+.gate{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-muted);
+  background:var(--critical-soft);border-radius:9px;padding:10px 12px}
+.gate input{margin:3px 0 0;flex:none;width:16px;height:16px;accent-color:var(--critical)}
+.act-row{display:flex;flex-wrap:wrap;gap:8px}
+.done{font-size:12.5px;color:var(--accent);font-weight:600}
+
+/* ---- conflict ---- */
+.conf{display:flex;flex-direction:column;gap:10px;padding:15px 18px}
+.opt{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;
+  flex-direction:column;gap:6px;background:var(--surface)}
+.opt .v{font-size:13.5px;font-weight:600}
+.opt .src{font-size:11.5px;color:var(--ink-subtle)}
+.note{font-size:12.5px;color:var(--ink-muted);margin:0}
+</style>
+
+<div class="wrap">
+
+  <div class="banner">
+    <span aria-hidden="true">🚫</span>
+    <div>
+      <strong>ADMIN_REVIEW_READY = NO · 설계 프로토타입</strong>
+      <p>화면 구조를 검토하기 위한 mock입니다. DB 반영·승인·활성화는 연결돼 있지 않고, 버튼은 이 페이지 안에서만 상태를 바꿉니다. 아래 rule과 원문은 실제 v2 추출 artifact에서 가져온 것으로, 실제로 발견된 오류 사례를 그대로 보여줍니다.</p>
+    </div>
+  </div>
+
+  <header class="head">
+    <div>
+      <p class="eyebrow">AI 추출 Rule 검수</p>
+      <h1>삼도이동 토지임대부 국민임대</h1>
+      <p class="sub">공고일 2026.09.14 · 제주특별자치도 · VER1.7 검토본 · 후보 56건</p>
+    </div>
+    <span class="state"><span class="dot"></span>검수 필요</span>
+  </header>
+
+  <div class="triage" role="group" aria-label="검수 우선순위로 거르기">
+    <button class="tri c1" aria-pressed="false" data-sev="1"><span class="n">7</span><span class="l">🚨 반드시 확인</span></button>
+    <button class="tri c2" aria-pressed="false" data-sev="2"><span class="n">24</span><span class="l">⚠ 확인 권장</span></button>
+    <button class="tri c3" aria-pressed="false" data-sev="3"><span class="n">25</span><span class="l">✓ 근거 명확</span></button>
+    <button class="tri c0" aria-pressed="false" data-sev="c"><span class="n">2</span><span class="l">기준 충돌</span></button>
+    <button class="tri c0" aria-pressed="false" data-sev="x"><span class="n">26</span><span class="l">연결 안 된 예외</span></button>
+  </div>
+
+  <div class="bulk">
+    <p class="bulk-why" id="bulkWhy"></p>
+    <button class="btn btn-primary" id="bulkBtn" disabled>✓ 근거 명확 25건 한 번에 승인</button>
+  </div>
+
+  <div class="split">
+    <div id="listCol"></div>
+    <div id="cardCol"></div>
+  </div>
+</div>
+
+<script>
+const RULES = [
+  {
+    id:'COMMON-1:1', sev:1, group:'공통조건', title:'신청자 연령 하한',
+    scope:'공통 · 나이', role:'COMMON.AGE_MIN', internal:'REVIEW_REQUIRED · category=age',
+    quote:'본 주택은 최초 입주자모집공고일 현재 제주특별자치도에 거주(주민등록표등본 기준)하는 만19세 이상인 분 【또는 세대주인 미성년자(자녀양육, 형제자매부양)】[국내에서 거주하는 재외동포(재외국민, 외국국적 동포) 및 외국인 포함]의 경우 청약이 가능합니다.',
+    interp:[['적용 대상','공통(GENERAL)'],['적용 단계','COMMON'],['조건','신청자 나이 ≥ 19'],['추출 값','19 (AGE)'],['연산자','gte'],['연결된 예외','없음|warn']],
+    flags:[
+      '원문에 "또는 세대주인 미성년자" 예외가 있으나 예외 rule이 연결되지 않았습니다.',
+      '청년 특별공급의 상한(만 39세 이하)이 별도 rule로 추출되지 않았습니다. 하한만 확정하면 40세 이상이 통과합니다.',
+      '인용된 근거 2건 중 b000265는 중복·교차청약 무효 문단으로, 연령 조건을 뒷받침하지 않습니다.'
+    ],
+    ev:'Ⅴ. 신청자격 및 당첨자 선정방법 · block b000268, b000265', gate:true
+  },
+  {
+    id:'COMMON-1:11', sev:1, group:'공통조건', title:'특별공급 당첨 이력 없음',
+    scope:'공통 · 특례', role:'COMMON.SPECIAL_SUPPLY_HISTORY', internal:'REVIEW_REQUIRED · category=eligibility',
+    quote:'「공공주택 특별법 시행규칙」 별표6의 특별공급을 받은 분 또는 「주택공급에 관한 규칙」 제35조 내지 제47조에 의하여 특별공급을 받은 분 【및 그 세대에 속한 분】은 금회 공급되는 주택의 신혼부부·생애최초·신생아 특별공급 대상자로 선정될 수 없습니다.\n※ 특별공급은 1회에 한하여 공급합니다. 【단,】 「주택공급에 관한 규칙」 제55조 단서조항에 해당하는 경우나 제55조의3을 적용하는 경우는 【제외】합니다.',
+    interp:[['적용 대상','공통(GENERAL)'],['적용 단계','COMMON'],['조건','특별공급 이력 없음 = true'],['추출 값','true (BOOLEAN)'],['연산자','eq'],['연결된 예외','없음|warn']],
+    flags:[
+      '인용한 근거 안에 "단, … 제외합니다"가 그대로 있는데 예외 rule이 연결되지 않았습니다.',
+      '청년은 "본인", 신혼·생애최초는 "본인 및 그 세대에 속한 분"으로 원문이 대상을 구분하는데 단일 boolean으로 평탄화됐습니다. 세대원 이력이 있는 신청자가 통과합니다.'
+    ],
+    ev:'Ⅴ. 신청자격 · block b000288–b000291', gate:true
+  },
+  {
+    id:'COMMON-0:9', sev:1, group:'공통조건', title:'무주택세대구성원 기준',
+    scope:'공통 · 무주택', role:'COMMON.HOUSEHOLD_HOMELESS', internal:'REVIEW_REQUIRED · category=housingOwnership',
+    quote:'무주택세대구성원【(청년 특별공급은 신청자 본인, 신혼부부 특별공급의 예비신혼부부는 혼인으로 구성될 세대를 말함. 이하 본 공고문에서 같음)】의 기준일은 입주자모집공고일(2026.09.14.)이며',
+    interp:[['적용 대상','공통(GENERAL)'],['적용 단계','COMMON'],['조건','세대 전원 무주택 = true'],['추출 값','true (BOOLEAN)'],['연산자','eq'],['연결된 예외','없음|warn']],
+    flags:[
+      '원문이 공급유형별로 범위를 달리 정의합니다(청년=본인, 예비신혼=혼인으로 구성될 세대). 단일 세대 기준으로 평탄화되어 청년 신청자의 세대원 주택이 잘못 반영됩니다.',
+      '생애최초의 "과거 주택소유 사실 없음" 조건이 이 rule에 포함되지 않았습니다.'
+    ],
+    ev:'Ⅳ. 신청기준 및 공통 유의사항 · block b000175', gate:true
+  },
+  {
+    id:'COMMON-1:17', sev:1, group:'공통조건', title:'해외체류 90일 초과 (중복 후보)',
+    scope:'공통 · 지역', role:'COMMON.OVERSEAS_90D', internal:'REVIEW_REQUIRED · category=exception',
+    quote:'입주자모집공고일 현재 해외에 있으며, 해외 체류기간이 계속하여 90일을 초과하거나 전체 기간이 연간(매년) 183일을 초과하는 분은 지역 우선공급 대상자(제주특별자치도 1년 이상 거주자) 및 기타지역 거주자로 청약이 불가하며, 이를 위반하여 당첨될 경우 부적격 처리됩니다.',
+    interp:[['적용 대상','공통(GENERAL)'],['적용 단계','COMMON'],['조건','해외체류 90일 초과 = true'],['추출 값','true (BOOLEAN)'],['연산자','eq'],['연결된 예외','없음|warn']],
+    flags:[
+      '같은 조건이 COMMON-0:19에서 이미 추출됐고, 그쪽에는 90일 이내 단기체류·생업 목적 예외가 연결돼 있습니다. 이 후보는 예외가 연결되지 않은 중복본입니다.',
+      '둘 중 하나만 승인해야 합니다. 이 후보를 승인하면 생업 목적 예외가 적용되지 않습니다.',
+      '원문은 "지역우선 대상자 자격"을 제한하는데, 조건 이름은 청약 가부처럼 읽힙니다.'
+    ],
+    ev:'Ⅳ. 신청기준 · block b001080', gate:true
+  },
+  {
+    id:'CONFLICT-1', sev:1, group:'공통조건', conflict:true, title:'지역우선 거주기간 기준일',
+    scope:'공통 · 지역', role:'COMMON.REGION.RESIDENCE_MIN', internal:'CONFLICT · resolution=null',
+    options:[
+      {v:'제주특별자치도 1년 이상 거주', src:'Ⅳ. 신청기준 및 공통 유의사항 · block b000087'},
+      {v:'최초 입주자모집공고일 현재 거주(기간 조건 없음)', src:'<표2> 지역우선 공급기준 · cell t012:3:1'}
+    ],
+    note:'같은 개념에 서로 다른 기준이 연결됐습니다. AI가 하나를 고르지 않았습니다. 두 근거를 원문에서 확인한 뒤 채택할 쪽을 선택해 주세요. 미해결 상태에서는 이 공급유형을 활성화할 수 없습니다.'
+  },
+  {
+    id:'EXCEPTIONS-0:0', sev:2, group:'특례', title:'배우자 혼인 전 주택소유 예외',
+    scope:'생애최초 · 특례', role:'FIRST_TIME.EXCEPTION', internal:'REVIEW_REQUIRED · stage=PRIORITY',
+    quote:'생애최초 특별공급의 경우 세대구성원 전원이 과거 주택소유사실이 없어야 합니다. 【단,】 신청자의 【배우자】가 【혼인 전】 주택을 소유하였다가 혼인신고 전 처분한 사실이 있는 경우는 【예외】로 합니다.',
+    interp:[['적용 대상','생애최초(FIRST_TIME)'],['적용 단계','PRIORITY|warn'],['조건','배우자 주택소유 = 혼인 전 취득·처분'],['추출 값','ownedAndDisposedBeforeMarriage'],['연산자','eq'],['연결된 base rule','없음|warn']],
+    flags:[
+      '단계가 PRIORITY로 지정됐으나 이 예외는 공급단계와 무관한 공통 예외입니다. 우선공급에만 적용되면 일반·추첨 단계에서 배우자 이력이 잘못 반영됩니다.',
+      '이 예외가 한정하는 base rule(세대구성원 전원 과거 무주택)과 연결되지 않았습니다.'
+    ],
+    ev:'Ⅳ. 신청기준 · block b000171', gate:true
+  },
+  {
+    id:'COMMON-0:19', sev:2, group:'공통조건', title:'장기 해외체류 지역우선 제한',
+    scope:'공통 · 지역', role:'COMMON.OVERSEAS_LONG_TERM', internal:'REVIEW_REQUIRED · category=region',
+    quote:'출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간 또는 연간 183일을 초과하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다.',
+    interp:[['적용 대상','공통(GENERAL)'],['적용 단계','COMMON'],['조건','장기 해외체류 = true'],['추출 값','true (BOOLEAN)'],['연산자','eq'],['연결된 예외','2건 연결됨']],
+    flags:[], flagsOk:'90일 이내 단기체류 예외와 생업 목적 국외체류 예외가 모두 연결돼 있습니다. 중복 후보 COMMON-1:17과 함께 검토하세요.',
+    ev:'Ⅳ. 신청기준 · block b000215, b000216'
+  },
+  {
+    id:'COMMON-0:4', sev:3, group:'생애최초', title:'세대구성원 전원 과거 무주택',
+    scope:'생애최초 · 무주택', role:'FIRST_TIME.NEVER_OWNED_HOME', internal:'AUTO_SAFE_CANDIDATE → 표시는 근거 명확',
+    quote:'생애최초 특별공급의 경우 세대구성원 전원이 과거 주택소유사실이 없어야 합니다.',
+    interp:[['적용 대상','생애최초(FIRST_TIME)'],['적용 단계','COMMON'],['조건','세대 과거 주택소유 = false'],['추출 값','false (BOOLEAN)'],['연산자','eq'],['연결된 예외','1건 연결됨']],
+    flags:[], flagsOk:'단일 원문 위치, 예외 rule 연결 완료. 다만 무주택은 critical category이므로 한 번에 승인 대상에서 제외됩니다.',
+    ev:'Ⅳ. 신청기준 · block b000171'
+  }
+];
+
+const SEV = {1:{cls:'s1',label:'🚨 반드시 확인'},2:{cls:'s2',label:'⚠ 확인 권장'},3:{cls:'s3',label:'✓ 근거 명확'}};
+const VERDICTS = {approved:'승인됨',edited:'수정 승인',held:'보류',excluded:'제외'};
+const state = {selected:'COMMON-1:1', filter:null, verdicts:{}, gates:{}};
+
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const markup = s => esc(s).replace(/【(.+?)】/g, '<mark>$1</mark>');
+
+function renderList(){
+  const groups = {};
+  for (const r of RULES){
+    if (state.filter === 'c' && !r.conflict) continue;
+    if (state.filter === 'x' && !(r.interp||[]).some(([k,v]) => k.startsWith('연결된') && v.endsWith('|warn'))) continue;
+    if (typeof state.filter === 'number' && r.sev !== state.filter) continue;
+    (groups[r.group] ||= []).push(r);
+  }
+  const html = Object.keys(groups).length ? Object.entries(groups).map(([g, rows]) => `
+    <div class="group"><h2>${esc(g)}</h2><div class="list">${rows.map(r => {
+      const s = SEV[r.sev], v = state.verdicts[r.id];
+      return `<button class="row ${s.cls}" data-id="${r.id}" aria-current="${state.selected===r.id}">
+        <span class="t">${esc(r.title)}</span>
+        <span class="m"><span class="sev ${s.cls}">${s.label}</span><span>${esc(r.scope)}</span>
+        ${v ? `<span class="verdict">· ${VERDICTS[v]}</span>` : ''}</span></button>`;
+    }).join('')}</div></div>`).join('')
+    : `<p class="note">이 조건에 해당하는 rule이 없습니다.</p>`;
+  document.getElementById('listCol').innerHTML = html;
+}
+
+function renderCard(){
+  const r = RULES.find(x => x.id === state.selected);
+  const col = document.getElementById('cardCol');
+  if (!r){ col.innerHTML = ''; return; }
+  const s = SEV[r.sev], v = state.verdicts[r.id];
+
+  if (r.conflict){
+    col.innerHTML = `<div class="card">
+      <div class="card-top"><h3>${esc(r.title)}</h3><span class="sev s1">🚨 기준 충돌</span></div>
+      <div class="conf">
+        <p class="note">${esc(r.note)}</p>
+        ${r.options.map((o,i) => `<div class="opt"><span class="v">${i===0?'①':'②'} ${esc(o.v)}</span>
+          <span class="src mono">${esc(o.src)}</span>
+          <div class="act-row"><button class="btn" data-act="pick">이 근거 채택</button></div></div>`).join('')}
+      </div>
+      <div class="prov"><b>내부 상태</b><span class="mono">${esc(r.internal)}</span></div>
+      <div class="actions"><div class="act-row"><button class="btn" data-act="held">둘 다 보류하고 원문 재확인</button></div>
+      ${v ? `<span class="done">현재 상태: ${VERDICTS[v]}</span>` : ''}</div>
+    </div>`;
+  } else {
+    const gateOpen = !r.gate || state.gates[r.id];
+    col.innerHTML = `<div class="card">
+      <div class="card-top"><h3>${esc(r.title)}</h3>
+        <span class="scope"><span class="sev ${s.cls}">${s.label}</span> &nbsp;${esc(r.scope)}</span></div>
+      <div class="cols">
+        <div class="col"><h4>공고 원문</h4><p class="quote">${markup(r.quote)}</p></div>
+        <div class="col"><h4>AI 해석</h4><dl>${r.interp.map(([k,val]) => {
+          const warn = val.endsWith('|warn');
+          return `<dt>${esc(k)}</dt><dd class="${warn?'warn':''}">${esc(warn?val.slice(0,-5):val)}${warn?' ⚠':''}</dd>`;
+        }).join('')}</dl></div>
+      </div>
+      ${r.flags && r.flags.length
+        ? `<div class="flags"><h4>⚠ 검증 경고 ${r.flags.length}건</h4><ul>${r.flags.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div>`
+        : `<div class="flags none"><h4>✓ 자동 검증 통과</h4><ul><li>${esc(r.flagsOk||'')}</li></ul></div>`}
+      <div class="prov">
+        <b>근거</b><span>${esc(r.ev)}</span>
+        <b>내부 상태</b><span class="mono">${esc(r.internal)}</span>
+        <b>semantic role</b><span class="mono">${esc(r.role)}</span>
+        <b>문서</b><span class="mono">VER1.7 검토본 · sha256:bd67d7ee…12e8763</span>
+        <b>추출</b><span class="mono">assessment-rule-extraction-v3 · 2026-09-18 16:43 KST</span>
+      </div>
+      <div class="actions">
+        ${r.gate ? `<label class="gate"><input type="checkbox" id="gate" ${gateOpen?'checked':''}>
+          <span>원문의 예외·범위 문구를 확인했고, 이 rule을 그대로 승인해도 된다고 판단합니다. 확인 전에는 승인할 수 없습니다.</span></label>` : ''}
+        <div class="act-row">
+          <button class="btn btn-primary" data-act="approved" ${gateOpen?'':'disabled'}>승인</button>
+          <button class="btn" data-act="edited">수정</button>
+          <button class="btn" data-act="held">보류</button>
+          <button class="btn" data-act="excluded">제외</button>
+        </div>
+        ${v ? `<span class="done">현재 상태: ${VERDICTS[v]} — 이 프로토타입에서는 저장되지 않습니다.</span>` : ''}
+      </div>
+    </div>`;
+  }
+}
+
+function renderBulk(){
+  const blockers = [];
+  if (RULES.some(r => r.conflict)) blockers.push('기준 충돌 2건');
+  blockers.push('연결 안 된 예외 26건');
+  blockers.push('critical category(무주택·지역·특례) 6건');
+  document.getElementById('bulkWhy').innerHTML =
+    `<b>한 번에 승인할 수 없습니다.</b> ${esc(blockers.join(' · '))}이 포함되어 있어요. 이 항목들은 개별로 원문을 확인해야 합니다.`;
+}
+
+document.addEventListener('click', e => {
+  const tri = e.target.closest('.tri');
+  if (tri){
+    const raw = tri.dataset.sev, val = /^\d+$/.test(raw) ? Number(raw) : raw;
+    state.filter = state.filter === val ? null : val;
+    document.querySelectorAll('.tri').forEach(b => b.setAttribute('aria-pressed', String(b === tri && state.filter !== null)));
+    renderList(); return;
+  }
+  const row = e.target.closest('.row');
+  if (row){ state.selected = row.dataset.id; renderList(); renderCard(); return; }
+  const act = e.target.closest('[data-act]');
+  if (act){
+    if (act.dataset.act !== 'pick') state.verdicts[state.selected] = act.dataset.act;
+    renderList(); renderCard();
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'gate'){ state.gates[state.selected] = e.target.checked; renderCard(); }
+});
+
+renderList(); renderCard(); renderBulk();
+</script>

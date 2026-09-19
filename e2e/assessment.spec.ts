@@ -95,6 +95,8 @@ async function shoot(page: Page, name: string, project: string) {
   });
   const tall = Math.min(Math.max(content + 80, size?.height ?? 844), 6000);
   if (size) await page.setViewportSize({ width: size.width, height: tall });
+  // Let brand/appear animations settle after the resize, otherwise they re-enter mid-capture.
+  await page.waitForTimeout(250);
   await page.screenshot({ path: `${SHOTS}/${project}__${name}.png` });
   if (size) await page.setViewportSize(size);
 }

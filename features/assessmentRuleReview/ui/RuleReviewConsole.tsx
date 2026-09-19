@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../components/ScreenHeader';
@@ -9,13 +9,23 @@ import { RuleDetailPanel } from './RuleDetailPanel';
 import { approvalBlockReasons, PRIORITY_LABEL, REVIEW_STATUS_LABEL, SOURCE_STATUS_LABEL, SUPPLY_GROUP_LABEL, supplyGroupOf } from './reviewLabels';
 import { useRuleReviewWorkspace } from './useRuleReviewWorkspace';
 import type { RuleListItemDto } from '../server/dto';
+import type { RuleReviewWorkspace } from '../server/types';
 
 const REASON = '관리자 검수 콘솔에서 확인';
 
 export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
-  const { workspace, summary, gate, rules, detail, actions, lastError } = useRuleReviewWorkspace();
+  const { workspace, summary, gate, rules, detail, actions, lastError, lastDone, clearFeedback } = useRuleReviewWorkspace();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [pendingSelection, setPendingSelection] = useState<string | null>(null);
+  const onDirtyChange = useCallback((value: boolean) => setDirty(value), []);
+
+  /** Moving away from a half-finished edit asks first instead of dropping the change. */
+  const selectRule = (ruleId: string) => {
+    if (dirty && ruleId !== selectedId) { setPendingSelection(ruleId); return; }
+    setSelectedId(ruleId);
+  };
     // Static export renders without a viewport; widening only after mount keeps
   // the server and client markup identical and avoids a hydration mismatch.
   const width = useWindowDimensions().width;
@@ -84,7 +94,30 @@ export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
           <Risk tone="ok" value={summary.approved + summary.edited} label="승인 완료" />
         </View>
 
+        {/* 퍼센트 하나로 뭉치지 않는다. 남은 개수를 종류별로 센다. */}
+        <View style={styles.progress}>
+          <Text accessibilityRole="header" style={styles.progressTitle}>
+            검수 완료 {summary.approved + summary.edited + summary.held + summary.rejected} / {summary.totalRules}
+          </Text>
+          <Text style={styles.progressLine}>
+            남은 검수 {summary.pending}건 · 반드시 확인 {all.filter(item => item.priority === 'CRITICAL_BLOCKER').length}건 · 활성화 blocker {gate.blockers.length}건
+          </Text>
+          <Text style={styles.progressLine}>
+            승인 {summary.approved} · 수정 후 승인 {summary.edited} · 보류 {summary.held} · 제외 {summary.rejected}
+          </Text>
+        </View>
+
         <ActivationPanel gate={gate} />
+
+        {/* 미해결 항목은 근거 없이 체크로 지우지 못하게 사유를 입력받는다. */}
+        {workspace.unresolvedItems.length ? (
+          <View style={styles.unresolved}>
+            <Text accessibilityRole="header" style={styles.sectionHeading}>공고에서 확정되지 않은 항목</Text>
+            {workspace.unresolvedItems.map(item => (
+              <UnresolvedRow key={item.unresolvedId} item={item} locked={notStarted || revalidation} onResolve={actions.resolveUnresolved} />
+            ))}
+          </View>
+        ) : null}
 
         {notStarted ? (
           <Action label="검수 시작하기" tone="primary" onPress={() => actions.startReview(REASON)} />
@@ -110,7 +143,50 @@ export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
           </Text>
         </MotionPressable>
 
-        {lastError ? <Text accessibilityRole="alert" style={styles.error}>처리하지 않았어요: {lastError}</Text> : null}
+        {/*
+          조용히 바뀌지 않게 하되, 자리를 늘 비워 둔다. 알림이 나타나면서 아래 내용이
+          밀리면 방금 누르려던 버튼이 옮겨가 오클릭이 난다.
+        */}
+        <View style={styles.feedbackSlot}>
+          {lastError ? (
+            <View style={styles.feedbackBad}>
+              <Text accessibilityRole="alert" style={styles.feedbackBadText}>
+                {lastError === 'STALE_REVIEW_REVISION'
+                  ? '다른 검수자가 먼저 수정했습니다. 최신 내용을 다시 불러왔어요. 입력하던 내용은 그대로 두었으니 확인 후 다시 저장해 주세요.'
+                  : `처리하지 않았어요: ${lastError}`}
+              </Text>
+              <Action label="닫기" onPress={clearFeedback} />
+            </View>
+          ) : lastDone ? (
+            <View style={styles.feedbackOk}>
+              <Text accessibilityRole="alert" style={styles.feedbackOkText}>{lastDone}</Text>
+              <Action label="닫기" onPress={clearFeedback} />
+            </View>
+          ) : (
+            <Text style={styles.feedbackIdle}>검수 결정을 하면 결과를 여기에서 알려드려요.</Text>
+          )}
+        </View>
+
+        {pendingSelection ? (
+          <View style={styles.dirtyDialog}>
+            <Text accessibilityRole="header" style={styles.dirtyTitle}>저장되지 않은 변경이 있어요</Text>
+            <Text style={styles.dirtyBody}>다른 rule로 이동하면 지금 고치던 내용이 사라져요.</Text>
+            <View style={styles.actionRow}>
+              <Action label="변경 버리고 이동" tone="danger"
+                onPress={() => { setDirty(false); setSelectedId(pendingSelection); setPendingSelection(null); }} />
+              <Action label="여기 남기" onPress={() => setPendingSelection(null)} />
+            </View>
+          </View>
+        ) : null}
+
+        {/* 검수 상태를 실제로 만들어 보기 위한 dev 전용 진입점. 운영 동작이 아니다. */}
+        <View style={styles.scenarioRow}>
+          <Text style={styles.scenarioLabel}>검수 상태 재현</Text>
+          <Action label="다른 검수자가 먼저 저장한 상황" disabled={notStarted || revalidation}
+            onPress={() => actions.simulateStaleRevision(all[0]?.ruleId ?? '')} />
+          <Action label="공고문이 바뀐 상황" disabled={revalidation}
+            onPress={() => actions.invalidateDocument('a'.repeat(63) + '1', '공고문 교체 재현')} />
+        </View>
 
         <View style={[styles.split, wide && styles.splitWide]}>
           <View style={[styles.column, wide && styles.listColumn]}>
@@ -120,7 +196,7 @@ export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
                 {items.map(item => (
                   <MotionPressable
                     key={item.ruleId} accessibilityRole="button" accessibilityState={{ selected: selectedId === item.ruleId }}
-                    onPress={() => setSelectedId(item.ruleId)} style={[styles.row, ROW_TONE[item.priority], selectedId === item.ruleId && styles.rowOn]}
+                    onPress={() => selectRule(item.ruleId)} style={[styles.row, ROW_TONE[item.priority], selectedId === item.ruleId && styles.rowOn]}
                   >
                     <Text style={styles.rowLabel}>{item.ruleLabel}</Text>
                     <View style={styles.rowMeta}>
@@ -146,6 +222,7 @@ export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
                 blockReasons={approvalBlockReasons(selectedRecord, workspace, gate)}
                 locked={notStarted || revalidation}
                 actions={actions}
+                onDirtyChange={onDirtyChange}
               />
             ) : (
               <Text style={styles.empty}>왼쪽에서 rule을 선택하면 원문과 AI 해석을 나란히 확인할 수 있어요.</Text>
@@ -178,7 +255,43 @@ function ActivationPanel({ gate }: { gate: ReturnType<typeof useRuleReviewWorksp
         </>
       )}
       <Action label="rule version 활성화" disabled onPress={() => undefined} />
-      <Text style={styles.activationBody}>활성화 버튼은 운영 backend 연결 전까지 비활성 상태로 둡니다.</Text>
+      <Text style={styles.activationBody}>운영 DB 연결 후 활성화할 수 있어요.</Text>
+    </View>
+  );
+}
+
+/** Resolving a note needs a written reason; a bare checkbox would erase the finding. */
+function UnresolvedRow({ item, locked, onResolve }: {
+  item: RuleReviewWorkspace['unresolvedItems'][number];
+  locked: boolean;
+  onResolve: (unresolvedId: string, resolution: string, reason: string) => unknown;
+}) {
+  const [note, setNote] = useState('');
+  const resolved = item.resolution !== null;
+  return (
+    <View style={styles.unresolvedRow}>
+      <View style={styles.unresolvedHead}>
+        <Badge tone={resolved ? 'NORMAL' : 'CRITICAL_BLOCKER'} text={resolved ? '처리됨' : '확인 필요'} />
+        <Text style={styles.unresolvedText}>{item.description}</Text>
+      </View>
+      {resolved ? (
+        <Text style={styles.unresolvedResolution}>처리 내용: {item.resolution}</Text>
+      ) : (
+        <>
+          <TextInput
+            accessibilityLabel={`${item.description} 검토 메모`} style={styles.unresolvedInput}
+            value={note} onChangeText={setNote} editable={!locked}
+            placeholder="어떻게 확인했는지 적어 주세요" placeholderTextColor={colors.textSubtle}
+          />
+          {!note.trim() ? <Text style={styles.unresolvedHint}>검토 메모를 적어야 처리할 수 있어요.</Text> : null}
+          <View style={styles.actionRow}>
+            <Action label="확인 완료로 처리" disabled={locked || !note.trim()}
+              onPress={() => onResolve(item.unresolvedId, note.trim(), '관리자 검수 콘솔에서 확인')} />
+            <Action label="보류로 남기기" disabled={locked || !note.trim()}
+              onPress={() => onResolve(item.unresolvedId, `보류 · ${note.trim()}`, '관리자 검수 콘솔에서 확인')} />
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -247,6 +360,29 @@ const styles = StyleSheet.create({
   activationTitle: { ...type.section },
   activationBody: { ...type.bodySm, color: colors.textMuted },
   blocker: { ...type.bodySm, color: colors.text },
+  progress: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceHigh, borderRadius: radius.cardSm, padding: spacing.sm, gap: 2 },
+  progressTitle: { ...type.section, color: colors.text },
+  progressLine: { ...type.bodySm, color: colors.textMuted },
+  sectionHeading: { ...type.bodySmStrong, color: colors.text },
+  unresolved: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceHigh, borderRadius: radius.cardSm, padding: spacing.sm, gap: spacing.sm },
+  unresolvedRow: { gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.xs },
+  unresolvedHead: { flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start', flexWrap: 'wrap' },
+  unresolvedText: { ...type.bodySm, color: colors.text, flexShrink: 1 },
+  unresolvedResolution: { ...type.bodySm, color: colors.textMuted },
+  unresolvedInput: { ...type.bodySm, color: colors.text, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.button, minHeight: size.control, paddingHorizontal: spacing.sm },
+  unresolvedHint: { ...type.caption, color: colors.error },
+  feedbackSlot: { minHeight: 56, justifyContent: 'center' },
+  feedbackIdle: { ...type.bodySm, color: colors.textSubtle },
+  feedbackOk: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#D6EFE0', borderRadius: radius.cardSm, padding: spacing.sm },
+  feedbackOkText: { ...type.bodySmStrong, color: colors.success, flex: 1 },
+  feedbackBad: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#FFDAD6', borderRadius: radius.cardSm, padding: spacing.sm },
+  feedbackBadText: { ...type.bodySm, color: '#93000A', flex: 1 },
+  dirtyDialog: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.warning, backgroundColor: '#FFDCC3', padding: spacing.sm, gap: spacing.xs },
+  dirtyTitle: { ...type.bodySmStrong, color: '#8A4900' },
+  dirtyBody: { ...type.bodySm, color: colors.textMuted },
+  scenarioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' },
+  scenarioLabel: { ...type.caption, color: colors.textSubtle },
+  actionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' },
   bulkRow: { gap: spacing.xs },
   bulkWhy: { ...type.bodySm, color: colors.error },
   filter: { alignSelf: 'flex-start', minHeight: size.touch, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1, borderColor: colors.outline, paddingHorizontal: spacing.md },

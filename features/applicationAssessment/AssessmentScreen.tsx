@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../components/ScreenHeader';
@@ -15,6 +15,7 @@ import { FORM_FIELDS, FORM_GROUP_HINTS, FORM_GROUP_LABELS, FORM_GROUPS, koreanMo
 import { REFERENCE_LISTING_ID, samdoReferenceRules, SUPPLY_LABELS } from './referenceRules';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
+import { registerAssessmentConsultationSeed } from '../assessmentConsultation/seedStore';
 import type { ApplicationAssessmentResult, SupplyType } from './types';
 
 const profileValue = (field: ProfileFieldState<unknown>) => field.status !== 'known' ? '확인 전' : typeof field.value === 'boolean' ? (field.value ? '예' : '아니요') : ({ single: '미혼', married: '기혼', 'no-home': '무주택', 'owns-home': '주택 보유' }[String(field.value)] ?? String(field.value));
@@ -70,6 +71,17 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
     setSnapshot({ result: assessment, profile, rulesId: rules.id }); move(3);
   };
   const editProfile = () => router.push('/profile');
+  const askAboutResult = () => {
+    if (!result) return;
+    const seedId = registerAssessmentConsultationSeed({
+      listingId: selected,
+      supplyType: supply,
+      profile,
+      answers: parsed.details,
+      result,
+    });
+    router.push(`/consultation?listingId=${encodeURIComponent(selected)}&seedId=${encodeURIComponent(seedId)}&supplyType=${supply}` as Href);
+  };
 
   return <SafeAreaView style={styles.screen} edges={['top']}>
     <ScreenHeader title="청약 맞춤판정" onBack={onBack} />
@@ -165,7 +177,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
-        {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} /> : <>
+        {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : <>
           <Text style={styles.body}>프로필이 변경됐어요. 새 정보로 다시 판정해 주세요.</Text>
           <PrimaryButton label="새 정보로 다시 판정하기" onPress={calculate} />
         </>}

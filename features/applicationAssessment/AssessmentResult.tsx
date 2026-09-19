@@ -25,9 +25,10 @@ type Props = {
   /** 누락 항목을 고칠 수 있는 곳으로 바로 보낸다. 결과 화면에서 막히지 않게 한다. */
   onEditProfile: () => void;
   onEditAnswers: () => void;
+  onAskAboutResult: () => void;
 };
 
-export function AssessmentResult({ result, onEditProfile, onEditAnswers }: Props) {
+export function AssessmentResult({ result, onEditProfile, onEditAnswers, onAskAboutResult }: Props) {
   const [showSatisfied, setShowSatisfied] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
@@ -52,6 +53,7 @@ export function AssessmentResult({ result, onEditProfile, onEditAnswers }: Props
       <View style={styles.badge}><Text style={styles.badgeText}>{SOURCE_LABELS[sourceStatus]}</Text></View>
       <Text style={styles.body}>{SOURCE_NOTES[sourceStatus]}</Text>
     </WanpanCard>
+    <PrimaryButton label="이 결과에 대해 물어보기" icon="chat" variant="soft" onPress={onAskAboutResult} />
     {groups.answers.length + groups.profile.length > 0 ? <WanpanCard style={styles.stack}>
       <Text accessibilityRole="header" style={styles.title}>내가 채우면 되는 정보</Text>
       {groups.answers.length ? <View style={styles.stack}>

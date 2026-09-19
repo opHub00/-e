@@ -175,11 +175,19 @@ export default function DiscoveryDetailRoute() {
           규칙이 없는 공고에서 누르면 준비 중 화면과 비활성 버튼만 나와 막다른 길이 된다.
         */}
         {assessmentRules.rules ? (
-          <PrimaryButton
-            label="내 조건으로 판정하기"
-            icon="fact-check"
-            onPress={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
-          />
+          <View style={styles.assessmentActions}>
+            <PrimaryButton
+              label="내 조건으로 판정하기"
+              icon="fact-check"
+              onPress={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
+            />
+            <PrimaryButton
+              label="이 공고 AI에게 물어보기"
+              icon="chat"
+              variant="soft"
+              onPress={() => router.push(`/consultation?listingId=${encodeURIComponent(listing.id)}` as Href)}
+            />
+          </View>
         ) : (
           <View style={styles.assessmentPending}>
             <MaterialIcons name="fact-check" size={18} color={colors.textSubtle} />
@@ -750,6 +758,7 @@ function TabButton({
 }
 
 const styles = StyleSheet.create({
+  assessmentActions: { gap: spacing.sm },
   assessmentPending: {
     flexDirection: 'row',
     alignItems: 'center',

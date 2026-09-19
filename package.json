@@ -23,6 +23,7 @@
     "test:e2e": "playwright test",
     "test:e2e:mobile": "playwright test --project=mobile-390x844",
     "test:e2e:desktop": "playwright test --project=desktop-1440x900",
+    "gen:rule-review-seed": "node --experimental-strip-types scripts/generate-rule-review-seed.mjs",
     "test:assessment-db": "node --experimental-strip-types scripts/check-assessment-migration.mjs",
     "export:assessment-reference": "node --experimental-strip-types scripts/export-assessment-reference.mjs",
     "assessment:rules": "node --experimental-strip-types scripts/assessment-rules.mjs",

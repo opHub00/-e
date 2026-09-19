@@ -1,0 +1,441 @@
+/**
+ * Browser-safe copy of the Samdo review seed.
+ *
+ * `samdoReviewFixture.test-data.ts` reads the rule package with `readFileSync`, which
+ * cannot run in the web bundle. This module is generated from that same fixture so the
+ * console shows real Samdo rules, evidence and conflicts rather than invented data.
+ * Regenerate with `npm run gen:rule-review-seed` whenever the fixture changes.
+ */
+import type { RuleReviewWorkspaceSeed } from '../server/types.ts';
+
+export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
+  "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+  "announcement": {
+    "id": "bade0617-63c6-4f61-86bf-6cd5ae17b101",
+    "title": "삼도이동 1지구 토지임대부 공공분양주택"
+  },
+  "document": {
+    "id": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+    "fileName": "(VER1.7_부동산원 제출용_공통) 삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
+    "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+    "versionLabel": "VER1.7"
+  },
+  "sourceStatus": "DRAFT_SOURCE_VERIFIED",
+  "version": "VER1.7-draft-transcription-1",
+  "rules": [
+    {
+      "ruleId": "youth.age",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": true,
+      "critical": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.age",
+        "label": "만 19~39세",
+        "semanticRole": "YOUTH_AGE",
+        "supplyType": "youth",
+        "category": "AGE",
+        "operator": null,
+        "value": [
+          {
+            "fact": "age",
+            "op": "gte",
+            "value": 19
+          },
+          {
+            "fact": "age",
+            "op": "lte",
+            "value": 39
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.age",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "만 19~39세",
+            "textExcerpt": "① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1888,
+                  "stream": "BodyText/Section0",
+                  "offset": 389301
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": true,
+      "critical": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.income",
+        "label": "본인 소득 140% 이하: 5,338,708원",
+        "semanticRole": "YOUTH_INCOME",
+        "supplyType": "youth",
+        "category": "INCOME",
+        "operator": "lte",
+        "value": 5338708,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표4> 청년 소득기준",
+            "label": "본인 소득 140% 이하: 5,338,708원",
+            "textExcerpt": "도시근로자 가구원수별 가구당 월평균소득액의 140%\n5,338,708원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1336,
+                  "stream": "BodyText/Section0",
+                  "offset": 286295
+                },
+                {
+                  "index": 1337,
+                  "stream": "BodyText/Section0",
+                  "offset": 286496
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.assets",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": true,
+      "critical": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.assets",
+        "label": "세대 총자산 362백만원 이하",
+        "semanticRole": "NEWLYWED_ASSETS",
+        "supplyType": "newlywed",
+        "category": "ASSET",
+        "operator": "lte",
+        "value": 362000000,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.assets",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3> 총자산 보유기준",
+            "label": "세대 총자산 362백만원 이하",
+            "textExcerpt": "362백만원 이하",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1216,
+                  "stream": "BodyText/Section0",
+                  "offset": 260832
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.deposit",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": true,
+      "critical": true,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [
+        "SEMANTIC_EVIDENCE_MISMATCH"
+      ],
+      "originalCandidate": {
+        "ruleKey": "firstHome.deposit",
+        "label": "선납 포함 저축액 600만원 이상",
+        "semanticRole": "FIRSTHOME_DEPOSIT",
+        "supplyType": "firstHome",
+        "category": "SAVINGS",
+        "operator": "gte",
+        "value": 6000000,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.deposit",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "선납 포함 저축액 600만원 이상",
+            "textExcerpt": "② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.residence",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": true,
+      "critical": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.residence",
+        "label": "공고일 제주 거주",
+        "semanticRole": "YOUTH_RESIDENCE",
+        "supplyType": "youth",
+        "category": "SCOPE",
+        "operator": "eq",
+        "value": "제주특별자치도",
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [
+          "youth.overseas"
+        ],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.residence",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "공고일 제주 거주",
+            "textExcerpt": "• 입주자모집공고일(2026.09.14.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 현재 제주특별자치도도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 제주특별자치도도에 거주하면서 아래조건(①~⑥)을 모두 갖춘 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1887,
+                  "stream": "BodyText/Section0",
+                  "offset": 389059
+                },
+                {
+                  "index": 2031,
+                  "stream": "BodyText/Section0",
+                  "offset": 420582
+                },
+                {
+                  "index": 2292,
+                  "stream": "BodyText/Section0",
+                  "offset": 476268
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.overseas",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": false,
+      "critical": true,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.overseas",
+        "label": "해외체류 이력은 별도 심사",
+        "semanticRole": "YOUTH_OVERSEAS",
+        "supplyType": "youth",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [
+          "해외체류와 생업 목적 예외를 함께 검토해야 합니다."
+        ],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.overseas",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표2> 지역우선 공급기준",
+            "label": "해외체류 이력은 별도 심사",
+            "textExcerpt": "출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과(거주제한기간이 2년인 주택은 각 연도별 183일을 말함) 하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.\n- 사례1) 모집공고일 현재 해당지역에 거주하고 있으나 계속해서 90일을 초과하여 국외에 체류한 경력이 있으면 해당지역 우선공급 대상자로는 불인정하나 기타지역 거주자로는 청약 가능합니다.\n- 사례2) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과하지 않는 경우 해당지역 우선공급 대상자로 청약 가능합니다.\n- 사례3) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과한 경우 해당지역 우선공급 대상자로 불인정되며 기타지역 거주자로도 인정되지 않습니다.\n- 입주자모집공고일 현재 해외에 있으며, 해외 체류기간이 계속하여 90일을 초과하거나 전체 기간이 연간(매년) 183일을 초과하는 분은 지역 우선공급 대상자(제주특별자치도 1년 이상 거주자) 및 기타지역 거주자(제주특별자치도 1년 미만 거주자)로 청약이 불가하며, 이를 위반하여 당첨될 경우 부적격 처리됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 216,
+                  "stream": "BodyText/Section0",
+                  "offset": 50934
+                },
+                {
+                  "index": 217,
+                  "stream": "BodyText/Section0",
+                  "offset": 51612
+                },
+                {
+                  "index": 218,
+                  "stream": "BodyText/Section0",
+                  "offset": 51942
+                },
+                {
+                  "index": 219,
+                  "stream": "BodyText/Section0",
+                  "offset": 52192
+                },
+                {
+                  "index": 1080,
+                  "stream": "BodyText/Section0",
+                  "offset": 223544
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.restrictions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "required": false,
+      "critical": false,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.restrictions",
+        "label": "특별공급 제한 없음",
+        "semanticRole": "YOUTH_RESTRICTIONS",
+        "supplyType": "youth",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.restrictions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 제한 없음",
+            "textExcerpt": "• 분양가상한제 적용주택, 투기과열지구 또는 청약과열지역에서 공급하는 주택 등에 이미 당첨되어 재당첨 제한 기간 내에 있는 분과 부적격 당첨 후 입주자로 선정될 수 없는 기간[입주자모집공고일(2026.09.14.) 기준 당첨일로부터 1년]내에 있는 분은 신청할 수 없습니다.\n• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2021,
+                  "stream": "BodyText/Section0",
+                  "offset": 417285
+                },
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "conflictId": "samdo.region.priority-date",
+      "concept": "지역우선 기준일",
+      "candidateRuleIds": [
+        "youth.residence"
+      ],
+      "candidates": [
+        {
+          "candidateId": "continuous-one-year",
+          "value": "2025-09-14 이전부터 계속 거주",
+          "evidenceIds": [
+            "samdo.v17.youth.residence"
+          ]
+        },
+        {
+          "candidateId": "announcement-date",
+          "value": "공고일 현재 거주",
+          "evidenceIds": [
+            "samdo.v17.youth.residence"
+          ]
+        }
+      ]
+    }
+  ],
+  "unresolvedItems": [
+    {
+      "unresolvedId": "samdo.management-number-mapping",
+      "type": "AMBIGUOUS_HOUSING_MANAGEMENT_NUMBER",
+      "description": "관리번호와 1·2지구 연결이 검토본에서 확정되지 않았습니다.",
+      "ruleIds": []
+    }
+  ],
+  "requiredCategories": [
+    {
+      "supplyType": "youth",
+      "category": "AGE"
+    },
+    {
+      "supplyType": "youth",
+      "category": "INCOME"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "ASSET"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "SAVINGS"
+    },
+    {
+      "supplyType": "youth",
+      "category": "SCOPE"
+    }
+  ]
+};
+

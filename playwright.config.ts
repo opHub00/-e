@@ -15,6 +15,9 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     trace: 'retain-on-failure',
+    // The PWA service worker serves public/offline.html when a navigation is slow,
+    // which makes parallel runs flake on a page the app never actually failed to load.
+    serviceWorkers: 'block',
     screenshot: 'only-on-failure',
   },
   projects: [

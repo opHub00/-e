@@ -152,6 +152,16 @@ test('parent-home question does not become a fabricated housing boolean', async 
   assert.ok(result.response.evidenceRefs.some(item => `${item.label} ${item.textExcerpt ?? ''}`.includes('부모')));
 });
 
+test('explicit absence of overseas stay and exceptions is not re-added as an exception', async () => {
+  const interpreted = await new DeterministicConsultationInterpreter().interpret({
+    message: '해외체류 없고 특례 없고 자녀 없고 태아나 입양도 없어요.',
+  });
+  assert.ok(interpreted.updates.some(item => item.field === 'overseasClear' && item.value === true));
+  assert.ok(interpreted.updates.some(item => item.field === 'specialExceptionsClear' && item.value === true));
+  assert.ok(interpreted.updates.some(item => item.field === 'childbirthClear' && item.value === true));
+  assert.equal(interpreted.updates.some(item => item.field === 'specialException'), false);
+});
+
 test('announcement-side missing rules are review actions and never user questions', async () => {
   const reference = structuredClone(rules);
   reference.sourceStatus = 'REFERENCE';

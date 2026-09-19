@@ -199,6 +199,19 @@ test('통과 조건·증빙서류·판정근거·공고 원문이 단계적으�
   await expectNoHorizontalOverflow(page);
 });
 
+test('판정 결과에서 상담으로 이어가면 결과와 입력을 다시 묻지 않고 재사용한다', async ({ page }) => {
+  const scenario = SCENARIOS[0];
+  await openResult(page, scenario);
+  await page.getByRole('button', { name: '이 결과에 대해 물어보기' }).click();
+  await expect(page).toHaveURL(/\/consultation\?.*seedId=/);
+  await expect(page.getByText(/판정 결과와 입력한 정보를 그대로 이어받았어요/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: '신청 가능한 조건이에요' })).toBeVisible();
+  await expect(page.getByText('9 / 9점', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '왜 9점이에요?' }).click();
+  await expect(page.getByText(/본인 월평균소득.*3점/).last()).toBeVisible();
+  await expect(page.getByRole('button', { name: /공고 근거 \d+건 보기/ })).toBeVisible();
+});
+
 test('NEEDS_MORE_INFORMATION은 해결 위치별로 나뉘고 공고 항목에는 CTA가 없다', async ({ page }, testInfo) => {
   // Answers are empty and the profile is complete, so only the answer bucket has entries.
   await openResult(page, SCENARIOS[4]);
@@ -262,7 +275,7 @@ test('접근성 스모크: heading 역할, 키보드 포커스, 색상만으로 
   expect(await page.getByRole('heading').count()).toBeGreaterThan(3);
 
   // Every disclosure exposes its state.
-  const toggles = page.getByRole('button', { name: /(보기|접기)$|^충족한 조건 \d+개$/ });
+  const toggles = page.getByRole('button', { name: /^(?:서류 목록|판정근거와 사용한 입력값|공고 원문) (?:보기|접기)$|^충족한 조건 \d+개$/ });
   const count = await toggles.count();
   expect(count, 'result screen must expose disclosures').toBeGreaterThan(0);
   for (let i = 0; i < count; i += 1) {

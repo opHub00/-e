@@ -114,7 +114,7 @@ Samdo VER1.7은 `DRAFT_SOURCE_VERIFIED` 문구를 응답당 한 번만 표시한
 
 배우자의 혼인 전 주택소유, 해외체류, 출산 완화 같은 입력은 일반 규칙으로 조용히 계산하지 않는다. `specialExceptions`를 통해 기존 엔진에 전달하고, 검토 규칙이 확인될 때까지 확정 답변을 막는다.
 
-## UI contract
+## UI contract와 presentation adapter
 
 `sendMessage()`는 갱신된 session과 다음 response를 반환한다.
 
@@ -134,7 +134,9 @@ Samdo VER1.7은 `DRAFT_SOURCE_VERIFIED` 문구를 응답당 한 번만 표시한
 }
 ```
 
-UI는 이 contract를 렌더링하며 Supabase schema나 rule expression을 알 필요가 없다. `evidenceId`는 drill-down 연결용이며 기본 화면 text로 출력하지 않는다.
+위 객체는 domain 내부 응답이다. `features/assessmentConsultation/engineAdapter.ts`가 이를 Claude UX의 `AssessmentConsultationResponse` 형태로 옮긴다. 이 경계에서 `failedConditions`와 `missingInformation`을 사용자용 `blocking`/`pending` 문구로 바꾸고, action·evidence·source status를 전달한다. adapter는 eligibility, stage, score를 계산하지 않는다.
+
+UI는 Supabase schema나 rule expression을 알 필요가 없다. `evidenceId`는 drill-down 연결용이며 기본 화면 text로 출력하지 않는다. 맞춤판정 결과에서 상담을 열 때는 메모리 내 seed로 이미 계산된 결과와 입력을 복제해 넘기므로 같은 질문을 반복하지 않는다.
 
 ## 향후 연결
 

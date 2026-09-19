@@ -16,15 +16,13 @@ type Props = {
   engine: ConsultationEngine;
   listingId: string;
   seededFrom?: 'ASSESSMENT_RESULT';
-  /** Shown when the answers come from the preview script rather than a real engine. */
-  previewNotice?: string;
   onOpenAssessment: () => void;
   onOpenProfile: () => void;
   onOpenPreparation: () => void;
   onBack: () => void;
 };
 
-export function ConsultationScreen({ engine, listingId, seededFrom, previewNotice, onOpenAssessment, onOpenProfile, onOpenPreparation, onBack }: Props) {
+export function ConsultationScreen({ engine, listingId, seededFrom, onOpenAssessment, onOpenProfile, onOpenPreparation, onBack }: Props) {
   const [session, setSession] = useState<ConsultationSession | null>(null);
   const [pending, setPending] = useState<ConsultationTurn[]>([]);
   const [input, setInput] = useState('');
@@ -75,7 +73,6 @@ export function ConsultationScreen({ engine, listingId, seededFrom, previewNotic
           ref={scroll} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}
         >
-          {previewNotice ? <View style={styles.preview}><MaterialIcons name="science" size={16} color={colors.warning} /><Text style={styles.previewText}>{previewNotice}</Text></View> : null}
           {/* 검토본 안내는 대화마다 반복하지 않고 시작할 때 한 번만 말한다. */}
           {note ? <Text style={styles.sourceNote}>{note}</Text> : null}
           {turns.map(t => t.role === 'user'
@@ -200,8 +197,6 @@ const styles = StyleSheet.create({
   badge: { borderRadius: radius.pill, borderWidth: 1, borderColor: colors.primary, paddingHorizontal: spacing.sm, paddingVertical: 2 },
   badgeText: { ...type.caption, color: colors.primary },
   scroll: { width: '100%', maxWidth: 720, alignSelf: 'center', padding: spacing.screen, paddingBottom: spacing.lg, gap: spacing.md },
-  preview: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start', backgroundColor: colors.surfaceLow, borderRadius: radius.cardSm, padding: spacing.sm },
-  previewText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
   sourceNote: { ...type.bodySm, color: colors.textMuted },
   userRow: { alignItems: 'flex-end' },
   userBubble: { ...type.body, color: colors.onPrimary, backgroundColor: colors.primary, borderRadius: radius.card, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, maxWidth: '88%', overflow: 'hidden' },
@@ -232,7 +227,7 @@ const styles = StyleSheet.create({
   chip: { minHeight: size.touch, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1, borderColor: colors.outline, backgroundColor: colors.surface, paddingHorizontal: spacing.md },
   chipText: { ...type.bodySm, color: colors.text },
   composer: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-end', width: '100%', maxWidth: 720, alignSelf: 'center' },
-  input: { ...type.body, color: colors.text, flex: 1, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.card, minHeight: size.control, maxHeight: 120, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  input: { ...type.body, color: colors.text, flex: 1, borderWidth: 1, borderColor: colors.surfaceHigh, borderRadius: radius.card, minHeight: size.control, maxHeight: 120, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   send: { width: size.touch, height: size.touch, borderRadius: radius.pill, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   sendOff: { opacity: 0.4 },
 });

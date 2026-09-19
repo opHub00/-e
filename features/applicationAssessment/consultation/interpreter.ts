@@ -18,7 +18,8 @@ const UPDATE_FIELDS = new Set<ConsultationFieldUpdate['field']>([
   'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets',
   'incomeTaxPaymentYears', 'marriageStatus', 'currentHousingOwnership',
   'previousHousingOwnership', 'householdHasHome', 'hasSubscriptionAccount',
-  'dualIncome', 'specialException',
+  'accountKindEligible', 'specialSupplyHistory', 'reWinningRestriction',
+  'overseasClear', 'specialExceptionsClear', 'childbirthClear', 'dualIncome', 'specialException',
 ]);
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -102,7 +103,16 @@ export class DeterministicConsultationInterpreter implements ConsultationLanguag
     pushNumber(updates, message, /소득세(?:를)?\s*(\d+)\s*년/, 'incomeTaxPaymentYears');
     if (/\b미혼\b/.test(message)) updates.push({ field: 'marriageStatus', value: 'single' });
     else if (/(기혼|현재\s*혼인|결혼했)/.test(message) && !/(결혼|혼인)\s*전/.test(message)) updates.push({ field: 'marriageStatus', value: 'married' });
-    if (/(해외.?체류|국외.?체류|생업 목적|출산.?특례|출산.?완화|배우자.*(?:결혼|혼인) 전.*(?:집|주택)|중복청약.*배우자)/.test(message)) {
+    if (/(주택청약종합저축|청약저축)/.test(message)) updates.push({ field: 'hasSubscriptionAccount', value: true }, { field: 'accountKindEligible', value: true });
+    if (/(특별공급|특공).{0,8}(?:당첨|선정).{0,8}(?:없|아니)|(?:당첨|선정).{0,8}이력.{0,4}(?:없|아니)/.test(message)) updates.push({ field: 'specialSupplyHistory', value: false });
+    if (/재당첨.{0,8}(?:제한|기간).{0,8}(?:없|아니|해당하지)/.test(message)) updates.push({ field: 'reWinningRestriction', value: false });
+    const overseasClear = /(해외|국외).?체류.{0,6}(?:없|안 했|하지 않았)/.test(message);
+    const exceptionsClear = /특례.{0,6}(?:없|해당하지|적용하지)/.test(message);
+    if (overseasClear) updates.push({ field: 'overseasClear', value: true });
+    if (exceptionsClear) updates.push({ field: 'specialExceptionsClear', value: true });
+    if (/(?:자녀.{0,4}없).*(?:태아|입양).{0,6}없|(?:태아|입양).{0,6}없.*자녀.{0,4}없/.test(message)) updates.push({ field: 'childbirthClear', value: true });
+    if (/(해외.?체류|국외.?체류|생업 목적|출산.?특례|출산.?완화|배우자.*(?:결혼|혼인) 전.*(?:집|주택)|중복청약.*배우자)/.test(message)
+      && !overseasClear && !exceptionsClear) {
       updates.push({ field: 'specialException', value: message.slice(0, 200) });
     }
     const intent = classifyIntent(message, updates.length > 0);

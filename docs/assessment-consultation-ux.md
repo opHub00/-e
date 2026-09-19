@@ -1,6 +1,6 @@
 # 공고 기반 AI 청약 상담 UX
 
-`ADMIN_REVIEW_READY = NO`, consultation engine은 다른 branch에서 개발 중이다. 이 문서는 presentation 설계와 engine merge 시 필요한 연결 지점을 기록한다.
+deterministic consultation engine과 연결된 공고 기반 상담의 presentation 설계를 기록한다. 상담 화면은 자격·단계·점수를 계산하지 않고, `assessApplication()` 결과를 UI contract로 변환해 보여준다.
 
 ## 0. 이 기능이 아닌 것
 
@@ -33,9 +33,7 @@
 
 즉 상담은 판정의 **앞(수집)과 뒤(설명)** 양쪽에 붙는다.
 
-### 아직 연결하지 않은 이유
-
-engine이 없는 상태에서 진입 버튼을 붙이면 "준비 중" 화면으로 가는 **막다른 CTA**가 된다. 이 저장소는 이미 같은 이유로 판정 규칙이 없는 공고에서 판정 버튼을 숨기고 있다([discovery/[id].tsx](../app/discovery/[id].tsx)의 주석). 같은 원칙을 따라 진입점은 engine merge 시 함께 연다.
+판정 규칙이 있는 공고에서만 두 진입점을 연다. 규칙이 없는 공고의 상세에는 상담 CTA를 노출하지 않으며, 직접 URL로 접근해도 다른 공고의 규칙으로 대체하지 않는다.
 
 ## 3. 상담 화면 IA
 
@@ -110,24 +108,11 @@ engine이 모르는 것을 오류로 그리지 않는다. `unresolved`는 회색
 
 `scoring === 'NOT_APPLICABLE'`이면 `가점제 아님 · 공급단계/추첨`으로 표시한다. `scoreLabel()` 한 곳에서만 판단하므로 0점 카드가 생길 경로가 없다.
 
-## 12. engine merge 시 필요한 것
+## 12. Engine 연결
 
-**코드 변경은 세 곳뿐이다.**
+`engineAdapter.ts`가 domain의 `ConsultationResponse`와 마지막 `ApplicationAssessmentResult`를 presentation contract로 변환한다. 어댑터는 상태·단계·점수·조건을 새로 계산하지 않는다. `blocking`과 `pending`만 기존 condition/missing label을 사람이 읽는 문구로 바꾸고, domain action과 evidence를 UI 형태로 옮긴다.
 
-1. **`app/consultation.tsx`** — `mockConsultationEngine`을 실제 engine으로 교체하고 `preview !== '1'` 게이트와 `previewNotice`를 제거한다.
-
-2. **진입점 2개 추가**
-   ```tsx
-   // app/discovery/[id].tsx — 판정 버튼 옆, rules가 있을 때만
-   <PrimaryButton label="이 공고 AI에게 물어보기" variant="soft" icon="forum"
-     onPress={() => router.push(`/consultation?listingId=${encodeURIComponent(listing.id)}`)} />
-
-   // features/applicationAssessment/AssessmentResult.tsx — 준비 단계 CTA 위
-   <PrimaryButton label="이 결과에 대해 물어보기" variant="soft"
-     onPress={() => router.push(`/consultation?listingId=${listingId}&seed=assessment`)} />
-   ```
-
-3. **`app/_layout.tsx`** — 이미 `<Stack.Screen name="consultation" headerShown: false />`가 등록돼 있다. 추가 작업 없음.
+맞춤판정 결과에서 시작할 때는 메모리 내 일회성 seed에 profile snapshot, answers, result를 복제해 전달한다. 브라우저 저장소나 DB에는 상담 답변을 추가 저장하지 않는다.
 
 **engine이 맞춰야 하는 contract**는 [contract.ts](../features/assessmentConsultation/contract.ts)이며, 화면이 실제로 소비하는 필드는 다음과 같다.
 
@@ -145,12 +130,14 @@ engine이 모르는 것을 오류로 그리지 않는다. `unresolved`는 회색
 | `reusedProfileFacts[]` | | 프로필 재사용 안내 |
 | `session.sourceStatus` | ✅ | 배지 + 첫 턴 안내 |
 
-**engine 쪽에서 지켜야 하는 것**
+**engine과 adapter가 지켜야 하는 것**
 
 - `suggestedQuestions`는 **3개 이하**로 보낸다(화면이 잘라내지만, 자르면 engine 의도가 사라진다).
 - `blocking`/`pending`은 **이미 사람이 읽는 문구**여야 한다. 화면은 rule key를 라벨로 바꾸지 않는다.
 - 답을 모르면 `message`에 사과를 쓰지 말고 **`unresolved`에 항목을 담는다.**
 - `assessment`는 deterministic 판정이 실제로 돌았을 때만 넣는다. 추측으로 카드를 만들면 안 된다.
+- 생애최초는 `scoring: NOT_APPLICABLE`, `score: null`로 전달한다.
+- 외부 AI provider가 없어도 offline interpreter로 동일한 orchestration을 검증한다.
 
 ## 13. MVP에서 하지 않는 것
 

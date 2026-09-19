@@ -1,10 +1,9 @@
 /**
  * Presentation contract for announcement-grounded consultation.
  *
- * The engine lives on another branch. This file is the boundary the UI is built
- * against: only types and pure helpers, no engine, no provider, no DB. Everything
- * the screen renders comes from a `ConsultationTurn`, so swapping the mock for the
- * real engine is one function signature.
+ * This file is the presentation boundary: only types and pure helpers, no rule
+ * evaluation, provider or DB access. The deterministic domain response is mapped
+ * to this contract by `engineAdapter.ts`.
  */
 import type { Evidence, RuleSourceStatus, Stage, Status, SupplyType } from '../applicationAssessment/types.ts';
 
@@ -63,6 +62,7 @@ export type ConsultationSession = {
   announcementTitle: string;
   listingId: string;
   sourceStatus: RuleSourceStatus;
+  seededFrom?: 'ASSESSMENT_RESULT';
   turns: ConsultationTurn[];
 };
 

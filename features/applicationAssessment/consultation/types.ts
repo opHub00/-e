@@ -70,6 +70,12 @@ export type ConsultationFieldUpdate =
   | { field: 'previousHousingOwnership'; value: boolean }
   | { field: 'householdHasHome'; value: boolean }
   | { field: 'hasSubscriptionAccount'; value: boolean }
+  | { field: 'accountKindEligible'; value: boolean }
+  | { field: 'specialSupplyHistory'; value: boolean }
+  | { field: 'reWinningRestriction'; value: boolean }
+  | { field: 'overseasClear'; value: boolean }
+  | { field: 'specialExceptionsClear'; value: boolean }
+  | { field: 'childbirthClear'; value: boolean }
   | { field: 'dualIncome'; value: boolean }
   | { field: 'specialException'; value: string };
 

@@ -73,6 +73,13 @@ export function applyConsultationUpdates(
       case 'previousHousingOwnership': next.userProfileSnapshot.housing.previousOwnership = knownField(update.value); break;
       case 'householdHasHome': next.userProfileSnapshot.housing.householdHasHome = knownField(update.value); break;
       case 'hasSubscriptionAccount': next.userProfileSnapshot.subscriptionAccount.hasAccount = knownField(update.value); break;
+      case 'overseasClear': {
+        next.collectedAnswers.overseasStayHistory = update.value ? [] : undefined;
+        if (!update.value) next.collectedAnswers.specialExceptions = [...new Set([...(next.collectedAnswers.specialExceptions ?? []), '해외체류 이력 추가 확인'])];
+        break;
+      }
+      case 'specialExceptionsClear': next.collectedAnswers.specialExceptions = update.value ? [] : next.collectedAnswers.specialExceptions; break;
+      case 'childbirthClear': next.collectedAnswers.children = update.value ? [] : next.collectedAnswers.children; break;
       case 'specialException': next.collectedAnswers.specialExceptions = [...new Set([...(next.collectedAnswers.specialExceptions ?? []), update.value])]; break;
       default: {
         const field = update.field as keyof AssessmentInput['details'];

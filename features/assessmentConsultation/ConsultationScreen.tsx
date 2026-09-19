@@ -184,7 +184,7 @@ function ProfileFactsDisclosure({ facts }: { facts: string[] }) {
   const [open, setOpen] = useState(false);
   return (
     <View style={styles.reused}>
-      <MotionPressable accessibilityRole="button" accessibilityState={{ expanded: open }} onPress={() => setOpen(value => !value)} style={styles.profileToggle}>
+      <MotionPressable accessibilityRole="button" accessibilityState={{ expanded: open }} aria-expanded={open} onPress={() => setOpen(value => !value)} style={styles.profileToggle}>
         <MaterialIcons name="person-outline" size={15} color={colors.textMuted} />
         <Text style={styles.reusedText}>사용 중인 내 정보 {open ? '접기' : '보기'}</Text>
       </MotionPressable>

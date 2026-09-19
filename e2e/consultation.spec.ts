@@ -70,7 +70,10 @@ test('multi-turn input reaches deterministic youth priority 9/9 and evidence', a
   await expect(page.getByText('청년 특별공급', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('1단계 우선공급', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('9 / 9점', { exact: true }).last()).toBeVisible();
-  await page.getByRole('button', { name: '사용 중인 내 정보 보기' }).last().click();
+  const profileFacts = page.getByRole('button', { name: '사용 중인 내 정보 보기' }).last();
+  await expect(profileFacts).toHaveAttribute('aria-expanded', 'false');
+  await profileFacts.click();
+  await expect(page.getByRole('button', { name: '사용 중인 내 정보 접기' }).last()).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByText('• 현재 주택 상태: 무주택', { exact: true }).last()).toBeVisible();
   await ask(page, '왜 9점이에요? 공고 근거 보여줘');
   const evidence = page.getByRole('button', { name: /공고 근거 \d+건 보기/ }).last();

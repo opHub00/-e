@@ -1,6 +1,6 @@
-import { createHash } from 'node:crypto';
 import type { CandidateRulePackage, CandidateRule, Evidence } from '../../ruleExtraction/server/candidate.ts';
 import type { CriticalRole, GuardStatus, SemanticErrorCategory } from '../../ruleExtraction/server/v4_1/semanticSafety.ts';
+import { hashCanonical } from '../domain/hashing.ts';
 import type { CriticalBlockerCode, CriticalCategory, RuleReviewWorkspaceSeed } from './types.ts';
 
 export type CandidateSafetyReview = { status: GuardStatus; criticalRole: CriticalRole; confidence: 'HIGH' | 'MEDIUM' | 'REVIEW_REQUIRED'; issues: { code: string; category: SemanticErrorCategory }[] };
@@ -17,7 +17,7 @@ export type MaterializeReviewInput = {
 };
 
 const categoryOf = (role: CriticalRole): CriticalCategory => role === 'TAX_HISTORY' ? 'TAX' : role;
-const evidenceId = (rule: CandidateRule, evidence: Evidence, index: number) => createHash('sha256').update(JSON.stringify([rule.candidateRuleId, index, evidence.locator])).digest('hex');
+const evidenceId = (rule: CandidateRule, evidence: Evidence, index: number) => hashCanonical([rule.candidateRuleId, index, evidence.locator]);
 function blocker(code: string): CriticalBlockerCode | null {
   if (code.startsWith('PARTIAL_RANGE_BINDING')) return 'PARTIAL_RANGE_BINDING';
   if (code.startsWith('SCOPE_MISMATCH') || code === 'SUPPLY_SCOPE_MISMATCH' || code === 'FUTURE_HOUSEHOLD_SCOPE_REQUIRED') return 'SCOPE_MISMATCH';
@@ -52,7 +52,7 @@ export function materializeCandidateReviewSeed(input: MaterializeReviewInput): R
     sourceStatus: pkg.sourceStatus, version: input.version, rules,
     conflicts: pkg.conflicts.map((conflict, index) => ({ conflictId: `conflict:${index}`, concept: conflict.description, candidateRuleIds: [],
       candidates: conflict.alternatives.map((alternative, alternativeIndex) => ({ candidateId: `conflict:${index}:${alternativeIndex}`, value: alternative.value,
-        evidenceIds: alternative.evidence.map((item, evidenceIndex) => createHash('sha256').update(JSON.stringify(['conflict', index, alternativeIndex, evidenceIndex, item.locator])).digest('hex')) })) })),
+        evidenceIds: alternative.evidence.map((item, evidenceIndex) => hashCanonical(['conflict', index, alternativeIndex, evidenceIndex, item.locator])) })) })),
     unresolvedItems: pkg.unresolvedItems.map((item, index) => ({ unresolvedId: `unresolved:${index}`, type: item.type, description: item.description, ruleIds: [] })),
     // CandidateRule only states related keys; it does not prove the semantic relation type. Keep exception relations orphaned for review.
     requiredCategories: structuredClone(input.requiredCategories), initialExceptionRelations: [] };

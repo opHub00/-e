@@ -9,11 +9,12 @@ import { RuleDetailPanel } from './RuleDetailPanel';
 import { approvalBlockReasons, PRIORITY_LABEL, REVIEW_STATUS_LABEL, SOURCE_STATUS_LABEL, SUPPLY_GROUP_LABEL, supplyGroupOf } from './reviewLabels';
 import { useRuleReviewWorkspace } from './useRuleReviewWorkspace';
 import type { RuleListItemDto } from '../server/dto';
+import type { RuleReviewRepository } from '../repository/RuleReviewRepository';
 
 const REASON = '관리자 검수 콘솔에서 확인';
 
-export function RuleReviewConsole({ onBack }: { onBack: () => void }) {
-  const { workspace, summary, gate, rules, detail, actions, lastError } = useRuleReviewWorkspace();
+export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; repository: RuleReviewRepository }) {
+  const { workspace, summary, gate, rules, detail, actions, lastError } = useRuleReviewWorkspace(repository);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(false);
     // Static export renders without a viewport; widening only after mount keeps

@@ -1,4 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { SAMDO_REVIEW_SEED } from '../features/assessmentRuleReview/fixtures/samdoReviewSeed.generated.ts';
+import { RULE_REVIEW_DEMO_SEED_KEY } from '../features/assessmentRuleReview/repository/RuleReviewRepository.ts';
+import { sha256Hex } from '../features/assessmentRuleReview/domain/hashing.ts';
 
 const ROUTE = '/admin/rule-review';
 
@@ -8,6 +11,7 @@ async function open(page: Page) {
   page.on('request', request => { if (/supabase\.co|\/rest\/v1\//.test(request.url())) db.push(request.url()); });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(String(error)));
+  await page.addInitScript(([key, seed]) => sessionStorage.setItem(key, seed), [RULE_REVIEW_DEMO_SEED_KEY, JSON.stringify(SAMDO_REVIEW_SEED)] as const);
   await page.goto(ROUTE);
   await expect(page.getByRole('heading', { name: '삼도이동 1지구 토지임대부 공공분양주택' })).toBeVisible();
   return { db, errors };
@@ -23,6 +27,18 @@ test('dashboard leads with risk counts and the activation gate, with no database
   await expect(page.getByRole('heading', { name: '활성화할 수 없음' })).toBeVisible();
   await expect(page.getByText(/\[REVIEW_NOT_STARTED\]/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'rule version 활성화' })).toBeDisabled();
+  expect(db).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test('browser Web Crypto agrees with the platform-neutral SHA-256 without a Metro shim', async ({ page }) => {
+  const { db, errors } = await open(page);
+  const input = '삼도이동 · 만 19~39세';
+  const browser = await page.evaluate(async value => {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+    return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+  }, input);
+  expect(browser).toBe(sha256Hex(input));
   expect(db).toEqual([]);
   expect(errors).toEqual([]);
 });

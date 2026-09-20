@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   relationText: { ...type.bodySm, color: colors.textMuted, flexShrink: 1 },
   conflict: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.error, padding: spacing.sm, gap: spacing.xs },
   conflictTitle: { ...type.bodySmStrong, color: '#93000A' },
-  conflictOption: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.outline, padding: spacing.sm, gap: spacing.xs },
+  conflictOption: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.sm, gap: spacing.xs },
   conflictValue: { ...type.bodySmStrong, color: colors.text },
   conflictState: { ...type.bodySm, color: colors.textMuted },
   evidenceActions: { gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.sm },

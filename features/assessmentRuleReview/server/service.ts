@@ -1,16 +1,12 @@
-import { createHash } from 'node:crypto';
 import { EXCEPTION_RELATION_TYPES, type ExceptionRelationType } from '../../ruleExtraction/server/v4_1/exceptionRelations.ts';
+import { canonicalSerialize, hashCanonical, PORTABLE_CANDIDATE_HASHER, type CandidateHasher } from '../domain/hashing.ts';
 import type { ActivationBlocker, ActivationGate, ConflictResolution, CriticalBlockerCode, EvidenceReviewStatus, ExceptionReviewStatus,
   ReviewAuditEntry, ReviewEvidence, ReviewMutation, ReviewableRuleSnapshot, RuleEditDiff, RuleReviewRecord, RuleReviewWorkspace, RuleReviewWorkspaceSeed } from './types.ts';
 
 const clone = <T>(value: T): T => structuredClone(value);
 const auditView = (workspace: RuleReviewWorkspace) => { const { auditLog: _auditLog, ...rest } = workspace; return clone(rest); };
-const stable = (value: unknown): string => {
-  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
-  if (value && typeof value === 'object') return `{${Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${JSON.stringify(k)}:${stable(v)}`).join(',')}}`;
-  return JSON.stringify(value);
-};
-export const hashReviewCandidate = (value: ReviewableRuleSnapshot) => createHash('sha256').update(stable(value)).digest('hex');
+const stable = canonicalSerialize;
+export const hashReviewCandidate = (value: ReviewableRuleSnapshot, hasher: CandidateHasher = PORTABLE_CANDIDATE_HASHER) => hashCanonical(value, hasher);
 const now = (mutation: ReviewMutation) => mutation.at ?? new Date().toISOString();
 const assertText = (value: string, name: string) => { if (!value.trim()) throw new Error(`${name}_REQUIRED`); };
 const blockingSafety = (rule: RuleReviewRecord) => rule.safetyBlockers.filter(code => !rule.resolvedBlockerCodes.includes(code));
@@ -24,7 +20,7 @@ function diff(before: unknown, after: unknown, path = ''): RuleEditDiff[] {
   return [...new Set([...Object.keys(a), ...Object.keys(b)])].sort().flatMap(key => diff(a[key], b[key], path ? `${path}.${key}` : key));
 }
 
-export function createRuleReviewWorkspace(seed: RuleReviewWorkspaceSeed): RuleReviewWorkspace {
+export function createRuleReviewWorkspace(seed: RuleReviewWorkspaceSeed, hasher: CandidateHasher = PORTABLE_CANDIDATE_HASHER): RuleReviewWorkspace {
   if (!/^[a-f0-9]{64}$/.test(seed.document.sha256)) throw new Error('INVALID_DOCUMENT_HASH');
   if (!seed.rules.length) throw new Error('RULES_REQUIRED');
   const ids = new Set<string>();
@@ -33,7 +29,7 @@ export function createRuleReviewWorkspace(seed: RuleReviewWorkspaceSeed): RuleRe
     ids.add(rule.ruleId);
     const originalCandidate = clone(rule.originalCandidate);
     return { ...clone(rule), originalCandidate, reviewStatus: 'PENDING_REVIEW' as const, reviewerId: null, reviewedAt: null, reviewNote: null,
-      decisionReason: null, originalCandidateHash: hashReviewCandidate(originalCandidate), editedRuleSnapshot: null, editDiff: [], resolvedBlockerCodes: [],
+      decisionReason: null, originalCandidateHash: hashReviewCandidate(originalCandidate, hasher), editedRuleSnapshot: null, editDiff: [], resolvedBlockerCodes: [],
       evidenceReviews: originalCandidate.evidence.map(evidence => ({ evidenceId: evidence.id, status: 'NEEDS_REVIEW' as const, reviewerId: null, reviewedAt: null, note: null, replacement: null })) };
   });
   const exceptionReviews = rules.filter(rule => rule.originalCandidate.category === 'EXCEPTION').map(rule => {
@@ -92,7 +88,7 @@ export function canActivateRuleVersion(workspace: RuleReviewWorkspace): Activati
 
 export class RuleReviewService {
   #workspace: RuleReviewWorkspace;
-  constructor(seed: RuleReviewWorkspaceSeed) { this.#workspace = createRuleReviewWorkspace(seed); }
+  constructor(seed: RuleReviewWorkspaceSeed, hasher: CandidateHasher = PORTABLE_CANDIDATE_HASHER) { this.#workspace = createRuleReviewWorkspace(seed, hasher); }
   snapshot() { return clone(this.#workspace); }
   gate() { return canActivateRuleVersion(this.#workspace); }
   #mutate<T>(mutation: ReviewMutation, action: string, targetType: string, targetId: string, operation: () => T): T {

@@ -3,6 +3,10 @@ import { SAMDO_REVIEW_SEED } from '../features/assessmentRuleReview/fixtures/sam
 import { RULE_REVIEW_DEMO_SEED_KEY } from '../features/assessmentRuleReview/repository/RuleReviewRepository.ts';
 
 const ROUTE = '/admin/rule-review';
+/** Decisions are frozen while a save is in flight, so each step waits for it to settle. */
+async function settle(page: Page) {
+  await expect(page.getByText('서버에 저장하는 중이에요… 저장이 끝나야 결정이 반영돼요.')).toHaveCount(0, { timeout: 15_000 });
+}
 const rule = (page: Page, label: string) => page.getByRole('button').filter({ hasText: label }).first();
 
 /**
@@ -128,7 +132,7 @@ test('a concurrent save is explained instead of overwriting the reviewer', async
   await page.getByLabel(/이상 기준 값/).fill('21');
 
   await page.getByRole('button', { name: '다른 검수자가 먼저 저장한 상황' }).click();
-  await expect(page.getByText(/다른 검수자가 먼저 수정했습니다/)).toBeVisible();
+  await expect(page.getByText(/다른 검수자가 먼저 저장했습니다/)).toBeVisible();
   await expect(page.getByText(/입력하던 내용은 그대로 두었으니/)).toBeVisible();
   // The typed value survives the refused save.
   await expect(page.getByLabel(/이상 기준 값/)).toHaveValue('21');
@@ -158,7 +162,9 @@ test('a changed announcement invalidates the review instead of looking approved'
   await page.getByRole('button', { name: '승인', exact: true }).click();
   await expect(page.getByText(/^승인했어요\.$/)).toBeVisible();
 
+  await settle(page);
   await page.getByRole('button', { name: '공고문이 바뀐 상황' }).click();
+  await settle(page);
   await expect(page.getByRole('alert')).toContainText('공고문 변경을 감지했습니다. 기존 검수 결과를 다시 확인해야 합니다.');
   await expect(page.getByText('문서 변경을 반영했어요.')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '공고문이 변경되어 기존 검수를 다시 확인해야 합니다' })).toBeVisible();
@@ -228,8 +234,9 @@ test('a complete review reaches activation eligible with the button still disabl
   for (const label of ['만 19~39세', '본인 소득 140%', '세대 총자산', '공고일 제주 거주', '해외체류', '특별공급 제한 없음']) {
     await rule(page, label).click();
     const valid = page.getByRole('button', { name: '유효', exact: true }).first();
-    if (await valid.count()) await valid.click();
+    if (await valid.count()) { await valid.click(); await settle(page); }
     await page.getByRole('button', { name: '승인', exact: true }).click();
+    await settle(page);
   }
 
   // This rule carries SEMANTIC_EVIDENCE_MISMATCH, so it only clears through an edit.

@@ -16,6 +16,10 @@ async function open(page: Page) {
   await expect(page.getByRole('heading', { name: '삼도이동 1지구 토지임대부 공공분양주택' })).toBeVisible();
   return { db, errors };
 }
+/** Decisions are frozen while a save is in flight, so each step waits for it to settle. */
+async function settle(page: Page) {
+  await expect(page.getByText('서버에 저장하는 중이에요… 저장이 끝나야 결정이 반영돼요.')).toHaveCount(0, { timeout: 15_000 });
+}
 const rule = (page: Page, label: string) => page.getByRole('button').filter({ hasText: label }).first();
 const start = (page: Page) => page.getByRole('button', { name: '검수 시작하기' }).click();
 

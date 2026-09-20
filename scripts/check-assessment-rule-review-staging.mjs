@@ -1,0 +1,60 @@
+// Isolated PostgreSQL test for staging auth/RPC/RLS. No network or credentials.
+import { readFile } from 'node:fs/promises';
+import { strict as assert } from 'node:assert';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
+
+const { PGlite } = await import(pathToFileURL(resolve('.cache/assessment-sql-check/node_modules/@electric-sql/pglite/dist/index.js')).href);
+const db = new PGlite(); let checks=0;
+const ok=(v,m)=>{assert.ok(v,m);checks++;}; const rejects=async(fn,m)=>{await assert.rejects(fn,undefined,m);checks++;};
+const ids={announcement:'11111111-1111-4111-8111-111111111111',document:'22222222-2222-4222-8222-222222222222',set:'33333333-3333-4333-8333-333333333333',reviewer:'44444444-4444-4444-8444-444444444444',admin:'55555555-5555-4555-8555-555555555555',normal:'66666666-6666-4666-8666-666666666666'};
+const hash='a'.repeat(64);
+try {
+  await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
+    create schema auth; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+    create schema storage; create table storage.buckets(id text primary key,name text,public boolean); create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
+    alter table storage.objects enable row level security; grant usage on schema public,auth,storage to anon,authenticated,service_role; grant all on storage.objects to anon,authenticated,service_role;`);
+  for(const name of ['20260915105910_assessment_rule_registry.sql','20260915112848_assessment_rule_import_lifecycle.sql','20260919204711_assessment_rule_review_backend.sql','20260920143000_assessment_rule_review_staging.sql'])
+    await db.exec(await readFile(new URL(`../supabase/migrations/${name}`,import.meta.url),'utf8'));
+  await db.query("insert into public.announcements(id,source,title) values($1,'LOCAL_TEST','Staging contract')",[ids.announcement]);
+  await db.query("insert into public.announcement_documents(id,announcement_id,document_type,storage_path,file_name,mime_type,sha256) values($1,$2,'DRAFT',$3,'review.hwp','application/x-hwp',$4)",[ids.document,ids.announcement,`2026/${ids.announcement}/${ids.document}/original.hwp`,hash]);
+  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,effective_date,config) values($1,$2,$3,'STAGING-1','DRAFT_SOURCE_VERIFIED','2026-09-14','{}')",[ids.set,ids.announcement,ids.document]);
+  const materialized=(await db.query("insert into public.assessment_rules(rule_set_id,supply_type,category,rule_key,config) values($1,'youth','ELIGIBILITY','youth.age','{}') returning id",[ids.set])).rows[0].id;
+  await db.query("insert into public.rule_evidence(rule_id,document_id,evidence_key,source,section,evidence_label) values($1,$2,'age:evidence','Samdo','신청자격','만 19~39세')",[materialized,ids.document]);
+  await db.query("insert into public.assessment_rule_review_versions(rule_set_id,reviewed_document_sha256,current_document_sha256) values($1,$2,$2)",[ids.set,hash]);
+  const candidate={ruleKey:'youth.age',label:'청년 나이',semanticRole:'AGE',supplyType:'youth',category:'AGE',operator:null,value:[19,39],scope:'APPLICANT',stage:null,score:null,maxScore:null,evidence:[{id:'age:evidence',documentId:ids.document,section:'신청자격',tableLabel:null,label:'나이',textExcerpt:'만 19~39세',locator:{}}],relatedExceptionRuleIds:[],warnings:[]};
+  const reviewId=(await db.query("insert into public.assessment_rule_reviews(rule_set_id,candidate_rule_id,materialized_rule_id,original_candidate_hash,original_candidate,critical_category,is_critical,is_required,candidate_status) values($1,'candidate:youth-age',$2,$3,$4,'AGE',true,true,'REVIEW_REQUIRED') returning id",[ids.set,materialized,'b'.repeat(64),candidate])).rows[0].id;
+  await db.query("insert into public.assessment_rule_evidence_reviews(rule_review_id,evidence_id) values($1,'age:evidence')",[reviewId]);
+  await db.query("insert into public.assessment_review_members(user_id,role) values($1,'reviewer'),($2,'admin')",[ids.reviewer,ids.admin]);
+  await db.exec('set role authenticated'); await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids.normal]);
+  await rejects(()=>db.query('select public.load_assessment_rule_review_workspace($1)',[ids.set]),'normal authenticated user forbidden');
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids.reviewer]);
+  ok((await db.query('select public.get_assessment_review_access() access')).rows[0].access.role==='reviewer','reviewer access resolved');
+  await rejects(()=>db.query('select * from public.assessment_rule_reviews'),'reviewer cannot access raw table');
+  let workspace=(await db.query("select public.load_assessment_rule_review_workspace($1) workspace",[ids.set])).rows[0].workspace;
+  ok(workspace.revision===0&&workspace.rules.length===1,'workspace DTO loads through RPC');
+  workspace=(await db.query("select public.mutate_assessment_rule_review($1::uuid,0,'START_REVIEW',$2::text,'{}','start') workspace",[ids.set,ids.set])).rows[0].workspace;
+  ok(workspace.revision===1&&workspace.lifecycleStatus==='IN_REVIEW','atomic start review');
+  await rejects(()=>db.query("select public.mutate_assessment_rule_review($1,0,'HOLD_RULE','candidate:youth-age','{}','stale')",[ids.set]),'stale revision blocked');
+  await db.query("select public.mutate_assessment_rule_review($1,1,'REVIEW_EVIDENCE','candidate:youth-age',$2,'evidence checked')",[ids.set,{evidenceId:'age:evidence',status:'VALID',replacement:null}]);
+  await db.query("select public.mutate_assessment_rule_review($1,2,'APPROVE_RULE','candidate:youth-age','{}','approved')",[ids.set]);
+  workspace=(await db.query("select public.load_assessment_rule_review_workspace($1) workspace",[ids.set])).rows[0].workspace;
+  ok(workspace.auditLog.length===3,'audit appended per mutation and exposed read-only through DTO');
+  await rejects(()=>db.query("select public.activate_reviewed_assessment_rule_set($1,3,null)",[ids.set]),'reviewer cannot activate');
+  await db.exec('reset role');
+  await db.query("insert into public.assessment_admin_reviews(rule_set_id,decision,reviewer_label) values($1,'APPROVED','LOCAL ADMIN')",[ids.set]);
+  await db.query('update public.assessment_rule_sets set approved_at=now() where id=$1',[ids.set]);
+  await rejects(()=>db.query("update public.assessment_rule_reviews set original_candidate='{}',revision=revision+1 where id=$1",[reviewId]),'original candidate immutable');
+  await db.exec('set role authenticated'); await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids.admin]);
+  ok((await db.query("select public.activate_reviewed_assessment_rule_set($1,3,null) result",[ids.set])).rows[0].result.status==='ACTIVE','admin activation rechecks server gate');
+  const nextHash='c'.repeat(64), nextDocument='77777777-7777-4777-8777-777777777777';
+  await db.exec('reset role'); await db.query("insert into public.announcement_documents(id,announcement_id,document_type,storage_path,file_name,mime_type,sha256) values($1,$2,'CORRECTION',$3,'review-v2.hwp','application/x-hwp',$4)",[nextDocument,ids.announcement,`2026/${ids.announcement}/${nextDocument}/original.hwp`,nextHash]);
+  await db.exec('set role authenticated'); await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids.admin]);
+  await db.query("select public.mutate_assessment_rule_review($1::uuid,3,'INVALIDATE_DOCUMENT',$2::text,$3,'new source')",[ids.set,ids.set,{hash:nextHash}]);
+  workspace=(await db.query("select public.load_assessment_rule_review_workspace($1) workspace",[ids.set])).rows[0].workspace;
+  ok(workspace.lifecycleStatus==='REVALIDATION_REQUIRED','document change invalidates prior review');
+  await db.exec('reset role'); await db.exec('set role anon');
+  await rejects(()=>db.query('select public.get_assessment_review_access()'),'anon cannot execute review RPC');
+  await db.exec('reset role');
+  console.log(`Assessment review staging SQL/RLS: ${checks} checks passed (isolated PGlite; no remote connection)`);
+} finally { await db.close(); }

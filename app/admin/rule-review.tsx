@@ -2,25 +2,54 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { RuleReviewConsole } from '../../features/assessmentRuleReview/ui/RuleReviewConsole';
-import { createBrowserRuleReviewRepository, type RuleReviewRepository } from '../../features/assessmentRuleReview/repository/RuleReviewRepository';
+import { createBrowserRuleReviewRepository, type RuleReviewRepositoryLike } from '../../features/assessmentRuleReview/repository/RuleReviewRepository';
+import { SupabaseRuleReviewRepository } from '../../features/assessmentRuleReview/repository/SupabaseRuleReviewRepository';
+import { readPublicRuleReviewTarget } from '../../features/assessmentRuleReview/repository/stagingTarget';
+import { getSupabaseClient } from '../../features/auth/supabaseClient';
 import { colors, spacing, type } from '../../design/tokens';
 
-/**
- * Admin-only rule review console.
- *
- * There is no admin authentication yet, so this route is deliberately unreachable
- * from user navigation: nothing links to it and it is not a tab. It runs the real
- * repository over an explicitly injected dev/test seed — no Supabase client,
- * database read/write, generated fixture import or activation.
- *
- * The root layout registers this route with `headerShown: false`.
- */
+type RouteState =
+  | { status: 'LOADING' }
+  | { status: 'READY'; repository: RuleReviewRepositoryLike; persistence: 'local' | 'staging' }
+  | { status: 'AUTH_REQUIRED' | 'FORBIDDEN' | 'NOT_CONFIGURED' | 'LOAD_FAILED'; message: string };
+
+/** Hidden route with a data-before-render authorization gate. */
 export default function AdminRuleReviewRoute() {
   const router = useRouter();
-  const [repository, setRepository] = useState<RuleReviewRepository | null>(null);
-  useEffect(() => setRepository(createBrowserRuleReviewRepository()), []);
-  if (!repository) return <View style={styles.empty}><Text style={styles.title}>Rule 검수 데이터가 연결되지 않았어요</Text><Text style={styles.body}>관리자 backend 연결 전에는 명시적으로 주입한 개발·테스트 seed에서만 콘솔을 열 수 있어요.</Text></View>;
-  return <RuleReviewConsole repository={repository} onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))} />;
+  const [state, setState] = useState<RouteState>({ status: 'LOADING' });
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const demoAllowed = process.env.NODE_ENV !== 'production' && process.env.EXPO_PUBLIC_WANPANE_ENV !== 'staging';
+      const demo = demoAllowed ? createBrowserRuleReviewRepository() : null;
+      if (demo) { if (active) setState({ status: 'READY', repository: demo, persistence: 'local' }); return; }
+      try {
+        readPublicRuleReviewTarget();
+        const client = getSupabaseClient();
+        const ruleSetId = process.env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID?.trim();
+        if (!client || !ruleSetId) throw new Error('STAGING_CONNECTION_REQUIRED');
+        const repository = new SupabaseRuleReviewRepository(client, ruleSetId);
+        const access = await repository.access();
+        if (!active) return;
+        if (!access.authenticated) setState({ status: 'AUTH_REQUIRED', message: '관리자 로그인이 필요합니다.' });
+        else if (!access.role) setState({ status: 'FORBIDDEN', message: 'Rule 검수 권한이 없습니다.' });
+        else setState({ status: 'READY', repository, persistence: 'staging' });
+      } catch (error) {
+        if (!active) return;
+        const code = error instanceof Error ? error.message : 'RULE_REVIEW_LOAD_FAILED';
+        setState({ status: code === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' : code === 'FORBIDDEN' ? 'FORBIDDEN' : code === 'STAGING_CONNECTION_REQUIRED' || code.startsWith('STAGING_') ? 'NOT_CONFIGURED' : 'LOAD_FAILED', message: code });
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  if (state.status !== 'READY') return (
+    <View style={styles.empty}>
+      <Text accessibilityRole="header" style={styles.title}>{state.status === 'LOADING' ? '관리자 권한을 확인하는 중이에요' : state.message}</Text>
+      {state.status !== 'LOADING' ? <Text style={styles.body}>권한이 확인되기 전에는 검수 데이터가 표시되지 않습니다.</Text> : null}
+    </View>
+  );
+  return <RuleReviewConsole repository={state.repository} persistence={state.persistence} onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))} />;
 }
 
 const styles = StyleSheet.create({

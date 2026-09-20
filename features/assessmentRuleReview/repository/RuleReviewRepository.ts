@@ -5,6 +5,7 @@ import type { ActivationGate, ConflictResolution, CriticalBlockerCode, EvidenceR
   ReviewEvidence, ReviewableRuleSnapshot, RuleReviewWorkspace, RuleReviewWorkspaceSeed } from '../server/types.ts';
 
 export type ReviewRepositoryMutation = { expectedRevision: number; reason: string };
+export type Awaitable<T> = T | Promise<T>;
 
 export interface RuleReviewRepository {
   snapshot(): RuleReviewWorkspace;
@@ -24,6 +25,12 @@ export interface RuleReviewRepository {
   bulkApproveSafe(ruleIds: string[], mutation: ReviewRepositoryMutation): void;
   invalidateDocument(hash: string, mutation: ReviewRepositoryMutation): void;
 }
+
+export type AsyncRuleReviewRepository = {
+  [K in keyof RuleReviewRepository]: RuleReviewRepository[K] extends (...args: infer A) => infer R
+    ? (...args: A) => Promise<Awaited<R>> : RuleReviewRepository[K]
+};
+export type RuleReviewRepositoryLike = RuleReviewRepository | AsyncRuleReviewRepository;
 
 /** Test/dev adapter. Future production UI can replace it with a trusted server repository. */
 export class InMemoryRuleReviewRepository implements RuleReviewRepository {

@@ -133,8 +133,8 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           original={record.originalCandidate}
           onDirtyChange={onDirtyChange}
           onCancel={() => setEditing(false)}
-          onSave={next => {
-            const result = actions.approveWithEdit(detail.ruleId, next, record.safetyBlockers, REASON);
+          onSave={async next => {
+            const result = await actions.approveWithEdit(detail.ruleId, next, record.safetyBlockers, REASON);
             if (result.ok) { setEditing(false); onDirtyChange(false); }
           }}
         />

@@ -11,12 +11,12 @@ import { useRuleReviewWorkspace } from './useRuleReviewWorkspace';
 import { reviewProgressPresentation, reviewStatusPresentation } from './reviewPresentation';
 import type { RuleListItemDto } from '../server/dto';
 import type { RuleReviewWorkspace } from '../server/types';
-import type { RuleReviewRepository } from '../repository/RuleReviewRepository';
+import type { RuleReviewRepositoryLike } from '../repository/RuleReviewRepository';
 
 const REASON = '관리자 검수 콘솔에서 확인';
 
-export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; repository: RuleReviewRepository }) {
-  const { workspace, summary, gate, rules, detail, actions, lastError, lastDone, lastDoneTone, clearFeedback } = useRuleReviewWorkspace(repository);
+export function RuleReviewConsole({ onBack, repository, persistence = 'local' }: { onBack: () => void; repository: RuleReviewRepositoryLike; persistence?: 'local' | 'staging' }) {
+  const { workspace, summary, gate, rules, detail, actions, loading, saving, lastError, lastDone, lastDoneTone, clearFeedback } = useRuleReviewWorkspace(repository);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -34,6 +34,13 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const wide = mounted && width >= 1024;
+
+  if (loading || !workspace || !summary || !gate) return (
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <ScreenHeader title="Rule 검수 콘솔" onBack={onBack} />
+      <View style={styles.loading}><Text style={styles.empty}>{lastError ? `검수 데이터를 불러오지 못했어요: ${lastError}` : '검수 데이터를 불러오는 중이에요.'}</Text></View>
+    </SafeAreaView>
+  );
 
   const all = rules({});
   const visible = onlyBlocking ? all.filter(item => item.priority === 'CRITICAL_BLOCKER') : all;
@@ -68,7 +75,7 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
         <View style={styles.banner}>
           <MaterialIcons name="science" size={16} color={colors.warning} />
           <Text style={styles.bannerText}>
-            관리자 인증과 운영 DB가 연결되기 전의 콘솔이에요. 검수 결정은 이 페이지 안에서만 유지되고 저장되지 않아요.
+            {persistence === 'staging' ? 'Staging 검수 저장소에 연결되어 있어요. 모든 결정은 revision과 감사 로그를 포함해 저장됩니다.' : '개발용 로컬 콘솔이에요. 검수 결정은 이 페이지 안에서만 유지되고 원격 DB에 저장되지 않아요.'}
           </Text>
         </View>
 
@@ -126,7 +133,7 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
         ) : null}
 
         {notStarted ? (
-          <Action label="검수 시작하기" tone="primary" onPress={() => actions.startReview(REASON)} />
+          <Action label="검수 시작하기" tone="primary" disabled={saving} onPress={() => actions.startReview(REASON)} />
         ) : null}
 
         <View style={styles.bulkRow}>
@@ -245,7 +252,7 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
   );
 }
 
-function ActivationPanel({ gate }: { gate: ReturnType<typeof useRuleReviewWorkspace>['gate'] }) {
+function ActivationPanel({ gate }: { gate: NonNullable<ReturnType<typeof useRuleReviewWorkspace>['gate']> }) {
   const eligible = gate.status === 'ACTIVATION_ELIGIBLE';
   return (
     <View style={[styles.activation, eligible ? styles.activationOk : styles.activationBlocked]}>
@@ -351,6 +358,7 @@ const BADGE_TEXT: Record<string, object> = {
 };
 
 const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   screen: { flex: 1, backgroundColor: colors.background },
   scroll: { width: '100%', maxWidth: 1240, alignSelf: 'center', padding: spacing.screen, paddingBottom: spacing.xl, gap: spacing.md },
   banner: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start', backgroundColor: colors.surfaceLow, borderRadius: radius.cardSm, padding: spacing.sm },

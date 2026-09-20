@@ -8,11 +8,12 @@ import type { ReviewRepositoryMutation } from './RuleReviewRepository.ts';
 
 type RpcResult = { data: unknown; error: { message: string; code?: string } | null };
 export type RuleReviewRpcClient = Pick<SupabaseClient, 'rpc'> & { auth: Pick<SupabaseClient['auth'], 'getSession'> };
-export type ReviewAccess = { authenticated: boolean; role: 'reviewer' | 'admin' | null };
+export type ReviewAccess = { authenticated: boolean; role: 'reviewer' | 'admin' | null; userId: string | null };
 
 const errorCode = (message: string) => {
+  if (/failed to fetch|network(?:error)?|load failed|fetch failed/i.test(message)) return 'RULE_REVIEW_OFFLINE';
   if (/stale review revision/i.test(message)) return 'STALE_REVIEW_REVISION';
-  if (/not authorized|forbidden/i.test(message)) return 'FORBIDDEN';
+  if (/not authorized|forbidden|permission denied/i.test(message)) return 'FORBIDDEN';
   if (/jwt|session|authenticated/i.test(message)) return 'AUTH_REQUIRED';
   if (/document revalidation/i.test(message)) return 'DOCUMENT_REVALIDATION_REQUIRED';
   return `RULE_REVIEW_DB_ERROR:${message}`;
@@ -25,11 +26,15 @@ export class SupabaseRuleReviewRepository {
 
   async access(): Promise<ReviewAccess> {
     const session = await this.client.auth.getSession();
-    if (session.error || !session.data.session) return { authenticated: false, role: null };
+    if (session.error || !session.data.session) return { authenticated: false, role: null, userId: null };
     const { data, error } = await this.client.rpc('get_assessment_review_access') as RpcResult;
     if (error) throw new Error(errorCode(error.message));
     const role = typeof data === 'object' && data ? (data as { role?: unknown }).role : null;
-    return { authenticated: true, role: role === 'admin' || role === 'reviewer' ? role : null };
+    return {
+      authenticated: true,
+      role: role === 'admin' || role === 'reviewer' ? role : null,
+      userId: session.data.session.user.id,
+    };
   }
 
   async snapshot(): Promise<RuleReviewWorkspace> {

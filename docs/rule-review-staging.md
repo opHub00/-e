@@ -14,6 +14,8 @@
 
 ## 구성
 
+- `RuleReviewConsole → ReviewGateway → RuleReviewRepository`: UI가 transport나 Supabase client를 직접 알지 않는 canonical 경계
+- `ReviewGateway`: load의 `READY/AUTH_REQUIRED/FORBIDDEN/OFFLINE/FAILED`와 commit의 `SAVED/STALE/AUTH_EXPIRED/OFFLINE/REJECTED/FAILED`를 명시적으로 변환
 - `SupabaseRuleReviewRepository`: 로그인한 사용자의 JWT로 read/mutation RPC 호출
 - `assessment_review_members`: `reviewer`/`admin` 역할의 최소 allow-list
 - `load_assessment_rule_review_workspace`: UI DTO 전체를 읽는 권한 검사 RPC
@@ -22,6 +24,8 @@
 - `InMemoryRuleReviewRepository`: 테스트와 명시적 dev seed 전용
 
 브라우저는 review table을 직접 읽거나 쓰지 않는다. `anon`과 일반 authenticated 사용자는 table 권한이 없고 RPC 내부의 `auth.uid()` allow-list 검사를 통과해야 한다.
+
+성공한 mutation은 gateway가 서버에서 다시 읽은 workspace snapshot을 함께 반환한다. UI는 이 snapshot만 채택하며 저장 전 상태를 승인·보류·활성화 가능으로 낙관적으로 바꾸지 않는다. stale 응답은 최신 서버 snapshot과 사용자 draft를 함께 유지하고 자동 merge하지 않는다. draft는 사용자와 rule set으로 만든 session key에 격리되며 로그아웃·계정 전환 시 이전 workspace를 즉시 제거한다. offline mutation은 queue나 background sync 없이 거절하고 사용자가 명시적으로 다시 시도해야 한다.
 
 ## 적용 순서
 

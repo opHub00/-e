@@ -30,7 +30,7 @@ test('fails closed before any review RPC when no auth session exists', async () 
   let rpcCalls=0;
   const mock={auth:{getSession:async()=>({data:{session:null},error:null})},rpc:async()=>{rpcCalls++;return {data:null,error:null};}} as unknown as RuleReviewRpcClient;
   const repo=new SupabaseRuleReviewRepository(mock,workspace.ruleVersionId);
-  assert.deepEqual(await repo.access(),{authenticated:false,role:null});
+  assert.deepEqual(await repo.access(),{authenticated:false,role:null,userId:null});
   assert.equal(rpcCalls,0);
 });
 
@@ -45,4 +45,29 @@ test('sends expected revision and mutation payload only through RPC', async () =
 test('normalizes stale revision without exposing credentials', async () => {
   const mock=client({error:'Stale review revision'}), repo=new SupabaseRuleReviewRepository(mock.value,workspace.ruleVersionId);
   await assert.rejects(()=>repo.reject('rule-1',{expectedRevision:1,reason:'bad'}),/STALE_REVIEW_REVISION/);
+});
+
+test('maps the complete repository mutation contract to the transactional RPC', async () => {
+  const mock = client();
+  const repo = new SupabaseRuleReviewRepository(mock.value, workspace.ruleVersionId);
+  const mutation = { expectedRevision: 4, reason: 'contract' };
+  const rule = workspace.rules[0]!;
+  const evidence = rule.originalCandidate.evidence[0]!;
+  await repo.startReview(mutation);
+  await repo.approve(rule.ruleId, mutation);
+  await repo.approveWithEdit(rule.ruleId, rule.originalCandidate, [], mutation);
+  await repo.hold(rule.ruleId, mutation);
+  await repo.reject(rule.ruleId, mutation);
+  await repo.resolveUnresolved('unresolved-1', 'resolved', mutation);
+  await repo.resolveConflict('conflict-1', { type: 'HELD', reason: 'contract' }, mutation);
+  await repo.reviewEvidence(rule.ruleId, evidence.id, 'VALID', mutation);
+  await repo.linkException(rule.ruleId, { status: 'INDEPENDENT' }, mutation);
+  await repo.invalidateDocument('f'.repeat(64), mutation);
+  const actions = mock.calls
+    .filter(call => call.name === 'mutate_assessment_rule_review')
+    .map(call => (call.args as { p_action: string }).p_action);
+  assert.deepEqual(actions, [
+    'START_REVIEW', 'APPROVE_RULE', 'APPROVE_RULE_WITH_EDIT', 'HOLD_RULE', 'REJECT_RULE',
+    'RESOLVE_UNRESOLVED', 'RESOLVE_CONFLICT', 'REVIEW_EVIDENCE', 'REVIEW_EXCEPTION', 'INVALIDATE_DOCUMENT',
+  ]);
 });

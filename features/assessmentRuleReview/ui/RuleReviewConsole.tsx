@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../components/ScreenHeader';
@@ -12,11 +12,30 @@ import { reviewProgressPresentation, reviewStatusPresentation } from './reviewPr
 import type { RuleListItemDto } from '../server/dto';
 import type { RuleReviewWorkspace } from '../server/types';
 import type { RuleReviewRepositoryLike } from '../repository/RuleReviewRepository';
+import type { ReviewGateway } from '../repository/ReviewGateway';
+import { clearReviewDraft } from './reviewDraftStore';
 
 const REASON = '관리자 검수 콘솔에서 확인';
 
-export function RuleReviewConsole({ onBack, repository, persistence = 'local' }: { onBack: () => void; repository: RuleReviewRepositoryLike; persistence?: 'local' | 'staging' }) {
-  const { workspace, summary, gate, rules, detail, actions, loading, saving, lastError, lastDone, lastDoneTone, clearFeedback } = useRuleReviewWorkspace(repository);
+type ConsoleProps = {
+  onBack: () => void;
+  repository: RuleReviewRepositoryLike;
+  initialWorkspace: RuleReviewWorkspace;
+  gateway: ReviewGateway;
+  persistence: 'local' | 'staging';
+  actorRole: 'local' | 'reviewer' | 'admin';
+  draftScope: string;
+  /** Re-runs the session load; used when a save reports the session ended. */
+  onSessionEnded: (reason: 'AUTH_EXPIRED') => void;
+  onRetryLoad: () => void;
+};
+
+export function RuleReviewConsole({ onBack, repository, initialWorkspace, gateway, persistence, actorRole, draftScope, onSessionEnded, onRetryLoad }: ConsoleProps) {
+  const { workspace, summary, gate, rules, detail, actions, save, clearFeedback, refresh } = useRuleReviewWorkspace(repository, gateway, initialWorkspace);
+  const saving = save.kind === 'SAVING';
+  const failed = save.kind === 'FAILED' ? save.outcome : null;
+  // Losing the session is not a console-level error: the route decides what to show.
+  useEffect(() => { if (failed?.status === 'AUTH_EXPIRED') onSessionEnded('AUTH_EXPIRED'); }, [failed, onSessionEnded]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -34,13 +53,6 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const wide = mounted && width >= 1024;
-
-  if (loading || !workspace || !summary || !gate) return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScreenHeader title="Rule 검수 콘솔" onBack={onBack} />
-      <View style={styles.loading}><Text style={styles.empty}>{lastError ? `검수 데이터를 불러오지 못했어요: ${lastError}` : '검수 데이터를 불러오는 중이에요.'}</Text></View>
-    </SafeAreaView>
-  );
 
   const all = rules({});
   const visible = onlyBlocking ? all.filter(item => item.priority === 'CRITICAL_BLOCKER') : all;
@@ -75,7 +87,9 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
         <View style={styles.banner}>
           <MaterialIcons name="science" size={16} color={colors.warning} />
           <Text style={styles.bannerText}>
-            {persistence === 'staging' ? 'Staging 검수 저장소에 연결되어 있어요. 모든 결정은 revision과 감사 로그를 포함해 저장됩니다.' : '개발용 로컬 콘솔이에요. 검수 결정은 이 페이지 안에서만 유지되고 원격 DB에 저장되지 않아요.'}
+            {persistence === 'staging'
+              ? 'Supabase Staging에 연결된 검수 콘솔이에요. 저장 결과는 서버가 확인한 snapshot으로만 반영됩니다.'
+              : '개발·테스트용 로컬 콘솔이에요. 검수 결정은 원격 DB에 저장되지 않아요.'}
           </Text>
         </View>
 
@@ -120,26 +134,30 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
           <Text style={styles.progressLine}>{progress.decisionLine}</Text>
         </View>
 
-        <ActivationPanel gate={gate} />
+        <ActivationPanel
+          gate={gate}
+          serverConfirmed={save.kind !== 'FAILED' && !saving}
+          canActivate={actorRole === 'admin' || actorRole === 'local'}
+        />
 
         {/* 미해결 항목은 근거 없이 체크로 지우지 못하게 사유를 입력받는다. */}
         {workspace.unresolvedItems.length ? (
           <View style={styles.unresolved}>
             <Text accessibilityRole="header" style={styles.sectionHeading}>공고에서 확정되지 않은 항목</Text>
             {workspace.unresolvedItems.map(item => (
-              <UnresolvedRow key={item.unresolvedId} item={item} locked={notStarted || revalidation} onResolve={actions.resolveUnresolved} />
+              <UnresolvedRow key={item.unresolvedId} item={item} locked={notStarted || revalidation || saving} onResolve={actions.resolveUnresolved} />
             ))}
           </View>
         ) : null}
 
         {notStarted ? (
-          <Action label="검수 시작하기" tone="primary" disabled={saving} onPress={() => actions.startReview(REASON)} />
+          <Action label="검수 시작하기" tone="primary" disabled={saving} onPress={() => void actions.startReview(REASON)} />
         ) : null}
 
         <View style={styles.bulkRow}>
           <Action
             label={`근거 명확 ${bulkTargets.length}건 한 번에 승인`}
-            disabled={notStarted || revalidation || bulkBlockedBy.length > 0 || bulkTargets.length === 0}
+            disabled={saving || notStarted || revalidation || bulkBlockedBy.length > 0 || bulkTargets.length === 0}
             onPress={() => actions.bulkApproveSafe(bulkTargets.map(item => item.ruleId), REASON)}
           />
           {bulkBlockedBy.length ? (
@@ -161,18 +179,21 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
           밀리면 방금 누르려던 버튼이 옮겨가 오클릭이 난다.
         */}
         <View style={styles.feedbackSlot}>
-          {lastError ? (
+          {save.kind === 'SAVING' ? (
+            <View style={styles.feedbackSaving}>
+              <ActivityIndicator color={colors.primary} />
+              <Text accessibilityRole="alert" style={styles.feedbackSavingText}>서버에 저장하는 중이에요… 저장이 끝나야 결정이 반영돼요.</Text>
+            </View>
+          ) : save.kind === 'FAILED' ? (
             <View style={styles.feedbackBad}>
-              <Text accessibilityRole="alert" style={styles.feedbackBadText}>
-                {lastError === 'STALE_REVIEW_REVISION'
-                  ? '다른 검수자가 먼저 수정했습니다. 최신 내용을 다시 불러왔어요. 입력하던 내용은 그대로 두었으니 확인 후 다시 저장해 주세요.'
-                  : `처리하지 않았어요: ${lastError}`}
-              </Text>
+              <Text accessibilityRole="alert" style={styles.feedbackBadText}>{save.label}</Text>
+              {/* 실패한 저장은 자동으로 다시 보내지 않는다. 다시 시도는 사람이 누른다. */}
+              <Action label="다시 시도" onPress={() => { refresh(); onRetryLoad(); }} />
               <Action label="닫기" onPress={clearFeedback} />
             </View>
-          ) : lastDone ? (
-            <View style={lastDoneTone === 'warning' ? styles.feedbackWarn : styles.feedbackOk}>
-              <Text accessibilityRole="alert" style={lastDoneTone === 'warning' ? styles.feedbackWarnText : styles.feedbackOkText}>{lastDone}</Text>
+          ) : save.kind === 'SAVED' ? (
+            <View style={save.tone === 'warning' ? styles.feedbackWarn : styles.feedbackOk}>
+              <Text accessibilityRole="alert" style={save.tone === 'warning' ? styles.feedbackWarnText : styles.feedbackOkText}>{save.label}</Text>
               <Action label="닫기" onPress={clearFeedback} />
             </View>
           ) : (
@@ -195,9 +216,9 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
         {/* 검수 상태를 실제로 만들어 보기 위한 dev 전용 진입점. 운영 동작이 아니다. */}
         <View style={styles.scenarioRow}>
           <Text style={styles.scenarioLabel}>검수 상태 재현</Text>
-          <Action label="다른 검수자가 먼저 저장한 상황" disabled={notStarted || revalidation}
+          <Action label="다른 검수자가 먼저 저장한 상황" disabled={saving || notStarted || revalidation}
             onPress={() => actions.simulateStaleRevision(all[0]?.ruleId ?? '')} />
-          <Action label="공고문이 바뀐 상황" disabled={revalidation}
+          <Action label="공고문이 바뀐 상황" disabled={saving || revalidation}
             onPress={() => actions.invalidateDocument('a'.repeat(63) + '1', '공고문 교체 재현')} />
         </View>
 
@@ -238,8 +259,10 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
                 workspace={workspace}
                 blockReasons={approvalBlockReasons(selectedRecord, workspace, gate)}
                 locked={notStarted || revalidation}
+                saving={saving}
                 revalidation={revalidation}
                 actions={actions}
+                draftScope={draftScope}
                 onDirtyChange={onDirtyChange}
               />
             ) : (
@@ -252,15 +275,24 @@ export function RuleReviewConsole({ onBack, repository, persistence = 'local' }:
   );
 }
 
-function ActivationPanel({ gate }: { gate: NonNullable<ReturnType<typeof useRuleReviewWorkspace>['gate']> }) {
-  const eligible = gate.status === 'ACTIVATION_ELIGIBLE';
+function ActivationPanel({ gate, serverConfirmed, canActivate }: { gate: ReturnType<typeof useRuleReviewWorkspace>['gate']; serverConfirmed: boolean; canActivate: boolean }) {
+  /*
+    활성화 가능은 서버가 확인해 준 상태에서만 말한다. 저장이 진행 중이거나 실패해
+    화면과 서버가 다를 수 있으면 가능하다고 하지 않는다.
+  */
+  const eligible = gate.status === 'ACTIVATION_ELIGIBLE' && gate.canActivate && serverConfirmed;
   return (
     <View style={[styles.activation, eligible ? styles.activationOk : styles.activationBlocked]}>
       <Text accessibilityRole="header" style={[styles.activationTitle, { color: eligible ? colors.success : colors.error }]}>
-        {eligible ? '활성화 가능' : gate.status === 'REVALIDATION_REQUIRED' ? '활성화할 수 없음 · 재검수 필요' : '활성화할 수 없음'}
+        {eligible ? '활성화 가능'
+          : gate.status === 'REVALIDATION_REQUIRED' ? '활성화할 수 없음 · 재검수 필요'
+            : !serverConfirmed ? '활성화 상태 확인 중'
+              : '활성화할 수 없음'}
       </Text>
       {eligible ? (
-        <Text style={styles.activationBody}>모든 검수 항목이 해결됐어요. 실제 활성화는 운영 backend 연결 후에 가능해요.</Text>
+        <Text style={styles.activationBody}>서버가 모든 검수 항목이 해결됐다고 확인했어요. 실제 활성화는 운영 backend 연결 후에 가능해요.</Text>
+      ) : !serverConfirmed ? (
+        <Text style={styles.activationBody}>서버 저장 결과를 확인하기 전에는 활성화 가능 여부를 표시하지 않아요.</Text>
       ) : (
         <>
           <Text style={styles.activationBody}>남은 차단 사유 {gate.blockers.length}건</Text>
@@ -273,7 +305,7 @@ function ActivationPanel({ gate }: { gate: NonNullable<ReturnType<typeof useRule
         </>
       )}
       <Action label="rule version 활성화" disabled onPress={() => undefined} />
-      <Text style={styles.activationBody}>운영 DB 연결 후 활성화할 수 있어요.</Text>
+      <Text style={styles.activationBody}>{canActivate ? '운영 DB 연결 후 활성화할 수 있어요.' : 'admin 권한만 활성화할 수 있어요.'}</Text>
     </View>
   );
 }
@@ -358,7 +390,6 @@ const BADGE_TEXT: Record<string, object> = {
 };
 
 const styles = StyleSheet.create({
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   screen: { flex: 1, backgroundColor: colors.background },
   scroll: { width: '100%', maxWidth: 1240, alignSelf: 'center', padding: spacing.screen, paddingBottom: spacing.xl, gap: spacing.md },
   banner: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start', backgroundColor: colors.surfaceLow, borderRadius: radius.cardSm, padding: spacing.sm },
@@ -393,6 +424,8 @@ const styles = StyleSheet.create({
   unresolvedInput: { ...type.bodySm, color: colors.text, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.button, minHeight: size.control, paddingHorizontal: spacing.sm },
   unresolvedHint: { ...type.caption, color: colors.error },
   feedbackSlot: { minHeight: 56, justifyContent: 'center' },
+  feedbackSaving: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: colors.surfaceLow, borderRadius: radius.cardSm, padding: spacing.sm },
+  feedbackSavingText: { ...type.bodySm, color: colors.textMuted, flex: 1 },
   feedbackIdle: { ...type.bodySm, color: colors.textSubtle },
   feedbackOk: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#D6EFE0', borderRadius: radius.cardSm, padding: spacing.sm },
   feedbackOkText: { ...type.bodySmStrong, color: colors.success, flex: 1 },

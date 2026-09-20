@@ -8,12 +8,18 @@ import {
   canEditOperator, canEditScore, describeChange, numberHint, parseNumber, ruleConditionText, valueKindOf, type RangeClause,
 } from './ruleFields';
 import type { ReviewableRuleSnapshot } from '../server/types';
+import { writeReviewDraft } from './reviewDraftStore';
 
 type Props = {
   original: ReviewableRuleSnapshot;
+  /** An edit that survived a session expiry, so the reviewer does not retype it. */
+  restored?: ReviewableRuleSnapshot | null;
+  /** A save is in flight; the form stays visible but cannot be changed or re-submitted. */
+  saving?: boolean;
   onCancel: () => void;
-  onSave: (edited: ReviewableRuleSnapshot) => void;
+  onSave: (edited: ReviewableRuleSnapshot) => void | Promise<void>;
   onDirtyChange: (dirty: boolean) => void;
+  draftScope?: string;
 };
 
 const rangeOf = (value: unknown) => Array.isArray(value) ? (value as RangeClause[]) : [];
@@ -26,19 +32,22 @@ const rangeOf = (value: unknown) => Array.isArray(value) ? (value as RangeClause
  * a refusal. Everything else is edited through a control that matches the value's kind,
  * and the change is previewed as a sentence before it is saved.
  */
-export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Props) {
+export function RuleEditForm({ original, restored, saving = false, onCancel, onSave, onDirtyChange, draftScope }: Props) {
   const kind = valueKindOf(original);
   const showOperator = canEditOperator(original);
   const showScore = canEditScore(original);
   const range = rangeOf(original.value);
-  const [scalar, setScalar] = useState(() => kind === 'BOOLEAN' || kind === 'AGE_RANGE' ? '' : String(original.value ?? ''));
-  const [bounds, setBounds] = useState(() => range.map(item => String(item.value)));
-  const [boolean_, setBoolean] = useState(() => original.value === true);
-  const [operator, setOperator] = useState(original.operator);
-  const [scope, setScope] = useState(original.scope);
-  const [stage, setStage] = useState(original.stage);
-  const [score, setScore] = useState(original.score === null ? '' : String(original.score));
-  const [maxScore, setMaxScore] = useState(original.maxScore === null ? '' : String(original.maxScore));
+  // A restored draft seeds the fields; otherwise they start from the AI original.
+  const start = restored ?? original;
+  const startRange = rangeOf(start.value);
+  const [scalar, setScalar] = useState(() => kind === 'BOOLEAN' || kind === 'AGE_RANGE' ? '' : String(start.value ?? ''));
+  const [bounds, setBounds] = useState(() => range.map((item, index) => String(startRange[index]?.value ?? item.value)));
+  const [boolean_, setBoolean] = useState(() => start.value === true);
+  const [operator, setOperator] = useState(start.operator);
+  const [scope, setScope] = useState(start.scope);
+  const [stage, setStage] = useState(start.stage);
+  const [score, setScore] = useState(start.score === null ? '' : String(start.score));
+  const [maxScore, setMaxScore] = useState(start.maxScore === null ? '' : String(start.maxScore));
 
   const next = useMemo<ReviewableRuleSnapshot | null>(() => {
     const draft = structuredClone(original);
@@ -80,6 +89,14 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
   const dirty = changes.length > 0;
   // Reported through an effect so the parent's dirty guard never updates during render.
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
+  /*
+    The draft is written as it changes, not only on submit. A session can expire between
+    the last keystroke and the save, and re-typing values already checked against the
+    source is exactly where transcription mistakes creep in.
+  */
+  useEffect(() => {
+    if (dirty && next) writeReviewDraft({ ruleId: original.ruleKey, edited: next }, draftScope);
+  }, [dirty, draftScope, next, original.ruleKey]);
 
   return (
     <View style={styles.form}>
@@ -182,12 +199,12 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
 
       <View style={styles.actions}>
         <MotionPressable
-          accessibilityRole="button" accessibilityState={{ disabled: !next || !changes.length }} disabled={!next || !changes.length}
-          onPress={() => next && onSave(next)} style={[styles.save, (!next || !changes.length) && styles.off]}
+          accessibilityRole="button" accessibilityState={{ disabled: saving || !next || !changes.length }} disabled={saving || !next || !changes.length}
+          onPress={() => { if (next) void onSave(next); }} style={[styles.save, (saving || !next || !changes.length) && styles.off]}
         >
-          <Text style={styles.saveText}>이 수정으로 승인</Text>
+          <Text style={styles.saveText}>{saving ? '저장 중…' : '이 수정으로 승인'}</Text>
         </MotionPressable>
-        <MotionPressable accessibilityRole="button" onPress={() => { onDirtyChange(false); onCancel(); }} style={styles.cancel}>
+        <MotionPressable accessibilityRole="button" accessibilityState={{ disabled: saving }} disabled={saving} onPress={() => { onDirtyChange(false); onCancel(); }} style={styles.cancel}>
           <Text style={styles.cancelText}>편집 취소</Text>
         </MotionPressable>
       </View>

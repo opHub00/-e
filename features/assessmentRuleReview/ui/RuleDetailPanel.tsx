@@ -7,6 +7,7 @@ import { RuleEditForm } from './RuleEditForm';
 import { ReviewRadioChoice } from './ReviewRadioChoice';
 import { SCOPE_TEXT, STAGE_TEXT, canEditScore, describeChange, ruleConditionText } from './ruleFields';
 import { reviewStatusPresentation } from './reviewPresentation';
+import { clearReviewDraft, readReviewDraft } from './reviewDraftStore';
 import {
   EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, historyLine,
 } from './reviewLabels';
@@ -20,15 +21,21 @@ type Props = {
   workspace: RuleReviewWorkspace;
   blockReasons: string[];
   locked: boolean;
+  /** A save is in flight: controls freeze, but an open edit keeps its input. */
+  saving: boolean;
   revalidation: boolean;
   actions: ReturnType<typeof useRuleReviewWorkspace>['actions'];
   onDirtyChange: (dirty: boolean) => void;
+  draftScope?: string;
 };
 
 const REASON = '관리자 검수 콘솔에서 확인';
 const RELATION_CHOICES = ['LIMITED_BY', 'EXEMPTED_BY', 'OVERRIDDEN_BY', 'QUALIFIED_BY', 'APPLIES_ONLY_IF'] as const;
 
-export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, revalidation, actions, onDirtyChange }: Props) {
+export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, saving, revalidation, actions, onDirtyChange, draftScope }: Props) {
+  // Controls are inert while the session is locked or a save is in flight; only a
+  // locked session closes the editor, because a pending save must not discard input.
+  const inert = locked || saving;
   // Static export renders without a viewport; widening only after mount avoids a mismatch.
   const width = useWindowDimensions().width;
   const [mounted, setMounted] = useState(false);
@@ -36,6 +43,10 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
   const wide = mounted && width >= 1024;
 
   const [showHistory, setShowHistory] = useState(false);
+  const restoredDraft = useMemo(() => {
+    const draft = readReviewDraft(draftScope);
+    return draft && draft.ruleId === detail.ruleId ? draft : null;
+  }, [detail.ruleId, draftScope]);
   const [editing, setEditing] = useState(false);
   const [replacingEvidence, setReplacingEvidence] = useState<string | null>(null);
   const [linkingBase, setLinkingBase] = useState<string | null>(null);
@@ -44,7 +55,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
 
   const conflict = workspace.conflicts.find(item => item.candidateRuleIds.includes(detail.ruleId));
   const edited = detail.editedCandidate;
-  const canApprove = !locked && blockReasons.length === 0;
+  const canApprove = !inert && blockReasons.length === 0;
   const orphan = detail.exceptionRelations.find(item => item.exceptionRuleId === detail.ruleId && item.status !== 'LINKED');
   const statusPresentation = reviewStatusPresentation(detail.reviewState, workspace.lifecycleStatus);
 
@@ -122,7 +133,10 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           ) : editing ? null : (
             <>
               <Text style={styles.noEdit}>아직 수정본이 없어요. 원본 그대로 승인하거나, 고쳐서 승인할 수 있어요.</Text>
-              <Action label="값 고치기" disabled={locked} onPress={() => setEditing(true)} />
+              {restoredDraft ? (
+                <Text style={styles.draftNote}>이전에 작성하던 수정 내용이 남아 있어요. 편집을 열면 이어서 쓸 수 있어요.</Text>
+              ) : null}
+              <Action label={restoredDraft ? '작성하던 수정 이어서 하기' : '값 고치기'} disabled={inert} onPress={() => setEditing(true)} />
             </>
           )}
         </View>
@@ -131,11 +145,15 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
       {editing ? (
         <RuleEditForm
           original={record.originalCandidate}
+          restored={restoredDraft?.edited ?? null}
+          saving={saving}
+          draftScope={draftScope}
           onDirtyChange={onDirtyChange}
-          onCancel={() => setEditing(false)}
+          onCancel={() => { clearReviewDraft(draftScope); setEditing(false); }}
           onSave={async next => {
+            // The form stays open and the draft stays on disk until the server accepts.
             const result = await actions.approveWithEdit(detail.ruleId, next, record.safetyBlockers, REASON);
-            if (result.ok) { setEditing(false); onDirtyChange(false); }
+            if (result.ok) { clearReviewDraft(draftScope); setEditing(false); onDirtyChange(false); }
           }}
         />
       ) : null}
@@ -168,7 +186,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
               {baseOptions.map(option => (
                 <ReviewRadioChoice
                   key={option.id} selected={linkingBase === option.id}
-                  disabled={locked} onPress={() => setLinkingBase(option.id)}
+                  disabled={inert} onPress={() => setLinkingBase(option.id)}
                   style={[styles.baseOption, linkingBase === option.id && styles.baseOptionOn]}
                 >
                   <Text style={styles.baseLabel}>{option.snapshot.label}</Text>
@@ -180,11 +198,11 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
               <Text style={styles.fieldLabel}>관계 유형</Text>
               <View style={styles.actionRow}>
                 {RELATION_CHOICES.map(relationType => (
-                  <Action key={relationType} label={RELATION_LABEL[relationType]} disabled={locked || !linkingBase}
+                  <Action key={relationType} label={RELATION_LABEL[relationType]} disabled={inert || !linkingBase}
                     onPress={() => actions.linkException(detail.ruleId, { status: 'LINKED', baseRuleId: linkingBase!, relationType }, REASON)} />
                 ))}
               </View>
-              <Action label="독립 예외로 둠" disabled={locked} onPress={() => actions.linkException(detail.ruleId, { status: 'INDEPENDENT' }, REASON)} />
+              <Action label="독립 예외로 둠" disabled={inert} onPress={() => actions.linkException(detail.ruleId, { status: 'INDEPENDENT' }, REASON)} />
             </View>
           ) : null}
         </View>
@@ -197,7 +215,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           {conflict.candidates.map((candidate, index) => (
             <View key={candidate.candidateId} style={styles.conflictOption}>
               <Text style={styles.conflictValue}>{index === 0 ? '①' : '②'} {String(candidate.value)}</Text>
-              <Action label="이 근거 채택" disabled={locked}
+              <Action label="이 근거 채택" disabled={inert}
                 onPress={() => actions.resolveConflict(conflict.conflictId, { type: 'CANDIDATE', candidateId: candidate.candidateId, reason: REASON }, REASON)} />
             </View>
           ))}
@@ -206,13 +224,13 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           <View style={styles.subsection}>
             <Text style={styles.fieldLabel}>둘 다 아니면 직접 입력</Text>
             <TextInput accessibilityLabel="직접 입력할 기준" style={styles.input} value={customValue} onChangeText={setCustomValue}
-              placeholder="예: 공고일 기준 1년 이상 계속 거주" placeholderTextColor={colors.textSubtle} editable={!locked} />
+              placeholder="예: 공고일 기준 1년 이상 계속 거주" placeholderTextColor={colors.textSubtle} editable={!inert} />
             <Text style={styles.fieldLabel}>이 판단의 근거</Text>
             {conflictEvidenceIds.map(id => {
               const source = workspace.rules.flatMap(rule => rule.originalCandidate.evidence).find(item => item.id === id);
               return (
                 <ReviewRadioChoice key={id} selected={customEvidence === id}
-                  disabled={locked} onPress={() => setCustomEvidence(id)} style={[styles.baseOption, customEvidence === id && styles.baseOptionOn]}>
+                  disabled={inert} onPress={() => setCustomEvidence(id)} style={[styles.baseOption, customEvidence === id && styles.baseOptionOn]}>
                   <Text style={styles.baseLabel}>{source?.label ?? id}</Text>
                   <Text style={styles.baseMeta}>{[source?.section, source?.tableLabel].filter(Boolean).join(' · ')}</Text>
                 </ReviewRadioChoice>
@@ -221,7 +239,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
             {!customValue.trim() || !customEvidence ? (
               <Text style={styles.hintWarn}>직접 입력한 기준은 값과 근거를 모두 지정해야 저장할 수 있어요.</Text>
             ) : null}
-            <Action label="직접 입력한 기준으로 확정" disabled={locked || !customValue.trim() || !customEvidence}
+            <Action label="직접 입력한 기준으로 확정" disabled={inert || !customValue.trim() || !customEvidence}
               onPress={() => actions.resolveConflict(conflict.conflictId,
                 { type: 'CUSTOM', value: customValue.trim(), evidenceIds: [customEvidence!], reason: REASON }, REASON)} />
           </View>
@@ -232,7 +250,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
                 : conflict.resolution.type === 'HELD' ? '보류' : `직접 입력 · ${String(conflict.resolution.value)}`}`
               : '현재: 선택 없음'}
           </Text>
-          <Action label="둘 다 보류하고 원문 재확인" disabled={locked}
+          <Action label="둘 다 보류하고 원문 재확인" disabled={inert}
             onPress={() => actions.resolveConflict(conflict.conflictId, { type: 'HELD', reason: REASON }, REASON)} />
         </View>
       ) : null}
@@ -246,9 +264,9 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
               <View style={styles.actionRow}>
                 <Badge tone={review.status === 'VALID' || review.status === 'REPLACED' ? 'NORMAL' : review.status === 'INVALID' ? 'CRITICAL_BLOCKER' : 'REVIEW_REQUIRED'}
                   text={EVIDENCE_STATUS_LABEL[review.status]} />
-                <Action label="유효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'VALID', REASON)} />
-                <Action label="무효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'INVALID', REASON)} />
-                <Action label={replacingEvidence === review.evidenceId ? '교체 취소' : '다른 근거로 교체'} disabled={locked}
+                <Action label="유효" disabled={inert} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'VALID', REASON)} />
+                <Action label="무효" disabled={inert} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'INVALID', REASON)} />
+                <Action label={replacingEvidence === review.evidenceId ? '교체 취소' : '다른 근거로 교체'} disabled={inert}
                   onPress={() => setReplacingEvidence(current => current === review.evidenceId ? null : review.evidenceId)} />
               </View>
               {review.replacement ? (
@@ -264,7 +282,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
                       <Text style={styles.baseLabel}>{option.label}</Text>
                       <Text style={styles.baseMeta}>{[option.section, option.tableLabel].filter(Boolean).join(' · ')}</Text>
                       <Text style={styles.excerpt}>{option.textExcerpt ?? '원문 발췌 없음'}</Text>
-                      <Action label="이 근거로 교체" disabled={locked}
+                      <Action label="이 근거로 교체" disabled={inert}
                         onPress={() => { actions.reviewEvidence(detail.ruleId, review.evidenceId, 'REPLACED', REASON, option); setReplacingEvidence(null); }} />
                     </View>
                   )) : <Text style={styles.hintWarn}>같은 문서에서 바꿀 수 있는 다른 근거가 없어요.</Text>}
@@ -277,8 +295,8 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
 
       <View style={styles.actionRow}>
         <Action label="승인" tone="primary" disabled={!canApprove} onPress={() => actions.approve(detail.ruleId, REASON)} />
-        <Action label="보류" disabled={locked} onPress={() => actions.hold(detail.ruleId, REASON)} />
-        <Action label="제외" tone="danger" disabled={locked} onPress={() => actions.reject(detail.ruleId, REASON)} />
+        <Action label="보류" disabled={inert} onPress={() => actions.hold(detail.ruleId, REASON)} />
+        <Action label="제외" tone="danger" disabled={inert} onPress={() => actions.reject(detail.ruleId, REASON)} />
       </View>
 
       <MotionPressable accessibilityRole="button" accessibilityState={{ expanded: showHistory }} aria-expanded={showHistory}
@@ -332,6 +350,7 @@ const styles = StyleSheet.create({
   editedNoteText: { ...type.caption, color: colors.primary },
   diff: { ...type.bodySm, color: colors.text },
   noEdit: { ...type.bodySm, color: colors.textMuted },
+  draftNote: { ...type.bodySm, color: colors.primary },
   field: { flexDirection: 'row', gap: spacing.sm },
   fieldLabelInline: { ...type.bodySm, color: colors.textSubtle, width: 76 },
   fieldLabel: { ...type.caption, color: colors.textSubtle },

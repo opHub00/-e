@@ -7,6 +7,12 @@ export type RuleReviewTargetInput = {
 
 export type RuleReviewTarget = { projectRef: string; url: string };
 
+/** Local fixture data is never allowed to bypass a staging or production target. */
+export function allowsLocalReviewSeed(environment?: string | null): boolean {
+  const normalized = environment?.trim().toLowerCase();
+  return normalized !== 'staging' && normalized !== 'production';
+}
+
 export function projectRefFromSupabaseUrl(value: string): string | null {
   try {
     const host = new URL(value).hostname.toLowerCase();

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
+import { ReviewRadioChoice } from './ReviewRadioChoice';
 import { colors, radius, size, spacing, type } from '../../../design/tokens';
 import {
   OPERATOR_CHOICES, OPERATOR_TEXT, SCOPE_CHOICES, SCOPE_TEXT, STAGE_CHOICES, STAGE_TEXT, UNIT_SUFFIX,
-  conditionText, describeChange, numberHint, parseNumber, valueKindOf, type RangeClause,
+  canEditOperator, canEditScore, describeChange, numberHint, parseNumber, ruleConditionText, valueKindOf, type RangeClause,
 } from './ruleFields';
 import type { ReviewableRuleSnapshot } from '../server/types';
 
@@ -27,6 +28,8 @@ const rangeOf = (value: unknown) => Array.isArray(value) ? (value as RangeClause
  */
 export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Props) {
   const kind = valueKindOf(original);
+  const showOperator = canEditOperator(original);
+  const showScore = canEditScore(original);
   const range = rangeOf(original.value);
   const [scalar, setScalar] = useState(() => kind === 'BOOLEAN' || kind === 'AGE_RANGE' ? '' : String(original.value ?? ''));
   const [bounds, setBounds] = useState(() => range.map(item => String(item.value)));
@@ -54,15 +57,17 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
       if (parsed === null) return null;
       draft.value = parsed;
     }
-    draft.operator = operator;
+    if (showOperator) draft.operator = operator;
     draft.scope = scope;
     draft.stage = stage;
-    draft.score = score.trim() ? parseNumber(score) : null;
-    draft.maxScore = maxScore.trim() ? parseNumber(maxScore) : null;
-    if (score.trim() && draft.score === null) return null;
-    if (maxScore.trim() && draft.maxScore === null) return null;
+    if (showScore) {
+      draft.score = score.trim() ? parseNumber(score) : null;
+      draft.maxScore = maxScore.trim() ? parseNumber(maxScore) : null;
+      if (score.trim() && draft.score === null) return null;
+      if (maxScore.trim() && draft.maxScore === null) return null;
+    }
     return draft;
-  }, [bounds, boolean_, kind, maxScore, operator, original, range, scalar, scope, score, stage]);
+  }, [bounds, boolean_, kind, maxScore, operator, original, range, scalar, scope, score, showOperator, showScore, stage]);
 
   const changes = useMemo(() => {
     if (!next) return [];
@@ -82,7 +87,7 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
 
       {kind === 'UNSUPPORTED' ? (
         <Text style={styles.unsupported}>
-          이 규칙의 값은 콘솔에서 편집할 수 있는 형태가 아니에요. 적용 대상·공급단계·배점만 고칠 수 있어요.
+          이 규칙의 값은 콘솔에서 편집할 수 있는 형태가 아니에요. 적용 대상과 공급단계만 고칠 수 있어요.
         </Text>
       ) : kind === 'AGE_RANGE' ? (
         <View style={styles.rangeRow}>
@@ -115,12 +120,16 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
         </View>
       )}
 
-      <Text style={styles.fieldLabel}>비교 방식</Text>
-      <View style={styles.choices}>
-        {OPERATOR_CHOICES.map(value => (
-          <Choice key={value} label={OPERATOR_TEXT[value]} selected={operator === value} onPress={() => setOperator(value)} />
-        ))}
-      </View>
+      {showOperator ? (
+        <>
+          <Text style={styles.fieldLabel}>비교 방식</Text>
+          <View style={styles.choices}>
+            {OPERATOR_CHOICES.map(value => (
+              <Choice key={value} label={OPERATOR_TEXT[value]} selected={operator === value} onPress={() => setOperator(value)} />
+            ))}
+          </View>
+        </>
+      ) : null}
 
       <Text style={styles.fieldLabel}>적용 대상</Text>
       <View style={styles.choices}>
@@ -136,16 +145,18 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
         ))}
       </View>
 
-      <View style={styles.scoreRow}>
-        <View style={styles.field}>
-          <Text style={styles.fieldLabel}>배점</Text>
-          <TextInput accessibilityLabel="배점" style={styles.input} inputMode="numeric" value={score} onChangeText={setScore} placeholder="배점 없음" placeholderTextColor={colors.textSubtle} />
+      {showScore ? (
+        <View style={styles.scoreRow}>
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>배점</Text>
+            <TextInput accessibilityLabel="배점" style={styles.input} inputMode="numeric" value={score} onChangeText={setScore} placeholder="배점 없음" placeholderTextColor={colors.textSubtle} />
+          </View>
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>배점 만점</Text>
+            <TextInput accessibilityLabel="배점 만점" style={styles.input} inputMode="numeric" value={maxScore} onChangeText={setMaxScore} placeholder="만점 없음" placeholderTextColor={colors.textSubtle} />
+          </View>
         </View>
-        <View style={styles.field}>
-          <Text style={styles.fieldLabel}>배점 만점</Text>
-          <TextInput accessibilityLabel="배점 만점" style={styles.input} inputMode="numeric" value={maxScore} onChangeText={setMaxScore} placeholder="만점 없음" placeholderTextColor={colors.textSubtle} />
-        </View>
-      </View>
+      ) : null}
 
       {/* 저장 전에 무엇이 어떻게 바뀌는지 문장으로 먼저 보여준다. */}
       <View style={styles.preview}>
@@ -165,7 +176,7 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
           ))
         )}
         <Text style={styles.currentCondition}>
-          최종 조건: {next ? conditionText(next.operator, next.value) : '—'}
+          최종 조건: {next ? ruleConditionText(next) : '—'}
         </Text>
       </View>
 
@@ -186,9 +197,9 @@ export function RuleEditForm({ original, onCancel, onSave, onDirtyChange }: Prop
 
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
-    <MotionPressable accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} style={[styles.choice, selected && styles.choiceOn]}>
+    <ReviewRadioChoice selected={selected} onPress={onPress} style={[styles.choice, selected && styles.choiceOn]}>
       <Text style={[styles.choiceText, selected && styles.choiceTextOn]}>{label}</Text>
-    </MotionPressable>
+    </ReviewRadioChoice>
   );
 }
 

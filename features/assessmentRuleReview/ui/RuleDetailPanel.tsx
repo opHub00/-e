@@ -4,9 +4,11 @@ import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../../design/tokens';
 import { Action, Badge } from './RuleReviewConsole';
 import { RuleEditForm } from './RuleEditForm';
-import { SCOPE_TEXT, STAGE_TEXT, conditionText, describeChange } from './ruleFields';
+import { ReviewRadioChoice } from './ReviewRadioChoice';
+import { SCOPE_TEXT, STAGE_TEXT, canEditScore, describeChange, ruleConditionText } from './ruleFields';
+import { reviewStatusPresentation } from './reviewPresentation';
 import {
-  EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, REVIEW_STATUS_LABEL, historyLine,
+  EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, historyLine,
 } from './reviewLabels';
 import type { getRuleDetail } from '../server/dto';
 import type { ReviewEvidence, RuleReviewRecord, RuleReviewWorkspace } from '../server/types';
@@ -18,6 +20,7 @@ type Props = {
   workspace: RuleReviewWorkspace;
   blockReasons: string[];
   locked: boolean;
+  revalidation: boolean;
   actions: ReturnType<typeof useRuleReviewWorkspace>['actions'];
   onDirtyChange: (dirty: boolean) => void;
 };
@@ -25,7 +28,7 @@ type Props = {
 const REASON = '관리자 검수 콘솔에서 확인';
 const RELATION_CHOICES = ['LIMITED_BY', 'EXEMPTED_BY', 'OVERRIDDEN_BY', 'QUALIFIED_BY', 'APPLIES_ONLY_IF'] as const;
 
-export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, actions, onDirtyChange }: Props) {
+export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, revalidation, actions, onDirtyChange }: Props) {
   // Static export renders without a viewport; widening only after mount avoids a mismatch.
   const width = useWindowDimensions().width;
   const [mounted, setMounted] = useState(false);
@@ -43,6 +46,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
   const edited = detail.editedCandidate;
   const canApprove = !locked && blockReasons.length === 0;
   const orphan = detail.exceptionRelations.find(item => item.exceptionRuleId === detail.ruleId && item.status !== 'LINKED');
+  const statusPresentation = reviewStatusPresentation(detail.reviewState, workspace.lifecycleStatus);
 
   // Editing is only meaningful while the session is open; leaving it closes the form.
   useEffect(() => { if (locked) { setEditing(false); onDirtyChange(false); } }, [locked, onDirtyChange]);
@@ -65,9 +69,15 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
     <View style={styles.panel}>
       <View style={styles.head}>
         <Text accessibilityRole="header" style={styles.title}>{detail.ruleLabel}</Text>
-        <Badge tone="plain" text={REVIEW_STATUS_LABEL[detail.reviewState]} />
+        <Badge tone={statusPresentation.tone} text={statusPresentation.currentLabel} />
       </View>
       <Text style={styles.role}>{detail.semanticRole}</Text>
+      {revalidation ? (
+        <View style={styles.revalidationNotice}>
+          <Text style={styles.revalidationNoticeText}>현재 공고문 기준 재확인이 필요합니다.</Text>
+          {statusPresentation.previousLabel ? <Text style={styles.previousDecision}>{statusPresentation.previousLabel}</Text> : null}
+        </View>
+      ) : null}
 
       {blockReasons.length ? (
         <View style={styles.guard}>
@@ -94,8 +104,10 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           <View style={styles.readonlyNote}><Text style={styles.readonlyNoteText}>읽기 전용 · 추출 당시 기록</Text></View>
           <Field label="적용 대상" value={`${detail.originalCandidate.supplyType} / ${SCOPE_TEXT[detail.originalCandidate.scope ?? ''] ?? detail.originalCandidate.scope ?? '—'}`} />
           <Field label="공급단계" value={detail.originalCandidate.stage ? STAGE_TEXT[detail.originalCandidate.stage] : '단계 없음'} />
-          <Field label="조건" value={conditionText(detail.originalCandidate.operator, detail.originalCandidate.value)} />
-          <Field label="배점" value={detail.originalCandidate.score === null ? '배점 없음' : `${detail.originalCandidate.score} / ${detail.originalCandidate.maxScore ?? '—'}`} />
+          <Field label="조건" value={ruleConditionText(detail.originalCandidate)} />
+          {canEditScore(detail.originalCandidate) ? (
+            <Field label="배점" value={detail.originalCandidate.score === null ? '배점 없음' : `${detail.originalCandidate.score} / ${detail.originalCandidate.maxScore ?? '—'}`} />
+          ) : null}
 
           <Text accessibilityRole="header" style={[styles.colTitle, styles.editedTitle]}>관리자 수정본</Text>
           {edited ? (
@@ -105,7 +117,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
                 const described = describeChange(change.path, change.before, change.after);
                 return <Text key={change.path} style={styles.diff}>{described.label}: {described.before} → {described.after}</Text>;
               })}
-              <Field label="최종 조건" value={conditionText(edited.operator, edited.value)} />
+              <Field label="최종 조건" value={ruleConditionText(edited)} />
             </>
           ) : editing ? null : (
             <>
@@ -154,16 +166,16 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
               {/* ID를 직접 입력하게 두지 않는다. 이름·조건·대상·단계를 보고 고른다. */}
               <Text style={styles.fieldLabel}>어떤 기본 규칙을 한정하나요?</Text>
               {baseOptions.map(option => (
-                <MotionPressable
-                  key={option.id} accessibilityRole="radio" accessibilityState={{ checked: linkingBase === option.id }}
+                <ReviewRadioChoice
+                  key={option.id} selected={linkingBase === option.id}
                   disabled={locked} onPress={() => setLinkingBase(option.id)}
                   style={[styles.baseOption, linkingBase === option.id && styles.baseOptionOn]}
                 >
                   <Text style={styles.baseLabel}>{option.snapshot.label}</Text>
                   <Text style={styles.baseMeta}>
-                    {conditionText(option.snapshot.operator, option.snapshot.value)} · {SCOPE_TEXT[option.snapshot.scope ?? ''] ?? '—'} · {option.snapshot.stage ? STAGE_TEXT[option.snapshot.stage] : '단계 없음'}
+                    {ruleConditionText(option.snapshot)} · {SCOPE_TEXT[option.snapshot.scope ?? ''] ?? '—'} · {option.snapshot.stage ? STAGE_TEXT[option.snapshot.stage] : '단계 없음'}
                   </Text>
-                </MotionPressable>
+                </ReviewRadioChoice>
               ))}
               <Text style={styles.fieldLabel}>관계 유형</Text>
               <View style={styles.actionRow}>
@@ -199,11 +211,11 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
             {conflictEvidenceIds.map(id => {
               const source = workspace.rules.flatMap(rule => rule.originalCandidate.evidence).find(item => item.id === id);
               return (
-                <MotionPressable key={id} accessibilityRole="radio" accessibilityState={{ checked: customEvidence === id }}
+                <ReviewRadioChoice key={id} selected={customEvidence === id}
                   disabled={locked} onPress={() => setCustomEvidence(id)} style={[styles.baseOption, customEvidence === id && styles.baseOptionOn]}>
                   <Text style={styles.baseLabel}>{source?.label ?? id}</Text>
                   <Text style={styles.baseMeta}>{[source?.section, source?.tableLabel].filter(Boolean).join(' · ')}</Text>
-                </MotionPressable>
+                </ReviewRadioChoice>
               );
             })}
             {!customValue.trim() || !customEvidence ? (
@@ -277,7 +289,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
         detail.history.length
           ? detail.history.map(entry => (
             <Text key={entry.sequence} style={styles.historyItem}>
-              {entry.at.slice(0, 16).replace('T', ' ')} · {entry.actor} · {historyLine(entry.action)} · {entry.reason}
+              {entry.at.slice(0, 16).replace('T', ' ')} · {entry.actor} · {revalidation ? '이전 문서 기준 · ' : ''}{historyLine(entry.action)} · {entry.reason}
             </Text>
           ))
           : <Text style={styles.historyItem}>아직 기록된 검수 이력이 없어요.</Text>
@@ -300,6 +312,9 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, alignItems: 'center', justifyContent: 'space-between' },
   title: { ...type.section, color: colors.text, flexShrink: 1 },
   role: { ...type.caption, color: colors.textSubtle },
+  revalidationNotice: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.warning, backgroundColor: '#FFDCC3', padding: spacing.sm, gap: 2 },
+  revalidationNoticeText: { ...type.bodySmStrong, color: '#8A4900' },
+  previousDecision: { ...type.caption, color: colors.textMuted },
   guard: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.error, backgroundColor: '#FFDAD6', padding: spacing.sm, gap: 2 },
   guardTitle: { ...type.bodySmStrong, color: '#93000A' },
   guardReason: { ...type.bodySm, color: colors.textMuted },

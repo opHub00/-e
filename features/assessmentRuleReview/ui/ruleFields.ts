@@ -21,7 +21,7 @@ export type RangeClause = { fact: string; op: string; value: number };
 const isRange = (value: unknown): value is RangeClause[] =>
   Array.isArray(value) && value.length > 0 && value.every(item => !!item && typeof item === 'object' && 'op' in item && 'value' in item);
 
-export function valueKindOf(snapshot: ReviewableRuleSnapshot): ValueKind {
+export function valueKindOf(snapshot: Pick<ReviewableRuleSnapshot, 'category' | 'value'>): ValueKind {
   if (isRange(snapshot.value)) return 'AGE_RANGE';
   const kind = KIND_BY_CATEGORY[snapshot.category];
   if (!kind) return 'UNSUPPORTED';
@@ -66,6 +66,22 @@ export function conditionText(operator: string | null, value: unknown): string {
   if (operator && OPERATOR_TEXT[operator]) return clause(operator, value);
   return `${operator ? `${operator} ` : ''}${literal(value)}`;
 }
+
+/** A condition sentence that follows the rule's value semantics, not its storage shape. */
+export function ruleConditionText(snapshot: Pick<ReviewableRuleSnapshot, 'category' | 'operator' | 'value'>): string {
+  const kind = valueKindOf(snapshot);
+  if (kind === 'BOOLEAN') return snapshot.value ? '예' : '아니요';
+  if (kind === 'TEXT') return String(snapshot.value);
+  return conditionText(snapshot.operator, snapshot.value);
+}
+
+/** Outer comparison controls are meaningful only for scalar numeric conditions. */
+export const canEditOperator = (snapshot: ReviewableRuleSnapshot): boolean =>
+  ['MONEY', 'COUNT', 'PERCENT', 'DURATION_YEARS'].includes(valueKindOf(snapshot));
+
+/** Score fields appear only when the rule actually carries scoring semantics. */
+export const canEditScore = (snapshot: ReviewableRuleSnapshot): boolean =>
+  snapshot.category === 'SCORE' || snapshot.score !== null || snapshot.maxScore !== null;
 
 export type FieldLabel = '조건' | '적용 대상' | '공급단계' | '배점';
 /** Human wording for one changed path, used by the edit preview and the saved diff. */

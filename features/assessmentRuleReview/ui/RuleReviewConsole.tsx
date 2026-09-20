@@ -6,8 +6,9 @@ import { ScreenHeader } from '../../../components/ScreenHeader';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../../design/tokens';
 import { RuleDetailPanel } from './RuleDetailPanel';
-import { approvalBlockReasons, PRIORITY_LABEL, REVIEW_STATUS_LABEL, SOURCE_STATUS_LABEL, SUPPLY_GROUP_LABEL, supplyGroupOf } from './reviewLabels';
+import { approvalBlockReasons, PRIORITY_LABEL, SOURCE_STATUS_LABEL, SUPPLY_GROUP_LABEL, supplyGroupOf } from './reviewLabels';
 import { useRuleReviewWorkspace } from './useRuleReviewWorkspace';
+import { reviewProgressPresentation, reviewStatusPresentation } from './reviewPresentation';
 import type { RuleListItemDto } from '../server/dto';
 import type { RuleReviewWorkspace } from '../server/types';
 import type { RuleReviewRepository } from '../repository/RuleReviewRepository';
@@ -15,7 +16,7 @@ import type { RuleReviewRepository } from '../repository/RuleReviewRepository';
 const REASON = '관리자 검수 콘솔에서 확인';
 
 export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; repository: RuleReviewRepository }) {
-  const { workspace, summary, gate, rules, detail, actions, lastError, lastDone, clearFeedback } = useRuleReviewWorkspace(repository);
+  const { workspace, summary, gate, rules, detail, actions, lastError, lastDone, lastDoneTone, clearFeedback } = useRuleReviewWorkspace(repository);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [onlyBlocking, setOnlyBlocking] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -49,6 +50,8 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
   const selectedRecord = selectedId ? workspace.rules.find(rule => rule.ruleId === selectedId) ?? null : null;
   const revalidation = workspace.lifecycleStatus === 'REVALIDATION_REQUIRED';
   const notStarted = workspace.lifecycleStatus === 'PENDING_REVIEW';
+  const criticalCount = all.filter(item => item.priority === 'CRITICAL_BLOCKER').length;
+  const progress = reviewProgressPresentation(summary, workspace.lifecycleStatus, gate.blockers.length, criticalCount);
 
   // The service refuses unsafe bulk approval; the console offers only what it would accept.
   const bulkTargets = all.filter(item => item.priority === 'NORMAL' && !item.critical && !item.hasConflict && !item.hasException && !item.hasWarning);
@@ -84,6 +87,12 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
           {SOURCE_STATUS_LABEL[summary.sourceStatus]} · {summary.document.versionLabel} · rule {summary.totalRules}개 · revision {summary.ruleVersion.revision}
         </Text>
         <Text style={styles.metaFaint}>문서 {summary.document.fileName} · sha256 {workspace.currentDocumentHash.slice(0, 12)}…</Text>
+        {revalidation ? (
+          <View style={styles.lifecycleContext}>
+            <Badge tone="REVIEW_REQUIRED" text="재검수 중" />
+            <Text style={styles.lifecycleContextText}>이전 검수 결정은 현재 공고문에 대한 승인이 아닙니다.</Text>
+          </View>
+        ) : null}
 
         {/* rule 수보다 위험 수를 먼저 읽게 한다. */}
         <View style={styles.riskRow}>
@@ -91,21 +100,17 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
           <Risk tone="critical" value={summary.conflicts} label="기준 충돌" />
           <Risk tone="critical" value={summary.orphanExceptions} label="연결 안 된 예외" />
           <Risk tone="warn" value={summary.unresolved} label="미해결 항목" />
-          <Risk tone="warn" value={summary.pending} label="검수 필요" />
-          <Risk tone="ok" value={summary.approved + summary.edited} label="승인 완료" />
+          <Risk tone="warn" value={revalidation ? summary.totalRules : summary.pending} label={revalidation ? '재확인 필요' : '검수 필요'} />
+          <Risk tone={revalidation ? 'warn' : 'ok'} value={summary.approved + summary.edited} label={revalidation ? '이전 문서 승인' : '승인 완료'} />
         </View>
 
         {/* 퍼센트 하나로 뭉치지 않는다. 남은 개수를 종류별로 센다. */}
         <View style={styles.progress}>
           <Text accessibilityRole="header" style={styles.progressTitle}>
-            검수 완료 {summary.approved + summary.edited + summary.held + summary.rejected} / {summary.totalRules}
+            {progress.heading}
           </Text>
-          <Text style={styles.progressLine}>
-            남은 검수 {summary.pending}건 · 반드시 확인 {all.filter(item => item.priority === 'CRITICAL_BLOCKER').length}건 · 활성화 blocker {gate.blockers.length}건
-          </Text>
-          <Text style={styles.progressLine}>
-            승인 {summary.approved} · 수정 후 승인 {summary.edited} · 보류 {summary.held} · 제외 {summary.rejected}
-          </Text>
+          <Text style={styles.progressLine}>{progress.primaryLine}</Text>
+          <Text style={styles.progressLine}>{progress.decisionLine}</Text>
         </View>
 
         <ActivationPanel gate={gate} />
@@ -159,8 +164,8 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
               <Action label="닫기" onPress={clearFeedback} />
             </View>
           ) : lastDone ? (
-            <View style={styles.feedbackOk}>
-              <Text accessibilityRole="alert" style={styles.feedbackOkText}>{lastDone}</Text>
+            <View style={lastDoneTone === 'warning' ? styles.feedbackWarn : styles.feedbackOk}>
+              <Text accessibilityRole="alert" style={lastDoneTone === 'warning' ? styles.feedbackWarnText : styles.feedbackOkText}>{lastDone}</Text>
               <Action label="닫기" onPress={clearFeedback} />
             </View>
           ) : (
@@ -194,7 +199,9 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
             {grouped.map(([group, items]) => (
               <View key={group} style={styles.group}>
                 <Text accessibilityRole="header" style={styles.groupTitle}>{SUPPLY_GROUP_LABEL[group] ?? group} · {items.length}건</Text>
-                {items.map(item => (
+                {items.map(item => {
+                  const presentation = reviewStatusPresentation(item.reviewStatus, workspace.lifecycleStatus);
+                  return (
                   <MotionPressable
                     key={item.ruleId} accessibilityRole="button" accessibilityState={{ selected: selectedId === item.ruleId }}
                     onPress={() => selectRule(item.ruleId)} style={[styles.row, ROW_TONE[item.priority], selectedId === item.ruleId && styles.rowOn]}
@@ -202,13 +209,15 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
                     <Text style={styles.rowLabel}>{item.ruleLabel}</Text>
                     <View style={styles.rowMeta}>
                       <Badge tone={item.priority} text={PRIORITY_LABEL[item.priority]} />
-                      <Badge tone="plain" text={REVIEW_STATUS_LABEL[item.reviewStatus]} />
+                      <Badge tone={presentation.tone} text={presentation.currentLabel} />
+                      {presentation.previousLabel ? <Badge tone="plain" text={presentation.previousLabel} /> : null}
                       {item.critical ? <Badge tone="plain" text="critical" /> : null}
                       {item.hasConflict ? <Badge tone="CRITICAL_BLOCKER" text="충돌" /> : null}
                       {item.hasException ? <Badge tone="REVIEW_REQUIRED" text="예외" /> : null}
                     </View>
                   </MotionPressable>
-                ))}
+                  );
+                })}
               </View>
             ))}
             {visible.length === 0 ? <Text style={styles.empty}>이 조건에 해당하는 rule이 없어요.</Text> : null}
@@ -222,6 +231,7 @@ export function RuleReviewConsole({ onBack, repository }: { onBack: () => void; 
                 workspace={workspace}
                 blockReasons={approvalBlockReasons(selectedRecord, workspace, gate)}
                 locked={notStarted || revalidation}
+                revalidation={revalidation}
                 actions={actions}
                 onDirtyChange={onDirtyChange}
               />
@@ -351,6 +361,8 @@ const styles = StyleSheet.create({
   title: { ...type.page, color: colors.text },
   meta: { ...type.body, color: colors.textMuted },
   metaFaint: { ...type.caption, color: colors.textSubtle },
+  lifecycleContext: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs },
+  lifecycleContextText: { ...type.bodySmStrong, color: '#8A4900', flexShrink: 1 },
   riskRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   risk: { minWidth: 132, flexGrow: 1, flexBasis: 132, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceHigh, borderLeftWidth: 4, borderRadius: radius.cardSm, padding: spacing.sm },
   riskValue: { ...type.headline },
@@ -376,6 +388,8 @@ const styles = StyleSheet.create({
   feedbackIdle: { ...type.bodySm, color: colors.textSubtle },
   feedbackOk: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#D6EFE0', borderRadius: radius.cardSm, padding: spacing.sm },
   feedbackOkText: { ...type.bodySmStrong, color: colors.success, flex: 1 },
+  feedbackWarn: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#FFDCC3', borderRadius: radius.cardSm, padding: spacing.sm },
+  feedbackWarnText: { ...type.bodySmStrong, color: '#8A4900', flex: 1 },
   feedbackBad: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', backgroundColor: '#FFDAD6', borderRadius: radius.cardSm, padding: spacing.sm },
   feedbackBadText: { ...type.bodySm, color: '#93000A', flex: 1 },
   dirtyDialog: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.warning, backgroundColor: '#FFDCC3', padding: spacing.sm, gap: spacing.xs },

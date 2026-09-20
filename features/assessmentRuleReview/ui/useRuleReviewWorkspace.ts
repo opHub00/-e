@@ -4,26 +4,34 @@ import type { ReviewEvidence, ReviewableRuleSnapshot } from '../server/types.ts'
 import type { RuleReviewRepository } from '../repository/RuleReviewRepository.ts';
 
 export type ReviewActionResult = { ok: true } | { ok: false; code: string };
+export type ReviewFeedbackTone = 'success' | 'warning';
 
 /** UI orchestration depends only on the repository contract. */
 export function useRuleReviewWorkspace(repository: RuleReviewRepository) {
   const [workspace, setWorkspace] = useState(() => repository.snapshot());
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastDone, setLastDone] = useState<string | null>(null);
+  const [lastDoneTone, setLastDoneTone] = useState<ReviewFeedbackTone>('success');
 
   /** The displayed revision is sent back so a newer repository state fails closed. */
-  const run = useCallback((operation: (instance: RuleReviewRepository, expectedRevision: number) => void, done?: string): ReviewActionResult => {
+  const run = useCallback((
+    operation: (instance: RuleReviewRepository, expectedRevision: number) => void,
+    done?: string,
+    tone: ReviewFeedbackTone = 'success',
+  ): ReviewActionResult => {
     try {
       operation(repository, workspace.revision);
       setWorkspace(repository.snapshot());
       setLastError(null);
       setLastDone(done ?? null);
+      setLastDoneTone(tone);
       return { ok: true };
     } catch (error) {
       const code = error instanceof Error ? error.message : 'UNKNOWN_REVIEW_ERROR';
       setWorkspace(repository.snapshot());
       setLastError(code);
       setLastDone(null);
+      setLastDoneTone('success');
       return { ok: false, code };
     }
   }, [repository, workspace.revision]);
@@ -50,14 +58,18 @@ export function useRuleReviewWorkspace(repository: RuleReviewRepository) {
     bulkApproveSafe: (ruleIds: string[], reason: string) =>
       run((repo, expectedRevision) => repo.bulkApproveSafe(ruleIds, { expectedRevision, reason }), '근거 명확 항목을 한 번에 승인했어요.'),
     invalidateDocument: (hash: string, reason: string) =>
-      run((repo, expectedRevision) => repo.invalidateDocument(hash, { expectedRevision, reason }), '문서 변경을 반영했어요.'),
+      run(
+        (repo, expectedRevision) => repo.invalidateDocument(hash, { expectedRevision, reason }),
+        '공고문 변경을 감지했습니다. 기존 검수 결과를 다시 확인해야 합니다.',
+        'warning',
+      ),
   }), [run]);
 
   const summary = useMemo(() => repository.summary(), [repository, workspace]);
   const gate = useMemo(() => repository.gate(), [repository, workspace]);
   const rules = useCallback((filter: RuleListFilter) => repository.list(filter), [repository, workspace]);
   const detail = useCallback((ruleId: string) => repository.detail(ruleId), [repository, workspace]);
-  const clearFeedback = useCallback(() => { setLastError(null); setLastDone(null); }, []);
+  const clearFeedback = useCallback(() => { setLastError(null); setLastDone(null); setLastDoneTone('success'); }, []);
 
-  return { workspace, summary, gate, rules, detail, actions, lastError, lastDone, clearFeedback };
+  return { workspace, summary, gate, rules, detail, actions, lastError, lastDone, lastDoneTone, clearFeedback };
 }

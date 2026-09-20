@@ -159,12 +159,56 @@ test('a changed announcement invalidates the review instead of looking approved'
   await expect(page.getByText(/^승인했어요\.$/)).toBeVisible();
 
   await page.getByRole('button', { name: '공고문이 바뀐 상황' }).click();
+  await expect(page.getByRole('alert')).toContainText('공고문 변경을 감지했습니다. 기존 검수 결과를 다시 확인해야 합니다.');
+  await expect(page.getByText('문서 변경을 반영했어요.')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '공고문이 변경되어 기존 검수를 다시 확인해야 합니다' })).toBeVisible();
   await expect(page.getByRole('heading', { name: /활성화할 수 없음 · 재검수 필요/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '재검수 완료 0 / 7' })).toBeVisible();
+  await expect(page.getByText(/이전 문서 기준 검수 1건 · 현재 문서 승인 0건/)).toBeVisible();
+  await expect(page.getByText('이전 문서 승인', { exact: true })).toBeVisible();
+  await expect(page.getByText('재확인 필요', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('이전 문서 기준 · 승인', { exact: true }).first()).toBeVisible();
   // Decisions are locked until a new rule version is reviewed.
   await rule(page, '세대 총자산').click();
+  await expect(page.getByText('현재 공고문 기준 재확인이 필요합니다.')).toBeVisible();
   // The unresolved row also has a 보류 control, so the detail panel's own one is taken last.
   await expect(page.getByRole('button', { name: '보류', exact: true }).last()).toBeDisabled();
+});
+
+test('every visible review radio exposes and updates aria-checked', async ({ page }, info) => {
+  desktopOnly(info);
+  await open(page);
+  await rule(page, '본인 소득 140%').click();
+  await page.getByRole('button', { name: '값 고치기' }).click();
+
+  const radios = page.getByRole('radio');
+  expect(await radios.count()).toBeGreaterThan(0);
+  for (let index = 0; index < await radios.count(); index += 1) {
+    await expect(radios.nth(index)).toHaveAttribute('aria-checked', /^(true|false)$/);
+  }
+
+  const next = page.getByRole('radio', { name: '미만' });
+  await expect(next).toHaveAttribute('aria-checked', 'false');
+  await next.click();
+  await expect(next).toHaveAttribute('aria-checked', 'true');
+});
+
+test('boolean and text rules hide meaningless operators and scores', async ({ page }, info) => {
+  desktopOnly(info);
+  await open(page);
+
+  await rule(page, '특별공급 제한 없음').click();
+  await expect(page.getByText('true =', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('예', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('배점 없음', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '값 고치기' }).click();
+  await expect(page.getByText('비교 방식', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('배점')).toHaveCount(0);
+  await page.getByRole('button', { name: '편집 취소' }).click();
+
+  await rule(page, '공고일 제주 거주').click();
+  await expect(page.getByText('제주특별자치도 =', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('제주특별자치도', { exact: true }).first()).toBeVisible();
 });
 
 test('a complete review reaches activation eligible with the button still disabled', async ({ page }, info) => {

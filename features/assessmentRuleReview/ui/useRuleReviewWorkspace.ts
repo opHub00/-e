@@ -19,6 +19,17 @@ const FAILURE_TEXT: Partial<Record<ReviewCommitOutcome['status'], string>> = {
   OFFLINE: '네트워크에 연결되어 있지 않아 저장하지 않았습니다. 검수 결정은 자동으로 보내지 않아요. 연결을 확인한 뒤 다시 시도해 주세요.',
 };
 
+const failureText = (outcome: ReviewCommitOutcome): string => {
+  const known = FAILURE_TEXT[outcome.status];
+  if (known) return known;
+  if (outcome.status === 'REJECTED') {
+    return outcome.code === 'FORBIDDEN'
+      ? '검수 권한이 변경되어 저장하지 않았어요. 현재 계정의 권한을 다시 확인해 주세요.'
+      : `서버 검수 규칙이 이 결정을 거부했어요. 내용을 고친 뒤 다시 저장해 주세요. (${outcome.code})`;
+  }
+  return `저장하지 않았어요: ${'code' in outcome ? outcome.code : outcome.status}`;
+};
+
 /** UI adopts only the workspace returned by a successful gateway commit. */
 export function useRuleReviewWorkspace(
   repository: RuleReviewRepositoryLike,
@@ -29,7 +40,7 @@ export function useRuleReviewWorkspace(
   const [save, setSave] = useState<SaveState>({ kind: 'IDLE' });
 
   const run = useCallback(async (
-    operation: (instance: RuleReviewRepositoryLike, expectedRevision: number) => void | Promise<void>,
+    operation: (instance: RuleReviewRepositoryLike, expectedRevision: number) => unknown | Promise<unknown>,
     label: string,
     tone: ReviewFeedbackTone = 'success',
   ): Promise<ReviewActionResult> => {
@@ -43,7 +54,7 @@ export function useRuleReviewWorkspace(
     if (outcome.status === 'STALE' && outcome.workspace) setWorkspace(outcome.workspace);
     setSave({
       kind: 'FAILED', outcome,
-      label: FAILURE_TEXT[outcome.status] ?? `저장하지 않았어요: ${'code' in outcome ? outcome.code : outcome.status}`,
+      label: failureText(outcome),
     });
     return { ok: false, outcome };
   }, [gateway, workspace.revision]);

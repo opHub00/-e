@@ -31,7 +31,7 @@ export type ReviewCommitOutcome =
  */
 export interface ReviewGateway {
   load(): Promise<ReviewLoadOutcome>;
-  commit(mutate: (repository: RuleReviewRepositoryLike) => void | Promise<void>): Promise<ReviewCommitOutcome>;
+  commit(mutate: (repository: RuleReviewRepositoryLike) => unknown | Promise<unknown>): Promise<ReviewCommitOutcome>;
   /** Supabase gateways notify this when the authenticated identity/session changes. */
   onSessionChange?(listener: () => void): () => void;
 }

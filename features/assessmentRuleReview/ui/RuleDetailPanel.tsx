@@ -26,7 +26,7 @@ type Props = {
   revalidation: boolean;
   actions: ReturnType<typeof useRuleReviewWorkspace>['actions'];
   onDirtyChange: (dirty: boolean) => void;
-  draftScope?: string;
+  draftScope: string;
 };
 
 const REASON = '관리자 검수 콘솔에서 확인';

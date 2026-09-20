@@ -6,6 +6,7 @@ import type { ActivationGate, ConflictResolution, CriticalBlockerCode, EvidenceR
 
 export type ReviewRepositoryMutation = { expectedRevision: number; reason: string };
 export type Awaitable<T> = T | Promise<T>;
+export type ReviewMutationResult = void | RuleReviewWorkspace;
 
 export interface RuleReviewRepository {
   snapshot(): RuleReviewWorkspace;
@@ -13,17 +14,17 @@ export interface RuleReviewRepository {
   gate(): ActivationGate;
   list(filter?: RuleListFilter): RuleListItemDto[];
   detail(ruleId: string): ReturnType<typeof getRuleDetail>;
-  startReview(mutation: ReviewRepositoryMutation): void;
-  approve(ruleId: string, mutation: ReviewRepositoryMutation): void;
-  approveWithEdit(ruleId: string, edited: ReviewableRuleSnapshot, resolved: CriticalBlockerCode[], mutation: ReviewRepositoryMutation): void;
-  hold(ruleId: string, mutation: ReviewRepositoryMutation): void;
-  reject(ruleId: string, mutation: ReviewRepositoryMutation): void;
-  reviewEvidence(ruleId: string, evidenceId: string, status: EvidenceReviewStatus, mutation: ReviewRepositoryMutation, replacement?: ReviewEvidence): void;
-  resolveConflict(conflictId: string, resolution: ConflictResolution, mutation: ReviewRepositoryMutation): void;
-  resolveUnresolved(unresolvedId: string, resolution: string, mutation: ReviewRepositoryMutation): void;
-  linkException(exceptionRuleId: string, decision: { status: Exclude<ExceptionReviewStatus, 'ORPHAN_EXCEPTION' | 'WRONG_RELATION'>; baseRuleId?: string; relationType?: ExceptionRelationType }, mutation: ReviewRepositoryMutation): void;
-  bulkApproveSafe(ruleIds: string[], mutation: ReviewRepositoryMutation): void;
-  invalidateDocument(hash: string, mutation: ReviewRepositoryMutation): void;
+  startReview(mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  approve(ruleId: string, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  approveWithEdit(ruleId: string, edited: ReviewableRuleSnapshot, resolved: CriticalBlockerCode[], mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  hold(ruleId: string, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  reject(ruleId: string, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  reviewEvidence(ruleId: string, evidenceId: string, status: EvidenceReviewStatus, mutation: ReviewRepositoryMutation, replacement?: ReviewEvidence): ReviewMutationResult;
+  resolveConflict(conflictId: string, resolution: ConflictResolution, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  resolveUnresolved(unresolvedId: string, resolution: string, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  linkException(exceptionRuleId: string, decision: { status: Exclude<ExceptionReviewStatus, 'ORPHAN_EXCEPTION' | 'WRONG_RELATION'>; baseRuleId?: string; relationType?: ExceptionRelationType }, mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  bulkApproveSafe(ruleIds: string[], mutation: ReviewRepositoryMutation): ReviewMutationResult;
+  invalidateDocument(hash: string, mutation: ReviewRepositoryMutation): ReviewMutationResult;
 }
 
 export type AsyncRuleReviewRepository = {

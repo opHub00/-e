@@ -3,6 +3,7 @@ import { createBrowserRuleReviewRepository } from './RuleReviewRepository.ts';
 import { createLocalReviewGateway, type ReviewFaultPlan, type ReviewGateway } from './ReviewGateway.ts';
 import { SupabaseRuleReviewRepository } from './SupabaseRuleReviewRepository.ts';
 import { createSupabaseReviewGateway } from './SupabaseReviewGateway.ts';
+import { createReviewAuthIdentityObserver } from './reviewAuthIdentity.ts';
 import { allowsLocalReviewSeed, readPublicRuleReviewTarget } from './stagingTarget.ts';
 
 export type ReviewGatewayResolution =
@@ -25,9 +26,8 @@ export function createConfiguredReviewGateway(plan: ReviewFaultPlan = {}): Revie
     if (!client || !ruleSetId) throw new Error('STAGING_CONNECTION_REQUIRED');
     const repository = new SupabaseRuleReviewRepository(client, ruleSetId);
     const subscribe = (listener: () => void) => {
-      const { data } = client.auth.onAuthStateChange(event => {
-        if (event !== 'INITIAL_SESSION') listener();
-      });
+      const observer = createReviewAuthIdentityObserver(listener);
+      const { data } = client.auth.onAuthStateChange((event, session) => observer(event, session));
       return () => data.subscription.unsubscribe();
     };
     return { status: 'READY', gateway: createSupabaseReviewGateway(repository, subscribe), persistence: 'staging' };

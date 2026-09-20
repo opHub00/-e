@@ -25,7 +25,9 @@
 
 브라우저는 review table을 직접 읽거나 쓰지 않는다. `anon`과 일반 authenticated 사용자는 table 권한이 없고 RPC 내부의 `auth.uid()` allow-list 검사를 통과해야 한다.
 
-성공한 mutation은 gateway가 서버에서 다시 읽은 workspace snapshot을 함께 반환한다. UI는 이 snapshot만 채택하며 저장 전 상태를 승인·보류·활성화 가능으로 낙관적으로 바꾸지 않는다. stale 응답은 최신 서버 snapshot과 사용자 draft를 함께 유지하고 자동 merge하지 않는다. draft는 사용자와 rule set으로 만든 session key에 격리되며 로그아웃·계정 전환 시 이전 workspace를 즉시 제거한다. offline mutation은 queue나 background sync 없이 거절하고 사용자가 명시적으로 다시 시도해야 한다.
+성공한 mutation RPC는 변경·audit·revision 증가와 같은 transaction에서 최종 workspace를 반환한다. gateway는 이 값을 authoritative snapshot으로 채택하며 성공 뒤 두 번째 read를 하지 않는다. `STALE_REVIEW_REVISION`일 때만 최신 snapshot을 별도로 읽어 사용자 draft와 함께 유지하고 자동 merge하지 않는다. draft는 사용자와 rule set으로 만든 필수 session key에 격리된다. 로그아웃·계정 전환 시 이전 workspace를 즉시 제거하지만 같은 사용자의 `TOKEN_REFRESHED`/`USER_UPDATED`는 편집 화면을 다시 로드하지 않는다. offline mutation은 queue나 background sync 없이 거절하고 사용자가 명시적으로 다시 시도해야 한다.
+
+SQL의 대문자 `RAISE EXCEPTION` token이 transport error code의 canonical source다. `AUTH_REQUIRED`, `FORBIDDEN`, `STALE_REVIEW_REVISION`은 별도 auth/concurrency outcome으로 변환하고 나머지 deterministic guard는 `REJECTED`로 보존한다. 알 수 없는 backend 오류만 `FAILED`가 된다. Migration과 TypeScript inventory의 drift는 로컬 테스트가 차단한다.
 
 ## 적용 순서
 

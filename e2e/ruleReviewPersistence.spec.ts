@@ -6,7 +6,7 @@ import { reviewDraftStorageKey } from '../features/assessmentRuleReview/ui/revie
 
 const ROUTE = '/admin/rule-review';
 const SAVING = '서버에 저장하는 중이에요… 저장이 끝나야 결정이 반영돼요.';
-const DRAFT_KEY = reviewDraftStorageKey();
+const DRAFT_KEY = reviewDraftStorageKey('local:reviewer@wanpane.local');
 const ANNOUNCEMENT = '삼도이동 1지구 토지임대부 공공분양주택';
 
 const rule = (page: Page, label: string) => page.getByRole('button').filter({ hasText: label }).first();
@@ -157,6 +157,7 @@ test('a stale revision reloads the server state and keeps the reviewer input', a
 
   await expect(page.getByText(/다른 검수자가 먼저 저장했습니다/)).toBeVisible();
   await expect(page.getByText(/비교한 뒤 다시 저장해 주세요/)).toBeVisible();
+  await expect(page.getByRole('button', { name: '다시 시도', exact: true })).toHaveCount(0);
   // The form stays open with the typed value, so the two versions can be compared.
   await expect(page.getByLabel('조건 값')).toHaveValue('4000000');
   await expect(page.getByText(/최종 조건: 4000000/)).toBeVisible();

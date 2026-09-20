@@ -13,5 +13,8 @@ test('local fixtures cannot bypass staging or production targets', () => {
   assert.equal(allowsLocalReviewSeed('staging'), false);
   assert.equal(allowsLocalReviewSeed(' production '), false);
   assert.equal(allowsLocalReviewSeed('development'), true);
-  assert.equal(allowsLocalReviewSeed(undefined), true);
+  assert.equal(allowsLocalReviewSeed('local'), true);
+  assert.equal(allowsLocalReviewSeed('test'), true);
+  assert.equal(allowsLocalReviewSeed(undefined), false);
+  assert.equal(allowsLocalReviewSeed('unknown'), false);
 });

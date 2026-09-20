@@ -187,8 +187,11 @@ export function RuleReviewConsole({ onBack, repository, initialWorkspace, gatewa
           ) : save.kind === 'FAILED' ? (
             <View style={styles.feedbackBad}>
               <Text accessibilityRole="alert" style={styles.feedbackBadText}>{save.label}</Text>
-              {/* 실패한 저장은 자동으로 다시 보내지 않는다. 다시 시도는 사람이 누른다. */}
-              <Action label="다시 시도" onPress={() => { refresh(); onRetryLoad(); }} />
+              {/* Backend/offline failures can reload explicitly. Domain rejection and stale
+                  comparison need a corrected user action, not blind transport retry. */}
+              {save.outcome.status === 'FAILED' || save.outcome.status === 'OFFLINE' ? (
+                <Action label="다시 시도" onPress={() => { refresh(); onRetryLoad(); }} />
+              ) : null}
               <Action label="닫기" onPress={clearFeedback} />
             </View>
           ) : save.kind === 'SAVED' ? (
@@ -213,14 +216,16 @@ export function RuleReviewConsole({ onBack, repository, initialWorkspace, gatewa
           </View>
         ) : null}
 
-        {/* 검수 상태를 실제로 만들어 보기 위한 dev 전용 진입점. 운영 동작이 아니다. */}
-        <View style={styles.scenarioRow}>
-          <Text style={styles.scenarioLabel}>검수 상태 재현</Text>
-          <Action label="다른 검수자가 먼저 저장한 상황" disabled={saving || notStarted || revalidation}
-            onPress={() => actions.simulateStaleRevision(all[0]?.ruleId ?? '')} />
-          <Action label="공고문이 바뀐 상황" disabled={saving || revalidation}
-            onPress={() => actions.invalidateDocument('a'.repeat(63) + '1', '공고문 교체 재현')} />
-        </View>
+        {/* 검수 상태를 실제로 만들어 보기 위한 local fixture 전용 진입점. */}
+        {persistence === 'local' ? (
+          <View style={styles.scenarioRow}>
+            <Text style={styles.scenarioLabel}>검수 상태 재현</Text>
+            <Action label="다른 검수자가 먼저 저장한 상황" disabled={saving || notStarted || revalidation}
+              onPress={() => actions.simulateStaleRevision(all[0]?.ruleId ?? '')} />
+            <Action label="공고문이 바뀐 상황" disabled={saving || revalidation}
+              onPress={() => actions.invalidateDocument('a'.repeat(63) + '1', '공고문 교체 재현')} />
+          </View>
+        ) : null}
 
         <View style={[styles.split, wide && styles.splitWide]}>
           <View style={[styles.column, wide && styles.listColumn]}>
@@ -280,17 +285,23 @@ function ActivationPanel({ gate, serverConfirmed, canActivate }: { gate: ReturnT
     활성화 가능은 서버가 확인해 준 상태에서만 말한다. 저장이 진행 중이거나 실패해
     화면과 서버가 다를 수 있으면 가능하다고 하지 않는다.
   */
-  const eligible = gate.status === 'ACTIVATION_ELIGIBLE' && gate.canActivate && serverConfirmed;
+  const domainEligible = gate.status === 'ACTIVATION_ELIGIBLE' && gate.canActivate && serverConfirmed;
+  const activatableByActor = domainEligible && canActivate;
   return (
-    <View style={[styles.activation, eligible ? styles.activationOk : styles.activationBlocked]}>
-      <Text accessibilityRole="header" style={[styles.activationTitle, { color: eligible ? colors.success : colors.error }]}>
-        {eligible ? '활성화 가능'
+    <View style={[styles.activation, domainEligible ? styles.activationOk : styles.activationBlocked]}>
+      <Text accessibilityRole="header" style={[styles.activationTitle, { color: domainEligible ? colors.success : colors.error }]}>
+        {activatableByActor ? '활성화 가능'
+          : domainEligible ? '검수 완료 · 관리자 활성화 필요'
           : gate.status === 'REVALIDATION_REQUIRED' ? '활성화할 수 없음 · 재검수 필요'
             : !serverConfirmed ? '활성화 상태 확인 중'
               : '활성화할 수 없음'}
       </Text>
-      {eligible ? (
-        <Text style={styles.activationBody}>서버가 모든 검수 항목이 해결됐다고 확인했어요. 실제 활성화는 운영 backend 연결 후에 가능해요.</Text>
+      {domainEligible ? (
+        <Text style={styles.activationBody}>
+          {canActivate
+            ? '서버가 모든 검수 항목이 해결됐다고 확인했어요. 실제 활성화는 운영 backend 연결 후에 가능해요.'
+            : '서버가 검수 완료를 확인했어요. admin 권한 사용자가 최신 revision을 다시 확인한 뒤 활성화해야 해요.'}
+        </Text>
       ) : !serverConfirmed ? (
         <Text style={styles.activationBody}>서버 저장 결과를 확인하기 전에는 활성화 가능 여부를 표시하지 않아요.</Text>
       ) : (

@@ -5,18 +5,19 @@ import { canActivateRuleVersion } from '../server/service.ts';
 import type { ConflictResolution, CriticalBlockerCode, EvidenceReviewStatus, ExceptionReviewStatus, ReviewEvidence,
   ReviewableRuleSnapshot, RuleReviewWorkspace } from '../server/types.ts';
 import type { ReviewRepositoryMutation } from './RuleReviewRepository.ts';
+import { normalizeReviewDbError, type SupabaseErrorLike } from './reviewDbErrorCodes.ts';
 
-type RpcResult = { data: unknown; error: { message: string; code?: string } | null };
+type RpcResult = { data: unknown; error: SupabaseErrorLike | null };
 export type RuleReviewRpcClient = Pick<SupabaseClient, 'rpc'> & { auth: Pick<SupabaseClient['auth'], 'getSession'> };
 export type ReviewAccess = { authenticated: boolean; role: 'reviewer' | 'admin' | null; userId: string | null };
 
-const errorCode = (message: string) => {
-  if (/failed to fetch|network(?:error)?|load failed|fetch failed/i.test(message)) return 'RULE_REVIEW_OFFLINE';
-  if (/stale review revision/i.test(message)) return 'STALE_REVIEW_REVISION';
-  if (/not authorized|forbidden|permission denied/i.test(message)) return 'FORBIDDEN';
-  if (/jwt|session|authenticated/i.test(message)) return 'AUTH_REQUIRED';
-  if (/document revalidation/i.test(message)) return 'DOCUMENT_REVALIDATION_REQUIRED';
-  return `RULE_REVIEW_DB_ERROR:${message}`;
+const workspaceFromRpc = (data: unknown, invalidCode = 'RULE_REVIEW_WORKSPACE_NOT_FOUND'): RuleReviewWorkspace => {
+  if (!data || typeof data !== 'object') throw new Error(invalidCode);
+  const value = data as Partial<RuleReviewWorkspace>;
+  if (typeof value.ruleVersionId !== 'string' || typeof value.revision !== 'number' || !Array.isArray(value.rules)) {
+    throw new Error(invalidCode);
+  }
+  return data as RuleReviewWorkspace;
 };
 
 export class SupabaseRuleReviewRepository {
@@ -28,7 +29,7 @@ export class SupabaseRuleReviewRepository {
     const session = await this.client.auth.getSession();
     if (session.error || !session.data.session) return { authenticated: false, role: null, userId: null };
     const { data, error } = await this.client.rpc('get_assessment_review_access') as RpcResult;
-    if (error) throw new Error(errorCode(error.message));
+    if (error) throw new Error(normalizeReviewDbError(error));
     const role = typeof data === 'object' && data ? (data as { role?: unknown }).role : null;
     return {
       authenticated: true,
@@ -39,9 +40,8 @@ export class SupabaseRuleReviewRepository {
 
   async snapshot(): Promise<RuleReviewWorkspace> {
     const { data, error } = await this.client.rpc('load_assessment_rule_review_workspace', { p_rule_set_id: this.ruleSetId }) as RpcResult;
-    if (error) throw new Error(errorCode(error.message));
-    if (!data || typeof data !== 'object') throw new Error('RULE_REVIEW_WORKSPACE_NOT_FOUND');
-    return data as RuleReviewWorkspace;
+    if (error) throw new Error(normalizeReviewDbError(error));
+    return workspaceFromRpc(data);
   }
 
   async summary() { return buildReviewSummary(await this.snapshot()); }
@@ -49,12 +49,15 @@ export class SupabaseRuleReviewRepository {
   async list(filter: RuleListFilter = {}) { return listReviewRules(await this.snapshot(), filter); }
   async detail(ruleId: string) { return getRuleDetail(await this.snapshot(), ruleId); }
 
-  private async mutate(action: string, targetId: string | null, payload: Record<string, unknown>, mutation: ReviewRepositoryMutation): Promise<void> {
-    const { error } = await this.client.rpc('mutate_assessment_rule_review', {
+  private async mutate(action: string, targetId: string | null, payload: Record<string, unknown>, mutation: ReviewRepositoryMutation): Promise<RuleReviewWorkspace> {
+    const { data, error } = await this.client.rpc('mutate_assessment_rule_review', {
       p_rule_set_id: this.ruleSetId, p_expected_revision: mutation.expectedRevision, p_action: action,
       p_target_id: targetId, p_payload: payload, p_reason: mutation.reason,
     }) as RpcResult;
-    if (error) throw new Error(errorCode(error.message));
+    if (error) throw new Error(normalizeReviewDbError(error));
+    // The RPC returns the workspace from the same transaction as mutation/audit/revision.
+    // A second read could mix in another reviewer's later mutation.
+    return workspaceFromRpc(data, 'RULE_REVIEW_INVALID_MUTATION_RESULT');
   }
   startReview(m: ReviewRepositoryMutation) { return this.mutate('START_REVIEW', this.ruleSetId, {}, m); }
   approve(id: string, m: ReviewRepositoryMutation) { return this.mutate('APPROVE_RULE', id, {}, m); }
@@ -77,7 +80,7 @@ export class SupabaseRuleReviewRepository {
     const { data, error } = await this.client.rpc('activate_reviewed_assessment_rule_set', {
       p_rule_set_id: this.ruleSetId, p_expected_revision: expectedRevision, p_expected_active_id: expectedActiveId,
     }) as RpcResult;
-    if (error) throw new Error(errorCode(error.message));
+    if (error) throw new Error(normalizeReviewDbError(error));
     return data;
   }
 }

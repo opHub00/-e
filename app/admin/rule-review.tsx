@@ -4,6 +4,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { RuleReviewConsole } from '../../features/assessmentRuleReview/ui/RuleReviewConsole';
 import type { ReviewFaultPlan, ReviewGateway, ReviewLoadOutcome } from '../../features/assessmentRuleReview/repository/ReviewGateway';
 import { createConfiguredReviewGateway } from '../../features/assessmentRuleReview/repository/createReviewGateway';
+import { isRuleReviewTestEnvironment } from '../../features/assessmentRuleReview/repository/stagingTarget';
 import { useReviewSession } from '../../features/assessmentRuleReview/ui/useReviewSession';
 import { readReviewDraft } from '../../features/assessmentRuleReview/ui/reviewDraftStore';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -29,7 +30,9 @@ function failedGateway(code: string): ReviewGateway {
   };
 }
 function resolveGateway(): { gateway: ReviewGateway; persistence: 'local' | 'staging' } {
-  const plan = ((globalThis as Record<string, unknown>)[DEV_FAULT_PLAN] ?? {}) as ReviewFaultPlan;
+  const plan = isRuleReviewTestEnvironment(process.env.EXPO_PUBLIC_WANPANE_ENV)
+    ? ((globalThis as Record<string, unknown>)[DEV_FAULT_PLAN] ?? {}) as ReviewFaultPlan
+    : {};
   const resolution = createConfiguredReviewGateway(plan);
   return resolution.status === 'READY'
     ? resolution

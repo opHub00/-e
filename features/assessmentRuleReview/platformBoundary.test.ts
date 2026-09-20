@@ -100,6 +100,8 @@ test('production UI boundary imports neither generated fixtures nor RuleReviewSe
     readFile(new URL('./server/samdoReviewFixture.test-data.ts', import.meta.url), 'utf8'),
   ]);
   assert.doesNotMatch(route, /samdoReviewSeed\.generated/);
+  assert.match(route, /isRuleReviewTestEnvironment/);
+  assert.match(route, /DEV_FAULT_PLAN/);
   assert.doesNotMatch(hook, /RuleReviewService/);
   assert.doesNotMatch(service + materialize, /node:crypto|from ['"]crypto['"]/);
   assert.doesNotMatch(fixture, /readFileSync|node:fs/);

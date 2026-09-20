@@ -9,9 +9,8 @@ import type { ReviewableRuleSnapshot } from '../server/types.ts';
  * per-rule, holds no credentials, and is cleared once the edit is saved or discarded.
  */
 const KEY = 'wanpane:admin-rule-review:draft:v2';
-const DEFAULT_SCOPE = 'local:reviewer@wanpane.local';
 
-export const reviewDraftStorageKey = (scope = DEFAULT_SCOPE) => `${KEY}:${encodeURIComponent(scope)}`;
+export const reviewDraftStorageKey = (scope: string) => `${KEY}:${encodeURIComponent(scope)}`;
 
 export type ReviewDraft = { ruleId: string; edited: ReviewableRuleSnapshot; savedAt: string };
 
@@ -19,11 +18,11 @@ const storage = (): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | null =
   try { return typeof sessionStorage === 'undefined' ? null : sessionStorage; } catch { return null; }
 };
 
-export function writeReviewDraft(draft: Omit<ReviewDraft, 'savedAt'>, scope = DEFAULT_SCOPE): void {
+export function writeReviewDraft(draft: Omit<ReviewDraft, 'savedAt'>, scope: string): void {
   try { storage()?.setItem(reviewDraftStorageKey(scope), JSON.stringify({ ...draft, savedAt: new Date().toISOString() })); } catch { /* storage unavailable */ }
 }
 
-export function readReviewDraft(scope = DEFAULT_SCOPE): ReviewDraft | null {
+export function readReviewDraft(scope: string): ReviewDraft | null {
   try {
     const raw = storage()?.getItem(reviewDraftStorageKey(scope));
     if (!raw) return null;
@@ -32,6 +31,6 @@ export function readReviewDraft(scope = DEFAULT_SCOPE): ReviewDraft | null {
   } catch { return null; }
 }
 
-export function clearReviewDraft(scope = DEFAULT_SCOPE): void {
+export function clearReviewDraft(scope: string): void {
   try { storage()?.removeItem(reviewDraftStorageKey(scope)); } catch { /* storage unavailable */ }
 }

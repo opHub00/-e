@@ -19,7 +19,7 @@ type Props = {
   onCancel: () => void;
   onSave: (edited: ReviewableRuleSnapshot) => void | Promise<void>;
   onDirtyChange: (dirty: boolean) => void;
-  draftScope?: string;
+  draftScope: string;
 };
 
 const rangeOf = (value: unknown) => Array.isArray(value) ? (value as RangeClause[]) : [];

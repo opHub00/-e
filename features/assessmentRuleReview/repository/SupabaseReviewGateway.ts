@@ -1,6 +1,7 @@
 import type { RuleReviewWorkspace } from '../server/types.ts';
 import type { ReviewCommitOutcome, ReviewGateway, ReviewLoadOutcome } from './ReviewGateway.ts';
 import { SupabaseRuleReviewRepository } from './SupabaseRuleReviewRepository.ts';
+import { REVIEW_DOMAIN_REJECTION_CODES } from './reviewDbErrorCodes.ts';
 
 type SessionSubscription = (listener: () => void) => () => void;
 
@@ -26,9 +27,16 @@ function commitFailure(error: unknown): Promise<ReviewCommitOutcome> | ReviewCom
   if (offline(code)) return { status: 'OFFLINE' };
   if (code === 'AUTH_REQUIRED') return { status: 'AUTH_EXPIRED' };
   if (code === 'FORBIDDEN') return { status: 'REJECTED', code };
-  if (code.startsWith('RULE_REVIEW_DB_ERROR:')) return { status: 'FAILED', code };
-  return { status: 'REJECTED', code };
+  if (REVIEW_DOMAIN_REJECTION_CODES.has(code)) return { status: 'REJECTED', code };
+  return { status: 'FAILED', code };
 }
+
+const mutationWorkspace = (value: unknown): RuleReviewWorkspace | null => {
+  if (!value || typeof value !== 'object') return null;
+  const workspace = value as Partial<RuleReviewWorkspace>;
+  return typeof workspace.ruleVersionId === 'string' && typeof workspace.revision === 'number' && Array.isArray(workspace.rules)
+    ? value as RuleReviewWorkspace : null;
+};
 
 /** Maps the staging repository to transport outcomes understood by the admin UX. */
 export function createSupabaseReviewGateway(
@@ -56,8 +64,10 @@ export function createSupabaseReviewGateway(
         const access = await repository.access();
         if (!access.authenticated) return { status: 'AUTH_EXPIRED' };
         if (!access.role) return { status: 'REJECTED', code: 'FORBIDDEN' };
-        await mutate(repository);
-        return { status: 'SAVED', workspace: await repository.snapshot() };
+        const returned = await mutate(repository);
+        const workspace = mutationWorkspace(returned);
+        if (!workspace) return { status: 'FAILED', code: 'RULE_REVIEW_INVALID_MUTATION_RESULT' };
+        return { status: 'SAVED', workspace };
       } catch (error) {
         const code = codeOf(error);
         if (code === 'STALE_REVIEW_REVISION') {

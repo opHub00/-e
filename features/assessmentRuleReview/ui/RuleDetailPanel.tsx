@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../../design/tokens';
 import { Action, Badge } from './RuleReviewConsole';
+import { RuleEditForm } from './RuleEditForm';
+import { SCOPE_TEXT, STAGE_TEXT, conditionText, describeChange } from './ruleFields';
 import {
   EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, REVIEW_STATUS_LABEL, historyLine,
 } from './reviewLabels';
 import type { getRuleDetail } from '../server/dto';
-import type { ReviewableRuleSnapshot, RuleReviewRecord, RuleReviewWorkspace } from '../server/types';
+import type { ReviewEvidence, RuleReviewRecord, RuleReviewWorkspace } from '../server/types';
 import type { useRuleReviewWorkspace } from './useRuleReviewWorkspace';
 
 type Props = {
@@ -17,44 +19,47 @@ type Props = {
   blockReasons: string[];
   locked: boolean;
   actions: ReturnType<typeof useRuleReviewWorkspace>['actions'];
+  onDirtyChange: (dirty: boolean) => void;
 };
 
 const REASON = '관리자 검수 콘솔에서 확인';
-const OPERATOR_TEXT: Record<string, string> = { gte: '이상', lte: '이하', gt: '초과', lt: '미만', eq: '=' };
-const valueText = (value: unknown) => value === null || value === undefined ? '—' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+const RELATION_CHOICES = ['LIMITED_BY', 'EXEMPTED_BY', 'OVERRIDDEN_BY', 'QUALIFIED_BY', 'APPLIES_ONLY_IF'] as const;
 
-/**
- * A reviewer has to spot a wrong bound at a glance, so the stored expression is
- * rendered as a readable condition instead of JSON. Anything that does not match a
- * known shape falls back to the raw value rather than guessing at its meaning.
- */
-function conditionText(operator: string | null, value: unknown): string {
-  const clause = (op: unknown, raw: unknown) =>
-    typeof op === 'string' && OPERATOR_TEXT[op] ? `${valueText(raw)} ${OPERATOR_TEXT[op]}` : `${valueText(op)} ${valueText(raw)}`;
-  if (Array.isArray(value) && value.every(item => item && typeof item === 'object' && 'op' in item)) {
-    return value.map(item => clause((item as { op: unknown }).op, (item as { value: unknown }).value)).join(' 그리고 ');
-  }
-  if (operator && OPERATOR_TEXT[operator]) return clause(operator, value);
-  return `${operator ? `${operator} ` : ''}${valueText(value)}`;
-}
-
-export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, actions }: Props) {
-    // Static export renders without a viewport; widening only after mount keeps
-  // the server and client markup identical and avoids a hydration mismatch.
+export function RuleDetailPanel({ detail, record, workspace, blockReasons, locked, actions, onDirtyChange }: Props) {
+  // Static export renders without a viewport; widening only after mount avoids a mismatch.
   const width = useWindowDimensions().width;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const wide = mounted && width >= 1024;
+
   const [showHistory, setShowHistory] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [replacingEvidence, setReplacingEvidence] = useState<string | null>(null);
+  const [linkingBase, setLinkingBase] = useState<string | null>(null);
+  const [customValue, setCustomValue] = useState('');
+  const [customEvidence, setCustomEvidence] = useState<string | null>(null);
+
   const conflict = workspace.conflicts.find(item => item.candidateRuleIds.includes(detail.ruleId));
   const edited = detail.editedCandidate;
   const canApprove = !locked && blockReasons.length === 0;
+  const orphan = detail.exceptionRelations.find(item => item.exceptionRuleId === detail.ruleId && item.status !== 'LINKED');
 
-  /** A minimal, explicit edit: the scope the reviewer is most likely to correct. */
-  const proposeScopeEdit = (): ReviewableRuleSnapshot => ({
-    ...structuredClone(record.originalCandidate),
-    scope: record.originalCandidate.scope === 'APPLICANT' ? 'HOUSEHOLD' : 'APPLICANT',
-  });
+  // Editing is only meaningful while the session is open; leaving it closes the form.
+  useEffect(() => { if (locked) { setEditing(false); onDirtyChange(false); } }, [locked, onDirtyChange]);
+
+  /** Evidence a reviewer may swap in: anything else attached to the same document. */
+  const replacementOptions = useMemo<ReviewEvidence[]>(() => workspace.rules
+    .flatMap(rule => rule.originalCandidate.evidence)
+    .filter(evidence => evidence.documentId === workspace.document.id && !record.originalCandidate.evidence.some(own => own.id === evidence.id))
+    .filter((evidence, index, all) => all.findIndex(item => item.id === evidence.id) === index), [record, workspace]);
+
+  /** Base rules an exception can hang from: any non-exception rule in the same package. */
+  const baseOptions = useMemo(() => workspace.rules
+    .filter(rule => rule.ruleId !== detail.ruleId && rule.originalCandidate.category !== 'EXCEPTION')
+    .map(rule => ({ id: rule.ruleId, snapshot: rule.editedRuleSnapshot ?? rule.originalCandidate })), [detail.ruleId, workspace]);
+
+  const conflictEvidenceIds = useMemo(
+    () => [...new Set((conflict?.candidates ?? []).flatMap(candidate => candidate.evidenceIds))], [conflict]);
 
   return (
     <View style={styles.panel}>
@@ -79,10 +84,6 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
             <View key={`${source.section}:${source.label}`} style={styles.sourceBlock}>
               <Text style={styles.sourceWhere}>{[source.section, source.tableLabel].filter(Boolean).join(' · ')}</Text>
               <Text selectable style={styles.excerpt}>{source.textExcerpt ?? '원문 발췌가 없습니다.'}</Text>
-              <View style={styles.evidenceRow}>
-                <Badge tone={source.review?.status === 'VALID' || source.review?.status === 'REPLACED' ? 'NORMAL' : source.review?.status === 'INVALID' ? 'CRITICAL_BLOCKER' : 'REVIEW_REQUIRED'}
-                  text={EVIDENCE_STATUS_LABEL[source.review?.status ?? 'NEEDS_REVIEW']} />
-              </View>
             </View>
           ))}
         </View>
@@ -91,8 +92,8 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           <Text accessibilityRole="header" style={styles.colTitle}>AI 원본 candidate</Text>
           {/* AI 원본은 수정 대상이 아니다. 입력이 아니라 읽기 전용 기록으로 보여준다. */}
           <View style={styles.readonlyNote}><Text style={styles.readonlyNoteText}>읽기 전용 · 추출 당시 기록</Text></View>
-          <Field label="적용 대상" value={`${detail.originalCandidate.supplyType} / ${detail.originalCandidate.scope ?? '—'}`} />
-          <Field label="공급단계" value={detail.originalCandidate.stage ?? '—'} />
+          <Field label="적용 대상" value={`${detail.originalCandidate.supplyType} / ${SCOPE_TEXT[detail.originalCandidate.scope ?? ''] ?? detail.originalCandidate.scope ?? '—'}`} />
+          <Field label="공급단계" value={detail.originalCandidate.stage ? STAGE_TEXT[detail.originalCandidate.stage] : '단계 없음'} />
           <Field label="조건" value={conditionText(detail.originalCandidate.operator, detail.originalCandidate.value)} />
           <Field label="배점" value={detail.originalCandidate.score === null ? '배점 없음' : `${detail.originalCandidate.score} / ${detail.originalCandidate.maxScore ?? '—'}`} />
 
@@ -100,15 +101,32 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           {edited ? (
             <>
               <View style={styles.editedNote}><Text style={styles.editedNoteText}>수정 후 승인됨 · 원본과 {record.editDiff.length}개 항목이 달라요</Text></View>
-              {record.editDiff.map(change => (
-                <Text key={change.path} style={styles.diff}>{change.path}: {valueText(change.before)} → {valueText(change.after)}</Text>
-              ))}
+              {record.editDiff.map(change => {
+                const described = describeChange(change.path, change.before, change.after);
+                return <Text key={change.path} style={styles.diff}>{described.label}: {described.before} → {described.after}</Text>;
+              })}
+              <Field label="최종 조건" value={conditionText(edited.operator, edited.value)} />
             </>
-          ) : (
-            <Text style={styles.noEdit}>아직 수정본이 없어요. 원본 그대로 승인하거나, 고쳐서 승인할 수 있어요.</Text>
+          ) : editing ? null : (
+            <>
+              <Text style={styles.noEdit}>아직 수정본이 없어요. 원본 그대로 승인하거나, 고쳐서 승인할 수 있어요.</Text>
+              <Action label="값 고치기" disabled={locked} onPress={() => setEditing(true)} />
+            </>
           )}
         </View>
       </View>
+
+      {editing ? (
+        <RuleEditForm
+          original={record.originalCandidate}
+          onDirtyChange={onDirtyChange}
+          onCancel={() => setEditing(false)}
+          onSave={next => {
+            const result = actions.approveWithEdit(detail.ruleId, next, record.safetyBlockers, REASON);
+            if (result.ok) { setEditing(false); onDirtyChange(false); }
+          }}
+        />
+      ) : null}
 
       {detail.warnings.length ? (
         <View style={styles.warnings}>
@@ -118,7 +136,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
       ) : null}
 
       {detail.exceptionRelations.length ? (
-        <View style={styles.exception}>
+        <View style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>예외 관계</Text>
           {detail.exceptionRelations.map(relation => (
             <View key={relation.exceptionRuleId} style={styles.relationRow}>
@@ -131,12 +149,29 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
               </Text>
             </View>
           ))}
-          {detail.exceptionRelations.some(item => item.status === 'ORPHAN_EXCEPTION') ? (
-            <View style={styles.actionRow}>
-              {(['LIMITED_BY', 'EXEMPTED_BY', 'QUALIFIED_BY'] as const).map(relationType => (
-                <Action key={relationType} label={`youth.residence에 ${RELATION_LABEL[relationType]}`} disabled={locked}
-                  onPress={() => actions.linkException(detail.ruleId, { status: 'LINKED', baseRuleId: 'youth.residence', relationType }, REASON)} />
+          {orphan ? (
+            <View style={styles.subsection}>
+              {/* ID를 직접 입력하게 두지 않는다. 이름·조건·대상·단계를 보고 고른다. */}
+              <Text style={styles.fieldLabel}>어떤 기본 규칙을 한정하나요?</Text>
+              {baseOptions.map(option => (
+                <MotionPressable
+                  key={option.id} accessibilityRole="radio" accessibilityState={{ checked: linkingBase === option.id }}
+                  disabled={locked} onPress={() => setLinkingBase(option.id)}
+                  style={[styles.baseOption, linkingBase === option.id && styles.baseOptionOn]}
+                >
+                  <Text style={styles.baseLabel}>{option.snapshot.label}</Text>
+                  <Text style={styles.baseMeta}>
+                    {conditionText(option.snapshot.operator, option.snapshot.value)} · {SCOPE_TEXT[option.snapshot.scope ?? ''] ?? '—'} · {option.snapshot.stage ? STAGE_TEXT[option.snapshot.stage] : '단계 없음'}
+                  </Text>
+                </MotionPressable>
               ))}
+              <Text style={styles.fieldLabel}>관계 유형</Text>
+              <View style={styles.actionRow}>
+                {RELATION_CHOICES.map(relationType => (
+                  <Action key={relationType} label={RELATION_LABEL[relationType]} disabled={locked || !linkingBase}
+                    onPress={() => actions.linkException(detail.ruleId, { status: 'LINKED', baseRuleId: linkingBase!, relationType }, REASON)} />
+                ))}
+              </View>
               <Action label="독립 예외로 둠" disabled={locked} onPress={() => actions.linkException(detail.ruleId, { status: 'INDEPENDENT' }, REASON)} />
             </View>
           ) : null}
@@ -149,35 +184,87 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
           <Text style={styles.guardReason}>AI가 한쪽을 고르지 않았어요. 원문을 확인한 뒤 채택할 근거를 선택해 주세요.</Text>
           {conflict.candidates.map((candidate, index) => (
             <View key={candidate.candidateId} style={styles.conflictOption}>
-              <Text style={styles.conflictValue}>{index === 0 ? '①' : '②'} {valueText(candidate.value)}</Text>
+              <Text style={styles.conflictValue}>{index === 0 ? '①' : '②'} {String(candidate.value)}</Text>
               <Action label="이 근거 채택" disabled={locked}
                 onPress={() => actions.resolveConflict(conflict.conflictId, { type: 'CANDIDATE', candidateId: candidate.candidateId, reason: REASON }, REASON)} />
             </View>
           ))}
+
+          {/* 둘 다 아닐 때. 근거 없이는 저장하지 못하게 막는다. */}
+          <View style={styles.subsection}>
+            <Text style={styles.fieldLabel}>둘 다 아니면 직접 입력</Text>
+            <TextInput accessibilityLabel="직접 입력할 기준" style={styles.input} value={customValue} onChangeText={setCustomValue}
+              placeholder="예: 공고일 기준 1년 이상 계속 거주" placeholderTextColor={colors.textSubtle} editable={!locked} />
+            <Text style={styles.fieldLabel}>이 판단의 근거</Text>
+            {conflictEvidenceIds.map(id => {
+              const source = workspace.rules.flatMap(rule => rule.originalCandidate.evidence).find(item => item.id === id);
+              return (
+                <MotionPressable key={id} accessibilityRole="radio" accessibilityState={{ checked: customEvidence === id }}
+                  disabled={locked} onPress={() => setCustomEvidence(id)} style={[styles.baseOption, customEvidence === id && styles.baseOptionOn]}>
+                  <Text style={styles.baseLabel}>{source?.label ?? id}</Text>
+                  <Text style={styles.baseMeta}>{[source?.section, source?.tableLabel].filter(Boolean).join(' · ')}</Text>
+                </MotionPressable>
+              );
+            })}
+            {!customValue.trim() || !customEvidence ? (
+              <Text style={styles.hintWarn}>직접 입력한 기준은 값과 근거를 모두 지정해야 저장할 수 있어요.</Text>
+            ) : null}
+            <Action label="직접 입력한 기준으로 확정" disabled={locked || !customValue.trim() || !customEvidence}
+              onPress={() => actions.resolveConflict(conflict.conflictId,
+                { type: 'CUSTOM', value: customValue.trim(), evidenceIds: [customEvidence!], reason: REASON }, REASON)} />
+          </View>
+
           <Text style={styles.conflictState}>
-            {conflict.resolution ? `현재: ${conflict.resolution.type === 'CANDIDATE' ? `${conflict.resolution.candidateId} 채택` : conflict.resolution.type === 'HELD' ? '보류' : '직접 입력'}` : '현재: 선택 없음'}
+            {conflict.resolution
+              ? `현재: ${conflict.resolution.type === 'CANDIDATE' ? `${conflict.resolution.candidateId} 채택`
+                : conflict.resolution.type === 'HELD' ? '보류' : `직접 입력 · ${String(conflict.resolution.value)}`}`
+              : '현재: 선택 없음'}
           </Text>
           <Action label="둘 다 보류하고 원문 재확인" disabled={locked}
             onPress={() => actions.resolveConflict(conflict.conflictId, { type: 'HELD', reason: REASON }, REASON)} />
         </View>
       ) : null}
 
-      <View style={styles.evidenceActions}>
+      <View style={styles.section}>
         <Text accessibilityRole="header" style={styles.sectionTitle}>근거 검토</Text>
-        {record.evidenceReviews.map(review => (
-          <View key={review.evidenceId} style={styles.actionRow}>
-            <Badge tone={review.status === 'VALID' || review.status === 'REPLACED' ? 'NORMAL' : review.status === 'INVALID' ? 'CRITICAL_BLOCKER' : 'REVIEW_REQUIRED'}
-              text={EVIDENCE_STATUS_LABEL[review.status]} />
-            <Action label="유효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'VALID', REASON)} />
-            <Action label="무효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'INVALID', REASON)} />
-          </View>
-        ))}
+        {record.evidenceReviews.map(review => {
+          const source = record.originalCandidate.evidence.find(item => item.id === review.evidenceId);
+          return (
+            <View key={review.evidenceId} style={styles.evidenceBlock}>
+              <View style={styles.actionRow}>
+                <Badge tone={review.status === 'VALID' || review.status === 'REPLACED' ? 'NORMAL' : review.status === 'INVALID' ? 'CRITICAL_BLOCKER' : 'REVIEW_REQUIRED'}
+                  text={EVIDENCE_STATUS_LABEL[review.status]} />
+                <Action label="유효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'VALID', REASON)} />
+                <Action label="무효" disabled={locked} onPress={() => actions.reviewEvidence(detail.ruleId, review.evidenceId, 'INVALID', REASON)} />
+                <Action label={replacingEvidence === review.evidenceId ? '교체 취소' : '다른 근거로 교체'} disabled={locked}
+                  onPress={() => setReplacingEvidence(current => current === review.evidenceId ? null : review.evidenceId)} />
+              </View>
+              {review.replacement ? (
+                <Text style={styles.replacedNote}>교체됨 → {review.replacement.label} · {[review.replacement.section, review.replacement.tableLabel].filter(Boolean).join(' · ')}</Text>
+              ) : null}
+              {replacingEvidence === review.evidenceId ? (
+                <View style={styles.subsection}>
+                  <Text style={styles.fieldLabel}>지금 근거</Text>
+                  <Text style={styles.excerpt}>{source?.textExcerpt ?? '원문 발췌 없음'}</Text>
+                  <Text style={styles.fieldLabel}>바꿀 근거 고르기</Text>
+                  {replacementOptions.length ? replacementOptions.map(option => (
+                    <View key={option.id} style={styles.baseOption}>
+                      <Text style={styles.baseLabel}>{option.label}</Text>
+                      <Text style={styles.baseMeta}>{[option.section, option.tableLabel].filter(Boolean).join(' · ')}</Text>
+                      <Text style={styles.excerpt}>{option.textExcerpt ?? '원문 발췌 없음'}</Text>
+                      <Action label="이 근거로 교체" disabled={locked}
+                        onPress={() => { actions.reviewEvidence(detail.ruleId, review.evidenceId, 'REPLACED', REASON, option); setReplacingEvidence(null); }} />
+                    </View>
+                  )) : <Text style={styles.hintWarn}>같은 문서에서 바꿀 수 있는 다른 근거가 없어요.</Text>}
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
       </View>
 
       <View style={styles.actionRow}>
         <Action label="승인" tone="primary" disabled={!canApprove} onPress={() => actions.approve(detail.ruleId, REASON)} />
-        <Action label="수정 후 승인" disabled={!canApprove}
-          onPress={() => actions.approveWithEdit(detail.ruleId, proposeScopeEdit(), record.safetyBlockers, REASON)} />
         <Action label="보류" disabled={locked} onPress={() => actions.hold(detail.ruleId, REASON)} />
         <Action label="제외" tone="danger" disabled={locked} onPress={() => actions.reject(detail.ruleId, REASON)} />
       </View>
@@ -202,7 +289,7 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={styles.fieldLabelInline}>{label}</Text>
       <Text style={styles.fieldValue}>{value}</Text>
     </View>
   );
@@ -224,7 +311,6 @@ const styles = StyleSheet.create({
   sourceBlock: { gap: 2, paddingBottom: spacing.xs },
   sourceWhere: { ...type.caption, color: colors.textSubtle },
   excerpt: { ...type.bodySm, color: colors.textMuted, borderLeftWidth: 2, borderLeftColor: colors.outline, paddingLeft: spacing.sm },
-  evidenceRow: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xs },
   readonlyNote: { alignSelf: 'flex-start', borderRadius: radius.pill, backgroundColor: colors.surfaceHigh, paddingHorizontal: spacing.sm, paddingVertical: 1 },
   readonlyNoteText: { ...type.caption, color: colors.textMuted },
   editedNote: { alignSelf: 'flex-start', borderRadius: radius.pill, backgroundColor: colors.lavender, paddingHorizontal: spacing.sm, paddingVertical: 1 },
@@ -232,21 +318,30 @@ const styles = StyleSheet.create({
   diff: { ...type.bodySm, color: colors.text },
   noEdit: { ...type.bodySm, color: colors.textMuted },
   field: { flexDirection: 'row', gap: spacing.sm },
-  fieldLabel: { ...type.bodySm, color: colors.textSubtle, width: 76 },
+  fieldLabelInline: { ...type.bodySm, color: colors.textSubtle, width: 76 },
+  fieldLabel: { ...type.caption, color: colors.textSubtle },
   fieldValue: { ...type.bodySmStrong, color: colors.text, flex: 1 },
   warnings: { borderRadius: radius.cardSm, backgroundColor: '#FFDCC3', padding: spacing.sm, gap: 2 },
   warnTitle: { ...type.bodySmStrong, color: '#8A4900' },
   warnItem: { ...type.bodySm, color: colors.textMuted },
+  section: { gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.sm },
+  subsection: { gap: spacing.xs, paddingLeft: spacing.sm, borderLeftWidth: 2, borderLeftColor: colors.surfaceHigh },
   sectionTitle: { ...type.bodySmStrong, color: colors.text },
-  exception: { gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.sm },
   relationRow: { flexDirection: 'row', gap: spacing.xs, alignItems: 'center', flexWrap: 'wrap' },
   relationText: { ...type.bodySm, color: colors.textMuted, flexShrink: 1 },
+  baseOption: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.sm, gap: 2 },
+  baseOptionOn: { borderColor: colors.primary, backgroundColor: colors.lavender },
+  baseLabel: { ...type.bodySmStrong, color: colors.text },
+  baseMeta: { ...type.caption, color: colors.textMuted },
   conflict: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.error, padding: spacing.sm, gap: spacing.xs },
   conflictTitle: { ...type.bodySmStrong, color: '#93000A' },
   conflictOption: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.sm, gap: spacing.xs },
   conflictValue: { ...type.bodySmStrong, color: colors.text },
   conflictState: { ...type.bodySm, color: colors.textMuted },
-  evidenceActions: { gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.sm },
+  evidenceBlock: { gap: spacing.xs, paddingBottom: spacing.xs },
+  replacedNote: { ...type.bodySm, color: colors.primary },
+  input: { ...type.bodySm, color: colors.text, borderWidth: 1, borderColor: colors.outline, borderRadius: radius.button, minHeight: size.control, paddingHorizontal: spacing.sm },
+  hintWarn: { ...type.caption, color: colors.error },
   actionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' },
   historyToggle: { minHeight: size.touch, justifyContent: 'center' },
   historyToggleText: { ...type.bodySmStrong, color: colors.primary },

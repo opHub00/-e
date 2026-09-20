@@ -7,7 +7,7 @@ import { buildSamdoReviewSeed } from './fixtures/buildSamdoReviewSeed.ts';
 import { SAMDO_REVIEW_SEED, SAMDO_REVIEW_SEED_PROVENANCE } from './fixtures/samdoReviewSeed.generated.ts';
 import { verifyReviewSeedProvenance } from './fixtures/provenance.ts';
 import { createRuleReviewWorkspace } from './server/service.ts';
-import { createBrowserRuleReviewRepository, RULE_REVIEW_DEMO_SEED_KEY } from './repository/RuleReviewRepository.ts';
+import { createBrowserRuleReviewRepository, InMemoryRuleReviewRepository, RULE_REVIEW_DEMO_SEED_KEY } from './repository/RuleReviewRepository.ts';
 
 const sourceUrl = new URL('../../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url);
 const source = JSON.parse(await readFile(sourceUrl, 'utf8')) as ImportPackage;
@@ -45,8 +45,49 @@ test('browser repository receives an explicit seed and preserves domain activati
   const repository = createBrowserRuleReviewRepository({ getItem: key => key === RULE_REVIEW_DEMO_SEED_KEY ? JSON.stringify(SAMDO_REVIEW_SEED) : null });
   assert.ok(repository);
   assert.equal(repository.snapshot().lifecycleStatus, 'PENDING_REVIEW');
-  repository.startReview('fixture repository boundary');
+  repository.startReview({ expectedRevision: repository.snapshot().revision, reason: 'fixture repository boundary' });
   assert.equal(repository.snapshot().lifecycleStatus, 'IN_REVIEW');
+  assert.equal(repository.gate().canActivate, false);
+});
+
+test('platform repository carries the full edited review to activation eligibility and revalidation', () => {
+  const repository = new InMemoryRuleReviewRepository(SAMDO_REVIEW_SEED, 'reviewer:integration');
+  const mutation = (reason: string) => ({ expectedRevision: repository.snapshot().revision, reason });
+  repository.startReview(mutation('검수 시작'));
+  assert.throws(() => repository.hold('youth.age', { expectedRevision: 0, reason: '오래된 화면' }), /STALE_REVIEW_REVISION/);
+
+  const initial = repository.snapshot();
+  const originalHash = initial.rules.find(rule => rule.ruleId === 'youth.age')!.originalCandidateHash;
+  const replacement = initial.rules.find(rule => rule.ruleId === 'youth.income')!.originalCandidate.evidence[0];
+  for (const rule of initial.rules) {
+    const evidenceId = rule.originalCandidate.evidence[0].id;
+    repository.reviewEvidence(rule.ruleId, evidenceId, rule.ruleId === 'youth.age' ? 'REPLACED' : 'VALID',
+      mutation('원문 근거 검토'), rule.ruleId === 'youth.age' ? replacement : undefined);
+  }
+  for (const rule of repository.snapshot().rules) {
+    if (rule.ruleId === 'firstHome.deposit') {
+      const edited = structuredClone(rule.originalCandidate); edited.scope = 'HOUSEHOLD';
+      repository.approveWithEdit(rule.ruleId, edited, ['SEMANTIC_EVIDENCE_MISMATCH'], mutation('저축액 scope 수정'));
+    } else if (rule.ruleId === 'youth.restrictions') repository.reject(rule.ruleId, mutation('불필요한 extra 제외'));
+    else repository.approve(rule.ruleId, mutation('원문과 일치'));
+  }
+  repository.linkException('youth.overseas',
+    { status: 'LINKED', baseRuleId: 'youth.residence', relationType: 'LIMITED_BY' }, mutation('해외체류 제한 연결'));
+  const residenceEvidenceId = repository.snapshot().rules.find(rule => rule.ruleId === 'youth.residence')!.originalCandidate.evidence[0].id;
+  repository.resolveConflict('samdo.region.priority-date',
+    { type: 'CUSTOM', value: '공고일 기준 1년 이상 계속 거주', evidenceIds: [residenceEvidenceId], reason: '표2 대조' },
+    mutation('지역우선 충돌 해결'));
+  repository.resolveUnresolved('samdo.management-number-mapping', '판정 scope에서 제외하고 별도 확인', mutation('관리번호 보류'));
+
+  assert.equal(repository.gate().canActivate, true);
+  assert.equal(repository.gate().status, 'ACTIVATION_ELIGIBLE');
+  const reviewed = repository.snapshot();
+  assert.equal(reviewed.rules.find(rule => rule.ruleId === 'youth.age')!.originalCandidateHash, originalHash);
+  assert.equal(reviewed.rules.find(rule => rule.ruleId === 'firstHome.deposit')!.reviewStatus, 'APPROVED_WITH_EDIT');
+  assert.ok(reviewed.auditLog.some(entry => entry.action === 'REVIEW_EVIDENCE' && JSON.stringify(entry.after).includes('REPLACED')));
+
+  repository.invalidateDocument('a'.repeat(63) + '1', mutation('새 문서 수신'));
+  assert.equal(repository.gate().status, 'REVALIDATION_REQUIRED');
   assert.equal(repository.gate().canActivate, false);
 });
 

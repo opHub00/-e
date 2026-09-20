@@ -29,6 +29,8 @@
 
 SQL의 대문자 `RAISE EXCEPTION` token이 transport error code의 canonical source다. `AUTH_REQUIRED`, `FORBIDDEN`, `STALE_REVIEW_REVISION`은 별도 auth/concurrency outcome으로 변환하고 나머지 deterministic guard는 `REJECTED`로 보존한다. 알 수 없는 backend 오류만 `FAILED`가 된다. Migration과 TypeScript inventory의 drift는 로컬 테스트가 차단한다.
 
+로컬 Playwright는 `playwright.config.ts`의 web server 환경에서 `EXPO_PUBLIC_WANPANE_ENV=test`와 비밀이 아닌 fixture Supabase endpoint를 명시하고, 실행할 때마다 `expo export --clear`로 브라우저 번들을 새로 만든다. 모든 fixture endpoint 요청은 Playwright가 가로채며 실제 DB로 보내지 않는다. 따라서 shell에서 환경변수를 별도로 설정할 필요가 없다. 일반 web export와 staging 명령에는 이 test 값이 전파되지 않는다. staging은 `WANPANE_ENV=staging`과 `EXPO_PUBLIC_WANPANE_ENV=staging`을 명시해야 하며, 환경이 없거나 알 수 없는 값이면 local review seed는 fail-closed된다.
+
 ## 적용 순서
 
 1. staging project ref를 production ref와 대조한다.

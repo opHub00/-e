@@ -1,16 +1,18 @@
 /** Cross-platform clean E2E build/server/test lifecycle used by npm scripts. */
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import {
+  E2E_OUTPUT_DIR,
+  assertWebBuildProfile,
+  createE2EBuildEnvironment,
+  runWebExport,
+} from '../scripts/web-build.mjs';
 
 const PORT = 4321;
 const require = createRequire(import.meta.url);
-const expoCli = require.resolve('expo/bin/cli');
 const playwrightCli = require.resolve('@playwright/test/cli');
 const env = {
-  ...process.env,
-  EXPO_PUBLIC_WANPANE_ENV: 'test',
-  EXPO_PUBLIC_SUPABASE_URL: 'https://e2e-fixture.supabase.co',
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: 'public-anon-e2e-placeholder',
+  ...createE2EBuildEnvironment(),
   WANPANE_E2E_EXTERNAL_SERVER: '1',
 };
 
@@ -18,15 +20,6 @@ const waitForExit = child => new Promise((resolve, reject) => {
   child.once('error', reject);
   child.once('exit', (code, signal) => resolve({ code, signal }));
 });
-
-const run = (entry, args, options = {}) => {
-  const child = spawn(process.execPath, [entry, ...args], {
-    env,
-    stdio: 'inherit',
-    ...options,
-  });
-  return waitForExit(child);
-};
 
 const endpointReady = async () => {
   try {
@@ -37,11 +30,11 @@ const endpointReady = async () => {
   }
 };
 
-const build = await run(expoCli, ['export', '--platform', 'web', '--clear']);
-if (build.code !== 0) throw new Error(`E2E_WEB_EXPORT_FAILED:${build.code ?? build.signal}`);
+await runWebExport({ env, outputDir: E2E_OUTPUT_DIR, clear: true });
+await assertWebBuildProfile({ outputDir: E2E_OUTPUT_DIR, profile: 'test' });
 if (await endpointReady()) throw new Error('E2E_PORT_ALREADY_IN_USE');
 
-const server = spawn(process.execPath, ['e2e/staticServer.mjs', 'dist', String(PORT)], {
+const server = spawn(process.execPath, ['e2e/staticServer.mjs', E2E_OUTPUT_DIR, String(PORT)], {
   env,
   stdio: 'inherit',
 });

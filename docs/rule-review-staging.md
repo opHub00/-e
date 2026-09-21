@@ -29,7 +29,22 @@
 
 SQL의 대문자 `RAISE EXCEPTION` token이 transport error code의 canonical source다. `AUTH_REQUIRED`, `FORBIDDEN`, `STALE_REVIEW_REVISION`은 별도 auth/concurrency outcome으로 변환하고 나머지 deterministic guard는 `REJECTED`로 보존한다. 알 수 없는 backend 오류만 `FAILED`가 된다. Migration과 TypeScript inventory의 drift는 로컬 테스트가 차단한다.
 
-로컬 Playwright는 `playwright.config.ts`의 web server 환경에서 `EXPO_PUBLIC_WANPANE_ENV=test`와 비밀이 아닌 fixture Supabase endpoint를 명시하고, 실행할 때마다 `expo export --clear`로 브라우저 번들을 새로 만든다. 모든 fixture endpoint 요청은 Playwright가 가로채며 실제 DB로 보내지 않는다. 따라서 shell에서 환경변수를 별도로 설정할 필요가 없다. 일반 web export와 staging 명령에는 이 test 값이 전파되지 않는다. staging은 `WANPANE_ENV=staging`과 `EXPO_PUBLIC_WANPANE_ENV=staging`을 명시해야 하며, 환경이 없거나 알 수 없는 값이면 local review seed는 fail-closed된다.
+## Web build profiles and cache isolation
+
+브라우저 build는 다음 공식 명령을 사용한다.
+
+| 용도 | 명령 | public environment | 산출물 | Metro cache namespace |
+|---|---|---|---|---|
+| Local development | `npm run web` | 개발 shell에서 명시 | 개발 서버 | `default` 또는 명시한 namespace |
+| Playwright E2E | `npm run test:e2e` | `test` | `.e2e/dist` | `e2e` |
+| Staging export | `npm run build:web:staging` | `staging` | `.staging/dist` | `staging` |
+| Production export | `npm run build:web` | `production` | `dist` | `production` |
+
+E2E runner는 child process에만 `EXPO_PUBLIC_WANPANE_ENV=test`와 비밀이 아닌 fixture Supabase endpoint를 전달한다. 부모 `process.env`는 변경하지 않는다. E2E 산출물과 Metro transform/file-map cache는 staging 및 production과 별도 디렉터리를 사용한다. 공식 staging/production wrapper는 매번 clean export를 수행하며, 상속된 test environment 또는 E2E fixture URL/key를 발견하면 `TEST_ENV_NOT_ALLOWED_IN_RELEASE_BUILD`로 중단한다. 환경값을 바꾸었을 때 raw `npx expo export`를 배포 명령으로 사용하지 않는다.
+
+Rule Review Playwright specs는 Supabase network request가 0건임을 직접 확인한다. 일부 다른 specs는 필요한 endpoint를 route interception으로 대체한다. 모든 브라우저 요청이 일괄 interception된다고 가정하지 않는다. shell에서 E2E 환경변수를 따로 설정할 필요는 없다. staging은 server 측 `WANPANE_ENV=staging`과 client build의 `EXPO_PUBLIC_WANPANE_ENV=staging`을 각각 명시해야 한다. 환경이 없거나 알 수 없는 값이면 local review seed와 test fault plan은 fail-closed된다.
+
+`npm run test:build-isolation`은 release/E2E 순서를 바꾸어 가며 전용 산출물을 만들고, 마지막 release 및 staging-like bundle에 E2E fixture 값이나 service-role 표식이 없는지 검사한다. 이 검사는 실제 Supabase에 연결하거나 원격 요청을 보내지 않는다.
 
 ## 적용 순서
 

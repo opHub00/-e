@@ -58,6 +58,8 @@ supabase/.temp/
 Thumbs.db
 .eslintcache
 .cache/
+.e2e/
+.staging/
 .parcel-cache/
 .turbo/
 

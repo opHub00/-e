@@ -26,15 +26,17 @@ export default defineConfig({
     { name: 'desktop-1440x900', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: externallyManagedServer ? undefined : {
-    command: `node e2e/prepareWebServer.mjs dist ${PORT}`,
+    command: `node e2e/prepareWebServer.mjs .e2e/dist ${PORT}`,
     url: `http://127.0.0.1:${PORT}/assessment`,
     env: {
       ...process.env,
       EXPO_PUBLIC_WANPANE_ENV: 'test',
-      // Public, non-secret fixture values let browser tests construct the client;
-      // every matching request is intercepted by Playwright and never reaches a DB.
+      // Public, non-secret fixture values let browser tests construct the client.
+      // Rule Review specs assert zero Supabase requests; other specs intercept only
+      // the endpoints they explicitly exercise.
       EXPO_PUBLIC_SUPABASE_URL: 'https://e2e-fixture.supabase.co',
       EXPO_PUBLIC_SUPABASE_ANON_KEY: 'public-anon-e2e-placeholder',
+      WANPANE_METRO_CACHE_NAMESPACE: 'e2e',
     },
     // Never reuse a server whose bundle may have been transformed for another env.
     reuseExistingServer: false,

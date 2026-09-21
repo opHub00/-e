@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { validateImportPackage } from '../features/applicationAssessment/server/importPackage.ts';
 import { createRuleLifecycle, ruleSemantics } from '../features/applicationAssessment/server/lifecycle.ts';
-import { guardImportTarget } from '../features/applicationAssessment/server/importTarget.ts';
+import { guardImportTarget, projectRefFromSupabaseHost } from '../features/applicationAssessment/server/importTarget.ts';
 import { isDeepStrictEqual } from 'node:util';
 
 const usage = `assessment-rules validate PACKAGE.json
@@ -21,22 +21,35 @@ async function readBounded(path, maxBytes) {
   if ((await stat(path)).size > maxBytes) throw new Error('Input file is too large');
   return readFile(path);
 }
-async function productionUrls() {
-  const urls = [process.env.EXPO_PUBLIC_SUPABASE_URL].filter(Boolean);
+/**
+ * Declared production identity only.
+ *
+ * The CLI's linked project is the current working target, not a production
+ * identity, so it is not consulted here. Process-level EXPO_PUBLIC_SUPABASE_URL
+ * is also ignored because a staging shell legitimately sets it to staging.
+ */
+async function productionRefs() {
+  const refs = new Set();
+  const addRef = (value) => {
+    const ref = value?.trim().toLowerCase();
+    if (ref && /^[a-z0-9]+$/.test(ref)) refs.add(ref);
+  };
+  const addUrl = (value) => {
+    try { addRef(projectRefFromSupabaseHost(new URL(value).hostname) ?? ''); } catch { /* not a URL */ }
+  };
+  addRef(process.env.SUPABASE_PRODUCTION_PROJECT_REF);
   for (const path of ['../.env', '../.env.local']) {
     try {
       const text = await readFile(new URL(path, import.meta.url), 'utf8');
       for (const line of text.split(/\r?\n/)) {
-        const match = line.match(/^EXPO_PUBLIC_SUPABASE_URL\s*=\s*["']?([^"'\s]+)["']?\s*$/);
-        if (match) urls.push(match[1]);
+        const url = line.match(/^EXPO_PUBLIC_SUPABASE_URL\s*=\s*["']?([^"'\s]+)["']?\s*$/);
+        if (url) addUrl(url[1]);
+        const ref = line.match(/^SUPABASE_PRODUCTION_PROJECT_REF\s*=\s*["']?([^"'\s]+)["']?\s*$/);
+        if (ref) addRef(ref[1]);
       }
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  try {
-    const ref = (await readFile(new URL('../supabase/.temp/project-ref', import.meta.url), 'utf8')).trim();
-    if (/^[a-z0-9]+$/.test(ref)) urls.push(`https://${ref}.supabase.co`);
-  } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  return urls;
+  return [...refs];
 }
 async function main() {
   const [command, target, ...args] = process.argv.slice(2);
@@ -54,7 +67,7 @@ async function main() {
   }
   // Validate all write arguments before contacting any target.
   if (command === 'approve' && !/^[a-f0-9]{32}$/.test(options['--fingerprint'])) throw new Error('Use the fingerprint from a saved review snapshot');
-  const url = guardImportTarget(process.env.ASSESSMENT_IMPORT_URL, process.env.ASSESSMENT_IMPORT_ENV, process.env.ASSESSMENT_STAGING_PROJECT_REF, await productionUrls());
+  const url = guardImportTarget(process.env.ASSESSMENT_IMPORT_URL, process.env.ASSESSMENT_IMPORT_ENV, process.env.ASSESSMENT_STAGING_PROJECT_REF, await productionRefs());
   const key = process.env.ASSESSMENT_SERVICE_ROLE_KEY;
   if (!key) throw new Error('A dedicated server credential is required');
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

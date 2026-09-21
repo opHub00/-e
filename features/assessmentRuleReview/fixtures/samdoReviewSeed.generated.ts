@@ -12,6 +12,7 @@ export const SAMDO_REVIEW_SEED_PROVENANCE: ReviewSeedProvenance = {
   "generatorVersion": "rule-review-seed-v2"
 };
 
+/** Test and dev fixture: a curated handful of rules. */
 export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
   "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
   "announcement": {
@@ -439,6 +440,6314 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "supplyType": "youth",
       "category": "SCOPE"
+    }
+  ]
+};
+
+/** Staging seed: one review candidate per materialized source rule. */
+export const SAMDO_STAGING_REVIEW_SEED: RuleReviewWorkspaceSeed = {
+  "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+  "announcement": {
+    "id": "bade0617-63c6-4f61-86bf-6cd5ae17b101",
+    "title": "삼도이동 1지구 토지임대부 공공분양주택"
+  },
+  "document": {
+    "id": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+    "fileName": "(VER1.7_부동산원 제출용_공통) 삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
+    "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+    "versionLabel": "VER1.7"
+  },
+  "sourceStatus": "DRAFT_SOURCE_VERIFIED",
+  "version": "VER1.7-draft-transcription-1",
+  "rules": [
+    {
+      "ruleId": "youth.residence",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.residence",
+        "label": "공고일 제주 거주",
+        "semanticRole": "YOUTH_RESIDENCE",
+        "supplyType": "youth",
+        "category": "SCOPE",
+        "operator": "eq",
+        "value": "제주특별자치도",
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [
+          "youth.overseas"
+        ],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.residence",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "공고일 제주 거주",
+            "textExcerpt": "• 입주자모집공고일(2026.09.14.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 현재 제주특별자치도도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 제주특별자치도도에 거주하면서 아래조건(①~⑥)을 모두 갖춘 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1887,
+                  "stream": "BodyText/Section0",
+                  "offset": 389059
+                },
+                {
+                  "index": 2031,
+                  "stream": "BodyText/Section0",
+                  "offset": 420582
+                },
+                {
+                  "index": 2292,
+                  "stream": "BodyText/Section0",
+                  "offset": 476268
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.overseas",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.overseas",
+        "label": "해외체류 이력은 별도 심사",
+        "semanticRole": "YOUTH_OVERSEAS",
+        "supplyType": "youth",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [
+          "해외체류와 생업 목적 예외를 함께 검토해야 합니다."
+        ],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.overseas",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표2> 지역우선 공급기준",
+            "label": "해외체류 이력은 별도 심사",
+            "textExcerpt": "출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과(거주제한기간이 2년인 주택은 각 연도별 183일을 말함) 하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.\n- 사례1) 모집공고일 현재 해당지역에 거주하고 있으나 계속해서 90일을 초과하여 국외에 체류한 경력이 있으면 해당지역 우선공급 대상자로는 불인정하나 기타지역 거주자로는 청약 가능합니다.\n- 사례2) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과하지 않는 경우 해당지역 우선공급 대상자로 청약 가능합니다.\n- 사례3) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과한 경우 해당지역 우선공급 대상자로 불인정되며 기타지역 거주자로도 인정되지 않습니다.\n- 입주자모집공고일 현재 해외에 있으며, 해외 체류기간이 계속하여 90일을 초과하거나 전체 기간이 연간(매년) 183일을 초과하는 분은 지역 우선공급 대상자(제주특별자치도 1년 이상 거주자) 및 기타지역 거주자(제주특별자치도 1년 미만 거주자)로 청약이 불가하며, 이를 위반하여 당첨될 경우 부적격 처리됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 216,
+                  "stream": "BodyText/Section0",
+                  "offset": 50934
+                },
+                {
+                  "index": 217,
+                  "stream": "BodyText/Section0",
+                  "offset": 51612
+                },
+                {
+                  "index": 218,
+                  "stream": "BodyText/Section0",
+                  "offset": 51942
+                },
+                {
+                  "index": 219,
+                  "stream": "BodyText/Section0",
+                  "offset": 52192
+                },
+                {
+                  "index": 1080,
+                  "stream": "BodyText/Section0",
+                  "offset": 223544
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.exceptions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.exceptions",
+        "label": "혼인·출산·배우자·군인 등 특례 미적용",
+        "semanticRole": "YOUTH_EXCEPTIONS",
+        "supplyType": "youth",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.exceptions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "혼인·출산·배우자·군인 등 특례 미적용",
+            "textExcerpt": "- [혼인특례] 신혼부부(예비신혼부부 제외) 특별공급의 경우, 신청자 본인이 혼인신고일 전에 당첨자로 관리된 사실이 있는 경우에도 신청이 가능합니다.\n- [출산특례] 신혼부부(예비신혼부부 포함)·신생아 특별공급의 경우, ‘24.06.19. 이후 출생한 자녀(태아나 입양 포함)가 있는 분은 신청자 본인 또는 배우자의 특별공급 당첨이력이 있더라도 한 차례에 한정(1세대 1주택 기준)하여 신청이 가능합니다. 이 경우 무주택세대구성원 요건을 충족하지 않아도(신청자 본인 또는 그 배우자가 주택을 소유한 경우에 한함) 신청할 수 있으나, 당첨 후 기존 소유 주택(입주자모집공고일 현재 신청자 또는 그 배우자가 소유한 주택으로서 분양권등을 포함)의 처분 조건*을 승낙하여야 합니다. (단, 이 경우 기존 소유 주택도 자산보유기준 적용 대상이 됩니다.)\n•10년 이상 장기복무 중인 군인은 본 주택의 해당순위(특별공급 및 일반공급 1순위, 2순위)의 청약자격과 입주자저축 요건을 충족 시 해당지역으로 청약할 수 있습니다.\n① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 243,
+                  "stream": "BodyText/Section0",
+                  "offset": 56766
+                },
+                {
+                  "index": 244,
+                  "stream": "BodyText/Section0",
+                  "offset": 57054
+                },
+                {
+                  "index": 1099,
+                  "stream": "BodyText/Section0",
+                  "offset": 227745
+                },
+                {
+                  "index": 2293,
+                  "stream": "BodyText/Section0",
+                  "offset": 476490
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.childbirth",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.childbirth",
+        "label": "출산가구 완화·태아·입양은 추가 확인",
+        "semanticRole": "YOUTH_CHILDBIRTH",
+        "supplyType": "youth",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.childbirth",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3-1> / <표4-1> / <표5-1>",
+            "label": "출산가구 완화·태아·입양은 추가 확인",
+            "textExcerpt": "※ (출산가구 소득기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득기준이 완화되며, 완화된 기준은 아래 “<표4-1> 출산가구 소득기준 완화(청년)”를 참고하시기 바랍니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1339,
+                  "stream": "BodyText/Section0",
+                  "offset": 286804
+                },
+                {
+                  "index": 2099,
+                  "stream": "BodyText/Section0",
+                  "offset": 434119
+                },
+                {
+                  "index": 2359,
+                  "stream": "BodyText/Section0",
+                  "offset": 489444
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.restrictions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": false,
+      "required": false,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.restrictions",
+        "label": "특별공급 제한 없음",
+        "semanticRole": "YOUTH_RESTRICTIONS",
+        "supplyType": "youth",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.restrictions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 제한 없음",
+            "textExcerpt": "• 분양가상한제 적용주택, 투기과열지구 또는 청약과열지역에서 공급하는 주택 등에 이미 당첨되어 재당첨 제한 기간 내에 있는 분과 부적격 당첨 후 입주자로 선정될 수 없는 기간[입주자모집공고일(2026.09.14.) 기준 당첨일로부터 1년]내에 있는 분은 신청할 수 없습니다.\n• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2021,
+                  "stream": "BodyText/Section0",
+                  "offset": 417285
+                },
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.specialHistory",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.specialHistory",
+        "label": "특별공급 당첨 이력 없음(특례 별도)",
+        "semanticRole": "YOUTH_SPECIALHISTORY",
+        "supplyType": "youth",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.specialHistory",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 당첨 이력 없음(특례 별도)",
+            "textExcerpt": "• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)\n•「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 동법 개정(‘10.02.23.) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분 및 그 세대에 속한 분은 특별공급을 받은 것으로 간주하므로 신혼부부 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                },
+                {
+                  "index": 2276,
+                  "stream": "BodyText/Section0",
+                  "offset": 470723
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.reWinning",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.reWinning",
+        "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+        "semanticRole": "YOUTH_REWINNING",
+        "supplyType": "youth",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.reWinning",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+            "textExcerpt": "• 신혼부부·생애최초·신생아 및 일반공급의 경우 재당첨제한 적용주택(이전기관 종사자 특별공급 주택, 분양가상한제 적용주택, 분양전환공공임대주택, 토지임대주택, 투기과열지구 및 청약과열지역에서 공급되는 주택 등)에 당첨되어 금회 공급되는 주택의 당첨자 발표일 현재 재당첨제한 기간 내에 있는 당첨자 및 그 세대(신혼부부 특별공급의 예비신혼부부의 경우 혼인으로 구성될 세대)에 속한 분, 부적격 당첨자로 처리되어 청약 제한 기간 내에 있는 분은 금회 공급되는 주택의 신혼부부·생애최초·신생아 및 일반공급의 당첨자로 선정될 수 없습니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 276,
+                  "stream": "BodyText/Section0",
+                  "offset": 72043
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.account",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.account",
+        "label": "입주자저축 보유 및 종류",
+        "semanticRole": "YOUTH_ACCOUNT",
+        "supplyType": "youth",
+        "category": "SUBSCRIPTION",
+        "operator": null,
+        "value": [
+          {
+            "fact": "hasAccount",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "accountKindEligible",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.account",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "입주자저축 보유 및 종류",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.months",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.months",
+        "label": "통장 가입 6개월 경과",
+        "semanticRole": "YOUTH_MONTHS",
+        "supplyType": "youth",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.months",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "통장 가입 6개월 경과",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.payments",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.payments",
+        "label": "납입인정 6회 이상",
+        "semanticRole": "YOUTH_PAYMENTS",
+        "supplyType": "youth",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.payments",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "납입인정 6회 이상",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.age",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.age",
+        "label": "만 19~39세",
+        "semanticRole": "YOUTH_AGE",
+        "supplyType": "youth",
+        "category": "AGE",
+        "operator": null,
+        "value": [
+          {
+            "fact": "age",
+            "op": "gte",
+            "value": 19
+          },
+          {
+            "fact": "age",
+            "op": "lte",
+            "value": 39
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.age",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "만 19~39세",
+            "textExcerpt": "① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1888,
+                  "stream": "BodyText/Section0",
+                  "offset": 389301
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.single",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.single",
+        "label": "혼인 중이 아님",
+        "semanticRole": "YOUTH_SINGLE",
+        "supplyType": "youth",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": "single",
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.single",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "혼인 중이 아님",
+            "textExcerpt": "① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1888,
+                  "stream": "BodyText/Section0",
+                  "offset": 389301
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.housing",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.housing",
+        "label": "현재 무주택 및 과거 주택소유 없음",
+        "semanticRole": "YOUTH_HOUSING",
+        "supplyType": "youth",
+        "category": "HOUSING",
+        "operator": null,
+        "value": [
+          {
+            "fact": "noHome",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "neverOwned",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.housing",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "현재 무주택 및 과거 주택소유 없음",
+            "textExcerpt": "① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1888,
+                  "stream": "BodyText/Section0",
+                  "offset": 389301
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.assets",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.assets",
+        "label": "본인 자산 276백만원 이하",
+        "semanticRole": "YOUTH_ASSETS",
+        "supplyType": "youth",
+        "category": "ASSET",
+        "operator": "lte",
+        "value": 276000000,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.assets",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3> 총자산 보유기준",
+            "label": "본인 자산 276백만원 이하",
+            "textExcerpt": "362백만원 이하\n(청년 계층은 신청자 본인 276백만원 이하",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1216,
+                  "stream": "BodyText/Section0",
+                  "offset": 260832
+                },
+                {
+                  "index": 1217,
+                  "stream": "BodyText/Section0",
+                  "offset": 260936
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.parentAssets",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.parentAssets",
+        "label": "부모 자산 1,034백만원 이하",
+        "semanticRole": "YOUTH_PARENTASSETS",
+        "supplyType": "youth",
+        "category": "ASSET",
+        "operator": "lte",
+        "value": 1034000000,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.parentAssets",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3> 총자산 보유기준",
+            "label": "부모 자산 1,034백만원 이하",
+            "textExcerpt": "및 부모\n1,034백만원 이하)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1218,
+                  "stream": "BodyText/Section0",
+                  "offset": 261108
+                },
+                {
+                  "index": 1219,
+                  "stream": "BodyText/Section0",
+                  "offset": 261202
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.income",
+        "label": "본인 소득 140% 이하: 5,338,708원",
+        "semanticRole": "YOUTH_INCOME",
+        "supplyType": "youth",
+        "category": "INCOME",
+        "operator": "lte",
+        "value": 5338708,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표4> 청년 소득기준",
+            "label": "본인 소득 140% 이하: 5,338,708원",
+            "textExcerpt": "도시근로자 가구원수별 가구당 월평균소득액의 140%\n5,338,708원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1336,
+                  "stream": "BodyText/Section0",
+                  "offset": 286295
+                },
+                {
+                  "index": 1337,
+                  "stream": "BodyText/Section0",
+                  "offset": 286496
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.PRIORITY.target",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.PRIORITY.target",
+        "label": "근로·자영업(과거 1년 납세 포함), 소득세 5년 이상",
+        "semanticRole": "YOUTH_PRIORITY_TARGET",
+        "supplyType": "youth",
+        "category": "STAGE",
+        "operator": null,
+        "value": [
+          {
+            "fact": "workOrBusinessIncome",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "incomeTaxPaymentYears",
+            "op": "gte",
+            "value": 5
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.PRIORITY.target",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "근로·자영업(과거 1년 납세 포함), 소득세 5년 이상",
+            "textExcerpt": "• 입주자모집공고일 현재 청년 특별공급 신청자격을 갖춘 자 중 근로자 또는 자영업자(과거 1년 내에 소득세를 납부한 분을 포함)로서 신청자 본인이 5년 이상 소득세를 납부한 분을 대상으로 주택형별 공급량의 30%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.\n※ 소득세는 「소득세법」 제19조(사업소득) 또는 제20조(근로소득)에 해당하는 소득에 대하여 납부하는 것을 말하며, 해당 소득세 납부의무자이나 소득공제·세액공제·세액감면 등으로 납부의무액이 없는 경우를 포함합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1903,
+                  "stream": "BodyText/Section0",
+                  "offset": 392571
+                },
+                {
+                  "index": 1904,
+                  "stream": "BodyText/Section0",
+                  "offset": 393137
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.PRIORITY.incomeScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.PRIORITY.incomeScore",
+        "label": "본인 월평균소득(원)",
+        "semanticRole": "YOUTH_PRIORITY_INCOMESCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.PRIORITY.incomeScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표7> 청년 특별공급 우선공급 가점표",
+            "label": "본인 월평균소득(원)",
+            "textExcerpt": "(1) 본인의 월평균 소득*\n① 70% 이하\n3\n② 70% 초과 100% 이하\n2\n③ 100% 초과\n1\n2,669,354원\n3,813,363원\n5,338,708원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1911,
+                  "stream": "BodyText/Section0",
+                  "offset": 394860
+                },
+                {
+                  "index": 1912,
+                  "stream": "BodyText/Section0",
+                  "offset": 395027
+                },
+                {
+                  "index": 1913,
+                  "stream": "BodyText/Section0",
+                  "offset": 395180
+                },
+                {
+                  "index": 1915,
+                  "stream": "BodyText/Section0",
+                  "offset": 395458
+                },
+                {
+                  "index": 1916,
+                  "stream": "BodyText/Section0",
+                  "offset": 395627
+                },
+                {
+                  "index": 1917,
+                  "stream": "BodyText/Section0",
+                  "offset": 395766
+                },
+                {
+                  "index": 1918,
+                  "stream": "BodyText/Section0",
+                  "offset": 395921
+                },
+                {
+                  "index": 1946,
+                  "stream": "BodyText/Section0",
+                  "offset": 401001
+                },
+                {
+                  "index": 1948,
+                  "stream": "BodyText/Section0",
+                  "offset": 401363
+                },
+                {
+                  "index": 1950,
+                  "stream": "BodyText/Section0",
+                  "offset": 401725
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.PRIORITY.residenceScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.PRIORITY.residenceScore",
+        "label": "제주 연속거주기간(개월)",
+        "semanticRole": "YOUTH_PRIORITY_RESIDENCESCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.PRIORITY.residenceScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표7> 청년 특별공급 우선공급 가점표",
+            "label": "제주 연속거주기간(개월)",
+            "textExcerpt": "(2) 해당 시·도\n연속 거주기간\n① 2년 이상\n3\n입주자모집공고일 현재 제주특별자치도에 주민등록표 등·초본상 계속해서 거주한 기간을 말하며, 해당 지역에 거주하지 않는 경우 0점\n※ 10년 이상 장기복무군인으로 청약하는 자는 제주특별자치도에 실제 거주하지 않을 경우 0점\n② 1년 이상 2년 미만\n2\n③ 1년 미만\n1\n④ 미거주\n0",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1919,
+                  "stream": "BodyText/Section0",
+                  "offset": 396060
+                },
+                {
+                  "index": 1920,
+                  "stream": "BodyText/Section0",
+                  "offset": 396166
+                },
+                {
+                  "index": 1921,
+                  "stream": "BodyText/Section0",
+                  "offset": 396325
+                },
+                {
+                  "index": 1922,
+                  "stream": "BodyText/Section0",
+                  "offset": 396476
+                },
+                {
+                  "index": 1923,
+                  "stream": "BodyText/Section0",
+                  "offset": 396615
+                },
+                {
+                  "index": 1924,
+                  "stream": "BodyText/Section0",
+                  "offset": 396887
+                },
+                {
+                  "index": 1925,
+                  "stream": "BodyText/Section0",
+                  "offset": 397134
+                },
+                {
+                  "index": 1926,
+                  "stream": "BodyText/Section0",
+                  "offset": 397305
+                },
+                {
+                  "index": 1927,
+                  "stream": "BodyText/Section0",
+                  "offset": 397444
+                },
+                {
+                  "index": 1928,
+                  "stream": "BodyText/Section0",
+                  "offset": 397595
+                },
+                {
+                  "index": 1929,
+                  "stream": "BodyText/Section0",
+                  "offset": 397734
+                },
+                {
+                  "index": 1930,
+                  "stream": "BodyText/Section0",
+                  "offset": 397881
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.PRIORITY.paymentScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.PRIORITY.paymentScore",
+        "label": "청약 납입인정횟수(회)",
+        "semanticRole": "YOUTH_PRIORITY_PAYMENTSCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.PRIORITY.paymentScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표7> 청년 특별공급 우선공급 가점표",
+            "label": "청약 납입인정횟수(회)",
+            "textExcerpt": "(3) 주택청약종합저축\n납입인정 횟수\n① 24회 이상\n3\n입주자저축(주택청약종합저축 또는 청약저축) 가입 확인서 기준\n② 12회 이상 23회 이하\n2\n③ 6회 이상 11회 이하\n1",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1931,
+                  "stream": "BodyText/Section0",
+                  "offset": 398020
+                },
+                {
+                  "index": 1932,
+                  "stream": "BodyText/Section0",
+                  "offset": 398130
+                },
+                {
+                  "index": 1933,
+                  "stream": "BodyText/Section0",
+                  "offset": 398289
+                },
+                {
+                  "index": 1934,
+                  "stream": "BodyText/Section0",
+                  "offset": 398442
+                },
+                {
+                  "index": 1935,
+                  "stream": "BodyText/Section0",
+                  "offset": 398581
+                },
+                {
+                  "index": 1936,
+                  "stream": "BodyText/Section0",
+                  "offset": 398784
+                },
+                {
+                  "index": 1937,
+                  "stream": "BodyText/Section0",
+                  "offset": 398951
+                },
+                {
+                  "index": 1938,
+                  "stream": "BodyText/Section0",
+                  "offset": 399090
+                },
+                {
+                  "index": 1939,
+                  "stream": "BodyText/Section0",
+                  "offset": 399255
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.GENERAL.incomeScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.GENERAL.incomeScore",
+        "label": "본인 월평균소득(원)",
+        "semanticRole": "YOUTH_GENERAL_INCOMESCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.GENERAL.incomeScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표8> 청년 특별공급 일반공급 가점표",
+            "label": "본인 월평균소득(원)",
+            "textExcerpt": "(1) 본인의 월평균 소득*\n① 70% 이하\n3\n② 70% 초과 100% 이하\n2\n③ 100% 초과\n1\n2,669,354원\n3,813,363원\n5,338,708원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1911,
+                  "stream": "BodyText/Section0",
+                  "offset": 394860
+                },
+                {
+                  "index": 1912,
+                  "stream": "BodyText/Section0",
+                  "offset": 395027
+                },
+                {
+                  "index": 1913,
+                  "stream": "BodyText/Section0",
+                  "offset": 395180
+                },
+                {
+                  "index": 1915,
+                  "stream": "BodyText/Section0",
+                  "offset": 395458
+                },
+                {
+                  "index": 1916,
+                  "stream": "BodyText/Section0",
+                  "offset": 395627
+                },
+                {
+                  "index": 1917,
+                  "stream": "BodyText/Section0",
+                  "offset": 395766
+                },
+                {
+                  "index": 1918,
+                  "stream": "BodyText/Section0",
+                  "offset": 395921
+                },
+                {
+                  "index": 1946,
+                  "stream": "BodyText/Section0",
+                  "offset": 401001
+                },
+                {
+                  "index": 1948,
+                  "stream": "BodyText/Section0",
+                  "offset": 401363
+                },
+                {
+                  "index": 1950,
+                  "stream": "BodyText/Section0",
+                  "offset": 401725
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.GENERAL.residenceScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.GENERAL.residenceScore",
+        "label": "제주 연속거주기간(개월)",
+        "semanticRole": "YOUTH_GENERAL_RESIDENCESCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.GENERAL.residenceScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표8> 청년 특별공급 일반공급 가점표",
+            "label": "제주 연속거주기간(개월)",
+            "textExcerpt": "(2) 해당 시·도\n연속 거주기간\n① 2년 이상\n3\n입주자모집공고일 현재 제주특별자치도에 주민등록표 등·초본상 계속해서 거주한 기간을 말하며, 해당 지역에 거주하지 않는 경우 0점\n※ 10년 이상 장기복무군인으로 청약하는 자는 제주특별자치도에 실제 거주하지 않을 경우 0점\n② 1년 이상 2년 미만\n2\n③ 1년 미만\n1\n④ 미거주\n0",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1968,
+                  "stream": "BodyText/Section0",
+                  "offset": 405870
+                },
+                {
+                  "index": 1969,
+                  "stream": "BodyText/Section0",
+                  "offset": 405976
+                },
+                {
+                  "index": 1970,
+                  "stream": "BodyText/Section0",
+                  "offset": 406135
+                },
+                {
+                  "index": 1971,
+                  "stream": "BodyText/Section0",
+                  "offset": 406286
+                },
+                {
+                  "index": 1972,
+                  "stream": "BodyText/Section0",
+                  "offset": 406425
+                },
+                {
+                  "index": 1973,
+                  "stream": "BodyText/Section0",
+                  "offset": 406697
+                },
+                {
+                  "index": 1974,
+                  "stream": "BodyText/Section0",
+                  "offset": 406980
+                },
+                {
+                  "index": 1975,
+                  "stream": "BodyText/Section0",
+                  "offset": 407151
+                },
+                {
+                  "index": 1976,
+                  "stream": "BodyText/Section0",
+                  "offset": 407290
+                },
+                {
+                  "index": 1977,
+                  "stream": "BodyText/Section0",
+                  "offset": 407441
+                },
+                {
+                  "index": 1978,
+                  "stream": "BodyText/Section0",
+                  "offset": 407580
+                },
+                {
+                  "index": 1979,
+                  "stream": "BodyText/Section0",
+                  "offset": 407727
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.GENERAL.paymentScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.GENERAL.paymentScore",
+        "label": "청약 납입인정횟수(회)",
+        "semanticRole": "YOUTH_GENERAL_PAYMENTSCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.GENERAL.paymentScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표8> 청년 특별공급 일반공급 가점표",
+            "label": "청약 납입인정횟수(회)",
+            "textExcerpt": "(3) 주택청약종합저축\n납입인정 횟수\n① 24회 이상\n3\n입주자저축(주택청약종합저축 또는 청약저축) 가입 확인서 기준\n② 12회 이상 23회 이하\n2\n③ 6회 이상 11회 이하\n1",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1980,
+                  "stream": "BodyText/Section0",
+                  "offset": 407866
+                },
+                {
+                  "index": 1981,
+                  "stream": "BodyText/Section0",
+                  "offset": 407976
+                },
+                {
+                  "index": 1982,
+                  "stream": "BodyText/Section0",
+                  "offset": 408135
+                },
+                {
+                  "index": 1983,
+                  "stream": "BodyText/Section0",
+                  "offset": 408288
+                },
+                {
+                  "index": 1984,
+                  "stream": "BodyText/Section0",
+                  "offset": 408427
+                },
+                {
+                  "index": 1985,
+                  "stream": "BodyText/Section0",
+                  "offset": 408630
+                },
+                {
+                  "index": 1986,
+                  "stream": "BodyText/Section0",
+                  "offset": 408797
+                },
+                {
+                  "index": 1987,
+                  "stream": "BodyText/Section0",
+                  "offset": 408936
+                },
+                {
+                  "index": 1988,
+                  "stream": "BodyText/Section0",
+                  "offset": 409101
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "youth.GENERAL.taxScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "youth.GENERAL.taxScore",
+        "label": "소득세 납부기간(년)",
+        "semanticRole": "YOUTH_GENERAL_TAXSCORE",
+        "supplyType": "youth",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.youth.GENERAL.taxScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표8> 청년 특별공급 일반공급 가점표",
+            "label": "소득세 납부기간(년)",
+            "textExcerpt": "(4) 근로기간 소득세 납부\n① 5년 이상\n3\n「소득세법」 제19조(사업소득) 또는 제20조(근로소득)에 해당하는 소득세를 말하며, 해당 소득세 납부의무자이나 소득공제·세액공제·세액감면 등으로 납부의무액이 없는 경우를 포함\n* 소득세 납부이력이 없는 경우 0점\n② 3년 이상 5년 미만\n2\n③ 3년 미만\n1\n④ 해당 없음\n0",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1989,
+                  "stream": "BodyText/Section0",
+                  "offset": 409240
+                },
+                {
+                  "index": 1990,
+                  "stream": "BodyText/Section0",
+                  "offset": 409407
+                },
+                {
+                  "index": 1991,
+                  "stream": "BodyText/Section0",
+                  "offset": 409558
+                },
+                {
+                  "index": 1992,
+                  "stream": "BodyText/Section0",
+                  "offset": 409697
+                },
+                {
+                  "index": 1993,
+                  "stream": "BodyText/Section0",
+                  "offset": 410067
+                },
+                {
+                  "index": 1994,
+                  "stream": "BodyText/Section0",
+                  "offset": 410244
+                },
+                {
+                  "index": 1995,
+                  "stream": "BodyText/Section0",
+                  "offset": 410407
+                },
+                {
+                  "index": 1996,
+                  "stream": "BodyText/Section0",
+                  "offset": 410546
+                },
+                {
+                  "index": 1997,
+                  "stream": "BodyText/Section0",
+                  "offset": 410697
+                },
+                {
+                  "index": 1998,
+                  "stream": "BodyText/Section0",
+                  "offset": 410836
+                },
+                {
+                  "index": 1999,
+                  "stream": "BodyText/Section0",
+                  "offset": 410987
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.adult",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.adult",
+        "label": "만 19세 이상(미성년 세대주 예외는 별도 확인)",
+        "semanticRole": "NEWLYWED_ADULT",
+        "supplyType": "newlywed",
+        "category": "AGE",
+        "operator": "gte",
+        "value": 19,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.adult",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "만 19세 이상(미성년 세대주 예외는 별도 확인)",
+            "textExcerpt": "■ 본 주택은 최초 입주자모집공고일 현재 제주특별자치도에 거주(주민등록표등본 기준)하는 만19세 이상인 분 또는 세대주인 미성년자(자녀양육, 형제자매부양)[국내에서 거주하는 재외동포(재외국민, 외국국적 동포) 및 외국인 포함]의 경우 청약이 가능합니다. 다만 청약신청자 중 경쟁이 있을 경우 해당 주택건설지역인 제주특별자치도 1년 이상 거주자가(2026.09.14. 이전부터 계속 거주) 우선합니다.\n※ 「민법」상 미성년자는 직계존속의 사망, 실종선고 및 행방불명 등으로 형제자매를 부양해야 하거나, 자녀를 부양하여야 하는 세대주만 신청 가능합니다. 이 경우 자녀 및 형제자매는 미성년자와 같은 세대별 주민등록표에 등재되어 있어야 합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 268,
+                  "stream": "BodyText/Section0",
+                  "offset": 67983
+                },
+                {
+                  "index": 1110,
+                  "stream": "BodyText/Section0",
+                  "offset": 232783
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.residence",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.residence",
+        "label": "공고일 제주 거주",
+        "semanticRole": "NEWLYWED_RESIDENCE",
+        "supplyType": "newlywed",
+        "category": "SCOPE",
+        "operator": "eq",
+        "value": "제주특별자치도",
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [
+          "newlywed.overseas"
+        ],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.residence",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "공고일 제주 거주",
+            "textExcerpt": "• 입주자모집공고일(2026.09.14.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 현재 제주특별자치도도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 제주특별자치도도에 거주하면서 아래조건(①~⑥)을 모두 갖춘 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1887,
+                  "stream": "BodyText/Section0",
+                  "offset": 389059
+                },
+                {
+                  "index": 2031,
+                  "stream": "BodyText/Section0",
+                  "offset": 420582
+                },
+                {
+                  "index": 2292,
+                  "stream": "BodyText/Section0",
+                  "offset": 476268
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.overseas",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.overseas",
+        "label": "해외체류 이력은 별도 심사",
+        "semanticRole": "NEWLYWED_OVERSEAS",
+        "supplyType": "newlywed",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [
+          "해외체류와 생업 목적 예외를 함께 검토해야 합니다."
+        ],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.overseas",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표2> 지역우선 공급기준",
+            "label": "해외체류 이력은 별도 심사",
+            "textExcerpt": "출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과(거주제한기간이 2년인 주택은 각 연도별 183일을 말함) 하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.\n- 사례1) 모집공고일 현재 해당지역에 거주하고 있으나 계속해서 90일을 초과하여 국외에 체류한 경력이 있으면 해당지역 우선공급 대상자로는 불인정하나 기타지역 거주자로는 청약 가능합니다.\n- 사례2) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과하지 않는 경우 해당지역 우선공급 대상자로 청약 가능합니다.\n- 사례3) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과한 경우 해당지역 우선공급 대상자로 불인정되며 기타지역 거주자로도 인정되지 않습니다.\n- 입주자모집공고일 현재 해외에 있으며, 해외 체류기간이 계속하여 90일을 초과하거나 전체 기간이 연간(매년) 183일을 초과하는 분은 지역 우선공급 대상자(제주특별자치도 1년 이상 거주자) 및 기타지역 거주자(제주특별자치도 1년 미만 거주자)로 청약이 불가하며, 이를 위반하여 당첨될 경우 부적격 처리됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 216,
+                  "stream": "BodyText/Section0",
+                  "offset": 50934
+                },
+                {
+                  "index": 217,
+                  "stream": "BodyText/Section0",
+                  "offset": 51612
+                },
+                {
+                  "index": 218,
+                  "stream": "BodyText/Section0",
+                  "offset": 51942
+                },
+                {
+                  "index": 219,
+                  "stream": "BodyText/Section0",
+                  "offset": 52192
+                },
+                {
+                  "index": 1080,
+                  "stream": "BodyText/Section0",
+                  "offset": 223544
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.exceptions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.exceptions",
+        "label": "혼인·출산·배우자·군인 등 특례 미적용",
+        "semanticRole": "NEWLYWED_EXCEPTIONS",
+        "supplyType": "newlywed",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.exceptions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "혼인·출산·배우자·군인 등 특례 미적용",
+            "textExcerpt": "- [혼인특례] 신혼부부(예비신혼부부 제외) 특별공급의 경우, 신청자 본인이 혼인신고일 전에 당첨자로 관리된 사실이 있는 경우에도 신청이 가능합니다.\n- [출산특례] 신혼부부(예비신혼부부 포함)·신생아 특별공급의 경우, ‘24.06.19. 이후 출생한 자녀(태아나 입양 포함)가 있는 분은 신청자 본인 또는 배우자의 특별공급 당첨이력이 있더라도 한 차례에 한정(1세대 1주택 기준)하여 신청이 가능합니다. 이 경우 무주택세대구성원 요건을 충족하지 않아도(신청자 본인 또는 그 배우자가 주택을 소유한 경우에 한함) 신청할 수 있으나, 당첨 후 기존 소유 주택(입주자모집공고일 현재 신청자 또는 그 배우자가 소유한 주택으로서 분양권등을 포함)의 처분 조건*을 승낙하여야 합니다. (단, 이 경우 기존 소유 주택도 자산보유기준 적용 대상이 됩니다.)\n•10년 이상 장기복무 중인 군인은 본 주택의 해당순위(특별공급 및 일반공급 1순위, 2순위)의 청약자격과 입주자저축 요건을 충족 시 해당지역으로 청약할 수 있습니다.\n① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 243,
+                  "stream": "BodyText/Section0",
+                  "offset": 56766
+                },
+                {
+                  "index": 244,
+                  "stream": "BodyText/Section0",
+                  "offset": 57054
+                },
+                {
+                  "index": 1099,
+                  "stream": "BodyText/Section0",
+                  "offset": 227745
+                },
+                {
+                  "index": 2293,
+                  "stream": "BodyText/Section0",
+                  "offset": 476490
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.childbirth",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.childbirth",
+        "label": "출산가구 완화·태아·입양은 추가 확인",
+        "semanticRole": "NEWLYWED_CHILDBIRTH",
+        "supplyType": "newlywed",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.childbirth",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3-1> / <표4-1> / <표5-1>",
+            "label": "출산가구 완화·태아·입양은 추가 확인",
+            "textExcerpt": "※ (출산가구 소득기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득기준이 완화되며, 완화된 기준은 아래 “<표4-1> 출산가구 소득기준 완화(청년)”를 참고하시기 바랍니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1339,
+                  "stream": "BodyText/Section0",
+                  "offset": 286804
+                },
+                {
+                  "index": 2099,
+                  "stream": "BodyText/Section0",
+                  "offset": 434119
+                },
+                {
+                  "index": 2359,
+                  "stream": "BodyText/Section0",
+                  "offset": 489444
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.restrictions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": false,
+      "required": false,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.restrictions",
+        "label": "특별공급 제한 없음",
+        "semanticRole": "NEWLYWED_RESTRICTIONS",
+        "supplyType": "newlywed",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.restrictions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 제한 없음",
+            "textExcerpt": "• 분양가상한제 적용주택, 투기과열지구 또는 청약과열지역에서 공급하는 주택 등에 이미 당첨되어 재당첨 제한 기간 내에 있는 분과 부적격 당첨 후 입주자로 선정될 수 없는 기간[입주자모집공고일(2026.09.14.) 기준 당첨일로부터 1년]내에 있는 분은 신청할 수 없습니다.\n• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2021,
+                  "stream": "BodyText/Section0",
+                  "offset": 417285
+                },
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.specialHistory",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.specialHistory",
+        "label": "특별공급 당첨 이력 없음(특례 별도)",
+        "semanticRole": "NEWLYWED_SPECIALHISTORY",
+        "supplyType": "newlywed",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.specialHistory",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 당첨 이력 없음(특례 별도)",
+            "textExcerpt": "• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)\n•「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 동법 개정(‘10.02.23.) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분 및 그 세대에 속한 분은 특별공급을 받은 것으로 간주하므로 신혼부부 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                },
+                {
+                  "index": 2276,
+                  "stream": "BodyText/Section0",
+                  "offset": 470723
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.reWinning",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.reWinning",
+        "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+        "semanticRole": "NEWLYWED_REWINNING",
+        "supplyType": "newlywed",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.reWinning",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+            "textExcerpt": "• 신혼부부·생애최초·신생아 및 일반공급의 경우 재당첨제한 적용주택(이전기관 종사자 특별공급 주택, 분양가상한제 적용주택, 분양전환공공임대주택, 토지임대주택, 투기과열지구 및 청약과열지역에서 공급되는 주택 등)에 당첨되어 금회 공급되는 주택의 당첨자 발표일 현재 재당첨제한 기간 내에 있는 당첨자 및 그 세대(신혼부부 특별공급의 예비신혼부부의 경우 혼인으로 구성될 세대)에 속한 분, 부적격 당첨자로 처리되어 청약 제한 기간 내에 있는 분은 금회 공급되는 주택의 신혼부부·생애최초·신생아 및 일반공급의 당첨자로 선정될 수 없습니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 276,
+                  "stream": "BodyText/Section0",
+                  "offset": 72043
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.account",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.account",
+        "label": "입주자저축 보유 및 종류",
+        "semanticRole": "NEWLYWED_ACCOUNT",
+        "supplyType": "newlywed",
+        "category": "SUBSCRIPTION",
+        "operator": null,
+        "value": [
+          {
+            "fact": "hasAccount",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "accountKindEligible",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.account",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "입주자저축 보유 및 종류",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분\n- 기관추천(장애인, 국가유공자 및 철거주택 소유자(도시재생 부지제공자)는 청약통장 불필요) / 신혼부부 특별공급\n수정필요",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                },
+                {
+                  "index": 1849,
+                  "stream": "BodyText/Section0",
+                  "offset": 381438
+                },
+                {
+                  "index": 4107,
+                  "stream": "BodyText/Section0",
+                  "offset": 924751
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.months",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.months",
+        "label": "통장 가입 6개월 경과",
+        "semanticRole": "NEWLYWED_MONTHS",
+        "supplyType": "newlywed",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.months",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "통장 가입 6개월 경과",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.payments",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.payments",
+        "label": "납입인정 6회 이상",
+        "semanticRole": "NEWLYWED_PAYMENTS",
+        "supplyType": "newlywed",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.payments",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "납입인정 6회 이상",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.family",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.family",
+        "label": "혼인 7년 이내 또는 만 7세 미만 자녀 / 예비신혼 / 한부모",
+        "semanticRole": "NEWLYWED_FAMILY",
+        "supplyType": "newlywed",
+        "category": "HOUSING",
+        "operator": null,
+        "value": null,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.family",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "혼인 7년 이내 또는 만 7세 미만 자녀 / 예비신혼 / 한부모",
+            "textExcerpt": "① 입주자모집공고일 현재 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내이거나 6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분], 예비신혼부부[혼인을 계획 중이고 해당 주택의 입주자모집공고일로부터 1년 이내(1년이 되기 전에 입주하는 경우 입주 전까지)] 혼인 사실을 증명할 수 있으며, 혼인으로 구성할 세대 전원이 무주택인 분), 한부모가족[6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분] 중 하나에 해당하는 무주택세대구성원 (※ 5페이지 무주택세대구성원 설명 참고)\n※ (예비신혼부부) 청약 시 기입한 예비배우자와의 혼인관계증명서 및 혼인으로 구성될 세대가 포함된 신청자의 세대별 주민등록표등본을 입주 전까지 우리공사로 제출해야 하며, 서류 미제출 또는 전 배우자와 재혼한 사실이 확인되는 경우 계약이 해제되고 입주가 불가합니다.\n※ (한부모가족) 「한부모가족지원법」 제4조에 따른 한부모가족(한부모가족증명서를 통해 증명 가능한 「한부모가족지원법」 제4조제1호에 해당하는 분을 포함)을 말하며, 가족관계증명서와 주민등록표등본을 통해 공고일 현재 자녀 유무 등 해당 사실을 증명할 수 있어야 합니다. 만일 추후 사실혼 관계 등 한부모가족 자격 미달인 사실이 확인될 경우 계약취소 또는 해제될 수 있습니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2032,
+                  "stream": "BodyText/Section0",
+                  "offset": 420824
+                },
+                {
+                  "index": 2033,
+                  "stream": "BodyText/Section0",
+                  "offset": 421690
+                },
+                {
+                  "index": 2034,
+                  "stream": "BodyText/Section0",
+                  "offset": 422132
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.housing",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.housing",
+        "label": "무주택세대구성원(예비신혼은 구성할 세대)",
+        "semanticRole": "NEWLYWED_HOUSING",
+        "supplyType": "newlywed",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.housing",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "무주택세대구성원(예비신혼은 구성할 세대)",
+            "textExcerpt": "① 입주자모집공고일 현재 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내이거나 6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분], 예비신혼부부[혼인을 계획 중이고 해당 주택의 입주자모집공고일로부터 1년 이내(1년이 되기 전에 입주하는 경우 입주 전까지)] 혼인 사실을 증명할 수 있으며, 혼인으로 구성할 세대 전원이 무주택인 분), 한부모가족[6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분] 중 하나에 해당하는 무주택세대구성원 (※ 5페이지 무주택세대구성원 설명 참고)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2032,
+                  "stream": "BodyText/Section0",
+                  "offset": 420824
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.size",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.size",
+        "label": "소득표 산정 가구원수 8인 이하(9인 이상 추가 확인)",
+        "semanticRole": "NEWLYWED_SIZE",
+        "supplyType": "newlywed",
+        "category": "HOUSING",
+        "operator": null,
+        "value": [
+          {
+            "fact": "incomeHouseholdSize",
+            "op": "gte",
+            "value": 3
+          },
+          {
+            "fact": "incomeHouseholdSize",
+            "op": "lte",
+            "value": 8
+          }
+        ],
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.size",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "소득표 산정 가구원수 8인 이하(9인 이상 추가 확인)",
+            "textExcerpt": "3인 이하\n4인\n5인\n6인\n7인\n8인",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2041,
+                  "stream": "BodyText/Section0",
+                  "offset": 424787
+                },
+                {
+                  "index": 2042,
+                  "stream": "BodyText/Section0",
+                  "offset": 424934
+                },
+                {
+                  "index": 2043,
+                  "stream": "BodyText/Section0",
+                  "offset": 425075
+                },
+                {
+                  "index": 2044,
+                  "stream": "BodyText/Section0",
+                  "offset": 425216
+                },
+                {
+                  "index": 2045,
+                  "stream": "BodyText/Section0",
+                  "offset": 425357
+                },
+                {
+                  "index": 2046,
+                  "stream": "BodyText/Section0",
+                  "offset": 425498
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.assets",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.assets",
+        "label": "세대 총자산 362백만원 이하",
+        "semanticRole": "NEWLYWED_ASSETS",
+        "supplyType": "newlywed",
+        "category": "ASSET",
+        "operator": "lte",
+        "value": 362000000,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.assets",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3> 총자산 보유기준",
+            "label": "세대 총자산 362백만원 이하",
+            "textExcerpt": "362백만원 이하",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1216,
+                  "stream": "BodyText/Section0",
+                  "offset": 260832
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.income",
+        "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+        "semanticRole": "NEWLYWED_INCOME",
+        "supplyType": "newlywed",
+        "category": "INCOME",
+        "operator": null,
+        "value": null,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5> 소득기준",
+            "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+            "textExcerpt": "④ 무주택세대구성원 전원(예비신혼부부의 경우 ‘혼인으로 구성될 세대’의 세대구성원 전원)의 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득(태아를 포함한 4인 이상인 세대는 가구원수별 가구당 월평균소득을 말함)”의 130%(단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2038,
+                  "stream": "BodyText/Section0",
+                  "offset": 423592
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.PRIORITY.target",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.PRIORITY.target",
+        "label": "혼인 2년 이내·만 3세 미만 자녀·예비신혼 우선대상",
+        "semanticRole": "NEWLYWED_PRIORITY_TARGET",
+        "supplyType": "newlywed",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.PRIORITY.target",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "혼인 2년 이내·만 3세 미만 자녀·예비신혼 우선대상",
+            "textExcerpt": "• 입주자모집공고일 현재 ① 혼인기간 2년 이내이거나 2세 이하(만3세 미만으로 태아 포함, 이하 같음)의 자녀를 둔 신혼부부, ② 예비신혼부부, ③ 2세 이하 자녀를 둔 한부모가족 중 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득”의 130%(맞벌이인 경우에는 140%) 이하인 사람을 대상으로 주택형별 공급량의 30%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2104,
+                  "stream": "BodyText/Section0",
+                  "offset": 435693
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.PRIORITY.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.PRIORITY.income",
+        "label": "우선공급 소득: 외벌이 130% / 맞벌이 140%",
+        "semanticRole": "NEWLYWED_PRIORITY_INCOME",
+        "supplyType": "newlywed",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.PRIORITY.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5>",
+            "label": "우선공급 소득: 외벌이 130% / 맞벌이 140%",
+            "textExcerpt": "• 입주자모집공고일 현재 ① 혼인기간 2년 이내이거나 2세 이하(만3세 미만으로 태아 포함, 이하 같음)의 자녀를 둔 신혼부부, ② 예비신혼부부, ③ 2세 이하 자녀를 둔 한부모가족 중 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득”의 130%(맞벌이인 경우에는 140%) 이하인 사람을 대상으로 주택형별 공급량의 30%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2104,
+                  "stream": "BodyText/Section0",
+                  "offset": 435693
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.PRIORITY.incomeScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.PRIORITY.incomeScore",
+        "label": "세대 소득구간(0: 낮음 / 1: 중간 / 2: 상위)",
+        "semanticRole": "NEWLYWED_PRIORITY_INCOMESCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.PRIORITY.incomeScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표9> 신혼부부 특별공급 우선공급 가점표",
+            "label": "세대 소득구간(0: 낮음 / 1: 중간 / 2: 상위)",
+            "textExcerpt": "(1) 해당 세대의 월평균소득*\n① 70% 이하\n3\n맞벌이인 경우 80% 이하\n② 70% 초과 100% 이하\n2\n맞벌이인 경우 80% 초과 110% 이하\n③ 100% 초과\n1\n맞벌이인 경우 110% 초과\n5,273,634원\n6,027,010원\n7,533,763원\n8,287,139원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2111,
+                  "stream": "BodyText/Section0",
+                  "offset": 437762
+                },
+                {
+                  "index": 2112,
+                  "stream": "BodyText/Section0",
+                  "offset": 437941
+                },
+                {
+                  "index": 2113,
+                  "stream": "BodyText/Section0",
+                  "offset": 438094
+                },
+                {
+                  "index": 2114,
+                  "stream": "BodyText/Section0",
+                  "offset": 438233
+                },
+                {
+                  "index": 2115,
+                  "stream": "BodyText/Section0",
+                  "offset": 438398
+                },
+                {
+                  "index": 2116,
+                  "stream": "BodyText/Section0",
+                  "offset": 438567
+                },
+                {
+                  "index": 2117,
+                  "stream": "BodyText/Section0",
+                  "offset": 438706
+                },
+                {
+                  "index": 2118,
+                  "stream": "BodyText/Section0",
+                  "offset": 438887
+                },
+                {
+                  "index": 2119,
+                  "stream": "BodyText/Section0",
+                  "offset": 439042
+                },
+                {
+                  "index": 2120,
+                  "stream": "BodyText/Section0",
+                  "offset": 439181
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2168,
+                  "stream": "BodyText/Section0",
+                  "offset": 447222
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.PRIORITY.residenceScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.PRIORITY.residenceScore",
+        "label": "제주 연속거주기간(개월)",
+        "semanticRole": "NEWLYWED_PRIORITY_RESIDENCESCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.PRIORITY.residenceScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표9> 신혼부부 특별공급 우선공급 가점표",
+            "label": "제주 연속거주기간(개월)",
+            "textExcerpt": "(2) 해당 시·도\n연속 거주기간\n① 2년 이상\n3\n입주자모집공고일 현재 제주특별자치도에 주민등록표 등·초본상 계속해서 거주한 기간을 말하며,\n해당 지역에 거주하지 않는 경우 0점\n※ 10년 이상 장기복무군인으로 청약하는 자는 제주특별자치도에 실제 거주하지 않는 경우 0점\n② 1년 이상 2년 미만\n2\n③ 1년 미만\n1\n④ 미거주",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2121,
+                  "stream": "BodyText/Section0",
+                  "offset": 439348
+                },
+                {
+                  "index": 2122,
+                  "stream": "BodyText/Section0",
+                  "offset": 439454
+                },
+                {
+                  "index": 2123,
+                  "stream": "BodyText/Section0",
+                  "offset": 439613
+                },
+                {
+                  "index": 2124,
+                  "stream": "BodyText/Section0",
+                  "offset": 439764
+                },
+                {
+                  "index": 2125,
+                  "stream": "BodyText/Section0",
+                  "offset": 439903
+                },
+                {
+                  "index": 2126,
+                  "stream": "BodyText/Section0",
+                  "offset": 440135
+                },
+                {
+                  "index": 2127,
+                  "stream": "BodyText/Section0",
+                  "offset": 440261
+                },
+                {
+                  "index": 2128,
+                  "stream": "BodyText/Section0",
+                  "offset": 440544
+                },
+                {
+                  "index": 2129,
+                  "stream": "BodyText/Section0",
+                  "offset": 440715
+                },
+                {
+                  "index": 2130,
+                  "stream": "BodyText/Section0",
+                  "offset": 440854
+                },
+                {
+                  "index": 2131,
+                  "stream": "BodyText/Section0",
+                  "offset": 441005
+                },
+                {
+                  "index": 2132,
+                  "stream": "BodyText/Section0",
+                  "offset": 441144
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.PRIORITY.paymentScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.PRIORITY.paymentScore",
+        "label": "청약 납입인정횟수(회)",
+        "semanticRole": "NEWLYWED_PRIORITY_PAYMENTSCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.PRIORITY.paymentScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표9> 신혼부부 특별공급 우선공급 가점표",
+            "label": "청약 납입인정횟수(회)",
+            "textExcerpt": "(3) 주택청약종합저축\n납입인정 횟수\n① 24회 이상\n3\n입주자저축(주택청약종합저축 또는 청약저축) 가입 확인서 기준\n② 12회 이상 23회 이하\n2\n③ 6회 이상 11회 이하\n1",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2134,
+                  "stream": "BodyText/Section0",
+                  "offset": 441430
+                },
+                {
+                  "index": 2135,
+                  "stream": "BodyText/Section0",
+                  "offset": 441540
+                },
+                {
+                  "index": 2136,
+                  "stream": "BodyText/Section0",
+                  "offset": 441699
+                },
+                {
+                  "index": 2137,
+                  "stream": "BodyText/Section0",
+                  "offset": 441852
+                },
+                {
+                  "index": 2138,
+                  "stream": "BodyText/Section0",
+                  "offset": 441991
+                },
+                {
+                  "index": 2139,
+                  "stream": "BodyText/Section0",
+                  "offset": 442194
+                },
+                {
+                  "index": 2140,
+                  "stream": "BodyText/Section0",
+                  "offset": 442361
+                },
+                {
+                  "index": 2141,
+                  "stream": "BodyText/Section0",
+                  "offset": 442500
+                },
+                {
+                  "index": 2142,
+                  "stream": "BodyText/Section0",
+                  "offset": 442665
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.GENERAL.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.GENERAL.income",
+        "label": "일반공급 소득: 외벌이 130% / 맞벌이 140%",
+        "semanticRole": "NEWLYWED_GENERAL_INCOME",
+        "supplyType": "newlywed",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.GENERAL.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5>",
+            "label": "일반공급 소득: 외벌이 130% / 맞벌이 140%",
+            "textExcerpt": "• 입주자모집공고일 현재 ① 혼인기간이 2년 초과 7년 이내이거나 3세 이상 6세 이하인 자녀를 둔 신혼부부, ② 3세 이상 6세 이하인 자녀를 둔 한부모가족 중 하나에 해당하고, 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득”의 130%(맞벌이 경우에는 140%) 이하인 사람 및 1단계 우선공급 낙첨자 전원을 대상으로 공급물량의 60%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2198,
+                  "stream": "BodyText/Section0",
+                  "offset": 452919
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.GENERAL.childrenScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.GENERAL.childrenScore",
+        "label": "미성년 자녀 수(명)",
+        "semanticRole": "NEWLYWED_GENERAL_CHILDRENSCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.GENERAL.childrenScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표10> 신혼부부 특별공급 일반공급 가점표",
+            "label": "미성년 자녀 수(명)",
+            "textExcerpt": "(1) 미성년 자녀 수*\n① 3명 이상\n3\n태아(입양) 포함\n② 2명\n2\n③ 1명\n1\n- (일반) 입주자모집공고일 현재 신청자의 미성년 자녀 수(임신·출산·입양한 자녀를 포함하며, 이하 ‘자녀’라고 함)를 말하며, 예비신혼부부의 경우 혼인으로 구성될 세대에 등재하는 미성년 자녀 수를 입력하고, 한부모가족은 신청자의 가족관계증명서와 주민등록표등본에서 확인이 되는 신청자의 미성년 자녀 수를 입력합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2205,
+                  "stream": "BodyText/Section0",
+                  "offset": 455138
+                },
+                {
+                  "index": 2206,
+                  "stream": "BodyText/Section0",
+                  "offset": 455301
+                },
+                {
+                  "index": 2207,
+                  "stream": "BodyText/Section0",
+                  "offset": 455452
+                },
+                {
+                  "index": 2208,
+                  "stream": "BodyText/Section0",
+                  "offset": 455591
+                },
+                {
+                  "index": 2209,
+                  "stream": "BodyText/Section0",
+                  "offset": 455746
+                },
+                {
+                  "index": 2210,
+                  "stream": "BodyText/Section0",
+                  "offset": 455891
+                },
+                {
+                  "index": 2211,
+                  "stream": "BodyText/Section0",
+                  "offset": 456030
+                },
+                {
+                  "index": 2212,
+                  "stream": "BodyText/Section0",
+                  "offset": 456175
+                },
+                {
+                  "index": 2247,
+                  "stream": "BodyText/Section0",
+                  "offset": 461733
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.GENERAL.noHomeScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.GENERAL.noHomeScore",
+        "label": "계산된 무주택기간(개월, -1: 산정 대상 아님)",
+        "semanticRole": "NEWLYWED_GENERAL_NOHOMESCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.GENERAL.noHomeScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표10> 신혼부부 특별공급 일반공급 가점표",
+            "label": "계산된 무주택기간(개월, -1: 산정 대상 아님)",
+            "textExcerpt": "(2) 무주택기간**\n① 3년 이상\n3\n<표1>의 신청자격별 검증 대상에 해당하는 모든 분이 계속하여 무주택인 기간으로 산정하되, 신청자가 만 30세가 되는 날(신청자가 만 30세가 되기 전에 혼인한 경우에는 혼인관계증명서상 최초 혼인신고일)부터 산정.\n※ \"공고일 현재 만30세 미만이면서 혼인한 적이 없는 분은 0점\n② 1년 이상 3년 미만\n2\n③ 1년 미만\n1\n④ 해당 없음\n0\n- <표1>의 신청자격별 검증 대상에 해당하는 모든 분이 무주택이 된 날부터 산정합니다.\n산 정 예 시\n무주택기간은 입주자모집공고일(2026.09.14.) 현재 무주택세대구성원 전원이 주택을 소유하지 아니한 기간(주택공급신청자의 무주택기간은 만30세가 되는 날부터 계산하되, 만30세 이전에 혼인한 경우 혼인신고일부터 계산)으로 하며, 무주택세대구성원(예비신혼부부의 경우 혼인으로 구성할 세대원 전원)이 주택을 소유한 사실이 있는 경우에는 그 주택을 처분한 후 무주택이 된 날부터 기간을 산정(주택소유여부는 “Ⅱ. 신청기준“의「2.무주택세대구성원 및 주택소유여부 판정기준」참조)\n예시1 : 미혼인 신청자가 현재 만34세이고, 무주택세대구성원 전원이 한 번도 주택을 소유한 적이 없을 경우 무주택기간은 4년.\n예시2 : 미혼인 신청자가 현재 만35세이고, 무주택세대구성원이 가장 최근에 주택을 처분한 지 1년이 되었다면, 무주택기간은 1년.\n예시3 : 기혼(만26세 혼인)인 신청자가 현재 만31세이고, 무주택세대구성원 전원이 한 번도 주택을 소유한 적이 없을 경우 무주택기간은 5년.\n예시4 : 기혼(만26세 혼인)인 신청자가 현재 만34세이고, 무주택세대구성원이 주택을 처분한 지 2년이 되었다면, 무주택기간은 2년.\n예시5 : 현재 만32세 미혼(만26세에 혼인 후 이혼)인 신청자의 무주택기간은 6년.\n예시6 : 현재 만28세 미혼인 신청자의 무주택기간은 0년(없음).\n※ 배우자가 혼인 전 주택을 소유했더라도, 혼인 전 해당 주택을 처분했다면 신청자의 무주택기간에는 영향이 없습니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2213,
+                  "stream": "BodyText/Section0",
+                  "offset": 456314
+                },
+                {
+                  "index": 2214,
+                  "stream": "BodyText/Section0",
+                  "offset": 456473
+                },
+                {
+                  "index": 2215,
+                  "stream": "BodyText/Section0",
+                  "offset": 456624
+                },
+                {
+                  "index": 2216,
+                  "stream": "BodyText/Section0",
+                  "offset": 456763
+                },
+                {
+                  "index": 2217,
+                  "stream": "BodyText/Section0",
+                  "offset": 457177
+                },
+                {
+                  "index": 2218,
+                  "stream": "BodyText/Section0",
+                  "offset": 457386
+                },
+                {
+                  "index": 2219,
+                  "stream": "BodyText/Section0",
+                  "offset": 457549
+                },
+                {
+                  "index": 2220,
+                  "stream": "BodyText/Section0",
+                  "offset": 457688
+                },
+                {
+                  "index": 2221,
+                  "stream": "BodyText/Section0",
+                  "offset": 457839
+                },
+                {
+                  "index": 2222,
+                  "stream": "BodyText/Section0",
+                  "offset": 457978
+                },
+                {
+                  "index": 2223,
+                  "stream": "BodyText/Section0",
+                  "offset": 458129
+                },
+                {
+                  "index": 2252,
+                  "stream": "BodyText/Section0",
+                  "offset": 463741
+                },
+                {
+                  "index": 2253,
+                  "stream": "BodyText/Section0",
+                  "offset": 464182
+                },
+                {
+                  "index": 2254,
+                  "stream": "BodyText/Section0",
+                  "offset": 464333
+                },
+                {
+                  "index": 2255,
+                  "stream": "BodyText/Section0",
+                  "offset": 465101
+                },
+                {
+                  "index": 2256,
+                  "stream": "BodyText/Section0",
+                  "offset": 465329
+                },
+                {
+                  "index": 2257,
+                  "stream": "BodyText/Section0",
+                  "offset": 465561
+                },
+                {
+                  "index": 2258,
+                  "stream": "BodyText/Section0",
+                  "offset": 465807
+                },
+                {
+                  "index": 2259,
+                  "stream": "BodyText/Section0",
+                  "offset": 466043
+                },
+                {
+                  "index": 2260,
+                  "stream": "BodyText/Section0",
+                  "offset": 466225
+                },
+                {
+                  "index": 2261,
+                  "stream": "BodyText/Section0",
+                  "offset": 466385
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.GENERAL.residenceScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.GENERAL.residenceScore",
+        "label": "제주 연속거주기간(개월)",
+        "semanticRole": "NEWLYWED_GENERAL_RESIDENCESCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.GENERAL.residenceScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표10> 신혼부부 특별공급 일반공급 가점표",
+            "label": "제주 연속거주기간(개월)",
+            "textExcerpt": "(3) 해당 시 · 도\n연속 거주기간\n① 2년 이상\n3\n입주자모집공고일 현재 제주특별자치도에 주민등록표 등·초본상 계속해서 거주한 기간을 말하며,\n해당 지역에 거주하지 않는 경우 0점\n※ 10년 이상 장기복무군인으로 청약하는 자는 제주특별자치도에 실제 거주하지 않는 경우 0점\n② 1년 이상 2년 미만\n2\n③ 1년 미만\n1\n④ 미거주",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2224,
+                  "stream": "BodyText/Section0",
+                  "offset": 458268
+                },
+                {
+                  "index": 2225,
+                  "stream": "BodyText/Section0",
+                  "offset": 458378
+                },
+                {
+                  "index": 2226,
+                  "stream": "BodyText/Section0",
+                  "offset": 458537
+                },
+                {
+                  "index": 2227,
+                  "stream": "BodyText/Section0",
+                  "offset": 458688
+                },
+                {
+                  "index": 2228,
+                  "stream": "BodyText/Section0",
+                  "offset": 458827
+                },
+                {
+                  "index": 2229,
+                  "stream": "BodyText/Section0",
+                  "offset": 459023
+                },
+                {
+                  "index": 2230,
+                  "stream": "BodyText/Section0",
+                  "offset": 459149
+                },
+                {
+                  "index": 2231,
+                  "stream": "BodyText/Section0",
+                  "offset": 459396
+                },
+                {
+                  "index": 2232,
+                  "stream": "BodyText/Section0",
+                  "offset": 459567
+                },
+                {
+                  "index": 2233,
+                  "stream": "BodyText/Section0",
+                  "offset": 459706
+                },
+                {
+                  "index": 2234,
+                  "stream": "BodyText/Section0",
+                  "offset": 459857
+                },
+                {
+                  "index": 2235,
+                  "stream": "BodyText/Section0",
+                  "offset": 459996
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "newlywed.GENERAL.paymentScore",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "newlywed.GENERAL.paymentScore",
+        "label": "청약 납입인정횟수(회)",
+        "semanticRole": "NEWLYWED_GENERAL_PAYMENTSCORE",
+        "supplyType": "newlywed",
+        "category": "SCORE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.newlywed.GENERAL.paymentScore",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표10> 신혼부부 특별공급 일반공급 가점표",
+            "label": "청약 납입인정횟수(회)",
+            "textExcerpt": "(4) 주택청약종합저축\n납입인정 횟수\n① 24회 이상\n3\n입주자저축(주택청약종합저축 또는 청약저축) 가입 확인서 기준\n② 12회 이상 23회 이하\n2\n③ 6회 이상 11회 이하\n1",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2237,
+                  "stream": "BodyText/Section0",
+                  "offset": 460282
+                },
+                {
+                  "index": 2238,
+                  "stream": "BodyText/Section0",
+                  "offset": 460392
+                },
+                {
+                  "index": 2239,
+                  "stream": "BodyText/Section0",
+                  "offset": 460551
+                },
+                {
+                  "index": 2240,
+                  "stream": "BodyText/Section0",
+                  "offset": 460704
+                },
+                {
+                  "index": 2241,
+                  "stream": "BodyText/Section0",
+                  "offset": 460843
+                },
+                {
+                  "index": 2242,
+                  "stream": "BodyText/Section0",
+                  "offset": 461046
+                },
+                {
+                  "index": 2243,
+                  "stream": "BodyText/Section0",
+                  "offset": 461213
+                },
+                {
+                  "index": 2244,
+                  "stream": "BodyText/Section0",
+                  "offset": 461352
+                },
+                {
+                  "index": 2245,
+                  "stream": "BodyText/Section0",
+                  "offset": 461517
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.adult",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.adult",
+        "label": "만 19세 이상(미성년 세대주 예외는 별도 확인)",
+        "semanticRole": "FIRSTHOME_ADULT",
+        "supplyType": "firstHome",
+        "category": "AGE",
+        "operator": "gte",
+        "value": 19,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.adult",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "만 19세 이상(미성년 세대주 예외는 별도 확인)",
+            "textExcerpt": "■ 본 주택은 최초 입주자모집공고일 현재 제주특별자치도에 거주(주민등록표등본 기준)하는 만19세 이상인 분 또는 세대주인 미성년자(자녀양육, 형제자매부양)[국내에서 거주하는 재외동포(재외국민, 외국국적 동포) 및 외국인 포함]의 경우 청약이 가능합니다. 다만 청약신청자 중 경쟁이 있을 경우 해당 주택건설지역인 제주특별자치도 1년 이상 거주자가(2026.09.14. 이전부터 계속 거주) 우선합니다.\n※ 「민법」상 미성년자는 직계존속의 사망, 실종선고 및 행방불명 등으로 형제자매를 부양해야 하거나, 자녀를 부양하여야 하는 세대주만 신청 가능합니다. 이 경우 자녀 및 형제자매는 미성년자와 같은 세대별 주민등록표에 등재되어 있어야 합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 268,
+                  "stream": "BodyText/Section0",
+                  "offset": 67983
+                },
+                {
+                  "index": 1110,
+                  "stream": "BodyText/Section0",
+                  "offset": 232783
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.residence",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.residence",
+        "label": "공고일 제주 거주",
+        "semanticRole": "FIRSTHOME_RESIDENCE",
+        "supplyType": "firstHome",
+        "category": "SCOPE",
+        "operator": "eq",
+        "value": "제주특별자치도",
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [
+          "firstHome.overseas"
+        ],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.residence",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "공고일 제주 거주",
+            "textExcerpt": "• 입주자모집공고일(2026.09.14.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 현재 제주특별자치도도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n• 입주자모집공고일(2026.09.14) 제주특별자치도도에 거주하면서 아래조건(①~⑥)을 모두 갖춘 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1887,
+                  "stream": "BodyText/Section0",
+                  "offset": 389059
+                },
+                {
+                  "index": 2031,
+                  "stream": "BodyText/Section0",
+                  "offset": 420582
+                },
+                {
+                  "index": 2292,
+                  "stream": "BodyText/Section0",
+                  "offset": 476268
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.overseas",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.overseas",
+        "label": "해외체류 이력은 별도 심사",
+        "semanticRole": "FIRSTHOME_OVERSEAS",
+        "supplyType": "firstHome",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [
+          "해외체류와 생업 목적 예외를 함께 검토해야 합니다."
+        ],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.overseas",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표2> 지역우선 공급기준",
+            "label": "해외체류 이력은 별도 심사",
+            "textExcerpt": "출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과(거주제한기간이 2년인 주택은 각 연도별 183일을 말함) 하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.\n- 사례1) 모집공고일 현재 해당지역에 거주하고 있으나 계속해서 90일을 초과하여 국외에 체류한 경력이 있으면 해당지역 우선공급 대상자로는 불인정하나 기타지역 거주자로는 청약 가능합니다.\n- 사례2) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과하지 않는 경우 해당지역 우선공급 대상자로 청약 가능합니다.\n- 사례3) 모집공고일 현재 해외에 있는 대상자로 국외 체류기간이 계속해서 90일을 초과한 경우 해당지역 우선공급 대상자로 불인정되며 기타지역 거주자로도 인정되지 않습니다.\n- 입주자모집공고일 현재 해외에 있으며, 해외 체류기간이 계속하여 90일을 초과하거나 전체 기간이 연간(매년) 183일을 초과하는 분은 지역 우선공급 대상자(제주특별자치도 1년 이상 거주자) 및 기타지역 거주자(제주특별자치도 1년 미만 거주자)로 청약이 불가하며, 이를 위반하여 당첨될 경우 부적격 처리됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 216,
+                  "stream": "BodyText/Section0",
+                  "offset": 50934
+                },
+                {
+                  "index": 217,
+                  "stream": "BodyText/Section0",
+                  "offset": 51612
+                },
+                {
+                  "index": 218,
+                  "stream": "BodyText/Section0",
+                  "offset": 51942
+                },
+                {
+                  "index": 219,
+                  "stream": "BodyText/Section0",
+                  "offset": 52192
+                },
+                {
+                  "index": 1080,
+                  "stream": "BodyText/Section0",
+                  "offset": 223544
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.exceptions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.exceptions",
+        "label": "혼인·출산·배우자·군인 등 특례 미적용",
+        "semanticRole": "FIRSTHOME_EXCEPTIONS",
+        "supplyType": "firstHome",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.exceptions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "혼인·출산·배우자·군인 등 특례 미적용",
+            "textExcerpt": "- [혼인특례] 신혼부부(예비신혼부부 제외) 특별공급의 경우, 신청자 본인이 혼인신고일 전에 당첨자로 관리된 사실이 있는 경우에도 신청이 가능합니다.\n- [출산특례] 신혼부부(예비신혼부부 포함)·신생아 특별공급의 경우, ‘24.06.19. 이후 출생한 자녀(태아나 입양 포함)가 있는 분은 신청자 본인 또는 배우자의 특별공급 당첨이력이 있더라도 한 차례에 한정(1세대 1주택 기준)하여 신청이 가능합니다. 이 경우 무주택세대구성원 요건을 충족하지 않아도(신청자 본인 또는 그 배우자가 주택을 소유한 경우에 한함) 신청할 수 있으나, 당첨 후 기존 소유 주택(입주자모집공고일 현재 신청자 또는 그 배우자가 소유한 주택으로서 분양권등을 포함)의 처분 조건*을 승낙하여야 합니다. (단, 이 경우 기존 소유 주택도 자산보유기준 적용 대상이 됩니다.)\n•10년 이상 장기복무 중인 군인은 본 주택의 해당순위(특별공급 및 일반공급 1순위, 2순위)의 청약자격과 입주자저축 요건을 충족 시 해당지역으로 청약할 수 있습니다.\n① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 243,
+                  "stream": "BodyText/Section0",
+                  "offset": 56766
+                },
+                {
+                  "index": 244,
+                  "stream": "BodyText/Section0",
+                  "offset": 57054
+                },
+                {
+                  "index": 1099,
+                  "stream": "BodyText/Section0",
+                  "offset": 227745
+                },
+                {
+                  "index": 2293,
+                  "stream": "BodyText/Section0",
+                  "offset": 476490
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.childbirth",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": false,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.childbirth",
+        "label": "출산가구 완화·태아·입양은 추가 확인",
+        "semanticRole": "FIRSTHOME_CHILDBIRTH",
+        "supplyType": "firstHome",
+        "category": "EXCEPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.childbirth",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3-1> / <표4-1> / <표5-1>",
+            "label": "출산가구 완화·태아·입양은 추가 확인",
+            "textExcerpt": "※ (출산가구 소득기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득기준이 완화되며, 완화된 기준은 아래 “<표4-1> 출산가구 소득기준 완화(청년)”를 참고하시기 바랍니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.\n※ (출산가구 소득·자산기준 완화) ‘23.03.28. 이후 출생한 자녀가 1명인 경우 10%p, 2명 이상인 경우(’23.03.28. 이후 출생한 자녀가 1명이고 ’23.03.27. 이전 출생한 자녀가 있는 경우 포함) 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표3-1> 출산가구 자산보유기준 완화” 및 “<표5-1> 출산가구 소득기준 완화”를 참고하시기 바랍니다. 단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격 미달일 경우 부적격 처리되어 향후 신청이 제한됩니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1339,
+                  "stream": "BodyText/Section0",
+                  "offset": 286804
+                },
+                {
+                  "index": 2099,
+                  "stream": "BodyText/Section0",
+                  "offset": 434119
+                },
+                {
+                  "index": 2359,
+                  "stream": "BodyText/Section0",
+                  "offset": 489444
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.restrictions",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": false,
+      "required": false,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.restrictions",
+        "label": "특별공급 제한 없음",
+        "semanticRole": "FIRSTHOME_RESTRICTIONS",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.restrictions",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 제한 없음",
+            "textExcerpt": "• 분양가상한제 적용주택, 투기과열지구 또는 청약과열지역에서 공급하는 주택 등에 이미 당첨되어 재당첨 제한 기간 내에 있는 분과 부적격 당첨 후 입주자로 선정될 수 없는 기간[입주자모집공고일(2026.09.14.) 기준 당첨일로부터 1년]내에 있는 분은 신청할 수 없습니다.\n• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2021,
+                  "stream": "BodyText/Section0",
+                  "offset": 417285
+                },
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.specialHistory",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.specialHistory",
+        "label": "특별공급 당첨 이력 없음(특례 별도)",
+        "semanticRole": "FIRSTHOME_SPECIALHISTORY",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.specialHistory",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "특별공급 당첨 이력 없음(특례 별도)",
+            "textExcerpt": "• 「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 「주택공급에 관한 규칙」개정(‘10.2.23) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분은 특별공급을 받은 것으로 간주하므로 청년 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)\n•「주택공급에 관한 규칙」 제35조부터 제47조까지의 특별공급 및 동법 개정(‘10.02.23.) 이전에 “3자녀 우선공급” 및 “노부모부양 우선공급”을 받은 분 및 그 세대에 속한 분은 특별공급을 받은 것으로 간주하므로 신혼부부 특별공급에 신청할 수 없습니다.(특별공급은 1회에 한하여 공급함. 단, 「주택공급에 관한 규칙」 제55조 및 제55조의3을 적용하는 경우는 제외)",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2022,
+                  "stream": "BodyText/Section0",
+                  "offset": 417733
+                },
+                {
+                  "index": 2276,
+                  "stream": "BodyText/Section0",
+                  "offset": 470723
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.reWinning",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.reWinning",
+        "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+        "semanticRole": "FIRSTHOME_REWINNING",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.reWinning",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": null,
+            "label": "재당첨 제한 없음(당첨일 일정은 확인 필요)",
+            "textExcerpt": "• 신혼부부·생애최초·신생아 및 일반공급의 경우 재당첨제한 적용주택(이전기관 종사자 특별공급 주택, 분양가상한제 적용주택, 분양전환공공임대주택, 토지임대주택, 투기과열지구 및 청약과열지역에서 공급되는 주택 등)에 당첨되어 금회 공급되는 주택의 당첨자 발표일 현재 재당첨제한 기간 내에 있는 당첨자 및 그 세대(신혼부부 특별공급의 예비신혼부부의 경우 혼인으로 구성될 세대)에 속한 분, 부적격 당첨자로 처리되어 청약 제한 기간 내에 있는 분은 금회 공급되는 주택의 신혼부부·생애최초·신생아 및 일반공급의 당첨자로 선정될 수 없습니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 276,
+                  "stream": "BodyText/Section0",
+                  "offset": 72043
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.account",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.account",
+        "label": "입주자저축 보유 및 종류",
+        "semanticRole": "FIRSTHOME_ACCOUNT",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": null,
+        "value": [
+          {
+            "fact": "hasAccount",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "accountKindEligible",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.account",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "입주자저축 보유 및 종류",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.months",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.months",
+        "label": "통장 가입 6개월 경과",
+        "semanticRole": "FIRSTHOME_MONTHS",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.months",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "통장 가입 6개월 경과",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.payments",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.payments",
+        "label": "납입인정 6회 이상",
+        "semanticRole": "FIRSTHOME_PAYMENTS",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "gte",
+        "value": 6,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.payments",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "납입인정 6회 이상",
+            "textExcerpt": "② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n① 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과된 분으로, 매월 약정납입일에 월 납입금을 6회 이상 납입하신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1889,
+                  "stream": "BodyText/Section0",
+                  "offset": 389531
+                },
+                {
+                  "index": 2035,
+                  "stream": "BodyText/Section0",
+                  "offset": 422822
+                },
+                {
+                  "index": 2683,
+                  "stream": "BodyText/Section0",
+                  "offset": 563347
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.housing",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.housing",
+        "label": "본인·세대 무주택 및 과거소유 없음(배우자 예외 별도)",
+        "semanticRole": "FIRSTHOME_HOUSING",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": null,
+        "value": [
+          {
+            "fact": "householdNoHome",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "neverOwned",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "householdNeverOwned",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.housing",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "본인·세대 무주택 및 과거소유 없음(배우자 예외 별도)",
+            "textExcerpt": "① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2293,
+                  "stream": "BodyText/Section0",
+                  "offset": 476490
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.rank",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.rank",
+        "label": "청약통장 1순위 확인",
+        "semanticRole": "FIRSTHOME_RANK",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.rank",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "청약통장 1순위 확인",
+            "textExcerpt": "② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.head",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.head",
+        "label": "표12 1순위: 세대주",
+        "semanticRole": "FIRSTHOME_HEAD",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": "eq",
+        "value": true,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.head",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표12> 일반공급 순위별 자격요건",
+            "label": "표12 1순위: 세대주",
+            "textExcerpt": "② 세대주이신 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2684,
+                  "stream": "BodyText/Section0",
+                  "offset": 563583
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.fiveYears",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.fiveYears",
+        "label": "표12 1순위: 세대 전원 과거 5년 당첨 없음",
+        "semanticRole": "FIRSTHOME_FIVEYEARS",
+        "supplyType": "firstHome",
+        "category": "SUBSCRIPTION",
+        "operator": "eq",
+        "value": true,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.fiveYears",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표12> 일반공급 순위별 자격요건",
+            "label": "표12 1순위: 세대 전원 과거 5년 당첨 없음",
+            "textExcerpt": "③ 무주택세대구성원으로 과거 5년 이내에 무주택세대구성원 전원이 다른 주택의 당첨자가 되지 않은 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2685,
+                  "stream": "BodyText/Section0",
+                  "offset": 563687
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.deposit",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "REVIEW_REQUIRED",
+      "safetyBlockers": [
+        "SEMANTIC_EVIDENCE_MISMATCH"
+      ],
+      "originalCandidate": {
+        "ruleKey": "firstHome.deposit",
+        "label": "선납 포함 저축액 600만원 이상",
+        "semanticRole": "FIRSTHOME_DEPOSIT",
+        "supplyType": "firstHome",
+        "category": "SAVINGS",
+        "operator": "gte",
+        "value": 6000000,
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.deposit",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "선납 포함 저축액 600만원 이상",
+            "textExcerpt": "② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2294,
+                  "stream": "BodyText/Section0",
+                  "offset": 476976
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.family",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.family",
+        "label": "혼인 중 또는 동일 등본의 미혼 자녀",
+        "semanticRole": "FIRSTHOME_FAMILY",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": null,
+        "value": null,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.family",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "혼인 중 또는 동일 등본의 미혼 자녀",
+            "textExcerpt": "③ 입주자모집공고일 현재 혼인(재혼 포함)중이거나 미혼인 자녀[입양을 포함하며, 신청자가 혼인 중이 아닌 경우에는 동일한 주민등록표등본상에 등재되어 있는 자녀(신청자의 태아 포함)를 말함]가 있는 분",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2296,
+                  "stream": "BodyText/Section0",
+                  "offset": 477650
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.household",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.household",
+        "label": "1인 가구 신청 불가 문구는 검토 메모 확인 필요",
+        "semanticRole": "FIRSTHOME_HOUSEHOLD",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": "gte",
+        "value": 2,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.household",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "1인 가구 신청 불가 문구는 검토 메모 확인 필요",
+            "textExcerpt": "※ 1인 가구는 생애최초 특별공급 청약 신청이 불가합니다.\n검토필요",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2297,
+                  "stream": "BodyText/Section0",
+                  "offset": 478066
+                },
+                {
+                  "index": 4108,
+                  "stream": "BodyText/Section0",
+                  "offset": 924833
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.tax",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.tax",
+        "label": "근로·사업 요건 및 본인 소득세 5년 이상",
+        "semanticRole": "FIRSTHOME_TAX",
+        "supplyType": "firstHome",
+        "category": "TAX",
+        "operator": null,
+        "value": [
+          {
+            "fact": "workOrBusinessIncome",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "fact": "incomeTaxPaymentYears",
+            "op": "gte",
+            "value": 5
+          }
+        ],
+        "scope": "APPLICANT",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.tax",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "근로·사업 요건 및 본인 소득세 5년 이상",
+            "textExcerpt": "④ 입주자모집공고일 현재 근로자 또는 자영업자(과거 1년 내에 소득세를 납부한 분을 포함)로서 신청자 본인이 5년 이상 소득세를 납부한 분\n※ 소득세는 「소득세법」 제19조(사업소득) 또는 제20조(근로소득)에 해당하는 소득에 대하여 납부하는 것을 말하며, 해당 소득세 납부의무자이나 소득공제 · 세액공제 · 세액감면 등으로 납부의무액이 없는 경우를 포함합니다.",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2298,
+                  "stream": "BodyText/Section0",
+                  "offset": 478361
+                },
+                {
+                  "index": 2299,
+                  "stream": "BodyText/Section0",
+                  "offset": 478641
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.size",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.size",
+        "label": "소득표 산정 가구원수 8인 이하(9인 이상 추가 확인)",
+        "semanticRole": "FIRSTHOME_SIZE",
+        "supplyType": "firstHome",
+        "category": "HOUSING",
+        "operator": null,
+        "value": [
+          {
+            "fact": "incomeHouseholdSize",
+            "op": "gte",
+            "value": 3
+          },
+          {
+            "fact": "incomeHouseholdSize",
+            "op": "lte",
+            "value": 8
+          }
+        ],
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.size",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": null,
+            "label": "소득표 산정 가구원수 8인 이하(9인 이상 추가 확인)",
+            "textExcerpt": "3인 이하\n4인\n5인\n6인\n7인\n8인",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2304,
+                  "stream": "BodyText/Section0",
+                  "offset": 480374
+                },
+                {
+                  "index": 2305,
+                  "stream": "BodyText/Section0",
+                  "offset": 480521
+                },
+                {
+                  "index": 2306,
+                  "stream": "BodyText/Section0",
+                  "offset": 480662
+                },
+                {
+                  "index": 2307,
+                  "stream": "BodyText/Section0",
+                  "offset": 480803
+                },
+                {
+                  "index": 2308,
+                  "stream": "BodyText/Section0",
+                  "offset": 480944
+                },
+                {
+                  "index": 2309,
+                  "stream": "BodyText/Section0",
+                  "offset": 481085
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.assets",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.assets",
+        "label": "세대 총자산 362백만원 이하",
+        "semanticRole": "FIRSTHOME_ASSETS",
+        "supplyType": "firstHome",
+        "category": "ASSET",
+        "operator": "lte",
+        "value": 362000000,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.assets",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅳ. 신청기준 및 공통 유의사항",
+            "tableLabel": "<표3> 총자산 보유기준",
+            "label": "세대 총자산 362백만원 이하",
+            "textExcerpt": "362백만원 이하",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 1216,
+                  "stream": "BodyText/Section0",
+                  "offset": 260832
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.income",
+        "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+        "semanticRole": "FIRSTHOME_INCOME",
+        "supplyType": "firstHome",
+        "category": "INCOME",
+        "operator": null,
+        "value": null,
+        "scope": "HOUSEHOLD",
+        "stage": null,
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5> 소득기준",
+            "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+            "textExcerpt": "⑥ 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득 기준”의 130%(단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2301,
+                  "stream": "BodyText/Section0",
+                  "offset": 479241
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.PRIORITY.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.PRIORITY.income",
+        "label": "소득 외벌이 100% / 맞벌이 120% 이하",
+        "semanticRole": "FIRSTHOME_PRIORITY_INCOME",
+        "supplyType": "firstHome",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "PRIORITY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.PRIORITY.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5> 소득기준",
+            "label": "소득 외벌이 100% / 맞벌이 120% 이하",
+            "textExcerpt": "• 입주자모집공고일 현재 위 생애최초 특별공급 신청자격에 해당되며 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득[4인 이상인 세대는 가구원수(공급신청자의 직계존속은 공급신청자 또는 공급신청자의 배우자와 1년 이상 같은 주민등록표등본에 올라 있는 경우만 가구원수에 포함)별 가구당 월평균소득을 말함]”의 100%(맞벌이인 경우 120%) 이하인 분을 대상으로 주택형별 공급량의 70%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2364,
+                  "stream": "BodyText/Section0",
+                  "offset": 491032
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.GENERAL.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.GENERAL.income",
+        "label": "소득 외벌이 130% / 맞벌이 140% 이하",
+        "semanticRole": "FIRSTHOME_GENERAL_INCOME",
+        "supplyType": "firstHome",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "GENERAL",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.GENERAL.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5> 소득기준",
+            "label": "소득 외벌이 130% / 맞벌이 140% 이하",
+            "textExcerpt": "• 입주자모집공고일 현재 위 생애최초 특별공급 신청자격에 해당되며 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득[4인 이상인 세대는 가구원수(공급신청자의 직계존속은 공급신청자 또는 공급신청자의 배우자와 1년 이상 같은 주민등록표등본에 올라 있는 경우만 가구원수 에 포함)별 가구당 월평균소득을 말함]”의 130%(맞벌이인 경우 140%) 이하인 분 및 1단계 우선공급 낙첨자 전원을 대상으로 주택형별 공급량의 20%(소수점 이하는 올림)를 “<표2> 지역우선 공급기준”에 따라 공급합니다.\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2367,
+                  "stream": "BodyText/Section0",
+                  "offset": 492278
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "firstHome.LOTTERY.income",
+      "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
+      "critical": true,
+      "required": true,
+      "candidateStatus": "AUTO_SAFE_CANDIDATE",
+      "safetyBlockers": [],
+      "originalCandidate": {
+        "ruleKey": "firstHome.LOTTERY.income",
+        "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+        "semanticRole": "FIRSTHOME_LOTTERY_INCOME",
+        "supplyType": "firstHome",
+        "category": "STAGE",
+        "operator": null,
+        "value": null,
+        "scope": "APPLICANT",
+        "stage": "LOTTERY",
+        "score": null,
+        "maxScore": null,
+        "relatedExceptionRuleIds": [],
+        "warnings": [],
+        "evidence": [
+          {
+            "id": "samdo.v17.firstHome.LOTTERY.income",
+            "documentId": "bade0617-63c6-4f61-86bf-6cd5ae17d101",
+            "section": "Ⅴ. 신청자격 및 당첨자 선정방법",
+            "tableLabel": "<표5> 소득기준",
+            "label": "소득 외벌이 130% / 맞벌이 200% 이하",
+            "textExcerpt": "• 입주자모집공고일 현재 위 생애최초 특별공급 신청자격에 해당되며 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득[4인 이상인 세대는 가구원수(공급신청자의 직계존속은 공급신청자 또는 공급신청자의 배우자와 1년 이상 같은 주민등록표등본에 올라 있는 경우만 가구원수에 포함)별 가구당 월평균소득을 말함]”의 130%(맞벌이인 경우 200%) 이하인 분 및 2단계 일반공급 낙첨자 전원을 대상으로 잔여물량에 대하여 “<표2> 지역우선 공급기준”에 따라 추첨을 통해 당첨자를 선정합니다.\n5,273,634원\n6,161,541원\n6,528,890원\n6,934,384원\n7,339,879원\n7,745,373원\n6,027,010원\n7,041,762원\n7,461,588원\n7,925,010원\n8,388,433원\n8,851,855원\n7,533,763원\n8,802,202원\n9,326,985원\n9,906,263원\n10,485,541원\n11,064,819원\n8,287,139원\n9,682,422원\n10,259,684원\n10,896,889원\n11,534,095원\n12,171,301원\n9,040,516원\n10,562,642원\n11,192,382원\n11,887,516원\n12,582,649원\n13,277,783원\n9,793,892원\n11,442,863원\n12,125,081원\n12,878,142원\n13,631,203원\n14,384,265원\n10,547,268원\n12,323,083원\n13,057,779원\n13,868,768원\n14,679,757원\n15,490,747원\n15,067,526원\n17,604,404원\n18,653,970원\n19,812,526원\n20,971,082원\n22,129,638원",
+            "locator": {
+              "sha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+              "paragraphs": [
+                {
+                  "index": 2370,
+                  "stream": "BodyText/Section0",
+                  "offset": 493570
+                },
+                {
+                  "index": 2153,
+                  "stream": "BodyText/Section0",
+                  "offset": 444795
+                },
+                {
+                  "index": 2154,
+                  "stream": "BodyText/Section0",
+                  "offset": 444952
+                },
+                {
+                  "index": 2155,
+                  "stream": "BodyText/Section0",
+                  "offset": 445109
+                },
+                {
+                  "index": 2156,
+                  "stream": "BodyText/Section0",
+                  "offset": 445266
+                },
+                {
+                  "index": 2157,
+                  "stream": "BodyText/Section0",
+                  "offset": 445423
+                },
+                {
+                  "index": 2158,
+                  "stream": "BodyText/Section0",
+                  "offset": 445580
+                },
+                {
+                  "index": 2160,
+                  "stream": "BodyText/Section0",
+                  "offset": 445920
+                },
+                {
+                  "index": 2161,
+                  "stream": "BodyText/Section0",
+                  "offset": 446081
+                },
+                {
+                  "index": 2162,
+                  "stream": "BodyText/Section0",
+                  "offset": 446242
+                },
+                {
+                  "index": 2163,
+                  "stream": "BodyText/Section0",
+                  "offset": 446403
+                },
+                {
+                  "index": 2164,
+                  "stream": "BodyText/Section0",
+                  "offset": 446564
+                },
+                {
+                  "index": 2165,
+                  "stream": "BodyText/Section0",
+                  "offset": 446725
+                },
+                {
+                  "index": 2312,
+                  "stream": "BodyText/Section0",
+                  "offset": 481570
+                },
+                {
+                  "index": 2313,
+                  "stream": "BodyText/Section0",
+                  "offset": 481731
+                },
+                {
+                  "index": 2314,
+                  "stream": "BodyText/Section0",
+                  "offset": 481892
+                },
+                {
+                  "index": 2315,
+                  "stream": "BodyText/Section0",
+                  "offset": 482053
+                },
+                {
+                  "index": 2316,
+                  "stream": "BodyText/Section0",
+                  "offset": 482214
+                },
+                {
+                  "index": 2317,
+                  "stream": "BodyText/Section0",
+                  "offset": 482377
+                },
+                {
+                  "index": 2175,
+                  "stream": "BodyText/Section0",
+                  "offset": 448377
+                },
+                {
+                  "index": 2176,
+                  "stream": "BodyText/Section0",
+                  "offset": 448538
+                },
+                {
+                  "index": 2177,
+                  "stream": "BodyText/Section0",
+                  "offset": 448699
+                },
+                {
+                  "index": 2178,
+                  "stream": "BodyText/Section0",
+                  "offset": 448862
+                },
+                {
+                  "index": 2179,
+                  "stream": "BodyText/Section0",
+                  "offset": 449025
+                },
+                {
+                  "index": 2180,
+                  "stream": "BodyText/Section0",
+                  "offset": 449188
+                },
+                {
+                  "index": 2320,
+                  "stream": "BodyText/Section0",
+                  "offset": 482863
+                },
+                {
+                  "index": 2321,
+                  "stream": "BodyText/Section0",
+                  "offset": 483024
+                },
+                {
+                  "index": 2322,
+                  "stream": "BodyText/Section0",
+                  "offset": 483187
+                },
+                {
+                  "index": 2323,
+                  "stream": "BodyText/Section0",
+                  "offset": 483350
+                },
+                {
+                  "index": 2324,
+                  "stream": "BodyText/Section0",
+                  "offset": 483513
+                },
+                {
+                  "index": 2325,
+                  "stream": "BodyText/Section0",
+                  "offset": 483676
+                },
+                {
+                  "index": 2328,
+                  "stream": "BodyText/Section0",
+                  "offset": 484183
+                },
+                {
+                  "index": 2329,
+                  "stream": "BodyText/Section0",
+                  "offset": 484344
+                },
+                {
+                  "index": 2330,
+                  "stream": "BodyText/Section0",
+                  "offset": 484507
+                },
+                {
+                  "index": 2331,
+                  "stream": "BodyText/Section0",
+                  "offset": 484670
+                },
+                {
+                  "index": 2332,
+                  "stream": "BodyText/Section0",
+                  "offset": 484833
+                },
+                {
+                  "index": 2333,
+                  "stream": "BodyText/Section0",
+                  "offset": 484996
+                },
+                {
+                  "index": 2336,
+                  "stream": "BodyText/Section0",
+                  "offset": 485482
+                },
+                {
+                  "index": 2337,
+                  "stream": "BodyText/Section0",
+                  "offset": 485645
+                },
+                {
+                  "index": 2338,
+                  "stream": "BodyText/Section0",
+                  "offset": 485808
+                },
+                {
+                  "index": 2339,
+                  "stream": "BodyText/Section0",
+                  "offset": 485971
+                },
+                {
+                  "index": 2340,
+                  "stream": "BodyText/Section0",
+                  "offset": 486134
+                },
+                {
+                  "index": 2341,
+                  "stream": "BodyText/Section0",
+                  "offset": 486297
+                },
+                {
+                  "index": 2352,
+                  "stream": "BodyText/Section0",
+                  "offset": 488103
+                },
+                {
+                  "index": 2353,
+                  "stream": "BodyText/Section0",
+                  "offset": 488266
+                },
+                {
+                  "index": 2354,
+                  "stream": "BodyText/Section0",
+                  "offset": 488429
+                },
+                {
+                  "index": 2355,
+                  "stream": "BodyText/Section0",
+                  "offset": 488592
+                },
+                {
+                  "index": 2356,
+                  "stream": "BodyText/Section0",
+                  "offset": 488755
+                },
+                {
+                  "index": 2357,
+                  "stream": "BodyText/Section0",
+                  "offset": 488918
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "conflictId": "samdo.region.priority-date",
+      "concept": "지역우선 기준일",
+      "candidateRuleIds": [
+        "youth.residence"
+      ],
+      "candidates": [
+        {
+          "candidateId": "continuous-one-year",
+          "value": "2025-09-14 이전부터 계속 거주",
+          "evidenceIds": [
+            "samdo.v17.youth.residence"
+          ]
+        },
+        {
+          "candidateId": "announcement-date",
+          "value": "공고일 현재 거주",
+          "evidenceIds": [
+            "samdo.v17.youth.residence"
+          ]
+        }
+      ]
+    }
+  ],
+  "unresolvedItems": [
+    {
+      "unresolvedId": "samdo.management-number-mapping",
+      "type": "AMBIGUOUS_HOUSING_MANAGEMENT_NUMBER",
+      "description": "관리번호와 1·2지구 연결이 검토본에서 확정되지 않았습니다.",
+      "ruleIds": []
+    }
+  ],
+  "requiredCategories": [
+    {
+      "supplyType": "youth",
+      "category": "SCOPE"
+    },
+    {
+      "supplyType": "youth",
+      "category": "SUBSCRIPTION"
+    },
+    {
+      "supplyType": "youth",
+      "category": "AGE"
+    },
+    {
+      "supplyType": "youth",
+      "category": "HOUSING"
+    },
+    {
+      "supplyType": "youth",
+      "category": "ASSET"
+    },
+    {
+      "supplyType": "youth",
+      "category": "INCOME"
+    },
+    {
+      "supplyType": "youth",
+      "category": "STAGE"
+    },
+    {
+      "supplyType": "youth",
+      "category": "SCORE"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "AGE"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "SCOPE"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "SUBSCRIPTION"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "HOUSING"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "ASSET"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "INCOME"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "STAGE"
+    },
+    {
+      "supplyType": "newlywed",
+      "category": "SCORE"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "AGE"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "SCOPE"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "SUBSCRIPTION"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "HOUSING"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "SAVINGS"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "TAX"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "ASSET"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "INCOME"
+    },
+    {
+      "supplyType": "firstHome",
+      "category": "STAGE"
     }
   ]
 };

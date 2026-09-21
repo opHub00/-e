@@ -1,6 +1,7 @@
 // Node-only, deterministic generator. The generated module has no filesystem dependency.
 import { readFile, writeFile } from 'node:fs/promises';
 import { buildSamdoReviewSeed } from '../features/assessmentRuleReview/fixtures/buildSamdoReviewSeed.ts';
+import { buildSamdoStagingReviewSeed } from '../features/assessmentRuleReview/fixtures/buildSamdoStagingReviewSeed.ts';
 import { REVIEW_SEED_GENERATOR_VERSION, sourceFixtureHash } from '../features/assessmentRuleReview/fixtures/provenance.ts';
 
 const sourceUrl = new URL('../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url);
@@ -20,6 +21,13 @@ import type { RuleReviewWorkspaceSeed } from '../server/types.ts';
 import type { ReviewSeedProvenance } from './provenance.ts';
 
 export const SAMDO_REVIEW_SEED_PROVENANCE: ReviewSeedProvenance = `;
-const output = `${header}${JSON.stringify(provenance, null, 2)};\n\nexport const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoReviewSeed(source), null, 2)};\n`;
+const output = `${header}${JSON.stringify(provenance, null, 2)};
+
+/** Test and dev fixture: a curated handful of rules. */
+export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoReviewSeed(source), null, 2)};
+
+/** Staging seed: one review candidate per materialized source rule. */
+export const SAMDO_STAGING_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoStagingReviewSeed(source), null, 2)};
+`;
 await writeFile(targetUrl, output, 'utf8');
 console.log('generated Samdo review seed');

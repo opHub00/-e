@@ -1,10 +1,17 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
-import { supabaseSessionStorage } from './authStorage';
+import { isServerRenderEnvironment, supabaseSessionStorage } from './authStorage';
 
 let client: SupabaseClient | null | undefined;
 
 export function getSupabaseClient(): SupabaseClient | null {
+  /*
+    A static render has no browser session to restore. Creating the auth client
+    there made GoTrue read session storage and start refresh timers inside Node,
+    which failed the whole export. The decision is deliberately not cached: the
+    browser process builds the real client after hydration.
+  */
+  if (isServerRenderEnvironment()) return null;
   if (client !== undefined) return client;
 
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();

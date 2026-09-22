@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { samdoReferenceRules } from '../referenceRules.ts';
+import { samdoReferenceRules } from '../reference/samdoReferenceRules.ts';
 import { assessApplication } from '../engine.ts';
 import { createMinimalApplicantProfile } from '../../profile/domain.ts';
 import { serializeRuleSet, decodeRuleSet } from './ruleCodec.ts';

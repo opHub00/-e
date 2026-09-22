@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, type } from '../../design/tokens';
-import { SUPPLY_LABELS, STAGE_LABELS } from '../applicationAssessment/referenceRules';
+import { SUPPLY_LABELS, STAGE_LABELS } from '../applicationAssessment/labels';
 import { STATUS_HEADLINE, scoreLabel, type ConsultationAssessment } from './contract';
 
 /**

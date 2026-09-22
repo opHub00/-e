@@ -4,7 +4,7 @@ import {
   ANNOUNCEMENT_ID, LISTING_ID, PROFILE_STORAGE_KEY, SCENARIOS, SUPPLY_TAB,
   NEEDS_PROFILE, catalogPayload, profileSeed, ruleSetPayload, type Scenario,
 } from './fixtures.ts';
-import { STAGE_LABELS } from '../features/applicationAssessment/referenceRules.ts';
+import { STAGE_LABELS } from '../features/applicationAssessment/labels.ts';
 import { FORM_FIELDS } from '../features/applicationAssessment/form.ts';
 
 const SHOTS = 'e2e/.artifacts/screenshots';

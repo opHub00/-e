@@ -11,7 +11,7 @@ import {
   type ConsultationAction, type ConsultationEngine, type ConsultationQuestion, type ConsultationSession, type ConsultationTurn,
 } from './contract';
 import type { Evidence } from '../applicationAssessment/types';
-import { SUPPLY_LABELS } from '../applicationAssessment/referenceRules';
+import { SUPPLY_LABELS } from '../applicationAssessment/labels';
 
 type Props = {
   engine: ConsultationEngine;

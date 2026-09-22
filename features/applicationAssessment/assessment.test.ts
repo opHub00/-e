@@ -4,7 +4,7 @@ import { createMinimalApplicantProfile, knownField } from '../profile/domain.ts'
 import { assessApplication } from './engine.ts';
 import { completedMonths } from './facts.ts';
 import { FORM_FIELDS, FORM_GROUPS, groupMissingInformation, koreanMoneyHint, parseForm } from './form.ts';
-import { samdoReferenceRules, rulesForListing } from './referenceRules.ts';
+import { samdoReferenceRules, rulesForListing } from './reference/samdoReferenceRules.ts';
 import type { AnnouncementRules, AssessmentInput, SupplyType } from './types.ts';
 
 /** Synthetic engineering fixtures. These numbers are NOT Samdo announcement rules. */

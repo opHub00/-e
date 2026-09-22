@@ -5,7 +5,7 @@ import { strict as assert } from 'node:assert';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { serializeRuleSet } from '../features/applicationAssessment/data/ruleCodec.ts';
-import { samdoReferenceRules } from '../features/applicationAssessment/referenceRules.ts';
+import { samdoReferenceRules } from '../features/applicationAssessment/reference/samdoReferenceRules.ts';
 import { decodeRuleSet } from '../features/applicationAssessment/data/ruleCodec.ts';
 
 const { PGlite } = await import(pathToFileURL(resolve('.cache/assessment-sql-check/node_modules/@electric-sql/pglite/dist/index.js')).href);

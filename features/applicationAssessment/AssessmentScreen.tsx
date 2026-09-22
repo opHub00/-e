@@ -12,7 +12,9 @@ import { useListingDataset } from '../discovery/data/useListingDataset';
 import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
 import { FORM_FIELDS, FORM_GROUP_HINTS, FORM_GROUP_LABELS, FORM_GROUPS, koreanMoneyHint, parseForm } from './form';
-import { REFERENCE_LISTING_ID, samdoReferenceRules, SUPPLY_LABELS } from './referenceRules';
+import { SUPPLY_LABELS } from './labels';
+import { REFERENCE_LISTING_ID, REFERENCE_RULE_SET } from './reference';
+import { announcementResidenceRegion } from './ruleRegion';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
 import { registerAssessmentConsultationSeed } from '../assessmentConsultation/seedStore';
@@ -43,6 +45,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const scroll = useRef<ScrollView>(null);
   const ruleLoad = useAssessmentRules(selected);
   const rules = ruleLoad.rules;
+  const residenceRegion = announcementResidenceRegion(rules);
   const catalog = useAssessmentCatalog();
   useEffect(() => {
     if (rules && !rules.supplies.some(s => s.type === supply)) setSupply(rules.supplies[0].type);
@@ -90,7 +93,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       <Text style={styles.body}>{step + 1} / 4 · 공고 선택 → 정보 확인 → 추가 질문 → 결과</Text>
       {step === 0 ? <>
         <Text style={styles.body}>신청 조건과 공급단계, 필요한 준비를 함께 확인해요.</Text>
-        <Choice label={`${samdoReferenceRules.title} · 원문 확인 전`} selected={selected === REFERENCE_LISTING_ID} onPress={() => choose(REFERENCE_LISTING_ID)} />
+        <Choice label={`${REFERENCE_RULE_SET.title} · 원문 확인 전`} selected={selected === REFERENCE_LISTING_ID} onPress={() => choose(REFERENCE_LISTING_ID)} />
         {catalog.items.map(item => <Choice key={item.id} label={`${item.title} · ${SOURCE_LABELS[item.sourceStatus]}`} selected={selected === `announcement:${item.id}`} onPress={() => choose(`announcement:${item.id}`)} />)}
         {catalog.status === 'LOADING' ? <Text style={styles.body}>등록된 공고 목록을 불러오고 있어요.</Text> : null}
         {catalog.status === 'ERROR' ? <PrimaryButton label="공고 목록을 불러오지 못했어요 · 다시 시도" variant="soft" onPress={catalog.retry} /> : null}
@@ -140,11 +143,14 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
             <Text accessibilityRole="header" style={styles.title}>{FORM_GROUP_LABELS[group]}</Text>
             {FORM_GROUP_HINTS[group] ? <Text style={styles.body}>{FORM_GROUP_HINTS[group]}</Text> : null}
             {group === 'residence' ? <WanpanCard style={styles.stack}>
-              <Text style={styles.strong}>공고 기준일에 제주에 거주했나요?</Text>
+              {/* 공고 지역은 규칙에서 읽는다. 규칙에 지역이 없거나 여럿이면 특정 지역을 가정하지 않는다. */}
+              <Text style={styles.strong}>{residenceRegion ? `공고 기준일에 ${residenceRegion.short}에 거주했나요?` : '공고 기준일 현재 거주지역을 알려주세요.'}</Text>
               <Text style={styles.body}>현재 프로필 거주지: {profile.residence.currentRegion}</Text>
-              {profile.residence.currentRegion !== '제주특별자치도' ? <Choice label={`프로필 거주지와 같아요 (${profile.residence.currentRegion})`} selected={raw.currentResidence === profile.residence.currentRegion} onPress={() => update('currentResidence', profile.residence.currentRegion)} /> : null}
-              <Choice label="제주특별자치도" selected={raw.currentResidence === '제주특별자치도'} onPress={() => update('currentResidence', '제주특별자치도')} />
-              <Choice label="제주 외 지역" selected={raw.currentResidence === '기타'} onPress={() => update('currentResidence', '기타')} />
+              {profile.residence.currentRegion !== residenceRegion?.profile ? <Choice label={`프로필 거주지와 같아요 (${profile.residence.currentRegion})`} selected={raw.currentResidence === profile.residence.currentRegion} onPress={() => update('currentResidence', profile.residence.currentRegion)} /> : null}
+              {residenceRegion ? <>
+                <Choice label={residenceRegion.profile} selected={raw.currentResidence === residenceRegion.profile} onPress={() => update('currentResidence', residenceRegion.profile)} />
+                <Choice label={`${residenceRegion.short} 외 지역`} selected={raw.currentResidence === '기타'} onPress={() => update('currentResidence', '기타')} />
+              </> : null}
               <Choice label="확인 전" selected={!raw.currentResidence} onPress={() => update('currentResidence', '')} />
             </WanpanCard> : null}
             {group === 'family' && supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.strong}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}

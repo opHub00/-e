@@ -5,7 +5,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../design/tokens';
 import { FACT_LABELS, groupMissingInformation } from './form';
-import { STAGE_LABELS, SUPPLY_LABELS } from './referenceRules';
+import { STAGE_LABELS, SUPPLY_LABELS } from './labels';
 import { SOURCE_LABELS } from './data/useAssessmentRules';
 import type { ApplicationAssessmentResult, ConditionResult, Evidence, RuleSourceStatus } from './types';
 

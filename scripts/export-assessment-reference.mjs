@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { samdoReferenceRules } from '../features/applicationAssessment/referenceRules.ts';
+import { samdoReferenceRules } from '../features/applicationAssessment/reference/samdoReferenceRules.ts';
 import { serializeRuleSet } from '../features/applicationAssessment/data/ruleCodec.ts';
 
 // Offline development export. IDs are dedicated fixture IDs, never management-number mappings.

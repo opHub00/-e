@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { getSupabaseClient } from '../../auth/supabaseClient';
-import { REFERENCE_LISTING_ID, samdoReferenceRules } from '../referenceRules';
+import { REFERENCE_LISTING_ID, REFERENCE_RULE_SET } from '../reference';
 import { StaticAssessmentRuleRepository, type AnnouncementSummary, type RuleReadResult } from './ruleRepository';
 import { createSupabaseRuleRepository } from './supabaseRuleRepository';
 
-const reference = new StaticAssessmentRuleRepository([samdoReferenceRules]);
+const reference = new StaticAssessmentRuleRepository([REFERENCE_RULE_SET]);
 const database = () => createSupabaseRuleRepository(getSupabaseClient());
 type LoadState = RuleReadResult | { status: 'LOADING' };
 export const SOURCE_LABELS = { REFERENCE: '원문 확인 전', DRAFT_SOURCE_VERIFIED: '검토본 기준', OFFICIAL_VERIFIED: '공식 공고 기준' } as const;

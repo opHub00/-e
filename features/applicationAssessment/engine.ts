@@ -57,7 +57,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
   const regionalThreshold = rules.parameters['region.localMonths'];
   const regionalPriority: ApplicationAssessmentResult['regionalPriority'] = typeof regionalThreshold !== 'number' ? undefined
     : rules.parameters['region.underReview'] === true || typeof facts.residenceMonths !== 'number'
-      ? { status:'NEEDS_REVIEW', label:'지역우선 배정은 검토본의 표2 수정 메모와 해외체류 기준 확인이 필요해요.' }
+      ? { status:'NEEDS_REVIEW', label:'지역우선 배정은 공고의 지역우선 기준과 해외체류 기준 확인이 필요해요.' }
       : facts.residenceMonths >= regionalThreshold ? { status:'LOCAL', label:'해당지역 우선배정 대상' }
         : { status:'REMAINDER_ONLY', label:'기타지역: 해당지역 미달 물량이 있을 때 공급 대상' };
   if (regionalPriority) warnings.push(regionalPriority.label);

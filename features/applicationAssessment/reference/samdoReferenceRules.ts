@@ -1,8 +1,14 @@
-import type { AnnouncementRules, ConditionRule, Evidence, Expression, ScoreRule } from './types.ts';
+/**
+ * LEGACY / REFERENCE_ONLY — structural sample of one announcement (삼도이동 1지구).
+ *
+ * This is not the runtime rule source. Real announcements are loaded from the
+ * rule registry (import package → review → activation → listing binding). The
+ * sample is reachable only by explicitly selecting REFERENCE_LISTING_ID and is
+ * always labelled 원문 확인 전. Keep announcement-specific wording in this folder.
+ */
+import type { AnnouncementRules, ConditionRule, Evidence, Expression, ScoreRule } from '../types.ts';
 
 export const REFERENCE_LISTING_ID = 'reference:samdo-2-1';
-export const SUPPLY_LABELS = { youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급' } as const;
-export const STAGE_LABELS = { PRIORITY: '1단계 우선공급', GENERAL: '2단계 일반공급', LOTTERY: '3단계 추첨공급' } as const;
 const evidence = (id: string, label: string): Evidence => ({ id: `samdo:${id}`, source: '삼도이동 1지구 · 공고 원문 확인 전', section: id.split('.')[0], label });
 const eq = (fact: string, value: string | boolean): Expression => ({ fact, op: 'eq', value });
 const limit = (fact: string, op: 'gte' | 'lte', parameter: string): Expression => ({ fact, op, value: { parameter } });

@@ -11,6 +11,7 @@ import { extractFacts } from '../features/ruleExtraction/server/v3/facts.ts';
 import { buildCallPlan } from '../features/ruleExtraction/server/v3/plans.ts';
 import { runV3BindingBenchmark } from '../features/ruleExtraction/server/v3/runner.ts';
 import { buildOfflineRetrievalScorecard } from '../features/ruleExtraction/server/v4/scorecard.ts';
+import { SAMDO_LITERAL_EXPECTATIONS } from '../features/ruleExtraction/server/fixtures/samdoLiteralExpectations.ts';
 
 const ID='990b2823e0ddc98fe7222815b6c844131bda6e9c1deac50c6de253eb0dbe524f';
 const SHA='bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763';
@@ -33,7 +34,7 @@ if(configured.model!=='gemini-2.5-flash')throw new Error('V4_BENCHMARK_MODEL_MUS
 const config={...configured,maxCalls:18,maxRetryCalls:0,maxEstimatedUsd:Math.min(configured.maxEstimatedUsd,1),maxOutputTokens:Math.min(configured.maxOutputTokens,2048),thinkingBudget:Math.min(configured.thinkingBudget,1024)};
 const persistUsage=async usage=>write('samdo-v4-provider-usage.json',{model:config.model,pricing:{input:config.inputUsdPerMillion,outputIncludingThinking:config.outputUsdPerMillion,unit:'USD per million tokens'},hardCaps:{semanticTasks:16,retries:2,networkCalls:18,estimatedUsd:1},calls:usage});
 const provider=new GeminiStructuredProvider(config,fetch,persistUsage);
-const result=await runV3BindingBenchmark(document,facts,provider,{plan:'PLAN_A_16',retryBudget:2,rateLimitBackoffMs:5000});
+const result=await runV3BindingBenchmark(document,facts,provider,{plan:'PLAN_A_16',retryBudget:2,rateLimitBackoffMs:5000,literalExpectations:SAMDO_LITERAL_EXPECTATIONS});
 if(provider.usage.length>18)throw new Error('NETWORK_CALL_CAP_EXCEEDED');
 const estimated=provider.usage.reduce((sum,row)=>sum+(row.estimatedUsd??0),0);if(estimated>1)throw new Error('COST_CAP_EXCEEDED');
 

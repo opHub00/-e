@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { ParsedDocument, SourceLocator } from '../parsedDocument.ts';
+import { OFFICIAL_REGION_NAME_PATTERN } from '../../../discovery/regions.ts';
 
 export const FACT_TYPES = ['PERCENT','MONEY','DATE','DURATION_MONTHS','DURATION_YEARS','COUNT','SCORE','RATIO','AGE','BOOLEAN_PHRASE','RANGE'] as const;
 export type FactType = typeof FACT_TYPES[number];
@@ -66,7 +67,7 @@ function tagsFor(text:string,tableIdentities:TableIdentity[]):FactContextTag[]{
   if(has(text,/청약|저축|납입|선납/u))tags.push('SUBSCRIPTION');
   if(has(text,/가점|점수|점\b/u))tags.push('SCORE');
   if(has(text,/단계|우선공급|일반공급|추첨/u))tags.push('STAGE');
-  if(has(text,/거주|해당지역|제주특별자치도/u))tags.push('RESIDENCE');
+  if(has(text,/거주|해당지역/u)||OFFICIAL_REGION_NAME_PATTERN.test(text))tags.push('RESIDENCE');
   if(has(text,/나이|연령|만\s*\d+\s*세/u))tags.push('AGE');
   if(has(text,/소득세|근로기간/u))tags.push('TAX');
   if(has(text,/단,|다만|제외|예외|불구하고|특례|해외체류|국외체류|혼인 전/u))tags.push('EXCEPTION');

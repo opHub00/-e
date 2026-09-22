@@ -4,6 +4,7 @@ import { dirname,join } from 'node:path';
 import { extractFacts } from '../features/ruleExtraction/server/v3/facts.ts';
 import { buildFrozenBenchmarkPack } from '../features/ruleExtraction/server/v4_1/benchmarkPack.ts';
 import { replayV41 } from '../features/ruleExtraction/server/v4_1/replay.ts';
+import { SAMDO_LITERAL_EXPECTATIONS } from '../features/ruleExtraction/server/fixtures/samdoLiteralExpectations.ts';
 
 const root='.ingestion/announcements/990b2823e0ddc98fe7222815b6c844131bda6e9c1deac50c6de253eb0dbe524f';
 const documentPath=join(root,'parsed/bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763/document-parser-v1/document.json');
@@ -13,7 +14,7 @@ const document=JSON.parse(await readFile(documentPath,'utf8'));
 const bindings=JSON.parse(await readFile(join(artifactDir,'samdo-v4-bindings.json'),'utf8'));
 const rules=JSON.parse(await readFile(join(artifactDir,'samdo-v4-rules.json'),'utf8'));
 const comparison=JSON.parse(await readFile(join(artifactDir,'samdo-v4-oracle-comparison.json'),'utf8'));
-const facts=extractFacts(document),replay=replayV41(document,facts,bindings.responses,rules.rules,comparison.highConfidenceCriticalErrors);
+const facts=extractFacts(document),replay=replayV41(document,facts,bindings.responses,rules.rules,comparison.highConfidenceCriticalErrors,SAMDO_LITERAL_EXPECTATIONS);
 const pack=buildFrozenBenchmarkPack(document,facts),outDir=join(root,'extraction/samdo-v4-1-offline');await mkdir(outDir,{recursive:true});
 await writeFile(join(outDir,'samdo-v4-1-replay.json'),`${JSON.stringify(replay,null,2)}\n`);
 await writeFile(join(outDir,'samdo-v4-1-frozen-pack.json'),`${JSON.stringify(pack,null,2)}\n`);

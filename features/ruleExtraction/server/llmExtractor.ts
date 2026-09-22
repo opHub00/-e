@@ -54,6 +54,11 @@ export function mergeCandidates(packages:CandidateRulePackage[]){
   }
   result.extractionWarnings=[...new Set(result.extractionWarnings)];return {result,duplicates};
 }
+/** Record ids come from the source document identity, never from an announcement name. */
+export function extractionRecordId(documentSha256:string,kind:'candidate'|'validation'){
+  if(!/^[0-9a-f]{64}$/.test(documentSha256))throw new Error('INVALID_DOCUMENT_HASH');
+  return `assessment-ai-${documentSha256.slice(0,16)}-${kind}-v1`;
+}
 export class LLMRuleExtractor implements RuleExtractor {
   private provider:StructuredProvider;private record:(name:string,value:unknown)=>Promise<void>;
   constructor(provider:StructuredProvider,record:(name:string,value:unknown)=>Promise<void>){this.provider=provider;this.record=record;}
@@ -82,9 +87,9 @@ export class LLMRuleExtractor implements RuleExtractor {
     }
     const {result,duplicates}=mergeCandidates(packages);validateCandidatePackage(result,d,base.announcement);
     addCompletenessWarnings(result,successfulGroups);
-    await this.record('samdo-ai-validation-v1',{rawRuleCount,acceptedBeforeMerge:packages.reduce((a,p)=>a+p.candidateRules.length,0),acceptedAfterMerge:result.candidateRules.length,rejectedCandidates:rejected,duplicates,failedCalls,skipped,
+    await this.record(extractionRecordId(d.sha256,'validation'),{rawRuleCount,acceptedBeforeMerge:packages.reduce((a,p)=>a+p.candidateRules.length,0),acceptedAfterMerge:result.candidateRules.length,rejectedCandidates:rejected,duplicates,failedCalls,skipped,
       blockExposureCounts:repeats,maxBlockExposure:Math.max(0,...Object.values(repeats)),repeatedBlockCount:Object.values(repeats).filter(x=>x>1).length});
-    await this.record('samdo-ai-candidate-v1',result);
+    await this.record(extractionRecordId(d.sha256,'candidate'),result);
     await this.record('extraction-complete',{completed:true,allCallsSucceeded:failedCalls.length===0,oracleRead:false,promptVersion:SEMANTIC_PROMPT_VERSION_V3});
     return result;
   }

@@ -22,6 +22,24 @@ export const DISCOVERY_REGIONS = REGION_DEFINITIONS.map((region) => region.disco
 export const PROFILE_REGIONS = REGION_DEFINITIONS.map((region) => region.profile);
 
 export type DiscoveryRegion = (typeof DISCOVERY_REGIONS)[number];
+export type ProfileRegion = (typeof PROFILE_REGIONS)[number];
+
+/**
+ * Full official names (서울특별시, 경기도, 제주특별자치도, and former names such as
+ * 전라북도). Announcements, rules and extraction use these; short forms like
+ * "서울" are too ambiguous for document text. This registry is the single
+ * source of truth: no module may hard-code one region.
+ */
+export const OFFICIAL_REGION_NAMES: readonly string[] = REGION_DEFINITIONS
+  .flatMap(region => region.aliases.filter(alias => /(?:특별시|광역시|특별자치시|특별자치도|도)$/.test(alias)))
+  .sort((a, b) => b.length - a.length);
+export const OFFICIAL_REGION_NAME_PATTERN = new RegExp(`(?:${OFFICIAL_REGION_NAMES.join('|')})`, 'u');
+
+/** Maps any known name of a region (official, former or short) to its official profile name. */
+export function normalizeProfileRegion(value: unknown): ProfileRegion | null {
+  const discovery = normalizeDiscoveryRegion(value);
+  return discovery ? REGION_DEFINITIONS.find(region => region.discovery === discovery)!.profile : null;
+}
 
 export function normalizeDiscoveryRegion(value: unknown): DiscoveryRegion | null {
   const text = value === null || value === undefined

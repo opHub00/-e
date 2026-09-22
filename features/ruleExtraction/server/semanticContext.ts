@@ -9,21 +9,25 @@ export const SELECTION_LIMITS:Record<Group,{tables:number;blocks:number}>={
 };
 const KEYWORDS:Record<Group,string[]>={
   COMMON:['입주자모집공고일','지역우선','해당지역','기타지역','해외체류','출입국','무주택세대구성원','청약통장','재당첨','중복신청','총 자산 보유 기준','소득 기준'],
-  YOUTH:['청년 특별공급','청년','표7','표8','만 19세','39세'],
-  NEWLYWED:['신혼부부 특별공급','예비신혼','한부모','표9','표10','혼인기간'],
+  YOUTH:['청년 특별공급','청년','가점표','만 19세','39세'],
+  NEWLYWED:['신혼부부 특별공급','예비신혼','한부모','가점표','혼인기간'],
   FIRST_TIME:['생애최초 특별공급','생애최초','600만원','소득세','1인 가구'],
   EXCEPTIONS:['단,','다만','제외','예외','특례','해외체류','배우자','혼인 전','출산'],
 };
 const SUPPLY_TERMS=['청년 특별공급','신혼부부 특별공급','생애최초 특별공급','신생아 특별공급'];
 export const hasExceptionMarker=(text:string)=>EXCEPTION_MARKERS.some(marker=>text.includes(marker));
+// Document-agnostic signals only: a table caption next to a supply term, and a won amount next to
+// income/asset terms. No announcement's table numbers or thresholds are baked in.
+const TABLE_CAPTION=/[<〈]\s*표\s*\d+\s*[>〉]/;
+const THRESHOLD_AMOUNT=/\d{1,3}(?:,\d{3}){2,}\s*원|\d[\d,]*\s*백만\s*원/;
 const score=(text:string,group:Group)=>{
   let value=KEYWORDS[group].reduce((sum,k)=>sum+(text.includes(k)?10:0),0)+(hasExceptionMarker(text)&&group==='EXCEPTIONS'?8:0);
-  if(group==='YOUTH'&&text.includes('청년 특별공급'))value+=50;if(group==='YOUTH'&&/[<〈]표[78][>〉]/.test(text))value+=80;
-  if(group==='YOUTH'&&/(2,669,354|5,338,708|276백만원|1,034백만원)/.test(text))value+=70;
-  if(group==='NEWLYWED'&&text.includes('신혼부부 특별공급'))value+=50;if(group==='NEWLYWED'&&/[<〈]표(?:9|10)[>〉]/.test(text))value+=80;
-  if(group==='NEWLYWED'&&/(9,793,892|10,547,268|362백만원)/.test(text))value+=50;
+  if(group==='YOUTH'&&text.includes('청년 특별공급'))value+=50;if(group==='YOUTH'&&TABLE_CAPTION.test(text)&&text.includes('청년'))value+=80;
+  if(group==='YOUTH'&&text.includes('청년')&&THRESHOLD_AMOUNT.test(text)&&/소득|자산/.test(text))value+=70;
+  if(group==='NEWLYWED'&&text.includes('신혼부부 특별공급'))value+=50;if(group==='NEWLYWED'&&TABLE_CAPTION.test(text)&&/신혼부부|예비신혼|한부모/.test(text))value+=80;
+  if(group==='NEWLYWED'&&/신혼부부|예비신혼|한부모/.test(text)&&THRESHOLD_AMOUNT.test(text)&&/소득|자산/.test(text))value+=50;
   if(group==='FIRST_TIME'&&text.includes('생애최초 특별공급'))value+=60;
-  if(group==='COMMON'&&(/특별공급 공급 세대수/.test(text)||/[<〈]표(?:7|8|9|10)[>〉]/.test(text)))value-=120;
+  if(group==='COMMON'&&(/특별공급 공급 세대수/.test(text)||(TABLE_CAPTION.test(text)&&SUPPLY_TERMS.some(k=>text.includes(k)))))value-=120;
   if(group==='COMMON'&&SUPPLY_TERMS.some(k=>text.includes(k))&&!KEYWORDS.COMMON.some(k=>text.includes(k)))value-=20;return value;
 };
 

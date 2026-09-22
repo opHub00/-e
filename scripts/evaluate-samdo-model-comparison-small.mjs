@@ -9,6 +9,7 @@ import { factContractForRole } from '../features/ruleExtraction/server/v4/retrie
 import { verifyFrozenBenchmarkPack } from '../features/ruleExtraction/server/v4_1/benchmarkPack.ts';
 import { compareModelResult,notMeasuredMetric } from '../features/ruleExtraction/server/v4_1/comparison.ts';
 import { validateSemanticBindingV41 } from '../features/ruleExtraction/server/v4_1/semanticSafety.ts';
+import { SAMDO_LITERAL_EXPECTATIONS } from '../features/ruleExtraction/server/fixtures/samdoLiteralExpectations.ts';
 
 const HASH='90936b302840fc046a4fe70f5b3845eb8121b365066f5845482adeff5b9c889b',ROOT='.ingestion/announcements/990b2823e0ddc98fe7222815b6c844131bda6e9c1deac50c6de253eb0dbe524f',SHA='bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763';
 const sourceDir=resolve(ROOT,'extraction','samdo-v4-1-offline'),dir=resolve(ROOT,'extraction','model-comparison-small');
@@ -40,7 +41,7 @@ function evaluate(artifact,usage){
   const completedTasks=artifact.results.filter(row=>row.status==='SUCCESS').length;
   const bindingRows=[],accepted=[],reviewRequired=[],rejected=[];
   for(const taskResult of artifact.results){if(taskResult.status!=='SUCCESS'||!taskResult.response)continue;const frozen=frozenById.get(taskResult.taskId),task=taskById.get(taskResult.taskId);if(!frozen||!task)throw new Error('UNKNOWN_FROZEN_TASK');const taskFactIds=new Set(frozen.payload.facts.map(fact=>fact.factId)),taskFacts=facts.filter(fact=>taskFactIds.has(fact.factId));
-    for(const binding of taskResult.response.bindings){const guard=validateSemanticBindingV41(document,task,binding,taskFacts,facts),row={taskName:taskResult.taskId,binding,boundFacts:binding.factIds.map(id=>byFact.get(id)).filter(Boolean),guard,rules:[],context:''};row.context=row.boundFacts.map(f=>f.contextText).join('\n');
+    for(const binding of taskResult.response.bindings){const guard=validateSemanticBindingV41(document,task,binding,taskFacts,facts,SAMDO_LITERAL_EXPECTATIONS),row={taskName:taskResult.taskId,binding,boundFacts:binding.factIds.map(id=>byFact.get(id)).filter(Boolean),guard,rules:[],context:''};row.context=row.boundFacts.map(f=>f.contextText).join('\n');
       if(guard.status==='REJECTED'){rejected.push({bindingId:binding.bindingId,taskName:taskResult.taskId,reasons:guard.issues.map(item=>item.code)});bindingRows.push(row);continue;}
       const built=buildCandidateRules(document,task,binding,taskFacts);row.rules=built.rules;if(built.unresolved.length||!built.rules.length){rejected.push({bindingId:binding.bindingId,taskName:taskResult.taskId,reasons:built.unresolved.length?built.unresolved:['NO_RULE_BUILT']});bindingRows.push(row);continue;}
       for(const rule of built.rules){rule.confidence=guard.confidence.level==='REVIEW_REQUIRED'?'LOW':guard.confidence.level;rule.confidenceReason=guard.confidence.reason;try{rule.evidence.forEach(item=>validateEvidence(item,document));(guard.status==='ACCEPTED'?accepted:reviewRequired).push(rule);}catch(error){rejected.push({bindingId:binding.bindingId,taskName:taskResult.taskId,reasons:[error instanceof Error?error.message:'INVALID_EVIDENCE']});}}

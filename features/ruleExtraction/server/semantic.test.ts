@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { GeminiStructuredProvider,mapUsage,providerConfig,type ProviderConfig } from './geminiProvider.ts';
-import { acceptWire,emptyCandidate,mergeCandidates,LLMRuleExtractor } from './llmExtractor.ts';
+import { acceptWire,emptyCandidate,mergeCandidates,LLMRuleExtractor,extractionRecordId } from './llmExtractor.ts';
 import { evaluateOracle,type OracleRule } from './oracleEvaluation.ts';
 import type { ParsedDocument } from './parsedDocument.ts';
 import type { Manifest } from '../../announcementIngestion/server/model.ts';
@@ -62,5 +62,10 @@ test('cross-cutting exception stage inference is rejected',()=>{const wire={...r
 test('two-pass extraction keeps raw/rejected artifacts and completes before oracle',async()=>{
  const artifacts=new Map<string,any>();let calls=0;
  const extractor=new LLMRuleExtractor({generate:async(label)=>{calls++;if(label==='pass1')return {groups:['COMMON','YOUTH','NEWLYWED','FIRST_TIME','EXCEPTIONS'].map(group=>({group,tableIds:[],blockIds:group==='YOUTH'?['b000000']:[]}))};return {candidateRules:[{...rule,evidence:[{blockId:'b000000',snippet:'130% 이하'}]},{...rule,evidence:[]}],unresolvedItems:[],conflicts:[],extractionWarnings:[]};}},async(name,value)=>{artifacts.set(name,value);});
- const result=await extractor.extract({manifest,document:doc});assert.equal(calls,2);assert.equal(result.candidateRules.length,1);assert.equal(result.sourceStatus,'REFERENCE');assert.ok(result.extractionWarnings.some(w=>w.startsWith('INCOMPLETE_SCOPE_EXTRACTION:YOUTH')));assert.equal(artifacts.get('samdo-ai-validation-v1').rejectedCandidates.length,1);assert.equal(artifacts.get('extraction-complete').oracleRead,false);assert.ok(artifacts.has('YOUTH-0-raw'));assert.equal('context' in artifacts.get('selected-contexts')[0],false);assert.equal(typeof artifacts.get('selected-contexts')[0].contextHash,'string');
+ const result=await extractor.extract({manifest,document:doc});assert.equal(calls,2);assert.equal(result.candidateRules.length,1);assert.equal(result.sourceStatus,'REFERENCE');assert.ok(result.extractionWarnings.some(w=>w.startsWith('INCOMPLETE_SCOPE_EXTRACTION:YOUTH')));assert.equal(artifacts.get(extractionRecordId(doc.sha256,'validation')).rejectedCandidates.length,1);assert.ok(artifacts.has(extractionRecordId(doc.sha256,'candidate')));assert.ok([...artifacts.keys()].every(key=>!/samdo/i.test(key)));assert.equal(artifacts.get('extraction-complete').oracleRead,false);assert.ok(artifacts.has('YOUTH-0-raw'));assert.equal('context' in artifacts.get('selected-contexts')[0],false);assert.equal(typeof artifacts.get('selected-contexts')[0].contextHash,'string');
+});
+test('extraction record ids derive from the document hash only',()=>{
+ assert.equal(extractionRecordId('a'.repeat(64),'candidate'),'assessment-ai-aaaaaaaaaaaaaaaa-candidate-v1');
+ assert.notEqual(extractionRecordId('a'.repeat(64),'candidate'),extractionRecordId('b'.repeat(64),'candidate'));
+ assert.throws(()=>extractionRecordId('samdo','candidate'),/INVALID_DOCUMENT_HASH/);
 });

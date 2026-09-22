@@ -65,3 +65,36 @@ check(() => {
 });
 
 console.log(`features/applicationAssessment/importTarget: ${checks}개 검증 통과`);
+
+// ── production: its own guard, explicit identity, no inference.
+import { assertProductionConfirmation, guardProductionImportTarget, productionConfirmation } from './importTarget.ts';
+check(() => {
+  assert.deepEqual(guardProductionImportTarget(productionUrl, PRODUCTION, STAGING, [PRODUCTION]), { origin: productionUrl, projectRef: PRODUCTION });
+  assert.deepEqual(guardProductionImportTarget(productionUrl, PRODUCTION, STAGING, []).projectRef, PRODUCTION);
+});
+check(() => {
+  assert.throws(() => guardProductionImportTarget(productionUrl, undefined, STAGING, [PRODUCTION]), /PRODUCTION_PROJECT_REF_REQUIRED/);
+  assert.throws(() => guardProductionImportTarget(productionUrl, 'short', STAGING, [PRODUCTION]), /PRODUCTION_PROJECT_REF_REQUIRED/);
+  assert.throws(() => guardProductionImportTarget(productionUrl, PRODUCTION, undefined, [PRODUCTION]), /STAGING_PROJECT_REF_REQUIRED_FOR_PRODUCTION/);
+  assert.throws(() => guardProductionImportTarget(stagingUrl, STAGING, STAGING, []), /PRODUCTION_REF_EQUALS_STAGING/);
+  assert.throws(() => guardProductionImportTarget(stagingUrl, PRODUCTION, STAGING, [PRODUCTION]), /PRODUCTION_URL_REF_MISMATCH/);
+  assert.throws(() => guardProductionImportTarget(`http://${PRODUCTION}.supabase.co`, PRODUCTION, STAGING, []), /PRODUCTION_URL_REF_MISMATCH/);
+  assert.throws(() => guardProductionImportTarget(`${productionUrl}/rest/v1`, PRODUCTION, STAGING, []), /bare Supabase origin/);
+  assert.throws(() => guardProductionImportTarget(productionUrl, PRODUCTION, STAGING, [STAGING]), /STAGING_DECLARED_AS_PRODUCTION/);
+  assert.throws(() => guardProductionImportTarget(productionUrl, PRODUCTION, STAGING, ['b'.repeat(20)]), /PRODUCTION_IDENTITY_CONFLICT/);
+});
+// the local/staging guard still refuses production.
+check(() => {
+  assert.throws(() => guardImportTarget(productionUrl, 'production', PRODUCTION, [PRODUCTION]), /Production target is forbidden/);
+});
+check(() => {
+  const id = 'd96c7afc-e10c-43cd-815f-97e401fc318f';
+  assert.doesNotThrow(() => assertProductionConfirmation('import', PRODUCTION, id, productionConfirmation('import', PRODUCTION, id)));
+  assert.throws(() => assertProductionConfirmation('import', PRODUCTION, id, undefined), /PRODUCTION_CONFIRMATION_REQUIRED/);
+  assert.throws(() => assertProductionConfirmation('import', PRODUCTION, id, productionConfirmation('activate', PRODUCTION, id)), /PRODUCTION_CONFIRMATION_REQUIRED/, 'a confirmation for one step does not cover another');
+  assert.throws(() => assertProductionConfirmation('import', PRODUCTION, id, productionConfirmation('import', STAGING, id)), /PRODUCTION_CONFIRMATION_REQUIRED/);
+  assert.throws(() => assertProductionConfirmation('import', PRODUCTION, id, productionConfirmation('import', PRODUCTION, 'bade0617-63c6-4f61-86bf-6cd5ae17a101')), /PRODUCTION_CONFIRMATION_REQUIRED/);
+  for (const command of ['reset', 'reseed', 'delete', 'purge'])
+    assert.throws(() => assertProductionConfirmation(command, PRODUCTION, id, productionConfirmation(command, PRODUCTION, id)), /DESTRUCTIVE_OPERATION_FORBIDDEN_IN_PRODUCTION/);
+});
+console.log(`features/applicationAssessment/importTarget (production): ${checks}개 검증 통과`);

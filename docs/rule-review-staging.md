@@ -40,6 +40,8 @@ SQL의 대문자 `RAISE EXCEPTION` token이 transport error code의 canonical so
 | Staging export | `npm run build:web:staging` | `staging` | `.staging/dist` | `staging` |
 | Production export | `npm run build:web` | `production` | `dist` | `production` |
 
+`npm run build:web:staging`은 `.env.staging.local`(또는 `WANPANE_STAGING_ENV_FILE`)에서 staging URL·ref·anon key·production ref·`RULE_REVIEW_STAGING_RULE_SET_ID`만 읽어 `EXPO_PUBLIC_*`로 옮긴다. URL과 ref 불일치, staging=production, anon이 아닌 key는 build 전에 실패한다. service-role·access token·write 스위치는 build 환경에서 제거된다. 별도 wrapper는 필요 없다.
+
 E2E runner는 child process에만 `EXPO_PUBLIC_WANPANE_ENV=test`와 비밀이 아닌 fixture Supabase endpoint를 전달한다. 부모 `process.env`는 변경하지 않는다. E2E 산출물과 Metro transform/file-map cache는 staging 및 production과 별도 디렉터리를 사용한다. 공식 staging/production wrapper는 매번 clean export를 수행하며, 상속된 test environment 또는 E2E fixture URL/key를 발견하면 `TEST_ENV_NOT_ALLOWED_IN_RELEASE_BUILD`로 중단한다. 환경값을 바꾸었을 때 raw `npx expo export`를 배포 명령으로 사용하지 않는다.
 
 Rule Review Playwright specs는 Supabase network request가 0건임을 직접 확인한다. 일부 다른 specs는 필요한 endpoint를 route interception으로 대체한다. 모든 브라우저 요청이 일괄 interception된다고 가정하지 않는다. shell에서 E2E 환경변수를 따로 설정할 필요는 없다. staging은 server 측 `WANPANE_ENV=staging`과 client build의 `EXPO_PUBLIC_WANPANE_ENV=staging`을 각각 명시해야 한다. 환경이 없거나 알 수 없는 값이면 local review seed와 test fault plan은 fail-closed된다.

@@ -138,17 +138,27 @@ export class DeterministicConsultationInterpreter implements ConsultationLanguag
     if (/\b미혼\b/.test(asserted)) updates.push({ field: 'marriageStatus', value: 'single' });
     else if (/(기혼|현재\s*혼인|결혼했)/.test(asserted) && !/(결혼|혼인)\s*전/.test(asserted)) updates.push({ field: 'marriageStatus', value: 'married' });
     if (/(주택청약종합저축|청약저축)/.test(asserted)) updates.push({ field: 'hasSubscriptionAccount', value: true }, { field: 'accountKindEligible', value: true });
-    if (/(특별공급|특공).{0,8}(?:당첨|선정).{0,8}(?:없|아니)|(?:당첨|선정).{0,8}이력.{0,4}(?:없|아니)/.test(asserted)) updates.push({ field: 'specialSupplyHistory', value: false });
+    // 이중부정("없지 않다")은 당첨 이력이 있다는 뜻일 수 있어 읽지 않는다.
+    if (!/없지\s*않/.test(asserted) && /(특별공급|특공).{0,8}(?:당첨|선정).{0,8}(?:없|아니)|(?:당첨|선정).{0,8}이력.{0,4}(?:없|아니)/.test(asserted)) updates.push({ field: 'specialSupplyHistory', value: false });
+    // "주택 소유한 적 없습니다"는 과거에도 현재에도 본인 명의 주택이 없다는 뜻이다.
+    // 지금 소유·보유 중이라는 말이나 이중부정이 같이 있으면 읽지 않고 질문을 남긴다.
+    const neverOwned = /(?:주택|집)\s*(?:을|를)?\s*(?:소유|보유)\s*(?:한|했던)?\s*적\s*(?:이|은)?\s*(?:한\s*번도\s*)?없/.test(asserted);
+    const ownsNow = /(?:소유|보유)\s*중|가지고\s*있|(?:현재|지금)\s*(?:주택|집)(?:을|를|이)?\s*(?:소유|보유|있)|없지\s*않/.test(asserted);
+    if (neverOwned && !ownsNow) updates.push({ field: 'previousHousingOwnership', value: false }, { field: 'currentHousingOwnership', value: 'no-home' });
     if (/재당첨.{0,8}(?:제한|기간).{0,8}(?:없|아니|해당하지)/.test(asserted)) updates.push({ field: 'reWinningRestriction', value: false });
     if (/맞벌이/.test(asserted)) updates.push({ field: 'dualIncome', value: true });
     else if (/외벌이/.test(asserted)) updates.push({ field: 'dualIncome', value: false });
-    const overseasClear = /(?:해외|국외)(?:에|에서)?.{0,4}(?:체류)?\s*(?:없|안\s*했|하지\s*않았)/.test(asserted);
+    const overseasPositive = asserted.match(/(?:해외|국외)(?:에|에서)?.{0,8}(\d+)\s*(년|개월|일).{0,8}(?:있었|체류|머물)/);
+    // "해외체류 이력 없습니다"처럼 이력·경험을 부정하는 표현도 받는다.
+    // 같은 발화에 체류 기간이나 "있었다"가 섞이면 부정으로 읽지 않고 기존처럼 특례 확인으로 보낸다.
+    const overseasNegative = /(?:해외|국외)\s*(?:에서|에)?\s*(?:체류|거주)?\s*(?:한\s*|했던\s*)?(?:이력|경험|기록|적)?\s*(?:은|이|도)?\s*(?:없|안\s*했|하지\s*않았)/.test(asserted);
+    const overseasAffirmed = /(?:해외|국외).{0,12}(?:있었|있어요|있습니다|있음)/.test(asserted) || /없지\s*않/.test(asserted);
+    const overseasClear = overseasNegative && !overseasPositive && !overseasAffirmed;
     const exceptionsClear = /특례.{0,6}(?:없|해당하지|적용하지)/.test(asserted);
     if (overseasClear) updates.push({ field: 'overseasClear', value: true });
     if (exceptionsClear) updates.push({ field: 'specialExceptionsClear', value: true });
     if (/(?:자녀|아이|애).{0,5}(?:없|없습니다)|(?:임신\s*아님|태아.{0,4}없)/.test(asserted)) updates.push({ field: 'childbirthClear', value: true });
     else if (/(?:자녀|아이|애|태아).{0,5}(?:있|있습니다|임신)/.test(asserted)) updates.push({ field: 'specialException', value: '자녀·태아·입양 자녀 상세정보 추가 확인' });
-    const overseasPositive = asserted.match(/(?:해외|국외)(?:에|에서)?.{0,8}(\d+)\s*(년|개월|일).{0,8}(?:있었|체류|머물)/);
     if (overseasPositive && !overseasClear) {
       updates.push({ field: 'specialException', value: `해외체류 ${overseasPositive[1]}${overseasPositive[2]} (정확한 체류일 확인 필요)` });
     }

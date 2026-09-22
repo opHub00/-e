@@ -249,3 +249,32 @@ test('supply type changes are announced once and use the selected deterministic 
   assert.match(result.response.message, /생애최초 특별공급 기준으로 볼게요/);
   assert.equal(result.response.score, undefined);
 });
+
+test('natural negative phrasings are recognised, mixed statements stay fail-closed', async () => {
+  const interpreter = new DeterministicConsultationInterpreter();
+  const fields = async (message: string) => (await interpreter.interpret({ message })).updates;
+  const has = (updates: Awaited<ReturnType<typeof fields>>, field: string, value?: unknown) =>
+    updates.some(u => u.field === field && (value === undefined || u.value === value));
+
+  const overseas = await fields('해외체류 이력 없습니다');
+  assert.ok(has(overseas, 'overseasClear', true));
+  assert.ok(!has(overseas, 'specialException'), '부정 표현을 특례로 오인하지 않는다');
+
+  const overseasMixed = await fields('해외체류 이력 없습니다. 작년에 해외에 4개월 있었어요.');
+  assert.ok(!has(overseasMixed, 'overseasClear'), '체류 기간이 섞이면 부정으로 읽지 않는다');
+  assert.ok(has(overseasMixed, 'specialException'), '대신 특례 확인으로 보낸다');
+
+  const housing = await fields('주택 소유한 적 없습니다');
+  assert.ok(has(housing, 'previousHousingOwnership', false));
+  assert.ok(has(housing, 'currentHousingOwnership', 'no-home'));
+  assert.ok(has(await fields('집을 소유한 적이 한 번도 없어요'), 'previousHousingOwnership', false));
+
+  const housingMixed = await fields('주택 소유한 적 없는데 지금은 집을 보유 중입니다');
+  assert.ok(!has(housingMixed, 'previousHousingOwnership'));
+  assert.ok(!has(housingMixed, 'currentHousingOwnership'));
+  assert.ok(!has(await fields('주택 소유한 적 없지 않습니다'), 'previousHousingOwnership'), '이중부정은 읽지 않는다');
+
+  assert.ok(has(await fields('특별공급 당첨된 적 없습니다'), 'specialSupplyHistory', false));
+  assert.ok(has(await fields('특별공급에 당첨된 적이 없어요'), 'specialSupplyHistory', false));
+  assert.ok(!has(await fields('특별공급 당첨된 적 없지 않습니다'), 'specialSupplyHistory'), '이중부정은 읽지 않는다');
+});

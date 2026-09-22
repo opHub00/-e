@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { buildSamdoReviewSeed } from './buildSamdoReviewSeed.ts';
-import { buildSamdoStagingReviewSeed } from './buildSamdoStagingReviewSeed.ts';
+import { SAMDO_STAGING_REVIEW_SEED } from './samdoReviewSeed.generated.ts';
+import { decodeReviewSeedAnnotation } from '../seed/annotations.ts';
+import { buildAssessmentReviewSeed } from '../seed/buildAssessmentReviewSeed.ts';
 import { CRITICAL_CATEGORIES } from '../server/types.ts';
 
 const source = JSON.parse(await readFile(new URL('../../../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url), 'utf8'));
+const annotation = decodeReviewSeedAnnotation(JSON.parse(await readFile(new URL('../../../data/assessment-rules/samdo-2026-v1.7.review-annotations.json', import.meta.url), 'utf8')));
 let checks = 0;
 const check = (fn: () => void) => { fn(); checks += 1; };
 
-const seed = buildSamdoStagingReviewSeed(source);
+const seed = buildAssessmentReviewSeed(source, annotation);
 
 /*
   The activation gate refuses while any materialized rule lacks a review row.
@@ -25,8 +28,8 @@ check(() => {
 
 // 테스트/개발용 fixture 는 계속 좁은 범위를 유지한다. 두 seed 는 서로 다른 목적이다.
 check(() => {
-  assert.equal(buildSamdoReviewSeed(source).rules.length, 7);
-  assert.ok(seed.rules.length > buildSamdoReviewSeed(source).rules.length);
+  assert.equal(buildSamdoReviewSeed(source, annotation).rules.length, 7);
+  assert.ok(seed.rules.length > buildSamdoReviewSeed(source, annotation).rules.length);
 });
 
 // 규칙 정체성과 근거는 source 에서 그대로 온다. 생성기가 새로 만들어내지 않는다.
@@ -62,7 +65,9 @@ check(() => {
 
 // 같은 입력이면 같은 출력. 카테고리 배정이 순서나 실행 시점에 흔들리지 않는다.
 check(() => {
-  assert.deepEqual(buildSamdoStagingReviewSeed(source), seed);
+  assert.deepEqual(buildAssessmentReviewSeed(source, annotation), seed);
+  // 이미 staging 에 들어간 75개 candidate 와 한 글자도 다르지 않다.
+  assert.equal(JSON.stringify(seed), JSON.stringify(SAMDO_STAGING_REVIEW_SEED));
 });
 
 // 예외 규칙은 EXCEPTION 으로 분류되고, 거주 규칙은 같은 공급유형의 해외체류 예외와 연결된다.
@@ -93,8 +98,8 @@ check(() => {
 
 // 매핑되지 않은 rule key 는 임의 분류 대신 build 를 멈춘다.
 check(() => {
-  const broken = { ...source, rules: [{ ...source.rules[0], ruleKey: 'youth.unmappedSegment' }] };
-  assert.throws(() => buildSamdoStagingReviewSeed(broken), /SAMDO_RULE_CATEGORY_UNMAPPED/);
+  const broken = { ...source, rules: [...source.rules, { ...source.rules[0], ruleKey: 'youth.unmappedSegment' }] };
+  assert.throws(() => buildAssessmentReviewSeed(broken, annotation), /REVIEW_RULE_CATEGORY_UNMAPPED/);
 });
 
 console.log(`features/assessmentRuleReview/stagingReviewSeed: ${checks}개 검증 통과`);

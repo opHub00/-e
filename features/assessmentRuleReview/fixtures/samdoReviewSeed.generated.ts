@@ -9,7 +9,8 @@ import type { ReviewSeedProvenance } from './provenance.ts';
 export const SAMDO_REVIEW_SEED_PROVENANCE: ReviewSeedProvenance = {
   "sourceFixtureHash": "17dee18c78e179d8f535057bf2aa28e7df01d91c28df92e14fc07a90acb04c1a",
   "sourceFixtureVersion": "VER1.7-draft-transcription-1",
-  "generatorVersion": "rule-review-seed-v2"
+  "annotationHash": "761c1394ada08300c6237ba61e5c38a4d973ae43e252ffaaa424abe4d4c39284",
+  "generatorVersion": "rule-review-seed-v3"
 };
 
 /** Test and dev fixture: a curated handful of rules. */
@@ -31,8 +32,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "youth.age",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": true,
       "critical": true,
+      "required": true,
       "candidateStatus": "AUTO_SAFE_CANDIDATE",
       "safetyBlockers": [],
       "originalCandidate": {
@@ -85,8 +86,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "youth.income",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": true,
       "critical": true,
+      "required": true,
       "candidateStatus": "AUTO_SAFE_CANDIDATE",
       "safetyBlockers": [],
       "originalCandidate": {
@@ -133,8 +134,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "newlywed.assets",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": true,
       "critical": true,
+      "required": true,
       "candidateStatus": "AUTO_SAFE_CANDIDATE",
       "safetyBlockers": [],
       "originalCandidate": {
@@ -176,8 +177,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "firstHome.deposit",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": true,
       "critical": true,
+      "required": true,
       "candidateStatus": "REVIEW_REQUIRED",
       "safetyBlockers": [
         "SEMANTIC_EVIDENCE_MISMATCH"
@@ -221,8 +222,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "youth.residence",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": true,
       "critical": true,
+      "required": true,
       "candidateStatus": "AUTO_SAFE_CANDIDATE",
       "safetyBlockers": [],
       "originalCandidate": {
@@ -276,8 +277,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "youth.overseas",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": false,
       "critical": true,
+      "required": false,
       "candidateStatus": "REVIEW_REQUIRED",
       "safetyBlockers": [],
       "originalCandidate": {
@@ -341,8 +342,8 @@ export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = {
     {
       "ruleId": "youth.restrictions",
       "ruleVersionId": "bade0617-63c6-4f61-86bf-6cd5ae17a101",
-      "required": false,
       "critical": false,
+      "required": false,
       "candidateStatus": "AUTO_SAFE_CANDIDATE",
       "safetyBlockers": [],
       "originalCandidate": {

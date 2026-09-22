@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "announcementId": "bade0617-63c6-4f61-86bf-6cd5ae17b101",
+  "documentSha256": "bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763",
+  "ruleSetVersion": "VER1.7-draft-transcription-1",
+  "safetyBlockers": [
+    {
+      "ruleKey": "firstHome.deposit",
+      "codes": ["SEMANTIC_EVIDENCE_MISMATCH"],
+      "reason": "검토본 전사에서 저축액 기준과 근거 문구가 일치하는지 확인되지 않았습니다."
+    }
+  ],
+  "exceptions": [],
+  "warnings": [],
+  "conflicts": [
+    {
+      "conflictId": "samdo.region.priority-date",
+      "concept": "지역우선 기준일",
+      "candidateRuleKeys": ["youth.residence"],
+      "candidates": [
+        { "candidateId": "continuous-one-year", "value": "2025-09-14 이전부터 계속 거주", "evidenceRuleKeys": ["youth.residence"] },
+        { "candidateId": "announcement-date", "value": "공고일 현재 거주", "evidenceRuleKeys": ["youth.residence"] }
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "unresolvedId": "samdo.management-number-mapping",
+      "type": "AMBIGUOUS_HOUSING_MANAGEMENT_NUMBER",
+      "description": "관리번호와 1·2지구 연결이 검토본에서 확정되지 않았습니다.",
+      "ruleKeys": []
+    }
+  ]
+}

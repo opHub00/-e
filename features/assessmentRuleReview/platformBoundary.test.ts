@@ -6,11 +6,13 @@ import { canonicalSerialize, createWebCryptoCandidateHasher, hashCanonical, sha2
 import { buildSamdoReviewSeed } from './fixtures/buildSamdoReviewSeed.ts';
 import { SAMDO_REVIEW_SEED, SAMDO_REVIEW_SEED_PROVENANCE } from './fixtures/samdoReviewSeed.generated.ts';
 import { verifyReviewSeedProvenance } from './fixtures/provenance.ts';
+import { decodeReviewSeedAnnotation } from './seed/annotations.ts';
 import { createRuleReviewWorkspace } from './server/service.ts';
 import { createBrowserRuleReviewRepository, InMemoryRuleReviewRepository, RULE_REVIEW_DEMO_SEED_KEY } from './repository/RuleReviewRepository.ts';
 
 const sourceUrl = new URL('../../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url);
 const source = JSON.parse(await readFile(sourceUrl, 'utf8')) as ImportPackage;
+const annotation = decodeReviewSeedAnnotation(JSON.parse(await readFile(new URL('../../data/assessment-rules/samdo-2026-v1.7.review-annotations.json', import.meta.url), 'utf8')));
 
 test('portable and Web Crypto SHA-256 agree across required byte boundaries and Samdo candidate', async () => {
   const web = createWebCryptoCandidateHasher();
@@ -35,10 +37,13 @@ test('review domain accepts an injected synchronous hasher without knowing its p
 });
 
 test('generated Samdo seed is reproducible and provenance detects an in-memory source change', () => {
-  assert.deepEqual(buildSamdoReviewSeed(source), SAMDO_REVIEW_SEED);
-  assert.doesNotThrow(() => verifyReviewSeedProvenance(source, SAMDO_REVIEW_SEED_PROVENANCE));
+  assert.deepEqual(buildSamdoReviewSeed(source, annotation), SAMDO_REVIEW_SEED);
+  assert.doesNotThrow(() => verifyReviewSeedProvenance(source, annotation, SAMDO_REVIEW_SEED_PROVENANCE));
   const changed = structuredClone(source); changed.announcement.title += ' 수정';
-  assert.throws(() => verifyReviewSeedProvenance(changed, SAMDO_REVIEW_SEED_PROVENANCE), /STALE_REVIEW_SEED/);
+  assert.throws(() => verifyReviewSeedProvenance(changed, annotation, SAMDO_REVIEW_SEED_PROVENANCE), /STALE_REVIEW_SEED/);
+  // 검토 annotation 이 바뀌어도 오래된 seed 로 판정한다.
+  const edited = structuredClone(annotation); edited.unresolved = [];
+  assert.throws(() => verifyReviewSeedProvenance(source, edited, SAMDO_REVIEW_SEED_PROVENANCE), /STALE_REVIEW_SEED/);
 });
 
 test('browser repository receives an explicit seed and preserves domain activation guards', () => {

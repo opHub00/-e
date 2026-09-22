@@ -1,15 +1,17 @@
-// Node-only, deterministic generator. The generated module has no filesystem dependency.
-import { readFile, writeFile } from 'node:fs/promises';
+// Node-only, deterministic generator for the checked-in test/dev review fixture.
+// The seed itself comes from the generic builder; only the fixture file and the
+// curated key list are Samdo-specific. The generated module has no filesystem dependency.
+import { writeFile } from 'node:fs/promises';
 import { buildSamdoReviewSeed } from '../features/assessmentRuleReview/fixtures/buildSamdoReviewSeed.ts';
-import { buildSamdoStagingReviewSeed } from '../features/assessmentRuleReview/fixtures/buildSamdoStagingReviewSeed.ts';
-import { REVIEW_SEED_GENERATOR_VERSION, sourceFixtureHash } from '../features/assessmentRuleReview/fixtures/provenance.ts';
+import { annotationHash, REVIEW_SEED_GENERATOR_VERSION, sourceFixtureHash } from '../features/assessmentRuleReview/fixtures/provenance.ts';
+import { loadReviewSeedInput, reviewSeedPaths } from './review-seed-input.mjs';
 
-const sourceUrl = new URL('../data/assessment-rules/samdo-2026-v1.7.json', import.meta.url);
+const { source, annotation, seed } = await loadReviewSeedInput(reviewSeedPaths(process.argv.slice(2)));
 const targetUrl = new URL('../features/assessmentRuleReview/fixtures/samdoReviewSeed.generated.ts', import.meta.url);
-const source = JSON.parse(await readFile(sourceUrl, 'utf8'));
 const provenance = {
   sourceFixtureHash: sourceFixtureHash(source),
   sourceFixtureVersion: source.ruleSet.version,
+  annotationHash: annotationHash(annotation),
   generatorVersion: REVIEW_SEED_GENERATOR_VERSION,
 };
 const header = `/**
@@ -24,10 +26,10 @@ export const SAMDO_REVIEW_SEED_PROVENANCE: ReviewSeedProvenance = `;
 const output = `${header}${JSON.stringify(provenance, null, 2)};
 
 /** Test and dev fixture: a curated handful of rules. */
-export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoReviewSeed(source), null, 2)};
+export const SAMDO_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoReviewSeed(source, annotation), null, 2)};
 
 /** Staging seed: one review candidate per materialized source rule. */
-export const SAMDO_STAGING_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(buildSamdoStagingReviewSeed(source), null, 2)};
+export const SAMDO_STAGING_REVIEW_SEED: RuleReviewWorkspaceSeed = ${JSON.stringify(seed, null, 2)};
 `;
 await writeFile(targetUrl, output, 'utf8');
-console.log('generated Samdo review seed');
+console.log(`generated review seed fixture for ${source.announcement.id} (${seed.rules.length} rules)`);

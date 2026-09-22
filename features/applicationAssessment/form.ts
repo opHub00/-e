@@ -20,7 +20,7 @@ export const FORM_FIELDS: FormField[] = [
   { key: 'birthDate', label: '생년월일', kind: 'date', group: 'basic' },
   { key: 'isHouseholdHead', label: '공고일 현재 세대주인가요?', kind:'boolean', group: 'basic', supplies:['firstHome'] },
   { key: 'incomeHouseholdSize', label: '공고 소득 산정 가구원수(태아·직계존속 인정기준 확인)', kind: 'number', group: 'basic', supplies: ['newlywed','firstHome'] },
-  { key: 'residenceStartDate', label: '제주 연속거주 시작일', kind: 'date', group: 'residence' },
+  { key: 'residenceStartDate', label: '거주지역 연속거주 시작일', kind: 'date', group: 'residence' },
   { key: 'everMarried', label: '과거를 포함해 혼인한 적이 있나요?', kind: 'boolean', group: 'family', supplies:['newlywed'] },
   { key: 'marriageDate', label: '혼인신고일(신혼부부 해당 시)', kind: 'date', group: 'family', supplies: ['newlywed'] },
   { key: 'firstMarriageDate', label: '최초 혼인신고일(혼인 이력이 있을 때)', kind:'date', group: 'family', supplies:['newlywed'] },

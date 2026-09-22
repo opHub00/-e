@@ -1,3 +1,4 @@
+import { REGION_DEFINITIONS } from '../../discovery/regions.ts';
 import { groupMissingInformation, missingLabel } from '../form.ts';
 import type { ApplicationAssessmentResult, SupplyType } from '../types.ts';
 import type {
@@ -8,6 +9,8 @@ import type {
   ConsultationResolution,
   ConsultationResponse,
 } from './types.ts';
+
+const REGION_OR_RESIDENCE = new RegExp(`(거주|${REGION_DEFINITIONS.flatMap(region => region.aliases).join('|')})`);
 
 const SUPPLY_LABEL: Record<SupplyType, string> = {
   youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급',
@@ -22,7 +25,7 @@ const PROFILE_FACTS = new Set([
 const QUESTION_BY_FACT: Record<string, string> = {
   age: '공고일 기준 나이를 계산할 수 있도록 생년월일을 알려주세요.',
   residence: '공고일 현재 거주지역을 알려주세요.',
-  residenceMonths: '제주특별자치도에서 연속 거주를 시작한 날짜를 알려주세요.',
+  residenceMonths: '공고에서 정한 거주지역에 계속 거주하기 시작한 날짜를 알려주세요.',
   overseasClear: '계속 90일 또는 연간 183일을 넘는 해외체류 이력이 있는지 알려주세요.',
   maritalStatus: '현재 혼인 여부를 프로필에서 확인해 주세요.',
   hasAccount: '청약통장 보유 여부를 프로필에서 확인해 주세요.',
@@ -93,7 +96,7 @@ export function selectMissingQuestions(keys: string[], excluded: readonly string
 function messageKeywords(message: string): string[] {
   const pairs: [RegExp, string][] = [
     [/부모/, '부모'], [/(통장|청약저축|납입)/, '청약'], [/(소득|월급)/, '소득'],
-    [/자산/, '자산'], [/(주택|집|무주택)/, '주택'], [/(거주|제주)/, '거주'],
+    [/자산/, '자산'], [/(주택|집|무주택)/, '주택'], [REGION_OR_RESIDENCE, '거주'],
     [/(혼인|결혼|신혼)/, '혼인'], [/(자녀|아이)/, '자녀'], [/(소득세|근로)/, '소득세'],
   ];
   return pairs.filter(([pattern]) => pattern.test(message)).map(([, keyword]) => keyword);

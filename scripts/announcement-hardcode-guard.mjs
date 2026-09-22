@@ -6,10 +6,10 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 export const FORBIDDEN = [
-  { name: 'announcement name', pattern: /삼도|[Ss]amdo|SAMDO/ },
-  { name: 'hard-coded region', pattern: /제주/ },
+  { name: 'announcement name', pattern: /삼도|[Ss]amdo|SAMDO|고덕엘리스트|고덕국제화|[Gg]odeok|A65BL|2026000438/ },
+  { name: 'hard-coded region', pattern: /제주|평택/ },
   // Thresholds printed in one announcement. Statutory values (19세, 6회, 600만원 …) are allowed.
-  { name: 'announcement amount', pattern: /362백만|276백만|1,034백만|2,669,354|5,338,708|9,793,892|10,547,268/ },
+  { name: 'announcement amount', pattern: /362백만|276백만|1,034백만|2,669,354|5,338,708|9,793,892|10,547,268|215,500천원|45,420천원|215_500_000|45_420_000/ },
 ];
 
 /** Paths allowed to mention a specific announcement, each with the reason. */

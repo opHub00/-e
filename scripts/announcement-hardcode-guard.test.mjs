@@ -16,6 +16,9 @@ test('the guard catches new hard-codes in generic modules and exempts only the f
   assert.ok(FORBIDDEN.some(rule => rule.pattern.test("value: '제주특별자치도'")));
   assert.ok(FORBIDDEN.some(rule => rule.pattern.test('const RUN = "samdo-v5"')));
   assert.ok(FORBIDDEN.some(rule => rule.pattern.test("'362백만원'")));
+  assert.ok(FORBIDDEN.some(rule => rule.pattern.test("title: '힐스테이트 고덕엘리스트'")), 'second announcement name');
+  assert.ok(FORBIDDEN.some(rule => rule.pattern.test("value: '평택시'")), 'second announcement region');
+  assert.ok(FORBIDDEN.some(rule => rule.pattern.test('lte(215_500_000)')), 'second announcement amount');
   assert.equal(FORBIDDEN.some(rule => rule.pattern.test("'만 19세', '6회', '600만원'")), false, 'statutory values are allowed');
   assert.equal(allowed('features/applicationAssessment/engine.ts'), null);
   assert.equal(allowed('features/assessmentRuleReview/seed/buildAssessmentReviewSeed.ts'), null);

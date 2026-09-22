@@ -20,7 +20,7 @@
 | 예외 관계 | 거주 ↔ 해외체류 (법정, 자동) + 공고별 추가 | 자동은 builder, 추가는 annotation `exceptions` | 예외 쪽 규칙이 EXCEPTION concept이 아니면 거부 |
 | 충돌 | 같은 개념의 서로 다른 읽기 (예: 지역우선 기준일) | annotation `conflicts` | 후보 2개 이상, 근거는 규칙 키로 참조 |
 | 검토 annotation | `<package>.review-annotations.json` | `data/assessment-rules/` | 스키마: `features/assessmentRuleReview/seed/annotations.ts`. 공고 id·문서 해시·버전이 package와 다르면 거부 |
-| listing binding | `announcement_listing_bindings(listing_id, announcement_id)` | DB | import API로는 쓸 수 없음. 운영자 단계 (아래 6번) |
+| listing binding | `announcement_listing_bindings(listing_id, announcement_id, bound_rule_set_id, revision)` | DB | import API로는 쓸 수 없음. admin 전용 RPC로만 변경 (아래 5번) |
 
 ## 2. 단계별 성격
 
@@ -33,7 +33,7 @@
 | 5. review seed 생성 | `buildAssessmentReviewSeed(package, annotation)` / `seed:staging:rule-review --package … --annotations …` | 결정적. 같은 입력이면 같은 seed. 모든 candidate는 PENDING으로 시작 |
 | 6. 규칙 검토 | 관리자 검토 콘솔 | **검토자 확인 필요** (critical 규칙·근거·예외·충돌·미해결) |
 | 7. 활성화 게이트 | `can_activate_assessment_rule_version` → `review`/`approve --fingerprint`/`activate` | 결정적 게이트 + **승인자 확인 필요** |
-| 8. listing binding | 운영자가 `announcement_listing_bindings`에 행 추가 | **운영자 확인 필요**. 명시 binding이 없으면 상담·판정은 "준비 중"으로 fail-closed |
+| 8. listing binding | admin이 `/admin/listing-bindings`(`bind_listing_to_assessment_rule_set`)로 연결 | **관리자 확인 필요**. 서버가 권한·공고 일치·활성 버전·revision을 검증하고 audit을 남김. binding이 없으면 fail-closed |
 | 9. 판정·상담 | `read_assessment_rule_set` → `assessApplication()` | 결정적. UI는 재계산하지 않음 |
 
 ## 3. 새 공고에서 해도 되는 것 / 안 되는 것
@@ -64,19 +64,20 @@
 | 레지스트리 승인 | `assessment-rules review <ruleSetId> --out …` → `approve <ruleSetId> --fingerprint … --reviewer …` | 저장된 스냅샷 지문으로만 승인 |
 | 활성화 | admin 계정으로 `activate_reviewed_assessment_rule_set(p_rule_set_id, p_expected_revision, p_expected_active_id)` | reviewer는 FORBIDDEN. 활성 버전은 공고 단위로 하나 |
 
-### 수동 단계: listing binding (자동화 대상)
+### listing binding: admin 전용 운영 기능
 
-import API는 binding을 바꿀 수 없다. 현재는 운영자가 staging 연결을 확인한 뒤 아래 한 줄을 실행한다.
-listing id는 탐색 데이터 정규화 규칙(`normalizeListingRecord`)이 만드는 값과 같아야 한다
-(청약홈 APT: `apt-<관리번호>-<공고번호>`).
+수동 SQL 대신 관리자 화면 `/admin/listing-bindings` 또는 아래 RPC를 쓴다. 모든 판단은 서버가 한다.
 
-```sql
-insert into public.announcement_listing_bindings(listing_id, announcement_id)
-values ('apt-2026000438-2026000438', 'cc799320-c2ef-4462-a6d8-25a856b415b8')
-on conflict do nothing;
-```
+| RPC | 권한 | 서버 검증 |
+|---|---|---|
+| `load_assessment_listing_bindings()` | reviewer·admin (읽기) | 공고별 활성 버전, 공고 출처에서 도출한 정규 listing id, 현재 binding, 최근 audit 50건 |
+| `bind_listing_to_assessment_rule_set(p_listing_id, p_rule_set_id, p_expected_revision, p_reason)` | admin | 사유 필수 · rule set 존재·활성·승인·공개 · listing이 그 공고의 정규 listing인지(아니면 `ANNOUNCEMENT_MISMATCH`/`UNKNOWN_LISTING`) · revision 일치(`STALE_BINDING_REVISION`) · 같은 값이면 `NO_CHANGE` |
+| `unbind_listing_from_assessment_rule_set(p_listing_id, p_expected_revision, p_reason)` | admin | 사유 필수 · binding 존재 · revision 일치 |
 
-향후 자동화는 audit log를 남기는 admin 전용 RPC로 옮기고, 이 SQL은 그 RPC의 동작 기준으로 쓴다.
+- 정규 listing id: 청약홈 APT `getAPTLttotPblancDetail:<관리번호>:<공고번호>` → `apt-<관리번호>-<공고번호>`, 무순위 → `remndr-…`, 그 외에는 listing 모양의 external id 그대로(`assessment_announcement_listing_ids`). 앱의 `normalizeListingRecord`와 같은 규칙이다.
+- 새 binding은 `p_expected_revision = 0`, 기존 binding은 화면에서 읽은 revision을 넘긴다. 해제 뒤 옛 revision으로는 다시 연결할 수 없다.
+- 모든 변경은 `announcement_listing_binding_audit_log`(append-only)에 행위자·역할·listing·이전/새 공고·이전/새 rule set·revision·사유·시각으로 남는다.
+- 읽기 경로 `read_assessment_rule_set`은 바뀌지 않았다. binding이 없으면 상담·판정은 "준비 중"으로 fail-closed.
 
 ### 이 공고로 추가된 범용 어휘
 

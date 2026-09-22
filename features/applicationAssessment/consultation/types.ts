@@ -19,6 +19,8 @@ export type ConsultationIntent =
   | 'CHECK_EXCEPTION'
   | 'CHECK_DOCUMENTS'
   | 'UPDATE_USER_INFO'
+  /** 상담에 사용 중인 내 정보를 보여 달라는 요청. 판정을 다시 하지 않는다. */
+  | 'SHOW_PROFILE'
   | 'UNKNOWN';
 
 export type ConsultationResolution =
@@ -51,6 +53,8 @@ export type ConsultationSession = {
   missingFields: string[];
   /** Missing answers the user explicitly said they cannot confirm in this session. */
   deferredFields: string[];
+  /** Fields the user stated in this conversation. Kept in the session only; never written to the saved profile. */
+  conversationFactKeys?: ConsultationFieldUpdate['field'][];
   conversationTurns: ConsultationTurn[];
 };
 
@@ -67,6 +71,7 @@ export type ConsultationFieldUpdate =
   | { field: 'totalAssets'; value: number }
   | { field: 'parentAssets'; value: number }
   | { field: 'incomeTaxPaymentYears'; value: number }
+  | { field: 'workOrBusinessIncomeEligible'; value: boolean }
   | { field: 'marriageStatus'; value: 'single' | 'married' }
   | { field: 'currentHousingOwnership'; value: 'no-home' | 'owns-home' }
   | { field: 'previousHousingOwnership'; value: boolean }

@@ -26,6 +26,7 @@ export function createConsultationSession(input: {
     lastAssessmentResult: null,
     missingFields: [],
     deferredFields: [],
+    conversationFactKeys: [],
     conversationTurns: [],
   };
 }
@@ -52,6 +53,7 @@ export function applyConsultationUpdates(
 ): ConsultationSession {
   const next = structuredClone(session);
   for (const update of updates) {
+    next.conversationFactKeys = [...new Set([...(next.conversationFactKeys ?? []), update.field])];
     switch (update.field) {
       case 'declaredAgeYears': next.collectedAnswers.declaredAgeYears = update.value; break;
       case 'birthDate': next.collectedAnswers.birthDate = update.value; break;
@@ -69,6 +71,7 @@ export function applyConsultationUpdates(
         break;
       }
       case 'incomeTaxPaymentYears': next.userProfileSnapshot.income.incomeTaxPaymentYears = knownField(update.value); break;
+      case 'workOrBusinessIncomeEligible': next.userProfileSnapshot.income.workOrBusinessIncomeEligible = knownField(update.value); break;
       case 'marriageStatus': next.userProfileSnapshot.family.marriageStatus = knownField(update.value); break;
       case 'currentHousingOwnership': next.userProfileSnapshot.housing.currentOwnership = knownField(update.value); break;
       case 'previousHousingOwnership': next.userProfileSnapshot.housing.previousOwnership = knownField(update.value); break;

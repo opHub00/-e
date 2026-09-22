@@ -1,5 +1,6 @@
 import { assessApplication } from '../engine.ts';
 import { buildConsultationResponse, selectMissingQuestions, unsupportedConsultationResponse } from './answerBuilder.ts';
+import { buildProfileSummaryResponse } from './profileSummary.ts';
 import { decodeConsultationInterpretation, DeterministicConsultationInterpreter, isUnknownConsultationAnswer } from './interpreter.ts';
 import { appendTurn, applyConsultationUpdates, assessmentInputFromSession } from './session.ts';
 import type {
@@ -40,6 +41,8 @@ export class ApplicationAssessmentConsultationEngine {
       return this.complete(withUser, response);
     }
 
+    // 내 정보 보기는 판정을 다시 하지 않고 세션에 있는 값만 보여준다.
+    if (intent === 'SHOW_PROFILE') return this.complete(withUser, buildProfileSummaryResponse(withUser));
     if (!this.rules) return this.complete(withUser, unsupportedConsultationResponse(intent, 'NO_RULES'));
     const updated = applyConsultationUpdates(withUser, interpretation.updates, this.rules);
     if (isUnknownConsultationAnswer(message) && interpretation.updates.length === 0) {

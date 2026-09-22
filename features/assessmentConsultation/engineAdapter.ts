@@ -131,7 +131,8 @@ export function mapConsultationResultToUiContract(input: {
     summary: input.response.summary, reason: input.response.reason, nextStep: input.response.nextStep,
     activeSupplyType: input.response.supplyType ?? undefined,
     contextTransition: input.response.contextTransition,
-    assessment: input.result ? mapAssessmentToUi(input.result) : undefined,
+    // 내 정보 보기 답변에는 판정 카드를 다시 붙이지 않는다.
+    assessment: input.result && input.response.intent !== 'SHOW_PROFILE' ? mapAssessmentToUi(input.result) : undefined,
     suggestedQuestions: input.response.suggestedQuestions.slice(0, 3).map(toQuestion),
     actions: mapActions(input.response.actions, input.result),
     evidenceRefs: toEvidence(input.response.evidenceRefs),

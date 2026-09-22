@@ -1,3 +1,4 @@
+import { guardedSupabaseUrl } from '../auth/supabaseTarget';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UserProfile } from '../../domain/types';
 import { rankNewsForBriefing } from './quality';
@@ -6,7 +7,7 @@ import type { NewsDataset } from './data/NewsProvider';
 
 export type { RankedNews } from './quality';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = guardedSupabaseUrl();
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const REQUEST_TIMEOUT_MS = 15_000;
 

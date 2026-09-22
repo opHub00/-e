@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { RuleReviewConsole } from '../../features/assessmentRuleReview/ui/RuleReviewConsole';
 import type { ReviewFaultPlan, ReviewGateway, ReviewLoadOutcome } from '../../features/assessmentRuleReview/repository/ReviewGateway';
-import { createConfiguredReviewGateway } from '../../features/assessmentRuleReview/repository/createReviewGateway';
+import { createConfiguredReviewGateway, type ReviewPersistence } from '../../features/assessmentRuleReview/repository/createReviewGateway';
 import { isRuleReviewTestEnvironment } from '../../features/assessmentRuleReview/repository/stagingTarget';
 import { useReviewSession } from '../../features/assessmentRuleReview/ui/useReviewSession';
 import { readReviewDraft } from '../../features/assessmentRuleReview/ui/reviewDraftStore';
@@ -13,8 +13,9 @@ import { colors, radius, size, spacing, type } from '../../design/tokens';
 /**
  * Admin-only rule review console.
  *
- * In dev/test an explicit seed creates the local gateway. Staging uses the same UI
- * contract through the Supabase repository after the staging identity gate succeeds.
+ * In dev/test an explicit seed creates the local gateway. Staging and production use the same UI
+ * contract through the Supabase repository after the project identity gate succeeds. The rule set
+ * comes from `?ruleSetId=` (a staging build may also carry a default).
  */
 const DEV_FAULT_PLAN = '__wanpaneReviewFaultPlan' as const;
 
@@ -29,18 +30,20 @@ function failedGateway(code: string): ReviewGateway {
     async commit() { return { status: 'FAILED', code }; },
   };
 }
-function resolveGateway(): { gateway: ReviewGateway; persistence: 'local' | 'staging' } {
+function resolveGateway(ruleSetId: string | null): { gateway: ReviewGateway; persistence: ReviewPersistence } {
   const plan = isRuleReviewTestEnvironment(process.env.EXPO_PUBLIC_WANPANE_ENV)
     ? ((globalThis as Record<string, unknown>)[DEV_FAULT_PLAN] ?? {}) as ReviewFaultPlan
     : {};
-  const resolution = createConfiguredReviewGateway(plan);
+  const resolution = createConfiguredReviewGateway(plan, ruleSetId);
   return resolution.status === 'READY'
     ? resolution
-    : { gateway: failedGateway(resolution.code), persistence: 'staging' };
+    : { gateway: failedGateway(resolution.code), persistence: process.env.EXPO_PUBLIC_WANPANE_ENV === 'production' ? 'production' : 'staging' };
 }
 function useGateway() {
+  const { ruleSetId } = useLocalSearchParams<{ ruleSetId?: string }>();
+  const requested = typeof ruleSetId === 'string' ? ruleSetId : null;
   // Per-route instance: an account change cannot reuse another actor's repository cache.
-  return useMemo(resolveGateway, []);
+  return useMemo(() => resolveGateway(requested), [requested]);
 }
 
 export default function AdminRuleReviewRoute() {

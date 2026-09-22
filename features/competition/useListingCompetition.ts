@@ -1,3 +1,4 @@
+import { guardedSupabaseUrl } from '../auth/supabaseTarget.ts';
 import { useEffect, useMemo, useState } from 'react';
 import type { DiscoveryListing } from '../discovery/types.ts';
 import {
@@ -10,7 +11,7 @@ import {
   type ListingCompetitionStatus,
 } from './domain.ts';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = guardedSupabaseUrl();
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const CLIENT_CACHE_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;

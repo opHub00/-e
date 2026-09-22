@@ -1,3 +1,4 @@
+import { guardedSupabaseUrl } from '../../features/auth/supabaseTarget';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -52,7 +53,7 @@ import {
   type BenchmarkExplanationContext,
 } from '../../features/benchmark/ai';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = guardedSupabaseUrl();
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 type Turn = AiTurn;

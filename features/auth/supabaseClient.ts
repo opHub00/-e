@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { isServerRenderEnvironment, supabaseSessionStorage } from './authStorage';
+import { publicSupabaseTarget } from './supabaseTarget';
 
 let client: SupabaseClient | null | undefined;
 
@@ -16,7 +17,8 @@ export function getSupabaseClient(): SupabaseClient | null {
 
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
   const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (!url || !anonKey) {
+  // A bundle whose URL is not its declared project gets no client: it fails closed.
+  if (!url || !anonKey || !publicSupabaseTarget().ok) {
     client = null;
     return client;
   }

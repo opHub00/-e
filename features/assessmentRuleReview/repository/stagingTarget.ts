@@ -1,3 +1,5 @@
+import { checkSupabaseTarget } from '../../auth/supabaseTarget.ts';
+
 export type RuleReviewTargetInput = {
   environment?: string | null;
   supabaseUrl?: string | null;
@@ -5,7 +7,7 @@ export type RuleReviewTargetInput = {
   productionProjectRef?: string | null;
 };
 
-export type RuleReviewTarget = { projectRef: string; url: string };
+export type RuleReviewTarget = { projectRef: string; url: string; environment: 'staging' | 'production' };
 
 /** Local fixture data is never allowed to bypass a staging or production target. */
 export function allowsLocalReviewSeed(environment?: string | null): boolean {
@@ -34,11 +36,25 @@ export function assertRuleReviewStagingTarget(input: RuleReviewTargetInput): Rul
   if (environment !== 'staging') throw new Error('STAGING_ENV_REQUIRED');
   if (!expected || !actual || actual !== expected) throw new Error('STAGING_PROJECT_REF_MISMATCH');
   if (production && actual === production) throw new Error('PRODUCTION_PROJECT_FORBIDDEN');
-  return { projectRef: actual, url };
+  return { projectRef: actual, url, environment: 'staging' };
+}
+
+/**
+ * The remote review target: staging with the checks above, or production when the bundle was built for
+ * production and its URL is the declared production project. Production uses the same runtime guard as
+ * the Supabase client. Local seeds and fault plans never apply to either.
+ */
+export function assertRuleReviewTarget(input: RuleReviewTargetInput): RuleReviewTarget {
+  const environment = input.environment?.trim().toLowerCase();
+  if (environment === 'staging') return assertRuleReviewStagingTarget(input);
+  if (environment !== 'production') throw new Error('REVIEW_ENV_REQUIRED');
+  const check = checkSupabaseTarget(input);
+  if (!check.ok) throw new Error(check.code);
+  return { projectRef: check.projectRef!, url: input.supabaseUrl!.trim(), environment: 'production' };
 }
 
 export function readPublicRuleReviewTarget(): RuleReviewTarget {
-  return assertRuleReviewStagingTarget({
+  return assertRuleReviewTarget({
     environment: process.env.EXPO_PUBLIC_WANPANE_ENV,
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     stagingProjectRef: process.env.EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF,

@@ -14,16 +14,16 @@ import { AUDIT_ACTION_LABEL, buildBindingRows, type BindingAction, type BindingR
 
 type Load = { phase: 'LOADING' } | { phase: 'READY'; state: ListingBindingState } | { phase: 'FAILED'; code: string };
 
-/** Composition root: staging identity gate first, then the signed-in Supabase session. */
+/** Composition root: staging or production identity gate first, then the signed-in Supabase session. */
 function useRepository(): SupabaseListingBindingRepository | { code: string } {
   return useMemo(() => {
     try {
       readPublicRuleReviewTarget();
       const client = getSupabaseClient();
-      if (!client) return { code: 'STAGING_CONNECTION_REQUIRED' };
+      if (!client) return { code: 'REVIEW_CONNECTION_REQUIRED' };
       return new SupabaseListingBindingRepository(client as unknown as ListingBindingRpcClient);
     } catch (error) {
-      return { code: error instanceof Error ? error.message : 'STAGING_CONNECTION_REQUIRED' };
+      return { code: error instanceof Error ? error.message : 'REVIEW_CONNECTION_REQUIRED' };
     }
   }, []);
 }

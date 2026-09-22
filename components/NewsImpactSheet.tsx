@@ -1,3 +1,4 @@
+import { guardedSupabaseUrl } from '../features/auth/supabaseTarget';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -20,7 +21,7 @@ import type { NewsImpactBriefing, NewsImpactGrounding } from '../features/news/a
 import type { NewsArticle, NewsRelevance } from '../features/news/types';
 import type { UserProfile } from '../domain/types';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = guardedSupabaseUrl();
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const REQUEST_TIMEOUT_MS = 20_000;
 

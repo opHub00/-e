@@ -1,3 +1,4 @@
+import { guardedSupabaseUrl } from '../../features/auth/supabaseTarget';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
@@ -23,7 +24,7 @@ import {
 import type { ProfileQuestionBundleId } from '../../features/profile/domain';
 import { useUserStore } from '../../store/useUserStore';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = guardedSupabaseUrl();
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 /**

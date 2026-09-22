@@ -22,7 +22,7 @@ type ConsoleProps = {
   repository: RuleReviewRepositoryLike;
   initialWorkspace: RuleReviewWorkspace;
   gateway: ReviewGateway;
-  persistence: 'local' | 'staging';
+  persistence: 'local' | 'staging' | 'production';
   actorRole: 'local' | 'reviewer' | 'admin';
   draftScope: string;
   /** Re-runs the session load; used when a save reports the session ended. */
@@ -87,7 +87,9 @@ export function RuleReviewConsole({ onBack, repository, initialWorkspace, gatewa
         <View style={styles.banner}>
           <MaterialIcons name="science" size={16} color={colors.warning} />
           <Text style={styles.bannerText}>
-            {persistence === 'staging'
+            {persistence === 'production'
+              ? '운영(Production) DB에 연결된 검수 콘솔이에요. 저장하면 운영 데이터에 바로 기록되고, 서버가 확인한 snapshot으로만 반영됩니다.'
+              : persistence === 'staging'
               ? 'Supabase Staging에 연결된 검수 콘솔이에요. 저장 결과는 서버가 확인한 snapshot으로만 반영됩니다.'
               : '개발·테스트용 로컬 콘솔이에요. 검수 결정은 원격 DB에 저장되지 않아요.'}
           </Text>

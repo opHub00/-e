@@ -33,14 +33,14 @@ const projectRefOf = url => {
 };
 
 /** A publishable/anon key only. A secret or service-role key is refused without echoing it. */
-function assertPublicKey(key) {
-  if (key.startsWith('sb_secret_')) throw new Error('STAGING_KEY_IS_NOT_PUBLIC');
+function assertPublicKey(key, label = 'STAGING') {
+  if (key.startsWith('sb_secret_')) throw new Error(`${label}_KEY_IS_NOT_PUBLIC`);
   const [, payload] = key.split('.');
   if (payload) {
     let role = null;
     try { role = JSON.parse(Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')).role; } catch {}
-    if (role !== 'anon') throw new Error('STAGING_KEY_IS_NOT_PUBLIC');
-  } else if (!key.startsWith('sb_publishable_')) throw new Error('STAGING_KEY_IS_NOT_PUBLIC');
+    if (role !== 'anon') throw new Error(`${label}_KEY_IS_NOT_PUBLIC`);
+  } else if (!key.startsWith('sb_publishable_')) throw new Error(`${label}_KEY_IS_NOT_PUBLIC`);
 }
 
 /** KEY=value lines; only the allow-listed staging identity keys are kept. */
@@ -84,13 +84,55 @@ export function createStagingBuildEnvironment(source = process.env, identity = r
   };
 }
 
-/** The production web build never targets or names the staging project. */
-export function createProductionBuildEnvironment(source = process.env, identity = readStagingIdentity(source)) {
-  const env = createReleaseBuildEnvironment('production', source);
+const PRODUCTION_PUBLIC_KEYS = [
+  'EXPO_PUBLIC_SUPABASE_URL', 'EXPO_PUBLIC_SUPABASE_ANON_KEY', 'EXPO_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY',
+  'EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF', 'SUPABASE_PRODUCTION_PROJECT_REF',
+];
+
+/**
+ * Production public values from an explicitly named file (WANPANE_PRODUCTION_ENV_FILE). There is no
+ * default: Vercel supplies them as environment variables, and a local preflight names its file.
+ * Only the allow-listed public keys are read.
+ */
+export function readProductionIdentity(source = process.env) {
+  const file = source.WANPANE_PRODUCTION_ENV_FILE?.trim();
+  if (!file) return {};
+  if (!existsSync(file)) throw new Error('PRODUCTION_ENV_FILE_NOT_FOUND');
+  const identity = {};
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/);
+    if (match && PRODUCTION_PUBLIC_KEYS.includes(match[1])) identity[match[1]] = match[2].trim().replace(/^['"]|['"]$/g, '');
+  }
+  return identity;
+}
+
+/**
+ * The production web build targets only its declared production project and never names staging.
+ * With a Supabase URL the production ref must be declared and match it; the ref is inlined so the
+ * runtime guard can check it again. `requireTarget` (release/preflight) refuses an unconfigured bundle.
+ */
+export function createProductionBuildEnvironment(source = process.env, identity = readStagingIdentity(source),
+  { requireTarget = false, production: productionIdentity = readProductionIdentity(source) } = {}) {
+  const values = { ...productionIdentity, ...Object.fromEntries(PRODUCTION_PUBLIC_KEYS.filter(key => source[key]?.trim()).map(key => [key, source[key].trim()])) };
+  const env = createReleaseBuildEnvironment('production', { ...source, ...values });
   delete env.EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF;
   delete env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID;
   const staging = identity.SUPABASE_STAGING_PROJECT_REF?.toLowerCase();
-  if (staging && env.EXPO_PUBLIC_SUPABASE_URL && projectRefOf(env.EXPO_PUBLIC_SUPABASE_URL) === staging) throw new Error('STAGING_TARGET_IN_PRODUCTION_BUILD');
+  const production = (values.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF || values.SUPABASE_PRODUCTION_PROJECT_REF
+    || identity.SUPABASE_PRODUCTION_PROJECT_REF)?.toLowerCase();
+  const url = env.EXPO_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    if (requireTarget) throw new Error('PRODUCTION_TARGET_REQUIRED');
+    delete env.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF;
+    return env;
+  }
+  if (staging && projectRefOf(url) === staging) throw new Error('STAGING_TARGET_IN_PRODUCTION_BUILD');
+  if (!production || !PROJECT_REF.test(production)) throw new Error('PRODUCTION_PROJECT_REF_REQUIRED');
+  if (staging && staging === production) throw new Error('STAGING_REF_EQUALS_PRODUCTION');
+  if (projectRefOf(url) !== production) throw new Error('PRODUCTION_URL_REF_MISMATCH');
+  if (!env.EXPO_PUBLIC_SUPABASE_ANON_KEY) throw new Error('PRODUCTION_PUBLIC_KEY_REQUIRED');
+  assertPublicKey(env.EXPO_PUBLIC_SUPABASE_ANON_KEY, 'PRODUCTION');
+  env.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF = production;
   return env;
 }
 
@@ -117,6 +159,8 @@ export function createReleaseBuildEnvironment(target, source = process.env) {
     ...baseEnvironment(source),
     EXPO_PUBLIC_WANPANE_ENV: target,
     WANPANE_METRO_CACHE_NAMESPACE: target,
+    // Release inputs are explicit. Expo's automatic .env loading could otherwise fill in another project's values.
+    EXPO_NO_DOTENV: '1',
   };
 }
 
@@ -147,7 +191,7 @@ async function webBundleText(directory) {
 }
 
 /** Verifies the compile-time environment and secret boundary of a completed web export. */
-export async function assertWebBuildProfile({ outputDir, profile, stagingProjectRef, productionProjectRef }) {
+export async function assertWebBuildProfile({ outputDir, profile, stagingProjectRef, productionProjectRef, requireTarget = false }) {
   if (!['test', 'staging', 'production'].includes(profile)) throw new Error('INVALID_WEB_BUILD_PROFILE');
   const text = await webBundleText(outputDir);
   const escaped = profile.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -175,5 +219,6 @@ export async function assertWebBuildProfile({ outputDir, profile, stagingProject
     if (stagingHostCount === 0) throw new Error('STAGING_TARGET_NOT_INLINED');
   }
   if (profile === 'production' && stagingRefCount !== 0) throw new Error('STAGING_TARGET_IN_PRODUCTION_BUILD');
+  if (profile === 'production' && requireTarget && productionHostCount === 0) throw new Error('PRODUCTION_TARGET_NOT_INLINED');
   return { profile, fixtureHostCount, fixtureKeyCount, serviceRoleMarkerCount, productionHostCount, stagingHostCount, stagingRefCount };
 }

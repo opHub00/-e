@@ -12,6 +12,7 @@ import {
   createReleaseBuildEnvironment,
   createStagingBuildEnvironment,
   parseStagingIdentity,
+  readProductionIdentity,
 } from './web-build.mjs';
 
 test('E2E environment is explicit and does not mutate its parent environment', () => {
@@ -153,4 +154,37 @@ test('bundle assertions reject the other project as a target', async () => {
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('production build declares and inlines its own project, or refuses', () => {
+  const url = `https://${PRODUCTION}.supabase.co`;
+  const env = createProductionBuildEnvironment({ EXPO_PUBLIC_SUPABASE_URL: url, EXPO_PUBLIC_SUPABASE_ANON_KEY: jwt('anon'), SUPABASE_PRODUCTION_PROJECT_REF: PRODUCTION }, identity(), { production: {} });
+  assert.equal(env.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF, PRODUCTION);
+  assert.equal(env.EXPO_NO_DOTENV, '1', 'Expo .env loading is off for release builds');
+  assert.equal(env.SUPABASE_PRODUCTION_PROJECT_REF, undefined, 'unprefixed input is not forwarded');
+  assert.throws(() => createProductionBuildEnvironment({ EXPO_PUBLIC_SUPABASE_URL: url, EXPO_PUBLIC_SUPABASE_ANON_KEY: jwt('anon') }, {}, { production: {} }), /PRODUCTION_PROJECT_REF_REQUIRED/);
+  assert.throws(() => createProductionBuildEnvironment({ EXPO_PUBLIC_SUPABASE_URL: `https://${'c'.repeat(20)}.supabase.co`, EXPO_PUBLIC_SUPABASE_ANON_KEY: jwt('anon') }, identity(), { production: {} }), /PRODUCTION_URL_REF_MISMATCH/);
+  assert.throws(() => createProductionBuildEnvironment({ EXPO_PUBLIC_SUPABASE_URL: url }, identity(), { production: {} }), /PRODUCTION_PUBLIC_KEY_REQUIRED/);
+  assert.throws(() => createProductionBuildEnvironment({ EXPO_PUBLIC_SUPABASE_URL: url, EXPO_PUBLIC_SUPABASE_ANON_KEY: jwt('service_role') }, identity(), { production: {} }), /PRODUCTION_KEY_IS_NOT_PUBLIC/);
+  assert.throws(() => createProductionBuildEnvironment({}, identity(), { requireTarget: true, production: {} }), /PRODUCTION_TARGET_REQUIRED/);
+  assert.equal(createProductionBuildEnvironment({}, identity(), { production: {} }).EXPO_PUBLIC_SUPABASE_URL, undefined, 'plain build:web may stay unconfigured');
+});
+
+test('production identity file is explicit and allow-listed', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'wanpane-prod-env-'));
+  try {
+    const file = join(root, '.env');
+    await writeFile(file, `EXPO_PUBLIC_SUPABASE_URL=https://${PRODUCTION}.supabase.co\nGEMINI_API_KEY=secret\nSUPABASE_SERVICE_ROLE_KEY=secret\nEXPO_PUBLIC_SUPABASE_ANON_KEY=${jwt('anon')}\n`);
+    assert.deepEqual(Object.keys(readProductionIdentity({ WANPANE_PRODUCTION_ENV_FILE: file })).sort(), ['EXPO_PUBLIC_SUPABASE_ANON_KEY', 'EXPO_PUBLIC_SUPABASE_URL']);
+    assert.deepEqual(readProductionIdentity({}), {}, 'no default file');
+    assert.throws(() => readProductionIdentity({ WANPANE_PRODUCTION_ENV_FILE: join(root, 'missing') }), /PRODUCTION_ENV_FILE_NOT_FOUND/);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('release bundle must inline its production target', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'wanpane-web-release-'));
+  try {
+    await writeFile(join(root, 'entry.js'), 'allowsLocalReviewSeed)("production") isRuleReviewTestEnvironment)("production")', 'utf8');
+    await assert.rejects(assertWebBuildProfile({ outputDir: root, profile: 'production', productionProjectRef: PRODUCTION, requireTarget: true }), /PRODUCTION_TARGET_NOT_INLINED/);
+  } finally { await rm(root, { recursive: true, force: true }); }
 });

@@ -57,4 +57,11 @@ check(() => {
   assert.equal(projectRefFromSupabaseHost('example.com'), null);
 });
 
+// URL 형태로 선언된 production 도 ref 형태와 똑같이 막아야 한다.
+check(() => {
+  assert.throws(() => guardImportTarget(productionUrl, 'staging', PRODUCTION, [productionUrl]), /Production target is forbidden/);
+  assert.throws(() => guardImportTarget(stagingUrl, 'staging', STAGING, [stagingUrl]), /Production target is forbidden/);
+  assert.equal(guardImportTarget(stagingUrl, 'staging', STAGING, [productionUrl]), stagingUrl);
+});
+
 console.log(`features/applicationAssessment/importTarget: ${checks}개 검증 통과`);

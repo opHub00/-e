@@ -4,6 +4,18 @@ export function projectRefFromSupabaseHost(hostname: string): string | null {
   return hostname.match(/^([a-z0-9]+)\.supabase\.co$/)?.[1] ?? null;
 }
 
+/** A declared production identity as a comparable key: the project ref, or the host for non-Supabase URLs. */
+function productionIdentityKey(value: string): string | null {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    return projectRefFromSupabaseHost(url.hostname) ?? url.hostname;
+  } catch {
+    return trimmed;
+  }
+}
+
 /**
  * Production identity is declared, never inferred from the current target.
  *
@@ -22,9 +34,11 @@ export function guardImportTarget(
   const target = new URL(url);
   if (target.username || target.password || target.search || target.hash || target.pathname !== '/') throw new Error('Use a bare Supabase origin');
   const loopback = ['localhost', '127.0.0.1', '[::1]'];
-  const production = productionRefs.map(ref => ref.trim().toLowerCase()).filter(Boolean);
-  const targetRef = projectRefFromSupabaseHost(target.hostname);
-  if (!loopback.includes(target.hostname) && targetRef && production.includes(targetRef)) throw new Error('Production target is forbidden');
+  // Callers may declare production as a bare ref or as a URL. Both must protect;
+  // comparing a URL against a ref would silently let the production target through.
+  const production = productionRefs.map(productionIdentityKey).filter((key): key is string => key !== null);
+  const targetKey = projectRefFromSupabaseHost(target.hostname) ?? target.hostname;
+  if (!loopback.includes(target.hostname) && production.includes(targetKey)) throw new Error('Production target is forbidden');
 
   if (environment === 'local') {
     if (target.protocol !== 'http:' || !loopback.includes(target.hostname)) throw new Error('Local requires a loopback HTTP endpoint');

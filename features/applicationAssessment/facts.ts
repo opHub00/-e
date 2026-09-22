@@ -21,7 +21,7 @@ const inverse = (value: boolean | undefined) => value === undefined ? undefined 
 /** Facts where -1 means "not applicable to this applicant" (0 points), distinct from unknown. */
 const NOT_APPLICABLE_SENTINEL_FACTS = new Set(['calculatedNoHomeMonths', 'newlywedMarriageScoreMonths', 'singleParentChildScoreMonths']);
 
-export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
+function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
   const p = input.profile;
   const d = input.details;
   const months = (date: string | undefined) => completedMonths(date, asOf);
@@ -111,4 +111,52 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
       (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','totalAssets','parentAssets','recognizedDepositAmount','realEstateAssets','vehicleValue'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
   }
   return facts;
+}
+
+type Details = AssessmentInput['details'];
+
+/** Children from the saved profile when the answers carry none: count 0, or one birth year per child. */
+function profileChildren(profile: AssessmentInput['profile']): Details['children'] {
+  const count = known(profile.family.childrenCount);
+  if (count === 0) return [];
+  const years = known(profile.family.childBirthYears);
+  if (!Number.isInteger(count) || !Array.isArray(years) || years.length !== count || !years.every(y => Number.isInteger(y) && y >= 1900 && y <= 2100)) return undefined;
+  return years.map(year => ({ birthDate: `${year}-01-01`, birthDateLatest: `${year}-12-31`, unborn: false }));
+}
+
+const hasRange = (d: Details) => !!d.marriageDateLatest || !!d.children?.some(child => child.birthDateLatest);
+
+/**
+ * Facts at the announcement date. A marriage date or a child's birth date may be known only to a
+ * month, a year or a duration ("결혼한 지 3년"). Every fact is then computed at the earliest and the
+ * latest possible dates and kept only where both agree — the facts are monotone in these dates, so
+ * the two ends decide every case in between. A disagreement leaves the fact unknown (fail closed).
+ */
+export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
+  return buildFactsWithRanges(input, asOf, workPeriodBasis, parameters).facts;
+}
+
+/** Facts, plus [low, high] for numeric facts whose two ends disagree (e.g. a child born "2022년 5월" is 51–52 months old). */
+export function buildFactsWithRanges(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): { facts: Record<string, Scalar | undefined>; ranges: Record<string, [number, number]> } {
+  const details: Details = input.details.children === undefined ? { ...input.details, children: profileChildren(input.profile) } : input.details;
+  if (!hasRange(details)) return { facts: buildExactFacts({ ...input, details }, asOf, workPeriodBasis, parameters), ranges: {} };
+  if (details.marriageDateLatest && (!validDate(details.marriageDate) || !validDate(details.marriageDateLatest) || details.marriageDateLatest < details.marriageDate!)) {
+    return { facts: buildExactFacts({ ...input, details: { ...details, marriageDate: undefined, marriageDateLatest: undefined } }, asOf, workPeriodBasis, parameters), ranges: {} };
+  }
+  const at = (end: 'early' | 'late'): Details => ({
+    ...details,
+    marriageDate: end === 'late' && details.marriageDateLatest ? details.marriageDateLatest : details.marriageDate,
+    children: details.children?.map(child => ({
+      unborn: child.unborn,
+      birthDate: end === 'late' && child.birthDateLatest ? child.birthDateLatest : child.birthDate,
+    })),
+  });
+  const early = buildExactFacts({ ...input, details: at('early') }, asOf, workPeriodBasis, parameters);
+  const late = buildExactFacts({ ...input, details: at('late') }, asOf, workPeriodBasis, parameters);
+  const ranges: Record<string, [number, number]> = {};
+  for (const key of Object.keys(early)) {
+    const a = early[key], b = late[key];
+    if (a !== b && typeof a === 'number' && typeof b === 'number' && a >= 0 && b >= 0) ranges[key] = [Math.min(a, b), Math.max(a, b)];
+  }
+  return { facts: Object.fromEntries(Object.keys(early).map(key => [key, early[key] === late[key] ? early[key] : undefined])), ranges };
 }

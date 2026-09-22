@@ -5,7 +5,11 @@ export type Stage = 'PRIORITY' | 'GENERAL' | 'LOTTERY';
 export type Status = 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_MORE_INFORMATION';
 export type RuleSourceStatus = 'REFERENCE' | 'DRAFT_SOURCE_VERIFIED' | 'OFFICIAL_VERIFIED';
 export type Scalar = string | number | boolean;
-export type Child = { birthDate?: string; unborn: boolean };
+/**
+ * birthDate is the earliest possible birth date. birthDateLatest is set only when the date is
+ * known to month or year precision; facts are then kept only if both ends agree.
+ */
+export type Child = { birthDate?: string; birthDateLatest?: string; unborn: boolean };
 
 /** Additional exact, announcement-date inputs. Existing profile stays the source of truth. */
 export type AssessmentInput = {
@@ -23,6 +27,8 @@ export type AssessmentInput = {
     singleParentQualified: boolean;
     unmarriedChildInHousehold: boolean;
     marriageDate: string;
+    /** Latest possible marriage date when only a month, a year or a duration is known (marriageDate is the earliest). */
+    marriageDateLatest: string;
     familyCategory: 'married' | 'engaged' | 'singleParent';
     spouse: { birthDate?: string };
     children: Child[];

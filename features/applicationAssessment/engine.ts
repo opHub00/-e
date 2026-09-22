@@ -1,4 +1,4 @@
-import { buildFacts, validDate } from './facts.ts';
+import { buildFactsWithRanges, validDate } from './facts.ts';
 import type { AnnouncementRules, ApplicationAssessmentResult, AssessmentInput, ConditionResult, ConditionRule, Expression, Scalar, SupplyRule } from './types.ts';
 
 type Evaluation = { value: boolean | null; inputs: Record<string, Scalar | null>; missing: string[] };
@@ -36,7 +36,7 @@ function condition(rule: ConditionRule, facts: Record<string, Scalar | undefined
 }
 
 function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply: SupplyRule, listingId: string): ApplicationAssessmentResult {
-  const facts = buildFacts(input, rules.announcementDate, rules.parameters['youth.workPeriodBasis'], rules.parameters);
+  const { facts, ranges } = buildFactsWithRanges(input, rules.announcementDate, rules.parameters['youth.workPeriodBasis'], rules.parameters);
   const base = supply.eligibility.map(r => condition(r, facts, rules));
   const allRules = [...supply.eligibility, ...supply.stages.flatMap(s => s.conditions)];
   const missing = base.flatMap(c => c.missing);
@@ -90,9 +90,14 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
     if (!selected.scores.length) missing.push('rule:score:empty');
     const breakdown: NonNullable<ApplicationAssessmentResult['score']>['breakdown'] = [];
     for (const rule of selected.scores) {
-      const actual = facts[rule.fact];
       const bands = rule.bands;
-      const matches = typeof actual === 'number' ? bands?.filter(b => (b.min === undefined || actual >= b.min) && (b.max === undefined || actual <= b.max)) : [];
+      const inBand = (value: number) => bands?.filter(b => (b.min === undefined || value >= b.min) && (b.max === undefined || value <= b.max)) ?? [];
+      const exact = facts[rule.fact];
+      let actual: number | undefined = typeof exact === 'number' ? exact : undefined;
+      let matches = actual === undefined ? [] : inBand(actual);
+      // A fact known only as a range (month/year precision) still scores when both ends fall in the same band.
+      const range = actual === undefined ? ranges[rule.fact] : undefined;
+      if (range) { const low = inBand(range[0]), high = inBand(range[1]); if (low.length === 1 && high.length === 1 && low[0] === high[0]) { actual = range[0]; matches = low; } }
       if (typeof actual !== 'number') missing.push(`input:${rule.fact}`);
       if (!bands?.length || bands.some(b => !Number.isFinite(b.points) || b.points < 0) || (typeof actual === 'number' && matches?.length !== 1)) missing.push(`rule:score:${rule.id}`);
       if (typeof actual === 'number' && bands?.length && matches?.length === 1) breakdown.push({ ruleId: rule.id, evidenceId: rule.evidence.id, label: rule.label, input: actual, points: matches[0].points, max: matches[0].notApplicable ? 0 : Math.max(...bands.filter(b => !b.notApplicable).map(b => b.points)), appliedBand: { min: matches[0].min, max: matches[0].max } });

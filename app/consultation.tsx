@@ -45,6 +45,15 @@ export default function ConsultationRoute() {
             {loading ? <>
               <ActivityIndicator color={colors.primary} />
               <Text accessibilityRole="header" style={styles.title}>공고 기준을 불러오고 있어요</Text>
+            </> : ruleLoad.state.status === 'SERVICE_UNAVAILABLE' ? <>
+              {/* 연결 문제는 규칙이 없는 것과 다르다. 다시 시도하면 해결될 수 있음을 알린다. */}
+              <Text accessibilityRole="header" style={styles.title}>공고 기준을 불러오지 못했어요</Text>
+              <Text style={styles.body}>지금은 판정 규칙 서버에 연결할 수 없어요. 연결이 확인되기 전에는 다른 규칙이나 일반 상식으로 대신 판정하지 않아요.</Text>
+              <PrimaryButton label="다시 불러오기" onPress={ruleLoad.retry} />
+            </> : ruleLoad.state.status === 'INVALID_RULE_SET' || ruleLoad.state.status === 'UNSUPPORTED_SCHEMA' ? <>
+              <Text accessibilityRole="header" style={styles.title}>이 공고의 규칙을 확인할 수 없어요</Text>
+              <Text style={styles.body}>등록된 규칙 형식을 검증하지 못해 상담을 열지 않았어요. 검증되지 않은 규칙으로 판정하지 않아요.</Text>
+              <PrimaryButton label="맞춤판정 공고 확인하기" onPress={() => router.replace('/assessment' as Href)} />
             </> : <>
               <Text accessibilityRole="header" style={styles.title}>이 공고의 상담은 준비 중이에요</Text>
               <Text style={styles.body}>등록된 맞춤판정 규칙이 없어 공고 기준의 답변을 만들 수 없습니다. 다른 공고 규칙이나 일반 상식으로 대신 판정하지 않아요.</Text>

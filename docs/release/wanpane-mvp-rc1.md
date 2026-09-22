@@ -14,14 +14,14 @@
 | 영역 | 항목 | 분류 | 비고 |
 |---|---|---|---|
 | DB migration | `20260825070000` ~ `20260908125941` (geocode cache, auth cloud profile, competition cache) | ALREADY_PRESENT | `master`에 있는 migration. 배포 직전 `migration list`로 확인 |
-| DB migration | `20260915105910` ~ `20260922121000` (assessment 6개, §2) | REQUIRED | production 미적용으로 가정 |
+| DB migration | `20260915105910` ~ `20260923090000` (assessment 7개, §2) | REQUIRED | production 미적용으로 가정 |
 | 환경변수 (Vercel, public) | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` = production 값 | REQUIRED | `npm run build:web`은 staging ref가 번들에 있으면 실패한다 |
 | 환경변수 (Vercel, public) | `EXPO_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY` | ALREADY_PRESENT | 기존 demo 배포 값 |
 | 환경변수 (Vercel, public) | `EXPO_PUBLIC_WANPANE_ENV` | 설정 불필요 | `build:web`이 `production`으로 고정 |
 | 환경변수 | `EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF`, `EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID` | STAGING_ONLY | production build가 제거한다 |
 | 환경변수 | `.env.staging.local`, `RULE_REVIEW_STAGING_*`, `SUPABASE_STAGING_*` | STAGING_ONLY | |
 | Edge Function secrets | `GEMINI_API_KEY`, `NAVER_NEWS_*`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_API_KEY` | ALREADY_PRESENT | 판정·상담 기능은 이 secret을 쓰지 않는다 |
-| Auth/admin | `assessment_review_members` 에 reviewer/admin 등록 | REQUIRED | 멤버 추가 RPC가 없어 service-role SQL로만 가능. 감사 기록을 남기는 절차 필요(§5 blocker) |
+| Auth/admin | 첫 admin: `assessment-rules bootstrap-admin` (service role, admin이 없을 때만). 이후 멤버: admin RPC `set_/revoke_assessment_review_member` | REQUIRED | 모든 변경이 append-only audit에 남는다. service role 직접 insert는 막혀 있다 |
 | Auth/admin | staging 테스트 계정 (`staging-users.json`) | STAGING_ONLY | |
 | Rule data | 고덕 A65BL 패키지 import (`OFFICIAL_VERIFIED`) | REQUIRED | §3 |
 | Rule data | 삼도 VER1.7 패키지 import (`DRAFT_SOURCE_VERIFIED`) | REQUIRED, 단 source 확인 선행 | 부동산원 제출용 초안 기반. 최종 공고문과 대조 필요(§5 blocker) |
@@ -30,9 +30,9 @@
 | Activation | 각 공고당 활성 버전 1개 | REQUIRED | `activate_reviewed_assessment_rule_set` |
 | Listing binding | `samdo-1-2026-ver1.7`, `apt-2026000438-2026000438` | REQUIRED | `bind_listing_to_assessment_rule_set` (admin RPC, audit 기록) |
 | Listing binding | `staging-unbound-listing` fail-closed 확인용 | STAGING_ONLY | production에서는 binding 없는 실제 listing으로 확인 |
-| Web | Vercel `buildCommand: npm run build:web` | REQUIRED | RC1에서 변경. 이전 값은 검증 없는 `npx expo export` |
+| Web | Vercel `buildCommand: npm run build:web:release` + env `SUPABASE_PRODUCTION_PROJECT_REF` | REQUIRED | target 누락·불일치 시 build 실패 |
 | Web | `.staging/dist`, staging QA 스크립트 | STAGING_ONLY | |
-| Admin UI | `/admin/rule-review`, `/admin/listing-bindings` | STAGING_ONLY (현재 코드) | 두 화면 모두 `EXPO_PUBLIC_WANPANE_ENV=staging`을 요구한다(§5 blocker) |
+| Admin UI | `/admin/rule-review?ruleSetId=`, `/admin/listing-bindings` | REQUIRED | production 번들에서도 production ref가 맞을 때만 연결. reviewer/admin 권한 그대로 |
 | Smoke | §4 | REQUIRED | |
 | Rollback | §6 | REQUIRED | |
 
@@ -48,11 +48,12 @@
 | 4 | `20260920143000_assessment_rule_review_staging.sql` | `assessment_review_members`, 권한 검사, workspace load/mutate RPC, `seed_assessment_rule_review`(service_role), `activate_reviewed_assessment_rule_set` | 중간. 파일명은 staging이지만 production에도 필요한 권한 경계. seed 데이터 없음 | 함수·`assessment_review_members` drop | 없음 |
 | 5 | `20260922120000_listing_binding_operations.sql` | binding에 `revision`/`bound_rule_set_id`/`bound_by`/`updated_at` 추가, audit log, admin 전용 bind/unbind/load RPC | 중간. `announcement_listing_bindings` ALTER + 기존 행 backfill `update` | 컬럼·audit·함수 drop | 기존 binding 행이 있으면 `bound_rule_set_id`만 채움. 신규 배포에서는 0행 |
 | 6 | `20260922121000_listing_binding_read_fix.sql` | `load_assessment_listing_bindings` 변수명 모호성(42702) 수정 | 낮음 | #5의 함수 정의로 되돌림 | 없음 |
+| 7 | `20260923090000_assessment_review_membership.sql` | 멤버십 audit log, admin 전용 grant/change/revoke RPC, service-role 전용 bootstrap(admin 없을 때만), service role의 멤버 테이블 직접 쓰기 회수 | 낮음. 새 테이블·함수 + grant 축소 | 함수·audit drop, `grant insert, update, delete on assessment_review_members to service_role` 복구 | 기존 활성 멤버마다 BASELINE audit 1행 |
 
 적용 절차(승인 후):
 1. §6.1 백업.
-2. 별도 checkout에서 `--project-ref ypdreeipoxcztbxtiklt`를 명시하고 `supabase migration list`로 1~3번 migration(`20260825070000` ~ `20260908125941`)이 적용돼 있고 assessment 6개가 없는지 확인(read-only).
-3. `supabase db push --dry-run` 결과가 위 6개와 정확히 같을 때만 push.
+2. 별도 checkout에서 `--project-ref ypdreeipoxcztbxtiklt`를 명시하고 `supabase migration list`로 1~3번 migration(`20260825070000` ~ `20260908125941`)이 적용돼 있고 assessment 7개가 없는지 확인(read-only).
+3. `supabase db push --dry-run` 결과가 위 7개와 정확히 같을 때만 push.
 4. 적용 직후 `test:assessment-db` 계열 SQL 검사와 같은 내용을 read-only로 확인: RLS 켜짐, anon이 review/member 테이블을 못 읽음, `read_assessment_rule_set`이 빈 결과를 fail-closed로 반환.
 
 ## 3. Rule data 승격 계획
@@ -71,7 +72,7 @@
 
 rule set UUID는 패키지에 고정돼 있으므로 production에서도 같은 id가 된다. 검수 결정·audit·binding revision은 production에서 새로 생긴다.
 
-현재 코드로는 위 절차를 production에 실행할 수 없다(§5 B1·B2).
+실행 절차와 명령은 [production-operations.md](production-operations.md)에 있다. 삼도는 `DRAFT_SOURCE_VERIFIED`라 `--allow-draft-source` 결정 없이는 import가 거부된다.
 
 ## 4. Production smoke (배포 직후)
 
@@ -83,16 +84,16 @@ rule set UUID는 패키지에 고정돼 있으므로 production에서도 같은 
 5. binding 없는 listing → "이 공고의 상담은 준비 중이에요".
 6. 네트워크 차단 → "공고 기준을 불러오지 못했어요", fixture 노출 없음.
 7. 번들: production host만, staging ref 0, service-role 0 (`npm run build:web`이 검사).
-8. admin: reviewer/admin 로그인 후 rule review와 binding 화면 load(§5 B2 해결 후).
+8. admin: reviewer/admin 로그인 후 rule review와 binding 화면 load.
 
 ## 5. 남은 blocker
 
 | # | Blocker | 해소 방법 |
 |---|---|---|
-| B1 | `assessment-rules` CLI는 `ASSESSMENT_IMPORT_ENV=local\|staging`만 허용하고 production endpoint를 거부한다. seed/reset 스크립트도 staging 전용 | production 전용 승인 게이트(명시 ref, 별도 opt-in, dry-run)를 가진 import/seed 경로를 별도 작업으로 추가 |
-| B2 | `/admin/rule-review`, `/admin/listing-bindings`는 `EXPO_PUBLIC_WANPANE_ENV=staging`일 때만 동작 | production admin 대상 판정(`readPublicRuleReviewTarget`)을 production 허용 규칙으로 확장하거나 production 운영용 별도 admin build 결정 |
+| B1 | ~~CLI가 production을 지원하지 않음~~ **해결**: production 전용 guard, 단계별 `--confirm`, `--dry-run`, reset/delete 없음 | [production-operations.md](production-operations.md) |
+| B2 | ~~admin 화면이 staging 전용~~ **해결**: production ref 검증 후 연결, route `?ruleSetId=`, runtime guard | 같은 문서 §3 |
 | B3 | 삼도 패키지 source가 `DRAFT_SOURCE_VERIFIED`(부동산원 제출용 초안) | 최종 게시 공고문과 대조 후 `OFFICIAL_VERIFIED` 패키지로 재import, 또는 초안임을 알고 공개할지 결정 |
-| B4 | `assessment_review_members` 등록 RPC 없음 | 멤버 부여를 audit가 남는 방식(SQL 스크립트 + 기록, 또는 RPC)으로 정의 |
+| B4 | ~~멤버 등록 RPC 없음~~ **해결**: migration 7, admin RPC + bootstrap + audit | 같은 문서 §4 |
 | B5 | production의 현재 migration 상태를 확인하지 않음(접근 금지) | 승인 후 read-only `migration list` |
 | B6 | Vercel production 환경변수가 production Supabase를 가리키는지 확인하지 않음 | 승인 후 Vercel 프로젝트 env 확인 |
 
@@ -103,8 +104,8 @@ rule set UUID는 패키지에 고정돼 있으므로 production에서도 같은 
 - 추가로 `supabase db dump --project-ref ypdreeipoxcztbxtiklt` (schema + data)를 로컬 비공개 위치에 저장. credential은 출력·커밋하지 않는다.
 
 ### 6.2 Migration rollback
-- 1~6은 additive라 기본 rollback은 "앱이 새 RPC를 호출하지 않도록 이전 web 배포로 되돌리기"다. schema는 남겨도 기존 기능에 영향이 없다.
-- schema 제거가 꼭 필요하면 역순(6 → 1)으로 drop 스크립트를 따로 작성해 검토 후 실행: 함수 → trigger → policy → 테이블 → `announcement-documents` bucket(비어 있을 때).
+- 1~7은 additive라 기본 rollback은 "앱이 새 RPC를 호출하지 않도록 이전 web 배포로 되돌리기"다. schema는 남겨도 기존 기능에 영향이 없다.
+- schema 제거가 꼭 필요하면 역순(7 → 1)으로 drop 스크립트를 따로 작성해 검토 후 실행: 함수 → trigger → policy → 테이블 → `announcement-documents` bucket(비어 있을 때).
 - `activate_assessment_rule_set`(#3에서 교체)은 #2 정의로 되돌린다.
 - 최후 수단: 6.1 백업으로 PITR 복원(다른 데이터 손실 범위 확인 후).
 

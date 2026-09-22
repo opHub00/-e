@@ -44,6 +44,10 @@ export type AssessmentInput = {
     businessIncome: number;
     totalAssets: number;
     parentAssets: number;
+    /** 세대가 보유한 부동산(건물+토지) 가액 합계. 부동산·자동차를 따로 보는 자산기준용. */
+    realEstateAssets: number;
+    /** 세대 보유 자동차 중 가장 높은 차량가액. 없으면 0. */
+    vehicleValue: number;
     workStartedAt: string;
     youthPriorityTarget: boolean;
     newlywedPriorityTarget: boolean;
@@ -82,7 +86,8 @@ export type ScoreRule = {
   label: string;
   fact: string;
   /** null means the announcement's scoring table has not been verified. */
-  bands: { min?: number; max?: number; points: number }[] | null;
+  /** notApplicable: the item cannot be chosen by this applicant (e.g. 한부모-only item for a married couple): 0 points, excluded from the maximum. */
+  bands: { min?: number; max?: number; points: number; notApplicable?: true }[] | null;
   evidence: Evidence;
 };
 export type SupplyRule = {

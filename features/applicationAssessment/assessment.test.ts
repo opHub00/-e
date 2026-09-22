@@ -196,7 +196,7 @@ test('모든 추가 질문은 화면에 표시할 묶음을 가진다', () => {
   for (const field of FORM_FIELDS) assert.ok(FORM_GROUPS.includes(field.group), field.key);
   // 금액 칸에만 되읽기를 붙인다. 납입횟수·가구원수는 금액이 아니다.
   assert.deepEqual(FORM_FIELDS.filter(f => f.money).map(f => f.key).sort(),
-    ['householdIncome', 'monthlyIncome', 'parentAssets', 'recognizedDepositAmount', 'totalAssets']);
+    ['householdIncome', 'monthlyIncome', 'parentAssets', 'realEstateAssets', 'recognizedDepositAmount', 'totalAssets', 'vehicleValue']);
 });
 
 test('누락정보는 해결할 수 있는 곳별로 나눈다', () => {

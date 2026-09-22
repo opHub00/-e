@@ -70,6 +70,8 @@ export type ConsultationFieldUpdate =
   | { field: 'householdIncome'; value: number }
   | { field: 'totalAssets'; value: number }
   | { field: 'parentAssets'; value: number }
+  | { field: 'realEstateAssets'; value: number }
+  | { field: 'vehicleValue'; value: number }
   | { field: 'incomeTaxPaymentYears'; value: number }
   | { field: 'workOrBusinessIncomeEligible'; value: boolean }
   | { field: 'marriageStatus'; value: 'single' | 'married' }

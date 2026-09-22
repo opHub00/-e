@@ -15,6 +15,7 @@ import { FORM_FIELDS, FORM_GROUP_HINTS, FORM_GROUP_LABELS, FORM_GROUPS, koreanMo
 import { SUPPLY_LABELS } from './labels';
 import { REFERENCE_LISTING_ID, REFERENCE_RULE_SET } from './reference';
 import { announcementResidenceRegion } from './ruleRegion';
+import { factsUsedByRules } from './ruleFacts';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
 import { registerAssessmentConsultationSeed } from '../assessmentConsultation/seedStore';
@@ -54,7 +55,8 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const title = rules?.title ?? selectedListing?.complexName;
   const parsed = parseForm(raw, supply);
   // 공고가 무주택기간을 직접 계산해 주면 해당 입력칸은 묻지 않는다. 기존 노출 규칙을 그대로 유지한다.
-  const visibleFields = FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key)));
+  const usedFacts = factsUsedByRules(rules);
+  const visibleFields = FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && (!f.onlyWhenRulesUse || usedFacts.has(f.key)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key)));
   const result = snapshot?.profile === profile && snapshot.rulesId === rules?.id ? snapshot.result : null;
   const update = (key: string, value: string) => { setRaw(p => ({ ...p, [key]: value })); setSnapshot(null); };
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };

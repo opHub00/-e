@@ -46,6 +46,9 @@ export const REVIEW_CATEGORY_BY_CONCEPT: Readonly<Record<string, CriticalCategor
   income: 'INCOME',
   assets: 'ASSET',
   parentAssets: 'ASSET',
+  // 부동산(건물+토지)과 자동차를 따로 제한하는 자산기준
+  realEstate: 'ASSET',
+  vehicle: 'ASSET',
   tax: 'TAX',
   residence: 'SCOPE',
   overseas: 'EXCEPTION',
@@ -54,7 +57,7 @@ export const REVIEW_CATEGORY_BY_CONCEPT: Readonly<Record<string, CriticalCategor
 };
 
 /** Concepts stated for the whole household. Youth supply is always assessed on the applicant alone. */
-const HOUSEHOLD_CONCEPTS = new Set(['housing', 'household', 'size', 'assets', 'income', 'family', 'fiveYears', 'head']);
+const HOUSEHOLD_CONCEPTS = new Set(['housing', 'household', 'size', 'assets', 'realEstate', 'vehicle', 'income', 'family', 'fiveYears', 'head']);
 const APPLICANT_ONLY_SUPPLIES = new Set(['youth']);
 /** Concepts that are recorded for review but do not block activation on their own. */
 const NON_CRITICAL_CONCEPTS = new Set(['restrictions']);

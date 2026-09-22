@@ -34,7 +34,7 @@ export const uuid = (value: unknown): string => {
   if (!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(v)) throw new Error('uuid');
   return v;
 };
-const facts = new Set(('accountKindEligible firstRank isHouseholdHead householdNoWinningFiveYears incomeHouseholdSize householdMemberCount plannedMarriageWithinDeadline singleParentQualified unmarriedChildInHousehold marriageWithin2Years marriageWithin7Years hasChildUnder7 hasChildUnder3 childbirthClear householdIncomeScoreTier calculatedNoHomeMonths age maritalStatus familyCategory marriageMonths hasChildren minorChildren youngestChildMonths noHome neverOwned householdNoHome householdNeverOwned noSpecialRestriction noSpecialSupplyHistory noReWinningRestriction hasAccount accountMonths recognizedPaymentCount recognizedDepositAmount residence residenceMonths overseasClear noHomeMonths monthlyIncome householdIncome dualIncome totalAssets parentAssets workMonths incomeTaxPaymentYears workOrBusinessIncome youthPriorityTarget newlywedPriorityTarget workOrTaxMonths exceptionsClear').split(' '));
+const facts = new Set(('accountKindEligible firstRank isHouseholdHead householdNoWinningFiveYears incomeHouseholdSize householdMemberCount plannedMarriageWithinDeadline singleParentQualified unmarriedChildInHousehold marriageWithin2Years marriageWithin7Years hasChildUnder7 hasChildUnder3 childbirthClear householdIncomeScoreTier calculatedNoHomeMonths age maritalStatus familyCategory marriageMonths hasChildren minorChildren youngestChildMonths noHome neverOwned householdNoHome householdNeverOwned noSpecialRestriction noSpecialSupplyHistory noReWinningRestriction hasAccount accountMonths recognizedPaymentCount recognizedDepositAmount residence residenceMonths overseasClear noHomeMonths monthlyIncome householdIncome dualIncome totalAssets parentAssets workMonths incomeTaxPaymentYears workOrBusinessIncome youthPriorityTarget newlywedPriorityTarget workOrTaxMonths exceptionsClear realEstateAssets vehicleValue householdIncomeScoreEligible newlywedMarriageScoreMonths singleParentChildScoreMonths').split(' '));
 const fact = (value: unknown): string => { const key = string(value); if (!facts.has(key)) throw new Error('unsupported fact'); return key; };
 function expression(value: unknown, parameters: Record<string, Scalar | null>, depth = 0): Expression {
   if (depth > 12) throw new Error('expression depth');
@@ -82,12 +82,13 @@ export function score(key: string, config: unknown, ev: Evidence): ScoreRule {
   if (Object.keys(c).some(k => !['label', 'fact', 'bands'].includes(k))) throw new Error('unknown score config');
   const bands = c.bands === null ? null : array(c.bands).map(raw => {
     const b = object(raw);
-    if (Object.keys(b).some(k => !['min', 'max', 'points'].includes(k))) throw new Error('unknown band config');
+    if (Object.keys(b).some(k => !['min', 'max', 'points', 'notApplicable'].includes(k))) throw new Error('unknown band config');
+    if (b.notApplicable !== undefined && (b.notApplicable !== true || b.points !== 0)) throw new Error('notApplicable band must be true and score 0');
     const min = b.min === undefined ? undefined : scalar(b.min);
     const max = b.max === undefined ? undefined : scalar(b.max);
     if ((min !== undefined && typeof min !== 'number') || (max !== undefined && typeof max !== 'number')) throw new Error('band bounds');
     if (min !== undefined && max !== undefined && min > max) throw new Error('band order');
-    return { ...(min === undefined ? {} : { min }), ...(max === undefined ? {} : { max }), points: integer(b.points) };
+    return { ...(min === undefined ? {} : { min }), ...(max === undefined ? {} : { max }), points: integer(b.points), ...(b.notApplicable === true ? { notApplicable: true as const } : {}) };
   });
   if (bands && (!bands.length || bands.some((b, i) => bands.some((other, j) => i < j && (b.min ?? -Infinity) <= (other.max ?? Infinity) && (other.min ?? -Infinity) <= (b.max ?? Infinity))))) throw new Error('empty or overlapping bands');
   return { id: key, label: string(c.label), fact: fact(c.fact), bands, evidence: ev };

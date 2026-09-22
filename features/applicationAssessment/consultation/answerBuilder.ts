@@ -37,6 +37,11 @@ const QUESTION_BY_FACT: Record<string, string> = {
   dualIncome: '맞벌이 여부를 알려주세요.',
   totalAssets: '공고 기준으로 산정한 총자산을 알려주세요.',
   parentAssets: '공고 기준으로 산정한 부모 총자산을 알려주세요.',
+  realEstateAssets: '세대가 보유한 부동산(건물+토지) 가액 합계를 알려주세요. 없으면 없다고 답해 주세요.',
+  vehicleValue: '세대가 보유한 자동차 중 가장 높은 차량가액을 알려주세요. 없으면 없다고 답해 주세요.',
+  householdIncomeScoreEligible: '공고 기준으로 산정한 세대 월평균소득과 맞벌이 여부를 알려주세요.',
+  newlywedMarriageScoreMonths: '신혼부부·예비신혼부부·한부모 중 어디에 해당하는지와, 신혼부부라면 혼인신고일을 알려주세요.',
+  singleParentChildScoreMonths: '신혼부부·예비신혼부부·한부모 중 어디에 해당하는지와, 한부모라면 가장 어린 자녀의 생년월일을 알려주세요.',
   incomeTaxPaymentYears: '신청자 본인의 소득세 납부기간을 프로필에서 확인해 주세요.',
   noHome: '현재 주택 소유 여부를 프로필에서 확인해 주세요.',
   neverOwned: '과거 주택 소유 이력을 프로필에서 확인해 주세요.',
@@ -65,7 +70,7 @@ const OPTIONS_BY_FACT: Partial<Record<string, { label: string; value: string }[]
 const PRIORITY = [
   'age', 'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome', 'householdNeverOwned',
   'hasAccount', 'accountMonths', 'recognizedPaymentCount', 'recognizedDepositAmount',
-  'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'incomeTaxPaymentYears',
+  'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'realEstateAssets', 'vehicleValue', 'incomeTaxPaymentYears',
   'residence', 'residenceMonths', 'overseasClear', 'exceptionsClear',
 ];
 

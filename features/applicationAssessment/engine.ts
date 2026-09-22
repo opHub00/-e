@@ -61,7 +61,8 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
       : facts.residenceMonths >= regionalThreshold ? { status:'LOCAL', label:'해당지역 우선배정 대상' }
         : { status:'REMAINDER_ONLY', label:'기타지역: 해당지역 미달 물량이 있을 때 공급 대상' };
   if (regionalPriority) warnings.push(regionalPriority.label);
-  for (const key of Object.keys(rules.parameters).filter(k => k.startsWith('warning.'))) {
+  // warning.<supplyType>.* is shown only for that supply; other warning.* keys apply to every supply.
+  for (const key of Object.keys(rules.parameters).filter(k => k.startsWith('warning.') && !(SUPPLY_TYPES.has(k.split('.')[1]) && k.split('.')[1] !== supply.type))) {
     if (typeof rules.parameters[key] === 'string') warnings.push(rules.parameters[key] as string);
   }
   if (!rules.parameters['dates.calculatedNoHome'] && input.details.housingDisposalDates?.some(date => !validDate(date) || (input.details.noHomeSince && date > input.details.noHomeSince))) {
@@ -94,7 +95,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
       const matches = typeof actual === 'number' ? bands?.filter(b => (b.min === undefined || actual >= b.min) && (b.max === undefined || actual <= b.max)) : [];
       if (typeof actual !== 'number') missing.push(`input:${rule.fact}`);
       if (!bands?.length || bands.some(b => !Number.isFinite(b.points) || b.points < 0) || (typeof actual === 'number' && matches?.length !== 1)) missing.push(`rule:score:${rule.id}`);
-      if (typeof actual === 'number' && bands?.length && matches?.length === 1) breakdown.push({ ruleId: rule.id, evidenceId: rule.evidence.id, label: rule.label, input: actual, points: matches[0].points, max: Math.max(...bands.map(b => b.points)), appliedBand: { min: matches[0].min, max: matches[0].max } });
+      if (typeof actual === 'number' && bands?.length && matches?.length === 1) breakdown.push({ ruleId: rule.id, evidenceId: rule.evidence.id, label: rule.label, input: actual, points: matches[0].points, max: matches[0].notApplicable ? 0 : Math.max(...bands.filter(b => !b.notApplicable).map(b => b.points)), appliedBand: { min: matches[0].min, max: matches[0].max } });
     }
     if (breakdown.length === selected.scores.length && !missing.some(m => m.startsWith('rule:score:'))) {
       score = { total: breakdown.reduce((sum, b) => sum + b.points, 0), max: breakdown.reduce((sum, b) => sum + b.max, 0), breakdown };
@@ -122,6 +123,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
 }
 
 /** Rules are trusted reviewed application data, never unvalidated AI output. */
+const SUPPLY_TYPES = new Set(['youth', 'newlywed', 'firstHome']);
 export function assessApplication(rules: AnnouncementRules, input: AssessmentInput, listingId = rules.listingId): ApplicationAssessmentResult[] {
   return rules.supplies.map(supply => evaluateSupply(rules, input, supply, listingId));
 }

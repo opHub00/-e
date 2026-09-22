@@ -15,7 +15,9 @@ export const FORM_GROUP_LABELS: Record<FormGroup, string> = {
 export const FORM_GROUP_HINTS: Partial<Record<FormGroup, string>> = {
   announcement: '공고 원문에서 직접 확인한 경우에만 답해 주세요. 모르면 비워 두는 편이 정확해요.',
 };
-export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children' | 'dates'; group: FormGroup; money?: true; supplies?: SupplyType[] };
+export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children' | 'dates'; group: FormGroup; money?: true; supplies?: SupplyType[];
+  /** Ask only when the loaded rules actually read this fact (a standard that only some announcements use). */
+  onlyWhenRulesUse?: true };
 export const FORM_FIELDS: FormField[] = [
   { key: 'birthDate', label: '생년월일', kind: 'date', group: 'basic' },
   { key: 'isHouseholdHead', label: '공고일 현재 세대주인가요?', kind:'boolean', group: 'basic', supplies:['firstHome'] },
@@ -24,7 +26,7 @@ export const FORM_FIELDS: FormField[] = [
   { key: 'everMarried', label: '과거를 포함해 혼인한 적이 있나요?', kind: 'boolean', group: 'family', supplies:['newlywed'] },
   { key: 'marriageDate', label: '혼인신고일(신혼부부 해당 시)', kind: 'date', group: 'family', supplies: ['newlywed'] },
   { key: 'firstMarriageDate', label: '최초 혼인신고일(혼인 이력이 있을 때)', kind:'date', group: 'family', supplies:['newlywed'] },
-  { key: 'plannedMarriageWithinDeadline', label:'예비신혼부부: 공고일부터 1년 이내 또는 앞선 입주일까지 혼인 증명이 가능한가요?', kind:'boolean', group: 'family', supplies:['newlywed'] },
+  { key: 'plannedMarriageWithinDeadline', label:'예비신혼부부: 공고에서 정한 기한까지 혼인 사실을 증명할 수 있나요?', kind:'boolean', group: 'family', supplies:['newlywed'] },
   { key: 'singleParentQualified', label:'한부모: 공고의 한부모가족 자격과 자녀 등재 요건을 충족하나요?', kind:'boolean', group: 'family', supplies:['newlywed'] },
   { key: 'unmarriedChildInHousehold', label:'혼인 중이 아니라면 동일 등본에 미혼 자녀가 있나요?', kind:'boolean', group: 'family', supplies:['firstHome'] },
   { key: 'children', label: '출생 자녀 생년월일(쉼표로 구분, 없으면 없음)', kind: 'children', group: 'family' },
@@ -42,8 +44,10 @@ export const FORM_FIELDS: FormField[] = [
   { key: 'householdIncome', label: '세대 월평균소득(원)', kind: 'number', group: 'income', money: true, supplies: ['newlywed', 'firstHome'] },
   { key: 'dualIncome', label: '맞벌이인가요?', kind: 'boolean', group: 'income', supplies: ['newlywed', 'firstHome'] },
   { key: 'workStartedAt', label: '근로 시작일', kind: 'date', group: 'income', supplies: ['youth'] },
-  { key: 'totalAssets', label: '자산 총액(원, 청년은 본인 / 그 외 세대)', kind: 'number', group: 'assets', money: true },
-  { key: 'parentAssets', label: '부모 자산 총액(원)', kind: 'number', group: 'assets', money: true, supplies: ['youth'] },
+  { key: 'totalAssets', label: '자산 총액(원, 청년은 본인 / 그 외 세대)', kind: 'number', group: 'assets', money: true, onlyWhenRulesUse: true },
+  { key: 'parentAssets', label: '부모 자산 총액(원)', kind: 'number', group: 'assets', money: true, supplies: ['youth'], onlyWhenRulesUse: true },
+  { key: 'realEstateAssets', label: '세대 부동산(건물+토지) 가액 합계(원, 없으면 0)', kind: 'number', group: 'assets', money: true, supplies: ['newlywed', 'firstHome'], onlyWhenRulesUse: true },
+  { key: 'vehicleValue', label: '세대 보유 자동차 중 가장 높은 차량가액(원, 없으면 0)', kind: 'number', group: 'assets', money: true, supplies: ['newlywed', 'firstHome'], onlyWhenRulesUse: true },
   { key: 'youthPriorityTarget', label: '공고의 청년 우선공급 대상 조건에 해당하나요?', kind: 'boolean', group: 'announcement', supplies: ['youth'] },
   { key: 'newlywedPriorityTarget', label: '공고의 신혼부부 우선공급 대상 조건에 해당하나요?', kind: 'boolean', group: 'announcement', supplies: ['newlywed'] },
 ];
@@ -104,6 +108,8 @@ export const FACT_LABELS: Record<string, string> = {
   householdMemberCount:'세대원 수', marriageWithin2Years:'혼인기간 2년 이내', marriageWithin7Years:'혼인기간 7년 이내',
   hasChildUnder7:'만 7세 미만 자녀', hasChildUnder3:'만 3세 미만 자녀', childbirthClear:'출산가구 완화 해당 여부',
   calculatedNoHomeMonths:'생년월일·최초 혼인일·세대 주택처분일', householdIncomeScoreTier:'가구원수·맞벌이 여부별 소득구간',
+  householdIncomeScoreEligible:'가구원수·맞벌이 여부별 가구소득(배점)', newlywedMarriageScoreMonths:'가족 유형·혼인신고일(혼인기간 배점)',
+  singleParentChildScoreMonths:'가족 유형·가장 어린 자녀 생년월일(자녀 나이 배점)',
   age: '생년월일', maritalStatus: '혼인 여부', familyCategory: '가족 유형', marriageMonths: '혼인신고일', hasChildren: '자녀 여부', minorChildren: '자녀 생년월일', youngestChildMonths: '가장 어린 자녀 생년월일',
   noHome: '현재 주택소유', neverOwned: '과거 주택소유', householdNoHome: '세대 주택소유', householdNeverOwned: '세대 과거 주택소유',
   noSpecialRestriction: '특별공급 제한', noSpecialSupplyHistory: '특별공급 당첨 이력', noReWinningRestriction: '재당첨 제한',

@@ -18,6 +18,9 @@ export function completedMonths(start: string | undefined, end: string | null): 
 const known = <T>(field: ProfileFieldState<T>): T | undefined => field.status === 'known' ? field.value : undefined;
 const inverse = (value: boolean | undefined) => value === undefined ? undefined : !value;
 
+/** Facts where -1 means "not applicable to this applicant" (0 points), distinct from unknown. */
+const NOT_APPLICABLE_SENTINEL_FACTS = new Set(['calculatedNoHomeMonths', 'newlywedMarriageScoreMonths', 'singleParentChildScoreMonths']);
+
 export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
   const p = input.profile;
   const d = input.details;
@@ -36,6 +39,11 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
   const cutoff = parameters['exceptions.childbirthAfter'];
   const childbirthClear = typeof cutoff === 'string' && children && validChildren ? !children.some(c => c.unborn || c.birthDate! >= cutoff) : undefined;
   const minorAgeYears = typeof parameters['children.minorAgeYears'] === 'number' ? parameters['children.minorAgeYears'] : 18;
+  // 가구소득 배점: 공고가 정한 비율(외벌이/맞벌이) 이하이면 1, 초과면 0. 비율이 없으면 계산하지 않는다.
+  const scorePercent = d.dualIncome === undefined ? undefined : parameters[d.dualIncome ? 'incomeScore.dualPercent' : 'incomeScore.singlePercent'];
+  const scoreLimit = typeof scorePercent === 'number' ? incomeThreshold(String(scorePercent)) : undefined;
+  const familyCategory = d.familyCategory ?? (known(p.family.marriageStatus) === 'married' ? 'married' : undefined);
+  const youngestChildMonths = validChildren && childAges!.length ? Math.min(...childAges as number[]) : undefined;
   const facts: Record<string, Scalar | undefined> = {
     age: birthMonths === undefined ? undefined : Math.floor(birthMonths / 12),
     accountKindEligible: d.accountKindEligible,
@@ -56,11 +64,15 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
     // -1 is an explicit not-applicable sentinel, distinct from a valid period under one month.
     calculatedNoHomeMonths: duration && !(known(p.housing.householdDisqualifyingPreviousOwnership) === true && !d.housingDisposalDates?.length) ? (duration.applicable ? duration.months : -1) : undefined,
     maritalStatus: known(p.family.marriageStatus),
-    familyCategory: d.familyCategory ?? (known(p.family.marriageStatus) === 'married' ? 'married' : undefined),
+    familyCategory,
     marriageMonths: months(d.marriageDate),
     hasChildren: children ? children.length > 0 : undefined,
     minorChildren: validChildren ? childAges!.filter(age => age! < minorAgeYears * 12).length + (parameters['children.includeUnborn'] === true ? children!.filter(c => c.unborn).length : 0) : undefined,
-    youngestChildMonths: validChildren && childAges!.length ? Math.min(...childAges as number[]) : undefined,
+    youngestChildMonths,
+    // 가족 유형에 따라 선택할 수 없는 배점 항목은 -1(해당 없음, 0점)로 둔다. 모르면 undefined.
+    newlywedMarriageScoreMonths: familyCategory === 'married' ? months(d.marriageDate) : familyCategory ? -1 : undefined,
+    singleParentChildScoreMonths: familyCategory === 'singleParent' ? youngestChildMonths : familyCategory ? -1 : undefined,
+    householdIncomeScoreEligible: typeof scoreLimit === 'number' && typeof d.householdIncome === 'number' && d.householdIncome >= 0 ? (d.householdIncome <= scoreLimit ? 1 : 0) : undefined,
     noHome: ownership === undefined ? undefined : ownership === 'no-home',
     neverOwned: inverse(known(p.housing.previousOwnership)),
     householdNoHome: ownership === 'owns-home' ? false : ownership === undefined ? undefined : inverse(known(p.housing.householdHasHome)),
@@ -81,6 +93,8 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
     dualIncome: d.dualIncome,
     totalAssets: d.totalAssets,
     parentAssets: d.parentAssets,
+    realEstateAssets: d.realEstateAssets,
+    vehicleValue: d.vehicleValue,
     workMonths: months(d.workStartedAt),
     incomeTaxPaymentYears: known(p.income.incomeTaxPaymentYears),
     workOrBusinessIncome: known(p.income.workOrBusinessIncomeEligible),
@@ -92,9 +106,9 @@ export function buildFacts(input: AssessmentInput, asOf: string | null, workPeri
   };
   // Never coerce negative values, fractions in counts, NaN, or infinity into eligibility.
   for (const [key, value] of Object.entries(facts)) {
-    if (typeof value === 'number' && (!Number.isFinite(value) || (value < 0 && !(key === 'calculatedNoHomeMonths' && value === -1)) ||
+    if (typeof value === 'number' && (!Number.isFinite(value) || (value < 0 && !(NOT_APPLICABLE_SENTINEL_FACTS.has(key) && value === -1)) ||
       (['recognizedPaymentCount', 'incomeTaxPaymentYears','householdMemberCount','incomeHouseholdSize'].includes(key) && !Number.isSafeInteger(value)) ||
-      (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','totalAssets','parentAssets','recognizedDepositAmount'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
+      (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','totalAssets','parentAssets','recognizedDepositAmount','realEstateAssets','vehicleValue'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
   }
   return facts;
 }

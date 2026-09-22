@@ -16,7 +16,7 @@ const SUPPLIES = new Set<SupplyType>(['youth', 'newlywed', 'firstHome']);
 const UPDATE_FIELDS = new Set<ConsultationFieldUpdate['field']>([
   'declaredAgeYears', 'birthDate', 'currentResidence', 'residenceDurationMonths',
   'subscriptionDurationMonths', 'recognizedPaymentCount', 'recognizedDepositAmount',
-  'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets',
+  'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'realEstateAssets', 'vehicleValue',
   'incomeTaxPaymentYears', 'workOrBusinessIncomeEligible', 'marriageStatus', 'currentHousingOwnership',
   'previousHousingOwnership', 'householdHasHome', 'hasSubscriptionAccount',
   'accountKindEligible', 'specialSupplyHistory', 'reWinningRestriction',
@@ -317,8 +317,17 @@ function extractClause(clause: string): Extracted[] {
       ? /(?:세대|가구)\s*(?:월\s*)?(?:평균\s*)?(?:소득|수입)/
       : /(?:월\s*(?:평균\s*)?(?:소득|수입)|월급|한\s*달\s*(?:소득|수입)|소득(?:은|이)?\s*월\s*(?:평균)?)/);
     if (monthly !== undefined) push('money', { field: household ? 'householdIncome' : 'monthlyIncome', value: monthly });
-    const assets = amount(clause, /(?:(?:총|세대|본인)\s*(?:총\s*)?(?:자산|재산)|(?<![가-힣])(?:자산|재산))/);
+    // 부동산·자동차를 따로 보는 공고도 있어, 그 금액을 총자산으로 합쳐 읽지 않는다.
+    const splitAsset = /(?:부동산|건물|토지|자동차|차량|(?<![가-힣])차(?:는|가|값)?(?![가-힣]))/.test(clause);
+    const assets = splitAsset ? undefined : amount(clause, /(?:(?:총|세대|본인)\s*(?:총\s*)?(?:자산|재산)|(?<![가-힣])(?:자산|재산))/);
     if (assets !== undefined) push('money', { field: 'totalAssets', value: assets });
+    const realEstate = amount(clause, /(?:부동산|건물\s*(?:과|와|및|\+)?\s*토지|토지)/);
+    const vehicle = amount(clause, /(?:자동차|차량|(?<![가-힣])차(?:는|가)?(?![가-힣]))\s*(?:가액|값|가격)?/);
+    if (realEstate !== undefined) push('money', { field: 'realEstateAssets', value: realEstate });
+    if (vehicle !== undefined) push('money', { field: 'vehicleValue', value: vehicle });
+    // "차 없어요", "부동산은 없어요"는 가액 0이라는 분명한 사실이다.
+    if (polarity === 'NEG' && realEstate === undefined && /(?:부동산|건물|토지)/.test(clause) && !HOUSE.test(clause.replace(/부동산/g, ''))) push('money', { field: 'realEstateAssets', value: 0 });
+    if (polarity === 'NEG' && vehicle === undefined && /(?:자동차|차량|(?<![가-힣])차(?:는|가|도)?(?![가-힣]))/.test(clause)) push('money', { field: 'vehicleValue', value: 0 });
   } else {
     const parents = amount(clause, /부모(?:님)?\s*(?:의\s*)?(?:총\s*)?(?:자산|재산)/);
     if (parents !== undefined) push('money', { field: 'parentAssets', value: parents });

@@ -41,6 +41,8 @@ const ANSWER_LINES: [key: string, label: string, format: (value: unknown) => str
   ['dualIncome', '맞벌이', yesNo('맞벌이', '외벌이')],
   ['totalAssets', '총자산', won],
   ['parentAssets', '부모 자산', won],
+  ['realEstateAssets', '세대 부동산 가액', won],
+  ['vehicleValue', '가장 높은 차량가액', won],
   ['specialSupplyHistory', '특별공급 당첨 이력', yesNo('있음', '없음')],
   ['reWinningRestriction', '재당첨 제한', yesNo('있음', '없음')],
   ['overseasStayHistory', '해외체류 이력', v => Array.isArray(v) && v.length === 0 ? '없음' : '있음(확인 필요)'],

@@ -27,7 +27,7 @@ const QUESTION_BY_FACT: Record<string, string> = {
   residence: '공고일 현재 거주지역을 알려주세요.',
   residenceMonths: '공고에서 정한 거주지역에 계속 거주하기 시작한 날짜를 알려주세요.',
   overseasClear: '계속 90일 또는 연간 183일을 넘는 해외체류 이력이 있는지 알려주세요.',
-  maritalStatus: '현재 혼인 여부를 프로필에서 확인해 주세요.',
+  maritalStatus: '현재 혼인 여부를 알려주세요. (예: 결혼했어요, 미혼이에요)',
   hasAccount: '청약통장 보유 여부를 프로필에서 확인해 주세요.',
   accountMonths: '청약통장 가입일 또는 공고일 기준 가입기간을 알려주세요.',
   recognizedPaymentCount: '청약통장 인정 납입횟수를 알려주세요.',
@@ -40,8 +40,8 @@ const QUESTION_BY_FACT: Record<string, string> = {
   realEstateAssets: '세대가 보유한 부동산(건물+토지) 가액 합계를 알려주세요. 없으면 없다고 답해 주세요.',
   vehicleValue: '세대가 보유한 자동차 중 가장 높은 차량가액을 알려주세요. 없으면 없다고 답해 주세요.',
   householdIncomeScoreEligible: '공고 기준으로 산정한 세대 월평균소득과 맞벌이 여부를 알려주세요.',
-  newlywedMarriageScoreMonths: '신혼부부·예비신혼부부·한부모 중 어디에 해당하는지와, 신혼부부라면 혼인신고일을 알려주세요.',
-  singleParentChildScoreMonths: '신혼부부·예비신혼부부·한부모 중 어디에 해당하는지와, 한부모라면 가장 어린 자녀의 생년월일을 알려주세요.',
+  newlywedMarriageScoreMonths: '혼인기간 배점을 확인하려면 정확한 혼인신고일을 알려주세요. (예: 2023년 5월 20일)',
+  singleParentChildScoreMonths: '자녀 나이 배점을 확인하려면 가장 어린 자녀의 생년월일을 일까지 알려주세요. (예: 2022년 5월 20일)',
   incomeTaxPaymentYears: '신청자 본인의 소득세 납부기간을 프로필에서 확인해 주세요.',
   noHome: '현재 주택 소유 여부를 프로필에서 확인해 주세요.',
   neverOwned: '과거 주택 소유 이력을 프로필에서 확인해 주세요.',
@@ -50,6 +50,19 @@ const QUESTION_BY_FACT: Record<string, string> = {
   specialExceptions: '적용 가능성이 있는 특례 내용을 알려주세요.',
   exceptionsClear: '배우자 이력·출산·해외체류 등 특례 적용 가능성이 있는지 알려주세요.',
   childbirthClear: '현재 자녀·태아·입양 자녀가 있나요?',
+  familyCategory: '신혼부부·예비신혼부부·한부모 중 어디에 해당하나요?',
+  marriageWithin7Years: '혼인신고일을 알려주세요. (예: 2023년 5월 20일)',
+  marriageWithin2Years: '혼인신고일을 알려주세요. (예: 2023년 5월 20일)',
+  marriageMonths: '혼인신고일을 알려주세요. (예: 2023년 5월 20일)',
+  hasChildUnder7: '자녀가 있다면 자녀 수와 생년월일(예: 2021년 3월, 2024년생)을 알려주세요. 없으면 없다고 답해 주세요.',
+  hasChildUnder3: '자녀가 있다면 자녀 수와 생년월일(예: 2021년 3월, 2024년생)을 알려주세요. 없으면 없다고 답해 주세요.',
+  minorChildren: '자녀가 있다면 자녀 수와 생년월일(예: 2021년 3월, 2024년생)을 알려주세요. 없으면 없다고 답해 주세요.',
+  youngestChildMonths: '자녀가 있다면 자녀 수와 생년월일(예: 2021년 3월, 2024년생)을 알려주세요. 없으면 없다고 답해 주세요.',
+  hasChildren: '자녀가 있다면 자녀 수와 생년월일(예: 2021년 3월, 2024년생)을 알려주세요. 없으면 없다고 답해 주세요.',
+  incomeHouseholdSize: '소득을 계산할 가구원 수(본인·배우자·자녀·태아 포함)를 알려주세요. (예: 세 식구예요)',
+  plannedMarriageWithinDeadline: '입주 전까지 혼인 사실을 증명할 수 있나요?',
+  singleParentQualified: '한부모가족 증명서를 낼 수 있나요?',
+  householdIncomeScoreTier: '공고 기준으로 산정한 세대 월평균소득과 맞벌이 여부를 알려주세요.',
 };
 
 const OPTIONS_BY_FACT: Partial<Record<string, { label: string; value: string }[]>> = {
@@ -61,6 +74,18 @@ const OPTIONS_BY_FACT: Partial<Record<string, { label: string; value: string }[]
     { label: '외벌이', value: '외벌이예요' },
     { label: '맞벌이', value: '맞벌이예요' },
   ],
+  familyCategory: [
+    { label: '신혼부부', value: '신혼부부예요' },
+    { label: '예비신혼부부', value: '예비신혼부부예요' },
+    { label: '한부모', value: '한부모 가정입니다' },
+  ],
+  plannedMarriageWithinDeadline: [
+    { label: '증명할 수 있어요', value: '입주 전까지 혼인 사실을 증명할 수 있어요' },
+    { label: '어려워요', value: '입주 전까지 혼인 증명은 어려워요' },
+  ],
+  singleParentQualified: [
+    { label: '낼 수 있어요', value: '한부모 가정입니다' },
+  ],
   childbirthClear: [
     { label: '없어요', value: '자녀 없어' },
     { label: '있어요', value: '자녀 또는 태아가 있어요' },
@@ -68,7 +93,9 @@ const OPTIONS_BY_FACT: Partial<Record<string, { label: string; value: string }[]
 };
 
 const PRIORITY = [
-  'age', 'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome', 'householdNeverOwned',
+  'age', 'maritalStatus', 'familyCategory', 'marriageWithin7Years', 'marriageWithin2Years', 'newlywedMarriageScoreMonths', 'marriageMonths',
+  'plannedMarriageWithinDeadline', 'singleParentQualified', 'hasChildUnder7', 'hasChildUnder3', 'minorChildren', 'youngestChildMonths',
+  'singleParentChildScoreMonths', 'childbirthClear', 'incomeHouseholdSize', 'householdIncomeScoreTier', 'householdIncomeScoreEligible', 'noHome', 'neverOwned', 'householdNoHome', 'householdNeverOwned',
   'hasAccount', 'accountMonths', 'recognizedPaymentCount', 'recognizedDepositAmount',
   'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'realEstateAssets', 'vehicleValue', 'incomeTaxPaymentYears',
   'residence', 'residenceMonths', 'overseasClear', 'exceptionsClear',

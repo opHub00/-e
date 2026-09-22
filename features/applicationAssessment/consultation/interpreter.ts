@@ -6,6 +6,7 @@ import type {
 } from './types.ts';
 import type { SupplyType } from '../types.ts';
 import { REGION_DEFINITIONS } from '../../discovery/regions.ts';
+import { childBirthLists, mentionsChild, rangeText, saidDates } from './familyFacts.ts';
 
 const INTENTS = new Set<ConsultationIntent>([
   'CHECK_ELIGIBILITY', 'CHECK_SCORE', 'CHECK_STAGE', 'WHY_RESULT',
@@ -17,7 +18,8 @@ const UPDATE_FIELDS = new Set<ConsultationFieldUpdate['field']>([
   'declaredAgeYears', 'birthDate', 'currentResidence', 'residenceDurationMonths',
   'subscriptionDurationMonths', 'recognizedPaymentCount', 'recognizedDepositAmount',
   'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'realEstateAssets', 'vehicleValue',
-  'incomeTaxPaymentYears', 'workOrBusinessIncomeEligible', 'marriageStatus', 'currentHousingOwnership',
+  'incomeTaxPaymentYears', 'workOrBusinessIncomeEligible', 'marriageDate', 'marriageDurationMonths', 'familyCategory',
+  'singleParentQualified', 'plannedMarriageWithinDeadline', 'incomeHouseholdSize', 'childBirthDates', 'childCount', 'specialSupplyRestriction', 'marriageStatus', 'currentHousingOwnership',
   'previousHousingOwnership', 'householdHasHome', 'hasSubscriptionAccount',
   'accountKindEligible', 'specialSupplyHistory', 'reWinningRestriction',
   'overseasClear', 'specialExceptionsClear', 'childbirthClear', 'dualIncome', 'specialException',
@@ -31,13 +33,20 @@ function exactKeys(value: Record<string, unknown>, allowed: readonly string[]): 
   return Object.keys(value).every(key => allowed.includes(key));
 }
 
+const DATE_RANGE = /^\d{4}-\d{2}-\d{2}(?:~\d{4}-\d{2}-\d{2})?$/;
+const COUNT_FIELDS = new Set(['incomeHouseholdSize', 'childCount']);
+
 function validUpdate(value: unknown): value is ConsultationFieldUpdate {
   if (!record(value) || !exactKeys(value, ['field', 'value']) || !UPDATE_FIELDS.has(value.field as ConsultationFieldUpdate['field'])) return false;
-  if (typeof value.value === 'number') return Number.isFinite(value.value) && value.value >= 0;
+  if (typeof value.value === 'number') return Number.isFinite(value.value) && value.value >= 0 && (!COUNT_FIELDS.has(String(value.field)) || (Number.isInteger(value.value) && value.value <= 20));
   if (typeof value.value === 'boolean') return true;
   if (typeof value.value !== 'string' || value.value.length > 200) return false;
   if (value.field === 'marriageStatus') return value.value === 'single' || value.value === 'married';
   if (value.field === 'currentHousingOwnership') return value.value === 'no-home' || value.value === 'owns-home';
+  if (value.field === 'familyCategory') return ['married', 'engaged', 'singleParent'].includes(value.value);
+  if (value.field === 'marriageDate') return DATE_RANGE.test(value.value);
+  if (value.field === 'childBirthDates') return value.value.split(',').every(part => DATE_RANGE.test(part));
+  if (value.field === 'marriageDurationMonths') return /^\d{1,3}~\d{1,3}$/.test(value.value);
   return true;
 }
 
@@ -75,15 +84,17 @@ function classifyIntent(message: string, hasUpdates: boolean): ConsultationInten
 
 export type ConsultationUtteranceKind = 'ASSERTION' | 'QUESTION' | 'CONDITIONAL_QUESTION' | 'UNKNOWN';
 
-const QUESTION_ENDING = /(?:\?|나요|인가요|되나요|되나|일까요|까요|할까|될까|되니|하니|가능한가|가능해|가능할|어때|몇\s*(?:점|년|개월|회|살)?|얼마|뭐|무엇|어떻게|어떤|왜|언제|어디|알려\s*줘|알려\s*주세요|보여\s*줘|보여\s*주세요|궁금|는지|은지|인지|기준(?:이|은)?\s*(?:뭐|어떻|몇|얼마)|기준(?:이야|이에요|인가)?\s*$)/;
-const CONDITION = /(?:만약|만일|가정(?:하|해|이)|(?:이라|라|다|으|하|되|있으|없으|했으|넘으|넣으|이|살|가|사|보|치)면(?!서|적|제))/;
+const QUESTION_ENDING = /(?:\?|(?<!(?:안\s?|태어))나요|인가요|되나요|되나|일까요|까요|할까|될까|되니|하니|가능한가|가능해|가능할|어때|몇\s*(?:점|년|개월|회|살)?|얼마|뭐|무엇|어떻게|어떤|왜|언제|어디|알려\s*줘|알려\s*주세요|보여\s*줘|보여\s*주세요|궁금|는지|은지|인지|기준(?:이|은)?\s*(?:뭐|어떻|몇|얼마)|기준(?:이야|이에요|인가)?\s*$)/;
+const CONDITION = /(?:만약|만일|가정(?:하|해|이)|(?:부부|부모|가정|가족|자녀|아이|세대주|무주택|미혼|기혼)면(?!서|적|제)|(?:이라|라|다|으|하|되|있으|없으|했으|넘으|넣으|이|살|가|사|보|치)면(?!서|적|제))/;
 const CONDITIONAL_QUESTION = new RegExp(`(?:${CONDITION.source}|여야|해야).*(?:\\?|나요|인가요|되나요|되나|몇\\s*점|얼마|가능|기준|유리|불리|돼요|되요|안\\s*돼|어때|어떻게)`);
 /** 추측·기억이 불확실한 말은 사실로 저장하지 않는다. */
 const HEDGE = /(?:아마|대충|대략|얼추|글쎄|거의|확실(?:하지|치|히는)\s*(?:않|모르|아니)|기억(?:이)?\s*(?:안|잘|가물)|헷갈|모르겠|것\s*같|거\s*같|듯(?:해|합|요|싶|하)|(?<!\d)(?:을|일|할|될)\s*(?:거(?!주|래|절)|걸|껄)|쯤|정도|남짓|(?:^|\s)약\s*\d|(?:였|이었|했|됐)나|인가\s*봐|수도\s*있)/;
 /** 앞으로의 계획이나 예정은 지금의 사실이 아니다. */
 const FUTURE = /(?:예정|계획|하려(?:고|구|면)?|할게|할래|생각\s*(?:중|이에요|입니다|이야|이다)|(?:^|\s)곧|나중에|내년|다음\s*(?:달|해)|앞으로|거예요|거에요|거야|겁니다)/;
 /** 다른 사람 이야기나 비교는 신청자 사실이 아니다. 배우자 유무는 혼인 사실로 따로 받는다. */
-const THIRD_PARTY = /(?:보다|처럼|만큼|비교|친구|동생|(?<![가-힣])형(?:은|이|도|네|한테)|누나|언니|오빠|엄마|아빠|어머니|아버지|부모(?!님?\s*(?:의\s*)?(?:총\s*)?(?:자산|재산))|배우자|남편|아내|와이프|남자\s*친구|여자\s*친구|애인|지인|남들|다른\s*사람|사촌|옆집)/;
+const THIRD_PARTY = /(?:보다|처럼|만큼|비교|친구|동생|(?<![가-힣])형(?:은|이|도|네|한테)|누나|언니|오빠|엄마|아빠|어머니|아버지|(?<!한)부모(?!님?\s*(?:의\s*)?(?:총\s*)?(?:자산|재산))|배우자|남편|아내|와이프|남자\s*친구|여자\s*친구|애인|지인|남들|다른\s*사람|사촌|옆집)/;
+/** "저랑 배우자 둘만 살아요": 신청자가 주어이고 배우자는 함께 사는 사람이다. */
+const SPOUSE_HOUSEHOLD = /(?:^|\s)(?:저|나|제)\s*(?:랑|와|하고|이랑)\s*(?:배우자|남편|아내|와이프)/;
 const SPOUSE_PRESENCE = /^(?:저는\s*|전\s*|저\s*)?(?:현재\s*|지금\s*)?(?:(?:배우자|남편|아내|와이프)(?:는|가|도)?\s*(?:없|있)|(?:배우자|남편|아내|와이프)(?:와|랑|이랑|하고)\s*(?:혼인|결혼)\s*(?:중|했|한\s*지))/;
 const DOUBLE_NEGATIVE = /(?:없지\s*(?:는|도)?\s*않|없진\s*않|없는\s*(?:건|것은?|게)\s*아니|아니(?:지|진)\s*않|않은\s*(?:건|것은?|게)\s*아니|안\s*한\s*(?:건|것은?|게)\s*아니|없다고\s*(?:는|하긴)?\s*(?:못|어렵))/;
 
@@ -94,7 +105,7 @@ function clauseGuard(value: string): ClauseGuard {
   if (HEDGE.test(value)) return 'HEDGE';
   if (FUTURE.test(value)) return 'FUTURE';
   if (CONDITION.test(value)) return 'CONDITION';
-  if (THIRD_PARTY.test(value) && !SPOUSE_PRESENCE.test(value)) return 'THIRD_PARTY';
+  if (THIRD_PARTY.test(value) && !SPOUSE_PRESENCE.test(value) && !SPOUSE_HOUSEHOLD.test(value)) return 'THIRD_PARTY';
   return 'NONE';
 }
 
@@ -157,7 +168,7 @@ export function normalizeConsultationNumbers(message: string): string {
   text = text.replace(/(\d),(?=\d{3}(?!\d))/g, '$1');
   // 고유어 수사 + 단위: 열두 번, 두 달, 스물다섯 살. "한 번도"는 부정 관용구라 남긴다.
   text = text.replace(
-    /(?<![가-힣])(열|스물|스무|서른|마흔|쉰)?\s?(하나|다섯|여섯|일곱|여덟|아홉|한|두|둘|세|셋|석|네|넷|넉)?\s*(번|회|달|살|명)(?![가-힣]*도(?![가-힣]))/g,
+    /(?<![가-힣])(열|스물|스무|서른|마흔|쉰)?\s?(하나|다섯|여섯|일곱|여덟|아홉|한|두|둘|세|셋|석|네|넷|넉)?\s*(번|회|달|살|명|식구)(?![가-힣]*도(?![가-힣]))/g,
     (whole, tens: string | undefined, ones: string | undefined, unit: string) => {
       if (!tens && !ones) return whole;
       const value = (tens ? NATIVE_TENS[tens] : 0) + (ones ? NATIVE_ONES[ones] : 0);
@@ -228,8 +239,36 @@ function regionsIn(clause: string): string[] {
 }
 
 type Topic = 'age' | 'birth' | 'residence' | 'account' | 'payments' | 'money' | 'tax' | 'work' | 'marriage'
-  | 'housing' | 'specialSupply' | 'reWinning' | 'overseas' | 'exceptions' | 'children' | 'dualIncome';
+  | 'housing' | 'specialSupply' | 'reWinning' | 'overseas' | 'exceptions' | 'children' | 'dualIncome'
+  | 'family' | 'household' | 'marriageDate' | 'childDates' | 'restriction';
 type Extracted = { topic: Topic; update: ConsultationFieldUpdate };
+/** Message-level context a single clause cannot see: which said dates are a child's birth dates. */
+type ClauseContext = { childBirthStarts: Set<string> };
+
+/** 혼인·결혼이 "있었던 일"로 말해진 경우. "결혼 전", "결혼하면"은 여기에 들지 않는다. */
+const MARRIAGE_EVENT = /(?:혼인\s*신고(?:를|는)?\s*(?:했|하였)|혼인\s*신고일|결혼\s*(?:을|은|도)?\s*(?:했|하였)|결혼한\s*(?:날|날짜|해)|혼인(?:한)?\s*(?:날|일(?:은|이|자)))/;
+const MARRIAGE_DURATION = /(?:결혼|혼인(?:\s*신고)?)\s*(?:을|을\s*)?(?:한|하고|신고한)?\s*(?:지|후)\s*(\d+)\s*(년|개월)\s*(?:이|가|째)?\s*(?:됐|되었|지났|이에요|예요|입니다|이야|째)/;
+const MARRIAGE_YEAR_NTH = /(?:결혼|혼인)\s*(\d+)\s*년\s*차/;
+const NATIVE_COUNT: Record<string, number> = { 하나: 1, 둘: 2, 셋: 3, 넷: 4 };
+
+/** 가구원수. "세 식구", "4인 가구", "가족은 모두 4명", "저랑 배우자 둘만". 범위("3~4명")는 읽지 않는다. */
+function householdSize(clause: string): number | undefined {
+  if (/\d+\s*[~\-]\s*\d+\s*(?:명|식구|인)/.test(clause)) return undefined;
+  const match = clause.match(/(?<!\d)(\d{1,2})\s*(?:식구|인\s*가구|인가구)/)
+    ?? clause.match(/(?:가족|가구원|세대원|식구)(?:\s*수)?(?:은|는|이|가)?\s*(?:모두|총|전부|다\s*해서)?\s*(\d{1,2})\s*명/)
+    ?? clause.match(/(?:우리\s*)?(?:집|가족)(?:은|이)?\s*(\d{1,2})\s*명(?:이서)?\s*(?:살|이에요|예요|입니다)/);
+  if (match) return Number(match[1]);
+  if (SPOUSE_HOUSEHOLD.test(clause) && /(?:둘|2\s*명)(?:만|이서|이)?\s*(?:살|이에요|예요|입니다|지내)/.test(clause) && !/(?:아이|자녀|애|부모)/.test(clause)) return 2;
+  return undefined;
+}
+
+/** 자녀 수. "아이가 2명", "아이 둘", "자녀 셋". 없음은 childbirthClear 쪽에서 받는다. */
+function childCount(clause: string): number | undefined {
+  const match = clause.match(/(?:자녀|자식|아이|애기|아기|애(?![매인정착]))(?:가|는|도|이|를)?\s*(?:모두|총)?\s*(\d{1,2})\s*명/)
+    ?? clause.match(/(?:자녀|자식|아이|애(?![매인정착]))(?:가|는|도|이)?\s*(하나|둘|셋|넷)(?!\s*도)(?![가-힣]*도(?![가-힣]))/);
+  if (!match) return undefined;
+  return NATIVE_COUNT[match[1]] ?? Number(match[1]);
+}
 
 const HOUSE = /(?:주택|(?<!모)집(?!합|중|계)|아파트|자가|빌라|오피스텔|분양권|입주권)/;
 const HOUSEHOLD = /(?:세대\s*(?:원|전원|구성원)?|가구원|가족\s*(?:모두|전원|중))/;
@@ -250,12 +289,20 @@ function amount(clause: string, label: RegExp): number | undefined {
 }
 
 /** ASSERTION으로 분류된 절 하나에서만 호출한다. */
-function extractClause(clause: string): Extracted[] {
+function extractClause(clause: string, context: ClauseContext = { childBirthStarts: new Set() }): Extracted[] {
   const out: Extracted[] = [];
   const push = (topic: Topic, update: ConsultationFieldUpdate) => out.push({ topic, update });
-  // 배우자 이야기는 혼인 사실로만 읽는다. 배우자의 주택·소득은 신청자 사실이 아니다.
-  if (SPOUSE_PRESENCE.test(clause)) {
-    if (!PAST_ONLY.test(clause)) push('marriage', { field: 'marriageStatus', value: /없/.test(clause) ? 'single' : 'married' });
+  // 배우자 이야기는 혼인 사실과 함께 사는 식구 수로만 읽는다. 배우자의 주택·소득은 신청자 사실이 아니다.
+  if (SPOUSE_PRESENCE.test(clause) || SPOUSE_HOUSEHOLD.test(clause)) {
+    if (!PAST_ONLY.test(clause)) {
+      const single = SPOUSE_PRESENCE.test(clause) && /없/.test(clause);
+      push('marriage', { field: 'marriageStatus', value: single ? 'single' : 'married' });
+      if (!single) push('family', { field: 'familyCategory', value: 'married' });
+    }
+    const size = householdSize(clause);
+    if (size !== undefined) push('household', { field: 'incomeHouseholdSize', value: size });
+    const count = childCount(clause);
+    if (count !== undefined) push('children', { field: 'childCount', value: count });
     return out;
   }
   const polarity = polarityOf(clause);
@@ -263,7 +310,7 @@ function extractClause(clause: string): Extracted[] {
   const housingText = clause.replace(/주택\s*청약\s*종합\s*저축|주택\s*청약/g, '청약통장');
 
   // 나이·생년월일
-  const hasChildren = CHILDREN.test(clause);
+  const hasChildren = CHILDREN.test(clause) || mentionsChild(clause);
   const age = clause.match(new RegExp(`(?:나이(?:는|가)?\\s*)?(?:만\\s*)?(?<!\\d)(\\d{1,2})\\s*(?:살|세(?!대))${THRESHOLD_AFTER}`))
     ?? clause.match(/나이(?:는|가)\s*(?:만\s*)?(\d{1,2})(?!\d|\s*(?:개월|년|회|원))/);
   if (age && !hasChildren) {
@@ -274,9 +321,58 @@ function extractClause(clause: string): Extracted[] {
     ?? clause.match(/(?:생년월일|생일)(?:은|이|:)?\s*((?:19|20)\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})/);
   if (birth) {
     const [month, day] = [Number(birth[2]), Number(birth[3])];
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      push('birth', { field: 'birthDate', value: `${birth[1]}-${birth[2].padStart(2, '0')}-${birth[3].padStart(2, '0')}` });
+    const date = `${birth[1]}-${birth[2].padStart(2, '0')}-${birth[3].padStart(2, '0')}`;
+    // 자녀의 생년월일로 읽힌 날짜는 신청자 생년월일이 아니다.
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && !context.childBirthStarts.has(date) && !hasChildren) {
+      push('birth', { field: 'birthDate', value: date });
     }
+  }
+
+  // 혼인일·혼인기간·가족 유형
+  if (!/(?:이혼|사별|돌싱|했었|결혼\s*전|혼인\s*전)/.test(clause)) {
+    const marriageDates = MARRIAGE_EVENT.test(clause)
+      ? saidDates(clause).filter(date => !context.childBirthStarts.has(date.start) && !/^\s*(?:에\s*)?(?:생|출생|태어)/.test(clause.slice(date.index + date.text.length)))
+      : [];
+    if (marriageDates.length === 1 && polarity !== 'NEG') {
+      push('marriageDate', { field: 'marriageDate', value: rangeText(marriageDates[0]) });
+      push('family', { field: 'familyCategory', value: 'married' });
+      push('marriage', { field: 'marriageStatus', value: 'married' });
+    }
+    const duration = clause.match(MARRIAGE_DURATION), nth = clause.match(MARRIAGE_YEAR_NTH);
+    if (duration && polarity !== 'NEG') {
+      const value = Number(duration[1]);
+      // "3년"은 36~47개월, "42개월"(3년 반)은 정확히 42개월이다.
+      const range = duration[2] === '년' ? `${value * 12}~${value * 12 + 11}` : `${value}~${value}`;
+      push('marriageDate', { field: 'marriageDurationMonths', value: range });
+      push('family', { field: 'familyCategory', value: 'married' });
+    } else if (nth && Number(nth[1]) >= 1 && polarity !== 'NEG') {
+      const value = Number(nth[1]);
+      push('marriageDate', { field: 'marriageDurationMonths', value: `${(value - 1) * 12}~${value * 12 - 1}` });
+      push('family', { field: 'familyCategory', value: 'married' });
+    }
+  }
+  if (/예비\s*신혼/.test(clause) && polarity !== 'NEG') {
+    push('family', { field: 'familyCategory', value: 'engaged' });
+    push('marriage', { field: 'marriageStatus', value: 'single' });
+  }
+  if (/한부모/.test(clause) && polarity !== 'NEG') {
+    push('family', { field: 'familyCategory', value: 'singleParent' });
+    push('family', { field: 'singleParentQualified', value: true });
+    push('marriage', { field: 'marriageStatus', value: 'single' });
+  }
+  if (/신혼\s*부부(?:예요|입니다|이에요|이고|로)|(?:혼인\s*신고|결혼)\s*(?:를|은|을)?\s*(?:했|하였)/.test(clause) && !/예비/.test(clause) && polarity !== 'NEG') {
+    push('family', { field: 'familyCategory', value: 'married' });
+  }
+  // 예비신혼부부의 혼인 증명 기한. 앞으로 할 일("할 거예요")은 FUTURE로 이미 걸러진다.
+  if (/(?:혼인|결혼)\s*(?:사실)?\s*(?:을|를)?\s*(?:증명|신고)\S*\s*(?:할\s*수\s*있|가능합니다)/.test(clause)) {
+    push('family', { field: 'plannedMarriageWithinDeadline', value: true });
+  } else if (/(?:혼인|결혼)[^.]{0,10}(?:증명|신고)[^.]{0,8}(?:어려|못\s*하|할\s*수\s*없)/.test(clause)) {
+    push('family', { field: 'plannedMarriageWithinDeadline', value: false });
+  }
+  const size = householdSize(clause);
+  if (size !== undefined) push('household', { field: 'incomeHouseholdSize', value: size });
+  if (/특별\s*공급\s*(?:횟수\s*)?제한/.test(clause) && polarity !== 'NONE') {
+    push('restriction', { field: 'specialSupplyRestriction', value: polarity === 'POS' });
   }
 
   // 거주지역과 거주기간. 공고 지역은 규칙이 판단하므로 여기서는 말한 지역을 그대로 옮긴다.
@@ -287,6 +383,11 @@ function extractClause(clause: string): Extracted[] {
     push('residence', { field: 'currentResidence', value: regions[0] });
     const months = durationMonths(clause);
     if (months.length === 1 && lives && !ACCOUNT.test(clause)) push('residence', { field: 'residenceDurationMonths', value: months[0] });
+  } else if (regions.length === 0 && lives && polarity !== 'NEG' && !OVERSEAS.test(clause) && !PAST_ONLY.test(clause) && !ACCOUNT.test(clause)) {
+    // "○○시에 거주한 지 5년": 공고가 시·군 단위로 거주기간을 볼 때. 시·도는 알 수 없으니 거주지역은 정하지 않는다.
+    const city = clause.match(/(?<![가-힣])([가-힣]{2,4})(시|군)(?:에서|에)\s/);
+    const months = durationMonths(clause);
+    if (city && !/^(?:당|동|역|잠|그|이|저|그때)$/.test(city[1]) && months.length === 1) push('residence', { field: 'residenceDurationMonths', value: months[0] });
   }
 
   // 청약통장
@@ -351,7 +452,7 @@ function extractClause(clause: string): Extracted[] {
   // 혼인
   if (!/(?:이혼|사별|돌싱|했었)/.test(clause)) {
     const single = /(?:미혼|싱글|솔로|(?:결혼|혼인)\s*(?:은|을|도)?\s*(?:아직\s*)?(?:안\s*했|안\s*한|하지\s*않았|한\s*적\s*(?:이|은)?\s*없|전이에요|전입니다|전이야)|아직\s*(?:결혼|혼인)\s*(?:안|전))/.test(clause);
-    const married = /(?:기혼|유부|(?<!안\s)(?:결혼|혼인)\s*(?:을|은|도)?\s*했|결혼한\s*지|혼인\s*(?:중|상태|신고\s*했)|신혼(?:이에요|입니다|부부(?:예요|입니다)))/.test(clause);
+    const married = /(?:기혼|유부|(?<!안\s)(?:결혼|혼인)\s*(?:을|은|도)?\s*했|결혼한\s*지|혼인\s*(?:중|상태|신고\s*했)|(?<!예비\s?)신혼(?:이에요|입니다|부부(?:예요|입니다)))/.test(clause);
     if (single !== married) push('marriage', { field: 'marriageStatus', value: single ? 'single' : 'married' });
   }
 
@@ -393,9 +494,17 @@ function extractClause(clause: string): Extracted[] {
 
   // 자녀·태아·입양
   if (hasChildren) {
-    const count = /(?:\d+\s*명|하나(?!도)|둘|셋)/.test(clause);
-    if (polarity === 'NEG' && !count) push('children', { field: 'childbirthClear', value: true });
-    else if (polarity === 'POS' || count || /임신\s*중/.test(clause)) push('children', { field: 'specialException', value: '자녀·태아·입양 자녀 상세정보 추가 확인' });
+    const count = childCount(clause);
+    const pregnancyOrAdoption = /(?:태아|임신|입양)/.test(clause);
+    if (polarity === 'NEG' && count === undefined) {
+      push('children', { field: 'childbirthClear', value: true });
+      if (!pregnancyOrAdoption) push('children', { field: 'childCount', value: 0 });
+    } else if (pregnancyOrAdoption && polarity !== 'NEG') {
+      // 태아·입양은 공고별 특례 판단이 필요해 검토로 보낸다.
+      push('children', { field: 'specialException', value: '자녀·태아·입양 자녀 상세정보 추가 확인' });
+    } else if (count !== undefined) {
+      push('children', { field: 'childCount', value: count });
+    }
   }
 
   // 특례
@@ -493,12 +602,22 @@ function parseSupply(message: string): SupplyType | undefined {
  */
 export class DeterministicConsultationInterpreter implements ConsultationLanguageProvider {
   async interpret({ message }: { message: string }): Promise<ConsultationInterpretation> {
-    const clauses = splitClauses(normalizeConsultationNumbers(message));
+    const normalized = normalizeConsultationNumbers(message);
+    const clauses = splitClauses(normalized);
+    // 자녀 생년월일 목록은 쉼표로 이어지므로 절이 아니라 문장 단위로 먼저 읽는다.
+    const sentences = normalized.split(/(?:(?<!\d)\.|\.(?!\d)|[!?\n])+/).map(part => part.trim()).filter(Boolean);
+    const asserted = sentences.filter(sentence => classifyConsultationUtterance(sentence) === 'ASSERTION');
+    // 주어 없는 "…생이에요"는 같은 문장이나 바로 앞 문장이 자녀가 있다고 말했을 때만 자녀 생년월일이다.
+    // "자녀는 없습니다"처럼 없다는 말은 문맥이 되지 않는다(본인 생년월일을 자녀로 읽지 않는다).
+    const hasChildren = (sentence: string | undefined) => !!sentence && mentionsChild(sentence) && !/없|아니/.test(sentence);
+    const childDates = asserted.flatMap((sentence, i) => childBirthLists(sentence, hasChildren(sentence) || hasChildren(asserted[i - 1])).flat());
+    const context: ClauseContext = { childBirthStarts: new Set(childDates.map(date => date.start)) };
     const extracted = clauses.flatMap(text => {
       const kind = classifyConsultationUtterance(text);
-      if (kind === 'ASSERTION') return extractClause(text);
+      if (kind === 'ASSERTION') return extractClause(text, context);
       return kind === 'UNKNOWN' && clauseGuard(text) === 'THIRD_PARTY' ? reviewFlags(text) : [];
     });
+    if (childDates.length) extracted.push({ topic: 'childDates', update: { field: 'childBirthDates', value: childDates.map(rangeText).join(',') } });
     const intent = classifyIntent(message, extracted.length > 0);
     const updates = intent === 'SHOW_PROFILE' ? [] : mergeExtracted(extracted);
     return {

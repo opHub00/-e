@@ -64,7 +64,7 @@ export const CONSULTATION_UTTERANCES: UtteranceCase[] = [
   c('이혼했어요', 'AMBIGUOUS', 'ASSERTION', {}, ['marriageStatus']),
   c('자녀는 없습니다', 'NEGATIVE', 'ASSERTION', { childbirthClear: true }),
   c('아이 하나도 없어요', 'COLLOQUIAL', 'ASSERTION', { childbirthClear: true }, ['specialException']),
-  c('아이가 한 명 있어요', 'POSITIVE', 'ASSERTION', { specialException: '자녀·태아·입양 자녀 상세정보 추가 확인' }, ['childbirthClear']),
+  c('아이가 한 명 있어요', 'POSITIVE', 'ASSERTION', { childCount: 1 }, ['childbirthClear', 'specialException']),
   c('자녀는 없고 태아는 있어요', 'MIXED', 'ASSERTION', { specialException: '자녀·태아·입양 자녀 상세정보 추가 확인' }, ['childbirthClear']),
   c('아이가 3살이에요', 'NUMERIC', 'ASSERTION', {}, ['declaredAgeYears', 'childbirthClear']),
 

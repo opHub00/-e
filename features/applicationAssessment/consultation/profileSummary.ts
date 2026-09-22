@@ -43,10 +43,17 @@ const ANSWER_LINES: [key: string, label: string, format: (value: unknown) => str
   ['parentAssets', '부모 자산', won],
   ['realEstateAssets', '세대 부동산 가액', won],
   ['vehicleValue', '가장 높은 차량가액', won],
+  ['familyCategory', '가족 유형', v => ({ married: '신혼부부', engaged: '예비신혼부부', singleParent: '한부모' } as Record<string, string>)[String(v)] ?? String(v)],
+  ['marriageDate', '혼인신고일', String],
+  ['marriageDateLatest', '혼인신고일(늦은 끝)', String],
+  ['incomeHouseholdSize', '소득 가구원 수', v => `${v}명`],
+  ['declaredChildCount', '말씀하신 자녀 수', v => `${v}명`],
+  ['plannedMarriageWithinDeadline', '입주 전 혼인 증명', yesNo('가능', '어려움')],
+  ['singleParentQualified', '한부모가족 증명', yesNo('가능', '확인 필요')],
   ['specialSupplyHistory', '특별공급 당첨 이력', yesNo('있음', '없음')],
   ['reWinningRestriction', '재당첨 제한', yesNo('있음', '없음')],
   ['overseasStayHistory', '해외체류 이력', v => Array.isArray(v) && v.length === 0 ? '없음' : '있음(확인 필요)'],
-  ['children', '자녀·태아·입양 자녀', v => Array.isArray(v) && v.length === 0 ? '없음' : `${Array.isArray(v) ? v.length : 0}명`],
+  ['children', '자녀 생년월일', v => Array.isArray(v) && v.length === 0 ? '없음' : Array.isArray(v) ? v.map(c => (c as { birthDate?: string; birthDateLatest?: string }).birthDateLatest ? `${(c as { birthDate?: string }).birthDate}~${(c as { birthDateLatest?: string }).birthDateLatest}` : String((c as { birthDate?: string }).birthDate)).join(', ') : '확인 필요'],
   ['specialExceptions', '특례', v => Array.isArray(v) && v.length === 0 ? '해당 없음' : `확인 필요 ${Array.isArray(v) ? v.length : 0}건`],
 ];
 

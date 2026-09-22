@@ -41,6 +41,8 @@ export type ConsultationCollectedAnswers = AssessmentInput['details'] & {
   declaredAgeYears?: number;
   declaredResidenceMonths?: number;
   declaredSubscriptionMonths?: number;
+  /** Stated number of children; birth dates are used only when their count matches. */
+  declaredChildCount?: number;
 };
 
 export type ConsultationSession = {
@@ -71,6 +73,18 @@ export type ConsultationFieldUpdate =
   | { field: 'totalAssets'; value: number }
   | { field: 'parentAssets'; value: number }
   | { field: 'realEstateAssets'; value: number }
+  /** "YYYY-MM-DD" or "YYYY-MM-DD~YYYY-MM-DD" when only a month or year is known. */
+  | { field: 'marriageDate'; value: string }
+  /** "min~max" completed months at the announcement date, e.g. "결혼한 지 3년" → "36~47". */
+  | { field: 'marriageDurationMonths'; value: string }
+  | { field: 'familyCategory'; value: 'married' | 'engaged' | 'singleParent' }
+  | { field: 'singleParentQualified'; value: boolean }
+  | { field: 'plannedMarriageWithinDeadline'; value: boolean }
+  | { field: 'incomeHouseholdSize'; value: number }
+  /** Comma-separated child birth dates, each "YYYY-MM-DD" or "YYYY-MM-DD~YYYY-MM-DD". */
+  | { field: 'childBirthDates'; value: string }
+  | { field: 'childCount'; value: number }
+  | { field: 'specialSupplyRestriction'; value: boolean }
   | { field: 'vehicleValue'; value: number }
   | { field: 'incomeTaxPaymentYears'; value: number }
   | { field: 'workOrBusinessIncomeEligible'; value: boolean }

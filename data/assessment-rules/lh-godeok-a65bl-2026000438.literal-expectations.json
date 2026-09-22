@@ -1,0 +1,114 @@
+{
+  "exact": {
+    "NEWLYWED.ASSET_LIMIT": {
+      "values": [
+        215500000,
+        45420000
+      ],
+      "operator": "lte",
+      "unit": "KRW",
+      "scope": "HOUSEHOLD"
+    },
+    "FIRST_TIME.ASSET_LIMIT": {
+      "values": [
+        215500000,
+        45420000
+      ],
+      "operator": "lte",
+      "unit": "KRW",
+      "scope": "HOUSEHOLD"
+    },
+    "COMMON.REGION.RESIDENCE_MIN": {
+      "values": [
+        1,
+        6
+      ],
+      "operator": "gte"
+    },
+    "COMMON.REGION.PRIORITY_RATIO": {
+      "values": [
+        30,
+        20,
+        50
+      ],
+      "operator": "eq",
+      "unit": "PERCENT"
+    }
+  },
+  "income": {
+    "NEWLYWED.INCOME.SINGLE_LIMIT": [
+      9793892,
+      11442863,
+      12125081,
+      12878142,
+      13631203,
+      14384265
+    ],
+    "NEWLYWED.INCOME.DUAL_LIMIT": [
+      15067526,
+      17604404,
+      18653970,
+      19812526,
+      20971082,
+      22129638
+    ],
+    "FIRST_TIME.INCOME.SINGLE_LIMIT": [
+      9793892,
+      11442863,
+      12125081,
+      12878142,
+      13631203,
+      14384265
+    ],
+    "FIRST_TIME.INCOME.DUAL_LIMIT": [
+      15067526,
+      17604404,
+      18653970,
+      19812526,
+      20971082,
+      22129638
+    ],
+    "FIRST_TIME.PRIORITY.INCOME_LIMIT": [
+      7533763,
+      8802202,
+      9326985,
+      9906263,
+      10485541,
+      11064819,
+      9040516,
+      10562642,
+      11192382,
+      11887516,
+      12582649,
+      13277783
+    ],
+    "FIRST_TIME.GENERAL.INCOME_LIMIT": [
+      9793892,
+      11442863,
+      12125081,
+      12878142,
+      13631203,
+      14384265,
+      10547268,
+      12323083,
+      13057779,
+      13868768,
+      14679757,
+      15490747
+    ],
+    "FIRST_TIME.LOTTERY.INCOME_LIMIT": [
+      9793892,
+      11442863,
+      12125081,
+      12878142,
+      13631203,
+      14384265,
+      15067526,
+      17604404,
+      18653970,
+      19812526,
+      20971082,
+      22129638
+    ]
+  }
+}

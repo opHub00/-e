@@ -50,3 +50,39 @@
 - `features/ruleExtraction/server/fixtures/samdoLiteralExpectations.ts`: 추출 벤치마크용 공고 literal
 - `features/applicationAssessment/reference/`: LEGACY/REFERENCE_ONLY 구조 샘플 (명시 선택 시에만)
 - `scripts/*samdo*`, `scripts/build-samdo-draft-package.py`: 보관용 삼도 벤치마크·전사 도구
+
+## 5. 두 번째 공고로 확인한 절차 (힐스테이트 고덕엘리스트 A65BL, 청약홈 2026000438)
+
+| 단계 | 실행한 명령·RPC | 결과 |
+|---|---|---|
+| 전사 → 패키지 | `node --experimental-strip-types scripts/build-import-package.mjs --transcription <공고>.transcription.json --parsed <parsed document.json> --out <공고>.json` | 인용 블록의 원문·페이지·bbox를 그대로 복사. 원문 해시가 다르거나, 없는 블록을 인용하거나, 규칙 숫자가 인용 원문에 없으면 실패 |
+| 검증 | `assessment-rules validate <공고>.json` | 구조·규칙 디코딩 |
+| 원문 업로드 | `assessment-rules upload <공고>.json --document <원문>` | 원문 SHA-256 재확인 후 비공개 저장 |
+| import | `assessment-rules import <공고>.json` | 저장된 원문 해시 재확인, 의미 round-trip, 승인·활성화 안 함 |
+| review seed | `seed-rule-review-staging.mjs --package … --annotations …` (`RULE_REVIEW_STAGING_ALLOW_WRITE=true`는 이 프로세스에서만) | 모든 규칙이 PENDING 후보 |
+| 검수 | reviewer 계정으로 `mutate_assessment_rule_review` (START_REVIEW → REVIEW_EVIDENCE → APPROVE_RULE → RESOLVE_UNRESOLVED → REVIEW_EXCEPTION) | 근거는 인용 블록 원문과 다시 대조한 뒤에만 VALID |
+| 레지스트리 승인 | `assessment-rules review <ruleSetId> --out …` → `approve <ruleSetId> --fingerprint … --reviewer …` | 저장된 스냅샷 지문으로만 승인 |
+| 활성화 | admin 계정으로 `activate_reviewed_assessment_rule_set(p_rule_set_id, p_expected_revision, p_expected_active_id)` | reviewer는 FORBIDDEN. 활성 버전은 공고 단위로 하나 |
+
+### 수동 단계: listing binding (자동화 대상)
+
+import API는 binding을 바꿀 수 없다. 현재는 운영자가 staging 연결을 확인한 뒤 아래 한 줄을 실행한다.
+listing id는 탐색 데이터 정규화 규칙(`normalizeListingRecord`)이 만드는 값과 같아야 한다
+(청약홈 APT: `apt-<관리번호>-<공고번호>`).
+
+```sql
+insert into public.announcement_listing_bindings(listing_id, announcement_id)
+values ('apt-2026000438-2026000438', 'cc799320-c2ef-4462-a6d8-25a856b415b8')
+on conflict do nothing;
+```
+
+향후 자동화는 audit log를 남기는 admin 전용 RPC로 옮기고, 이 SQL은 그 RPC의 동작 기준으로 쓴다.
+
+### 이 공고로 추가된 범용 어휘
+
+- 사실: `realEstateAssets`(세대 부동산), `vehicleValue`(최고 차량가액), `householdIncomeScoreEligible`(공고 비율 `incomeScore.singlePercent/dualPercent` 이하면 1),
+  `newlywedMarriageScoreMonths`·`singleParentChildScoreMonths`(가족 유형상 선택 불가 항목은 -1)
+- 배점 구간 `notApplicable: true`: 선택할 수 없는 항목은 0점이고 최대점에서도 뺀다
+- 규칙 개념: `realEstate`, `vehicle` → ASSET(세대)
+- 경고: `warning.<supplyType>.*`는 해당 공급유형 결과에만 붙는다
+- 거주: 공고 규칙에 `residence eq`가 없으면(전국 청약) 폼은 중립 질문을 하고 지역을 가정하지 않는다

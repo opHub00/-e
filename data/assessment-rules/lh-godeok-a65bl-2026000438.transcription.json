@@ -1,0 +1,3735 @@
+{
+  "evidencePrefix": "godeok.a65bl",
+  "evidenceSource": "힐스테이트 고덕엘리스트 A65BL 공공분양주택 입주자모집공고(청약홈 첨부, 2026.09.11.)",
+  "announcement": {
+    "id": "cc799320-c2ef-4462-a6d8-25a856b415b8",
+    "source": "APT_APPLY",
+    "externalId": "getAPTLttotPblancDetail:2026000438:2026000438",
+    "housingManagementNumber": "2026000438",
+    "title": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+    "publisher": "한국토지주택공사 경기남부지역본부",
+    "announcementDate": "2026-09-11",
+    "regionCode": "410",
+    "regionName": "경기도",
+    "sourceUrl": "https://www.applyhome.co.kr/ai/aia/selectAPTLttotPblancDetail.do?houseManageNo=2026000438&pblancNo=2026000438"
+  },
+  "document": {
+    "id": "58a654bc-865a-459a-81af-92ea5064dee4",
+    "documentType": "OFFICIAL",
+    "storagePath": "2026/cc799320-c2ef-4462-a6d8-25a856b415b8/58a654bc-865a-459a-81af-92ea5064dee4/original.pdf",
+    "fileName": "applyhome-2026000438-atchmnfl-1973016-5.pdf",
+    "mimeType": "application/pdf",
+    "versionLabel": "2026.09.11. 입주자모집공고",
+    "sha256": "be9fc0f60a274236b5de9391bf4279dce90252821009735a60e969eada768542",
+    "isOfficial": true,
+    "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?atchmnflSeqNo=1973016&atchmnflSn=5&houseManageNo=2026000438&pblancNo=2026000438",
+    "publishedAt": null
+  },
+  "ruleSet": {
+    "id": "d96c7afc-e10c-43cd-815f-97e401fc318f",
+    "version": "OFFICIAL-2026-09-11-transcription-1",
+    "sourceStatus": "OFFICIAL_VERIFIED",
+    "effectiveDate": "2026-09-11",
+    "config": {
+      "parameters": {
+        "amounts.integerWon": true,
+        "children.includeUnborn": true,
+        "children.minorAgeYears": 19,
+        "exceptions.childbirthAfter": "2023-03-28",
+        "incomeScore.singlePercent": 80,
+        "incomeScore.dualPercent": 100,
+        "newlywed.priorityPercent": 70,
+        "newlywed.generalPercent": 20,
+        "firstHome.priorityPercent": 70,
+        "firstHome.generalPercent": 20,
+        "selection.rounding": "CEIL",
+        "selection.tieBreak": "LOTTERY",
+        "warning.region": "지역우선공급: 평택시 1년 이상 계속 거주자 30%, 경기도 6개월 이상 20%, 기타지역(전국) 50%로 배분해요. 배분 비율과 순서는 판정에 계산하지 않아요.",
+        "warning.selection": "공급단계는 처음 들어가는 단계예요. 낙첨하면 다음 단계 추첨에 다시 포함돼요.",
+        "warning.newlywed.rank": "신혼부부 특별공급은 1순위(혼인기간 중 출산·입양·임신 자녀가 있는 신혼부부, 혼인 외 출생자, 만 7세 미만 자녀를 둔 한부모)와 2순위(예비신혼부부, 1순위가 아닌 신혼부부)를 먼저 나눠요. 1단계는 같은 순위 안에서 가점순, 2·3단계는 추첨이에요.",
+        "income.3.80": 6027010,
+        "income.4.80": 7041762,
+        "income.5.80": 7461588,
+        "income.6.80": 7925010,
+        "income.7.80": 8388433,
+        "income.8.80": 8851855,
+        "income.3.100": 7533763,
+        "income.4.100": 8802202,
+        "income.5.100": 9326985,
+        "income.6.100": 9906263,
+        "income.7.100": 10485541,
+        "income.8.100": 11064819,
+        "income.3.120": 9040516,
+        "income.4.120": 10562642,
+        "income.5.120": 11192382,
+        "income.6.120": 11887516,
+        "income.7.120": 12582649,
+        "income.8.120": 13277783,
+        "income.3.130": 9793892,
+        "income.4.130": 11442863,
+        "income.5.130": 12125081,
+        "income.6.130": 12878142,
+        "income.7.130": 13631203,
+        "income.8.130": 14384265,
+        "income.3.140": 10547268,
+        "income.4.140": 12323083,
+        "income.5.140": 13057779,
+        "income.6.140": 13868768,
+        "income.7.140": 14679757,
+        "income.8.140": 15490747,
+        "income.3.200": 15067526,
+        "income.4.200": 17604404,
+        "income.5.200": 18653970,
+        "income.6.200": 19812526,
+        "income.7.200": 20971082,
+        "income.8.200": 22129638
+      },
+      "supplies": [
+        {
+          "type": "newlywed",
+          "eligibility": [
+            "newlywed.adult",
+            "newlywed.overseas",
+            "newlywed.exceptions",
+            "newlywed.childbirth",
+            "newlywed.restrictions",
+            "newlywed.specialHistory",
+            "newlywed.reWinning",
+            "newlywed.account",
+            "newlywed.months",
+            "newlywed.payments",
+            "newlywed.size",
+            "newlywed.income",
+            "newlywed.realEstate",
+            "newlywed.vehicle",
+            "newlywed.family",
+            "newlywed.housing"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "newlywed.PRIORITY.income"
+              ],
+              "scores": [
+                "newlywed.PRIORITY.incomeScore",
+                "newlywed.PRIORITY.childrenScore",
+                "newlywed.PRIORITY.residenceScore",
+                "newlywed.PRIORITY.paymentScore",
+                "newlywed.PRIORITY.marriageScore",
+                "newlywed.PRIORITY.childAgeScore"
+              ]
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [
+                "newlywed.GENERAL.income"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "LOTTERY",
+              "conditions": [
+                "newlywed.LOTTERY.income"
+              ],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "firstHome",
+          "eligibility": [
+            "firstHome.adult",
+            "firstHome.overseas",
+            "firstHome.exceptions",
+            "firstHome.childbirth",
+            "firstHome.restrictions",
+            "firstHome.specialHistory",
+            "firstHome.reWinning",
+            "firstHome.account",
+            "firstHome.months",
+            "firstHome.payments",
+            "firstHome.size",
+            "firstHome.income",
+            "firstHome.realEstate",
+            "firstHome.vehicle",
+            "firstHome.housing",
+            "firstHome.deposit",
+            "firstHome.family",
+            "firstHome.tax"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "firstHome.PRIORITY.income"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [
+                "firstHome.GENERAL.income"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "LOTTERY",
+              "conditions": [
+                "firstHome.LOTTERY.income"
+              ],
+              "scores": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "ruleKey": "newlywed.adult",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년자(만 19세 이상)인 무주택세대구성원",
+        "expression": {
+          "fact": "age",
+          "op": "gte",
+          "value": 19
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅱ-2. 무주택 기준",
+        "blockIds": [
+          "b000903",
+          "b000290"
+        ],
+        "derivedLiterals": {
+          "19": "「민법」상 성년은 만 19세(b000290: 공고문의 나이는 만 나이)"
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.overseas",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해외체류(계속 90일·연간 183일 초과) 이력은 별도 심사",
+        "expression": {
+          "fact": "overseasClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "출입국에 관한 사실증명"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅱ-1. 지역우선 공급기준",
+        "blockIds": [
+          "b000854",
+          "b000855",
+          "b000856"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.exceptions",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "출산특례·혼인특례(중복 적용 불가)는 추가 확인",
+        "expression": {
+          "fact": "exceptionsClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001524"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.childbirth",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "expression": {
+          "fact": "childbirthClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "가족관계증명서",
+          "임신진단서(해당 시)"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001515"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.restrictions",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "특별공급 제한 없음",
+        "expression": {
+          "fact": "noSpecialRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001249",
+          "b001250"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.specialHistory",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "특별공급 당첨 이력 없음(1회 한정)",
+        "expression": {
+          "fact": "noSpecialSupplyHistory",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001249",
+          "b001250"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.reWinning",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "재당첨 제한·부적격 당첨 제한 기간 아님",
+        "expression": {
+          "fact": "noReWinningRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001247",
+          "b001248"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "주택청약종합저축(공고일 전일까지 전환한 통장 포함)",
+        "expression": {
+          "all": [
+            {
+              "fact": "hasAccount",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "accountKindEligible",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        },
+        "documents": [
+          "청약통장 순위(가입)확인서"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "청약 유의사항",
+        "blockIds": [
+          "b000064",
+          "b000065",
+          "b001511"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.months",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주자저축 가입 6개월 경과",
+        "expression": {
+          "fact": "accountMonths",
+          "op": "gte",
+          "value": 6
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001511"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.payments",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "월납입금 6회 이상 납입",
+        "expression": {
+          "fact": "recognizedPaymentCount",
+          "op": "gte",
+          "value": 6
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001511"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.size",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "소득표 가구원수 8인 이하(8인 초과는 추가 확인)",
+        "expression": {
+          "all": [
+            {
+              "fact": "incomeHouseholdSize",
+              "op": "gte",
+              "value": 3
+            },
+            {
+              "fact": "incomeHouseholdSize",
+              "op": "lte",
+              "value": 8
+            }
+          ]
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "<표4> 소득기준",
+        "blockIds": [
+          "b001084",
+          "b001149"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 월평균소득 외벌이 130% / 맞벌이 200% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "소득 관련 증빙서류"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001512",
+          "b001513",
+          "b001084",
+          "b001128",
+          "b001129",
+          "b001130"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.realEstate",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 부동산(건물+토지) 215,500천원 이하",
+        "expression": {
+          "fact": "realEstateAssets",
+          "op": "lte",
+          "value": 215500000
+        },
+        "documents": [
+          "자산 보유 사실확인서"
+        ]
+      },
+      "evidence": {
+        "section": "<표2> 자산보유기준",
+        "blockIds": [
+          "b001015",
+          "b001017",
+          "b001019",
+          "b001514"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 보유 자동차 중 최고 차량가액 45,420천원 이하",
+        "expression": {
+          "fact": "vehicleValue",
+          "op": "lte",
+          "value": 45420000
+        },
+        "documents": [
+          "자동차 등록원부"
+        ]
+      },
+      "evidence": {
+        "section": "<표2> 자산보유기준",
+        "blockIds": [
+          "b001038",
+          "b001041",
+          "b001042",
+          "b001043",
+          "b001514"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.family",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "혼인 7년 이내 또는 만 7세 미만 자녀를 둔 신혼부부 / 예비신혼부부 / 만 7세 미만 자녀를 둔 한부모",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "fact": "familyCategory",
+                      "op": "eq",
+                      "value": "married"
+                    },
+                    {
+                      "fact": "maritalStatus",
+                      "op": "eq",
+                      "value": "married"
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "fact": "marriageWithin7Years",
+                      "op": "eq",
+                      "value": true
+                    },
+                    {
+                      "fact": "hasChildUnder7",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "engaged"
+                },
+                {
+                  "fact": "maritalStatus",
+                  "op": "eq",
+                  "value": "single"
+                },
+                {
+                  "fact": "plannedMarriageWithinDeadline",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "fact": "familyCategory",
+                      "op": "eq",
+                      "value": "singleParent"
+                    },
+                    {
+                      "fact": "maritalStatus",
+                      "op": "eq",
+                      "value": "single"
+                    },
+                    {
+                      "fact": "singleParentQualified",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "fact": "hasChildUnder7",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "혼인관계증명서",
+          "가족관계증명서",
+          "주민등록표등본"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001503",
+          "b001504",
+          "b001506"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.housing",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "무주택세대구성원(예비신혼부부는 혼인으로 구성할 세대 전원 무주택)",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001503",
+          "b001504",
+          "b000903"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.income",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "1단계 우선공급(70%): 외벌이 100% / 맞벌이 120% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001529",
+          "b001530",
+          "b001084",
+          "b001116",
+          "b001117",
+          "b001118"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.GENERAL.income",
+      "supplyType": "newlywed",
+      "stage": "GENERAL",
+      "category": "STAGE",
+      "config": {
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001535",
+          "b001536",
+          "b001084",
+          "b001124",
+          "b001125",
+          "b001126"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.LOTTERY.income",
+      "supplyType": "newlywed",
+      "stage": "LOTTERY",
+      "category": "STAGE",
+      "config": {
+        "label": "3단계 추첨공급: 외벌이 130% / 맞벌이 200% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001541",
+          "b001542",
+          "b001084",
+          "b001128",
+          "b001129",
+          "b001130"
+        ]
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.incomeScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "가구소득 외벌이 80%·맞벌이 100% 이하",
+        "fact": "householdIncomeScoreEligible",
+        "bands": [
+          {
+            "min": 1,
+            "max": 1,
+            "points": 1
+          },
+          {
+            "min": 0,
+            "max": 0,
+            "points": 0
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001562",
+          "b001563",
+          "b001564",
+          "b001565",
+          "b001566",
+          "b001567",
+          "b001568",
+          "b001120",
+          "b001121",
+          "b001122"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.childrenScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "미성년 자녀 수(태아 포함, 명)",
+        "fact": "minorChildren",
+        "bands": [
+          {
+            "min": 0,
+            "max": 0,
+            "points": 0
+          },
+          {
+            "min": 1,
+            "max": 1,
+            "points": 1
+          },
+          {
+            "min": 2,
+            "max": 2,
+            "points": 2
+          },
+          {
+            "min": 3,
+            "points": 3
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001569",
+          "b001570",
+          "b001571",
+          "b001572",
+          "b001573"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.residenceScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "해당 주택건설지역(평택시) 연속 거주기간(개월)",
+        "fact": "residenceMonths",
+        "bands": [
+          {
+            "min": 0,
+            "max": 11,
+            "points": 1
+          },
+          {
+            "min": 12,
+            "max": 35,
+            "points": 2
+          },
+          {
+            "min": 36,
+            "points": 3
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001574",
+          "b001575",
+          "b001576",
+          "b001577",
+          "b001578",
+          "b001579",
+          "b001580"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.paymentScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "주택청약종합저축 납입인정 횟수(회)",
+        "fact": "recognizedPaymentCount",
+        "bands": [
+          {
+            "min": 6,
+            "max": 11,
+            "points": 1
+          },
+          {
+            "min": 12,
+            "max": 23,
+            "points": 2
+          },
+          {
+            "min": 24,
+            "points": 3
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001581",
+          "b001582",
+          "b001583",
+          "b001584",
+          "b001585"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.marriageScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "혼인기간(개월, 신혼부부만. 예비신혼·한부모는 0점)",
+        "fact": "newlywedMarriageScoreMonths",
+        "bands": [
+          {
+            "min": -1,
+            "max": -1,
+            "points": 0,
+            "notApplicable": true
+          },
+          {
+            "min": 0,
+            "max": 36,
+            "points": 3
+          },
+          {
+            "min": 37,
+            "max": 60,
+            "points": 2
+          },
+          {
+            "min": 61,
+            "max": 84,
+            "points": 1
+          },
+          {
+            "min": 85,
+            "points": 0
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001586",
+          "b001587",
+          "b001588",
+          "b001589",
+          "b001590"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.childAgeScore",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "SCORE",
+      "config": {
+        "label": "가장 어린 자녀 나이(개월, 한부모만. 신혼·예비신혼은 0점)",
+        "fact": "singleParentChildScoreMonths",
+        "bands": [
+          {
+            "min": -1,
+            "max": -1,
+            "points": 0,
+            "notApplicable": true
+          },
+          {
+            "min": 0,
+            "max": 35,
+            "points": 3
+          },
+          {
+            "min": 36,
+            "max": 59,
+            "points": 2
+          },
+          {
+            "min": 60,
+            "max": 83,
+            "points": 1
+          }
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001591",
+          "b001592",
+          "b001593",
+          "b001594",
+          "b001595"
+        ],
+        "tableLabel": "신혼부부 특별공급 가점항목"
+      }
+    },
+    {
+      "ruleKey": "firstHome.adult",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년자(만 19세 이상)인 무주택세대구성원",
+        "expression": {
+          "fact": "age",
+          "op": "gte",
+          "value": 19
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅱ-2. 무주택 기준",
+        "blockIds": [
+          "b000903",
+          "b000290"
+        ],
+        "derivedLiterals": {
+          "19": "「민법」상 성년은 만 19세(b000290: 공고문의 나이는 만 나이)"
+        }
+      }
+    },
+    {
+      "ruleKey": "firstHome.overseas",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해외체류(계속 90일·연간 183일 초과) 이력은 별도 심사",
+        "expression": {
+          "fact": "overseasClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "출입국에 관한 사실증명"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅱ-1. 지역우선 공급기준",
+        "blockIds": [
+          "b000854",
+          "b000855",
+          "b000856"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.exceptions",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "배우자의 혼인 전 당첨·주택 처분 이력 특례는 추가 확인",
+        "expression": {
+          "fact": "exceptionsClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001476"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.childbirth",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "expression": {
+          "fact": "childbirthClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "가족관계증명서",
+          "임신진단서(해당 시)"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001468"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.restrictions",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "특별공급 제한 없음",
+        "expression": {
+          "fact": "noSpecialRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001249",
+          "b001250"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.specialHistory",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "특별공급 당첨 이력 없음(1회 한정)",
+        "expression": {
+          "fact": "noSpecialSupplyHistory",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001249",
+          "b001250"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.reWinning",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "재당첨 제한·부적격 당첨 제한 기간 아님",
+        "expression": {
+          "fact": "noReWinningRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "3-1. 공통 유의사항",
+        "blockIds": [
+          "b001247",
+          "b001248"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.account",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "주택청약종합저축(공고일 전일까지 전환한 통장 포함)",
+        "expression": {
+          "all": [
+            {
+              "fact": "hasAccount",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "accountKindEligible",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        },
+        "documents": [
+          "청약통장 순위(가입)확인서"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "청약 유의사항",
+        "blockIds": [
+          "b000064",
+          "b000065",
+          "b001457"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.months",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주자저축 가입 12개월 경과",
+        "expression": {
+          "fact": "accountMonths",
+          "op": "gte",
+          "value": 12
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001457"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.payments",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "월납입금 12회 이상 납입",
+        "expression": {
+          "fact": "recognizedPaymentCount",
+          "op": "gte",
+          "value": 12
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001457"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.size",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "소득표 가구원수 8인 이하(8인 초과는 추가 확인)",
+        "expression": {
+          "all": [
+            {
+              "fact": "incomeHouseholdSize",
+              "op": "gte",
+              "value": 3
+            },
+            {
+              "fact": "incomeHouseholdSize",
+              "op": "lte",
+              "value": 8
+            }
+          ]
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "<표4> 소득기준",
+        "blockIds": [
+          "b001084",
+          "b001149"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.income",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 월평균소득 외벌이 130% / 맞벌이 200% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "소득 관련 증빙서류"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001464",
+          "b001465",
+          "b001466",
+          "b001084",
+          "b001112",
+          "b001113",
+          "b001114"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.realEstate",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 부동산(건물+토지) 215,500천원 이하",
+        "expression": {
+          "fact": "realEstateAssets",
+          "op": "lte",
+          "value": 215500000
+        },
+        "documents": [
+          "자산 보유 사실확인서"
+        ]
+      },
+      "evidence": {
+        "section": "<표2> 자산보유기준",
+        "blockIds": [
+          "b001015",
+          "b001017",
+          "b001019",
+          "b001467"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.vehicle",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 보유 자동차 중 최고 차량가액 45,420천원 이하",
+        "expression": {
+          "fact": "vehicleValue",
+          "op": "lte",
+          "value": 45420000
+        },
+        "documents": [
+          "자동차 등록원부"
+        ]
+      },
+      "evidence": {
+        "section": "<표2> 자산보유기준",
+        "blockIds": [
+          "b001038",
+          "b001041",
+          "b001042",
+          "b001043",
+          "b001467"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.housing",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "생애최초: 세대 전원 무주택이며 과거 주택 소유 사실 없음(배우자 혼인 전 처분은 예외)",
+        "expression": {
+          "all": [
+            {
+              "fact": "householdNoHome",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "neverOwned",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "householdNeverOwned",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        },
+        "documents": [],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001455",
+          "b001456"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.deposit",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "선납금 포함 저축액 600만원 이상",
+        "expression": {
+          "fact": "recognizedDepositAmount",
+          "op": "gte",
+          "value": 6000000
+        },
+        "documents": [
+          "청약통장 순위(가입)확인서"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001457",
+          "b001458"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.family",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "혼인(재혼 포함) 중이거나 동일 등본의 미혼 자녀(태아·입양 포함)가 있음. 1인가구 불가",
+        "expression": {
+          "any": [
+            {
+              "fact": "maritalStatus",
+              "op": "eq",
+              "value": "married"
+            },
+            {
+              "all": [
+                {
+                  "fact": "hasChildren",
+                  "op": "eq",
+                  "value": true
+                },
+                {
+                  "fact": "unmarriedChildInHousehold",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "혼인관계증명서",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001459",
+          "b001460",
+          "b001477",
+          "b001478"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.tax",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "근로자·자영업자(또는 1년 내 소득세 납부)이며 본인 소득세 5년 이상 납부",
+        "expression": {
+          "all": [
+            {
+              "fact": "workOrBusinessIncome",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "incomeTaxPaymentYears",
+              "op": "gte",
+              "value": 5
+            }
+          ]
+        },
+        "documents": [
+          "소득금액증명",
+          "소득세 납부 입증서류"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001461",
+          "b001462"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.PRIORITY.income",
+      "supplyType": "firstHome",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "1단계 우선공급(70%): 외벌이 100% / 맞벌이 120% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.100"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.120"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001484",
+          "b001485",
+          "b001487",
+          "b001084",
+          "b001103",
+          "b001104",
+          "b001105"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.GENERAL.income",
+      "supplyType": "firstHome",
+      "stage": "GENERAL",
+      "category": "STAGE",
+      "config": {
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001491",
+          "b001492",
+          "b001493",
+          "b001084",
+          "b001107",
+          "b001109",
+          "b001110"
+        ]
+      }
+    },
+    {
+      "ruleKey": "firstHome.LOTTERY.income",
+      "supplyType": "firstHome",
+      "stage": "LOTTERY",
+      "category": "STAGE",
+      "config": {
+        "label": "3단계 추첨공급: 외벌이 130% / 맞벌이 200% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "section": "Ⅲ-3. 신청자격 및 당첨자 선정방법",
+        "blockIds": [
+          "b001497",
+          "b001498",
+          "b001499",
+          "b001084",
+          "b001112",
+          "b001113",
+          "b001114"
+        ]
+      }
+    }
+  ]
+}

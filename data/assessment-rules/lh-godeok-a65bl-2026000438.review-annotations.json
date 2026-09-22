@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "announcementId": "cc799320-c2ef-4462-a6d8-25a856b415b8",
+  "documentSha256": "be9fc0f60a274236b5de9391bf4279dce90252821009735a60e969eada768542",
+  "ruleSetVersion": "OFFICIAL-2026-09-11-transcription-1",
+  "safetyBlockers": [],
+  "exceptions": [],
+  "warnings": [
+    {
+      "ruleKey": "newlywed.PRIORITY.residenceScore",
+      "message": "평택시에 거주하지 않으면 0점이지만 지금 입력은 거주 시작일만 받아요. 평택시 비거주자는 이 항목이 확인 필요로 남아요."
+    },
+    {
+      "ruleKey": "newlywed.PRIORITY.marriageScore",
+      "message": "혼인기간은 개월 단위로 계산해요. 36·60·84개월 경계에 걸리면 혼인신고일 기준 날짜를 다시 확인해야 해요."
+    },
+    {
+      "ruleKey": "newlywed.family",
+      "message": "1순위·2순위는 자격이 아니라 선정 순서예요. 판정은 자격과 공급단계만 계산해요."
+    }
+  ],
+  "conflicts": [],
+  "unresolved": [
+    {
+      "unresolvedId": "godeok.income-table-structure",
+      "type": "PDF_TABLE_STRUCTURE_REVIEW",
+      "description": "<표4>는 PDF 표 격자·읽기 순서 확인 경고가 있어요. 공급유형 라벨(생애최초·신혼부부)과 소득 행의 연결을 원문 표와 대조해 확정해야 해요.",
+      "ruleKeys": [
+        "newlywed.income",
+        "newlywed.PRIORITY.income",
+        "newlywed.GENERAL.income",
+        "newlywed.LOTTERY.income",
+        "newlywed.PRIORITY.incomeScore",
+        "firstHome.income",
+        "firstHome.PRIORITY.income",
+        "firstHome.GENERAL.income",
+        "firstHome.LOTTERY.income"
+      ]
+    },
+    {
+      "unresolvedId": "godeok.residence-scope",
+      "type": "RESIDENCE_SCOPE_REVIEW",
+      "description": "신청자격은 \"평택시 및 전국에 거주\"이고 유의사항은 \"거주지역 제한이 있는 주택\"이라고 적혀 있어요. 전국 거주자 신청 가능(지역우선은 배분만)으로 전사했고 거주 요건 규칙은 두지 않았어요.",
+      "ruleKeys": [
+        "newlywed.overseas",
+        "firstHome.overseas"
+      ]
+    }
+  ]
+}

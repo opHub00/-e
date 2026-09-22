@@ -23,7 +23,34 @@ const workspaceFromRpc = (data: unknown, invalidCode = 'RULE_REVIEW_WORKSPACE_NO
 export class SupabaseRuleReviewRepository {
   private readonly client: RuleReviewRpcClient;
   readonly ruleSetId: string;
+  /**
+   * Last known active state. Review mutations never change activation, so it is
+   * read on load and reattached to mutation results without an extra request.
+   */
+  private activation: RuleReviewWorkspace['activation'];
   constructor(client: RuleReviewRpcClient, ruleSetId: string) { this.client = client; this.ruleSetId = ruleSetId; }
+
+  /**
+   * Consultation only reads an approved, active, public version. Asking the same
+   * public RPC tells the console whether this version is the one in use.
+   * A failure leaves the state unknown instead of blocking the review workspace.
+   */
+  private async readActivation(workspace: RuleReviewWorkspace): Promise<RuleReviewWorkspace['activation']> {
+    try {
+      const { data, error } = await this.client.rpc('read_assessment_rule_set', {
+        p_announcement_id: workspace.announcement.id, p_listing_id: null,
+      }) as RpcResult;
+      if (error) return undefined;
+      const activeId = typeof data === 'object' && data ? (data as { rule_set?: { id?: unknown } }).rule_set?.id : undefined;
+      return { state: activeId === workspace.ruleVersionId ? 'ACTIVE' : 'NOT_ACTIVE' };
+    } catch {
+      return undefined;
+    }
+  }
+
+  private withActivation(workspace: RuleReviewWorkspace): RuleReviewWorkspace {
+    return this.activation ? { ...workspace, activation: this.activation } : workspace;
+  }
 
   async access(): Promise<ReviewAccess> {
     const session = await this.client.auth.getSession();
@@ -41,7 +68,9 @@ export class SupabaseRuleReviewRepository {
   async snapshot(): Promise<RuleReviewWorkspace> {
     const { data, error } = await this.client.rpc('load_assessment_rule_review_workspace', { p_rule_set_id: this.ruleSetId }) as RpcResult;
     if (error) throw new Error(normalizeReviewDbError(error));
-    return workspaceFromRpc(data);
+    const workspace = workspaceFromRpc(data);
+    this.activation = await this.readActivation(workspace);
+    return this.withActivation(workspace);
   }
 
   async summary() { return buildReviewSummary(await this.snapshot()); }
@@ -57,7 +86,7 @@ export class SupabaseRuleReviewRepository {
     if (error) throw new Error(normalizeReviewDbError(error));
     // The RPC returns the workspace from the same transaction as mutation/audit/revision.
     // A second read could mix in another reviewer's later mutation.
-    return workspaceFromRpc(data, 'RULE_REVIEW_INVALID_MUTATION_RESULT');
+    return this.withActivation(workspaceFromRpc(data, 'RULE_REVIEW_INVALID_MUTATION_RESULT'));
   }
   startReview(m: ReviewRepositoryMutation) { return this.mutate('START_REVIEW', this.ruleSetId, {}, m); }
   approve(id: string, m: ReviewRepositoryMutation) { return this.mutate('APPROVE_RULE', id, {}, m); }
@@ -81,6 +110,7 @@ export class SupabaseRuleReviewRepository {
       p_rule_set_id: this.ruleSetId, p_expected_revision: expectedRevision, p_expected_active_id: expectedActiveId,
     }) as RpcResult;
     if (error) throw new Error(normalizeReviewDbError(error));
+    if (typeof data === 'object' && data && (data as { status?: unknown }).status === 'ACTIVE') this.activation = { state: 'ACTIVE' };
     return data;
   }
 }

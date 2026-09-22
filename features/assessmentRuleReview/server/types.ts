@@ -114,6 +114,11 @@ export type RuleReviewWorkspace = {
   exceptionReviews: ExceptionReview[];
   requiredCategories: RuleReviewWorkspaceSeed['requiredCategories'];
   auditLog: ReviewAuditEntry[];
+  /**
+   * Whether this rule version is the one consultation currently reads.
+   * Absent when the active state could not be read; the review gate is unaffected.
+   */
+  activation?: { state: 'ACTIVE' | 'NOT_ACTIVE' };
 };
 
 export type ActivationBlocker = { code: ActivationBlockerCode; ruleId?: string; conflictId?: string; unresolvedId?: string; message: string };

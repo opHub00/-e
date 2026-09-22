@@ -138,6 +138,7 @@ export function RuleReviewConsole({ onBack, repository, initialWorkspace, gatewa
           gate={gate}
           serverConfirmed={save.kind !== 'FAILED' && !saving}
           canActivate={actorRole === 'admin' || actorRole === 'local'}
+          active={workspace.activation?.state === 'ACTIVE'}
         />
 
         {/* 미해결 항목은 근거 없이 체크로 지우지 못하게 사유를 입력받는다. */}
@@ -280,7 +281,20 @@ export function RuleReviewConsole({ onBack, repository, initialWorkspace, gatewa
   );
 }
 
-function ActivationPanel({ gate, serverConfirmed, canActivate }: { gate: ReturnType<typeof useRuleReviewWorkspace>['gate']; serverConfirmed: boolean; canActivate: boolean }) {
+function ActivationPanel({ gate, serverConfirmed, canActivate, active }: { gate: ReturnType<typeof useRuleReviewWorkspace>['gate']; serverConfirmed: boolean; canActivate: boolean; active: boolean }) {
+  /*
+    이미 활성화된 버전에 "관리자 활성화 필요"를 남기면 할 일이 남은 것처럼 읽힌다.
+    활성 여부는 서버의 공개 규칙 조회로 확인한 값일 때만 보여준다.
+  */
+  if (active) {
+    return (
+      <View style={[styles.activation, styles.activationOk]}>
+        <Text accessibilityRole="header" style={[styles.activationTitle, { color: colors.success }]}>활성 버전 · 상담에 사용 중</Text>
+        <Text style={styles.activationBody}>이 rule version이 현재 활성화되어 있어요. 상담은 이 규칙으로 판정해요.</Text>
+        <Text style={styles.activationBody}>내용을 바꾸려면 새 검수 버전을 만들어 다시 활성화해야 해요.</Text>
+      </View>
+    );
+  }
   /*
     활성화 가능은 서버가 확인해 준 상태에서만 말한다. 저장이 진행 중이거나 실패해
     화면과 서버가 다를 수 있으면 가능하다고 하지 않는다.

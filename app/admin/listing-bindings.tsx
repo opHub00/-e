@@ -40,6 +40,7 @@ export default function ListingBindingsRoute() {
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
   const back = useCallback(() => (router.canGoBack() ? router.back() : router.replace('/home')), [router]);
+  const openReview = useCallback((ruleSetId: string) => router.push(`/admin/rule-review?ruleSetId=${ruleSetId}`), [router]);
 
   const refresh = useCallback(async () => {
     if (!(repository instanceof SupabaseListingBindingRepository)) { setLoad({ phase: 'FAILED', code: repository.code }); return; }
@@ -76,15 +77,15 @@ export default function ListingBindingsRoute() {
             {load.code === 'AUTH_REQUIRED' ? <Button label="로그인하러 가기" onPress={() => router.push('/auth')} /> : <Button label="다시 불러오기" onPress={() => void refresh()} />}
           </View>
         ) : null}
-        {load.phase === 'READY' ? <Ready state={load.state} reason={reason} setReason={setReason} busy={busy} notice={notice} onRun={run} onRefresh={() => void refresh()} /> : null}
+        {load.phase === 'READY' ? <Ready state={load.state} reason={reason} setReason={setReason} busy={busy} notice={notice} onRun={run} onRefresh={() => void refresh()} onOpenReview={openReview} /> : null}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Ready({ state, reason, setReason, busy, notice, onRun, onRefresh }: {
+function Ready({ state, reason, setReason, busy, notice, onRun, onRefresh, onOpenReview }: {
   state: ListingBindingState; reason: string; setReason: (v: string) => void; busy: string | null;
-  notice: { tone: 'ok' | 'error'; text: string } | null; onRun: (row: BindingRow, action: BindingAction) => void; onRefresh: () => void;
+  notice: { tone: 'ok' | 'error'; text: string } | null; onRun: (row: BindingRow, action: BindingAction) => void; onRefresh: () => void; onOpenReview: (ruleSetId: string) => void;
 }) {
   const rows = buildBindingRows(state);
   const admin = state.role === 'admin';
@@ -108,6 +109,10 @@ function Ready({ state, reason, setReason, busy, notice, onRun, onRefresh }: {
           <Text style={styles.body}>소속 공고: {row.ownerTitle ?? '확인되지 않음'}</Text>
           <Text style={styles.body}>현재 연결: {row.boundTitle ?? '없음'}{row.revision ? ` · revision ${row.revision}` : ''}</Text>
           <Text style={styles.body}>활성 규칙 버전: {row.activeVersion ?? '없음'}</Text>
+          {/* 검수 콘솔은 rule set을 지정해야 열린다. 여기서 고른 공고의 활성 버전으로만 이동한다. */}
+          {row.activeRuleSetId
+            ? <Button label="이 공고의 활성 버전 검수 콘솔 열기" onPress={() => onOpenReview(row.activeRuleSetId!)} />
+            : null}
           {row.actions.map(action => (
             <Button key={action.kind} label={busy === `${row.listingId}:${action.kind}` ? '처리 중…' : action.label}
               disabled={!!busy || !reason.trim()} tone={action.kind === 'UNBIND' ? 'danger' : 'primary'} onPress={() => onRun(row, action)} />

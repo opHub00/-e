@@ -10,6 +10,8 @@ export type BindingRow = {
   ownerTitle: string | null;
   boundTitle: string | null;
   activeVersion: string | null;
+  /** The announcement's active rule set, so the review console can be opened for it. Never auto-selected. */
+  activeRuleSetId: string | null;
   revision: number | null;
   actions: BindingAction[];
 };
@@ -47,13 +49,14 @@ export function buildBindingRows(state: ListingBindingState): BindingRow[] {
               { kind: 'UNBIND', label: '연결 해제', ruleSetId: null, expectedRevision: binding!.revision },
             ];
       rows.push({ listingId, status, statusLabel: STATUS_LABEL[status], ownerTitle: announcement.title,
-        boundTitle: binding?.announcementTitle ?? null, activeVersion: announcement.activeVersion, revision: binding?.revision ?? null, actions });
+        boundTitle: binding?.announcementTitle ?? null, activeVersion: announcement.activeVersion, activeRuleSetId: announcement.activeRuleSetId,
+        revision: binding?.revision ?? null, actions });
     }
   }
   for (const binding of state.bindings) {
     if (placed.has(binding.listingId)) continue;
     rows.push({ listingId: binding.listingId, status: 'UNKNOWN_LISTING', statusLabel: STATUS_LABEL.UNKNOWN_LISTING, ownerTitle: null,
-      boundTitle: binding.announcementTitle, activeVersion: null, revision: binding.revision,
+      boundTitle: binding.announcementTitle, activeVersion: null, activeRuleSetId: null, revision: binding.revision,
       actions: admin ? [{ kind: 'UNBIND', label: '연결 해제', ruleSetId: null, expectedRevision: binding.revision }] : [] });
   }
   return rows;

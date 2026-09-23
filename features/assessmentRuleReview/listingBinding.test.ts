@@ -37,6 +37,15 @@ test('reviewers get the same table with no actions', () => {
   assert.ok(rows.length === 2 && rows.every(r => r.actions.length === 0));
 });
 
+// The review console needs a rule set id in its route; the row carries the announcement's own active version.
+test('each row names the announcement active rule set the review console can be opened for', () => {
+  const rows = buildBindingRows(state('reviewer', [binding('apt-1-1', 'a-1', 'rs-1', 3), binding('legacy-x', 'a-2', 'rs-2', 1)]));
+  const byId = Object.fromEntries(rows.map(r => [r.listingId, r]));
+  assert.equal(byId['apt-1-1'].activeRuleSetId, 'rs-1');
+  assert.equal(byId['draft-2'].activeRuleSetId, 'rs-2', 'an unbound listing can still open its announcement review');
+  assert.equal(byId['legacy-x'].activeRuleSetId, null, 'a listing no announcement claims has no review target');
+});
+
 test('decoder is strict and the repository never throws', async () => {
   assert.throws(() => decodeListingBindingState({ role: 'user', announcements: [], bindings: [], audit: [] }), /INVALID_RESPONSE/);
   assert.throws(() => decodeListingBindingState({ role: 'admin', announcements: [{ ...A, listingIds: 'apt-1-1' }], bindings: [], audit: [] }), /INVALID_RESPONSE/);

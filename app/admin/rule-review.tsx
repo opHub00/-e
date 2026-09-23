@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { RuleReviewConsole } from '../../features/assessmentRuleReview/ui/RuleReviewConsole';
 import type { ReviewFaultPlan, ReviewGateway, ReviewLoadOutcome } from '../../features/assessmentRuleReview/repository/ReviewGateway';
@@ -30,6 +30,17 @@ function failedGateway(code: string): ReviewGateway {
     async commit() { return { status: 'FAILED', code }; },
   };
 }
+/** 생성되는 라우트 타입(.expo/types)은 커밋되지 않아 최신이 아닐 수 있다. 실제 경로는 app/admin/listing-bindings.tsx 다. */
+const BINDINGS_ROUTE = '/admin/listing-bindings' as Href;
+const RULE_SET_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Which rule set the route asks for. Nothing is chosen for the operator: an active version is never auto-selected. */
+type RequestedRuleSet = { status: 'MISSING' } | { status: 'INVALID'; value: string } | { status: 'OK'; id: string };
+function requestedRuleSet(value: unknown): RequestedRuleSet {
+  if (typeof value !== 'string' || !value.trim()) return { status: 'MISSING' };
+  const id = value.trim();
+  return RULE_SET_ID.test(id) ? { status: 'OK', id } : { status: 'INVALID', value: id };
+}
+
 function resolveGateway(ruleSetId: string | null): { gateway: ReviewGateway; persistence: ReviewPersistence } {
   const plan = isRuleReviewTestEnvironment(process.env.EXPO_PUBLIC_WANPANE_ENV)
     ? ((globalThis as Record<string, unknown>)[DEV_FAULT_PLAN] ?? {}) as ReviewFaultPlan
@@ -41,14 +52,16 @@ function resolveGateway(ruleSetId: string | null): { gateway: ReviewGateway; per
 }
 function useGateway() {
   const { ruleSetId } = useLocalSearchParams<{ ruleSetId?: string }>();
-  const requested = typeof ruleSetId === 'string' ? ruleSetId : null;
+  const requested = requestedRuleSet(ruleSetId);
+  const id = requested.status === 'OK' ? requested.id : null;
   // Per-route instance: an account change cannot reuse another actor's repository cache.
-  return useMemo(() => resolveGateway(requested), [requested]);
+  const resolved = useMemo(() => resolveGateway(id), [id]);
+  return { ...resolved, requested };
 }
 
 export default function AdminRuleReviewRoute() {
   const router = useRouter();
-  const { gateway, persistence } = useGateway();
+  const { gateway, persistence, requested } = useGateway();
   const { state, retry, invalidate } = useReviewSession(gateway);
   const [expiredDuringReview, setExpiredDuringReview] = useState(false);
   const lastDraftScope = useRef<string | null>(null);
@@ -57,6 +70,24 @@ export default function AdminRuleReviewRoute() {
   const onSessionEnded = useCallback(() => { setExpiredDuringReview(true); invalidate({ phase: 'AUTH_REQUIRED' }); }, [invalidate]);
   const retryLoad = useCallback(() => { setExpiredDuringReview(false); retry(); }, [retry]);
 
+  /*
+    Opening /admin/rule-review directly names no rule set. That is a normal starting point for an
+    admin, not a failure, so the console says which announcement to pick instead of showing a load
+    error. The dev/test local seed keeps its own entry point and needs no id.
+  */
+  if (requested.status !== 'OK' && persistence !== 'local') {
+    return <Shell>
+      <Text accessibilityRole="header" style={styles.title}>
+        {requested.status === 'MISSING' ? '검수할 공고를 선택해 주세요' : '검수 주소의 rule set ID가 올바르지 않아요'}
+      </Text>
+      <Text style={styles.body}>
+        {requested.status === 'MISSING'
+          ? 'Rule 검수 콘솔은 공고의 rule set을 지정해야 열려요. 주소 끝에 ?ruleSetId=<rule set ID>를 붙이거나, 공고 listing 연결 관리에서 검수할 공고를 골라 주세요.'
+          : `주소에 있는 값(${requested.value.slice(0, 12)}${requested.value.length > 12 ? '…' : ''})은 rule set ID 형식(UUID)이 아니에요. 공고 listing 연결 관리에서 다시 열어 주세요.`}
+      </Text>
+      <Retry label="공고 listing 연결 관리 열기" onPress={() => router.push(BINDINGS_ROUTE)} />
+    </Shell>;
+  }
   if (state.phase === 'LOADING') {
     /* 이전 공고의 rule을 남겨 두지 않는다. 남으면 지금 검수 중인 공고로 읽힌다. */
     return <Shell><ActivityIndicator color={colors.primary} />

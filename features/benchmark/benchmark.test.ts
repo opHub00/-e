@@ -8,6 +8,7 @@ import {
   createMinimalApplicantProfile,
   knownField,
   notApplicableField,
+  unknownField,
   type ApplicantProfileV2,
 } from '../profile/domain.ts';
 
@@ -18,7 +19,7 @@ const completeProfile = (): ApplicantProfileV2 => ({
     currentRegion: '서울특별시',
     preferredRegions: ['서울특별시'],
   }),
-  basic: { name: '테스트', age: 31, occupation: knownField('worker') },
+  basic: { name: '테스트', age: 31, birthDate: unknownField(), occupation: knownField('worker') },
   subscriptionAccount: {
     hasAccount: knownField(true),
     accountMonths: knownField(48),

@@ -5,7 +5,7 @@ import { buildNewlywedDashboard, getNewlywedRelatedListings, hasOfficialSpecialS
 
 const completeProfile = (): ApplicantProfileV2 => ({
   version: 2,
-  basic: { name: '테스터', age: 32, occupation: knownField('worker') },
+  basic: { name: '테스터', age: 32, birthDate: unknownField(), occupation: knownField('worker') },
   residence: { currentRegion: '서울' }, preferences: { regions: ['서울'] },
   subscriptionAccount: { hasAccount: knownField(true), accountMonths: knownField(36), monthlyPayment: knownField(250000) },
   housing: {

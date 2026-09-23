@@ -23,7 +23,10 @@ export type ApplicantProfileV2 = {
   version: 2;
   basic: {
     name: string;
+    /** 예전 프로필은 나이만 가지고 있다. 생년월일이 있으면 그 값에서 계산해 채운다. */
     age: number;
+    /** canonical YYYY-MM-DD. 나이와 판정 입력의 source of truth. */
+    birthDate: ProfileFieldState<string>;
     occupation: ProfileFieldState<Occupation>;
   };
   residence: { currentRegion: string };
@@ -238,6 +241,7 @@ export function createApplicantProfileFromLegacy(profile: UserProfile): Applican
     basic: {
       name: profile.name.trim(),
       age: clampInt(profile.age, 15, 99),
+      birthDate: unknownField(),
       occupation: knownField(isOccupation(profile.occupation) ? profile.occupation : 'etc'),
     },
     residence: { currentRegion: profile.region.trim() },
@@ -342,6 +346,7 @@ export function migrateApplicantProfile(
     basic: {
       name: readString(basic.name, base.basic.name),
       age: clampInt(readNumber(basic.age, base.basic.age), 15, 99),
+      birthDate: readField(basic.birthDate, isBirthDate),
       occupation: readField(basic.occupation, isOccupation),
     },
     residence: { currentRegion: readString(residence.currentRegion, base.residence.currentRegion) },
@@ -640,6 +645,13 @@ function isOccupation(value: unknown): value is Occupation {
   return value === 'student' || value === 'worker' || value === 'etc';
 }
 
+/** 저장된 생년월일은 canonical YYYY-MM-DD 이고 실제 달력 날짜여야 한다. */
+function isBirthDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 function isOwnership(value: unknown): value is 'no-home' | 'owns-home' {
   return value === 'no-home' || value === 'owns-home';
 }
@@ -654,4 +666,26 @@ function isAmountRange(value: unknown): value is AmountRange {
 
 function isIncomeRange(value: unknown): value is IncomeRange {
   return ['under-30m', '30m-50m', '50m-70m', '70m-100m', 'over-100m'].includes(String(value));
+}
+
+/**
+ * 생년월일이 나이의 source of truth다. 예전 프로필은 나이만 가지고 있으므로
+ * 생년월일이 없으면 저장된 나이를 그대로 쓴다(기존 데이터가 깨지지 않는다).
+ */
+export function applicantAge(profile: ApplicantProfileV2, asOf: string): number {
+  const birthDate = profile.basic.birthDate.status === 'known' ? profile.basic.birthDate.value : undefined;
+  if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return profile.basic.age;
+  const [by, bm, bd] = birthDate.split('-').map(Number);
+  const [ay, am, ad] = asOf.split('-').map(Number);
+  const age = ay - by - (am < bm || (am === bm && ad < bd) ? 1 : 0);
+  return age >= 0 && age < 150 ? age : profile.basic.age;
+}
+
+/**
+ * 생년월일을 저장하면서 화면들이 읽는 `basic.age`도 같은 값으로 맞춘다.
+ * 나이를 따로 입력받던 기존 화면과 계산 결과가 어긋나지 않게 하기 위한 것이다.
+ */
+export function withApplicantBirthDate(profile: ApplicantProfileV2, birthDate: string, asOf: string): ApplicantProfileV2 {
+  const next: ApplicantProfileV2 = { ...profile, basic: { ...profile.basic, birthDate: knownField(birthDate) } };
+  return { ...next, basic: { ...next.basic, age: applicantAge(next, asOf) } };
 }

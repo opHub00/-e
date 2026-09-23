@@ -25,13 +25,15 @@ function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriod
   const p = input.profile;
   const d = input.details;
   const months = (date: string | undefined) => completedMonths(date, asOf);
-  const birthMonths = months(d.birthDate);
+  // 저장된 생년월일을 그대로 쓴다. 이번 판정에서 직접 답한 값이 있으면 그 값이 우선이다(자녀 정보와 같은 규칙).
+  const birthDate = d.birthDate ?? known(p.basic.birthDate);
+  const birthMonths = months(birthDate);
   const overseasClear = d.overseasStayHistory?.length === 0;
   const children = d.children;
   const childAges = children?.filter(c => !c.unborn).map(c => months(c.birthDate));
   const validChildren = childAges?.every(age => age !== undefined);
   const ownership = known(p.housing.currentOwnership);
-  const duration = noHomeDuration({ birthDate:d.birthDate, firstMarriageDate:d.firstMarriageDate, everMarried:d.everMarried, disposalDates:d.housingDisposalDates },asOf);
+  const duration = noHomeDuration({ birthDate, firstMarriageDate:d.firstMarriageDate, everMarried:d.everMarried, disposalDates:d.housingDisposalDates },asOf);
   const householdSize = d.incomeHouseholdSize;
   const incomeSize = Number.isInteger(householdSize) && householdSize! >= 1 ? Math.max(3,householdSize!) : undefined;
   const incomeThreshold = (name: string) => incomeSize === undefined ? undefined : parameters[`income.${incomeSize}.${name}`];

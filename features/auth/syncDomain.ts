@@ -37,6 +37,7 @@ export function mergeApplicantProfiles(
       basic: {
         name: plain(local.basic.name, cloud.basic.name, 'basic.name'),
         age: plain(local.basic.age, cloud.basic.age, 'basic.age'),
+        birthDate: field(local.basic.birthDate, cloud.basic.birthDate, 'basic.birthDate'),
         occupation: field(local.basic.occupation, cloud.basic.occupation, 'basic.occupation'),
       },
       residence: {

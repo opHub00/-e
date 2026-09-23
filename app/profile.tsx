@@ -25,7 +25,9 @@ import {
   type ProfileFieldState,
   type ProfileQuestionBundleId,
 } from '../features/profile/domain';
+import { withApplicantBirthDate } from '../features/profile/domain';
 import { getProfileTermHelp, type ProfileTermId } from '../features/profile/terminology';
+import { formatDateInput, normalizeDateInput } from '../features/applicationAssessment/questionnaire/dateInput';
 import { useUserStore } from '../store/useUserStore';
 import { getRegionLabel, PROFILE_REGIONS } from '../features/discovery/regions';
 const OCCUPATIONS: Array<{ value: Occupation; label: string }> = [
@@ -212,6 +214,11 @@ function BundleFields({
   onChange: (profile: ApplicantProfileV2) => void;
 }) {
   const set = <K extends keyof ApplicantProfileV2>(key: K, value: ApplicantProfileV2[K]) => onChange({ ...profile, [key]: value });
+  // 생년월일은 입력 중에도 화면에 그대로 두고, 올바른 날짜가 되면 프로필에 저장한다.
+  const [birthDateDraft, setBirthDateDraft] = useState<string | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const birthDateParsed = normalizeDateInput(birthDateDraft ?? '', { notAfter: today, notAfterLabel: '오늘' });
+  const birthDateError = birthDateDraft && birthDateParsed.status === 'INVALID' ? birthDateParsed.message : null;
   const numberField = (value: string, max: number) => {
     const digits = value.replace(/[^0-9]/g, '');
     return digits ? knownField(Math.min(max, Number(digits))) : unknownField<number>();
@@ -224,10 +231,23 @@ function BundleFields({
           <Field label="이름 또는 닉네임">
             <TextInput style={styles.input} value={profile.basic.name} onChangeText={(name) => set('basic', { ...profile.basic, name })} />
           </Field>
-          {/* 편집 중에는 하한을 걸지 않는다. 매 글자마다 15로 올려붙이면 27을 칠 수가 없다.
-              하한은 저장 시 migrateApplicantProfile 이 한 번만 적용한다. */}
-          <Field label="나이">
-            <TextInput style={styles.input} value={profile.basic.age > 0 ? String(profile.basic.age) : ''} keyboardType="number-pad" maxLength={3} placeholder="예: 27" placeholderTextColor={colors.outline} onChangeText={(value) => set('basic', { ...profile.basic, age: Math.min(99, Number(value.replace(/[^0-9]/g, '')) || 0) })} />
+          {/* 생년월일이 나이의 기준이다. 저장하면 나이도 같은 값으로 맞춰 둔다.
+              예전에 나이만 입력한 프로필은 생년월일이 비어 있어도 그대로 쓴다. */}
+          <Field label="생년월일">
+            <TextInput
+              style={styles.input} keyboardType="number-pad" maxLength={10} placeholder="예: 19940705"
+              placeholderTextColor={colors.outline}
+              value={birthDateDraft ?? (knownValue(profile.basic.birthDate) ?? '')}
+              onChangeText={(value) => {
+                const formatted = formatDateInput(value);
+                setBirthDateDraft(formatted);
+                const parsed = normalizeDateInput(formatted, { notAfter: today, notAfterLabel: '오늘' });
+                if (parsed.status === 'OK') set('basic', withApplicantBirthDate(profile, parsed.value, today).basic);
+              }}
+            />
+            {birthDateError ? <Text accessibilityRole="alert" style={styles.fieldError}>{birthDateError}</Text> : null}
+            {!birthDateError && knownValue(profile.basic.birthDate) ? <Text style={styles.fieldHint}>만 {profile.basic.age}세로 계산했어요.</Text> : null}
+            {!knownValue(profile.basic.birthDate) && profile.basic.age > 0 ? <Text style={styles.fieldHint}>지금은 나이 {profile.basic.age}세만 저장돼 있어요. 생년월일을 넣으면 맞춤판정에서 다시 묻지 않아요.</Text> : null}
           </Field>
           <Field label="지금 하는 일">
             <ChoiceRow options={OCCUPATIONS} value={knownValue(profile.basic.occupation)} onChange={(occupation) => set('basic', { ...profile.basic, occupation: knownField(occupation) })} />
@@ -503,6 +523,8 @@ const styles = StyleSheet.create({
   helpCard: { marginTop: 2, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, borderWidth: 1, borderColor: colors.surfaceHigh, padding: 12, gap: 4 },
   helpTitle: { ...type.bodySmStrong, color: colors.text },
   helpBody: { ...type.caption, color: colors.textMuted, lineHeight: 19 },
+  fieldError: { ...type.bodySm, color: colors.error },
+  fieldHint: { ...type.bodySm, color: colors.textMuted },
   input: { ...type.bodyLg, minHeight: size.control, borderRadius: radius.button, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface, paddingHorizontal: spacing.md, color: colors.text },
   choiceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   choice: { minHeight: size.touch, justifyContent: 'center', paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surface },

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -11,15 +11,14 @@ import { useUserStore } from '../../store/useUserStore';
 import { useListingDataset } from '../discovery/data/useListingDataset';
 import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
-import { FORM_FIELDS, FORM_GROUP_HINTS, FORM_GROUP_LABELS, FORM_GROUPS, koreanMoneyHint, parseForm } from './form';
+import { QuestionnaireFlow } from './QuestionnaireFlow';
 import { SUPPLY_LABELS } from './labels';
 import { REFERENCE_LISTING_ID, REFERENCE_RULE_SET } from './reference';
 import { announcementResidenceRegion } from './ruleRegion';
-import { factsUsedByRules } from './ruleFacts';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
 import { AssessmentResult } from './AssessmentResult';
 import { registerAssessmentConsultationSeed } from '../assessmentConsultation/seedStore';
-import type { ApplicationAssessmentResult, SupplyType } from './types';
+import type { ApplicationAssessmentResult, AssessmentInput, SupplyType } from './types';
 
 const profileValue = (field: ProfileFieldState<unknown>) => field.status !== 'known' ? '확인 전' : typeof field.value === 'boolean' ? (field.value ? '예' : '아니요') : ({ single: '미혼', married: '기혼', 'no-home': '무주택', 'owns-home': '주택 보유' }[String(field.value)] ?? String(field.value));
 
@@ -34,15 +33,13 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const router = useRouter();
   const profile = useUserStore(s => s.applicantProfile);
   const hydrated = useUserStore(s => s.profileHydrated);
+  const setApplicantProfile = useUserStore(s => s.setApplicantProfile);
   const dataset = useListingDataset();
   const [selected, setSelected] = useState(listingId ?? '');
   const [supply, setSupply] = useState<SupplyType>('youth');
   const [step, setStep] = useState(0);
-  const [raw, setRaw] = useState<Record<string, string>>({});
+  const [questionnaireDetails, setQuestionnaireDetails] = useState<AssessmentInput['details']>({});
   const [snapshot, setSnapshot] = useState<{ result: ApplicationAssessmentResult; profile: typeof profile; rulesId: string } | null>(null);
-  // 입력하는 도중에는 형식 오류를 띄우지 않는다. 칸을 떠났거나 판정을 눌렀을 때만 알린다.
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [attempted, setAttempted] = useState(false);
   const scroll = useRef<ScrollView>(null);
   const ruleLoad = useAssessmentRules(selected);
   const rules = ruleLoad.rules;
@@ -53,28 +50,10 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   }, [rules, supply]);
   const selectedListing = dataset.listings.find(l => l.id === selected);
   const title = rules?.title ?? selectedListing?.complexName;
-  const parsed = parseForm(raw, supply);
-  // 공고가 무주택기간을 직접 계산해 주면 해당 입력칸은 묻지 않는다. 기존 노출 규칙을 그대로 유지한다.
-  const usedFacts = factsUsedByRules(rules);
-  const visibleFields = FORM_FIELDS.filter(f => (!f.supplies || f.supplies.includes(supply)) && (!f.onlyWhenRulesUse || usedFacts.has(f.key)) && !(rules?.parameters['dates.calculatedNoHome'] && ['noHomeSince','youthPriorityTarget','newlywedPriorityTarget','workStartedAt'].includes(f.key)));
   const result = snapshot?.profile === profile && snapshot.rulesId === rules?.id ? snapshot.result : null;
-  const update = (key: string, value: string) => { setRaw(p => ({ ...p, [key]: value })); setSnapshot(null); };
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
-  const resetAnswers = () => { setRaw({}); setSnapshot(null); setTouched({}); setAttempted(false); };
+  const resetAnswers = () => { setQuestionnaireDetails({}); setSnapshot(null); };
   const choose = (id: string) => { setSelected(id); resetAnswers(); };
-  /** 오류는 해당 칸 바로 아래에 붙인다. 목록 맨 끝에 모으면 3화면 위의 칸을 찾아 올라가야 한다. */
-  const fieldError = (key: string, label: string) => {
-    if (!touched[key] && !attempted) return null;
-    const error = parseForm({ [key]: raw[key] ?? '' }, supply).errors[0];
-    return error ? error.replace(`${label}: `, '') : null;
-  };
-  const calculate = () => {
-    if (!rules || !hydrated) return;
-    if (parsed.errors.length) { setAttempted(true); return; }
-    const assessment = assessApplication(rules, { profile, details: parsed.details }, selected).find(r => r.supplyType === supply);
-    if (!assessment) return;
-    setSnapshot({ result: assessment, profile, rulesId: rules.id }); move(3);
-  };
   const editProfile = () => router.push('/profile');
   const askAboutResult = () => {
     if (!result) return;
@@ -82,7 +61,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       listingId: selected,
       supplyType: supply,
       profile,
-      answers: parsed.details,
+      answers: questionnaireDetails,
       result,
     });
     router.push(`/consultation?listingId=${encodeURIComponent(selected)}&seedId=${encodeURIComponent(seedId)}&supplyType=${supply}` as Href);
@@ -135,59 +114,25 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       </> : null}
       {step === 2 ? <>
         <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
-        <Text style={styles.body}>공고 기준일의 정보를 입력해 주세요. 추가 입력은 이 화면에서만 사용해요. 모르는 항목은 비워 두셔도 판정할 수 있어요.</Text>
-        {FORM_GROUPS.map(group => {
-          const fields = visibleFields.filter(f => f.group === group);
-          const extras = group === 'residence' || (group === 'family' && supply === 'newlywed');
-          if (!fields.length && !extras) return null;
-          return <View key={group} style={styles.section}>
-            {/* 묶음 제목을 heading으로 노출해 스크린리더에서 건너뛰며 읽을 수 있게 한다. */}
-            <Text accessibilityRole="header" style={styles.title}>{FORM_GROUP_LABELS[group]}</Text>
-            {FORM_GROUP_HINTS[group] ? <Text style={styles.body}>{FORM_GROUP_HINTS[group]}</Text> : null}
-            {group === 'residence' ? <WanpanCard style={styles.stack}>
-              {/* 공고 지역은 규칙에서 읽는다. 규칙에 지역이 없거나 여럿이면 특정 지역을 가정하지 않는다. */}
-              <Text style={styles.strong}>{residenceRegion ? `공고 기준일에 ${residenceRegion.short}에 거주했나요?` : '공고 기준일 현재 거주지역을 알려주세요.'}</Text>
-              <Text style={styles.body}>현재 프로필 거주지: {profile.residence.currentRegion}</Text>
-              {profile.residence.currentRegion !== residenceRegion?.profile ? <Choice label={`프로필 거주지와 같아요 (${profile.residence.currentRegion})`} selected={raw.currentResidence === profile.residence.currentRegion} onPress={() => update('currentResidence', profile.residence.currentRegion)} /> : null}
-              {residenceRegion ? <>
-                <Choice label={residenceRegion.profile} selected={raw.currentResidence === residenceRegion.profile} onPress={() => update('currentResidence', residenceRegion.profile)} />
-                <Choice label={`${residenceRegion.short} 외 지역`} selected={raw.currentResidence === '기타'} onPress={() => update('currentResidence', '기타')} />
-              </> : null}
-              <Choice label="확인 전" selected={!raw.currentResidence} onPress={() => update('currentResidence', '')} />
-            </WanpanCard> : null}
-            {group === 'family' && supply === 'newlywed' ? <WanpanCard style={styles.stack}><Text style={styles.strong}>가족 유형</Text>{[['married', '신혼부부'], ['engaged', '예비신혼부부'], ['singleParent', '한부모'], ['', '확인 전']].map(([key, label]) => <Choice key={key} label={label} selected={(raw.familyCategory ?? '') === key} onPress={() => update('familyCategory', key)} />)}</WanpanCard> : null}
-            {fields.map(field => <WanpanCard key={field.key} style={styles.stack}>
-              <Text style={styles.strong}>{field.label}</Text>
-              {field.kind === 'boolean' ? <BooleanChoices value={raw[field.key]} onChange={value => update(field.key, value)} /> : <>
-                <TextInput
-                  accessibilityLabel={field.label} value={raw[field.key] ?? ''} onChangeText={value => update(field.key, value)}
-                  onBlur={() => setTouched(current => ({ ...current, [field.key]: true }))}
-                  placeholder={field.kind === 'date' ? 'YYYY-MM-DD (예: 1994-03-07)' : field.kind === 'children' ? '2020-01-01, 2023-01-01 또는 없음' : field.money ? '원 단위로 입력 (예: 362000000)' : '모르면 비워 두세요'}
-                  placeholderTextColor={colors.textSubtle} keyboardType={field.kind === 'number' ? 'numeric' : 'default'} autoCapitalize="none"
-                  inputMode={field.kind === 'number' ? 'numeric' : undefined}
-                  style={[styles.input, fieldError(field.key, field.label) ? styles.inputError : null]}
-                />
-                {/* 금액은 원 단위로 계산한다. 0의 개수를 눈으로 세지 않도록 입력값을 억·만 단위로 되읽어 준다. */}
-                {field.money && koreanMoneyHint(raw[field.key]) ? <Text style={styles.hint}>입력한 금액: {koreanMoneyHint(raw[field.key])}</Text> : null}
-                {fieldError(field.key, field.label) ? <Text accessibilityRole="alert" style={styles.error}>{fieldError(field.key, field.label)}</Text> : null}
-              </>}
-            </WanpanCard>)}
-          </View>;
-        })}
-        <View style={styles.section}>
-          <Text accessibilityRole="header" style={styles.title}>해외체류·특례</Text>
-          <WanpanCard style={styles.stack}><Text style={styles.strong}>거주기간 중 해외 체류 이력이 있나요?</Text><BooleanChoices value={raw.overseas} onChange={v => update('overseas', v)} /><Text style={styles.body}>이력이 있으면 공고의 연속거주 인정 기준을 추가로 확인해요.</Text></WanpanCard>
-          <WanpanCard style={styles.stack}><Text style={styles.strong}>출산 완화·태아·입양·배우자 주택이력·재혼·군인 등 특례를 적용해야 하나요?</Text><BooleanChoices value={raw.exceptions} onChange={v => update('exceptions', v)} /></WanpanCard>
-        </View>
-        {attempted && parsed.errors.length ? <Text accessibilityRole="alert" style={styles.error}>입력 형식을 확인할 항목이 {parsed.errors.length}개 있어요. 안내가 표시된 칸을 고쳐 주세요.</Text> : null}
-        <PrimaryButton label="내 조건으로 판정하기" disabled={!hydrated} onPress={calculate} />
-        <PrimaryButton label="유형·프로필 다시 확인" variant="soft" onPress={() => move(1)} />
+        <QuestionnaireFlow
+          rules={rules} supply={supply} profile={profile} listingId={selected} residenceRegion={residenceRegion}
+          onProfileChange={setApplicantProfile}
+          onComplete={(details, nextProfile) => {
+            if (!rules) return;
+            const assessment = assessApplication(rules, { profile: nextProfile, details }, selected).find(r => r.supplyType === supply);
+            if (!assessment) return;
+            setQuestionnaireDetails(details);
+            setSnapshot({ result: assessment, profile: nextProfile, rulesId: rules.id });
+            move(3);
+          }}
+          onBack={() => move(1)}
+        />
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
         {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : <>
           <Text style={styles.body}>프로필이 변경됐어요. 새 정보로 다시 판정해 주세요.</Text>
-          <PrimaryButton label="새 정보로 다시 판정하기" onPress={calculate} />
+          <PrimaryButton label="질문으로 돌아가 다시 판정하기" onPress={() => move(2)} />
         </>}
         <Text style={styles.notice}>입력한 정보를 기준으로 한 예상 판정이며, 최종 자격은 사업주체 및 청약기관 심사를 통해 확정됩니다.</Text>
         {/* 확인 필요 결과에서 다시 판정을 첫 행동으로 두면, 공고 기준이 없는 동안 같은 입력을 되풀이하게 된다. 누락 항목별 수정은 결과 카드 안에 있다. */}

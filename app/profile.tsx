@@ -235,7 +235,7 @@ function BundleFields({
               예전에 나이만 입력한 프로필은 생년월일이 비어 있어도 그대로 쓴다. */}
           <Field label="생년월일">
             <TextInput
-              style={styles.input} keyboardType="number-pad" maxLength={10} placeholder="예: 19940705"
+              accessibilityLabel="생년월일" style={styles.input} keyboardType="number-pad" maxLength={10} placeholder="예: 19940705"
               placeholderTextColor={colors.outline}
               value={birthDateDraft ?? (knownValue(profile.basic.birthDate) ?? '')}
               onChangeText={(value) => {

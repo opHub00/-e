@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,7 +39,8 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const [supply, setSupply] = useState<SupplyType>('youth');
   const [step, setStep] = useState(0);
   const [questionnaireDetails, setQuestionnaireDetails] = useState<AssessmentInput['details']>({});
-  const [snapshot, setSnapshot] = useState<{ result: ApplicationAssessmentResult; profile: typeof profile; rulesId: string } | null>(null);
+  // 판정은 "마지막으로 제출한 답변 + 지금의 프로필"로 계산한다. 프로필이 바뀌면 다시 계산하고, 오래된 결과를 남기지 않는다.
+  const [submitted, setSubmitted] = useState(false);
   const scroll = useRef<ScrollView>(null);
   const ruleLoad = useAssessmentRules(selected);
   const rules = ruleLoad.rules;
@@ -50,9 +51,12 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   }, [rules, supply]);
   const selectedListing = dataset.listings.find(l => l.id === selected);
   const title = rules?.title ?? selectedListing?.complexName;
-  const result = snapshot?.profile === profile && snapshot.rulesId === rules?.id ? snapshot.result : null;
+  const result: ApplicationAssessmentResult | null = useMemo(
+    () => (submitted && rules ? assessApplication(rules, { profile, details: questionnaireDetails }, selected).find(r => r.supplyType === supply) ?? null : null),
+    [submitted, rules, profile, questionnaireDetails, selected, supply],
+  );
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
-  const resetAnswers = () => { setQuestionnaireDetails({}); setSnapshot(null); };
+  const resetAnswers = () => { setQuestionnaireDetails({}); setSubmitted(false); };
   const choose = (id: string) => { setSelected(id); resetAnswers(); };
   const editProfile = () => router.push('/profile');
   const askAboutResult = () => {
@@ -117,22 +121,16 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         <QuestionnaireFlow
           rules={rules} supply={supply} profile={profile} listingId={selected} residenceRegion={residenceRegion}
           onProfileChange={setApplicantProfile}
-          onComplete={(details, nextProfile) => {
-            if (!rules) return;
-            const assessment = assessApplication(rules, { profile: nextProfile, details }, selected).find(r => r.supplyType === supply);
-            if (!assessment) return;
-            setQuestionnaireDetails(details);
-            setSnapshot({ result: assessment, profile: nextProfile, rulesId: rules.id });
-            move(3);
-          }}
+          onComplete={details => { if (!rules) return; setQuestionnaireDetails(details); setSubmitted(true); move(3); }}
           onBack={() => move(1)}
+          onStepChange={() => scroll.current?.scrollTo({ y: 0, animated: false })}
         />
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
         {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : <>
-          <Text style={styles.body}>프로필이 변경됐어요. 새 정보로 다시 판정해 주세요.</Text>
-          <PrimaryButton label="질문으로 돌아가 다시 판정하기" onPress={() => move(2)} />
+          <Text style={styles.body}>이 공고의 판정 기준을 불러오지 못했어요.</Text>
+          <PrimaryButton label="질문으로 돌아가기" onPress={() => move(2)} />
         </>}
         <Text style={styles.notice}>입력한 정보를 기준으로 한 예상 판정이며, 최종 자격은 사업주체 및 청약기관 심사를 통해 확정됩니다.</Text>
         {/* 확인 필요 결과에서 다시 판정을 첫 행동으로 두면, 공고 기준이 없는 동안 같은 입력을 되풀이하게 된다. 누락 항목별 수정은 결과 카드 안에 있다. */}

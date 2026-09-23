@@ -11,9 +11,14 @@ export type DateInputResult =
 const pad = (value: number) => String(value).padStart(2, '0');
 const lastDay = (year: number, month: number) => new Date(Date.UTC(year, month, 0)).getUTCDate();
 
-/** 입력 중 화면에 보여주는 형태. 숫자만 치면 자동으로 하이픈을 끼워 준다. */
+/**
+ * 입력 중 화면에 보여주는 형태. 숫자만 치면 자동으로 하이픈을 끼워 준다.
+ * 사용자가 `.`이나 `/`를 직접 쳤다면 그 표기를 지우지 않는다(1994.7.5 를 1994-75 로 바꾸지 않는다).
+ */
 export function formatDateInput(raw: string): string {
-  const digits = raw.replace(/[^0-9]/g, '').slice(0, 8);
+  const typed = raw.replace(/[^0-9 .\-/]/g, '');
+  if (/[ .\-/]/.test(typed)) return typed.slice(0, 10);
+  const digits = typed.slice(0, 8);
   if (digits.length <= 4) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;

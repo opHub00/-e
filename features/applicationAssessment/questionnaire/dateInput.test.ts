@@ -46,6 +46,9 @@ test('입력 중에는 자동으로 하이픈을 끼워 보여준다', () => {
   assert.equal(formatDateInput('19940705'), '1994-07-05');
   assert.equal(formatDateInput('1994-07-05'), '1994-07-05');
   assert.equal(formatDateInput('199407051234'), '1994-07-05', '8자리를 넘으면 잘라낸다');
+  assert.equal(formatDateInput('1994.7.5'), '1994.7.5', '직접 쓴 구분자는 그대로 둔다');
+  assert.equal(formatDateInput('1994/07/05'), '1994/07/05');
+  assert.equal(normalizeDateInput(formatDateInput('1994.7.5')).status, 'OK');
   assert.equal(displayDate('1994-07-05'), '1994.07.05');
 });
 

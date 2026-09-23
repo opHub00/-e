@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { WanpanCard } from '../../components/WanpanCard';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -23,6 +23,8 @@ type Props = {
   onProfileChange: (profile: ApplicantProfileV2) => void;
   onComplete: (details: AssessmentInput['details'], profile: ApplicantProfileV2) => void;
   onBack: () => void;
+  /** 질문이 바뀌면 부모 화면을 맨 위로 올린다. 스크롤 영역은 부모 하나만 둔다. */
+  onStepChange?: () => void;
 };
 
 /**
@@ -31,14 +33,13 @@ type Props = {
  * 질문 목록과 순서는 questionnaire/questions 가 정한다. 이 화면은 답을 받고, 로컬에 저장하고,
  * 마지막에 기존 판정 입력(details)으로 바꿔 넘길 뿐이다. 규칙 엔진에는 아무 조건도 넣지 않는다.
  */
-export function QuestionnaireFlow({ rules, supply, profile, listingId, residenceRegion, onProfileChange, onComplete, onBack }: Props) {
+export function QuestionnaireFlow({ rules, supply, profile, listingId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange }: Props) {
   const announcementDate = rules?.announcementDate ?? null;
   const restored = useRef(false);
   const [answers, setAnswers] = useState<Answers>({});
   const [index, setIndex] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const scroll = useRef<ScrollView>(null);
 
   const questions = useMemo(
     () => buildQuestionnaire({ rules, supply, profile, answers, announcementDate, residenceRegion }),
@@ -69,12 +70,12 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
 
   const move = useCallback((next: number) => {
     setIndex(Math.max(0, Math.min(next, questions.length - 1)));
-    scroll.current?.scrollTo({ y: 0, animated: false });
-  }, [questions.length]);
+    onStepChange?.();
+  }, [questions.length, onStepChange]);
   const set = (id: string, value: string) => setAnswers(previous => ({ ...previous, [id]: value }));
   const goNext = () => {
     if (current && errors[current.id]) { setTouched(t => ({ ...t, [current.id]: true })); return; }
-    if (index >= questions.length - 1) { setShowSummary(true); return; }
+    if (index >= questions.length - 1) { setShowSummary(true); onStepChange?.(); return; }
     move(index + 1);
   };
   const finish = () => {
@@ -95,7 +96,7 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
 
   if (showSummary) {
     const unanswered = questions.filter(question => (answers[question.id] ?? '').trim() === '');
-    return <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.wrap}>
+    return <View style={styles.wrap}>
       <Text accessibilityRole="header" style={styles.title}>입력을 마쳤어요</Text>
       <Text style={styles.body}>필요한 정보 {progress.total}개 중 {progress.answered}개를 확인했어요.</Text>
       <View style={styles.track}><AnimatedBar ratio={progress.ratio} style={styles.fill} /></View>
@@ -110,10 +111,10 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
       </WanpanCard> : <WanpanCard style={styles.stack}><Text style={styles.strong}>필요한 정보를 모두 확인했어요</Text></WanpanCard>}
       <PrimaryButton label="내 조건으로 판정하기" onPress={finish} />
       <PrimaryButton label="답변 다시 보기" variant="soft" onPress={() => { setShowSummary(false); move(questions.length - 1); }} />
-    </ScrollView>;
+    </View>;
   }
 
-  return <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.wrap}>
+  return <View style={styles.wrap}>
     <View style={styles.progressRow}>
       <Text style={styles.step}>{current.section} · {index + 1} / {questions.length}</Text>
       <Text style={styles.step}>{progress.answered}개 확인</Text>
@@ -161,7 +162,7 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
     {!answeredCurrent ? <PrimaryButton label="지금은 모르겠어요 · 건너뛰기" variant="soft" onPress={() => (index >= questions.length - 1 ? setShowSummary(true) : move(index + 1))} /> : null}
     <PrimaryButton label="이전" variant="soft" onPress={() => (index === 0 ? onBack() : move(index - 1))} />
     <Text style={styles.saved}>입력한 내용은 이 기기에 저장돼요. 나갔다가 돌아와도 이어서 답할 수 있어요.</Text>
-  </ScrollView>;
+  </View>;
 }
 
 const styles = StyleSheet.create({

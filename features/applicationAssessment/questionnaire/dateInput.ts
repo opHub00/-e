@@ -12,16 +12,28 @@ const pad = (value: number) => String(value).padStart(2, '0');
 const lastDay = (year: number, month: number) => new Date(Date.UTC(year, month, 0)).getUTCDate();
 
 /**
- * 입력 중 화면에 보여주는 형태. 숫자만 치면 자동으로 하이픈을 끼워 준다.
- * 사용자가 `.`이나 `/`를 직접 쳤다면 그 표기를 지우지 않는다(1994.7.5 를 1994-75 로 바꾸지 않는다).
+ * 입력 중 화면에 보여주는 형태.
+ *
+ * 숫자만 치면 연-월-일로 끊어 준다: 1994 → 1994-0 → 1994-07 → 1994-07-0 → 1994-07-05.
+ * 하이픈은 이 함수가 넣은 것으로 보고 매번 다시 계산한다. 한 글자씩 칠 때도, 한 번에 붙여넣을 때도 같은 결과가 나온다.
+ * `.` `/` 공백을 직접 쓴 입력(1994.7.5)은 사용자의 표기이므로 건드리지 않고, 판정 전에 normalizeDateInput 이 canonical 로 바꾼다.
  */
 export function formatDateInput(raw: string): string {
-  const typed = raw.replace(/[^0-9 .\-/]/g, '');
-  if (/[ .\-/]/.test(typed)) return typed.slice(0, 10);
-  const digits = typed.slice(0, 8);
+  const cleaned = raw.replace(/[^0-9 .\-/]/g, '');
+  if (/[ ./]/.test(cleaned)) return cleaned.slice(0, 10);
+  const digits = cleaned.replace(/-/g, '').slice(0, 8);
   if (digits.length <= 4) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+}
+
+/** 쉼표로 여러 날짜를 받는 칸(자녀 생년월일 등). 각 조각에 같은 규칙을 적용한다. */
+export function formatDateListInput(raw: string): string {
+  if (/[^0-9 .,\-/]/.test(raw)) return raw.slice(0, 120); // "없음" 같은 답은 그대로 둔다
+  return raw.split(',').map(part => {
+    const spaced = part.startsWith(' ') ? ' ' : '';
+    return spaced + formatDateInput(part.trim());
+  }).join(',').slice(0, 120);
 }
 
 export type DateBounds = { notBefore?: string; notAfter?: string; notAfterLabel?: string };

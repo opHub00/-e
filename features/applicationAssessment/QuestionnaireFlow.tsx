@@ -11,7 +11,7 @@ import type { AnnouncementRules, AssessmentInput, SupplyType } from './types';
 import { koreanMoneyHint } from './form';
 import { assessmentDetails, profileUpdatesFromAnswers } from './questionnaire/adapter';
 import { clearDraft, readDraft, writeDraft } from './questionnaire/draft';
-import { displayDate, formatDateInput, normalizeDateInput } from './questionnaire/dateInput';
+import { displayDate, formatDateInput, formatDateListInput, normalizeDateInput } from './questionnaire/dateInput';
 import { applyPrefill, buildQuestionnaire, questionnaireProgress, type Answers, type Question } from './questionnaire/questions';
 
 type Props = {
@@ -26,6 +26,10 @@ type Props = {
   /** 질문이 바뀌면 부모 화면을 맨 위로 올린다. 스크롤 영역은 부모 하나만 둔다. */
   onStepChange?: () => void;
 };
+
+/** 날짜 칸은 치는 동안 연-월-일로 끊어 준다. 다른 칸은 사용자가 친 그대로 둔다. */
+const formatAnswer = (kind: Question['kind'], value: string) =>
+  kind === 'date' ? formatDateInput(value) : kind === 'dateList' ? formatDateListInput(value) : value;
 
 /**
  * 한 번에 하나씩 묻는 판정 질문지.
@@ -142,7 +146,7 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
           <TextInput
             accessibilityLabel={current.title}
             value={answers[current.id] ?? ''}
-            onChangeText={value => set(current.id, current.kind === 'date' ? formatDateInput(value) : value)}
+            onChangeText={value => set(current.id, formatAnswer(current.kind, value))}
             onBlur={() => setTouched(t => ({ ...t, [current.id]: true }))}
             placeholder={current.kind === 'date' ? '예: 19940705' : current.kind === 'dateList' ? '예: 20220510, 20240103 (없으면 없음)' : current.kind === 'money' ? '원 단위 · 예: 7000000' : '숫자만 입력'}
             placeholderTextColor={colors.textSubtle}

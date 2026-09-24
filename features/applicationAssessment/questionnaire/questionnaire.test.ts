@@ -191,6 +191,9 @@ test('공급유형별로 규칙이 읽지 않는 질문은 아예 나오지 않�
   savedProfile.subscriptionAccount.hasAccount = knownField(true);
   savedProfile.family.marriageStatus = knownField('married');
   savedProfile.basic.birthDate = knownField('1994-03-01');
+  savedProfile.housing.currentOwnership = knownField('no-home');
+  savedProfile.housing.householdHasHome = knownField(false);
+  savedProfile.housing.hasSpecialSupplyRestriction = knownField(false);
   // 프로필이 채워진 신혼부부 기준 질문 수를 기록해 둔다(기존 25개와 비교).
   const count = ask({ profile: savedProfile, answers: { familyCategory: 'married', overseas: 'no' } }).length;
   assert.ok(count <= 18, `질문 수가 ${count}개로 줄어야 한다`);

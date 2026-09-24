@@ -69,6 +69,10 @@ const QUESTION_FACTS: Record<string, string[]> = {
   youthPriorityTarget: ['youthPriorityTarget'],
   newlywedPriorityTarget: ['newlywedPriorityTarget'],
   exceptions: ['exceptionsClear'],
+  // 원래 프로필에서만 오던 사실들. 프로필이 비어 있을 때만 여기서 묻고, 답은 프로필에 저장한다.
+  maritalStatus: ['maritalStatus'],
+  householdHomeOwnership: ['householdNoHome', 'noHome'],
+  specialSupplyRestriction: ['noSpecialRestriction'],
 };
 
 /** 한 공급유형의 규칙이 읽는 사실만 모은다(자격·공급단계·배점 전부). */
@@ -185,6 +189,14 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
     title: '한부모가족 증명서를 낼 수 있나요?',
     why: '한부모 자격은 증명서로 확인해요.',
   });
+  // 혼인 상태를 규칙이 직접 읽는데 프로필에 없고, 가족 유형 질문도 없을 때만 묻는다
+  // (가족 유형을 물으면 그 답이 프로필의 혼인 여부로 저장되므로 두 번 묻지 않는다).
+  if (facts.has('maritalStatus') && marriageStatus === undefined && !questions.some(question => question.id === 'familyCategory')) add({
+    id: 'maritalStatus', kind: 'choice', section: '가족',
+    options: [{ value: 'married', label: '기혼 (혼인신고를 마쳤어요)' }, { value: 'single', label: '미혼' }, { value: '', label: '잘 모르겠어요' }],
+    title: '현재 혼인 상태가 어떻게 되시나요?',
+    why: '공고가 혼인 상태를 자격 요건으로 봐요. 한 번 답하면 프로필에 저장해서 다시 묻지 않아요.',
+  });
   if (uses('everMarried') && supply === 'newlywed') add({
     id: 'everMarried', kind: 'boolean', section: '가족', options: YES_NO,
     title: '과거를 포함해 혼인한 적이 있나요?',
@@ -228,6 +240,29 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
   });
 
   // ── 주택 이력
+  // 무주택 여부와 특별공급 제한은 원래 프로필 화면에서만 받던 값이다.
+  // 규칙이 읽는데 프로필이 비어 있으면 판정이 계속 "확인 필요"로 남으므로, 여기서 한 번 묻는다.
+  const ownership = known(profile.housing.currentOwnership);
+  const householdHasHome = known(profile.housing.householdHasHome);
+  const householdNoHomeKnown = ownership === 'owns-home' || (ownership !== undefined && householdHasHome !== undefined);
+  if ((facts.has('householdNoHome') && !householdNoHomeKnown) || (facts.has('noHome') && ownership === undefined)) add({
+    id: 'householdHomeOwnership', kind: 'choice', section: '주택',
+    options: [
+      { value: 'none', label: '아니요, 세대원 모두 주택이 없어요' },
+      { value: 'self', label: '네, 제가 주택을 가지고 있어요' },
+      { value: 'household', label: '저는 없지만 다른 세대원이 가지고 있어요' },
+      { value: '', label: '잘 모르겠어요' },
+    ],
+    title: '지금 세대원 중 주택을 가진 사람이 있나요?',
+    why: '무주택 여부가 이 공고의 자격 요건이에요. 한 번 답하면 프로필에 저장해서 다시 묻지 않아요.',
+  });
+  // 공고가 정한 제한 사유라 '공고 확인' 단계에서 묻는다(주거 단계가 6개로 불어나지 않게 하는 효과도 있다).
+  if (facts.has('noSpecialRestriction') && known(profile.housing.hasSpecialSupplyRestriction) === undefined) add({
+    id: 'specialSupplyRestriction', kind: 'boolean', section: '공고 확인', options: YES_NO,
+    title: '특별공급을 받을 수 없는 제한 사유가 있나요?',
+    help: '과거 당첨 이력과는 다른 항목이에요. 공고가 정한 특별공급 제한 사유를 말해요.',
+    why: '제한 사유가 없어야 특별공급을 신청할 수 있어요. 한 번 답하면 프로필에 저장돼요.',
+  });
   if (uses('noHomeSince') && supply === 'newlywed') add({
     id: 'noHomeSince', kind: 'date', section: '주택', title: '무주택기간은 언제부터인가요?',
     why: '공고가 인정하는 무주택기간을 확인해요.',

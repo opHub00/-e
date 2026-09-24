@@ -78,6 +78,23 @@ export function profileUpdatesFromAnswers(profile: ApplicantProfileV2, answers: 
     next = { ...next, subscriptionAccount: { ...next.subscriptionAccount, hasAccount: knownField(answers.hasAccount === 'yes') } };
     changed.push('청약통장 보유');
   }
+  // 규칙이 읽지만 프로필에만 있던 값들. 질문지에서 받았으면 프로필에 넣어야 엔진까지 닿는다.
+  if ((answers.maritalStatus === 'married' || answers.maritalStatus === 'single') && next.family.marriageStatus.status !== 'known') {
+    next = { ...next, family: { ...next.family, marriageStatus: knownField(answers.maritalStatus) } };
+    changed.push('혼인 여부');
+  }
+  const ownership = answers.householdHomeOwnership;
+  if (ownership === 'none' || ownership === 'self' || ownership === 'household') {
+    const housing = { ...next.housing };
+    let touched = false;
+    if (housing.currentOwnership.status !== 'known') { housing.currentOwnership = knownField(ownership === 'self' ? 'owns-home' : 'no-home'); touched = true; }
+    if (housing.householdHasHome.status !== 'known') { housing.householdHasHome = knownField(ownership !== 'none'); touched = true; }
+    if (touched) { next = { ...next, housing }; changed.push('주택 보유 여부'); }
+  }
+  if ((answers.specialSupplyRestriction === 'yes' || answers.specialSupplyRestriction === 'no') && next.housing.hasSpecialSupplyRestriction.status !== 'known') {
+    next = { ...next, housing: { ...next.housing, hasSpecialSupplyRestriction: knownField(answers.specialSupplyRestriction === 'yes') } };
+    changed.push('특별공급 제한 여부');
+  }
   const children = childrenFromAnswer(answers.children);
   if (children && next.family.childrenCount.status !== 'known') {
     next = { ...next, family: { ...next.family, childrenCount: knownField(children.count), childBirthYears: knownField(children.years) } };

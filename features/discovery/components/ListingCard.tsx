@@ -12,6 +12,7 @@ import {
   RECRUITMENT_STATUS_LABEL,
 } from '../domain';
 import type { DiscoveryListing, ListingRelevance } from '../types';
+import { INSIGHT_VIEW, type ListingInsight } from '../../listingInsight/domain';
 import { ListingVisualFrame } from './ListingVisualFrame';
 
 type Props = {
@@ -20,6 +21,12 @@ type Props = {
   saved: boolean;
   onToggleSaved: () => void;
   onOpen: () => void;
+  /** 판정 규칙이 연결된 공고에서만 들어온다. 없으면 기존 표시를 그대로 둔다. */
+  insight?: ListingInsight | null;
+  /** 마감까지 남은 기간. 날짜를 모르면 null 이라 아무것도 그리지 않는다. */
+  deadline?: string | null;
+  /** 부족한 정보를 채우러 갈 곳. insight 가 있을 때만 쓴다. */
+  onStartAssessment?: () => void;
 };
 
 const STATUS_STYLE: Record<
@@ -42,7 +49,7 @@ const THUMB = 96;
  * 주택 유형은 왼쪽 칸의 아이콘이 대신하므로 사실 목록에서는 뺀다.
  * 같은 정보를 두 번 쓰면 좁은 오른쪽 칸이 금방 찬다.
  */
-export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }: Props) {
+export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen, insight, deadline, onStartAssessment }: Props) {
   const status = STATUS_STYLE[listing.recruitmentStatus];
   const schedule = formatRecruitmentSchedule(listing);
   const facts = [
@@ -78,6 +85,12 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
             <Text style={styles.place} numberOfLines={1}>
               {listing.region}
             </Text>
+            {/* 마감은 공고 데이터만으로 계산한다. 날짜가 없으면 아예 그리지 않는다. */}
+            {deadline ? (
+              <View style={[styles.statusChip, { backgroundColor: tint.amber.bg }]}>
+                <Text style={[styles.statusText, { color: tint.amber.fg }]}>{deadline}</Text>
+              </View>
+            ) : null}
           </View>
 
           <Text style={styles.name} numberOfLines={2}>
@@ -95,10 +108,34 @@ export function ListingCard({ listing, relevance, saved, onToggleSaved, onOpen }
             </View>
           ) : null}
 
-          <View style={styles.relevance}>
-            <MaterialIcons name="auto-awesome" size={13} color={colors.primary} />
-            <Text style={styles.relevanceText}>{relevance.label}</Text>
-          </View>
+          {/* 판정 결과가 있으면 그것이 우선이다. 없으면 기존 관심도 표시를 그대로 둔다. */}
+          {insight ? (
+            <View style={styles.insight}>
+              <View style={styles.insightRow}>
+                <MaterialIcons name={INSIGHT_VIEW[insight.status].icon} size={13} color={tint[INSIGHT_VIEW[insight.status].tone].fg} />
+                <Text style={[styles.insightText, { color: tint[INSIGHT_VIEW[insight.status].tone].fg }]} numberOfLines={2}>
+                  {insight.label}
+                </Text>
+              </View>
+              <Text style={styles.insightDetail} numberOfLines={1}>{insight.sentence}</Text>
+              {insight.sourceStatus === 'OFFICIAL_VERIFIED' ? (
+                <View style={styles.insightRow}>
+                  <MaterialIcons name="verified" size={12} color={tint.green.fg} />
+                  <Text style={[styles.insightDetail, { color: tint.green.fg }]}>공식 공고 기준으로 판정했어요</Text>
+                </View>
+              ) : null}
+              {insight.answerableMissing > 0 && onStartAssessment ? (
+                <MotionPressable accessibilityRole="button" accessibilityLabel={`${listing.complexName} 추가 정보 입력하기`} onPress={onStartAssessment} style={styles.cta}>
+                  <Text style={styles.ctaText}>정보 {insight.answerableMissing}개 입력하고 분석하기</Text>
+                </MotionPressable>
+              ) : null}
+            </View>
+          ) : (
+            <View style={styles.relevance}>
+              <MaterialIcons name="auto-awesome" size={13} color={colors.primary} />
+              <Text style={styles.relevanceText}>{relevance.label}</Text>
+            </View>
+          )}
         </View>
       </MotionPressable>
 
@@ -175,4 +212,11 @@ const styles = StyleSheet.create({
 
   relevance: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1 },
   relevanceText: { ...type.micro, color: colors.primary },
+
+  insight: { gap: 3, marginTop: 1 },
+  insightRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  insightText: { ...type.micro, flexShrink: 1 },
+  insightDetail: { ...type.micro, color: colors.textMuted },
+  cta: { marginTop: 2, alignSelf: 'flex-start', borderRadius: radius.pill, backgroundColor: colors.lavender, paddingHorizontal: 10, paddingVertical: 5 },
+  ctaText: { ...type.micro, color: colors.primary },
 });

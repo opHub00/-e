@@ -23,6 +23,9 @@ import {
 } from '../../features/discovery/domain';
 import { useAssessmentRules } from '../../features/applicationAssessment/data/useAssessmentRules';
 import { ListingDetailHero } from '../../features/discovery/components/ListingDetailHero';
+import { ListingInsightSection } from '../../features/listingInsight/ListingInsightSection';
+import { useListingInsight } from '../../features/listingInsight/useListingInsight';
+import { deadlineLabel } from '../../features/listingInsight/domain';
 import { useListingDataset } from '../../features/discovery/data/useListingDataset';
 import { getStoriesForListing } from '../../features/discovery/stories';
 import type { DiscoveryListing, ListingStory } from '../../features/discovery/types';
@@ -61,6 +64,8 @@ export default function DiscoveryDetailRoute() {
   const listing = discoveryListings.find((item) => item.id === id);
   const competitionState = useListingCompetition(listing);
   const assessmentRules = useAssessmentRules(listing?.id);
+  // 상세 화면은 이미 규칙을 들고 있다. 그 값을 그대로 넘겨 같은 listing 을 두 번 묻지 않는다.
+  const insightState = useListingInsight(listing?.id, Boolean(listing), assessmentRules.rules);
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -196,6 +201,15 @@ export default function DiscoveryDetailRoute() {
             </Text>
           </View>
         )}
+
+        {/* 엔진이 실제로 판정한 결과. 규칙이 연결된 공고에서만 나온다. */}
+        <Appear delay={stagger.short} distance={travel.content}>
+          <ListingInsightSection
+            state={insightState}
+            deadline={deadlineLabel(listing.recruitmentEndDate, new Date().toISOString().slice(0, 10))}
+            onContinueAssessment={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}` as Href)}
+          />
+        </Appear>
 
         <Appear delay={stagger.short} distance={travel.content}>
           <PersonalFitSection result={personalFit} onCompleteProfile={openProfilePrompt} />

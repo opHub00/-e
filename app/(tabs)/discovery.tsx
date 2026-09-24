@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, shadow, spacing, tint, tracking, type } from '../../design/tokens';
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
+import { InsightListingCard, type ListViewport } from '../../features/listingInsight/InsightListingCard';
 import {
   DEFAULT_DISCOVERY_FILTERS,
   createDiscoveryFilters,
@@ -54,6 +55,9 @@ const SUPPLY_CYCLE: DiscoveryFilters['supplyType'][] = [
 
 export default function DiscoveryRoute() {
   const router = useRouter();
+  // 목록에서 보이는 카드만 판정 규칙을 부르게 하려고 스크롤 위치를 잰다.
+  const [listViewport, setListViewport] = useState<ListViewport>({ height: 0, scrollY: 0 });
+  const today = new Date().toISOString().slice(0, 10);
   const applicantProfile = useUserStore((state) => state.applicantProfile);
   const profileHydrated = useUserStore((state) => state.profileHydrated);
   const profile = useMemo(() => toDiscoveryUserProfile(applicantProfile), [applicantProfile]);
@@ -384,15 +388,25 @@ export default function DiscoveryRoute() {
           <ScrollView
             contentContainerStyle={styles.listBody}
             showsVerticalScrollIndicator={false}
+            scrollEventThrottle={64}
+            onLayout={(event) =>
+              setListViewport((previous) => ({ ...previous, height: event.nativeEvent.layout.height }))
+            }
+            onScroll={(event) =>
+              setListViewport((previous) => ({ ...previous, scrollY: event.nativeEvent.contentOffset.y }))
+            }
           >
             {visibleListings.map((listing, index) => (
               <AppearItem key={listing.id} index={index}>
-                <ListingCard
+                <InsightListingCard
                   listing={listing}
                   relevance={getListingRelevance(profile, listing)}
                   saved={savedListingIds.includes(listing.id)}
+                  viewport={listViewport}
+                  today={today}
                   onToggleSaved={() => toggleSavedListing(listing.id)}
                   onOpen={() => openListing(listing.id)}
+                  onStartAssessment={() => router.push(`/assessment?listingId=${encodeURIComponent(listing.id)}`)}
                 />
               </AppearItem>
             ))}

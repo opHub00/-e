@@ -107,7 +107,8 @@
             "firstHome.residence",
             "firstHome.realEstate",
             "firstHome.vehicle",
-            "firstHome.noSpecialSupplyHistory"
+            "firstHome.noSpecialSupplyHistory",
+            "firstHome.tax"
           ],
           "stages": [
             {
@@ -617,7 +618,9 @@
       "evidence": {
         "section": "<표2> 부동산 및 자동차 소유에 관한 자산보유기준",
         "blockIds": [
-          "b000403"
+          "b000603",
+          "b000403",
+          "b000407"
         ]
       }
     },
@@ -640,6 +643,8 @@
       "evidence": {
         "section": "<표2> 부동산 및 자동차 소유에 관한 자산보유기준",
         "blockIds": [
+          "b000603",
+          "b000403",
           "b000407"
         ]
       }
@@ -1042,7 +1047,9 @@
       "evidence": {
         "section": "<표2> 부동산 및 자동차 소유에 관한 자산보유기준",
         "blockIds": [
-          "b000403"
+          "b000588",
+          "b000403",
+          "b000407"
         ]
       }
     },
@@ -1065,6 +1072,8 @@
       "evidence": {
         "section": "<표2> 부동산 및 자동차 소유에 관한 자산보유기준",
         "blockIds": [
+          "b000588",
+          "b000403",
           "b000407"
         ]
       }
@@ -1251,6 +1260,38 @@
           "4": "가구원수 구간 '4인'(b000433)",
           "5": "가구원수 구간 '5인'(b000433)"
         }
+      }
+    },
+    {
+      "ruleKey": "firstHome.tax",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "근로자·자영업자로서 소득세를 5년 이상 납부",
+        "expression": {
+          "all": [
+            {
+              "fact": "workOrBusinessIncome",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "fact": "incomeTaxPaymentYears",
+              "op": "gte",
+              "value": 5
+            }
+          ]
+        },
+        "documents": [
+          "소득세 납부 증명 서류"
+        ]
+      },
+      "evidence": {
+        "section": "Ⅴ-6. 생애최초 특별공급",
+        "blockIds": [
+          "b000575"
+        ]
       }
     }
   ]

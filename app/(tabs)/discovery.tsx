@@ -18,6 +18,7 @@ import { colors, radius, shadow, spacing, tint, tracking, type } from '../../des
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import { InsightListingCard, type ListViewport } from '../../features/listingInsight/InsightListingCard';
+import { AnalyzableListingsSection } from '../../features/listingInsight/AnalyzableListingsSection';
 import {
   DEFAULT_DISCOVERY_FILTERS,
   createDiscoveryFilters,
@@ -396,6 +397,13 @@ export default function DiscoveryRoute() {
               setListViewport((previous) => ({ ...previous, scrollY: event.nativeEvent.contentOffset.y }))
             }
           >
+            {/* 판정까지 가능한 공고는 별도 영역이다. 사용자가 고른 지역·추천 필터를 적용하지 않고,
+                일반 목록에 섞지도 않는다. 전체 dataset 에서 바인딩된 공고만 추린다. */}
+            <AnalyzableListingsSection
+              listings={discoveryListings}
+              onOpen={(listingId) => openListing(listingId)}
+              onAnalyze={(listingId) => router.push(`/assessment?listingId=${encodeURIComponent(listingId)}`)}
+            />
             {visibleListings.map((listing, index) => (
               <AppearItem key={listing.id} index={index}>
                 <InsightListingCard

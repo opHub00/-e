@@ -19,6 +19,8 @@ import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import { InsightListingCard, type ListViewport } from '../../features/listingInsight/InsightListingCard';
 import { AnalyzableListingsSection } from '../../features/listingInsight/AnalyzableListingsSection';
+import { useAnalysisReadyListings } from '../../features/listingInsight/useAnalysisReadyListings';
+import { excludeAnalysisReady } from '../../features/listingInsight/analyzableListings';
 import {
   DEFAULT_DISCOVERY_FILTERS,
   createDiscoveryFilters,
@@ -86,6 +88,13 @@ export default function DiscoveryRoute() {
   const visibleListings = useMemo(
     () => searchListings(filteredListings, query),
     [filteredListings, query],
+  );
+  // 분석 가능 섹션이 실제로 보여준 공고는 일반 목록에서 한 번만 나오게 뺀다.
+  // 조회 실패·빈 결과면 ids 가 비어 있어 일반 목록은 기존과 똑같다.
+  const analysisReady = useAnalysisReadyListings(discoveryListings);
+  const generalListings = useMemo(
+    () => excludeAnalysisReady(visibleListings, analysisReady.ids),
+    [visibleListings, analysisReady.ids],
   );
   const mapListings = useMemo(
     () => getMappableListings(visibleListings),
@@ -400,11 +409,11 @@ export default function DiscoveryRoute() {
             {/* 판정까지 가능한 공고는 별도 영역이다. 사용자가 고른 지역·추천 필터를 적용하지 않고,
                 일반 목록에 섞지도 않는다. 전체 dataset 에서 바인딩된 공고만 추린다. */}
             <AnalyzableListingsSection
-              listings={discoveryListings}
+              state={analysisReady}
               onOpen={(listingId) => openListing(listingId)}
               onAnalyze={(listingId) => router.push(`/assessment?listingId=${encodeURIComponent(listingId)}`)}
             />
-            {visibleListings.map((listing, index) => (
+            {generalListings.map((listing, index) => (
               <AppearItem key={listing.id} index={index}>
                 <InsightListingCard
                   listing={listing}
@@ -418,7 +427,7 @@ export default function DiscoveryRoute() {
                 />
               </AppearItem>
             ))}
-            {visibleListings.length === 0 ? (
+            {generalListings.length === 0 ? (
               <WanpanCard style={styles.emptyCard}>
                 <MaterialIcons name="filter-alt-off" size={26} color={colors.primary} />
                 <Text style={styles.emptyTitle}>필터에 맞는 청약이 없어요</Text>

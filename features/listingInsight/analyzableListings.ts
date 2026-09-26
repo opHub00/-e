@@ -27,6 +27,19 @@ export async function readBoundListings(client: BindingReadClient): Promise<Boun
   return out;
 }
 
+/**
+ * 분석 가능 섹션이 실제로 보여준 공고를 일반 목록에서 한 번만 빼기 위한 필터.
+ *
+ * 일반 목록의 filterListings 는 건드리지 않는다. 이미 걸러진 결과에서 섹션이 맡은 공고만 뺀다.
+ * 섹션이 아무것도 못 보여줬으면(조회 실패·빈 결과) 일반 목록은 그대로 둔다. 그래야 실패했을 때
+ * 공고가 어디에서도 보이지 않는 일이 생기지 않는다.
+ */
+export function excludeAnalysisReady<T extends { id: string }>(listings: T[], analysisReadyIds: readonly string[]): T[] {
+  if (!analysisReadyIds.length) return listings;
+  const shown = new Set(analysisReadyIds);
+  return listings.filter(listing => !shown.has(listing.id));
+}
+
 /** 활성 rule set 이 담고 있는 규칙 수. 활성 세트는 승인된 세트이므로 곧 검수 완료 규칙 수다. */
 export function countApprovedRules(rules: AnnouncementRules): number {
   let total = 0;

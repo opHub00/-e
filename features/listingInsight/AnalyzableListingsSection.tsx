@@ -1,35 +1,20 @@
-import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { AppearItem } from '../../components/motion/AppearItem';
 import { colors, radius, size, spacing, tint, type } from '../../design/tokens';
-import { getSupabaseClient } from '../auth/supabaseClient';
 import { RECRUITMENT_STATUS_LABEL } from '../discovery/domain';
 import type { DiscoveryListing } from '../discovery/types';
-import { countApprovedRules, readBoundListings, sourceStatusLabel, type BindingReadClient } from './analyzableListings';
+import { countApprovedRules, sourceStatusLabel } from './analyzableListings';
 import { INSIGHT_VIEW } from './domain';
 import { listingRuleCache, useListingInsight } from './useListingInsight';
+import type { AnalysisReadyState } from './useAnalysisReadyListings';
 
 type Props = {
-  listings: DiscoveryListing[];
+  /** 조회는 부모(useAnalysisReadyListings)가 한다. 이 컴포넌트는 받은 것만 그린다. */
+  state: AnalysisReadyState;
   onOpen: (listingId: string) => void;
   onAnalyze: (listingId: string) => void;
-};
-
-/**
- * 바인딩 목록은 화면당 한 번만 읽는다. 목록이 다시 그려져도 같은 약속을 쓴다.
- * 이 조회는 공개 select 하나이고, 쓰기는 없다.
- */
-let boundPromise: Promise<string[]> | null = null;
-const loadBoundListingIds = (): Promise<string[]> => {
-  if (!boundPromise) {
-    const client = getSupabaseClient();
-    boundPromise = client
-      ? readBoundListings(client as unknown as BindingReadClient).then(rows => rows.map(row => row.listingId))
-      : Promise.resolve([]);
-  }
-  return boundPromise;
 };
 
 /**
@@ -42,15 +27,8 @@ const loadBoundListingIds = (): Promise<string[]> => {
  * 노출 기준은 announcement_listing_bindings 조회 결과 그대로다
  * (그 테이블이 보이는 것 자체가 활성·공개·승인된 rule set 과 binding 이 있다는 뜻이다).
  */
-export function AnalyzableListingsSection({ listings, onOpen, onAnalyze }: Props) {
-  const [boundIds, setBoundIds] = useState<string[] | null>(null);
-  useEffect(() => {
-    let current = true;
-    void loadBoundListingIds().then(ids => { if (current) setBoundIds(ids); });
-    return () => { current = false; };
-  }, []);
-
-  if (boundIds === null) {
+export function AnalyzableListingsSection({ state, onOpen, onAnalyze }: Props) {
+  if (state.status === 'LOADING') {
     return (
       <View style={styles.wrap}>
         <Header />
@@ -58,7 +36,7 @@ export function AnalyzableListingsSection({ listings, onOpen, onAnalyze }: Props
       </View>
     );
   }
-  const matched = listings.filter(listing => boundIds.includes(listing.id));
+  const matched = state.listings;
   if (!matched.length) return null;
 
   return (

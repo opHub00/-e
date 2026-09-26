@@ -6,7 +6,7 @@ import { createMinimalApplicantProfile } from '../profile/domain.ts';
 import { getVisibleListings, DEFAULT_DISCOVERY_FILTERS } from '../discovery/domain.ts';
 import { toDiscoveryUserProfile } from '../profile/domain.ts';
 import type { DiscoveryListing } from '../discovery/types.ts';
-import { countApprovedRules, readBoundListings, sourceStatusLabel, type BindingReadClient } from './analyzableListings.ts';
+import { countApprovedRules, excludeAnalysisReady, readBoundListings, sourceStatusLabel, type BindingReadClient } from './analyzableListings.ts';
 
 const godeok = validateImportPackage(JSON.parse(readFileSync(new URL('../../data/assessment-rules/lh-godeok-a65bl-2026000438.json', import.meta.url), 'utf8'))).rules;
 const GODEOK_ID = 'apt-2026000438-2026000438';
@@ -88,4 +88,55 @@ test('공식 검증 여부는 source_status 로만 말한다', () => {
   assert.equal(sourceStatusLabel('REFERENCE'), '원문 확인 전');
   assert.equal(sourceStatusLabel(undefined), '확인 불가', '모르면 단정하지 않는다');
   assert.equal(godeok.sourceStatus, 'OFFICIAL_VERIFIED');
+});
+
+// ── 중복 노출 제거: 섹션이 보여준 공고만 일반 목록에서 뺀다.
+const GODEOK = listing({ id: GODEOK_ID, complexName: '힐스테이트 고덕엘리스트 A65BL', region: '경기', district: '평택시', recruitmentStatus: 'closed' });
+const SEOUL_A = listing({ id: 'apt-seoul-a', complexName: '서울 공고 A', region: '서울' });
+const SEOUL_B = listing({ id: 'apt-seoul-b', complexName: '서울 공고 B', region: '서울' });
+const ALL = [GODEOK, SEOUL_A, SEOUL_B];
+const profileSeoul = toDiscoveryUserProfile(createMinimalApplicantProfile({ name: '검증', age: 31, currentRegion: '서울', preferredRegions: ['서울'] }));
+
+/** 화면 전체에서 고덕이 몇 번 보이는지 = 섹션 + 일반 목록. */
+const godeokAppearances = (filters: Parameters<typeof getVisibleListings>[2], sectionIds: string[]) => {
+  const section = ALL.filter(item => sectionIds.includes(item.id));
+  const general = excludeAnalysisReady(getVisibleListings(ALL, profileSeoul, filters), sectionIds);
+  return {
+    total: section.filter(i => i.id === GODEOK_ID).length + general.filter(i => i.id === GODEOK_ID).length,
+    section: section.length,
+    general: general.map(i => i.id),
+  };
+};
+
+test('기본 필터에서 고덕은 화면에 1회만 나온다', () => {
+  const result = godeokAppearances({ ...DEFAULT_DISCOVERY_FILTERS, regions: ['서울'] }, [GODEOK_ID]);
+  assert.equal(result.total, 1);
+  assert.equal(result.section, 1);
+  assert.ok(!result.general.includes(GODEOK_ID), '기본 필터에서는 원래 일반 목록에 없다');
+});
+
+test('지역 전국으로 넓혀도 고덕은 1회만 나온다', () => {
+  const result = godeokAppearances({ ...DEFAULT_DISCOVERY_FILTERS, regions: [], personalizedOnly: false }, [GODEOK_ID]);
+  assert.equal(result.total, 1, '전국에서는 일반 목록에도 들어오지만 섹션 것만 남긴다');
+  assert.ok(!result.general.includes(GODEOK_ID));
+});
+
+test('추천 필터를 꺼도 고덕은 1회만 나온다', () => {
+  const result = godeokAppearances({ ...DEFAULT_DISCOVERY_FILTERS, regions: ['서울'], personalizedOnly: false }, [GODEOK_ID]);
+  assert.equal(result.total, 1);
+});
+
+test('섹션 조회가 실패하면 일반 목록의 고덕을 숨기지 않는다', () => {
+  const result = godeokAppearances({ ...DEFAULT_DISCOVERY_FILTERS, regions: [], personalizedOnly: false }, []);
+  assert.equal(result.section, 0, '섹션은 아무것도 못 보여준다');
+  assert.equal(result.total, 1, '대신 일반 목록에서 보인다');
+  assert.ok(result.general.includes(GODEOK_ID), '어디에서도 사라지면 안 된다');
+});
+
+test('다른 공고의 목록 결과는 그대로다', () => {
+  const filters = { ...DEFAULT_DISCOVERY_FILTERS, regions: [], personalizedOnly: false };
+  const before = getVisibleListings(ALL, profileSeoul, filters).map(item => item.id);
+  const after = excludeAnalysisReady(getVisibleListings(ALL, profileSeoul, filters), [GODEOK_ID]).map(item => item.id);
+  assert.deepEqual(after, before.filter(id => id !== GODEOK_ID), '고덕만 빠지고 순서도 그대로다');
+  assert.deepEqual(excludeAnalysisReady(ALL, []), ALL, '뺄 것이 없으면 배열을 그대로 돌려준다');
 });

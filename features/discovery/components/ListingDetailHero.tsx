@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, tracking, type } from '../../../design/tokens';
 import { selectListingVisual } from '../../listingVisual/selectListingVisual';
+import { ListingGallery } from './ListingGallery';
 import { ListingVisualFrame } from './ListingVisualFrame';
 import type { DiscoveryListing } from '../types';
 
@@ -21,14 +23,19 @@ const BAND_FRAME = 68;
  */
 export function ListingDetailHero({ listing }: { listing: DiscoveryListing }) {
   const visual = selectListingVisual(listing);
+  // 갤러리에서 고른 사진이 위에 걸린다. 아무것도 고르지 않았으면 대표 이미지다.
+  const [chosenUrl, setChosenUrl] = useState<string | null>(null);
 
   // 손으로 등록한 사진과 공식 홈페이지에서 찾아 검증을 통과한 사진은 같은 자리를 쓴다.
   // 둘 다 출처를 아래에 남기므로, 어디서 온 그림인지 화면에서 확인할 수 있다.
   if (visual.kind === 'verified_image' || visual.kind === 'sourced_image') {
+    const gallery = visual.kind === 'sourced_image' ? visual.gallery : [];
+    const shownUrl = chosenUrl && gallery.some(image => image.url === chosenUrl) ? chosenUrl : visual.url;
     return (
       <View style={styles.hero}>
         <ListingVisualFrame
-          visual={visual}
+          // 사진을 바꾸면 상자 안의 그림만 갈리고 높이는 그대로다.
+          visual={{ ...visual, url: shownUrl }}
           housingType={listing.housingType}
           variant="hero"
           style={styles.heroFrame}
@@ -39,6 +46,11 @@ export function ListingDetailHero({ listing }: { listing: DiscoveryListing }) {
         <Text style={styles.attribution}>
           {visual.attribution ? `${visual.source.name} · ${visual.attribution}` : visual.source.name}
         </Text>
+        <ListingGallery
+          images={gallery}
+          selectedUrl={shownUrl}
+          onSelect={image => setChosenUrl(image.url)}
+        />
       </View>
     );
   }

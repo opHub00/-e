@@ -61,7 +61,7 @@ export function selectListingVisual(
     const sourced = resolvedListingImage(listing);
     if (sourced) {
       return { kind: 'sourced_image', url: sourced.url, source: sourced.source,
-        attribution: sourced.attribution, confidence: sourced.confidence, fallback };
+        attribution: sourced.attribution, confidence: sourced.confidence, gallery: sourced.gallery, fallback };
     }
     return fallback;
   }

@@ -55,13 +55,15 @@ if (sourced.kind === 'sourced_image') {
   // 재사용 허가를 주장하지 않는다. verified_image 와 섞이면 안 된다.
   assert.equal('reusePermission' in sourced, false);
   assert.ok(sourced.attribution.includes('공식 분양 홈페이지'));
+  // 갤러리는 대표 이미지로 시작하고, 같은 장이 두 번 나오지 않는다.
+  assert.equal(sourced.gallery[0]?.url, sourced.url);
+  assert.equal(new Set(sourced.gallery.map(item => item.url)).size, sourced.gallery.length);
+  for (const item of sourced.gallery) assert.ok(item.label && item.subjectType);
   // 이미지를 못 불러오면 기존 대체 표현으로 돌아간다.
   assert.equal(getListingVisualErrorFallback(sourced).kind, 'map_preview');
 }
 
-// 검증을 통과하지 못한 공고는 기존 fallback 을 그대로 쓴다.
-for (const id of ['apt-2026000438-2026000438', 'apt-2026000446-2026000446']) {
-  assert.equal(selectListingVisual({ ...listing, id }).kind, 'map_preview', `${id}: fallback 이어야 한다`);
-}
+// 대표 이미지를 고르지 못한 공고는 기존 fallback 을 그대로 쓴다.
+assert.equal(selectListingVisual({ ...listing, id: 'apt-2026000438-2026000438' }).kind, 'map_preview');
 
 console.log('Listing visual enrichment tests passed.');

@@ -1,18 +1,118 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "visuals": [
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/sub/sub_overview_top.v1.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/pages/changeinfo",
+      "sourceType": "official_hero",
+      "subjectType": "complex_overview",
+      "subjectEvidence": [
+        "조감·단지 전경 표현",
+        "외관·단지 표현",
+        "가로로 긴 비율(4.14)"
+      ],
+      "primaryScore": 0.95,
+      "primaryEligible": false,
+      "dedupeKey": "sub_overview_top.v1",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(complex_overview).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1920,
+      "height": 464,
+      "byteLength": 48999,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "페이지 머리에 까는 띠 비율이에요(1920×464)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/hero_bg.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.78)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0.8,
+      "primaryEligible": true,
+      "dedupeKey": "hero_bg",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 3840×2160"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 3840,
+      "height": 2160,
+      "byteLength": 297908,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/sub/premium_img3.v100.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/pages/premium",
+      "sourceType": "official_press",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(2.93)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "premium_img3.v100",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 660,
+      "height": 225,
+      "byteLength": 202397,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(660×225, 최소 640×360)."
+    },
     {
       "listingId": "apt-2026000453-2026000453",
       "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_01.jpg",
       "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
       "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.78)"
+      ],
+      "primaryScore": 0.4,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_01",
       "verified": true,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 1,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "조감도·투시도·전경 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(community).",
         "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
         "해상도 1920×1080"
       ],
@@ -30,13 +130,21 @@
       "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_02.jpg",
       "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
       "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.78)"
+      ],
+      "primaryScore": 0.4,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_02",
       "verified": true,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 1,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "조감도·투시도·전경 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(community).",
         "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
         "해상도 1920×1080"
       ],
@@ -54,13 +162,21 @@
       "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_03.jpg",
       "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
       "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.78)"
+      ],
+      "primaryScore": 0.4,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_03",
       "verified": true,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 1,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "조감도·투시도·전경 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(community).",
         "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
         "해상도 1920×1080"
       ],
@@ -74,34 +190,766 @@
       "blockedReason": null
     },
     {
-      "listingId": "apt-2026000446-2026000446",
-      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/main_tit.png",
-      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_04.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
       "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "조감·단지 전경 표현",
+        "외관·단지 표현",
+        "가로로 긴 비율(1.78)"
+      ],
+      "primaryScore": 0.4,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_04",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1920×1080"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1920,
+      "height": 1080,
+      "byteLength": 584055,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_05.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.78)"
+      ],
+      "primaryScore": 0.4,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_05",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1920×1080"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1920,
+      "height": 1080,
+      "byteLength": 618540,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/contact_bg.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.3,
+      "primaryEligible": false,
+      "dedupeKey": "contact_bg",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 2560×1708"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 2560,
+      "height": 1708,
+      "byteLength": 363339,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/contact_img_01.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "map",
+      "subjectEvidence": [
+        "약도·위치도 표현",
+        "가로로 긴 비율(1.79)"
+      ],
+      "primaryScore": 0.3,
+      "primaryEligible": false,
+      "dedupeKey": "contact_img_01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(map).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1024×572"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1024,
+      "height": 572,
+      "byteLength": 913463,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(map)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/schedule_bg.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "schedule_bg",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1352×1352"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1352,
+      "height": 1352,
+      "byteLength": 123329,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_img_04_m.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "외관·단지 표현",
+        "세로로 긴 비율(0.77)"
+      ],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "community_img_04",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 656×852"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 656,
+      "height": 852,
+      "byteLength": 163481,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_thumb_01.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.33)"
+      ],
+      "primaryScore": 0.25,
+      "primaryEligible": false,
+      "dedupeKey": "community_thumb_01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.8,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 120,
+      "height": 90,
+      "byteLength": 17561,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(120×90, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_thumb_02.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.33)"
+      ],
+      "primaryScore": 0.25,
+      "primaryEligible": false,
+      "dedupeKey": "community_thumb_02",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 120,
+      "height": 90,
+      "byteLength": 14720,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(120×90, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_thumb_03.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.33)"
+      ],
+      "primaryScore": 0.25,
+      "primaryEligible": false,
+      "dedupeKey": "community_thumb_03",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 120,
+      "height": 90,
+      "byteLength": 17272,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(120×90, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_thumb_04.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.33)"
+      ],
+      "primaryScore": 0.25,
+      "primaryEligible": false,
+      "dedupeKey": "community_thumb_04",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 120,
+      "height": 90,
+      "byteLength": 15576,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(120×90, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/community_thumb_05.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.33)"
+      ],
+      "primaryScore": 0.25,
+      "primaryEligible": false,
+      "dedupeKey": "community_thumb_05",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요."
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 120,
+      "height": 90,
+      "byteLength": 18320,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(120×90, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/main/unit_bg.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "unit_bg",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1920×1080"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1920,
+      "height": 1080,
+      "byteLength": 1220325,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/data/cyber/59A/unit_iso.jpg",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/pages/unit",
+      "sourceType": "official_press",
+      "subjectType": "floor_plan",
+      "subjectEvidence": [
+        "평면도 표현",
+        "가로로 긴 비율(1.58)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "unit_iso",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(floor_plan).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 1384×876"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 1384,
+      "height": 876,
+      "byteLength": 429360,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(floor_plan)."
+    },
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/resources/img/sub/contact_map.v100.png",
+      "sourceUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/pages/contact",
+      "sourceType": "official_press",
+      "subjectType": "map",
+      "subjectEvidence": [
+        "약도·위치도 표현"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "contact_map.v100",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(map).",
+        "페이지에 단지명 조각(광명, 시티프라디움)이 있어요.",
+        "해상도 819×654"
+      ],
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "width": 819,
+      "height": 654,
+      "byteLength": 83383,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(map)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/main_img01.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.86)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0.8,
+      "primaryEligible": true,
+      "dedupeKey": "main_img01",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1920×1032"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1920,
+      "height": 1032,
+      "byteLength": 1589144,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/prize_bg.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.45,
+      "primaryEligible": false,
+      "dedupeKey": "prize_bg",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1920×1000"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1920,
+      "height": 1000,
+      "byteLength": 160621,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/sub_top.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/planning.html",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(5.05)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0.6,
+      "primaryEligible": false,
+      "dedupeKey": "sub_top",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
         "페이지에 단지명 조각(진주, 판문지구)이 있어요."
       ],
       "announcementNo": "2026000446",
       "announcementTitle": "진주 판문지구 레이크써밋 웰가",
-      "width": 609,
-      "height": 68,
-      "byteLength": 86695,
+      "width": 1920,
+      "height": 380,
+      "byteLength": 79720,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "페이지 머리에 까는 띠 비율이에요(1920×380)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/contact_bg.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.3,
+      "primaryEligible": false,
+      "dedupeKey": "contact_bg",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1920×1000"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1920,
+      "height": 1000,
+      "byteLength": 1767100,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/intro_bg.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.3,
+      "primaryEligible": false,
+      "dedupeKey": "intro_bg",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1920×1000"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1920,
+      "height": 1000,
+      "byteLength": 40388,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/complex.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/complex.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.69)"
+      ],
+      "primaryScore": 0.15,
+      "primaryEligible": false,
+      "dedupeKey": "complex",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×1750"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 1750,
+      "byteLength": 1823100,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/bi.png",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_press",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "브랜드·장식 이미지",
+        "가로로 긴 비율(4.04)"
+      ],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "bi",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 368,
+      "height": 91,
+      "byteLength": 10113,
       "contentType": "image/png",
       "reusePermission": null,
-      "blockedReason": "해상도가 작아요(609×68, 최소 640×360)."
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(368×91, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/planning.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/planning.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "planning",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×1401"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 1401,
+      "byteLength": 1351923,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/system01.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/system.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "system01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×1260"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 1260,
+      "byteLength": 749131,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/system02.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/system.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "system02",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×1340"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 1340,
+      "byteLength": 605627,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/system03.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/system.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "system03",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×1180"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 1180,
+      "byteLength": 651906,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
     },
     {
       "listingId": "apt-2026000446-2026000446",
       "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/intro_tit.png",
       "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
       "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(2.81)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "intro_tit",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.6,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
@@ -118,11 +966,48 @@
     },
     {
       "listingId": "apt-2026000446-2026000446",
-      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/intro_img.png",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/main_tit.png",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "브랜드·장식 이미지",
+        "가로로 긴 비율(8.96)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "main_tit",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 609,
+      "height": 68,
+      "byteLength": 86695,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(609×68, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/arr_sm.png",
       "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
       "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.71)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "arr_sm",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.6,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
@@ -130,20 +1015,562 @@
       ],
       "announcementNo": "2026000446",
       "announcementTitle": "진주 판문지구 레이크써밋 웰가",
-      "width": 208,
-      "height": 344,
-      "byteLength": 83049,
+      "width": 12,
+      "height": 7,
+      "byteLength": 3632,
       "contentType": "image/png",
       "reusePermission": null,
-      "blockedReason": "해상도가 작아요(208×344, 최소 640×360)."
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(12×7, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/pre_arr.png",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.79)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "pre_arr",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 75,
+      "height": 42,
+      "byteLength": 4318,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(75×42, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/pre_img03.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.76)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "pre_img03",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 600,
+      "height": 340,
+      "byteLength": 276384,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(600×340, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/pre_img04.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.47)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "pre_img04",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 500,
+      "height": 340,
+      "byteLength": 226673,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(500×340, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/pre_img05.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.71)"
+      ],
+      "primaryScore": 0.2,
+      "primaryEligible": false,
+      "dedupeKey": "pre_img05",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 600,
+      "height": 350,
+      "byteLength": 163611,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(600×350, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/contact_map.png",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/",
+      "sourceType": "official_hero",
+      "subjectType": "map",
+      "subjectEvidence": [
+        "약도·위치도 표현",
+        "가로로 긴 비율(1.45)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "contact_map",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(map).",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요."
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 570,
+      "height": 392,
+      "byteLength": 46077,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(570×392, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/sub/plan.jpg",
+      "sourceUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/plan.html",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.34)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "plan",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(진주, 판문지구)이 있어요.",
+        "해상도 1200×3547"
+      ],
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "width": 1200,
+      "height": 3547,
+      "byteLength": 3143748,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(unknown)."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260911121838011376.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.60)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0.8,
+      "primaryEligible": false,
+      "dedupeKey": "20260911121838011376",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×1200"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 1200,
+      "byteLength": 351858,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260911121838010218.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(1.60)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0.8,
+      "primaryEligible": false,
+      "dedupeKey": "20260911121838010218",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×1200"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 1200,
+      "byteLength": 312087,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824060245014365.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
+      "sourceType": "official_hero",
+      "subjectType": "building_render",
+      "subjectEvidence": [
+        "가로로 긴 비율(30.00)",
+        "큰 가로 이미지라 단지 이미지로 본다"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260824060245014365",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(building_render).",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1200,
+      "height": 40,
+      "byteLength": 8095,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(1200×40, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260911035442017700.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15220/etc/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.70)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260911035442017700",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×2755"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 2755,
+      "byteLength": 980480,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260910070542013890.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15221/etc/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.72)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260910070542013890",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×2665"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 2665,
+      "byteLength": 803576,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260910071245014293.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15226/etc/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.43)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260910071245014293",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×4488"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 4488,
+      "byteLength": 1229146,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260910020554014994.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15233/etc/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.72)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260910020554014994",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요.",
+        "해상도 1920×2665"
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 1920,
+      "height": 2665,
+      "byteLength": 706163,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065658018970.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065658018970",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 3496,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065724011733.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065724011733",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 2890,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065751013348.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065751013348",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 3351,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065815010777.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065815010777",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 3028,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065841013382.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065841013382",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 2652,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/08/20260824065904011606.png",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/15118/premium/index",
+      "sourceType": "official_press",
+      "subjectType": "unknown",
+      "subjectEvidence": [],
+      "primaryScore": 0.1,
+      "primaryEligible": false,
+      "dedupeKey": "20260824065904011606",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 60,
+      "height": 60,
+      "byteLength": 2768,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(60×60, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
     },
     {
       "listingId": "apt-2026000438-2026000438",
       "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260910082129019917.jpg",
       "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
-      "sourceType": "official_press",
+      "sourceType": "official_hero",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.75)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260910082129019917",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.6,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
@@ -156,15 +1583,22 @@
       "byteLength": 93272,
       "contentType": "image/jpeg",
       "reusePermission": null,
-      "blockedReason": "해상도가 작아요(360×480, 최소 640×360)."
+      "blockedReason": "해상도가 작아요(360×480, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
     },
     {
       "listingId": "apt-2026000438-2026000438",
       "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260921093306016472.jpg",
       "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
-      "sourceType": "official_press",
+      "sourceType": "official_hero",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.75)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260921093306016472",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.6,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
@@ -177,15 +1611,22 @@
       "byteLength": 138673,
       "contentType": "image/jpeg",
       "reusePermission": null,
-      "blockedReason": "해상도가 작아요(360×480, 최소 640×360)."
+      "blockedReason": "해상도가 작아요(360×480, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
     },
     {
       "listingId": "apt-2026000438-2026000438",
       "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260922060100013877.jpg",
       "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
-      "sourceType": "official_press",
+      "sourceType": "official_hero",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.75)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260922060100013877",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 0.6,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
@@ -198,20 +1639,211 @@
       "byteLength": 125788,
       "contentType": "image/jpeg",
       "reusePermission": null,
-      "blockedReason": "해상도가 작아요(360×480, 최소 640×360)."
+      "blockedReason": "해상도가 작아요(360×480, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/upload/2026/09/20260910043146015037.jpg",
+      "sourceUrl": "https://hillstate.co.kr/SALE/1052/main/index",
+      "sourceType": "official_hero",
+      "subjectType": "unknown",
+      "subjectEvidence": [
+        "세로로 긴 비율(0.75)"
+      ],
+      "primaryScore": 0,
+      "primaryEligible": false,
+      "dedupeKey": "20260910043146015037",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.6,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "페이지에 단지명 조각(힐스테이트, 고덕엘리스트)이 있어요."
+      ],
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "width": 360,
+      "height": 480,
+      "byteLength": 135717,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(360×480, 최소 640×360). 이 홈페이지가 블록 65BL·12BL을 함께 다루고 있어, 어느 블록 사진인지 확인할 수 없어요."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/visual-apt.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(3.00)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": true,
+      "dedupeKey": "visual-apt",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 1920×640"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 1920,
+      "height": 640,
+      "byteLength": 2040546,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/m/assets/images/main/m_visual-apt.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(1.56)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": true,
+      "dedupeKey": "visual-apt",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 750×480"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 750,
+      "height": 480,
+      "byteLength": 693038,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/sub/overview_01.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/pages/overview.asp",
+      "sourceType": "official_hero",
+      "subjectType": "complex_overview",
+      "subjectEvidence": [
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.69)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": true,
+      "dedupeKey": "overview_01",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(complex_overview).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 1200×708"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 1200,
+      "height": 708,
+      "byteLength": 107412,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/sub/overview_02.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/pages/overview.asp",
+      "sourceType": "official_hero",
+      "subjectType": "complex_overview",
+      "subjectEvidence": [
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.69)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": true,
+      "dedupeKey": "overview_02",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(complex_overview).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 1200×708"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 1200,
+      "height": 708,
+      "byteLength": 108651,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/sub/overview_03.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/pages/overview.asp",
+      "sourceType": "official_hero",
+      "subjectType": "complex_overview",
+      "subjectEvidence": [
+        "조감·단지 전경 표현",
+        "가로로 긴 비율(1.69)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": true,
+      "dedupeKey": "overview_03",
+      "verified": true,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(complex_overview).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 1200×708"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 1200,
+      "height": 708,
+      "byteLength": 158378,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": null
     },
     {
       "listingId": "apt-2026000404-2026000404",
       "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-01.jpg",
       "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
       "sourceType": "official_hero",
+      "subjectType": "landscape",
+      "subjectEvidence": [
+        "조경 표현",
+        "외관·단지 표현",
+        "가로로 긴 비율(1.98)"
+      ],
+      "primaryScore": 0.85,
+      "primaryEligible": true,
+      "dedupeKey": "complex-img-01",
       "verified": true,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
       "confidence": 1,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "영문 조감도·외관 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(landscape).",
         "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
         "해상도 1920×970"
       ],
@@ -226,16 +1858,173 @@
     },
     {
       "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-obj-02.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(1.38)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "com-obj-02",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 358,
+      "height": 259,
+      "byteLength": 94036,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(358×259, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-iso-05.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "com-iso-05",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 293,
+      "height": 239,
+      "byteLength": 92919,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(293×239, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-img-03.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(1.36)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "com-img-03",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 240,
+      "height": 177,
+      "byteLength": 30660,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(240×177, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-img-04.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(1.36)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "com-img-04",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 240,
+      "height": 177,
+      "byteLength": 28579,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(240×177, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-img-05.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "apartment_exterior",
+      "subjectEvidence": [
+        "외관·단지 표현",
+        "가로로 긴 비율(1.36)"
+      ],
+      "primaryScore": 1,
+      "primaryEligible": false,
+      "dedupeKey": "com-img-05",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(apartment_exterior).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 240,
+      "height": 177,
+      "byteLength": 42154,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(240×177, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
       "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-02.jpg",
       "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
       "sourceType": "official_hero",
+      "subjectType": "landscape",
+      "subjectEvidence": [
+        "조경 표현",
+        "외관·단지 표현",
+        "가로로 긴 비율(1.85)"
+      ],
+      "primaryScore": 0.85,
+      "primaryEligible": false,
+      "dedupeKey": "complex-img-02",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
-      "confidence": 1,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "영문 조감도·외관 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(landscape).",
         "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
       ],
       "announcementNo": "2026000404",
@@ -252,13 +2041,21 @@
       "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-03.jpg",
       "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
       "sourceType": "official_hero",
+      "subjectType": "landscape",
+      "subjectEvidence": [
+        "조경 표현",
+        "외관·단지 표현",
+        "가로로 긴 비율(1.85)"
+      ],
+      "primaryScore": 0.85,
+      "primaryEligible": false,
+      "dedupeKey": "complex-img-03",
       "verified": false,
-      "fetchedAt": "2026-09-26T13:30:18.920Z",
-      "confidence": 1,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
       "evidence": [
         "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
-        "영문 조감도·외관 표현",
-        "갤러리·메인 이미지 경로",
+        "무엇을 찍었는지 알 수 있어요(landscape).",
         "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
       ],
       "announcementNo": "2026000404",
@@ -269,6 +2066,216 @@
       "contentType": "image/jpeg",
       "reusePermission": null,
       "blockedReason": "해상도가 작아요(435×235, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-iso-01.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.94)"
+      ],
+      "primaryScore": 0.6,
+      "primaryEligible": false,
+      "dedupeKey": "com-iso-01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 591,
+      "height": 305,
+      "byteLength": 122992,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(591×305, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-iso-02.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.67)"
+      ],
+      "primaryScore": 0.6,
+      "primaryEligible": false,
+      "dedupeKey": "com-iso-02",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 459,
+      "height": 275,
+      "byteLength": 87717,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(459×275, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-img-01.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.36)"
+      ],
+      "primaryScore": 0.6,
+      "primaryEligible": false,
+      "dedupeKey": "com-img-01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 240,
+      "height": 177,
+      "byteLength": 36426,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(240×177, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-img-02.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현",
+        "가로로 긴 비율(1.36)"
+      ],
+      "primaryScore": 0.6,
+      "primaryEligible": false,
+      "dedupeKey": "com-img-02",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 240,
+      "height": 177,
+      "byteLength": 38441,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(240×177, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/side-arrow.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "landscape",
+      "subjectEvidence": [
+        "조경 표현",
+        "외관·단지 표현",
+        "세로로 긴 비율(0.36)"
+      ],
+      "primaryScore": 0.55,
+      "primaryEligible": false,
+      "dedupeKey": "side-arrow",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(landscape).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 16,
+      "height": 45,
+      "byteLength": 291,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "파일이 너무 작아 대표 사진으로 보기 어려워요. 해상도가 작아요(16×45, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/com-obj-01.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "community",
+      "subjectEvidence": [
+        "커뮤니티·실내 표현"
+      ],
+      "primaryScore": 0.5,
+      "primaryEligible": false,
+      "dedupeKey": "com-obj-01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 0.8,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(community).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요."
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 302,
+      "height": 323,
+      "byteLength": 50697,
+      "contentType": "image/png",
+      "reusePermission": null,
+      "blockedReason": "해상도가 작아요(302×323, 최소 640×360)."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/main/premium-bg-01.jpg",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue/",
+      "sourceType": "official_hero",
+      "subjectType": "brand",
+      "subjectEvidence": [
+        "글 뒤에 까는 섹션 배경이에요."
+      ],
+      "primaryScore": 0.3,
+      "primaryEligible": false,
+      "dedupeKey": "premium-bg-01",
+      "verified": false,
+      "fetchedAt": "2026-09-26T14:43:29.689Z",
+      "confidence": 1,
+      "evidence": [
+        "공고에 적힌 공식 홈페이지와 같은 도메인이에요.",
+        "무엇을 찍었는지 알 수 있어요(brand).",
+        "페이지에 단지명 조각(검암역, 푸르지오)이 있어요.",
+        "해상도 1920×970"
+      ],
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "width": 1920,
+      "height": 970,
+      "byteLength": 232549,
+      "contentType": "image/jpeg",
+      "reusePermission": null,
+      "blockedReason": "단지 사진이 아니에요(brand)."
     }
   ]
 }

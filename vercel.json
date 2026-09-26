@@ -23,6 +23,10 @@
     {
       "source": "/discovery/:id",
       "destination": "/discovery/[id]"
+    },
+    {
+      "source": "/admin/scoring/:id",
+      "destination": "/admin/scoring/[id]"
     }
   ]
 }

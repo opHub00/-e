@@ -40,9 +40,10 @@ test('5. 로그아웃하면 다시 로그인 화면 상태가 된다', () => {
   assert.deepEqual(resolveAdminAccess({ authHydrated: true, session: null, role: 'admin' }), { status: 'SIGNED_OUT' }, '세션이 없으면 이전 role 은 의미가 없다');
 });
 
-test('관리자 메뉴는 기존 화면을 그대로 가리킨다', () => {
-  assert.deepEqual(ADMIN_MENU.map(item => item.href), [
-    '/admin', '/admin/announcements', '/admin/learning-status', '/admin/rule-review', '/admin/listing-bindings',
-  ]);
-  assert.deepEqual(ADMIN_MENU.map(item => item.label), ['대시보드', '공고 관리', '학습·규칙 현황', 'Rule 검수', 'Listing 연결']);
+test('관리자 메뉴는 기존 화면을 계속 가리킨다', () => {
+  // 메뉴 이름과 묶음은 바뀔 수 있다. 하지만 이미 쓰던 화면으로 가는 길이 사라지면 안 된다.
+  const hrefs = ADMIN_MENU.map(item => item.href);
+  for (const href of ['/admin', '/admin/announcements', '/admin/learning-status', '/admin/rule-review', '/admin/listing-bindings']) {
+    assert.ok(hrefs.includes(href), `${href} 로 가는 메뉴가 사라졌다`);
+  }
 });

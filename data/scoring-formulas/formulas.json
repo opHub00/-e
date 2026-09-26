@@ -1,0 +1,352 @@
+{
+  "schemaVersion": 1,
+  "formulas": [
+    {
+      "id": "general-private-standard",
+      "name": "민영주택 일반공급 가점제",
+      "description": "무주택 기간·부양가족 수·청약통장 가입기간 세 항목을 더해 84점 만점으로 계산해요.",
+      "targets": [
+        "generalPrivate"
+      ],
+      "version": "1.0.0",
+      "status": "REVIEW",
+      "publishedToUsers": false,
+      "legalBasis": "주택공급에 관한 규칙 별표 1(가점제 배점 기준)",
+      "components": [
+        {
+          "id": "noHomePeriod",
+          "label": "무주택 기간",
+          "description": "세대 구성원 모두가 집을 갖지 않은 기간이에요.",
+          "unit": "개월",
+          "fact": "noHomeMonths",
+          "order": 1,
+          "bands": [
+            {
+              "max": 11,
+              "points": 2,
+              "label": "1년 미만",
+              "note": "만 30세 미만 미혼인 기간은 무주택 기간에 넣지 않아요."
+            },
+            {
+              "min": 12,
+              "max": 23,
+              "points": 4,
+              "label": "1년 이상 2년 미만"
+            },
+            {
+              "min": 24,
+              "max": 35,
+              "points": 6,
+              "label": "2년 이상 3년 미만"
+            },
+            {
+              "min": 36,
+              "max": 47,
+              "points": 8,
+              "label": "3년 이상 4년 미만"
+            },
+            {
+              "min": 48,
+              "max": 59,
+              "points": 10,
+              "label": "4년 이상 5년 미만"
+            },
+            {
+              "min": 60,
+              "max": 71,
+              "points": 12,
+              "label": "5년 이상 6년 미만"
+            },
+            {
+              "min": 72,
+              "max": 83,
+              "points": 14,
+              "label": "6년 이상 7년 미만"
+            },
+            {
+              "min": 84,
+              "max": 95,
+              "points": 16,
+              "label": "7년 이상 8년 미만"
+            },
+            {
+              "min": 96,
+              "max": 107,
+              "points": 18,
+              "label": "8년 이상 9년 미만"
+            },
+            {
+              "min": 108,
+              "max": 119,
+              "points": 20,
+              "label": "9년 이상 10년 미만"
+            },
+            {
+              "min": 120,
+              "max": 131,
+              "points": 22,
+              "label": "10년 이상 11년 미만"
+            },
+            {
+              "min": 132,
+              "max": 143,
+              "points": 24,
+              "label": "11년 이상 12년 미만"
+            },
+            {
+              "min": 144,
+              "max": 155,
+              "points": 26,
+              "label": "12년 이상 13년 미만"
+            },
+            {
+              "min": 156,
+              "max": 167,
+              "points": 28,
+              "label": "13년 이상 14년 미만"
+            },
+            {
+              "min": 168,
+              "max": 179,
+              "points": 30,
+              "label": "14년 이상 15년 미만"
+            },
+            {
+              "min": 180,
+              "points": 32,
+              "label": "15년 이상"
+            }
+          ]
+        },
+        {
+          "id": "dependents",
+          "label": "부양가족 수",
+          "description": "신청자를 뺀, 같은 세대에서 부양하는 가족 수예요.",
+          "unit": "명",
+          "fact": "dependentCount",
+          "order": 2,
+          "bands": [
+            {
+              "min": 0,
+              "max": 0,
+              "points": 5,
+              "label": "0명"
+            },
+            {
+              "min": 1,
+              "max": 1,
+              "points": 10,
+              "label": "1명"
+            },
+            {
+              "min": 2,
+              "max": 2,
+              "points": 15,
+              "label": "2명"
+            },
+            {
+              "min": 3,
+              "max": 3,
+              "points": 20,
+              "label": "3명"
+            },
+            {
+              "min": 4,
+              "max": 4,
+              "points": 25,
+              "label": "4명"
+            },
+            {
+              "min": 5,
+              "max": 5,
+              "points": 30,
+              "label": "5명"
+            },
+            {
+              "min": 6,
+              "points": 35,
+              "label": "6명 이상"
+            }
+          ]
+        },
+        {
+          "id": "accountPeriod",
+          "label": "청약통장 가입기간",
+          "description": "청약통장을 만든 날부터 지금까지의 기간이에요.",
+          "unit": "개월",
+          "fact": "subscriptionMonths",
+          "order": 3,
+          "bands": [
+            {
+              "max": 5,
+              "points": 1,
+              "label": "6개월 미만"
+            },
+            {
+              "min": 6,
+              "max": 11,
+              "points": 2,
+              "label": "6개월 이상 1년 미만"
+            },
+            {
+              "min": 12,
+              "max": 23,
+              "points": 3,
+              "label": "1년 이상 2년 미만"
+            },
+            {
+              "min": 24,
+              "max": 35,
+              "points": 4,
+              "label": "2년 이상 3년 미만"
+            },
+            {
+              "min": 36,
+              "max": 47,
+              "points": 5,
+              "label": "3년 이상 4년 미만"
+            },
+            {
+              "min": 48,
+              "max": 59,
+              "points": 6,
+              "label": "4년 이상 5년 미만"
+            },
+            {
+              "min": 60,
+              "max": 71,
+              "points": 7,
+              "label": "5년 이상 6년 미만"
+            },
+            {
+              "min": 72,
+              "max": 83,
+              "points": 8,
+              "label": "6년 이상 7년 미만"
+            },
+            {
+              "min": 84,
+              "max": 95,
+              "points": 9,
+              "label": "7년 이상 8년 미만"
+            },
+            {
+              "min": 96,
+              "max": 107,
+              "points": 10,
+              "label": "8년 이상 9년 미만"
+            },
+            {
+              "min": 108,
+              "max": 119,
+              "points": 11,
+              "label": "9년 이상 10년 미만"
+            },
+            {
+              "min": 120,
+              "max": 131,
+              "points": 12,
+              "label": "10년 이상 11년 미만"
+            },
+            {
+              "min": 132,
+              "max": 143,
+              "points": 13,
+              "label": "11년 이상 12년 미만"
+            },
+            {
+              "min": 144,
+              "max": 155,
+              "points": 14,
+              "label": "12년 이상 13년 미만"
+            },
+            {
+              "min": 156,
+              "max": 167,
+              "points": 15,
+              "label": "13년 이상 14년 미만"
+            },
+            {
+              "min": 168,
+              "max": 179,
+              "points": 16,
+              "label": "14년 이상 15년 미만"
+            },
+            {
+              "min": 180,
+              "points": 17,
+              "label": "15년 이상"
+            }
+          ]
+        }
+      ],
+      "interpretations": [
+        {
+          "minTotal": 70,
+          "headline": "가점이 높은 편이에요",
+          "detail": "인기 지역 일반공급에서도 경쟁해 볼 만한 점수예요. 다만 단지마다 당첨 가점은 달라서 공고별 경쟁률을 함께 보세요."
+        },
+        {
+          "minTotal": 50,
+          "headline": "중간 수준이에요",
+          "detail": "지역과 단지에 따라 결과가 갈리는 구간이에요. 무주택 기간과 통장 가입기간은 시간이 지나면 오르니 함께 보세요."
+        },
+        {
+          "minTotal": 0,
+          "headline": "아직 점수를 쌓는 중이에요",
+          "detail": "가점만으로 경쟁하기는 이른 점수예요. 추첨제 물량이나 특별공급 자격을 함께 확인해 보세요."
+        }
+      ],
+      "testCases": [
+        {
+          "id": "case-max",
+          "label": "만점(15년 무주택·6명 부양·15년 통장)",
+          "inputs": {
+            "noHomePeriod": 180,
+            "dependents": 6,
+            "accountPeriod": 180
+          },
+          "expectedTotal": 84
+        },
+        {
+          "id": "case-min",
+          "label": "최소(1년 미만·0명·6개월 미만)",
+          "inputs": {
+            "noHomePeriod": 0,
+            "dependents": 0,
+            "accountPeriod": 0
+          },
+          "expectedTotal": 8
+        },
+        {
+          "id": "case-mid",
+          "label": "중간(무주택 5년·2명 부양·통장 7년)",
+          "inputs": {
+            "noHomePeriod": 60,
+            "dependents": 2,
+            "accountPeriod": 84
+          },
+          "expectedTotal": 36
+        },
+        {
+          "id": "case-boundary",
+          "label": "경계(무주택 만 1년·통장 만 6개월)",
+          "inputs": {
+            "noHomePeriod": 12,
+            "dependents": 1,
+            "accountPeriod": 6
+          },
+          "expectedTotal": 16
+        }
+      ],
+      "history": [
+        {
+          "at": "2026-09-27",
+          "actor": "시스템 등록",
+          "summary": "주택공급에 관한 규칙 별표 1의 배점표를 초안으로 등록했어요. 아직 사람이 검수하지 않아 검토 중 상태예요."
+        }
+      ],
+      "updatedAt": "2026-09-27"
+    }
+  ]
+}

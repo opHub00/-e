@@ -65,7 +65,7 @@ export default function ListingBindingsRoute() {
   }, [busy, reason, refresh, repository]);
 
   return (
-    <AdminChrome title="공고 listing 연결 관리">
+    <AdminChrome title="공고-규칙 연결" subtitle="어떤 공고에 어떤 규칙을 쓸지 이어 주는 화면이에요.">
       <>
         {load.phase === 'LOADING' ? <View style={styles.card}><ActivityIndicator color={colors.primary} /><Text style={styles.body}>연결 상태를 불러오는 중이에요</Text></View> : null}
         {load.phase === 'FAILED' ? (

@@ -1,164 +1,167 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
-import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { StatusPill } from '../../components/StatusPill';
-import { MotionPressable } from '../../components/motion/MotionPressable';
-import { colors, radius, size, spacing, type } from '../../design/tokens';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { colors, spacing, type } from '../../design/tokens';
 import { AdminShell } from '../../features/adminPortal/AdminShell';
 import { useLearningRows } from '../../features/adminPortal/useLearningRows';
 import { adminAccessMessage } from '../../features/adminPortal/access';
 import { RLS_LIMIT_NOTE } from '../../features/adminPortal/dashboard';
+import { countLabel } from '../../features/adminPortal/status';
 import {
-  buildAnnouncementRows, filterAnnouncementRows, sortAnnouncementRows,
+  buildAnnouncementRows, regionChoices, selectAnnouncementRows,
   type AdminAnnouncementRow, type AnnouncementFilter,
 } from '../../features/adminPortal/announcementRows';
+import {
+  AdminButton, CellText, DataList, KpiGrid, Notice, PageIntro, SearchFilterBar, SectionCard, StatusBadge,
+} from '../../features/adminPortal/ui/AdminKit';
+import { resolvedListingImage } from '../../features/listingVisual/resolvedRegistry';
 
-const FILTERS: { key: AnnouncementFilter; label: string }[] = [
+const STATUS_FILTERS: { key: AnnouncementFilter; label: string }[] = [
   { key: 'ALL', label: '전체' },
   { key: 'ANALYZABLE', label: '분석 가능' },
   { key: 'NO_ACTIVE_RULES', label: '활성 규칙 없음' },
 ];
 
 /**
- * 공고 관리 목록.
+ * 공고 관리.
  *
- * 관측 가능한 공고를 한 줄씩 보여주고, 상세 상태(수집 → 규칙 → 검수 → 활성화 → 연결)는
- * 기존 학습 현황 화면으로 넘긴다. 이 화면은 읽기만 한다.
+ * 한 줄이 공고 하나다. 이 공고가 지금 사용자에게 어디까지 열려 있는지(분석 가능 여부, 규칙, 연결,
+ * 대표 이미지)를 한 줄에서 읽고, 더 들어갈 일은 오른쪽 버튼으로 넘긴다. 이 화면은 읽기만 한다.
  */
 export default function AdminAnnouncementsRoute() {
   return (
-    <AdminShell title="공고 관리" subtitle="지금 관리자 API 로 조회할 수 있는 공고예요.">
+    <AdminShell title="공고 관리" subtitle="지금 관리자 권한으로 조회할 수 있는 공고예요.">
       {() => <AnnouncementList />}
     </AdminShell>
   );
 }
 
+/** 이 공고에 연결된 listing 중 검증된 대표 이미지가 있는지. */
+const hasImage = (row: AdminAnnouncementRow, listingIds: string[]) =>
+  listingIds.some(id => resolvedListingImage({ id }));
+
 function AnnouncementList() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
-  const wide = width >= 900;
   const state = useLearningRows(true);
-  const [filter, setFilter] = useState<AnnouncementFilter>('ALL');
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState<AnnouncementFilter>('ALL');
+  const [region, setRegion] = useState('ALL');
+
+  const all = useMemo(
+    () => (state.phase === 'READY' ? buildAnnouncementRows(state.rows) : []),
+    [state.phase, state.phase === 'READY' ? state.rows : null],
+  );
+  const listingsByAnnouncement = useMemo(() => {
+    const map = new Map<string, string[]>();
+    if (state.phase === 'READY') for (const row of state.rows) map.set(row.announcementId, row.listingIds);
+    return map;
+  }, [state.phase, state.phase === 'READY' ? state.rows : null]);
 
   if (state.phase === 'LOADING') {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} /><Text style={styles.body}>공고를 불러오는 중이에요</Text></View>;
   }
   if (state.phase === 'FAILED') {
     return (
-      <View style={styles.card}>
-        <Text accessibilityRole="header" style={styles.cardTitle}>공고를 불러오지 못했어요</Text>
-        <Text style={styles.body}>{adminAccessMessage(state.code)}</Text>
-        <Link label="다시 불러오기" onPress={state.refresh} />
-      </View>
+      <SectionCard title="공고를 불러오지 못했어요" description={adminAccessMessage(state.code)}>
+        <AdminButton label="다시 불러오기" icon="refresh" onPress={state.refresh} />
+      </SectionCard>
     );
   }
 
-  const all = sortAnnouncementRows(buildAnnouncementRows(state.rows));
-  const rows = filterAnnouncementRows(all, filter);
+  const rows = selectAnnouncementRows(all, { query, status, region });
+  const analyzable = all.filter(row => row.analyzable).length;
+  const withImage = all.filter(row => hasImage(row, listingsByAnnouncement.get(row.announcementId) ?? [])).length;
+
   return (
     <>
-      <View style={styles.filters}>
-        {FILTERS.map(item => {
-          const active = filter === item.key;
-          const count = filterAnnouncementRows(all, item.key).length;
-          return (
-            <MotionPressable key={item.key} accessibilityRole="button" accessibilityState={{ selected: active }}
-              onPress={() => setFilter(item.key)} style={[styles.filter, active && styles.filterActive]}>
-              <Text style={[styles.filterText, active && styles.filterTextActive]}>{item.label} {count}</Text>
-            </MotionPressable>
-          );
-        })}
-      </View>
+      <PageIntro
+        title="공고 관리"
+        description={`수집된 공고 ${all.length}건을 관리해요. 한 줄이 공고 하나이고, 오른쪽 버튼으로 필요한 화면에 바로 갈 수 있어요.`}
+        actions={<AdminButton label="분석 현황" tone="quiet" icon="insights" onPress={() => router.push('/admin/learning-status' as Href)} />}
+      />
 
-      {wide ? (
-        <View style={styles.headRow}>
-          {['공고명', '지역', '공급기관', '공고일', '규칙', '승인', '연결', '업데이트'].map(label => (
-            <Text key={label} style={[styles.headCell, label === '공고명' && styles.cellWide]}>{label}</Text>
-          ))}
-        </View>
-      ) : null}
+      <KpiGrid items={[
+        { label: '수집된 공고', value: countLabel(all.length), tone: 'neutral', icon: 'campaign' },
+        { label: '분석 가능', value: countLabel(analyzable), hint: '규칙 활성 + 연결 완료', tone: 'green', icon: 'verified' },
+        { label: '활성 규칙 없음', value: countLabel(all.filter(row => !row.ruleSetId).length), tone: 'amber', icon: 'rule' },
+        { label: '대표 이미지 있음', value: countLabel(withImage), hint: '공식 홈페이지에서 확인된 사진', tone: 'purple', icon: 'image' },
+      ]} />
 
-      {rows.length === 0 ? (
-        <View style={styles.card}><Text style={styles.body}>이 조건에 맞는 공고가 없어요.</Text></View>
-      ) : rows.map(row => <Row key={row.announcementId} row={row} wide={wide} router={router} />)}
+      <SectionCard title={`공고 목록 ${rows.length}건`} description="검색과 필터는 함께 걸려요.">
+        <SearchFilterBar
+          placeholder="단지명, 지역, 사업주체로 찾기"
+          query={query}
+          onQuery={setQuery}
+          filters={[
+            { label: '상태', value: status, choices: STATUS_FILTERS.map(item => ({ key: item.key, label: item.label })), onChange: key => setStatus(key as AnnouncementFilter) },
+            {
+              label: '지역',
+              value: region,
+              choices: [{ key: 'ALL', label: '전체' }, ...regionChoices(all).map(name => ({ key: name, label: name }))],
+              onChange: setRegion,
+            },
+          ]}
+        />
 
-      <Text style={styles.note}>{RLS_LIMIT_NOTE}</Text>
+        <DataList
+          rows={rows}
+          keyOf={row => row.announcementId}
+          empty={{
+            title: '조건에 맞는 공고가 없어요',
+            body: '검색어나 필터를 바꿔 보세요. 검수 중이거나 비활성인 규칙 세트는 이 목록에서 볼 수 없어요.',
+            action: <AdminButton label="필터 초기화" tone="quiet" onPress={() => { setQuery(''); setStatus('ALL'); setRegion('ALL'); }} />,
+          }}
+          columns={[
+            {
+              key: 'title', header: '공고', flex: 3,
+              render: row => (
+                <View style={styles.titleCell}>
+                  <CellText strong>{row.title}</CellText>
+                  <CellText muted>{row.region} · {row.publisher} · {row.announcementDate}</CellText>
+                </View>
+              ),
+            },
+            {
+              key: 'analyzable', header: '분석', flex: 1,
+              render: row => <StatusBadge status={row.analyzable ? 'ANALYZABLE' : 'NOT_ANALYZABLE'} />,
+            },
+            {
+              key: 'rules', header: '규칙', flex: 1.4,
+              render: row => (
+                <View style={styles.titleCell}>
+                  <CellText>{row.ruleSetId ? `승인 ${row.approvedCount} / ${row.ruleCount}` : '활성 규칙 없음'}</CellText>
+                  {row.ruleSetId ? <CellText muted>{row.version}</CellText> : null}
+                </View>
+              ),
+            },
+            { key: 'binding', header: '연결', flex: 0.9, render: row => <CellText>{row.bindingLabel}</CellText> },
+            {
+              key: 'image', header: '대표 이미지', flex: 1.1,
+              render: row => (
+                <CellText muted>
+                  {hasImage(row, listingsByAnnouncement.get(row.announcementId) ?? []) ? '있음' : '없음'}
+                </CellText>
+              ),
+            },
+          ]}
+          actions={row => (
+            <>
+              {row.ruleSetId ? (
+                <AdminButton label="규칙 검수" tone="quiet" onPress={() => router.push(`/admin/rule-review?ruleSetId=${row.ruleSetId}` as Href)} />
+              ) : null}
+              <AdminButton label="분석 현황" tone="quiet" onPress={() => router.push('/admin/learning-status' as Href)} />
+            </>
+          )}
+        />
+
+        <Notice icon="visibility-off">{RLS_LIMIT_NOTE}</Notice>
+      </SectionCard>
     </>
   );
 }
 
-function Row({ row, wide, router }: { row: AdminAnnouncementRow; wide: boolean; router: ReturnType<typeof useRouter> }) {
-  const openDetail = () => router.push('/admin/learning-status' as Href);
-  return (
-    <View style={styles.row}>
-      <MotionPressable accessibilityRole="button" accessibilityLabel={`${row.title} 상세 상태 보기`} onPress={openDetail}>
-        {wide ? (
-          <View style={styles.dataRow}>
-            <Text style={[styles.cell, styles.cellWide, styles.cellStrong]} numberOfLines={2}>{row.title}</Text>
-            <Text style={styles.cell}>{row.region}</Text>
-            <Text style={styles.cell}>{row.publisher}</Text>
-            <Text style={styles.cell}>{row.announcementDate}</Text>
-            <Text style={styles.cell}>{row.ruleCount}</Text>
-            <Text style={styles.cell}>{row.approvedCount}</Text>
-            <Text style={styles.cell}>{row.bindingLabel}</Text>
-            <Text style={styles.cell}>{row.updatedAt}</Text>
-          </View>
-        ) : (
-          <View style={styles.stack}>
-            <Text style={styles.cellStrong} numberOfLines={2}>{row.title}</Text>
-            <Text style={styles.meta}>{row.region} · {row.publisher} · {row.announcementDate}</Text>
-            <Text style={styles.meta}>규칙 {row.ruleCount} · 승인 {row.approvedCount} · 연결 {row.bindingLabel} · 업데이트 {row.updatedAt}</Text>
-          </View>
-        )}
-      </MotionPressable>
-
-      <View style={styles.pills}>
-        <StatusPill label={row.officialLabel} tone={row.officialLabel === '공식 공고 기준' ? 'green' : 'neutral'} icon="verified" />
-        {row.statuses.map(status => (
-          <StatusPill key={status.key} label={status.label} tone={status.tone}
-            icon={status.tone === 'green' ? 'check-circle' : 'help-outline'} />
-        ))}
-      </View>
-
-      {row.notes.length ? <Text style={styles.note}>· {row.notes[0]}</Text> : null}
-
-      <View style={styles.links}>
-        <Link label="상세 상태" onPress={openDetail} />
-        {row.ruleSetId ? <Link label="검수 콘솔" onPress={() => router.push(`/admin/rule-review?ruleSetId=${row.ruleSetId}` as Href)} /> : null}
-        <Link label="listing 연결" onPress={() => router.push('/admin/listing-bindings' as Href)} />
-      </View>
-    </View>
-  );
-}
-
-const Link = ({ label, onPress }: { label: string; onPress: () => void }) => (
-  <MotionPressable accessibilityRole="button" onPress={onPress} style={styles.link}>
-    <Text style={styles.linkText}>{label}</Text>
-  </MotionPressable>
-);
-
 const styles = StyleSheet.create({
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  filter: { minHeight: 32, justifyContent: 'center', paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors.surfaceContainer },
-  filterActive: { backgroundColor: colors.primary },
-  filterText: { ...type.bodySm, color: colors.textMuted },
-  filterTextActive: { color: colors.onPrimary },
-  headRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.md, paddingBottom: 4 },
-  headCell: { ...type.micro, color: colors.textSubtle, flex: 1 },
-  row: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: 8 },
-  dataRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
-  cell: { ...type.bodySm, color: colors.textMuted, flex: 1 },
-  cellWide: { flex: 3 },
-  cellStrong: { ...type.bodyStrong, color: colors.text },
-  stack: { gap: 3 },
-  meta: { ...type.bodySm, color: colors.textMuted },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  links: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  link: { minHeight: size.touch, justifyContent: 'center' },
-  linkText: { ...type.bodySmStrong, color: colors.primary },
-  card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: spacing.sm },
-  cardTitle: { ...type.cardTitle, color: colors.text },
   body: { ...type.body, color: colors.textMuted },
-  note: { ...type.bodySm, color: colors.textSubtle },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
+  titleCell: { gap: 2 },
 });

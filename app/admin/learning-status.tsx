@@ -63,7 +63,7 @@ export default function LearningStatusRoute() {
   useEffect(() => { void refresh(); }, [refresh]);
 
   return (
-    <AdminChrome title="공고 · Rule 관리 현황" subtitle="한 공고의 수집 → 규칙 → 검수 → 활성화 → 연결 상태예요.">
+    <AdminChrome title="분석 현황" subtitle="공고마다 수집 → 규칙 생성 → 검수 → 활성화 → 공고 연결 중 어디까지 왔는지 보여드려요.">
       <>
         {load.phase === 'LOADING' ? (
           <View style={styles.card}>

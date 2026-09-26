@@ -1,15 +1,20 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useRouter, usePathname, type Href } from 'expo-router';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../design/tokens';
 import { useAuthStore } from '../auth/useAuthStore';
 import { ADMIN_ROLE_LABEL, adminAccessMessage, type AdminAccess } from './access';
 import { useAdminAccess } from './useAdminAccess';
-import { ADMIN_LOGIN_ROUTE, ADMIN_MENU } from './navigation';
+import { useIsWide } from './useIsWide';
+import { ADMIN_LOGIN_ROUTE, ADMIN_MENU, ADMIN_MENU_GROUPS, activeMenuHref, type AdminMenuItem } from './navigation';
 
 export { ADMIN_LOGIN_ROUTE, ADMIN_MENU };
+
+/** 사이드바를 펼쳐 둘 수 있는 너비. 이보다 좁으면 서랍으로 접는다. */
+const WIDE = 1024;
 
 type Props = {
   title: string;
@@ -30,8 +35,7 @@ type ChromeProps = {
  * Admin 화면 공통 껍데기.
  *
  * 라우터를 갈아엎지 않는다. 각 화면이 이 컴포넌트를 쓰면 권한 처리·내비게이션·로그아웃이
- * 한 곳에서 같은 방식으로 동작한다. 기존 화면(rule-review, listing-bindings)은 자기 권한 화면을
- * 이미 갖고 있으므로 건드리지 않고, 새 화면부터 이걸 쓴다.
+ * 한 곳에서 같은 방식으로 동작한다.
  *
  * 권한이 없을 때 일반 서비스 로그인 화면으로 돌려보내지 않는다. 운영자는 관리자 입구에 머물러야 한다.
  */
@@ -73,8 +77,8 @@ export function AdminShell({ title, subtitle, children }: Props) {
 /**
  * 껍데기만 씌우는 형태.
  *
- * 이미 자기 권한 처리와 데이터 로직을 갖고 있는 화면(검수 콘솔, listing 연결, 학습 현황)에 쓴다.
- * 여기서는 권한을 판정하지 않는다. 상단 브랜드·내비게이션·로그아웃만 같은 자리에 둔다.
+ * 이미 자기 권한 처리와 데이터 로직을 갖고 있는 화면(검수 콘솔, listing 연결)에 쓴다.
+ * 여기서는 권한을 판정하지 않는다. 사이드바·상단 바·로그아웃만 같은 자리에 둔다.
  * 그래야 기존 화면의 AUTH_REQUIRED/FORBIDDEN 안내와 mutation 흐름이 그대로 유지된다.
  */
 export function AdminChrome({ title, subtitle, scroll = true, children }: ChromeProps) {
@@ -82,61 +86,152 @@ export function AdminChrome({ title, subtitle, scroll = true, children }: Chrome
   const pathname = usePathname();
   const access = useAdminAccess();
   const signOut = useAuthStore(state => state.signOut);
-  const { width } = useWindowDimensions();
-  const wide = width >= 900;
+  const wide = useIsWide(WIDE);
+  const [drawer, setDrawer] = useState(false);
   const signedIn = access.status === 'ALLOWED' || access.status === 'FORBIDDEN';
+  const active = activeMenuHref(pathname);
 
   const leave = async () => {
     await signOut();
     router.replace(ADMIN_LOGIN_ROUTE as Href);
   };
 
+  const go = (item: AdminMenuItem) => {
+    setDrawer(false);
+    router.push(item.href as Href);
+  };
+
+  const menu = (
+    <ScrollView contentContainerStyle={styles.sidebarScroll} showsVerticalScrollIndicator={false}>
+      {ADMIN_MENU_GROUPS.map(group => (
+        <View key={group.title} style={styles.group}>
+          <Text style={styles.groupTitle}>{group.title}</Text>
+          {group.items.map(item => {
+            const selected = item.href === active;
+            return (
+              <MotionPressable
+                key={item.href}
+                accessibilityRole="link"
+                accessibilityLabel={`${item.label} · ${item.hint}`}
+                accessibilityState={{ selected }}
+                onPress={() => go(item)}
+                style={[styles.menuItem, selected && styles.menuItemActive]}
+              >
+                <MaterialIcons name={item.icon} size={20} color={selected ? colors.primary : colors.textSubtle} />
+                <View style={styles.menuCopy}>
+                  <Text style={[styles.menuLabel, selected && styles.menuLabelActive]}>{item.label}</Text>
+                  <Text style={styles.menuHint} numberOfLines={1}>{item.hint}</Text>
+                </View>
+              </MotionPressable>
+            );
+          })}
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  /** 사이드바 아래 계정 칸. 지금 누구로 들어와 있는지와 나가는 길을 늘 같은 자리에 둔다. */
+  const account = (
+    <View style={styles.account}>
+      <View style={styles.accountWho}>
+        <View style={styles.avatar}>
+          <MaterialIcons name="person" size={18} color={colors.primary} />
+        </View>
+        <View style={styles.accountCopy}>
+          <Text style={styles.accountName} numberOfLines={1}>
+            {access.status === 'ALLOWED' ? ADMIN_ROLE_LABEL[access.role] : '로그인 필요'}
+          </Text>
+          <Text style={styles.accountMail} numberOfLines={1}>
+            {access.status === 'ALLOWED' || access.status === 'FORBIDDEN' ? access.email ?? '계정 확인 중' : '관리자 계정으로 들어와 주세요'}
+          </Text>
+        </View>
+      </View>
+      <MotionPressable
+        accessibilityRole="button"
+        accessibilityLabel={signedIn ? '로그아웃' : '관리자 로그인'}
+        onPress={() => (signedIn ? void leave() : router.replace(ADMIN_LOGIN_ROUTE as Href))}
+        style={styles.accountAction}
+      >
+        <MaterialIcons name={signedIn ? 'logout' : 'login'} size={18} color={colors.textMuted} />
+      </MotionPressable>
+    </View>
+  );
+
+  const content = (
+    <>
+      {title ? (
+        <View style={styles.titleRow}>
+          <Text accessibilityRole="header" style={styles.title}>{title}</Text>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        </View>
+      ) : null}
+      {children}
+    </>
+  );
+
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <View style={[styles.header, wide && styles.headerWide]}>
-        <View style={styles.brandRow}>
-          <Text accessibilityRole="header" style={styles.brand}>완판e Admin</Text>
-          {access.status === 'ALLOWED' ? (
-            <Text style={styles.who}>{ADMIN_ROLE_LABEL[access.role]} · {access.email ?? '계정 확인 중'}</Text>
-          ) : null}
+      <View style={styles.layout}>
+        {wide ? (
+          <View style={styles.sidebar}>
+            <View style={styles.brandBox}>
+              <Text accessibilityRole="header" style={styles.brand}>완판e</Text>
+              <Text style={styles.brandSub}>운영 콘솔</Text>
+            </View>
+            {menu}
+            {account}
+          </View>
+        ) : null}
+
+        <View style={styles.main}>
+          <View style={styles.topbar}>
+            {!wide ? (
+              <MotionPressable accessibilityRole="button" accessibilityLabel="메뉴 열기" onPress={() => setDrawer(true)} style={styles.iconButton}>
+                <MaterialIcons name="menu" size={22} color={colors.text} />
+              </MotionPressable>
+            ) : null}
+            {/* 제목은 본문 위에 한 번만 쓴다. 상단 바는 지금 누구로 들어와 있는지를 맡는다. */}
+            <Text style={styles.topbarTitle} numberOfLines={1}>완판e 운영 콘솔</Text>
+            <View style={styles.topbarRight}>
+              {access.status === 'ALLOWED' ? (
+                <Text style={styles.topbarWho} numberOfLines={1}>
+                  {ADMIN_ROLE_LABEL[access.role]} · {access.email ?? '계정 확인 중'}
+                </Text>
+              ) : null}
+              <MotionPressable
+                accessibilityRole="button"
+                accessibilityLabel={signedIn ? '로그아웃' : '관리자 로그인'}
+                onPress={() => (signedIn ? void leave() : router.replace(ADMIN_LOGIN_ROUTE as Href))}
+                style={styles.iconButton}
+              >
+                <MaterialIcons name={signedIn ? 'logout' : 'login'} size={20} color={colors.textMuted} />
+              </MotionPressable>
+            </View>
+          </View>
+
+          {scroll ? (
+            <ScrollView contentContainerStyle={[styles.content, wide && styles.contentWide]}>{content}</ScrollView>
+          ) : (
+            <View style={styles.flexBody}>{content}</View>
+          )}
         </View>
-        {/* 로그아웃은 로그인한 동안 항상 닿을 수 있어야 한다. 권한이 없어도 마찬가지다. */}
-        {signedIn ? (
-          <MotionPressable accessibilityRole="button" accessibilityLabel="로그아웃" onPress={() => void leave()} style={styles.logout}>
-            <Text style={styles.logoutText}>로그아웃</Text>
-          </MotionPressable>
-        ) : (
-          <MotionPressable accessibilityRole="button" accessibilityLabel="관리자 로그인" onPress={() => router.replace(ADMIN_LOGIN_ROUTE as Href)} style={styles.logout}>
-            <Text style={styles.logoutText}>관리자 로그인</Text>
-          </MotionPressable>
-        )}
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.nav}>
-        {ADMIN_MENU.map(item => {
-          const active = pathname === item.href;
-          return (
-            <MotionPressable key={item.href} accessibilityRole="button" accessibilityState={{ selected: active }}
-              onPress={() => router.push(item.href as Href)} style={[styles.navItem, active && styles.navItemActive]}>
-              <Text style={[styles.navText, active && styles.navTextActive]}>{item.label}</Text>
-            </MotionPressable>
-          );
-        })}
-      </ScrollView>
-
-      {scroll ? (
-        <ScrollView contentContainerStyle={[styles.content, wide && styles.contentWide]}>
-          {title ? (
-            <View style={styles.titleRow}>
-              <Text accessibilityRole="header" style={styles.title}>{title}</Text>
-              {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      <Modal visible={drawer && !wide} transparent animationType="fade" onRequestClose={() => setDrawer(false)}>
+        <View style={styles.drawerBackdrop}>
+          <View style={styles.drawer}>
+            <View style={styles.drawerHead}>
+              <Text accessibilityRole="header" style={styles.brand}>완판e 운영 콘솔</Text>
+              <MotionPressable accessibilityRole="button" accessibilityLabel="메뉴 닫기" onPress={() => setDrawer(false)} style={styles.iconButton}>
+                <MaterialIcons name="close" size={22} color={colors.text} />
+              </MotionPressable>
             </View>
-          ) : null}
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={styles.flexBody}>{children}</View>
-      )}
+            {menu}
+            {account}
+          </View>
+          <MotionPressable accessibilityRole="button" accessibilityLabel="메뉴 닫기" onPress={() => setDrawer(false)} style={styles.drawerRest} />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -157,25 +252,50 @@ export const Action = ({ label, onPress }: { label: string; onPress: () => void 
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.surfaceHigh, backgroundColor: colors.surface },
-  headerWide: { paddingHorizontal: spacing.xl },
-  brandRow: { gap: 2, flexShrink: 1 },
+  layout: { flex: 1, flexDirection: 'row' },
+
+  sidebar: { width: 268, borderRightWidth: 1, borderRightColor: colors.surfaceHigh, backgroundColor: colors.surface },
+  sidebarScroll: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm, gap: spacing.md },
+  brandBox: { paddingHorizontal: spacing.md, paddingTop: spacing.md, paddingBottom: spacing.sm, gap: 1 },
   brand: { ...type.bodyStrong, color: colors.text },
-  who: { ...type.micro, color: colors.textSubtle },
-  logout: { minHeight: size.touch, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  logoutText: { ...type.bodySmStrong, color: colors.primary },
-  nav: { gap: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
-  navItem: { minHeight: 34, justifyContent: 'center', paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors.surfaceContainer },
-  navItemActive: { backgroundColor: colors.primary },
-  navText: { ...type.bodySm, color: colors.textMuted },
-  navTextActive: { color: colors.onPrimary },
+  brandSub: { ...type.micro, color: colors.textSubtle },
+  group: { gap: 2 },
+  groupTitle: { ...type.micro, color: colors.textSubtle, paddingHorizontal: spacing.sm, paddingBottom: 4 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 52, paddingHorizontal: spacing.sm, borderRadius: radius.cardSm },
+  menuItemActive: { backgroundColor: colors.lavender },
+  menuCopy: { flex: 1, minWidth: 0, gap: 1 },
+  menuLabel: { ...type.bodySmStrong, color: colors.textMuted },
+  menuLabelActive: { color: colors.primary },
+  menuHint: { ...type.micro, color: colors.textSubtle },
+
+  account: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderTopWidth: 1, borderTopColor: colors.surfaceHigh, padding: spacing.md },
+  accountWho: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1, minWidth: 0 },
+  avatar: { width: 32, height: 32, borderRadius: radius.pill, backgroundColor: colors.lavender, alignItems: 'center', justifyContent: 'center' },
+  accountCopy: { flex: 1, minWidth: 0 },
+  accountName: { ...type.bodySmStrong, color: colors.text },
+  accountMail: { ...type.micro, color: colors.textSubtle },
+  accountAction: { width: size.iconButton, height: size.iconButton, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill },
+
+  main: { flex: 1, minWidth: 0 },
+  topbar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.surfaceHigh, backgroundColor: colors.surface },
+  topbarTitle: { ...type.bodyStrong, color: colors.text, flex: 1, minWidth: 0 },
+  topbarRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexShrink: 1 },
+  topbarWho: { ...type.micro, color: colors.textSubtle, flexShrink: 1 },
+  iconButton: { width: size.iconButton, height: size.iconButton, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill },
+
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
-  contentWide: { paddingHorizontal: spacing.xl, maxWidth: 1180, width: '100%', alignSelf: 'center' },
+  contentWide: { paddingHorizontal: spacing.lg, paddingVertical: spacing.lg, maxWidth: 1280, width: '100%', alignSelf: 'center' },
   titleRow: { gap: 2 },
   title: { ...type.section, color: colors.text },
   subtitle: { ...type.bodySm, color: colors.textMuted },
-  center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   flexBody: { flex: 1 },
+
+  drawerBackdrop: { flex: 1, flexDirection: 'row', backgroundColor: 'rgba(28,27,34,0.4)' },
+  drawer: { width: 288, maxWidth: '86%', backgroundColor: colors.surface },
+  drawerHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: spacing.sm },
+  drawerRest: { flex: 1 },
+
+  center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   panel: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: spacing.sm },
   panelTitle: { ...type.cardTitle, color: colors.text },
   body: { ...type.body, color: colors.textMuted },

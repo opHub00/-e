@@ -74,3 +74,29 @@ export function filterAnnouncementRows(rows: AdminAnnouncementRow[], filter: Ann
   if (filter === 'NO_ACTIVE_RULES') return rows.filter(row => !row.ruleSetId);
   return rows;
 }
+
+/** 목록에 쓸 지역 선택지. 실제로 행이 있는 지역만 내놓는다. */
+export function regionChoices(rows: AdminAnnouncementRow[]): string[] {
+  return [...new Set(rows.map(row => row.region).filter(region => region !== '—'))].sort((left, right) => left.localeCompare(right));
+}
+
+/**
+ * 검색.
+ *
+ * 운영자는 단지명 일부만 기억한다. 그래서 제목·지역·사업주체·공고 id 를 함께 본다.
+ * 띄어쓰기는 무시한다. "검암역 푸르지오"와 "검암역푸르지오"가 다르게 걸리면 안 된다.
+ */
+export function searchAnnouncementRows(rows: AdminAnnouncementRow[], query: string): AdminAnnouncementRow[] {
+  const needle = query.replace(/\s+/g, '').toLowerCase();
+  if (!needle) return rows;
+  return rows.filter(row =>
+    `${row.title}${row.region}${row.publisher}${row.announcementId}`.replace(/\s+/g, '').toLowerCase().includes(needle));
+}
+
+export type AnnouncementQuery = { query: string; status: AnnouncementFilter; region: string };
+
+/** 검색 → 상태 → 지역 순으로 좁힌다. 화면은 이 함수 하나만 부른다. */
+export function selectAnnouncementRows(rows: AdminAnnouncementRow[], select: AnnouncementQuery): AdminAnnouncementRow[] {
+  const byRegion = select.region === 'ALL' ? rows : rows.filter(row => row.region === select.region);
+  return sortAnnouncementRows(filterAnnouncementRows(searchAnnouncementRows(byRegion, select.query), select.status));
+}

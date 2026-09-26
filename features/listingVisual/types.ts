@@ -33,4 +33,19 @@ export type ListingVerifiedImage = {
   fallback: ListingLocationPreview | ListingVisualNone;
 };
 
-export type ListingVisual = ListingVerifiedImage | ListingLocationPreview | ListingVisualNone;
+/**
+ * 공식 출처에서 자동으로 찾은 대표 이미지.
+ *
+ * 재사용 허가를 주장하지 않는다. 그래서 verified_image 와 나눠 둔다.
+ * 대신 어디서 왔는지(공고의 공식 분양 홈페이지)를 화면에 함께 적는다.
+ */
+export type ListingSourcedImage = {
+  kind: 'sourced_image';
+  url: string;
+  source: VerifiedListingImageCandidate['source'];
+  attribution: string;
+  confidence: number;
+  fallback: ListingLocationPreview | ListingVisualNone;
+};
+
+export type ListingVisual = ListingVerifiedImage | ListingSourcedImage | ListingLocationPreview | ListingVisualNone;

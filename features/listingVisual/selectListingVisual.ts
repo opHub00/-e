@@ -52,11 +52,19 @@ export function isVerifiedImageCandidate(
 
 export function selectListingVisual(
   listing: DiscoveryListing,
-  // 손으로 등록한 검증 사진이 먼저다. 없으면 공식 출처에서 자동으로 찾아 허가까지 확인된 후보를 쓴다.
-  candidate = getVerifiedListingImage(listing) ?? resolvedListingImage(listing),
+  candidate = getVerifiedListingImage(listing),
 ): ListingVisual {
   const fallback = getListingLocationFallback(listing);
-  if (!isVerifiedImageCandidate(candidate)) return fallback;
+  if (!isVerifiedImageCandidate(candidate)) {
+    // 손으로 등록한 사진이 없으면, 공식 분양 홈페이지에서 자동으로 찾아 검증을 통과한 이미지를 쓴다.
+    // 재사용 허가를 주장하지 않으므로 출처를 함께 들고 다니는 다른 종류로 돌려준다.
+    const sourced = resolvedListingImage(listing);
+    if (sourced) {
+      return { kind: 'sourced_image', url: sourced.url, source: sourced.source,
+        attribution: sourced.attribution, confidence: sourced.confidence, fallback };
+    }
+    return fallback;
+  }
   return {
     kind: 'verified_image',
     url: candidate.url,
@@ -68,7 +76,7 @@ export function selectListingVisual(
 }
 
 export function getListingVisualErrorFallback(visual: ListingVisual): ListingLocationPreview | ListingVisualNone {
-  if (visual.kind === 'verified_image') return visual.fallback;
+  if (visual.kind === 'verified_image' || visual.kind === 'sourced_image') return visual.fallback;
   if (visual.kind === 'map_preview') return { kind: 'none', reason: 'preview_unavailable' };
   return visual;
 }

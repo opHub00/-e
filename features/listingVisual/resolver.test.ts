@@ -1,112 +1,160 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { buildVisualRecord, looksSiteWideBrandImage, pickBest, representativeImageUrl, sameOrigin, type ListingVisualRecord } from './resolver.ts';
+import {
+  MIN_CONFIDENCE, buildVisualRecord, imageDimensions, isExcludedImage, nameTokens, pickBest, sameOrigin,
+  scoreCandidate, type ListingVisualRecord,
+} from './resolver.ts';
 import { listingVisualRecords, resolvedListingImage } from './resolvedRegistry.ts';
+import { classifySource, collectImageCandidates } from '../../scripts/resolve-listing-visuals.mjs';
 
+const HOME = 'https://www.prugio.com/hb/2026/pravenue';
 const base = {
   listingId: 'apt-2026000404-2026000404',
   announcementNo: '2026000404',
   announcementTitle: '검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택',
-  officialHomepage: 'https://www.prugio.com/hb/2026/pravenue',
-  sourceType: 'official_project_page' as const,
+  officialHomepage: HOME,
+  pageUrl: HOME,
+  pageTitle: '검암역 푸르지오 프라베뉴',
+  alt: '단지 조감도',
+  sourceType: 'official_hero' as const,
+  width: 1920, height: 970, byteLength: 400_000, contentType: 'image/jpeg',
   fetchedAt: '2026-09-26T00:00:00.000Z',
-  fetch: { ok: true, contentType: 'image/jpeg', byteLength: 300_000 },
 };
 
-test('공식 홈페이지가 내건 단지 이미지는 허가가 기록되면 통과한다', () => {
-  const record = buildVisualRecord({
-    ...base,
-    imageUrl: 'https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-01.jpg',
-    sourceUrl: base.officialHomepage,
-    reusePermission: { basis: 'written-permission', referenceUrl: 'https://example.com/permission' },
-  });
+test('공식 홈페이지의 큰 단지 이미지는 통과하고 근거가 남는다', () => {
+  const record = buildVisualRecord({ ...base, imageUrl: `${HOME}/assets/images/main/complex-img-01.jpg` });
   assert.equal(record.verified, true);
   assert.equal(record.blockedReason, null);
-  assert.equal(record.checks.officialHomepageMatch, true);
-  assert.equal(record.sourceType, 'official_project_page');
+  assert.ok(record.confidence >= MIN_CONFIDENCE);
+  assert.ok(record.evidence.some(item => item.includes('공식 홈페이지')));
+  assert.ok(record.evidence.some(item => item.includes('1920×970')));
 });
 
-test('허가가 없으면 화면에 내보내지 않고 이유를 남긴다', () => {
+test('다른 도메인 이미지는 단지명이 비슷해도 쓰지 않는다', () => {
   const record = buildVisualRecord({
-    ...base,
-    imageUrl: 'https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-01.jpg',
-    sourceUrl: base.officialHomepage,
+    ...base, imageUrl: 'https://blog.example.com/photo/pravenue-aerial.jpg', pageUrl: 'https://blog.example.com/1',
   });
   assert.equal(record.verified, false);
-  assert.match(record.blockedReason ?? '', /재사용 허가/);
+  assert.match(record.blockedReason ?? '', /공식 홈페이지 도메인이 아니에요/);
 });
 
-test('다른 사이트 이미지는 단지명이 비슷해도 쓰지 않는다', () => {
-  const record = buildVisualRecord({
-    ...base,
-    imageUrl: 'https://blog.example.com/photos/prugio-pravenue.jpg',
-    sourceUrl: 'https://blog.example.com/post/1',
-    reusePermission: { basis: 'open-license', referenceUrl: 'https://example.com/license' },
+test('로고·SEO·공용 배너·favicon 은 후보에서 뺀다', () => {
+  for (const path of [
+    '/common/hillstate/hlst_seo.png', '/img/common/og.png', '/assets/images/common/og.png',
+    '/upload/logo.png', '/img/favicon.png', '/resources/banner/main.jpg', '/img/popup/pop0917a.jpg',
+    '/icons/sprite.svg', '/img/main.gif',
+  ]) assert.equal(isExcludedImage(`https://example.com${path}`), true, path);
+  assert.equal(isExcludedImage('https://example.com/resources/img/main/community_img_01.jpg'), false);
+});
+
+test('해상도가 작으면 대표 이미지로 쓰지 않는다', () => {
+  const small = buildVisualRecord({ ...base, imageUrl: `${HOME}/assets/images/main/complex-img-02.jpg`, width: 435, height: 235 });
+  assert.equal(small.verified, false);
+  assert.match(small.blockedReason ?? '', /해상도가 작아요\(435×235/);
+});
+
+test('이미지가 아니거나 너무 작은 파일은 막는다', () => {
+  const html = buildVisualRecord({ ...base, imageUrl: `${HOME}/a.jpg`, contentType: 'text/html', byteLength: 900 });
+  assert.equal(html.verified, false);
+  assert.match(html.blockedReason ?? '', /이미지 형식이 아니에요/);
+  assert.match(html.blockedReason ?? '', /너무 작아/);
+});
+
+test('근거가 약하면 통과시키지 않는다', () => {
+  const weak = scoreCandidate({
+    ...base, imageUrl: 'https://other.com/x/y.jpg', alt: '', pageTitle: '', width: 100, height: 100,
   });
-  assert.equal(record.verified, false);
-  assert.match(record.blockedReason ?? '', /공식 홈페이지에서 온 이미지가 아니에요/);
+  assert.ok(weak.confidence < MIN_CONFIDENCE || weak.blocked.length > 0);
 });
 
-test('사이트 공통 브랜드·SEO 이미지는 단지 사진으로 쓰지 않는다', () => {
-  for (const url of [
-    'https://hillstate.co.kr/common/hillstate/hlst_seo.png',
-    'https://example.com/img/common/og.png',
-    'https://example.com/assets/images/common/og.png',
-    'https://example.com/upload/logo.png',
-  ]) assert.equal(looksSiteWideBrandImage(url), true, url);
-  assert.equal(looksSiteWideBrandImage('https://example.com/upload/2026/09/complex-view.jpg'), false);
+test('단지명 조각을 뽑을 때 일반 낱말은 버린다', () => {
+  const tokens = nameTokens('검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택');
+  assert.ok(tokens.includes('푸르지오'));
+  assert.ok(tokens.includes('프라베뉴'));
+  assert.ok(!tokens.includes('공공분양주택'));
 });
 
-test('받아지지 않거나 이미지가 아닌 응답은 통과하지 못한다', () => {
-  const notImage = buildVisualRecord({
-    ...base, imageUrl: 'https://www.prugio.com/hb/2026/pravenue/assets/images/main/complex-img-01.jpg',
-    sourceUrl: base.officialHomepage, fetch: { ok: true, contentType: 'text/html', byteLength: 900 },
-    reusePermission: { basis: 'open-license', referenceUrl: 'https://example.com/license' },
+test('페이지에서 img·srcset·배경·og 를 모두 모은다', () => {
+  const html = `<title>x</title>
+    <img src="/a.jpg" alt="조감도">
+    <img srcset="/b-1x.jpg 1x, /b-2x.jpg 2x" alt="전경">
+    <div style="background-image:url('/c.jpg')"></div>
+    <meta property="og:image" content="/d.png">`;
+  const urls = collectImageCandidates(html, 'https://e.com/p').map(item => item.url);
+  for (const suffix of ['/a.jpg', '/b-1x.jpg', '/b-2x.jpg', '/c.jpg', '/d.png']) {
+    assert.ok(urls.some(url => url.endsWith(suffix)), suffix);
+  }
+});
+
+test('경로 모양으로 출처 종류를 나눈다', () => {
+  assert.equal(classifySource('https://e.com/img/gallery/aerial-1.jpg', 'img'), 'official_gallery');
+  assert.equal(classifySource('https://e.com/img/siteplan.jpg', 'img'), 'official_sitemap');
+  assert.equal(classifySource('https://e.com/assets/images/main/visual.jpg', 'img'), 'official_hero');
+  assert.equal(classifySource('https://e.com/etc/x.jpg', 'img'), 'official_press');
+});
+
+test('후보가 여럿이면 출처 우선순위 → confidence 순으로 고른다', () => {
+  const make = (sourceType: ListingVisualRecord['sourceType'], confidence: number, verified = true): ListingVisualRecord => ({
+    listingId: 'x', imageUrl: `https://e.com/${sourceType}.jpg`, sourceUrl: 'https://e.com', sourceType, verified,
+    fetchedAt: '2026-09-26T00:00:00.000Z', confidence, evidence: [], announcementNo: '1', announcementTitle: 't',
+    width: 1920, height: 1080, byteLength: 300_000, contentType: 'image/jpeg', reusePermission: null, blockedReason: null,
   });
-  assert.equal(notImage.verified, false);
-  assert.match(notImage.blockedReason ?? '', /실제로 받아 확인하지 못했어요/);
+  assert.equal(pickBest([make('official_press', 1), make('official_hero', 0.7)])?.sourceType, 'official_hero');
+  assert.equal(pickBest([make('official_hero', 0.7), make('official_hero', 0.9)])?.confidence, 0.9);
+  assert.equal(pickBest([make('official_hero', 1, false)]), null);
 });
 
-test('og:image 를 절대 주소로 바꾼다', () => {
-  const html = '<meta property="og:image" content="/img/view.jpg">';
-  assert.equal(representativeImageUrl(html, 'https://example.com/hb/2026/x'), 'https://example.com/img/view.jpg');
-  assert.equal(representativeImageUrl('<html></html>', 'https://example.com'), null);
+test('PNG·JPEG 머리에서 가로·세로를 읽는다', () => {
+  const png = new Uint8Array(32);
+  png.set([0x89, 0x50, 0x4e, 0x47], 0);
+  const view = new DataView(png.buffer);
+  view.setUint32(16, 1920);
+  view.setUint32(20, 1080);
+  assert.deepEqual(imageDimensions(png), { width: 1920, height: 1080 });
+
+  // SOF0: ff d8 | ff c0 len len precision | height height width width
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x04, 0x38, 0x07, 0x80, 0, 0]);
+  assert.deepEqual(imageDimensions(jpeg), { width: 1920, height: 1080 });
+
+  assert.equal(imageDimensions(new Uint8Array([1, 2, 3])), null);
   assert.equal(sameOrigin('https://a.com/x', 'https://a.com/y'), true);
   assert.equal(sameOrigin('https://a.com/x', 'https://b.com/x'), false);
 });
 
-test('후보가 여럿이면 공고 페이지 → 분양 페이지 → 등록 사진 순으로 고른다', () => {
-  const make = (sourceType: ListingVisualRecord['sourceType']): ListingVisualRecord => ({
-    listingId: 'x', imageUrl: 'https://e.com/a.jpg', sourceUrl: 'https://e.com', sourceType, verified: true,
-    fetchedAt: '2026-09-26T00:00:00.000Z', announcementNo: '1', announcementTitle: 't',
-    checks: { officialHomepageMatch: true, imageFetched: true, contentType: 'image/jpeg', byteLength: 3000 },
-    reusePermission: { basis: 'open-license', referenceUrl: 'https://e.com/l' }, blockedReason: null,
-  });
-  assert.equal(pickBest([make('verified_registry'), make('official_project_page'), make('official_announcement')])?.sourceType, 'official_announcement');
-  assert.equal(pickBest([{ ...make('official_announcement'), verified: false }]), null, '검증되지 않은 후보는 고르지 않는다');
-});
-
-test('지금 기록된 4건은 메타데이터를 모두 갖추고, 허가가 없어 화면에 나가지 않는다', () => {
+test('지금 기록에는 공고 4건과 후보들이 메타데이터를 갖춰 들어 있다', () => {
   const records = listingVisualRecords();
-  assert.equal(records.length, 4);
+  const byAnnouncement = new Map<string, ListingVisualRecord[]>();
   for (const record of records) {
-    for (const key of ['listingId', 'imageUrl', 'sourceUrl', 'sourceType', 'verified', 'fetchedAt']) {
+    for (const key of ['listingId', 'imageUrl', 'sourceUrl', 'sourceType', 'verified', 'fetchedAt', 'confidence', 'evidence', 'blockedReason']) {
       assert.ok(key in record, `${record.listingId}: ${key} 가 없다`);
     }
-    assert.match(record.listingId, /^apt-\d+-\d+$/);
-    assert.match(record.fetchedAt, /^\d{4}-\d{2}-\d{2}T/);
-    assert.equal(record.verified, false, '허가 없이 verified 가 되면 안 된다');
-    assert.ok(record.blockedReason, '막힌 이유가 적혀 있어야 한다');
-    assert.equal(resolvedListingImage({ id: record.listingId }), undefined, '화면에 나가면 안 된다');
+    assert.ok(record.listingId.includes(record.announcementNo), `${record.listingId}: 공고번호와 어긋난다`);
+    if (!byAnnouncement.has(record.announcementNo)) byAnnouncement.set(record.announcementNo, []);
+    byAnnouncement.get(record.announcementNo)!.push(record);
+    if (record.verified) assert.equal(record.blockedReason, null);
+    else assert.ok(record.blockedReason, `${record.imageUrl}: 막힌 이유가 없다`);
+  }
+  assert.deepEqual([...byAnnouncement.keys()].sort(), ['2026000404', '2026000438', '2026000446', '2026000453']);
+  for (const [no, list] of byAnnouncement) assert.ok(list.length <= 3, `${no}: 후보가 3개를 넘는다`);
+});
+
+test('검증을 통과한 공고만 이미지를 내보낸다', () => {
+  const shown = ['apt-2026000404-2026000404', 'apt-2026000453-2026000453']
+    .map(id => resolvedListingImage({ id }));
+  for (const image of shown) {
+    assert.ok(image, '검증을 통과한 공고는 이미지를 돌려줘야 한다');
+    assert.match(image!.url, /^https:\/\//);
+    assert.ok(image!.attribution.includes('공식 분양 홈페이지'), '출처를 함께 들고 다녀야 한다');
+    assert.ok(image!.confidence >= MIN_CONFIDENCE);
+  }
+  for (const id of ['apt-2026000438-2026000438', 'apt-2026000446-2026000446']) {
+    assert.equal(resolvedListingImage({ id }), undefined, `${id}: 검증을 통과하지 못하면 내보내지 않는다`);
   }
 });
 
 test('기록 파일이 실제 공고와 묶여 있다', () => {
   const raw = JSON.parse(readFileSync(new URL('../../data/listing-visuals/resolved.json', import.meta.url), 'utf8'));
-  const numbers = raw.visuals.map((item: ListingVisualRecord) => item.announcementNo).sort();
-  assert.deepEqual(numbers, ['2026000404', '2026000438', '2026000446', '2026000453']);
-  for (const item of raw.visuals as ListingVisualRecord[]) {
-    assert.ok(item.listingId.includes(item.announcementNo), `${item.listingId}: 공고번호와 listing id 가 어긋난다`);
-  }
+  assert.equal(raw.schemaVersion, 2);
+  assert.ok(raw.visuals.length >= 4);
 });

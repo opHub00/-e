@@ -22,7 +22,9 @@ const BAND_FRAME = 68;
 export function ListingDetailHero({ listing }: { listing: DiscoveryListing }) {
   const visual = selectListingVisual(listing);
 
-  if (visual.kind === 'verified_image') {
+  // 손으로 등록한 사진과 공식 홈페이지에서 찾아 검증을 통과한 사진은 같은 자리를 쓴다.
+  // 둘 다 출처를 아래에 남기므로, 어디서 온 그림인지 화면에서 확인할 수 있다.
+  if (visual.kind === 'verified_image' || visual.kind === 'sourced_image') {
     return (
       <View style={styles.hero}>
         <ListingVisualFrame

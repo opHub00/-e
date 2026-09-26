@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../components/ScreenHeader';
+import { AdminChrome } from '../../features/adminPortal/AdminShell';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../design/tokens';
 import { getSupabaseClient } from '../../features/auth/supabaseClient';
@@ -66,9 +65,8 @@ export default function ListingBindingsRoute() {
   }, [busy, reason, refresh, repository]);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScreenHeader title="공고 listing 연결 관리" onBack={back} />
-      <ScrollView contentContainerStyle={styles.content}>
+    <AdminChrome title="공고 listing 연결 관리">
+      <>
         {load.phase === 'LOADING' ? <View style={styles.card}><ActivityIndicator color={colors.primary} /><Text style={styles.body}>연결 상태를 불러오는 중이에요</Text></View> : null}
         {load.phase === 'FAILED' ? (
           <View style={styles.card}>
@@ -78,8 +76,8 @@ export default function ListingBindingsRoute() {
           </View>
         ) : null}
         {load.phase === 'READY' ? <Ready state={load.state} reason={reason} setReason={setReason} busy={busy} notice={notice} onRun={run} onRefresh={() => void refresh()} onOpenReview={openReview} /> : null}
-      </ScrollView>
-    </SafeAreaView>
+      </>
+    </AdminChrome>
   );
 }
 

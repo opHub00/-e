@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { RuleReviewConsole } from '../../features/assessmentRuleReview/ui/RuleReviewConsole';
+import { AdminChrome } from '../../features/adminPortal/AdminShell';
 import type { ReviewFaultPlan, ReviewGateway, ReviewLoadOutcome } from '../../features/assessmentRuleReview/repository/ReviewGateway';
 import { createConfiguredReviewGateway, type ReviewPersistence } from '../../features/assessmentRuleReview/repository/createReviewGateway';
 import { isRuleReviewTestEnvironment } from '../../features/assessmentRuleReview/repository/stagingTarget';
@@ -133,23 +134,27 @@ export default function AdminRuleReviewRoute() {
       <Retry label="다시 불러오기" onPress={retryLoad} />
     </Shell>;
   }
+  // 콘솔 자체(검수·mutation 흐름)는 그대로다. 위에 관리자 공통 내비게이션과 로그아웃만 얹는다.
   return (
-    <RuleReviewConsole
-      repository={state.repository}
-      initialWorkspace={state.workspace}
-      gateway={gateway}
-      persistence={persistence}
-      actorRole={state.role}
-      draftScope={state.sessionKey}
-      onBack={back}
-      onSessionEnded={onSessionEnded}
-      onRetryLoad={retryLoad}
-    />
+    <AdminChrome scroll={false}>
+      <RuleReviewConsole
+        repository={state.repository}
+        initialWorkspace={state.workspace}
+        gateway={gateway}
+        persistence={persistence}
+        actorRole={state.role}
+        draftScope={state.sessionKey}
+        onBack={back}
+        onSessionEnded={onSessionEnded}
+        onRetryLoad={retryLoad}
+      />
+    </AdminChrome>
   );
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <View style={styles.empty}>{children}</View>;
+  // 권한·오류 안내는 이 화면이 그대로 판단한다. 껍데기만 관리자 공통으로 맞춘다.
+  return <AdminChrome scroll={false}><View style={styles.empty}>{children}</View></AdminChrome>;
 }
 function Retry({ label, onPress }: { label: string; onPress: () => void }) {
   return (

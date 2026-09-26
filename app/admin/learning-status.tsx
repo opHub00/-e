@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../components/ScreenHeader';
+import { AdminChrome } from '../../features/adminPortal/AdminShell';
 import { StatusPill } from '../../components/StatusPill';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { Appear } from '../../components/motion/Appear';
@@ -64,9 +63,8 @@ export default function LearningStatusRoute() {
   useEffect(() => { void refresh(); }, [refresh]);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScreenHeader title="공고 · Rule 관리 현황" onBack={back} />
-      <ScrollView contentContainerStyle={styles.content}>
+    <AdminChrome title="공고 · Rule 관리 현황" subtitle="한 공고의 수집 → 규칙 → 검수 → 활성화 → 연결 상태예요.">
+      <>
         {load.phase === 'LOADING' ? (
           <View style={styles.card}>
             <ActivityIndicator color={colors.primary} />
@@ -89,8 +87,8 @@ export default function LearningStatusRoute() {
         ) : null}
 
         {load.phase === 'READY' ? <Ready role={load.role} rows={load.rows} onRefresh={() => void refresh()} router={router} /> : null}
-      </ScrollView>
-    </SafeAreaView>
+      </>
+    </AdminChrome>
   );
 }
 

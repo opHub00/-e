@@ -18,6 +18,14 @@ type Props = {
   children: (access: Extract<AdminAccess, { status: 'ALLOWED' }>) => ReactNode;
 };
 
+type ChromeProps = {
+  title?: string;
+  subtitle?: string;
+  /** 본문이 스스로 스크롤을 갖는 화면(검수 콘솔 등)은 false 로 둔다. */
+  scroll?: boolean;
+  children: ReactNode;
+};
+
 /**
  * Admin 화면 공통 껍데기.
  *
@@ -29,11 +37,8 @@ type Props = {
  */
 export function AdminShell({ title, subtitle, children }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const access = useAdminAccess();
   const signOut = useAuthStore(state => state.signOut);
-  const { width } = useWindowDimensions();
-  const wide = width >= 900;
 
   const leave = async () => {
     await signOut();
@@ -62,6 +67,30 @@ export function AdminShell({ title, subtitle, children }: Props) {
     return children(access);
   };
 
+  return <AdminChrome title={title} subtitle={subtitle}>{body()}</AdminChrome>;
+}
+
+/**
+ * 껍데기만 씌우는 형태.
+ *
+ * 이미 자기 권한 처리와 데이터 로직을 갖고 있는 화면(검수 콘솔, listing 연결, 학습 현황)에 쓴다.
+ * 여기서는 권한을 판정하지 않는다. 상단 브랜드·내비게이션·로그아웃만 같은 자리에 둔다.
+ * 그래야 기존 화면의 AUTH_REQUIRED/FORBIDDEN 안내와 mutation 흐름이 그대로 유지된다.
+ */
+export function AdminChrome({ title, subtitle, scroll = true, children }: ChromeProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const access = useAdminAccess();
+  const signOut = useAuthStore(state => state.signOut);
+  const { width } = useWindowDimensions();
+  const wide = width >= 900;
+  const signedIn = access.status === 'ALLOWED' || access.status === 'FORBIDDEN';
+
+  const leave = async () => {
+    await signOut();
+    router.replace(ADMIN_LOGIN_ROUTE as Href);
+  };
+
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <View style={[styles.header, wide && styles.headerWide]}>
@@ -71,34 +100,43 @@ export function AdminShell({ title, subtitle, children }: Props) {
             <Text style={styles.who}>{ADMIN_ROLE_LABEL[access.role]} · {access.email ?? '계정 확인 중'}</Text>
           ) : null}
         </View>
-        {access.status === 'ALLOWED' ? (
+        {/* 로그아웃은 로그인한 동안 항상 닿을 수 있어야 한다. 권한이 없어도 마찬가지다. */}
+        {signedIn ? (
           <MotionPressable accessibilityRole="button" accessibilityLabel="로그아웃" onPress={() => void leave()} style={styles.logout}>
             <Text style={styles.logoutText}>로그아웃</Text>
           </MotionPressable>
-        ) : null}
+        ) : (
+          <MotionPressable accessibilityRole="button" accessibilityLabel="관리자 로그인" onPress={() => router.replace(ADMIN_LOGIN_ROUTE as Href)} style={styles.logout}>
+            <Text style={styles.logoutText}>관리자 로그인</Text>
+          </MotionPressable>
+        )}
       </View>
 
-      {access.status === 'ALLOWED' ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.nav}>
-          {ADMIN_MENU.map(item => {
-            const active = pathname === item.href;
-            return (
-              <MotionPressable key={item.href} accessibilityRole="button" accessibilityState={{ selected: active }}
-                onPress={() => router.push(item.href as Href)} style={[styles.navItem, active && styles.navItemActive]}>
-                <Text style={[styles.navText, active && styles.navTextActive]}>{item.label}</Text>
-              </MotionPressable>
-            );
-          })}
-        </ScrollView>
-      ) : null}
-
-      <ScrollView contentContainerStyle={[styles.content, wide && styles.contentWide]}>
-        <View style={styles.titleRow}>
-          <Text accessibilityRole="header" style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        </View>
-        {body()}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.nav}>
+        {ADMIN_MENU.map(item => {
+          const active = pathname === item.href;
+          return (
+            <MotionPressable key={item.href} accessibilityRole="button" accessibilityState={{ selected: active }}
+              onPress={() => router.push(item.href as Href)} style={[styles.navItem, active && styles.navItemActive]}>
+              <Text style={[styles.navText, active && styles.navTextActive]}>{item.label}</Text>
+            </MotionPressable>
+          );
+        })}
       </ScrollView>
+
+      {scroll ? (
+        <ScrollView contentContainerStyle={[styles.content, wide && styles.contentWide]}>
+          {title ? (
+            <View style={styles.titleRow}>
+              <Text accessibilityRole="header" style={styles.title}>{title}</Text>
+              {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+            </View>
+          ) : null}
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={styles.flexBody}>{children}</View>
+      )}
     </SafeAreaView>
   );
 }
@@ -137,6 +175,7 @@ const styles = StyleSheet.create({
   title: { ...type.section, color: colors.text },
   subtitle: { ...type.bodySm, color: colors.textMuted },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
+  flexBody: { flex: 1 },
   panel: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: spacing.sm },
   panelTitle: { ...type.cardTitle, color: colors.text },
   body: { ...type.body, color: colors.textMuted },

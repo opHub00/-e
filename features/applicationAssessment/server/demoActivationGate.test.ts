@@ -56,8 +56,11 @@ test('자격에 영향을 주는 HELD·누락이 있으면 활성화 gate 를 �
       assert.equal(item.canActivate, false, `${item.title}: 치명 항목이 있는데 활성화 가능으로 계산됐다`);
     }
   }
-  // 지금 상태: 세 공고 모두 자격에 영향을 주는 항목이 남아 있어 활성화하지 않는다.
-  assert.deepEqual(summary.filter(item => item.canActivate).map(item => item.title), []);
+  // 지금 상태: 검암역만 gate 를 통과한다. 민영 두 건은 예치금·소득 대체 기준이 남아 있어 활성화하지 않는다.
+  assert.deepEqual(summary.filter(item => item.canActivate).map(item => item.title), ['검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택']);
+  for (const item of summary.filter(i => !i.canActivate)) {
+    assert.ok(item.criticalHeld.length + item.criticalGaps.length > 0, `${item.title}: 이유 없이 활성화를 막고 있다`);
+  }
 });
 
 test('고덕은 이 검수 대상에 들어 있지 않다', () => {

@@ -16,7 +16,7 @@ const load = (name: string): AnnouncementRules =>
   validateImportPackage(JSON.parse(readFileSync(new URL(`../../../data/assessment-rules/${name}`, import.meta.url), 'utf8'))).rules;
 
 const PACKAGES = [
-  { file: 'ico-geomam-b1bl-2026000404.json', title: '검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택', sha: '30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815', region: '인천광역시', stages: { newlywed: ['PRIORITY'], firstHome: ['PRIORITY'] } },
+  { file: 'ico-geomam-b1bl-2026000404.json', title: '검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택', sha: '30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815', region: '인천광역시', stages: { newlywed: ['PRIORITY', 'GENERAL', 'LOTTERY'], firstHome: ['PRIORITY', 'GENERAL'] } },
   { file: 'gm-cityprodium-2026000453.json', title: '광명 시티프라디움 에듀하임', sha: 'e4b9cd987e63bc4e2d4e33f74b616492a051aaafb90ca59053329edf05d0c693', region: '경기도', stages: { newlywed: ['PRIORITY', 'GENERAL', 'LOTTERY'], firstHome: ['PRIORITY'] } },
   { file: 'jj-panmun-2026000446.json', title: '진주 판문지구 레이크써밋 웰가', sha: 'b64f953ca25634202eebefc042836f6713323132511cb9da51ae1a5780ef66cb', region: '경상남도', stages: { newlywed: ['PRIORITY', 'GENERAL', 'LOTTERY'], firstHome: ['PRIORITY'] } },
 ] as const;
@@ -62,6 +62,7 @@ test('모든 규칙이 공고 원문 근거(문서 해시·페이지·발췌)를
 
 /** 수도권 공공분양(검암역) 기준으로 자격을 모두 채운 신청자. */
 function eligibleProfile(region: string): ApplicantProfileV2 {
+  // 검암역은 출산가구 완화·과거 주택소유 사실을 프로필에서 읽는다.
   const profile = createMinimalApplicantProfile({ name: '시연', age: 33, currentRegion: region, preferredRegions: [] });
   profile.basic.birthDate = knownField('1993-05-05');
   profile.family.marriageStatus = knownField('married');
@@ -70,9 +71,14 @@ function eligibleProfile(region: string): ApplicantProfileV2 {
   profile.housing.hasSpecialSupplyRestriction = knownField(false);
   profile.subscriptionAccount.hasAccount = knownField(true);
   profile.household.memberCount = knownField(3);
+  profile.housing.previousOwnership = knownField(false);
+  profile.housing.householdDisqualifyingPreviousOwnership = knownField(false);
+  profile.income.workOrBusinessIncomeEligible = knownField(true);
+  profile.income.incomeTaxPaymentYears = knownField(7);
   return profile;
 }
 const details = (region: string) => ({
+  familyCategory: 'married', specialExceptions: [], overseasStayHistory: [], children: [],
   marriageDate: '2023-06-01', accountKindEligible: true, subscriptionAccountOpenedAt: '2019-01-10',
   recognizedPaymentCount: 40, recognizedDepositAmount: 12000000, householdIncome: 7000000, dualIncome: false,
   incomeHouseholdSize: 3, realEstateAssets: 0, vehicleValue: 0, currentResidence: region,

@@ -1,5 +1,6 @@
 import type { DiscoveryListing } from '../discovery/types.ts';
 import { getVerifiedListingImage } from './registry.ts';
+import { resolvedListingImage } from './resolvedRegistry.ts';
 import type {
   ListingLocationPreview,
   ListingVisual,
@@ -51,7 +52,8 @@ export function isVerifiedImageCandidate(
 
 export function selectListingVisual(
   listing: DiscoveryListing,
-  candidate = getVerifiedListingImage(listing),
+  // 손으로 등록한 검증 사진이 먼저다. 없으면 공식 출처에서 자동으로 찾아 허가까지 확인된 후보를 쓴다.
+  candidate = getVerifiedListingImage(listing) ?? resolvedListingImage(listing),
 ): ListingVisual {
   const fallback = getListingLocationFallback(listing);
   if (!isVerifiedImageCandidate(candidate)) return fallback;

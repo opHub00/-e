@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "visuals": [
+    {
+      "listingId": "apt-2026000453-2026000453",
+      "imageUrl": "https://xn--hc0bz5m11b1ue95n2zf6zxvzd.com/upload/og_img/og_20260918095438_e1452c16.jpg",
+      "sourceUrl": "https://광명시티프라디움.com",
+      "sourceType": "official_project_page",
+      "verified": false,
+      "fetchedAt": "2026-09-26T13:08:38.032Z",
+      "announcementNo": "2026000453",
+      "announcementTitle": "광명 시티프라디움 에듀하임",
+      "checks": {
+        "officialHomepageMatch": true,
+        "imageFetched": true,
+        "contentType": "image/jpeg",
+        "byteLength": 523853
+      },
+      "reusePermission": null,
+      "blockedReason": "재사용 허가가 기록되지 않았어요. 사람이 확인해 적어야 화면에 나가요."
+    },
+    {
+      "listingId": "apt-2026000446-2026000446",
+      "imageUrl": "https://www.xn--o39a41ub8co0jgretwah37b.com/img/common/og.png",
+      "sourceUrl": "https://www.레이크써밋웰가.com",
+      "sourceType": "official_project_page",
+      "verified": false,
+      "fetchedAt": "2026-09-26T13:08:38.032Z",
+      "announcementNo": "2026000446",
+      "announcementTitle": "진주 판문지구 레이크써밋 웰가",
+      "checks": {
+        "officialHomepageMatch": true,
+        "imageFetched": true,
+        "contentType": "image/png",
+        "byteLength": 24968
+      },
+      "reusePermission": null,
+      "blockedReason": "사이트 공통 브랜드·SEO 이미지로 보여요. 이 단지 사진이라고 볼 수 없어요. 재사용 허가가 기록되지 않았어요. 사람이 확인해 적어야 화면에 나가요."
+    },
+    {
+      "listingId": "apt-2026000438-2026000438",
+      "imageUrl": "https://hillstate.co.kr/common/hillstate/hlst_seo.png",
+      "sourceUrl": "https://hillstate.co.kr/s/gd12",
+      "sourceType": "official_project_page",
+      "verified": false,
+      "fetchedAt": "2026-09-26T13:08:38.032Z",
+      "announcementNo": "2026000438",
+      "announcementTitle": "힐스테이트 고덕엘리스트 A65BL 공공분양주택",
+      "checks": {
+        "officialHomepageMatch": true,
+        "imageFetched": true,
+        "contentType": "image/png",
+        "byteLength": 49524
+      },
+      "reusePermission": null,
+      "blockedReason": "사이트 공통 브랜드·SEO 이미지로 보여요. 이 단지 사진이라고 볼 수 없어요. 재사용 허가가 기록되지 않았어요. 사람이 확인해 적어야 화면에 나가요."
+    },
+    {
+      "listingId": "apt-2026000404-2026000404",
+      "imageUrl": "https://www.prugio.com/hb/2026/pravenue/assets/images/common/og.png",
+      "sourceUrl": "https://www.prugio.com/hb/2026/pravenue",
+      "sourceType": "official_project_page",
+      "verified": false,
+      "fetchedAt": "2026-09-26T13:08:38.032Z",
+      "announcementNo": "2026000404",
+      "announcementTitle": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
+      "checks": {
+        "officialHomepageMatch": true,
+        "imageFetched": false,
+        "contentType": "text/html; charset=utf-8",
+        "byteLength": 13458
+      },
+      "reusePermission": null,
+      "blockedReason": "이미지를 실제로 받아 확인하지 못했어요. 사이트 공통 브랜드·SEO 이미지로 보여요. 이 단지 사진이라고 볼 수 없어요. 재사용 허가가 기록되지 않았어요. 사람이 확인해 적어야 화면에 나가요."
+    }
+  ]
+}

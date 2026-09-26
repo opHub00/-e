@@ -11,34 +11,137 @@
       "title": "검암역 푸르지오 프라베뉴 (B-1BL) 공공분양주택",
       "ruleSetId": "2f8a6c19-47db-4e53-8a7c-51d9e0b3f642",
       "decisions": {
-        "newlywed.householdNoHome": { "decision": "APPROVED", "reason": "b000600 '무주택세대구성원' 과 직접 일치." },
-        "newlywed.marriageOrYoungChild": { "decision": "HELD", "critical": true, "reason": "원문은 신혼부부(혼인 7년 이내 또는 만 7세 미만 자녀)·예비신혼부부·한부모가족 세 갈래다. 규칙은 앞의 한 갈래만 담았다. 예비신혼부부와 한부모는 판정에서 빠진다." },
-        "newlywed.residence": { "decision": "HELD", "critical": false, "reason": "거주 요건 자체는 원문대로지만, 인천 거주자 50% 우선공급 단계를 광역 단위 하나로 눌러 담았다. 자격 통과 여부는 바뀌지 않는다." },
-        "newlywed.account": { "decision": "APPROVED", "reason": "b000603 ② 주택청약종합저축·청약저축 과 직접 일치." },
-        "newlywed.accountMonths": { "decision": "APPROVED", "reason": "b000603 '가입하여 6개월이 경과' 와 숫자까지 일치." },
-        "newlywed.payments": { "decision": "APPROVED", "reason": "b000603 '월납입금을 6회 이상 납입' 과 숫자까지 일치." },
-        "newlywed.income": { "decision": "APPROVED", "reason": "b000603·b000604 의 130%/배우자 소득 200% 와 b000433 표의 가구원수별 금액이 그대로 들어갔다." },
-        "newlywed.realEstate": { "decision": "APPROVED", "reason": "b000603 ③ 이 신혼부부에 표2 자산기준 적용을 명시하고, b000403 의 215,500천원과 일치. 요약표(b000056)의 '60㎡·84㎡형 미적용' 은 다른 공급유형 열이다." },
-        "newlywed.vehicle": { "decision": "APPROVED", "reason": "b000407 자동차 45,420천원 이하와 일치." },
-        "newlywed.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "b000134 '특별공급은 1회에 한하여 공급' 과 일치." },
-        "newlywed.noReWinningRestriction": { "decision": "APPROVED", "reason": "b000540 재당첨 제한 문구와 일치." },
-        "newlywed.PRIORITY.income": { "decision": "HELD", "critical": false, "reason": "우선공급 70% 기준(100%/맞벌이 120%)은 정확하나, 일반공급 20%·추첨 10% 단계를 옮기지 않아 단계 구조가 불완전하다. 자격 판정에는 영향이 없고 단계 표시만 좁아진다." },
-        "firstHome.neverOwned": { "decision": "APPROVED", "reason": "b000571 '모든 세대구성원이 과거 주택을 소유한 사실이 없는 경우' 와 일치." },
-        "firstHome.householdNoHome": { "decision": "APPROVED", "reason": "b000572 무주택세대구성원과 일치." },
-        "firstHome.accountFirstRank": { "decision": "APPROVED", "reason": "b000571 '가입하여 12개월이 경과… 12회 이상 납입' 과 숫자까지 일치." },
-        "firstHome.deposit": { "decision": "APPROVED", "reason": "b000572 '선납금을 포함하여 600만원 이상' 과 일치." },
-        "firstHome.unmarriedChildInHousehold": { "decision": "HELD", "critical": true, "reason": "원문은 '혼인 중이거나 미혼 자녀가 있는 분' 이고 자녀에 임신·입양을 포함한다. 규칙은 혼인 상태 또는 등본상 미혼 자녀로만 표현해 임신·입양 범위가 좁다." },
-        "firstHome.residence": { "decision": "HELD", "critical": false, "reason": "인천 거주자 우선공급 단계를 광역 단위로 눌러 담았다." },
-        "firstHome.realEstate": { "decision": "APPROVED", "reason": "b000403 215,500천원과 일치. b000588 출산가구 완화는 별도 HELD 로 기록." },
-        "firstHome.vehicle": { "decision": "APPROVED", "reason": "b000407 45,420천원과 일치." },
-        "firstHome.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "b000134 와 일치." },
-        "firstHome.tax": { "decision": "APPROVED", "reason": "b000575 ④ '근로자 또는 자영업자… 신청자 본인이 5년 이상 소득세' 와 일치. 검수 중 누락을 발견해 추가한 규칙이다." },
-        "firstHome.PRIORITY.income": { "decision": "HELD", "critical": false, "reason": "우선공급 70% 기준은 정확하나 일반공급·추첨 단계를 옮기지 않았다." }
+        "newlywed.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000600 '무주택세대구성원' 과 직접 일치."
+        },
+        "newlywed.residence": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "거주 요건 자체는 원문대로(인천 또는 수도권)다. 인천 거주자 50% 우선공급 '배분 비율' 은 담지 않았다. 자격 통과 여부는 바뀌지 않고, 단계 배분만 표시하지 않는다."
+        },
+        "newlywed.account": {
+          "decision": "APPROVED",
+          "reason": "b000603 ② 주택청약종합저축·청약저축 과 직접 일치."
+        },
+        "newlywed.accountMonths": {
+          "decision": "APPROVED",
+          "reason": "b000603 '가입하여 6개월이 경과' 와 숫자까지 일치."
+        },
+        "newlywed.payments": {
+          "decision": "APPROVED",
+          "reason": "b000603 '월납입금을 6회 이상 납입' 과 숫자까지 일치."
+        },
+        "newlywed.income": {
+          "decision": "APPROVED",
+          "reason": "b000603·b000604 의 130%/배우자 소득 200% 와 b000433 표의 가구원수별 금액이 그대로 들어갔다."
+        },
+        "newlywed.realEstate": {
+          "decision": "APPROVED",
+          "reason": "b000603 ③ 이 신혼부부에 표2 자산기준 적용을 명시하고, b000403 의 215,500천원과 일치. 요약표(b000056)의 '60㎡·84㎡형 미적용' 은 다른 공급유형 열이다."
+        },
+        "newlywed.vehicle": {
+          "decision": "APPROVED",
+          "reason": "b000407 자동차 45,420천원 이하와 일치."
+        },
+        "newlywed.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "b000134 '특별공급은 1회에 한하여 공급' 과 일치."
+        },
+        "newlywed.noReWinningRestriction": {
+          "decision": "APPROVED",
+          "reason": "b000540 재당첨 제한 문구와 일치."
+        },
+        "newlywed.PRIORITY.income": {
+          "decision": "APPROVED",
+          "reason": "b000608 1단계 우선공급 100%/맞벌이 120% 와 일치. 2·3단계를 함께 담아 단계 구조가 완성됐다."
+        },
+        "firstHome.neverOwned": {
+          "decision": "APPROVED",
+          "reason": "b000571 '모든 세대구성원이 과거 주택을 소유한 사실이 없는 경우' 와 일치."
+        },
+        "firstHome.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000572 무주택세대구성원과 일치."
+        },
+        "firstHome.accountFirstRank": {
+          "decision": "APPROVED",
+          "reason": "b000571 '가입하여 12개월이 경과… 12회 이상 납입' 과 숫자까지 일치."
+        },
+        "firstHome.deposit": {
+          "decision": "APPROVED",
+          "reason": "b000572 '선납금을 포함하여 600만원 이상' 과 일치."
+        },
+        "firstHome.residence": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "위와 같다. 자격에는 영향이 없다."
+        },
+        "firstHome.realEstate": {
+          "decision": "APPROVED",
+          "reason": "b000403 215,500천원과 일치. b000588 출산가구 완화는 별도 HELD 로 기록."
+        },
+        "firstHome.vehicle": {
+          "decision": "APPROVED",
+          "reason": "b000407 45,420천원과 일치."
+        },
+        "firstHome.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "b000134 와 일치."
+        },
+        "firstHome.tax": {
+          "decision": "APPROVED",
+          "reason": "b000575 ④ '근로자 또는 자영업자… 신청자 본인이 5년 이상 소득세' 와 일치. 검수 중 누락을 발견해 추가한 규칙이다."
+        },
+        "firstHome.PRIORITY.income": {
+          "decision": "APPROVED",
+          "reason": "b000579 1단계 우선공급 100%/맞벌이 120% 와 일치. 2단계를 함께 담았다."
+        },
+        "newlywed.family": {
+          "decision": "APPROVED",
+          "reason": "b000600·b000602 의 신혼부부(혼인 7년 이내 또는 만 7세 미만 자녀)·예비신혼부부(입주 전 혼인 증명)·한부모(만 7세 미만 자녀, 증명서) 세 갈래를 모두 담았다. 고덕과 같은 구조다."
+        },
+        "newlywed.childbirth": {
+          "decision": "APPROVED",
+          "reason": "b000643 출산가구 소득·자산기준 완화를 자동 통과시키지 않고 추가 확인(REVIEW)으로 남겼다. 완화 계산을 지어내지 않는다."
+        },
+        "newlywed.GENERAL.income": {
+          "decision": "APPROVED",
+          "reason": "b000608 2단계 일반공급 '130% 이하(맞벌이 140% 이하)' 와 b000433 표 금액이 일치."
+        },
+        "newlywed.LOTTERY.income": {
+          "decision": "APPROVED",
+          "reason": "b000608 3단계 추첨공급 '맞벌이 200% 이하' 와 b000426 표 금액이 일치."
+        },
+        "firstHome.family": {
+          "decision": "APPROVED",
+          "reason": "b000572·b000573 '혼인 중이거나 미혼 자녀(임신 및 입양을 포함)' 를 임신·입양까지 포함해 담았다."
+        },
+        "firstHome.childbirth": {
+          "decision": "APPROVED",
+          "reason": "b000588 출산가구 완화를 추가 확인으로 남겼다."
+        },
+        "firstHome.GENERAL.income": {
+          "decision": "APPROVED",
+          "reason": "b000579 2단계 일반공급 130%/맞벌이 140% 와 일치."
+        }
       },
       "packageGaps": [
-        { "item": "출산가구 소득·자산기준 완화(10%p/20%p, b000588)", "impact": "2023.03.28. 이후 출생 자녀가 있는 세대는 실제보다 좁게 판정될 수 있다.", "critical": true },
-        { "item": "추첨공급 10% 단계와 배점표", "impact": "단계·점수 표시가 좁아진다. 자격 판정에는 영향 없음.", "critical": false },
-        { "item": "예비신혼부부·한부모가족 경로", "impact": "해당 신청자는 판정 대상에서 빠진다.", "critical": true }
+        {
+          "item": "지역우선 배분 비율(인천 50% 등)과 순위(1·2순위) 구분",
+          "impact": "자격 판정에는 영향이 없고 단계·순위 표시만 좁다. 경고 문구로 안내한다.",
+          "critical": false
+        },
+        {
+          "item": "배점표(미성년 자녀수·거주기간·통장기간 등)",
+          "impact": "신혼부부 우선공급 안에서의 점수 경쟁을 계산하지 않는다. 자격·단계 판정에는 영향 없음.",
+          "critical": false
+        },
+        {
+          "item": "출산가구 완화 수치(10%p/20%p) 자동 적용",
+          "impact": "완화 대상자는 추가 확인으로 표시된다. 완화를 임의로 계산해 통과시키지 않는다.",
+          "critical": false
+        }
       ]
     },
     {
@@ -46,28 +149,98 @@
       "title": "광명 시티프라디움 에듀하임",
       "ruleSetId": "4a71c852-6f39-4d81-bb27-8e05c9d3a160",
       "decisions": {
-        "newlywed.householdNoHome": { "decision": "APPROVED", "reason": "b000194 '무주택세대구성원' 과 일치." },
-        "newlywed.marriageWithin7Years": { "decision": "APPROVED", "reason": "b000194 '혼인기간이 7년 이내' 와 숫자까지 일치." },
-        "newlywed.residence": { "decision": "HELD", "critical": false, "reason": "원문은 광명시 거주자 우선, 그다음 수도권이다. 규칙은 광역 단위 하나로만 표현했다." },
-        "newlywed.account": { "decision": "HELD", "critical": true, "reason": "원문은 '청약통장 가입기간 6개월 경과(지역별·면적별 예치금액 이상)' 이다. 예치금 기준이 표에만 있어 규칙에 담기지 못했다. 통장 보유만으로 통과시키면 실제보다 넓게 판정한다." },
-        "newlywed.accountMonths": { "decision": "APPROVED", "reason": "b000194 '가입기간 6개월 경과' 와 일치." },
-        "newlywed.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "특별공급 1회 제한과 일치." },
-        "newlywed.noReWinningRestriction": { "decision": "APPROVED", "reason": "재당첨 제한 문구와 일치." },
-        "newlywed.PRIORITY.income": { "decision": "HELD", "critical": true, "reason": "b000197 은 '부부 모두 소득이 있는 경우 120% 이하, 단 부부 중 1인의 소득은 100% 이하' 라는 단서를 단다. 엔진에 1인 소득 사실이 없어 이 단서를 표현하지 못했다." },
-        "newlywed.GENERAL.income": { "decision": "HELD", "critical": false, "reason": "원문은 '100% 초과 140% 이하' 구간이다. 규칙은 상한만 담아 하한이 없다. 단계 판정이 실제보다 넓다." },
-        "newlywed.LOTTERY.realEstate": { "decision": "APPROVED", "reason": "b000199 '부동산가액 3억 3,100만원 이하' 와 일치(원 단위 환산은 derivedLiterals 에 기록)." },
-        "firstHome.neverOwned": { "decision": "APPROVED", "reason": "b000266·b000267 과 일치." },
-        "firstHome.householdNoHome": { "decision": "APPROVED", "reason": "b000266 '무주택세대주' 와 일치." },
-        "firstHome.isHouseholdHead": { "decision": "APPROVED", "reason": "b000266 '무주택세대주' 에서 세대주 요건을 분리해 표현." },
-        "firstHome.residence": { "decision": "HELD", "critical": false, "reason": "광명시 우선 단계를 광역 단위로 단순화." },
-        "firstHome.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "특별공급 1회 제한과 일치." },
-        "firstHome.PRIORITY.income": { "decision": "HELD", "critical": false, "reason": "우선공급 기준은 맞으나 일반·추첨 단계를 옮기지 않았다." }
+        "newlywed.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000194 '무주택세대구성원' 과 일치."
+        },
+        "newlywed.marriageWithin7Years": {
+          "decision": "APPROVED",
+          "reason": "b000194 '혼인기간이 7년 이내' 와 숫자까지 일치."
+        },
+        "newlywed.residence": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "원문은 광명시 거주자 우선, 그다음 수도권이다. 규칙은 광역 단위 하나로만 표현했다."
+        },
+        "newlywed.account": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "원문은 '청약통장 가입기간 6개월 경과(지역별·면적별 예치금액 이상)' 이다. 예치금 기준이 표에만 있어 규칙에 담기지 못했다. 통장 보유만으로 통과시키면 실제보다 넓게 판정한다."
+        },
+        "newlywed.accountMonths": {
+          "decision": "APPROVED",
+          "reason": "b000194 '가입기간 6개월 경과' 와 일치."
+        },
+        "newlywed.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "특별공급 1회 제한과 일치."
+        },
+        "newlywed.noReWinningRestriction": {
+          "decision": "APPROVED",
+          "reason": "재당첨 제한 문구와 일치."
+        },
+        "newlywed.PRIORITY.income": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "b000197 은 '부부 모두 소득이 있는 경우 120% 이하, 단 부부 중 1인의 소득은 100% 이하' 라는 단서를 단다. 엔진에 1인 소득 사실이 없어 이 단서를 표현하지 못했다."
+        },
+        "newlywed.GENERAL.income": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "원문은 '100% 초과 140% 이하' 구간이다. 규칙은 상한만 담아 하한이 없다. 단계 판정이 실제보다 넓다."
+        },
+        "newlywed.LOTTERY.realEstate": {
+          "decision": "APPROVED",
+          "reason": "b000199 '부동산가액 3억 3,100만원 이하' 와 일치(원 단위 환산은 derivedLiterals 에 기록)."
+        },
+        "firstHome.neverOwned": {
+          "decision": "APPROVED",
+          "reason": "b000266·b000267 과 일치."
+        },
+        "firstHome.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000266 '무주택세대주' 와 일치."
+        },
+        "firstHome.isHouseholdHead": {
+          "decision": "APPROVED",
+          "reason": "b000266 '무주택세대주' 에서 세대주 요건을 분리해 표현."
+        },
+        "firstHome.residence": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "광명시 우선 단계를 광역 단위로 단순화."
+        },
+        "firstHome.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "특별공급 1회 제한과 일치."
+        },
+        "firstHome.PRIORITY.income": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "우선공급 기준은 맞으나 일반·추첨 단계를 옮기지 않았다."
+        }
       },
       "packageGaps": [
-        { "item": "민영 청약 예치금(지역·면적별 금액)", "impact": "통장 요건이 실제보다 느슨하다.", "critical": true },
-        { "item": "일반공급 가점제(무주택기간·부양가족·통장기간)", "impact": "일반공급 경로를 판정할 수 없다. 특별공급 판정에는 영향 없음.", "critical": false },
-        { "item": "소득기준 '또는 자산기준' 선택지(b000194)", "impact": "소득으로만 판정해 자산으로 충족하는 신청자를 놓친다.", "critical": true },
-        { "item": "생애최초 소득세 납부기간 요건", "impact": "원문에 '5년 이상' 문구가 없어 규칙을 만들지 않았다. 표에 있을 가능성이 남아 있다.", "critical": true }
+        {
+          "item": "민영 청약 예치금(지역·면적별 금액)",
+          "impact": "통장 요건이 실제보다 느슨하다.",
+          "critical": true
+        },
+        {
+          "item": "일반공급 가점제(무주택기간·부양가족·통장기간)",
+          "impact": "일반공급 경로를 판정할 수 없다. 특별공급 판정에는 영향 없음.",
+          "critical": false
+        },
+        {
+          "item": "소득기준 '또는 자산기준' 선택지(b000194)",
+          "impact": "소득으로만 판정해 자산으로 충족하는 신청자를 놓친다.",
+          "critical": true
+        },
+        {
+          "item": "생애최초 소득세 납부기간 요건",
+          "impact": "원문에 '5년 이상' 문구가 없어 규칙을 만들지 않았다. 표에 있을 가능성이 남아 있다.",
+          "critical": true
+        }
       ]
     },
     {
@@ -75,27 +248,94 @@
       "title": "진주 판문지구 레이크써밋 웰가",
       "ruleSetId": "8d31b7f4-25ce-4a69-9f02-6b4d8e13c7a5",
       "decisions": {
-        "newlywed.householdNoHome": { "decision": "APPROVED", "reason": "b000170 '무주택세대구성원' 과 일치." },
-        "newlywed.marriageWithin7Years": { "decision": "APPROVED", "reason": "b000170 '혼인기간이 7년 이내' 와 일치." },
-        "newlywed.residence": { "decision": "HELD", "critical": true, "reason": "원문은 '진주시에 거주하거나 경상남도 및 부산·울산에 거주' 이고 3단계 경쟁에서 진주시 1년 이상 계속 거주자를 우선한다. 규칙은 광역 3개로만 표현해 진주시 요건과 거주기간이 빠졌다." },
-        "newlywed.account": { "decision": "HELD", "critical": true, "reason": "민영 예치금 기준이 표에만 있어 담지 못했다. 통장 보유만으로 통과시킨다." },
-        "newlywed.accountMonths": { "decision": "APPROVED", "reason": "가입 6개월 경과와 일치." },
-        "newlywed.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "특별공급 1회 제한과 일치." },
-        "newlywed.noReWinningRestriction": { "decision": "APPROVED", "reason": "재당첨 제한과 일치." },
-        "newlywed.PRIORITY.income": { "decision": "HELD", "critical": true, "reason": "b000173 의 '부부 중 1인의 소득은 100% 이하' 단서를 표현하지 못했다." },
-        "newlywed.GENERAL.income": { "decision": "HELD", "critical": false, "reason": "'100% 초과 140% 이하' 의 하한을 담지 못했다." },
-        "newlywed.LOTTERY.realEstate": { "decision": "APPROVED", "reason": "b000175 '부동산가액 3억 3,100만원 이하' 와 일치." },
-        "firstHome.neverOwned": { "decision": "APPROVED", "reason": "b000239·b000240 과 일치." },
-        "firstHome.householdNoHome": { "decision": "APPROVED", "reason": "b000239 '무주택세대구성원' 과 일치." },
-        "firstHome.residence": { "decision": "HELD", "critical": true, "reason": "진주시 요건이 빠지고 광역 단위로만 표현됐다." },
-        "firstHome.noSpecialSupplyHistory": { "decision": "APPROVED", "reason": "특별공급 1회 제한과 일치." },
-        "firstHome.PRIORITY.income": { "decision": "HELD", "critical": true, "reason": "생애최초 우선공급 130% 기준은 b000243 에서 확인했으나, 맞벌이 구분 없이 단일 130% 로 눌러 담았다. 원문의 맞벌이 취급을 확인하지 못했다." }
+        "newlywed.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000170 '무주택세대구성원' 과 일치."
+        },
+        "newlywed.marriageWithin7Years": {
+          "decision": "APPROVED",
+          "reason": "b000170 '혼인기간이 7년 이내' 와 일치."
+        },
+        "newlywed.residence": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "원문은 '진주시에 거주하거나 경상남도 및 부산·울산에 거주' 이고 3단계 경쟁에서 진주시 1년 이상 계속 거주자를 우선한다. 규칙은 광역 3개로만 표현해 진주시 요건과 거주기간이 빠졌다."
+        },
+        "newlywed.account": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "민영 예치금 기준이 표에만 있어 담지 못했다. 통장 보유만으로 통과시킨다."
+        },
+        "newlywed.accountMonths": {
+          "decision": "APPROVED",
+          "reason": "가입 6개월 경과와 일치."
+        },
+        "newlywed.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "특별공급 1회 제한과 일치."
+        },
+        "newlywed.noReWinningRestriction": {
+          "decision": "APPROVED",
+          "reason": "재당첨 제한과 일치."
+        },
+        "newlywed.PRIORITY.income": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "b000173 의 '부부 중 1인의 소득은 100% 이하' 단서를 표현하지 못했다."
+        },
+        "newlywed.GENERAL.income": {
+          "decision": "HELD",
+          "critical": false,
+          "reason": "'100% 초과 140% 이하' 의 하한을 담지 못했다."
+        },
+        "newlywed.LOTTERY.realEstate": {
+          "decision": "APPROVED",
+          "reason": "b000175 '부동산가액 3억 3,100만원 이하' 와 일치."
+        },
+        "firstHome.neverOwned": {
+          "decision": "APPROVED",
+          "reason": "b000239·b000240 과 일치."
+        },
+        "firstHome.householdNoHome": {
+          "decision": "APPROVED",
+          "reason": "b000239 '무주택세대구성원' 과 일치."
+        },
+        "firstHome.residence": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "진주시 요건이 빠지고 광역 단위로만 표현됐다."
+        },
+        "firstHome.noSpecialSupplyHistory": {
+          "decision": "APPROVED",
+          "reason": "특별공급 1회 제한과 일치."
+        },
+        "firstHome.PRIORITY.income": {
+          "decision": "HELD",
+          "critical": true,
+          "reason": "생애최초 우선공급 130% 기준은 b000243 에서 확인했으나, 맞벌이 구분 없이 단일 130% 로 눌러 담았다. 원문의 맞벌이 취급을 확인하지 못했다."
+        }
       },
       "packageGaps": [
-        { "item": "진주시 1년 이상 계속 거주 요건", "impact": "지역 우선 판정이 실제보다 넓다.", "critical": true },
-        { "item": "민영 청약 예치금", "impact": "통장 요건이 실제보다 느슨하다.", "critical": true },
-        { "item": "일반공급 가점제", "impact": "일반공급 경로 판정 불가.", "critical": false },
-        { "item": "생애최초 소득세 납부기간 요건", "impact": "원문에서 확인하지 못했다.", "critical": true }
+        {
+          "item": "진주시 1년 이상 계속 거주 요건",
+          "impact": "지역 우선 판정이 실제보다 넓다.",
+          "critical": true
+        },
+        {
+          "item": "민영 청약 예치금",
+          "impact": "통장 요건이 실제보다 느슨하다.",
+          "critical": true
+        },
+        {
+          "item": "일반공급 가점제",
+          "impact": "일반공급 경로 판정 불가.",
+          "critical": false
+        },
+        {
+          "item": "생애최초 소득세 납부기간 요건",
+          "impact": "원문에서 확인하지 못했다.",
+          "critical": true
+        }
       ]
     }
   ]

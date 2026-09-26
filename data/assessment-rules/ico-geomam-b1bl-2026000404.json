@@ -65,16 +65,24 @@
         "income.7.200": 20971082,
         "income.8.200": 22129638,
         "warning.region": "지역우선공급: 인천광역시 거주자에게 먼저 공급하고, 남은 물량은 수도권(서울특별시·경기도) 거주자와 함께 경쟁해요. 배분 비율은 판정에 계산하지 않아요.",
-        "warning.newlywed.rank": "신혼부부 특별공급은 1순위(혼인기간 중 출산·입양·임신 자녀가 있는 신혼부부, 혼인 외 출생자, 만 7세 미만 자녀를 둔 한부모)와 2순위(예비신혼부부, 1순위가 아닌 신혼부부)를 먼저 나눠요.",
         "warning.selection": "공급단계는 처음 들어가는 단계예요. 낙첨하면 다음 단계 추첨에 다시 포함돼요.",
-        "warning.debt.table": "공고문의 표(공급세대수·배점표)는 좌표 정보가 없어 구조화하지 않았어요. 표에서만 확인할 수 있는 기준은 이 규칙 집합에 들어 있지 않아요."
+        "warning.debt.table": "공고문의 표(공급세대수·배점표)는 좌표 정보가 없어 구조화하지 않았어요. 표에서만 확인할 수 있는 기준은 이 규칙 집합에 들어 있지 않아요.",
+        "income.3.140": 10547268,
+        "income.4.140": 12323083,
+        "income.5.140": 13057779,
+        "income.6.140": 13868768,
+        "income.7.140": 14679757,
+        "income.8.140": 15490747,
+        "exceptions.childbirthAfter": "2023-03-28",
+        "warning.newlywed.rank": "신혼부부 특별공급은 1순위(혼인기간 중 출산·입양·임신 자녀가 있는 신혼부부, 혼인 외 출생자, 만 7세 미만 자녀를 둔 한부모)와 2순위(예비신혼부부, 1순위가 아닌 신혼부부)를 먼저 나눠요. 순위 자체는 판정에 계산하지 않아요."
       },
       "supplies": [
         {
           "type": "newlywed",
           "eligibility": [
             "newlywed.householdNoHome",
-            "newlywed.marriageOrYoungChild",
+            "newlywed.family",
+            "newlywed.childbirth",
             "newlywed.residence",
             "newlywed.account",
             "newlywed.accountMonths",
@@ -92,21 +100,36 @@
                 "newlywed.PRIORITY.income"
               ],
               "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [
+                "newlywed.GENERAL.income"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "LOTTERY",
+              "conditions": [
+                "newlywed.LOTTERY.income"
+              ],
+              "scores": null
             }
           ]
         },
         {
           "type": "firstHome",
           "eligibility": [
-            "firstHome.neverOwned",
             "firstHome.householdNoHome",
-            "firstHome.accountFirstRank",
-            "firstHome.deposit",
-            "firstHome.unmarriedChildInHousehold",
+            "firstHome.family",
+            "firstHome.childbirth",
             "firstHome.residence",
             "firstHome.realEstate",
             "firstHome.vehicle",
             "firstHome.noSpecialSupplyHistory",
+            "firstHome.neverOwned",
+            "firstHome.accountFirstRank",
+            "firstHome.deposit",
             "firstHome.tax"
           ],
           "stages": [
@@ -114,6 +137,13 @@
               "stage": "PRIORITY",
               "conditions": [
                 "firstHome.PRIORITY.income"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [
+                "firstHome.GENERAL.income"
               ],
               "scores": null
             }
@@ -145,58 +175,6 @@
         "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
         "section": "Ⅴ-7. 신혼부부 특별공급",
         "label": "무주택세대구성원",
-        "tableLabel": null,
-        "pageNumber": 26,
-        "textExcerpt": "■ 입주자모집공고일(2026.08.21.) 현재 인천광역시에 거주하거나 수도권(서울특별시 및 경기도)에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\r\n         ① 신혼부부 특별공급 기본 요건\r\n            - 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내 이거나 6세 이하(만7세 미만을 말함)의 자녀(태아 포함)를 둔 무주택세대구성원]\r\n            - 예비신혼부부(혼인을 계획 중이며 해당 주택의 입주 전까지 혼인사실을 증명할 수 있으며 혼인으로 구성할 세대원 전원이 무주택인 자)\r\n            - 한부모가족(6세 이하(만7세 미만을 말함) 자녀(태아를 포함)를 둔 무주택세대구성원)",
-        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
-        "locator": {
-          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
-          "parserVersion": "xpdf-pdftotext-layout-1",
-          "pages": [
-            26
-          ],
-          "blocks": [
-            {
-              "id": "b000600",
-              "page": 26,
-              "bbox": null
-            }
-          ]
-        }
-      }
-    },
-    {
-      "ruleKey": "newlywed.marriageOrYoungChild",
-      "supplyType": "newlywed",
-      "stage": null,
-      "category": "ELIGIBILITY",
-      "config": {
-        "label": "혼인기간 7년 이내이거나 만 7세 미만 자녀가 있는 신혼부부",
-        "expression": {
-          "any": [
-            {
-              "fact": "marriageWithin7Years",
-              "op": "eq",
-              "value": true
-            },
-            {
-              "fact": "hasChildUnder7",
-              "op": "eq",
-              "value": true
-            }
-          ]
-        },
-        "documents": [
-          "혼인관계증명서",
-          "주민등록표등본"
-        ]
-      },
-      "evidence": {
-        "id": "geomam.b1bl.newlywed.marriageOrYoungChild",
-        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
-        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
-        "section": "Ⅴ-7. 신혼부부 특별공급",
-        "label": "혼인기간 7년 이내이거나 만 7세 미만 자녀가 있는 신혼부부",
         "tableLabel": null,
         "pageNumber": 26,
         "textExcerpt": "■ 입주자모집공고일(2026.08.21.) 현재 인천광역시에 거주하거나 수도권(서울특별시 및 경기도)에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\r\n         ① 신혼부부 특별공급 기본 요건\r\n            - 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내 이거나 6세 이하(만7세 미만을 말함)의 자녀(태아 포함)를 둔 무주택세대구성원]\r\n            - 예비신혼부부(혼인을 계획 중이며 해당 주택의 입주 전까지 혼인사실을 증명할 수 있으며 혼인으로 구성할 세대원 전원이 무주택인 자)\r\n            - 한부모가족(6세 이하(만7세 미만을 말함) 자녀(태아를 포함)를 둔 무주택세대구성원)",
@@ -1303,63 +1281,6 @@
       }
     },
     {
-      "ruleKey": "firstHome.unmarriedChildInHousehold",
-      "supplyType": "firstHome",
-      "stage": null,
-      "category": "ELIGIBILITY",
-      "config": {
-        "label": "혼인 중이거나 미혼 자녀가 있을 것",
-        "expression": {
-          "any": [
-            {
-              "fact": "maritalStatus",
-              "op": "eq",
-              "value": "married"
-            },
-            {
-              "fact": "unmarriedChildInHousehold",
-              "op": "eq",
-              "value": true
-            }
-          ]
-        },
-        "documents": [
-          "주민등록표등본",
-          "가족관계증명서"
-        ]
-      },
-      "evidence": {
-        "id": "geomam.b1bl.firstHome.unmarriedChildInHousehold",
-        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
-        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
-        "section": "Ⅴ-6. 생애최초 특별공급",
-        "label": "혼인 중이거나 미혼 자녀가 있을 것",
-        "tableLabel": null,
-        "pageNumber": 25,
-        "textExcerpt": "무주택세대구성원 중 저축액이 선납금을 포함하여 600만원 이상인 분\r\n      ③ 혼인(재혼 포함)중이거나 미혼인 자녀(임신 및 입양을 포함하며, 신청자가 혼인 중이 아닌 경우에는 동일한 주민등록표등본상에 등재되어 있는 자녀를 말함)가 있\n는 분\r\n         ※ 입양의 경우 입주 시까지 입양자격을 유지하여야 하고 입주지정기간 개시일 이후 입양상태를 증명할 수 있는 서류(입양관계증명서, 가족관계증명서)를 추가로",
-        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
-        "locator": {
-          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
-          "parserVersion": "xpdf-pdftotext-layout-1",
-          "pages": [
-            25
-          ],
-          "blocks": [
-            {
-              "id": "b000572",
-              "page": 25,
-              "bbox": null
-            },
-            {
-              "id": "b000573",
-              "page": 25,
-              "bbox": null
-            }
-          ]
-        }
-      }
-    },
-    {
       "ruleKey": "firstHome.residence",
       "supplyType": "firstHome",
       "stage": null,
@@ -1799,6 +1720,1271 @@
               "bbox": null
             }
           ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.family",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "혼인 7년 이내 또는 만 7세 미만 자녀를 둔 신혼부부 / 예비신혼부부 / 만 7세 미만 자녀를 둔 한부모",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "fact": "familyCategory",
+                      "op": "eq",
+                      "value": "married"
+                    },
+                    {
+                      "fact": "maritalStatus",
+                      "op": "eq",
+                      "value": "married"
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "fact": "marriageWithin7Years",
+                      "op": "eq",
+                      "value": true
+                    },
+                    {
+                      "fact": "hasChildUnder7",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "engaged"
+                },
+                {
+                  "fact": "maritalStatus",
+                  "op": "eq",
+                  "value": "single"
+                },
+                {
+                  "fact": "plannedMarriageWithinDeadline",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "fact": "familyCategory",
+                      "op": "eq",
+                      "value": "singleParent"
+                    },
+                    {
+                      "fact": "maritalStatus",
+                      "op": "eq",
+                      "value": "single"
+                    },
+                    {
+                      "fact": "singleParentQualified",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "fact": "hasChildUnder7",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "혼인관계증명서",
+          "가족관계증명서",
+          "한부모가족증명서"
+        ]
+      },
+      "evidence": {
+        "id": "geomam.b1bl.newlywed.family",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-7. 신혼부부 특별공급",
+        "label": "혼인 7년 이내 또는 만 7세 미만 자녀를 둔 신혼부부 / 예비신혼부부 / 만 7세 미만 자녀를 둔 한부모",
+        "tableLabel": null,
+        "pageNumber": 26,
+        "textExcerpt": "■ 입주자모집공고일(2026.08.21.) 현재 인천광역시에 거주하거나 수도권(서울특별시 및 경기도)에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\r\n         ① 신혼부부 특별공급 기본 요건\r\n            - 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내 이거나 6세 이하(만7세 미만을 말함)의 자녀(태아 포함)를 둔 무주택세대구성원]\r\n            - 예비신혼부부(혼인을 계획 중이며 해당 주택의 입주 전까지 혼인사실을 증명할 수 있으며 혼인으로 구성할 세대원 전원이 무주택인 자)\r\n            - 한부모가족(6세 이하(만7세 미만을 말함) 자녀(태아를 포함)를 둔 무주택세대구성원)\n한부모가족     「한부모가족지원법」 제4조에 따른 한부모가족을 의미하며, 가족관계증명서와 주민등록표등본을 통해 공고일 현재 자녀 유무 등 해당사실을 증명할\r\n                수 있는 자를 말함.(한부모가족증명서를 통해 증명 가능한 「한부모가족지원법」 제4조 제1호에 해당하는 자를 포함) 단, 추후 사실혼 관계 등 한부모\r\n                가족 자격 미달인 사실이 확인될 경우 계약취소 또는 해제될 수 있음",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            26
+          ],
+          "blocks": [
+            {
+              "id": "b000600",
+              "page": 26,
+              "bbox": null
+            },
+            {
+              "id": "b000602",
+              "page": 26,
+              "bbox": null
+            }
+          ],
+          "derivedLiterals": {
+            "7": "공고문의 '혼인기간이 7년 이내', '6세 이하(만7세 미만)' (b000600)"
+          }
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.childbirth",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "expression": {
+          "fact": "childbirthClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "출생증명서",
+          "임신진단서"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "id": "geomam.b1bl.newlywed.childbirth",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-7. 신혼부부 특별공급",
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "tableLabel": null,
+        "pageNumber": 27,
+        "textExcerpt": "- (출산가구 소득·자산기준 완화) 2023.03.28. 이후 출생한 자녀(태아 포함)가 1명만 있는 경우 10%p, 2명 이상(2023.03.28. 이후 출생한 자녀가 1명이고, 2023.03.28\r\n   . 전 출생한 자녀가 있는 경우 포함)인 경우 20%p 가산하여 소득 및 자산기준 완화되며, 완화된 기준은 “<표3> 출산가구 자산보유기준 완화” 및 “<표5> 출산\r\n   가구 소득기준 완화”를 참고하시기 바랍니다.(단, 출산가구 완화된 소득·자산기준을 인정받으려는 분은 출생, 입양, 임신 등 관련 서류를 제출하여 해당 내용을\r\n   증명해야 하며, 서류를 제출하지 않거나 자격미달일 경우 부적격 처리되어 향후 신청이 제한됩니다)",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            27
+          ],
+          "blocks": [
+            {
+              "id": "b000643",
+              "page": 27,
+              "bbox": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "firstHome.family",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "혼인(재혼 포함) 중이거나 동일 등본의 미혼 자녀(임신·입양 포함)가 있음",
+        "expression": {
+          "any": [
+            {
+              "fact": "maritalStatus",
+              "op": "eq",
+              "value": "married"
+            },
+            {
+              "all": [
+                {
+                  "fact": "hasChildren",
+                  "op": "eq",
+                  "value": true
+                },
+                {
+                  "fact": "unmarriedChildInHousehold",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "geomam.b1bl.firstHome.family",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-6. 생애최초 특별공급",
+        "label": "혼인(재혼 포함) 중이거나 동일 등본의 미혼 자녀(임신·입양 포함)가 있음",
+        "tableLabel": null,
+        "pageNumber": 25,
+        "textExcerpt": "무주택세대구성원 중 저축액이 선납금을 포함하여 600만원 이상인 분\r\n      ③ 혼인(재혼 포함)중이거나 미혼인 자녀(임신 및 입양을 포함하며, 신청자가 혼인 중이 아닌 경우에는 동일한 주민등록표등본상에 등재되어 있는 자녀를 말함)가 있\n는 분\r\n         ※ 입양의 경우 입주 시까지 입양자격을 유지하여야 하고 입주지정기간 개시일 이후 입양상태를 증명할 수 있는 서류(입양관계증명서, 가족관계증명서)를 추가로",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            25
+          ],
+          "blocks": [
+            {
+              "id": "b000572",
+              "page": 25,
+              "bbox": null
+            },
+            {
+              "id": "b000573",
+              "page": 25,
+              "bbox": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "firstHome.childbirth",
+      "supplyType": "firstHome",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "expression": {
+          "fact": "childbirthClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "출생증명서",
+          "임신진단서"
+        ],
+        "onFailure": "REVIEW"
+      },
+      "evidence": {
+        "id": "geomam.b1bl.firstHome.childbirth",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-6. 생애최초 특별공급",
+        "label": "출산가구 소득·자산기준 완화(2023.3.28. 이후 출생·태아)는 추가 확인",
+        "tableLabel": null,
+        "pageNumber": 26,
+        "textExcerpt": "※ (출산가구 소득·자산기준 완화) 2023.03.28. 이후 출생한 자녀(태아 포함, 미성년 자녀만 해당. 이하 본 문장에서 같음.)가 1명만 있는 경우 10%p, 2명 이상\r\n             (2023.03.28. 이후 출생한 자녀가 1명이고, 2023.03.28. 전 출생한 자녀가 있는 경우 포함)인 경우 20%p 가산하여 소득 및 자산기준이 완화되며, 완화 기준은 “<표\r\n             3> 출산가구 자산보유기준 완화” 및 “<표5> 출산가구 소득기준 완화”를 참고하시기 바랍니다.(단, 완화된 소득·자산 기준을 인정받으려는 분은 출생, 입양, 임신\r\n             등 관련 서류를 제출하여 해당 내용을 증명해야 하며, 서류를 제출하지 않거나 자격미달일 경우 부적격 처리 되어 향후 신청이 제한됩니다.",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            26
+          ],
+          "blocks": [
+            {
+              "id": "b000588",
+              "page": 26,
+              "bbox": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.GENERAL.income",
+      "supplyType": "newlywed",
+      "stage": "GENERAL",
+      "category": "STAGE",
+      "config": {
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "lte",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "gte",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "소득 증빙 서류"
+        ]
+      },
+      "evidence": {
+        "id": "geomam.b1bl.newlywed.GENERAL.income",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-7. 신혼부부 특별공급",
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "tableLabel": null,
+        "pageNumber": 27,
+        "textExcerpt": "단 계     소득구분                                                                                               내 용\r\n    1단계  우선공급(70%)\r\n    2단계  일반공급(20%)   세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 100% 이하인 분 (부부 모두 소득이 있는 경우 120% 이하)\r\n                     세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 130% 이하인 분(부부 모두 소득이 있는 경우 140% 이하) 및 1단계\r\n    3단계  추첨공급(10%)   공급 낙첨자\r\n■ ②순위                부부 모두 소득이 있는 신청자로서, 세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 200% 이하인 분 및 2단계 공급\r\n                     낙첨자\n구 분   3인 이하                4인          5인          6인          7인                       8인\r\n           도시근로자 가구당 월평균소득액의 90%       6,780,387         7,921,982   8,394,287   8,915,637   9,436,987               9,958,337\r\n           도시근로자 가구당 월평균소득액의 100%      7,533,763         8,802,202   9,326,985   9,906,263   10,485,541              11,064,819\r\n           도시근로자 가구당 월평균소득액의 110%      8,287,139         9,682,422   10,259,684  10,896,889  11,534,095              12,171,301\r\n           도시근로자 가구당 월평균소득액의 120%      9,040,516         10,562,642  11,192,382  11,887,516  12,582,649              13,277,783\r\n           도시근로자 가구당 월평균소득액의 130%      9,793,892         11,442,863  12,125,081  12,878,142  13,631,203              14,384,265\r\n           도시근로자 가구당 월평균소득액의 140%      10,547,268        12,323,083  13,057,779  13,868,768  14,679,757              15,490,747\r\n           도시근로자 가구당 월평균소득액의 150%      11,300,645        13,203,303  13,990,478  14,859,395  15,728,312              16,597,229\r\n           도시근로자 가구당 월평균소득액의 160%      12,054,021        14,083,523  14,923,176  15,850,021  16,776,866              17,703,710\r\n           도시근로자 가구당 월평균소득액의 170%      12,807,397        14,963,743  15,855,875  16,840,647  17,825,420              18,810,192\r\n           도시근로자 가구당 월평균소득액의 210%      15,820,902        18,484,624  19,586,669  20,803,152  22,019,636              23,236,120\r\n           도시근로자 가구당 월평균소득액의 220%      16,574,279        19,364,844  20,519,367  21,793,779  23,068,190              24,342,602",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            27,
+            20
+          ],
+          "blocks": [
+            {
+              "id": "b000608",
+              "page": 27,
+              "bbox": null
+            },
+            {
+              "id": "b000433",
+              "page": 20,
+              "bbox": null
+            }
+          ],
+          "derivedLiterals": {
+            "3": "가구원수 구간(b000433 소득표 머리글)",
+            "4": "가구원수 구간(b000433 소득표 머리글)",
+            "5": "가구원수 구간(b000433 소득표 머리글)",
+            "6": "가구원수 구간(b000433 소득표 머리글)",
+            "7": "가구원수 구간(b000433 소득표 머리글)",
+            "8": "가구원수 구간(b000433 소득표 머리글)"
+          }
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.LOTTERY.income",
+      "supplyType": "newlywed",
+      "stage": "LOTTERY",
+      "category": "STAGE",
+      "config": {
+        "label": "3단계 추첨공급(10%): 맞벌이 200% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "lte",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "gte",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.200"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "소득 증빙 서류"
+        ]
+      },
+      "evidence": {
+        "id": "geomam.b1bl.newlywed.LOTTERY.income",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-7. 신혼부부 특별공급",
+        "label": "3단계 추첨공급(10%): 맞벌이 200% 이하",
+        "tableLabel": null,
+        "pageNumber": 27,
+        "textExcerpt": "단 계     소득구분                                                                                               내 용\r\n    1단계  우선공급(70%)\r\n    2단계  일반공급(20%)   세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 100% 이하인 분 (부부 모두 소득이 있는 경우 120% 이하)\r\n                     세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 130% 이하인 분(부부 모두 소득이 있는 경우 140% 이하) 및 1단계\r\n    3단계  추첨공급(10%)   공급 낙첨자\r\n■ ②순위                부부 모두 소득이 있는 신청자로서, 세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 200% 이하인 분 및 2단계 공급\r\n                     낙첨자\n구 분   3인 이하                4인          5인          6인          7인                       8인\r\n           도시근로자 가구당 월평균소득액의 90%       6,780,387         7,921,982   8,394,287   8,915,637   9,436,987               9,958,337\r\n           도시근로자 가구당 월평균소득액의 100%      7,533,763         8,802,202   9,326,985   9,906,263   10,485,541              11,064,819\r\n           도시근로자 가구당 월평균소득액의 110%      8,287,139         9,682,422   10,259,684  10,896,889  11,534,095              12,171,301\r\n           도시근로자 가구당 월평균소득액의 120%      9,040,516         10,562,642  11,192,382  11,887,516  12,582,649              13,277,783\r\n           도시근로자 가구당 월평균소득액의 130%      9,793,892         11,442,863  12,125,081  12,878,142  13,631,203              14,384,265\r\n           도시근로자 가구당 월평균소득액의 140%      10,547,268        12,323,083  13,057,779  13,868,768  14,679,757              15,490,747\r\n           도시근로자 가구당 월평균소득액의 150%      11,300,645        13,203,303  13,990,478  14,859,395  15,728,312              16,597,229\r\n           도시근로자 가구당 월평균소득액의 160%      12,054,021        14,083,523  14,923,176  15,850,021  16,776,866              17,703,710\r\n           도시근로자 가구당 월평균소득액의 170%      12,807,397        14,963,743  15,855,875  16,840,647  17,825,420              18,810,192\r\n           도시근로자 가구당 월평균소득액의 210%      15,820,902        18,484,624  19,586,669  20,803,152  22,019,636              23,236,120\r\n           도시근로자 가구당 월평균소득액의 220%      16,574,279        19,364,844  20,519,367  21,793,779  23,068,190              24,342,602\n공급유형                                         구분   3인 이하           4인         5인          6인          7인           [단위 : 원]\r\n                                                          9,040,516   10,562,642  11,192,382  11,887,516  12,582,649      8인\r\n         다자녀가구     우선공급     도시근로자 가구당 월평균소득액의 120%        9,793,892   11,442,863  12,125,081  12,878,142  13,631,203  13,277,783\r\n            (10%)    (90%)  도시근로자 가구당 월평균소득액의 130%        9,040,516   10,562,642  11,192,382  11,887,516  12,582,649  14,384,265\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)      15,067,526  17,604,404  18,653,970  19,812,526  20,971,082  13,277,783\r\n                      추첨    도시근로자 가구당 월평균소득액의 120%        9,040,516   10,562,642  11,192,382  11,887,516  12,582,649  22,129,638\r\n                     (10%)  도시근로자 가구당 월평균소득액의 200%        9,793,892   11,442,863  12,125,081  12,878,142  13,631,203  13,277,783\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)      9,040,516   10,562,642  11,192,382  11,887,516  12,582,649  14,384,265\r\n         노부모부양     우선공급     도시근로자 가구당 월평균소득액의 120%        15,067,526  17,604,404  18,653,970  19,812,526  20,971,082  13,277,783\r\n             (5%)    (90%)  도시근로자 가구당 월평균소득액의 130%        7,533,763   8,802,202   9,326,985   9,906,263   10,485,541  22,129,638\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)      9,040,516   10,562,642  11,192,382  11,887,516  12,582,649  11,064,819\r\n                      추첨    도시근로자 가구당 월평균소득액의 120%        9,793,892   11,442,863  12,125,081  12,878,142  13,631,203  13,277,783\r\n                     (10%)  도시근로자 가구당 월평균소득액의 200%        10,547,268  12,323,083  13,057,779  13,868,768  14,679,757  14,384,265\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)      9,793,892   11,442,863  12,125,081  12,878,142  13,631,203  15,490,747\r\n                   우선공급     도시근로자 가구당 월평균소득액의 100%                                                                    14,384,265\r\n                     (70%)  도시근로자 가구당 월평균소득액의 120%        15,067,526  17,604,404  18,653,970  19,812,526  20,971,082\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)                                                                  22,129,638\r\n         생애최초      일반공급     도시근로자 가구당 월평균소득액의 130%\r\n           (15%)     (20%)  도시근로자 가구당 월평균소득액의 140%\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)\r\n                   추첨       도시근로자 가구당 월평균소득액의 130%\r\n                   (10%)\r\n                            도시근로자 가구당 월평균소득액의 200%\r\n                            (본인 및 배우자가 모두 소득이 있는 경우)",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            27,
+            20,
+            19
+          ],
+          "blocks": [
+            {
+              "id": "b000608",
+              "page": 27,
+              "bbox": null
+            },
+            {
+              "id": "b000433",
+              "page": 20,
+              "bbox": null
+            },
+            {
+              "id": "b000426",
+              "page": 19,
+              "bbox": null
+            }
+          ],
+          "derivedLiterals": {
+            "3": "가구원수 구간(b000433 소득표 머리글)",
+            "4": "가구원수 구간(b000433 소득표 머리글)",
+            "5": "가구원수 구간(b000433 소득표 머리글)",
+            "6": "가구원수 구간(b000433 소득표 머리글)",
+            "7": "가구원수 구간(b000433 소득표 머리글)",
+            "8": "가구원수 구간(b000433 소득표 머리글)"
+          }
+        }
+      }
+    },
+    {
+      "ruleKey": "firstHome.GENERAL.income",
+      "supplyType": "firstHome",
+      "stage": "GENERAL",
+      "category": "STAGE",
+      "config": {
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "lte",
+                  "value": 3
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.3.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 4
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.4.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 5
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.5.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 6
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.6.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "eq",
+                  "value": 7
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.7.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "incomeHouseholdSize",
+                  "op": "gte",
+                  "value": 8
+                },
+                {
+                  "any": [
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": false
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.130"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "all": [
+                        {
+                          "fact": "dualIncome",
+                          "op": "eq",
+                          "value": true
+                        },
+                        {
+                          "fact": "householdIncome",
+                          "op": "lte",
+                          "value": {
+                            "parameter": "income.8.140"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "소득 증빙 서류"
+        ]
+      },
+      "evidence": {
+        "id": "geomam.b1bl.firstHome.GENERAL.income",
+        "documentId": "6c2e91a7-53b8-4d0e-b6f4-9a1c3e8d7205",
+        "source": "검암역 푸르지오 프라베뉴(인천검암역세권 B-1BL) 민간참여 공공분양주택 입주자모집공고(청약홈 첨부, 2026.08.21.)",
+        "section": "Ⅴ-6. 생애최초 특별공급",
+        "label": "2단계 일반공급(20%): 외벌이 130% / 맞벌이 140% 이하",
+        "tableLabel": null,
+        "pageNumber": 25,
+        "textExcerpt": "당첨자  1단계 우선공급(70%) 세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 100% 이하인 분 (부부 모두 소득이 있는 경우 120% 이하)\r\n선정방법\r\n      2단계  일반공급(20%)  세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 130% 이하인 분 및 1단계 공급 낙첨자 (부부 모두 소득이 있는 경\r\n      3단계  추첨공급(10%)\r\n                      우 140% 이하)\r\n                      부부 모두 소득이 있는 신청자로서, 세대의 월평균소득이 전년도 도시근로자 가구원수별 월평균소득의 200% 이하인 분 및 2단계 공급\n구 분   3인 이하                4인          5인          6인          7인                       8인\r\n           도시근로자 가구당 월평균소득액의 90%       6,780,387         7,921,982   8,394,287   8,915,637   9,436,987               9,958,337\r\n           도시근로자 가구당 월평균소득액의 100%      7,533,763         8,802,202   9,326,985   9,906,263   10,485,541              11,064,819\r\n           도시근로자 가구당 월평균소득액의 110%      8,287,139         9,682,422   10,259,684  10,896,889  11,534,095              12,171,301\r\n           도시근로자 가구당 월평균소득액의 120%      9,040,516         10,562,642  11,192,382  11,887,516  12,582,649              13,277,783\r\n           도시근로자 가구당 월평균소득액의 130%      9,793,892         11,442,863  12,125,081  12,878,142  13,631,203              14,384,265\r\n           도시근로자 가구당 월평균소득액의 140%      10,547,268        12,323,083  13,057,779  13,868,768  14,679,757              15,490,747\r\n           도시근로자 가구당 월평균소득액의 150%      11,300,645        13,203,303  13,990,478  14,859,395  15,728,312              16,597,229\r\n           도시근로자 가구당 월평균소득액의 160%      12,054,021        14,083,523  14,923,176  15,850,021  16,776,866              17,703,710\r\n           도시근로자 가구당 월평균소득액의 170%      12,807,397        14,963,743  15,855,875  16,840,647  17,825,420              18,810,192\r\n           도시근로자 가구당 월평균소득액의 210%      15,820,902        18,484,624  19,586,669  20,803,152  22,019,636              23,236,120\r\n           도시근로자 가구당 월평균소득액의 220%      16,574,279        19,364,844  20,519,367  21,793,779  23,068,190              24,342,602",
+        "sourceUrl": "https://static.applyhome.co.kr/ai/aia/getAtchmnfl.do?houseManageNo=2026000404&pblancNo=2026000404&atchmnflSeqNo=1954200&atchmnflSn=5",
+        "locator": {
+          "sha256": "30352bc614788225bab9d2d892ee9f5f7bcfce00bd73ac310e98279aac79f815",
+          "parserVersion": "xpdf-pdftotext-layout-1",
+          "pages": [
+            25,
+            20
+          ],
+          "blocks": [
+            {
+              "id": "b000579",
+              "page": 25,
+              "bbox": null
+            },
+            {
+              "id": "b000433",
+              "page": 20,
+              "bbox": null
+            }
+          ],
+          "derivedLiterals": {
+            "3": "가구원수 구간(b000433 소득표 머리글)",
+            "4": "가구원수 구간(b000433 소득표 머리글)",
+            "5": "가구원수 구간(b000433 소득표 머리글)",
+            "6": "가구원수 구간(b000433 소득표 머리글)",
+            "7": "가구원수 구간(b000433 소득표 머리글)",
+            "8": "가구원수 구간(b000433 소득표 머리글)"
+          }
         }
       }
     }

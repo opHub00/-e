@@ -62,20 +62,21 @@ function Dashboard() {
   }));
   const tasks = operationTasks({ rows: state.rows, imageStates });
   const openTasks = tasks.filter(task => task.count > 0);
+  const imageAttention = [...imageStates.values()].filter(state => state !== 'AUTO_VERIFIED').length;
   const kpis: Kpi[] = [
-    { label: '수집된 공고', value: countLabel(summary.collectedAnnouncements), hint: '공고 등록만 된 것 포함', tone: 'neutral', icon: 'campaign' },
-    { label: '분석 가능한 공고', value: countLabel(summary.analyzableAnnouncements), hint: '규칙 활성 + 공고 연결 완료', tone: 'green', icon: 'verified' },
-    { label: '확인 필요한 공고', value: countLabel(summary.needsAttention), hint: '관측된 제약이 있는 공고', tone: summary.needsAttention ? 'amber' : 'neutral', icon: 'error-outline' },
-    { label: '활성 규칙 세트', value: countLabel(summary.activeRuleSets), tone: 'purple', icon: 'rule' },
+    { label: '전체 공고', value: countLabel(summary.collectedAnnouncements), hint: '지금 조회되는 공고', tone: 'neutral', icon: 'campaign' },
+    { label: '분석 가능 공고', value: countLabel(summary.analyzableAnnouncements), hint: '사용자 화면에서 판정이 열려요', tone: 'green', icon: 'verified' },
     {
-      label: '승인된 규칙',
-      value: countLabel(summary.approvedRules, '개'),
-      hint: summary.approvedRulesUnknownFor ? `공고 ${summary.approvedRulesUnknownFor}건은 확인 불가` : undefined,
-      tone: 'purple', icon: 'fact-check',
+      label: '검수 필요 공고',
+      value: countLabel(tasks.find(task => task.key === 'pendingReview')?.count ?? 0),
+      hint: '승인되지 않은 규칙이 남아 있어요',
+      tone: (tasks.find(task => task.key === 'pendingReview')?.count ?? 0) ? 'amber' : 'neutral',
+      icon: 'fact-check',
     },
-    { label: '공고-규칙 연결', value: countLabel(summary.listingBindings), tone: 'green', icon: 'link' },
-    { label: '가점 계산식', value: countLabel(formulas.length, '개'), hint: `서비스에 쓸 수 있는 산식 ${activeFormulas}개`, tone: 'purple', icon: 'calculate' },
-    { label: '마지막 확인', value: '방금', hint: '화면을 열 때마다 다시 읽어요', tone: 'neutral', icon: 'schedule' },
+    { label: '서비스 적용 중인 분석 규칙', value: countLabel(summary.activeRuleSets, '건'), hint: '공고에 연결돼 실제로 쓰이는 규칙', tone: 'purple', icon: 'rule' },
+    { label: '이미지 확인 필요', value: countLabel(imageAttention), hint: '대표 사진이 없거나 사람이 봐야 해요', tone: imageAttention ? 'amber' : 'neutral', icon: 'image' },
+    // 가입자 수를 읽는 경로가 아직 없다. 0 으로 적으면 사용자가 없다는 뜻이 된다.
+    { label: '전체 사용자', value: '연결 필요', hint: '가입자를 읽는 경로가 아직 없어요', tone: 'neutral', icon: 'group' },
   ];
 
   return (

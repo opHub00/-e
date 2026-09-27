@@ -82,3 +82,23 @@ export function historyLine(action: string): string {
     BULK_APPROVE_SAFE: '근거 명확 일괄 승인', DOCUMENT_INVALIDATED: '문서 변경 감지', COMPLETE_REVIEW: '검수 완료',
   } as Record<string, string>)[action] ?? action;
 }
+
+/** 공급단계를 운영자 말로. */
+const STAGE_PATH: Record<string, string> = {
+  PRIORITY: '우선공급', GENERAL: '일반공급', LOTTERY: '추첨공급',
+};
+
+/**
+ * 이 규칙이 누구에게, 어느 단계에서 적용되는가.
+ *
+ * 검수자는 규칙 이름보다 "어떤 신청자 이야기인지"를 먼저 찾는다.
+ * 내부 키(`newlywed.PRIORITY.income`)를 읽게 하지 않고, 같은 정보를 사람 말 한 줄로 만든다.
+ * 단계가 없는 공통 조건은 단계를 적지 않는다. 없는 단계를 지어내면 안 된다.
+ */
+export function ruleScopePath(input: { supplyType?: string | null; stage?: string | null; category?: string | null }): string {
+  const parts: string[] = [];
+  if (input.category === 'EXCEPTION') parts.push('예외 규칙');
+  else if (input.supplyType) parts.push(SUPPLY_GROUP_LABEL[input.supplyType] ?? input.supplyType);
+  if (input.stage && STAGE_PATH[input.stage]) parts.push(STAGE_PATH[input.stage]);
+  return parts.join(' → ');
+}

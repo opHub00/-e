@@ -24,12 +24,35 @@ type Tab = 'overview' | 'bands' | 'wording' | 'tests' | 'simulator' | 'history';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'overview', label: '기본 정보' },
-  { key: 'bands', label: '배점 항목' },
-  { key: 'wording', label: '해석 문구' },
-  { key: 'tests', label: '테스트' },
-  { key: 'simulator', label: '시뮬레이터' },
+  { key: 'bands', label: '배점표' },
+  { key: 'wording', label: '점수 설명' },
+  { key: 'tests', label: '예시로 확인' },
+  { key: 'simulator', label: '점수 계산해 보기' },
   { key: 'history', label: '변경 이력' },
 ];
+
+/**
+ * 운영자가 가장 자주 섞는 두 가지를 먼저 갈라 준다.
+ * 자격 판정은 규칙 검수 화면의 일이고, 이 화면은 가점 계산만 다룬다.
+ */
+function ScopeNote() {
+  return (
+    <SectionCard title="이 화면이 다루는 것" description="두 가지는 다른 일이에요. 섞이면 운영 실수가 나요.">
+      <View style={styles.scopeRow}>
+        <View style={styles.scopeCard}>
+          <Text style={styles.scopeTitle}>자격 판정</Text>
+          <Text style={styles.scopeQuestion}>이 공고에 신청할 수 있는가?</Text>
+          <Text style={styles.scopeBody}>공고마다 다른 조건이에요. 규칙 검수 화면에서 다뤄요.</Text>
+        </View>
+        <View style={[styles.scopeCard, styles.scopeCardActive]}>
+          <Text style={styles.scopeTitle}>가점 계산 · 지금 이 화면</Text>
+          <Text style={styles.scopeQuestion}>신청할 수 있다면 몇 점인가?</Text>
+          <Text style={styles.scopeBody}>법으로 정해진 배점표예요. 공고가 달라도 계산 방식은 같아요.</Text>
+        </View>
+      </View>
+    </SectionCard>
+  );
+}
 
 /**
  * 가점 계산식 상세.
@@ -201,7 +224,7 @@ function Detail({ formula: published }: { formula: ScoringFormula }) {
         ) : null}
       </SectionCard>
 
-      {tab === 'overview' ? <Overview formula={formula} problems={problems} /> : null}
+      {tab === 'overview' ? <><ScopeNote /><Overview formula={formula} problems={problems} /></> : null}
       {tab === 'bands' ? <Bands formula={formula} onEdit={edit} /> : null}
       {tab === 'wording' ? <Wording formula={formula} /> : null}
       {tab === 'tests' ? <Tests formula={formula} onEdit={edit} /> : null}
@@ -248,7 +271,7 @@ function Overview({ formula, problems }: { formula: ScoringFormula; problems: Re
 
       <SectionCard title="표 점검" description="구간에 빈틈이나 겹침이 있으면 어떤 사용자는 점수가 나오지 않아요.">
         {problems.length === 0 ? (
-          <Notice tone="green" icon="check-circle">항목과 구간이 빈틈 없이 이어져 있어요.</Notice>
+          <Notice tone="green" icon="check-circle">항목과 구간이 빈틈 없이 이어져 있어요. 어떤 값을 넣어도 점수가 하나로 정해져요.</Notice>
         ) : (
           problems.map(problem => (
             <Notice key={problem.message} tone="amber" icon="warning">{problem.message}</Notice>
@@ -592,6 +615,12 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   totalValue: { ...type.display, color: colors.primary },
   statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  scopeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  scopeCard: { flex: 1, minWidth: 220, gap: 3, padding: spacing.md, borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surfaceLow },
+  scopeCardActive: { borderColor: colors.primaryFixed, backgroundColor: colors.lavender },
+  scopeTitle: { ...type.micro, color: colors.textSubtle },
+  scopeQuestion: { ...type.bodyStrong, color: colors.text },
+  scopeBody: { ...type.bodySm, color: colors.textMuted, lineHeight: 20 },
   breakdownRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   breakdownItem: { minWidth: 120, gap: 2 },
   breakdownLabel: { ...type.bodySm, color: colors.textMuted },

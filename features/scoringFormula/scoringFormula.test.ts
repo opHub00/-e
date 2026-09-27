@@ -11,6 +11,7 @@ import {
   upsertTestCase, withDraft, writeDraft,
 } from './draftStore.ts';
 import { SCORING_RPC, scoringErrorMessage } from './repository.ts';
+import { buildScoringSeedPackage, verifyScoringSeedPackage } from './seedPackage.ts';
 
 const component = (over: Partial<ScoringComponent> = {}): ScoringComponent => ({
   id: 'period', label: '무주택 기간', description: '', unit: '개월', fact: 'noHomeMonths', order: 1,
@@ -151,6 +152,36 @@ test('등록된 법정 배점표가 84점 만점으로 맞는다', () => {
   assert.equal(maxOf('accountPeriod'), 17);
 });
 
+test('84점 산식의 모든 경계값과 unknown을 검증한다', () => {
+  const standard = scoringFormula('general-private-standard')!;
+  for (const component of standard.components) {
+    for (const band of component.bands) {
+      for (const candidate of [band.min, band.max].filter((item): item is number => item !== undefined)) {
+        assert.equal(matchBand(component, candidate)?.points, band.points, `${component.id} ${candidate}`);
+        if (candidate > 0) assert.ok(matchBand(component, candidate - 1), `${component.id} ${candidate - 1}`);
+        assert.ok(matchBand(component, candidate + 1), `${component.id} ${candidate + 1}`);
+      }
+    }
+  }
+  assert.equal(calculateScore(standard, { noHomePeriod: null, dependents: 6, accountPeriod: 180 }).total, null);
+  assert.equal(calculateScore(standard, { noHomePeriod: 999, dependents: 99, accountPeriod: 999 }).total, 84);
+  assert.equal(calculateScore(standard, { noHomeMonths: 999, dependentCount: 99, subscriptionMonths: 999 }).total, 84, 'canonical fact keys work');
+  assert.equal(calculateScore(standard, { noHomePeriod: 0, dependents: 0, accountPeriod: 0 }).total, 8);
+});
+
+test('시드 패키지는 결정적이고 IN_REVIEW·비공개로 고정된다', () => {
+  const standard = scoringFormula('general-private-standard')!;
+  const first = buildScoringSeedPackage(standard), second = buildScoringSeedPackage(structuredClone(standard));
+  assert.equal(first.sourcePackageHash, second.sourcePackageHash);
+  assert.equal(first.formula.status, 'IN_REVIEW');
+  assert.equal(first.formula.publishedToUsers, false);
+  assert.doesNotThrow(() => verifyScoringSeedPackage(first));
+  assert.throws(() => verifyScoringSeedPackage({ ...first, sourcePackageHash: '0'.repeat(64) }), /STALE_SCORING_SEED_PACKAGE/);
+  const wrongKeyFormula = structuredClone(standard);
+  wrongKeyFormula.testCases[0].inputs = { noHomeMonths: 180, dependentCount: 6, subscriptionMonths: 180 };
+  assert.throws(() => verifyScoringSeedPackage(buildScoringSeedPackage(wrongKeyFormula)), /SCORING_TEST_INPUT_KEYS_MISMATCH/);
+});
+
 test('검수 전 산식은 사용자에게 내보내지 않는다', () => {
   const standard = scoringFormula('general-private-standard')!;
   assert.equal(standard.status, 'REVIEW', '사람이 검수하기 전에는 활성이 아니다');
@@ -235,7 +266,7 @@ test('산식 저장소 계약이 migration 과 같은 이름을 쓴다', async (
     assert.ok(sql.includes(`function public.${name}(`), `${name} 이 migration 에 없다`);
   }
   // 저장소가 돌려줄 수 있는 오류는 전부 운영자 말로 옮겨 둔다.
-  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_TARGET_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND']) {
+  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
     assert.ok(sql.includes(code), `${code} 를 내는 곳이 migration 에 없다`);
     assert.notEqual(scoringErrorMessage(code), `처리하지 못했어요 (${code}).`, `${code} 의 안내 문구가 없다`);
   }
@@ -248,11 +279,14 @@ test('migration 이 발행본 불변·적용범위당 활성 하나·감사 로�
     assert.ok(sql.includes(`create table public.${table}`), `${table} 표가 없다`);
     assert.ok(sql.includes(`alter table public.${table} enable row level security`), `${table} 에 RLS 가 없다`);
   }
-  assert.ok(sql.includes('guard_published_scoring_immutable'), '발행본을 잠그는 트리거가 없다');
-  assert.ok(sql.includes('guard_single_active_scoring'), '적용 대상당 활성 하나를 지키는 트리거가 없다');
+  assert.ok(sql.includes('guard_scoring_version_immutable'), '발행본 전체를 잠그는 트리거가 없다');
+  assert.ok(sql.includes('scoring_one_active_scope_idx'), '동시성에도 안전한 partial unique index가 없다');
   assert.ok(sql.includes('guard_scoring_audit_append_only'), '감사 로그를 추가 전용으로 두는 트리거가 없다');
   // 권한은 새로 만들지 않고 기존 판정을 그대로 쓴다.
   assert.ok(sql.includes('assert_assessment_review_access'), '기존 권한 판정을 쓰지 않는다');
   // 사용자 앱에는 공개된 활성 버전만 보인다.
   assert.ok(sql.includes("using (status = 'ACTIVE' and published_to_users)"), '초안이 사용자에게 새어 나갈 수 있다');
+  assert.ok(sql.includes("status in ('DRAFT','IN_REVIEW','ACTIVE','RETIRED')"));
+  assert.ok(sql.includes("pg_advisory_xact_lock"), '활성화 경쟁을 직렬화하지 않는다');
+  assert.ok(sql.includes("grant execute on function public.seed_scoring_formula_package(jsonb,boolean) to service_role"));
 });

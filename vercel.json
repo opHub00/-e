@@ -27,6 +27,10 @@
     {
       "source": "/admin/scoring/:id",
       "destination": "/admin/scoring/[id]"
+    },
+    {
+      "source": "/admin/announcements/:id",
+      "destination": "/admin/announcements/[id]"
     }
   ]
 }

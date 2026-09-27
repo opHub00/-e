@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { AdminShell } from '../../../features/adminPortal/AdminShell';
@@ -6,7 +6,13 @@ import { countLabel, dateLabel } from '../../../features/adminPortal/status';
 import {
   AdminButton, CellText, DataList, KpiGrid, Notice, PageIntro, SearchFilterBar, SectionCard, StatusBadge,
 } from '../../../features/adminPortal/ui/AdminKit';
-import { loadFormulas } from '../../../features/scoringFormula/registry';
+import {
+  actorLabel, loadScoringFormulaList, runScoring, scoringPermission, scoringSource,
+  type ScoringFormulaView,
+} from '../../../features/scoringFormula/adapter';
+import type { ScoringFormula } from '../../../features/scoringFormula/domain';
+import type { ScoringAccess } from '../../../features/scoringFormula/repository';
+import { createConfiguredScoringRepository } from '../../../features/scoringFormula/configuredRepository';
 import {
   SCORING_STATUS_LABEL, isServiceReady, summarizeFormula, type ScoringStatus,
 } from '../../../features/scoringFormula/domain';
@@ -42,9 +48,27 @@ function ScoringList() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<'ALL' | ScoringStatus>('ALL');
+  // 목록도 어댑터를 거친다. 서버 구현이 끼워지면 이 화면은 그대로 둔 채 출처만 바뀐다.
+  const [formulas, setFormulas] = useState<ScoringFormulaView[]>([]);
+  const [access, setAccess] = useState<ScoringAccess | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const permission = scoringPermission(access);
 
-  const formulas = loadFormulas();
-  const summaries = useMemo(() => formulas.map(summarizeFormula), [formulas]);
+  useEffect(() => {
+    let alive = true;
+    const outcome = runScoring(() => loadScoringFormulaList(createConfiguredScoringRepository()));
+    void outcome.then(result => {
+      if (!alive) return;
+      if (result.ok) { setFormulas(result.value.formulas); setAccess(result.value.access); setError(null); }
+      else setError(result.message);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const summaries = useMemo(() => formulas.map(formula => ({
+    ...summarizeFormula(formula), hasDraft: formula.hasDraft, draftVersion: formula.draftVersion,
+    updatedBy: actorLabel(formula.actors.updated),
+  })), [formulas]);
   const serviceReady = formulas.filter(isServiceReady).length;
   const published = formulas.filter(formula => formula.publishedToUsers && isServiceReady(formula)).length;
 
@@ -59,8 +83,17 @@ function ScoringList() {
       <PageIntro
         title="가점 계산식"
         description="무주택 기간·부양가족 수·통장 가입기간처럼 점수를 매기는 항목과 구간을 관리해요. 숫자를 직접 넣어보는 시뮬레이터도 함께 있어요."
-        actions={<AdminButton label="새 산식 추가" icon="add" onPress={() => router.push('/admin/scoring/new' as Href)} />}
+        actions={
+          <AdminButton
+            label="새 산식 추가"
+            icon="add"
+            disabled={!permission.canEdit}
+            onPress={() => router.push('/admin/scoring/new' as Href)}
+          />
+        }
       />
+
+      {error ? <Notice tone="pink" icon="error-outline">{error}</Notice> : null}
 
       <KpiGrid items={[
         { label: '등록된 산식', value: countLabel(summaries.length, '개'), tone: 'neutral', icon: 'calculate' },
@@ -96,6 +129,10 @@ function ScoringList() {
               ),
             },
             { key: 'version', header: '버전', flex: 0.8, render: row => <CellText>{row.version}</CellText> },
+            {
+              key: 'draft', header: '후속 초안', flex: 1,
+              render: row => <CellText muted>{row.hasDraft ? row.draftVersion?.version ?? '있음' : '없음'}</CellText>,
+            },
             { key: 'status', header: '상태', flex: 1, render: row => <StatusBadge status={STATUS_BADGE[row.status]} /> },
             { key: 'published', header: '사용자 노출', flex: 1, render: row => <StatusBadge status={row.publishedToUsers ? 'PUBLISHED' : 'INTERNAL'} /> },
             {
@@ -109,7 +146,10 @@ function ScoringList() {
                 </View>
               ),
             },
-            { key: 'updated', header: '최근 수정', flex: 1, hideOnNarrow: true, render: row => <CellText muted>{dateLabel(row.updatedAt) ?? '—'}</CellText> },
+            {
+              key: 'updated', header: '최근 수정', flex: 1.2, hideOnNarrow: true,
+              render: row => <View style={styles.cell}><CellText muted>{dateLabel(row.updatedAt) ?? '—'}</CellText><CellText muted>{row.updatedBy}</CellText></View>,
+            },
           ]}
           actions={row => (
             <>
@@ -120,10 +160,13 @@ function ScoringList() {
         />
       </SectionCard>
 
-      <Notice icon="info">
-        산식은 파일로 관리하고 있어요. 이 화면에서 고친 내용은 브라우저에만 남고 서비스에는 반영되지 않아요.
-        실제 반영은 개발자가 파일을 갱신하고 배포할 때 이뤄져요.
-      </Notice>
+      {scoringSource() === 'fixture-repository' ? (
+        <Notice icon="info">
+          로컬 테스트용 메모리 저장소를 사용하고 있어요. 새로고침하면 변경 내용이 초기화되며 운영 데이터에는 반영되지 않아요.
+        </Notice>
+      ) : null}
+
+      {permission.reason ? <Notice icon="lock">{permission.reason}</Notice> : null}
     </>
   );
 }

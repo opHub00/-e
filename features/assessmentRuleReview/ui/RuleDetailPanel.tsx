@@ -9,7 +9,7 @@ import { SCOPE_TEXT, STAGE_TEXT, canEditScore, describeChange, ruleConditionText
 import { reviewStatusPresentation } from './reviewPresentation';
 import { clearReviewDraft, readReviewDraft } from './reviewDraftStore';
 import {
-  EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, historyLine,
+  EVIDENCE_STATUS_LABEL, EXCEPTION_STATUS_LABEL, RELATION_LABEL, historyLine, ruleScopePath,
 } from './reviewLabels';
 import type { getRuleDetail } from '../server/dto';
 import type { ReviewEvidence, RuleReviewRecord, RuleReviewWorkspace } from '../server/types';
@@ -76,12 +76,20 @@ export function RuleDetailPanel({ detail, record, workspace, blockReasons, locke
   const conflictEvidenceIds = useMemo(
     () => [...new Set((conflict?.candidates ?? []).flatMap(candidate => candidate.evidenceIds))], [conflict]);
 
+  const scopePath = ruleScopePath({
+    supplyType: detail.originalCandidate.supplyType,
+    stage: detail.originalCandidate.stage,
+    category: detail.originalCandidate.category,
+  });
+
   return (
     <View style={styles.panel}>
       <View style={styles.head}>
         <Text accessibilityRole="header" style={styles.title}>{detail.ruleLabel}</Text>
         <Badge tone={statusPresentation.tone} text={statusPresentation.currentLabel} />
       </View>
+      {/* 검수자가 먼저 찾는 것은 "어떤 신청자 이야기인가"다. 내부 키 대신 이 한 줄을 맨 앞에 둔다. */}
+      {scopePath ? <Text style={styles.scopePath}>{scopePath}</Text> : null}
       <Text style={styles.role}>{detail.semanticRole}</Text>
       {revalidation ? (
         <View style={styles.revalidationNotice}>
@@ -329,6 +337,7 @@ const styles = StyleSheet.create({
   panel: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceHigh, borderRadius: radius.card, padding: spacing.md, gap: spacing.sm, minWidth: 0 },
   head: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, alignItems: 'center', justifyContent: 'space-between' },
   title: { ...type.section, color: colors.text, flexShrink: 1 },
+  scopePath: { ...type.bodySmStrong, color: colors.primary },
   role: { ...type.caption, color: colors.textSubtle },
   revalidationNotice: { borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.warning, backgroundColor: '#FFDCC3', padding: spacing.sm, gap: 2 },
   revalidationNoticeText: { ...type.bodySmStrong, color: '#8A4900' },

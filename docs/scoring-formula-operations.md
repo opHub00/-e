@@ -38,7 +38,7 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## 권한과 RLS
 
-기존 `assert_assessment_review_access`를 재사용한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw draft/test/audit를 읽거나 쓸 수 없다. 사용자 읽기는 `ACTIVE AND published_to_users` formula/item/band와 제한된 active read/evaluate RPC뿐이다.
+기존 `assert_assessment_review_access`를 재사용한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw draft/test/audit를 읽거나 쓸 수 없다. 사용자 읽기는 `ACTIVE AND published_to_users` formula/item/band와 제한된 active read/evaluate RPC뿐이며, 공개 active snapshot에서는 test case와 내부 history를 제거한다.
 
 모든 SECURITY DEFINER 함수는 `search_path=''`와 schema-qualified object를 사용한다. 함수 기본 실행권은 회수하고 필요한 role에만 다시 부여한다. service-role seed는 server script에만 있으며 client bundle에 import되지 않는다.
 

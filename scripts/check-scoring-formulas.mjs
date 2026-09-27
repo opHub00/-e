@@ -60,6 +60,8 @@ try {
   ok(Number((await db.query('select count(*) count from public.scoring_formulas')).rows[0].count) === 1, 'anon can read only the published ACTIVE formula');
   ok(Number((await db.query('select count(*) count from public.scoring_formula_items')).rows[0].count) === 3, 'anon can read items of the published ACTIVE formula');
   await rejects(() => db.query('select count(*) from public.scoring_formula_test_cases'), /permission denied/i, 'anon cannot read scoring test cases');
+  const publicFormula = (await db.query("select public.get_active_scoring_formula('generalPrivate') result")).rows[0].result;
+  ok(publicFormula.testCases.length === 0 && publicFormula.history === undefined, 'public active formula omits test cases and internal history');
   await db.exec('reset role; set role service_role');
   await rejects(() => db.query("update public.scoring_formula_items set label='changed' where formula_id=$1", [formulaId]), /SCORING_VERSION_IMMUTABLE/, 'ACTIVE children are immutable even for privileged writes');
   await rejects(() => db.query("update public.scoring_formula_audit_logs set reason='changed' where formula_id=$1", [formulaId]), /SCORING_AUDIT_APPEND_ONLY/, 'audit is append-only even for privileged writes');

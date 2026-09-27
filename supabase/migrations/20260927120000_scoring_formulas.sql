@@ -344,7 +344,8 @@ insert into public.scoring_formula_audit_logs(formula_id,action,actor_user_id,re
 return public.scoring_formula_snapshot(p_formula_id); end $$;
 
 create function public.get_active_scoring_formula(p_target text) returns jsonb language sql stable security definer set search_path='' as $$
-select public.scoring_formula_snapshot(id) from public.scoring_formulas where target=p_target and status='ACTIVE' and published_to_users limit 1 $$;
+select jsonb_set(public.scoring_formula_snapshot(id),'{testCases}','[]'::jsonb,true) - 'history'
+from public.scoring_formulas where target=p_target and status='ACTIVE' and published_to_users limit 1 $$;
 create function public.evaluate_active_scoring_formula(p_target text,p_inputs jsonb) returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare formula_id uuid; begin select id into formula_id from public.scoring_formulas where target=p_target and status='ACTIVE' and published_to_users limit 1;
 if formula_id is null then return null; end if; return public.evaluate_scoring_formula_snapshot(formula_id,p_inputs); end $$;

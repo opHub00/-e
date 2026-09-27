@@ -13,6 +13,9 @@ import {
 } from '../../features/adminPortal/ui/AdminKit';
 import { loadFormulas } from '../../features/scoringFormula/registry';
 import { isServiceReady, summarizeFormula } from '../../features/scoringFormula/domain';
+import { imageStateOf, operationTasks } from '../../features/adminPortal/operations';
+import { listingVisualRecords } from '../../features/listingVisual/resolvedRegistry';
+import type { ListingVisualRecord } from '../../features/listingVisual/resolver';
 
 /**
  * 운영 대시보드.
@@ -46,6 +49,19 @@ function Dashboard() {
   }
 
   const summary = buildAdminDashboard(state.rows);
+
+  // 공고 하나에 listing 이 여럿일 수 있다. 그중 하나라도 쓸 만한 이미지가 있으면 그 공고는 해결된 것이다.
+  const byListing = new Map<string, ListingVisualRecord[]>();
+  for (const record of listingVisualRecords()) {
+    if (!byListing.has(record.listingId)) byListing.set(record.listingId, []);
+    byListing.get(record.listingId)!.push(record);
+  }
+  const imageStates = new Map(state.rows.map(row => {
+    const records = row.listingIds.flatMap(id => byListing.get(id) ?? []);
+    return [row.announcementId, imageStateOf(records)] as const;
+  }));
+  const tasks = operationTasks({ rows: state.rows, imageStates });
+  const openTasks = tasks.filter(task => task.count > 0);
   const kpis: Kpi[] = [
     { label: '수집된 공고', value: countLabel(summary.collectedAnnouncements), hint: '공고 등록만 된 것 포함', tone: 'neutral', icon: 'campaign' },
     { label: '분석 가능한 공고', value: countLabel(summary.analyzableAnnouncements), hint: '규칙 활성 + 공고 연결 완료', tone: 'green', icon: 'verified' },
@@ -113,6 +129,43 @@ function Dashboard() {
       </SectionCard>
 
       <SectionCard
+        title={openTasks.length ? `지금 확인이 필요한 일 ${openTasks.length}가지` : '지금 확인이 필요한 일이 없어요'}
+        description="항목을 누르면 바로 처리하는 화면으로 가요. 확인할 수 없는 값은 숫자 대신 이유를 적어요."
+      >
+        <DataList
+          rows={tasks}
+          keyOf={task => task.key}
+          empty={{ title: '확인할 일이 없어요', body: '지금 관측되는 문제가 없어요.' }}
+          columns={[
+            {
+              key: 'label', header: '할 일', flex: 3,
+              render: task => (
+                <View style={styles.taskCell}>
+                  <CellText strong>{task.label}</CellText>
+                  <CellText muted>{task.detail}</CellText>
+                </View>
+              ),
+            },
+            {
+              key: 'count', header: '건수', flex: 0.8,
+              render: task => <CellText strong>{task.count ? countLabel(task.count) : '없음'}</CellText>,
+            },
+            {
+              key: 'state', header: '상태', flex: 1,
+              render: task => <StatusBadge status={task.count ? 'NEEDS_CHECK' : 'APPROVED'} />,
+            },
+          ]}
+          actions={task => (
+            <AdminButton
+              label={task.count ? '처리하러 가기' : '화면 열기'}
+              tone={task.count ? 'primary' : 'quiet'}
+              onPress={() => router.push(task.href as Href)}
+            />
+          )}
+        />
+      </SectionCard>
+
+      <SectionCard
         title="가점 계산식"
         description="사용자에게 점수 해석을 보여주려면, 검토를 마친 산식이 활성 상태여야 해요."
         action={<AdminButton label="가점 계산식 관리" tone="quiet" icon="calculate" onPress={() => router.push('/admin/scoring' as Href)} />}
@@ -149,4 +202,5 @@ function Dashboard() {
 const styles = StyleSheet.create({
   body: { ...type.body, color: colors.textMuted },
   center: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
+  taskCell: { gap: 2 },
 });

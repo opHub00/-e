@@ -13,6 +13,10 @@ import { LearningStatusRepository, type LearningStatusClient } from '../../featu
 import {
   buildLearningRows, lifecycleLabel, summarizeLearningRows, type LearningRow, type ObservedState, type Stage,
 } from '../../features/adminLearningStatus/domain';
+import {
+  LIFECYCLE_STATE_BADGE, LIFECYCLE_STATE_LABEL, lifecycleOf,
+} from '../../features/adminPortal/operations';
+import { StatusBadge } from '../../features/adminPortal/ui/AdminKit';
 
 type Load =
   | { phase: 'LOADING' }
@@ -117,6 +121,18 @@ function Ready({ role, rows, onRefresh, router }: { role: 'reviewer' | 'admin'; 
       {rows.map(row => (
         <Appear key={row.announcementId} replayKey={row.announcementId} distance={6} style={styles.card}>
           <Text accessibilityRole="header" style={styles.title}>{row.title}</Text>
+
+          {/* 운영자가 먼저 읽는 줄. 기술 용어 없이 네 단계로 어디까지 왔는지만 말한다. */}
+          <View style={styles.lifecycle}>
+            {lifecycleOf(row).map(step => (
+              <View key={step.key} style={styles.lifecycleStep}>
+                <Text style={styles.lifecycleLabel}>{step.label}</Text>
+                <StatusBadge status={LIFECYCLE_STATE_BADGE[step.state]} />
+                <Text style={styles.lifecycleDetail} numberOfLines={2}>{step.detail}</Text>
+              </View>
+            ))}
+          </View>
+
           <View style={styles.pills}>
             <StatusPill label={row.officialLabel} tone={row.officialLabel === '공식 공고 기준' ? 'green' : 'neutral'} icon="verified" />
             <StatusPill label={row.ruleSetId ? '활성화된 규칙 있음' : '활성화된 규칙 없음'} tone={row.ruleSetId ? 'green' : 'amber'} icon={row.ruleSetId ? 'gavel' : 'help-outline'} />
@@ -197,6 +213,10 @@ const styles = StyleSheet.create({
   badge: { ...type.bodySmStrong, color: colors.primary },
   body: { ...type.body, color: colors.textMuted },
   note: { ...type.bodySm, color: colors.textSubtle },
+  lifecycle: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  lifecycleStep: { minWidth: 150, flex: 1, gap: 4 },
+  lifecycleLabel: { ...type.bodySmStrong, color: colors.text },
+  lifecycleDetail: { ...type.micro, color: colors.textSubtle, lineHeight: 16 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   track: { gap: 4 },
   stage: { gap: 4 },

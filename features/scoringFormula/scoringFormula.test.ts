@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFile } from 'node:fs/promises';
 import {
   calculateScore, componentMax, formulaMax, interpretationFor, isServiceReady, matchBand, publishedFormulaFor,
   runTestCases, summarizeFormula, validateFormula, type ScoringComponent, type ScoringFormula,
 } from './domain.ts';
 import { loadFormulas, scoringFormula } from './registry.ts';
+import {
+  activationChecks, addBand, canActivate, clearDraft, editBand, removeBand, removeTestCase, setStatus,
+  upsertTestCase, withDraft, writeDraft,
+} from './draftStore.ts';
+import { SCORING_RPC, scoringErrorMessage } from './repository.ts';
 
 const component = (over: Partial<ScoringComponent> = {}): ScoringComponent => ({
   id: 'period', label: '무주택 기간', description: '', unit: '개월', fact: 'noHomeMonths', order: 1,
@@ -150,4 +156,103 @@ test('검수 전 산식은 사용자에게 내보내지 않는다', () => {
   assert.equal(standard.status, 'REVIEW', '사람이 검수하기 전에는 활성이 아니다');
   assert.equal(standard.publishedToUsers, false);
   assert.equal(publishedFormulaFor(loadFormulas(), 'generalPrivate'), null, '아직 서비스에 연결되지 않았다');
+});
+
+test('초안은 배포본을 덮어쓰지 않고 브라우저에만 남는다', () => {
+  const base = scoringFormula('general-private-standard')!;
+  clearDraft(base.id);
+  assert.equal(withDraft(base).isDraft, false, '초안이 없으면 배포본 그대로다');
+
+  const edited = setStatus(base, 'DRAFT');
+  writeDraft(edited);
+  const loaded = withDraft(base);
+  assert.equal(loaded.isDraft, true);
+  assert.equal(loaded.formula.status, 'DRAFT');
+  assert.equal(scoringFormula('general-private-standard')!.status, 'REVIEW', '배포본은 그대로여야 한다');
+
+  clearDraft(base.id);
+  assert.equal(withDraft(base).isDraft, false);
+});
+
+test('구간을 더하고 고치고 지울 수 있다', () => {
+  const base = scoringFormula('general-private-standard')!;
+  const added = addBand(base, 'dependents');
+  const component = added.components.find(item => item.id === 'dependents')!;
+  assert.equal(component.bands.length, base.components.find(item => item.id === 'dependents')!.bands.length + 1);
+  assert.equal(component.bands.at(-1)!.label, '새 구간');
+  assert.ok(added.history.length > base.history.length, '무엇을 바꿨는지 이력에 남는다');
+
+  const fixed = editBand(added, 'dependents', component.bands.length - 1, { points: 40, label: '7명 이상' });
+  assert.equal(fixed.components.find(item => item.id === 'dependents')!.bands.at(-1)!.points, 40);
+
+  const removed = removeBand(fixed, 'dependents', component.bands.length - 1);
+  assert.equal(removed.components.find(item => item.id === 'dependents')!.bands.length, component.bands.length - 1);
+});
+
+test('예시를 운영자가 직접 더하고 지울 수 있다', () => {
+  const base = scoringFormula('general-private-standard')!;
+  const added = upsertTestCase(base, {
+    id: 'case-new', label: '무주택 10년 / 부양 3명 / 통장 10년',
+    inputs: { noHomePeriod: 120, dependents: 3, accountPeriod: 120 }, expectedTotal: 22 + 20 + 12,
+  });
+  assert.equal(added.testCases.length, base.testCases.length + 1);
+  assert.ok(runTestCases(added).every(run => run.passed), '법정 배점표로 계산한 기대값이 맞아야 한다');
+
+  const changed = upsertTestCase(added, { ...added.testCases.at(-1)!, expectedTotal: 1 });
+  assert.equal(changed.testCases.length, added.testCases.length, '같은 id 는 덮어쓴다');
+  assert.equal(runTestCases(changed).some(run => !run.passed), true);
+
+  assert.equal(removeTestCase(changed, 'case-new').testCases.length, base.testCases.length);
+});
+
+test('활성화는 여섯 가지 검사를 모두 통과해야 열린다', () => {
+  const base = scoringFormula('general-private-standard')!;
+  const keys = activationChecks(base).map(check => check.key);
+  assert.deepEqual(keys, ['basics', 'overlap', 'gap', 'negative', 'max', 'tests']);
+  assert.equal(canActivate(base), true, '등록된 법정 배점표는 활성화할 수 있어야 한다');
+
+  // 구간을 겹치게 만들면 활성화가 막힌다.
+  const overlapping = editBand(base, 'dependents', 1, { min: 0 });
+  assert.equal(canActivate(overlapping), false);
+  assert.equal(activationChecks(overlapping).find(check => check.key === 'overlap')?.passed, false);
+
+  // 점수를 음수로 만들어도 막힌다.
+  const negative = editBand(base, 'dependents', 0, { points: -5 });
+  assert.equal(activationChecks(negative).find(check => check.key === 'negative')?.passed, false);
+
+  // 예시가 하나도 없으면 막힌다.
+  const noTests = { ...base, testCases: [] };
+  assert.equal(activationChecks(noTests).find(check => check.key === 'tests')?.passed, false);
+
+  // 기대값이 틀린 예시가 있어도 막힌다.
+  const badTest = upsertTestCase(base, { ...base.testCases[0], expectedTotal: 1 });
+  assert.equal(canActivate(badTest), false);
+});
+
+test('산식 저장소 계약이 migration 과 같은 이름을 쓴다', async () => {
+  const sql = await readFile(new URL('../../supabase/migrations/20260927120000_scoring_formulas.sql', import.meta.url), 'utf8');
+  for (const name of Object.values(SCORING_RPC)) {
+    assert.ok(sql.includes(`function public.${name}(`), `${name} 이 migration 에 없다`);
+  }
+  // 저장소가 돌려줄 수 있는 오류는 전부 운영자 말로 옮겨 둔다.
+  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_TARGET_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND']) {
+    assert.ok(sql.includes(code), `${code} 를 내는 곳이 migration 에 없다`);
+    assert.notEqual(scoringErrorMessage(code), `처리하지 못했어요 (${code}).`, `${code} 의 안내 문구가 없다`);
+  }
+  assert.match(scoringErrorMessage('UNKNOWN_CODE'), /처리하지 못했어요/);
+});
+
+test('migration 이 발행본 불변·적용범위당 활성 하나·감사 로그를 지킨다', async () => {
+  const sql = await readFile(new URL('../../supabase/migrations/20260927120000_scoring_formulas.sql', import.meta.url), 'utf8');
+  for (const table of ['scoring_formulas', 'scoring_formula_items', 'scoring_formula_bands', 'scoring_formula_test_cases', 'scoring_formula_audit_logs']) {
+    assert.ok(sql.includes(`create table public.${table}`), `${table} 표가 없다`);
+    assert.ok(sql.includes(`alter table public.${table} enable row level security`), `${table} 에 RLS 가 없다`);
+  }
+  assert.ok(sql.includes('guard_published_scoring_immutable'), '발행본을 잠그는 트리거가 없다');
+  assert.ok(sql.includes('guard_single_active_scoring'), '적용 대상당 활성 하나를 지키는 트리거가 없다');
+  assert.ok(sql.includes('guard_scoring_audit_append_only'), '감사 로그를 추가 전용으로 두는 트리거가 없다');
+  // 권한은 새로 만들지 않고 기존 판정을 그대로 쓴다.
+  assert.ok(sql.includes('assert_assessment_review_access'), '기존 권한 판정을 쓰지 않는다');
+  // 사용자 앱에는 공개된 활성 버전만 보인다.
+  assert.ok(sql.includes("using (status = 'ACTIVE' and published_to_users)"), '초안이 사용자에게 새어 나갈 수 있다');
 });

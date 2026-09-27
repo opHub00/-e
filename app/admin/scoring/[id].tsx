@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { colors, radius, spacing, tracking, type } from '../../../design/tokens';
 import { AdminShell } from '../../../features/adminPortal/AdminShell';
@@ -12,8 +12,12 @@ import {
 } from '../../../features/adminPortal/ui/AdminKit';
 import { scoringFormula } from '../../../features/scoringFormula/registry';
 import {
+  activationChecks, addBand, canActivate, clearDraft, editBand, removeBand, removeTestCase, setPublished,
+  setStatus, upsertTestCase, withDraft, writeDraft,
+} from '../../../features/scoringFormula/draftStore';
+import {
   SCORING_STATUS_LABEL, SCORING_TARGET_LABEL, calculateScore, componentMax, formulaMax, isServiceReady,
-  runTestCases, validateFormula, type ScoringComponent, type ScoringFormula,
+  runTestCases, validateFormula, type ScoringBand, type ScoringComponent, type ScoringFormula, type ScoringTestCase,
 } from '../../../features/scoringFormula/domain';
 
 type Tab = 'overview' | 'bands' | 'wording' | 'tests' | 'simulator' | 'history';
@@ -86,16 +90,24 @@ function CreateGuide() {
   );
 }
 
-function Detail({ formula }: { formula: ScoringFormula }) {
+function Detail({ formula: published }: { formula: ScoringFormula }) {
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string }>();
   const initial = TABS.some(item => item.key === params.tab) ? (params.tab as Tab) : 'overview';
   const [tab, setTab] = useState<Tab>(initial);
   const [confirmPublish, setConfirmPublish] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  // 편집 결과는 브라우저 초안에만 쌓인다. 배포본은 그대로 둔다.
+  const [loaded, setLoaded] = useState(() => withDraft(published));
+  const formula = loaded.formula;
+  const edit = (next: ScoringFormula) => { writeDraft(next); setLoaded({ formula: next, isDraft: true }); };
+  const discard = () => { clearDraft(published.id); setLoaded({ formula: published, isDraft: false }); setConfirmDiscard(false); };
 
   const problems = useMemo(() => validateFormula(formula), [formula]);
   const runs = useMemo(() => runTestCases(formula), [formula]);
+  const checks = useMemo(() => activationChecks(formula), [formula]);
   const ready = isServiceReady(formula);
+  const activatable = canActivate(formula);
 
   return (
     <>
@@ -105,10 +117,17 @@ function Detail({ formula }: { formula: ScoringFormula }) {
         actions={
           <>
             <AdminButton label="목록" tone="quiet" icon="arrow-back" onPress={() => router.push('/admin/scoring' as Href)} />
+            {loaded.isDraft ? <AdminButton label="초안 버리기" tone="danger" icon="undo" onPress={() => setConfirmDiscard(true)} /> : null}
             <AdminButton label="사용자에게 공개" icon="visibility" onPress={() => setConfirmPublish(true)} disabled={!ready} />
           </>
         }
       />
+
+      {loaded.isDraft ? (
+        <Notice tone="amber" icon="edit-note">
+          지금 보고 있는 것은 이 브라우저에만 저장된 초안이에요. 서비스에는 아직 반영되지 않았어요.
+        </Notice>
+      ) : null}
 
       <KpiGrid items={[
         { label: '만점', value: `${formulaMax(formula)}점`, hint: `${formula.components.length}개 항목 합계`, tone: 'purple', icon: 'calculate' },
@@ -140,12 +159,64 @@ function Detail({ formula }: { formula: ScoringFormula }) {
         })}
       </View>
 
+      <SectionCard
+        title="상태 바꾸기"
+        description="초안 → 검토 중 → 활성 순서로 옮겨요. 활성으로 가려면 아래 검사를 모두 통과해야 해요."
+      >
+        <View style={styles.statusRow}>
+          {(['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'] as const).map(next => {
+            const blocked = next === 'ACTIVE' && !activatable;
+            return (
+              <AdminButton
+                key={next}
+                label={SCORING_STATUS_LABEL[next]}
+                tone={formula.status === next ? 'primary' : 'quiet'}
+                disabled={blocked || formula.status === next}
+                onPress={() => edit(setStatus(formula, next))}
+              />
+            );
+          })}
+          <AdminButton
+            label={formula.publishedToUsers ? '사용자 공개 끄기' : '사용자 공개 켜기'}
+            tone="quiet"
+            icon={formula.publishedToUsers ? 'visibility-off' : 'visibility'}
+            onPress={() => edit(setPublished(formula, !formula.publishedToUsers))}
+          />
+        </View>
+        <DataList
+          rows={checks}
+          keyOf={check => check.key}
+          empty={{ title: '검사 항목이 없어요', body: '' }}
+          columns={[
+            { key: 'label', header: '검사', flex: 1.4, render: check => <CellText strong>{check.label}</CellText> },
+            { key: 'detail', header: '내용', flex: 4, render: check => <CellText>{check.detail}</CellText> },
+            {
+              key: 'state', header: '결과', flex: 1,
+              render: check => <StatusBadge status={check.passed ? 'APPROVED' : 'NEEDS_CHECK'} />,
+            },
+          ]}
+        />
+        {!activatable ? (
+          <Notice tone="amber" icon="block">통과하지 못한 검사가 있어 활성으로 바꿀 수 없어요.</Notice>
+        ) : null}
+      </SectionCard>
+
       {tab === 'overview' ? <Overview formula={formula} problems={problems} /> : null}
-      {tab === 'bands' ? <Bands formula={formula} /> : null}
+      {tab === 'bands' ? <Bands formula={formula} onEdit={edit} /> : null}
       {tab === 'wording' ? <Wording formula={formula} /> : null}
-      {tab === 'tests' ? <Tests formula={formula} /> : null}
+      {tab === 'tests' ? <Tests formula={formula} onEdit={edit} /> : null}
       {tab === 'simulator' ? <Simulator formula={formula} /> : null}
       {tab === 'history' ? <History formula={formula} /> : null}
+
+      <ConfirmDialog
+        open={confirmDiscard}
+        title="초안을 버릴까요?"
+        body="이 브라우저에 저장한 편집 내용이 사라지고, 배포된 내용으로 돌아가요."
+        confirmLabel="초안 버리기"
+        tone="danger"
+        onConfirm={discard}
+        onCancel={() => setConfirmDiscard(false)}
+      />
 
       <ConfirmDialog
         open={confirmPublish}
@@ -188,38 +259,89 @@ function Overview({ formula, problems }: { formula: ScoringFormula; problems: Re
   );
 }
 
-function Bands({ formula }: { formula: ScoringFormula }) {
+function Bands({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: ScoringFormula) => void }) {
   const [advanced, setAdvanced] = useState(false);
   const components = [...formula.components].sort((left, right) => left.order - right.order);
   return (
     <>
       {components.map(component => (
-        <ComponentCard key={component.id} component={component} advanced={advanced} onToggleAdvanced={() => setAdvanced(value => !value)} />
+        <ComponentCard
+          key={component.id}
+          component={component}
+          advanced={advanced}
+          onToggleAdvanced={() => setAdvanced(value => !value)}
+          onEditBand={(index, patch) => onEdit(editBand(formula, component.id, index, patch))}
+          onAddBand={() => onEdit(addBand(formula, component.id))}
+          onRemoveBand={index => onEdit(removeBand(formula, component.id, index))}
+        />
       ))}
     </>
   );
 }
 
-function ComponentCard({ component, advanced, onToggleAdvanced }: {
-  component: ScoringComponent; advanced: boolean; onToggleAdvanced: () => void;
+function ComponentCard({ component, advanced, onToggleAdvanced, onEditBand, onAddBand, onRemoveBand }: {
+  component: ScoringComponent;
+  advanced: boolean;
+  onToggleAdvanced: () => void;
+  onEditBand: (index: number, patch: Partial<ScoringBand>) => void;
+  onAddBand: () => void;
+  onRemoveBand: (index: number) => void;
 }) {
+  const [editing, setEditing] = useState<number | null>(null);
   return (
     <SectionCard
       title={`${component.label} · 최대 ${componentMax(component)}점`}
       description={component.description}
+      action={<AdminButton label="구간 추가" tone="quiet" icon="add" onPress={onAddBand} />}
     >
       <DataList
-        rows={component.bands}
-        keyOf={band => band.label}
+        rows={component.bands.map((band, index) => ({ band, index }))}
+        keyOf={row => `${row.index}`}
         empty={{ title: '구간이 없어요', body: '이 항목은 아직 점수를 낼 수 없어요.' }}
         columns={[
-          { key: 'range', header: '구간', flex: 2.2, render: band => <CellText strong>{band.label}</CellText> },
-          { key: 'points', header: '점수', flex: 0.8, render: band => <CellText strong>{band.points}점</CellText> },
           {
-            key: 'note', header: '비고', flex: 2.6,
-            render: band => <CellText muted>{band.note ?? '—'}</CellText>,
+            key: 'range', header: '구간', flex: 2.2,
+            render: row => editing === row.index
+              ? <TextInput
+                  accessibilityLabel={`${component.label} ${row.index + 1}번째 구간 이름`}
+                  value={row.band.label}
+                  onChangeText={text => onEditBand(row.index, { label: text })}
+                  style={styles.inlineInput}
+                />
+              : <CellText strong>{row.band.label}</CellText>,
           },
+          {
+            key: 'bounds', header: `범위(${component.unit})`, flex: 1.6,
+            render: row => (
+              <CellText muted>
+                {row.band.min ?? '처음'} ~ {row.band.max ?? '끝'}
+              </CellText>
+            ),
+          },
+          {
+            key: 'points', header: '점수', flex: 1,
+            render: row => editing === row.index
+              ? <TextInput
+                  accessibilityLabel={`${component.label} ${row.index + 1}번째 구간 점수`}
+                  value={String(row.band.points)}
+                  inputMode="numeric"
+                  onChangeText={text => onEditBand(row.index, { points: Number(text.replace(/[^0-9]/g, '')) || 0 })}
+                  style={styles.inlineInput}
+                />
+              : <CellText strong>{row.band.points}점</CellText>,
+          },
+          { key: 'note', header: '비고', flex: 2.2, hideOnNarrow: true, render: row => <CellText muted>{row.band.note ?? '—'}</CellText> },
         ]}
+        actions={row => (
+          <>
+            <AdminButton
+              label={editing === row.index ? '완료' : '수정'}
+              tone="quiet"
+              onPress={() => setEditing(editing === row.index ? null : row.index)}
+            />
+            <AdminButton label="삭제" tone="danger" onPress={() => { setEditing(null); onRemoveBand(row.index); }} />
+          </>
+        )}
       />
       <Disclosure label="고급 설정" open={advanced} onToggle={onToggleAdvanced}>
         <View style={styles.valueRow}>
@@ -253,41 +375,104 @@ function Wording({ formula }: { formula: ScoringFormula }) {
   );
 }
 
-function Tests({ formula }: { formula: ScoringFormula }) {
+function Tests({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: ScoringFormula) => void }) {
   const runs = runTestCases(formula);
+  const components = [...formula.components].sort((left, right) => left.order - right.order);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [label, setLabel] = useState('');
+
+  /** 입력한 값으로 지금 점수를 내 보고, 그 값을 기대 점수로 삼는다. */
+  const preview = calculateScore(formula, Object.fromEntries(components.map(component => {
+    const text = draft[component.id];
+    const value = text === undefined || text.trim() === '' ? null : Number(text);
+    return [component.id, value !== null && Number.isFinite(value) ? value : null];
+  })));
+
+  const add = () => {
+    if (preview.total === null) return;
+    const inputs = Object.fromEntries(components.map(component => [component.id, Number(draft[component.id] ?? 0)]));
+    const testCase: ScoringTestCase = {
+      id: `case-${Date.now()}`,
+      label: label.trim() || components.map(component => `${component.label} ${inputs[component.id]}${component.unit}`).join(' / '),
+      inputs,
+      expectedTotal: preview.total,
+    };
+    onEdit(upsertTestCase(formula, testCase));
+    setDraft({});
+    setLabel('');
+  };
+
   return (
-    <SectionCard
-      title={`저장된 예시 ${runs.length}개`}
-      description="배점표를 고친 뒤 무엇이 달라졌는지 바로 확인하려고 남겨 둔 예시예요."
-    >
-      <DataList
-        rows={runs}
-        keyOf={run => run.testCase.id}
-        empty={{ title: '저장된 예시가 없어요', body: '예시가 있으면 배점표를 고칠 때 실수를 빨리 찾을 수 있어요.' }}
-        columns={[
-          { key: 'label', header: '예시', flex: 2.4, render: run => <CellText strong>{run.testCase.label}</CellText> },
-          {
-            key: 'input', header: '입력', flex: 2.4,
-            render: run => (
-              <CellText muted>
-                {formula.components
-                  .map(component => `${component.label} ${run.testCase.inputs[component.id] ?? '—'}${component.unit}`)
-                  .join(' · ')}
-              </CellText>
-            ),
-          },
-          { key: 'expected', header: '기대 점수', flex: 0.9, render: run => <CellText>{run.testCase.expectedTotal}점</CellText> },
-          {
-            key: 'actual', header: '실제 점수', flex: 0.9,
-            render: run => <CellText strong>{run.actualTotal === null ? '계산 불가' : `${run.actualTotal}점`}</CellText>,
-          },
-          {
-            key: 'result', header: '결과', flex: 0.9,
-            render: run => <StatusBadge status={run.passed ? 'APPROVED' : 'NEEDS_CHECK'} />,
-          },
-        ]}
-      />
-    </SectionCard>
+    <>
+      <SectionCard
+        title={`저장된 예시 ${runs.length}개`}
+        description="배점표를 고친 뒤 무엇이 달라졌는지 바로 확인하려고 남겨 둔 예시예요. 활성화하려면 모두 통과해야 해요."
+      >
+        <DataList
+          rows={runs}
+          keyOf={run => run.testCase.id}
+          empty={{ title: '저장된 예시가 없어요', body: '예시가 하나도 없으면 활성화할 수 없어요. 아래에서 만들어 주세요.' }}
+          columns={[
+            { key: 'label', header: '예시', flex: 2.6, render: run => <CellText strong>{run.testCase.label}</CellText> },
+            {
+              key: 'input', header: '입력', flex: 2.4, hideOnNarrow: true,
+              render: run => (
+                <CellText muted>
+                  {components.map(component => `${component.label} ${run.testCase.inputs[component.id] ?? '—'}${component.unit}`).join(' · ')}
+                </CellText>
+              ),
+            },
+            { key: 'expected', header: '기대', flex: 0.8, render: run => <CellText>{run.testCase.expectedTotal}점</CellText> },
+            {
+              key: 'actual', header: '실제', flex: 0.8,
+              render: run => <CellText strong>{run.actualTotal === null ? '계산 불가' : `${run.actualTotal}점`}</CellText>,
+            },
+            {
+              key: 'result', header: '결과', flex: 0.9,
+              render: run => <StatusBadge status={run.passed ? 'APPROVED' : 'NEEDS_CHECK'} />,
+            },
+          ]}
+          actions={run => (
+            <AdminButton label="삭제" tone="danger" onPress={() => onEdit(removeTestCase(formula, run.testCase.id))} />
+          )}
+        />
+      </SectionCard>
+
+      <SectionCard
+        title="예시 만들기"
+        description="값을 넣으면 지금 배점표로 계산한 점수가 기대 점수가 돼요. 나중에 표를 고쳤을 때 이 값이 달라지면 바로 알 수 있어요."
+      >
+        <View style={styles.fieldRow}>
+          {components.map(component => (
+            <NumberField
+              key={component.id}
+              label={component.label}
+              unit={component.unit}
+              value={draft[component.id] ?? ''}
+              onChange={next => setDraft(current => ({ ...current, [component.id]: next.replace(/[^0-9]/g, '') }))}
+            />
+          ))}
+        </View>
+        <FormSection title="예시 이름" description="비워 두면 입력값으로 이름을 만들어 드려요.">
+          <TextInput
+            accessibilityLabel="예시 이름"
+            value={label}
+            onChangeText={setLabel}
+            placeholder="예: 무주택 10년 / 부양가족 3명 / 통장 10년"
+            placeholderTextColor={colors.textSubtle}
+            style={styles.inlineInput}
+          />
+        </FormSection>
+        {preview.total === null ? (
+          <Notice tone="amber" icon="help-outline">
+            아직 기대 점수를 낼 수 없어요. {preview.problems.join(' ')}
+          </Notice>
+        ) : (
+          <Notice tone="green" icon="check-circle">지금 배점표로 계산하면 {preview.total}점이에요. 이 값을 기대 점수로 저장해요.</Notice>
+        )}
+        <AdminButton label="예시 저장" icon="add" onPress={add} disabled={preview.total === null} />
+      </SectionCard>
+    </>
   );
 }
 
@@ -295,6 +480,7 @@ function Tests({ formula }: { formula: ScoringFormula }) {
 function Simulator({ formula }: { formula: ScoringFormula }) {
   const components = [...formula.components].sort((left, right) => left.order - right.order);
   const [raw, setRaw] = useState<Record<string, string>>({});
+  const [why, setWhy] = useState(false);
 
   const inputs = Object.fromEntries(components.map(component => {
     const text = raw[component.id];
@@ -338,20 +524,38 @@ function Simulator({ formula }: { formula: ScoringFormula }) {
           <Notice icon="info">이 점수에 맞는 해석 문구가 아직 없어요.</Notice>
         )}
 
-        <DataList
-          rows={result.breakdown}
-          keyOf={item => item.componentId}
-          empty={{ title: '항목이 없어요', body: '배점 항목을 먼저 등록해 주세요.' }}
-          columns={[
-            { key: 'label', header: '항목', flex: 1.8, render: item => <CellText strong>{item.label}</CellText> },
-            { key: 'input', header: '입력값', flex: 1, render: item => <CellText>{item.input === null ? '—' : item.input}</CellText> },
-            { key: 'band', header: '해당 구간', flex: 2, render: item => <CellText>{item.bandLabel ?? item.problem ?? '—'}</CellText> },
-            {
-              key: 'points', header: '점수', flex: 1,
-              render: item => <CellText strong>{item.points === null ? '—' : `${item.points} / ${item.max}점`}</CellText>,
-            },
-          ]}
-        />
+        <View style={styles.breakdownRow}>
+          {result.breakdown.map(item => (
+            <View key={item.componentId} style={styles.breakdownItem}>
+              <Text style={styles.breakdownLabel}>{item.label}</Text>
+              <Text style={styles.breakdownValue}>{item.points === null ? '—' : `${item.points}점`}</Text>
+              <Text style={styles.breakdownMax}>최대 {item.max}점</Text>
+            </View>
+          ))}
+        </View>
+
+        <Disclosure label="왜 이 점수가 나왔나요?" open={why} onToggle={() => setWhy(value => !value)}>
+          <DataList
+            rows={result.breakdown}
+            keyOf={item => item.componentId}
+            empty={{ title: '항목이 없어요', body: '배점 항목을 먼저 등록해 주세요.' }}
+            columns={[
+              { key: 'label', header: '항목', flex: 1.6, render: item => <CellText strong>{item.label}</CellText> },
+              { key: 'input', header: '넣은 값', flex: 1, render: item => <CellText>{item.input === null ? '—' : item.input}</CellText> },
+              {
+                key: 'band', header: '적용된 구간', flex: 2.4,
+                render: item => <CellText>{item.bandLabel ?? item.problem ?? '—'}</CellText>,
+              },
+              {
+                key: 'points', header: '점수', flex: 1,
+                render: item => <CellText strong>{item.points === null ? '—' : `${item.points} / ${item.max}점`}</CellText>,
+              },
+            ]}
+          />
+          <Text style={styles.hint}>
+            각 항목은 넣은 값이 어느 구간에 드는지 찾아 그 구간의 점수를 받아요. 구간 경계는 양끝을 포함해요.
+          </Text>
+        </Disclosure>
       </SectionCard>
     </>
   );
@@ -387,5 +591,12 @@ const styles = StyleSheet.create({
   listItem: { ...type.bodySm, color: colors.textMuted, lineHeight: 22 },
   totalRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   totalValue: { ...type.display, color: colors.primary },
+  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  breakdownRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  breakdownItem: { minWidth: 120, gap: 2 },
+  breakdownLabel: { ...type.bodySm, color: colors.textMuted },
+  breakdownValue: { ...type.page, color: colors.text },
+  breakdownMax: { ...type.micro, color: colors.textSubtle },
+  inlineInput: { ...type.bodySm, color: colors.text, minHeight: 34, paddingHorizontal: 8, borderRadius: radius.button, backgroundColor: colors.surfaceLow, borderWidth: 1, borderColor: colors.surfaceHigh, outlineStyle: 'none' as never },
   totalMax: { ...type.bodySm, color: colors.textSubtle, letterSpacing: tracking.normal },
 });

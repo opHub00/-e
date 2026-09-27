@@ -382,14 +382,14 @@ const styles = StyleSheet.create({
 
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs },
   kpiCard: { paddingHorizontal: spacing.xs, paddingBottom: spacing.sm },
-  kpiInner: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: 6, ...shadow.card },
+  kpiInner: { backgroundColor: colors.surface, borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: 6, ...shadow.card },
   kpiTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   kpiLabel: { ...type.bodySm, color: colors.textMuted, flexShrink: 1 },
   kpiIcon: { width: 28, height: 28, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   kpiValue: { ...type.display, color: colors.text },
   kpiHint: { ...type.micro, color: colors.textSubtle },
 
-  section: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: spacing.md },
+  section: { backgroundColor: colors.surface, borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, padding: spacing.md, gap: spacing.md },
   sectionHead: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm, flexWrap: 'wrap' },
   sectionCopy: { gap: 2, flex: 1, minWidth: 200 },
   sectionTitle: { ...type.cardTitle, color: colors.text },

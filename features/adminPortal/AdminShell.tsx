@@ -104,7 +104,8 @@ export function AdminChrome({ title, subtitle, scroll = true, children }: Chrome
   const menu = (
     <ScrollView contentContainerStyle={styles.sidebarScroll} showsVerticalScrollIndicator={false}>
       {ADMIN_MENU_GROUPS.map(group => (
-        <View key={group.title} style={styles.group}>
+        // 계정 관리는 일상 운영과 성격이 달라 한 줄 그어 떼어 둔다.
+        <View key={group.title} style={[styles.group, group.separated && styles.groupSeparated]}>
           <Text style={styles.groupTitle}>{group.title}</Text>
           {group.items.map(item => {
             const selected = item.href === active;
@@ -194,9 +195,15 @@ export function AdminChrome({ title, subtitle, scroll = true, children }: Chrome
             <Text style={styles.topbarTitle} numberOfLines={1}>완판e 운영 콘솔</Text>
             <View style={styles.topbarRight}>
               {access.status === 'ALLOWED' ? (
-                <Text style={styles.topbarWho} numberOfLines={1}>
-                  {ADMIN_ROLE_LABEL[access.role]} · {access.email ?? '계정 확인 중'}
-                </Text>
+                <View style={styles.topbarWho}>
+                  <View style={styles.topbarAvatar}>
+                    <MaterialIcons name="person" size={16} color={colors.primary} />
+                  </View>
+                  <View style={styles.topbarWhoCopy}>
+                    <Text style={styles.topbarName} numberOfLines={1}>{access.email ?? '계정 확인 중'}</Text>
+                    <Text style={styles.topbarRole} numberOfLines={1}>{ADMIN_ROLE_LABEL[access.role]}</Text>
+                  </View>
+                </View>
               ) : null}
               <MotionPressable
                 accessibilityRole="button"
@@ -254,15 +261,18 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   layout: { flex: 1, flexDirection: 'row' },
 
-  sidebar: { width: 268, borderRightWidth: 1, borderRightColor: colors.surfaceHigh, backgroundColor: colors.surface },
+  sidebar: { width: 248, borderRightWidth: 1, borderRightColor: colors.surfaceHigh, backgroundColor: colors.surface },
   sidebarScroll: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm, gap: spacing.md },
   brandBox: { paddingHorizontal: spacing.md, paddingTop: spacing.md, paddingBottom: spacing.sm, gap: 1 },
   brand: { ...type.bodyStrong, color: colors.text },
   brandSub: { ...type.micro, color: colors.textSubtle },
   group: { gap: 2 },
+  /** 묶음 사이 가는 선. 메뉴가 길어져도 덩어리로 읽힌다. */
+  groupSeparated: { borderTopWidth: 1, borderTopColor: colors.surfaceHigh, paddingTop: spacing.md, marginTop: spacing.xs },
   groupTitle: { ...type.micro, color: colors.textSubtle, paddingHorizontal: spacing.sm, paddingBottom: 4 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 52, paddingHorizontal: spacing.sm, borderRadius: radius.cardSm },
-  menuItemActive: { backgroundColor: colors.lavender },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 52, paddingHorizontal: spacing.sm, borderRadius: radius.cardSm, borderWidth: 1, borderColor: 'transparent' },
+  /** 선택된 메뉴: 아주 옅은 보라 배경 + 얇은 테두리 + 보라 글자. 색 하나로만 알리지 않는다. */
+  menuItemActive: { backgroundColor: colors.lavender, borderColor: colors.primaryFixed },
   menuCopy: { flex: 1, minWidth: 0, gap: 1 },
   menuLabel: { ...type.bodySmStrong, color: colors.textMuted },
   menuLabelActive: { color: colors.primary },
@@ -280,7 +290,11 @@ const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.surfaceHigh, backgroundColor: colors.surface },
   topbarTitle: { ...type.bodyStrong, color: colors.text, flex: 1, minWidth: 0 },
   topbarRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexShrink: 1 },
-  topbarWho: { ...type.micro, color: colors.textSubtle, flexShrink: 1 },
+  topbarWho: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexShrink: 1 },
+  topbarAvatar: { width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.lavender, alignItems: 'center', justifyContent: 'center' },
+  topbarWhoCopy: { flexShrink: 1, minWidth: 0 },
+  topbarName: { ...type.bodySmStrong, color: colors.text },
+  topbarRole: { ...type.micro, color: colors.textSubtle },
   iconButton: { width: size.iconButton, height: size.iconButton, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill },
 
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },

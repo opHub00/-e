@@ -6,6 +6,8 @@ import {
   buildAnnouncementRows, regionChoices, searchAnnouncementRows, selectAnnouncementRows,
 } from './announcementRows.ts';
 import type { LearningRow } from '../adminLearningStatus/domain.ts';
+import type { ListingVisualRecord } from '../listingVisual/resolver.ts';
+import { IMAGE_STATE_LABEL, imageStateOf, lifecycleOf, operationTasks, scheduleRows } from './operations.ts';
 
 const row = (over: Partial<LearningRow> = {}): LearningRow => ({
   announcementId: 'a1', title: '가나 아파트', source: 'applyhome', publisher: 'LH', regionName: '경기',
@@ -104,4 +106,67 @@ test('분석 가능한 공고가 목록 맨 위로 온다', () => {
   ]);
   const sorted = selectAnnouncementRows(rows, { query: '', status: 'ALL', region: 'ALL' });
   assert.equal(sorted[0].title, '분석 가능', '운영자가 먼저 볼 것이 위에 있어야 한다');
+});
+
+test('이미지 상태를 운영자 말로 나눈다', () => {
+  const record = (over: Partial<ListingVisualRecord> = {}): ListingVisualRecord => ({
+    listingId: 'l1', imageUrl: 'https://e.com/a.jpg', sourceUrl: 'https://e.com', sourceType: 'official_hero',
+    subjectType: 'apartment_exterior', subjectEvidence: [], primaryScore: 1, primaryEligible: true, dedupeKey: 'a',
+    verified: true, fetchedAt: '2026-09-27', confidence: 1, evidence: [], announcementNo: '1', announcementTitle: 't',
+    width: 1920, height: 1080, byteLength: 300_000, contentType: 'image/jpeg', reusePermission: null, blockedReason: null,
+    ...over,
+  });
+  assert.equal(imageStateOf([]), 'NONE');
+  assert.equal(imageStateOf([record()]), 'AUTO_VERIFIED');
+  assert.equal(imageStateOf([record({ primaryEligible: false })]), 'NEEDS_HUMAN', '통과했지만 대표로 못 세우면 사람이 본다');
+  assert.equal(imageStateOf([record({ verified: false, primaryEligible: false, blockedReason: '막힘' })]), 'UNUSABLE');
+  // 운영자에게 confidence 숫자를 먼저 보여주지 않는다.
+  for (const label of Object.values(IMAGE_STATE_LABEL)) assert.doesNotMatch(label, /confidence|0\.\d/);
+});
+
+test('할 일 목록은 0건도 남기고, 누르면 갈 곳이 있다', () => {
+  const rows = [
+    row({ announcementId: 'a1', ruleSetId: null, listingIds: [] }),
+    row({ announcementId: 'a2', listingIds: [] }),
+    row({ announcementId: 'a3', approvedCount: 5, ruleCount: 10 }),
+    row({ announcementId: 'a4', reviewObservable: false, ruleCount: null, approvedCount: null }),
+  ];
+  const tasks = operationTasks({ rows, imageStates: new Map([['a1', 'AUTO_VERIFIED' as const]]) });
+  const byKey = new Map(tasks.map(task => [task.key, task]));
+  assert.equal(byKey.get('noActiveRules')?.count, 1);
+  assert.equal(byKey.get('notBound')?.count, 1, '규칙은 있는데 연결 안 된 공고만 센다');
+  assert.equal(byKey.get('pendingReview')?.count, 1);
+  assert.equal(byKey.get('reviewUnknown')?.count, 1, '읽지 못한 것과 안 끝난 것을 섞지 않는다');
+  assert.equal(byKey.get('missingImage')?.count, 3, '이미지 상태를 모르는 공고도 확인 대상이다');
+  for (const task of tasks) {
+    assert.match(task.href, /^\/admin/, `${task.key}: 갈 곳이 있어야 한다`);
+    assert.ok(task.detail.trim(), `${task.key}: 왜 할 일인지 적어야 한다`);
+  }
+  assert.equal(tasks.length, 6, '0 건인 항목도 사라지지 않는다');
+});
+
+test('공고 lifecycle 은 네 단계로 어디서 막혔는지 알려준다', () => {
+  const steps = (over: Parameters<typeof row>[0]) => lifecycleOf(row(over));
+  assert.deepEqual(steps({}).map(step => step.state), ['DONE', 'DONE', 'DONE', 'DONE']);
+  assert.deepEqual(steps({ ruleSetId: null, listingIds: [] }).map(step => step.state),
+    ['DONE', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED']);
+  assert.deepEqual(steps({ listingIds: [] }).map(step => step.state), ['DONE', 'DONE', 'DONE', 'NEEDS_CHECK']);
+  assert.equal(steps({ approvedCount: 3, ruleCount: 10 })[2].state, 'NEEDS_CHECK');
+  assert.equal(steps({ reviewObservable: false, approvedCount: null, ruleCount: null })[2].state, 'UNKNOWN',
+    '읽지 못한 것을 미완료로 적지 않는다');
+  for (const step of steps({})) assert.ok(step.detail.trim(), '각 단계에 설명이 있어야 한다');
+});
+
+test('모집 일정은 마감 임박 순으로 세우고 날짜를 모르면 뒤로 민다', () => {
+  const listing = (id: string, end: string | null) => ({
+    id, complexName: id, district: '서울', recruitmentStatus: 'open' as const,
+    announcementDate: '2026-09-01', recruitmentStartDate: '2026-09-20', recruitmentEndDate: end,
+    winnerAnnouncementDate: null, contractStartDate: null,
+  });
+  const rows = scheduleRows([
+    listing('늦음', '2026-10-10'), listing('모름', null), listing('빠름', '2026-09-28'),
+  ] as never, new Date('2026-09-27T00:00:00Z'));
+  assert.deepEqual(rows.map(item => item.complexName), ['빠름', '늦음', '모름']);
+  assert.equal(rows[0].daysToClose, 1);
+  assert.equal(rows[2].daysToClose, null);
 });

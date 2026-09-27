@@ -13,7 +13,12 @@ export type AdminMenuItem = {
   icon: ComponentProps<typeof MaterialIcons>['name'];
 };
 
-export type AdminMenuGroup = { title: string; items: AdminMenuItem[] };
+export type AdminMenuGroup = {
+  title: string;
+  items: AdminMenuItem[];
+  /** 계정 관리처럼 일상 운영과 성격이 다른 묶음. 사이드바 아래쪽에 떼어 둔다. */
+  separated?: boolean;
+};
 
 /**
  * 관리자 메뉴.
@@ -25,17 +30,19 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
   {
     title: '운영 현황',
     items: [
-      { label: '대시보드', hint: '오늘의 운영 상태 한눈에', href: '/admin', icon: 'dashboard' },
+      { label: '대시보드', hint: '오늘 무엇을 해야 하는지', href: '/admin', icon: 'dashboard' },
     ],
   },
   {
-    title: '공고',
+    title: '공고 운영',
     items: [
-      { label: '공고 관리', hint: '수집된 공고와 대표 이미지', href: '/admin/announcements', icon: 'campaign' },
+      { label: '공고 관리', hint: '공고 목록과 등록 정보', href: '/admin/announcements', icon: 'campaign' },
+      { label: '모집 일정', hint: '접수·발표 일정 한눈에', href: '/admin/schedule', icon: 'event' },
+      { label: '이미지 관리', hint: '대표 이미지와 갤러리', href: '/admin/images', icon: 'image' },
     ],
   },
   {
-    title: '분석',
+    title: '분석 운영',
     items: [
       { label: '분석 현황', hint: '공고별 분석 준비 단계', href: '/admin/learning-status', icon: 'insights' },
       { label: '규칙 검수', hint: '추출된 규칙 확인·승인', href: '/admin/rule-review', icon: 'fact-check' },
@@ -44,11 +51,17 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
     ],
   },
   {
-    title: '서비스',
+    title: '서비스 운영',
     items: [
       { label: '지식베이스', hint: 'AI 가 참고하는 문서', href: '/admin/knowledge', icon: 'library-books' },
       { label: '사용자', hint: '가입자 현황', href: '/admin/users', icon: 'group' },
-      { label: '관리자 계정', hint: '운영 권한 관리', href: '/admin/admins', icon: 'admin-panel-settings' },
+    ],
+  },
+  {
+    title: '계정 관리',
+    separated: true,
+    items: [
+      { label: '관리자', hint: '운영 권한 관리', href: '/admin/admins', icon: 'admin-panel-settings' },
     ],
   },
 ];

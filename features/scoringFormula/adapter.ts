@@ -291,13 +291,14 @@ export function createScoringRepository(remoteRepository?: () => ScoringFormulaR
 }
 
 export const loadScoringFormulaList = async (repository = createScoringRepository()) => {
-  const [access, formulas] = await Promise.all([repository.getAccess(), repository.list()]);
+  const access = await repository.getAccess();
+  const formulas = await repository.list();
   return { access, formulas: formulas.map(value => toScoringFormulaView(value)) };
 };
 export const loadScoringFormulaDetail = async (id: string, repository = createScoringRepository()) => {
-  const [access, formula, audit] = await Promise.all([
-    repository.getAccess(), repository.get(id), repository.auditHistory(id),
-  ]);
+  const access = await repository.getAccess();
+  const formula = await repository.get(id);
+  const audit = await repository.auditHistory(id);
   return { access, formula: toScoringFormulaView(formula, audit) };
 };
 

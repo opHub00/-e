@@ -5,7 +5,6 @@ import {
   NEEDS_PROFILE, catalogPayload, profileSeed, ruleSetPayload, type Scenario,
 } from './fixtures.ts';
 import { STAGE_LABELS } from '../features/applicationAssessment/labels.ts';
-import { FORM_FIELDS } from '../features/applicationAssessment/form.ts';
 
 const SHOTS = 'e2e/.artifacts/screenshots';
 const STATUS_TEXT = {
@@ -47,24 +46,48 @@ async function openResult(page: Page, scenario: Scenario) {
   await expect(page.getByRole('heading', { name: '내 조건으로 확인한 결과' })).toBeVisible();
 }
 
-/** Fields hidden for a supply type are skipped, so one answer map drives every scenario. */
+/**
+ * The additional-information form is paged by category. Fill only the fields
+ * rendered on the current page, then advance until the deterministic submit
+ * action appears. One answer map can still drive every supply scenario.
+ */
 async function fillAnswers(page: Page, answers: Record<string, string>) {
-  const choice = async (name: string) => {
+  for (let step = 0; step < 8; step += 1) {
+    await fillVisibleAnswers(page, answers);
+
+    const submit = page.getByRole('button', { name: '내 조건으로 판정하기' });
+    if (await submit.isVisible().catch(() => false)) return;
+
+    const next = page.getByRole('button', { name: '다음', exact: true });
+    if (!(await next.isVisible().catch(() => false))) break;
+    await next.click();
+  }
+
+  throw new Error('assessment questionnaire did not reach its submit step');
+}
+
+/** Fields hidden for a supply type are skipped on each questionnaire page. */
+async function fillVisibleAnswers(page: Page, answers: Record<string, string>) {
+  const choice = async (name: string | RegExp) => {
     const radio = page.getByRole('radio', { name, exact: true });
-    if (await radio.count()) await radio.first().click();
+    if (await radio.first().isVisible().catch(() => false)) await radio.first().click();
   };
-  if (answers.currentResidence) await choice(answers.currentResidence);
-  if (answers.familyCategory === 'married') await choice('신혼부부');
+  if (answers.currentResidence) {
+    await choice(/네, .+에 살아요/);
+    await choice(answers.currentResidence);
+  }
+  if (answers.familyCategory === 'married') await choice(/신혼부부 \(혼인신고를 마쳤어요\)/);
 
   for (const [key, value] of Object.entries(answers)) {
     if (['currentResidence', 'familyCategory', 'overseas', 'exceptions'].includes(key)) continue;
-    const input = page.getByLabel(labelFor(key), { exact: true });
-    if (await input.count()) { await input.first().fill(value); continue; }
-    if (value === 'yes' || value === 'no') await booleanCard(page, labelFor(key), value === 'yes' ? '예' : '아니요');
+    const label = questionLabelFor(key);
+    const input = page.getByLabel(label, { exact: typeof label === 'string' });
+    if (await input.first().isVisible().catch(() => false)) { await input.first().fill(value); continue; }
+    if (value === 'yes' || value === 'no') await booleanCard(page, label, value === 'yes' ? '예' : '아니요');
   }
 
-  if (answers.overseas) await booleanCard(page, /거주기간 중 해외 체류 이력이 있나요/, answers.overseas === 'yes' ? '예' : '아니요');
-  if (answers.exceptions) await booleanCard(page, /특례를 적용해야 하나요/, answers.exceptions === 'yes' ? '예' : '아니요');
+  if (answers.overseas) await booleanCard(page, /최근 거주기간 중 해외에 머문 적이 있나요/, answers.overseas === 'yes' ? '예' : '아니요');
+  if (answers.exceptions) await booleanCard(page, /출산·혼인 특례처럼 따로 확인할 사정이 있나요/, answers.exceptions === 'yes' ? '예' : '아니요');
 }
 
 async function booleanCard(page: Page, label: string | RegExp, answer: '예' | '아니요') {
@@ -75,11 +98,36 @@ async function booleanCard(page: Page, label: string | RegExp, answer: '예' | '
   if (await radio.count()) await radio.first().click();
 }
 
-/** Reuse the product's own labels: a copy change fails the test instead of silently skipping a field. */
-function labelFor(key: string): string {
-  const field = FORM_FIELDS.find(f => f.key === key);
-  if (!field) throw new Error(`unknown answer key: ${key}`);
-  return field.label;
+/** Questionnaire labels are conversational and intentionally differ from the legacy flat form labels. */
+const QUESTION_LABELS: Record<string, string | RegExp> = {
+  birthDate: '생년월일이 언제인가요?',
+  residenceStartDate: '지금 지역에 언제부터 계속 살고 계신가요?',
+  marriageDate: '혼인신고일이 언제인가요?',
+  firstMarriageDate: '최초 혼인신고일이 언제인가요?',
+  everMarried: '과거를 포함해 혼인한 적이 있나요?',
+  children: '자녀가 있나요? 있다면 생년월일을 알려주세요.',
+  incomeHouseholdSize: '소득을 계산할 가구원은 몇 명인가요?',
+  isHouseholdHead: /공고일.*기준으로 세대주이신가요\?/,
+  housingDisposalDates: '세대원이 주택을 처분한 날짜를 알려주세요.',
+  specialSupplyHistory: '특별공급에 당첨된 적이 있나요?',
+  reWinningRestriction: '재당첨 제한 기간에 해당하나요?',
+  householdNoWinningFiveYears: '세대원 모두 최근 5년 안에 다른 주택에 당첨된 적이 없나요?',
+  accountKindEligible: '주택청약종합저축(또는 청약저축)인가요?',
+  subscriptionAccountOpenedAt: '청약통장에 언제 가입하셨나요?',
+  recognizedPaymentCount: '납입인정 횟수는 몇 회인가요?',
+  recognizedDepositAmount: '선납금을 포함한 저축액은 얼마인가요?',
+  firstRank: '청약통장 순위확인서에서 1순위인가요?',
+  monthlyIncome: '본인 월평균소득은 얼마인가요?',
+  householdIncome: '세대 월평균소득은 얼마인가요?',
+  dualIncome: '맞벌이인가요?',
+  totalAssets: '본인(또는 세대) 자산 총액은 얼마인가요?',
+  parentAssets: '부모님 자산 총액은 얼마인가요?',
+};
+
+function questionLabelFor(key: string): string | RegExp {
+  const label = QUESTION_LABELS[key];
+  if (!label) throw new Error(`unknown questionnaire answer key: ${key}`);
+  return label;
 }
 /**
  * react-native-web scrolls an inner container, not the document, so `fullPage` would
@@ -252,16 +300,26 @@ test('추가 질문은 묶음으로 나뉘고 금액은 억·만 단위로 되�
   await page.getByRole('radio', { name: SUPPLY_TAB.youth, exact: true }).click();
   await page.getByRole('button', { name: '추가 정보 입력하기' }).click();
 
-  for (const group of ['기본정보', '거주', '혼인·자녀', '주택·당첨 이력', '청약통장', '소득', '자산', '해외체류·특례']) {
-    await expect(page.getByRole('heading', { name: group, exact: true })).toBeVisible();
-  }
+  const visited: string[] = [];
+  for (let step = 0; step < 6; step += 1) {
+    const progress = page.getByText(/^\d+ \/ \d+ (?:기본정보|주거·주택이력|청약|소득·자산|확인)$/).first();
+    const text = await progress.textContent();
+    if (text) visited.push(text.replace(/^\d+ \/ \d+ /, ''));
 
-  const income = page.getByLabel('본인 월평균소득(원)', { exact: true });
-  await expect(page.getByText(/입력한 금액:/)).toHaveCount(0);
-  await income.fill('2669354');
-  await expect(page.getByText('입력한 금액: 266만 9,354원', { exact: true })).toBeVisible();
-  await page.getByLabel('자산 총액(원, 청년은 본인 / 그 외 세대)', { exact: true }).fill('100000000');
-  await expect(page.getByText('입력한 금액: 1억원', { exact: true })).toBeVisible();
+    const income = page.getByLabel('본인 월평균소득은 얼마인가요?', { exact: true });
+    if (await income.isVisible().catch(() => false)) {
+      await expect(page.getByText(/입력한 금액:/)).toHaveCount(0);
+      await income.fill('2669354');
+      await expect(page.getByText('입력한 금액: 266만 9,354원', { exact: true })).toBeVisible();
+      await page.getByLabel('본인(또는 세대) 자산 총액은 얼마인가요?', { exact: true }).fill('100000000');
+      await expect(page.getByText('입력한 금액: 1억원', { exact: true })).toBeVisible();
+    }
+
+    const submit = page.getByRole('button', { name: '내 조건으로 판정하기' });
+    if (await submit.isVisible().catch(() => false)) break;
+    await page.getByRole('button', { name: '다음', exact: true }).click();
+  }
+  expect(visited).toEqual(['기본정보', '주거·주택이력', '청약', '소득·자산', '확인']);
 
   await expectNoHorizontalOverflow(page);
   await shoot(page, 'question-groups', testInfo.project.name);

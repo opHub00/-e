@@ -132,7 +132,7 @@ test('supply context changes visibly and first-home stays scoreless', async ({ p
 test('unsupported announcement has no dead conversation input', async ({ page }) => {
   await stubDatabase(page, { rules: false });
   await page.goto(`/consultation?listingId=announcement%3A${ANNOUNCEMENT_ID}`);
-  await expect(page.getByRole('heading', { name: '이 공고의 상담은 준비 중이에요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '이 공고의 규칙을 확인할 수 없어요' })).toBeVisible();
   await expect(page.getByLabel('상담 질문 입력')).toHaveCount(0);
 });
 

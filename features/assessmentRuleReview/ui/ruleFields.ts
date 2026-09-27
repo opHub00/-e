@@ -81,7 +81,8 @@ export const canEditOperator = (snapshot: ReviewableRuleSnapshot): boolean =>
 
 /** Score fields appear only when the rule actually carries scoring semantics. */
 export const canEditScore = (snapshot: ReviewableRuleSnapshot): boolean =>
-  snapshot.category === 'SCORE' || snapshot.score !== null || snapshot.maxScore !== null;
+  !['BOOLEAN', 'TEXT', 'UNSUPPORTED'].includes(valueKindOf(snapshot))
+  && (snapshot.category === 'SCORE' || snapshot.score !== null || snapshot.maxScore !== null);
 
 export type FieldLabel = '조건' | '적용 대상' | '공급단계' | '배점';
 /** Human wording for one changed path, used by the edit preview and the saved diff. */

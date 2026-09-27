@@ -208,8 +208,9 @@ test('boolean and text rules hide meaningless operators and scores', async ({ pa
   await expect(page.getByText('예', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('배점 없음', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '값 고치기' }).click();
-  await expect(page.getByText('비교 방식', { exact: true })).toHaveCount(0);
-  await expect(page.getByLabel('배점')).toHaveCount(0);
+  const editor = page.getByRole('heading', { name: '관리자 수정', exact: true }).locator('..');
+  await expect(editor.getByText('비교 방식', { exact: true })).toHaveCount(0);
+  await expect(editor.getByLabel('배점', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '편집 취소' }).click();
 
   await rule(page, '공고일 제주 거주').click();

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { AdminShell } from '../../../features/adminPortal/AdminShell';
+import { AdminChrome } from '../../../features/adminPortal/AdminShell';
 import { countLabel, dateLabel } from '../../../features/adminPortal/status';
 import {
   AdminButton, CellText, DataList, KpiGrid, Notice, PageIntro, SearchFilterBar, SectionCard, StatusBadge,
@@ -38,9 +38,9 @@ const FILTERS: { key: 'ALL' | ScoringStatus; label: string }[] = [
  */
 export default function ScoringListRoute() {
   return (
-    <AdminShell title="가점 계산식" subtitle="청약가점 배점표를 확인하고 시뮬레이터로 점검해요.">
-      {() => <ScoringList />}
-    </AdminShell>
+    <AdminChrome title="가점 계산식" subtitle="청약가점 배점표를 확인하고 시뮬레이터로 점검해요.">
+      <ScoringList />
+    </AdminChrome>
   );
 }
 

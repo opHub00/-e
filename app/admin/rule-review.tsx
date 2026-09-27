@@ -43,13 +43,15 @@ function requestedRuleSet(value: unknown): RequestedRuleSet {
 }
 
 function resolveGateway(ruleSetId: string | null): { gateway: ReviewGateway; persistence: ReviewPersistence } {
-  const plan = isRuleReviewTestEnvironment(process.env.EXPO_PUBLIC_WANPANE_ENV)
+  const environment = process.env.EXPO_PUBLIC_WANPANE_ENV;
+  const localEnvironment = isRuleReviewTestEnvironment(environment);
+  const plan = localEnvironment
     ? ((globalThis as Record<string, unknown>)[DEV_FAULT_PLAN] ?? {}) as ReviewFaultPlan
     : {};
   const resolution = createConfiguredReviewGateway(plan, ruleSetId);
   return resolution.status === 'READY'
     ? resolution
-    : { gateway: failedGateway(resolution.code), persistence: process.env.EXPO_PUBLIC_WANPANE_ENV === 'production' ? 'production' : 'staging' };
+    : { gateway: failedGateway(resolution.code), persistence: localEnvironment ? 'local' : environment === 'production' ? 'production' : 'staging' };
 }
 function useGateway() {
   const { ruleSetId } = useLocalSearchParams<{ ruleSetId?: string }>();

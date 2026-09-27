@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { colors, radius, spacing, tracking, type } from '../../../design/tokens';
-import { AdminShell } from '../../../features/adminPortal/AdminShell';
+import { AdminChrome } from '../../../features/adminPortal/AdminShell';
 import { dateLabel } from '../../../features/adminPortal/status';
 import {
   AdminButton, CellText, ConfirmDialog, DataList, Disclosure, FormSection, KpiGrid, LabeledValue, Notice,
@@ -67,12 +67,9 @@ function ScopeNote() {
 export default function ScoringDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
-    <AdminShell title={id === 'new' ? '새 산식 추가' : '가점 계산식'} subtitle={id === 'new' ? '새 배점표를 만드는 방법이에요.' : '배점 항목과 구간, 해석 문구를 확인해요.'}>
-      {() => {
-        if (id === 'new') return <CreateGuide />;
-        return typeof id === 'string' ? <Detail formulaId={id} /> : <NotFound id={String(id)} />;
-      }}
-    </AdminShell>
+    <AdminChrome title={id === 'new' ? '새 산식 추가' : '가점 계산식'} subtitle={id === 'new' ? '새 배점표를 만드는 방법이에요.' : '배점 항목과 구간, 해석 문구를 확인해요.'}>
+      {id === 'new' ? <CreateGuide /> : typeof id === 'string' ? <Detail formulaId={id} /> : <NotFound id={String(id)} />}
+    </AdminChrome>
   );
 }
 

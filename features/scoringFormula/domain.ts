@@ -12,6 +12,7 @@
 import type { SupplyType } from '../applicationAssessment/types.ts';
 
 /** 산식이 지금 어디까지 왔는가. 활성만 서비스에 쓸 수 있다. */
+/** Browser-draft lifecycle kept stable for the parallel UI work. */
 export type ScoringStatus = 'DRAFT' | 'REVIEW' | 'ACTIVE' | 'SUSPENDED';
 
 export const SCORING_STATUS_LABEL: Record<ScoringStatus, string> = {
@@ -70,8 +71,8 @@ export type ScoringInterpretation = {
 export type ScoringTestCase = {
   id: string;
   label: string;
-  /** component.id → 입력값 */
-  inputs: Record<string, number>;
+  /** component.fact → 입력값. 기존 fixture의 component.id도 읽기 호환한다. */
+  inputs: Record<string, number | null>;
   expectedTotal: number;
 };
 
@@ -140,7 +141,9 @@ export function calculateScore(formula: ScoringFormula, inputs: Record<string, n
   const problems: string[] = [];
   for (const component of [...formula.components].sort((left, right) => left.order - right.order)) {
     const max = componentMax(component);
-    const value = inputs[component.id];
+    const value = Object.prototype.hasOwnProperty.call(inputs, component.fact)
+      ? inputs[component.fact]
+      : inputs[component.id];
     if (typeof value !== 'number' || !Number.isFinite(value)) {
       breakdown.push({ componentId: component.id, label: component.label, input: null, points: null, max, bandLabel: null, problem: '값이 아직 없어요.' });
       problems.push(`${component.label}: 값이 아직 없어요.`);
@@ -189,7 +192,17 @@ export function validateFormula(formula: ScoringFormula): FormulaProblem[] {
   if (!formula.legalBasis.trim()) problems.push({ componentId: null, message: '기준이 된 근거를 적어 주세요.' });
   if (!formula.components.length) problems.push({ componentId: null, message: '배점 항목이 하나도 없어요.' });
 
+  const componentIds = new Set<string>();
+  const componentOrders = new Set<number>();
+
   for (const component of formula.components) {
+    if (!component.id.trim() || !component.label.trim() || !component.fact.trim() || !component.unit.trim()) {
+      problems.push({ componentId: component.id || null, message: '항목의 키·이름·입력값·단위를 모두 적어 주세요.' });
+    }
+    if (componentIds.has(component.id)) problems.push({ componentId: component.id, message: `${component.id}: 항목 키가 중복됐어요.` });
+    if (componentOrders.has(component.order)) problems.push({ componentId: component.id, message: `${component.label}: 표시 순서 ${component.order}가 중복됐어요.` });
+    componentIds.add(component.id);
+    componentOrders.add(component.order);
     if (!component.bands.length) {
       problems.push({ componentId: component.id, message: `${component.label}: 구간이 하나도 없어요.` });
       continue;
@@ -201,6 +214,7 @@ export function validateFormula(formula: ScoringFormula): FormulaProblem[] {
       if (band.min !== undefined && band.max !== undefined && band.min > band.max) {
         problems.push({ componentId: component.id, message: `${component.label}: 구간의 시작이 끝보다 커요(${band.label}).` });
       }
+      if (!band.label.trim()) problems.push({ componentId: component.id, message: `${component.label}: 구간 설명이 비어 있어요.` });
     }
     // 구간을 시작값 순으로 세우고, 앞 구간의 끝과 다음 구간의 시작이 맞닿는지 본다.
     const sorted = [...component.bands].sort((left, right) => (left.min ?? -Infinity) - (right.min ?? -Infinity));

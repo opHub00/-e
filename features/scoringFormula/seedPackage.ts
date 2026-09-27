@@ -37,4 +37,12 @@ export function verifyScoringSeedPackage(value: ScoringSeedPackage): void {
   const { sourcePackageHash, ...payload } = value;
   if (sha256Hex(canonicalSerialize(payload)) !== sourcePackageHash) throw new Error('STALE_SCORING_SEED_PACKAGE');
   if (value.formula.status !== 'IN_REVIEW' || value.formula.publishedToUsers) throw new Error('UNSAFE_SCORING_SEED_STATE');
+  const itemKeys = value.formula.components.map(component => component.id).sort();
+  for (const testCase of value.formula.testCases) {
+    const inputKeys = Object.keys(testCase.inputs).sort();
+    if (inputKeys.length !== itemKeys.length || inputKeys.some((key, index) => key !== itemKeys[index])
+      || Object.values(testCase.inputs).some(input => typeof input !== 'number' || !Number.isFinite(input))) {
+      throw new Error(`SCORING_TEST_INPUT_KEYS_MISMATCH:${testCase.id}`);
+    }
+  }
 }

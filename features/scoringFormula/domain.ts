@@ -71,7 +71,7 @@ export type ScoringInterpretation = {
 export type ScoringTestCase = {
   id: string;
   label: string;
-  /** component.fact → 입력값. 기존 fixture의 component.id도 읽기 호환한다. */
+  /** 저장·검수 예시는 component.id(DB item_key) → 입력값을 사용한다. */
   inputs: Record<string, number | null>;
   expectedTotal: number;
 };

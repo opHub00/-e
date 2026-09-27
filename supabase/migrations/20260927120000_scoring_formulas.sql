@@ -114,7 +114,9 @@ begin
     formula_id := coalesce(new.formula_id, old.formula_id);
     select status into locked_status from public.scoring_formulas where id=formula_id;
   end if;
-  if locked_status in ('ACTIVE','RETIRED') and coalesce(current_setting('wanpane.scoring_internal', true),'') <> 'lifecycle' then
+  if locked_status = 'ACTIVE' and coalesce(current_setting('wanpane.scoring_internal', true),'') <> 'lifecycle' then
+    raise exception 'SCORING_VERSION_PUBLISHED';
+  elsif locked_status = 'RETIRED' and coalesce(current_setting('wanpane.scoring_internal', true),'') <> 'lifecycle' then
     raise exception 'SCORING_VERSION_IMMUTABLE';
   end if;
   return coalesce(new, old);
@@ -143,6 +145,14 @@ create policy scoring_bands_public_read on public.scoring_formula_bands for sele
     where i.id=item_id and f.status='ACTIVE' and f.published_to_users));
 grant select on public.scoring_formulas, public.scoring_formula_items, public.scoring_formula_bands to anon, authenticated;
 
+create function public.scoring_formula_actor(p_user_id uuid)
+returns jsonb language sql stable security definer set search_path = '' as $$
+select case when p_user_id is null then null else jsonb_build_object(
+  'userId',p_user_id::text,
+  'email',(select u.email from auth.users u where u.id=p_user_id),
+  'role',(select m.role from public.assessment_review_members m where m.user_id=p_user_id and m.enabled)
+) end $$;
+
 create function public.scoring_formula_snapshot(p_formula_id uuid)
 returns jsonb language sql stable security definer set search_path = '' as $$
 select jsonb_build_object(
@@ -150,6 +160,11 @@ select jsonb_build_object(
   'target',f.target,'targets',jsonb_build_array(f.target),'scopeKey',f.scope_key,'applicableScope',f.applicable_scope,
   'status',f.status,'publishedToUsers',f.published_to_users,'legalBasis',f.legal_basis,
   'interpretations',f.interpretations,'revision',f.revision,'updatedAt',f.updated_at,
+  'hasDraft',exists(select 1 from public.scoring_formulas d where d.slug=f.slug and d.status in ('DRAFT','IN_REVIEW')),
+  'draftVersion',(select jsonb_build_object('id',d.id::text,'version',d.version,'status',d.status,'updatedAt',d.updated_at)
+    from public.scoring_formulas d where d.slug=f.slug and d.status in ('DRAFT','IN_REVIEW') order by d.updated_at desc,d.created_at desc limit 1),
+  'actors',jsonb_build_object('created',public.scoring_formula_actor(f.created_by),'updated',public.scoring_formula_actor(f.updated_by),
+    'activated',public.scoring_formula_actor(f.activated_by)),
   'components',coalesce((select jsonb_agg(jsonb_build_object(
     'id',i.item_key,'recordId',i.id::text,'label',i.label,'description',i.description,'unit',i.unit,
     'fact',i.fact,'order',i.display_order,'declaredMaxScore',i.declared_max_score,
@@ -200,7 +215,7 @@ end $$;
 
 create function public.validate_scoring_formula(p_formula_id uuid)
 returns jsonb language plpgsql stable security definer set search_path = '' as $$
-declare errors jsonb:='[]'; item record; previous_max numeric; band record; actual_max integer;
+declare errors jsonb:='[]'; item record; previous_max numeric; band record; actual_max integer; test record;
 begin
   if not exists(select 1 from public.scoring_formulas where id=p_formula_id) then raise exception 'SCORING_FORMULA_NOT_FOUND'; end if;
   if not exists(select 1 from public.scoring_formula_items where formula_id=p_formula_id) then errors:=errors||'"EMPTY_ITEMS"'::jsonb; end if;
@@ -218,8 +233,21 @@ begin
       if band.max_value is null and exists(select 1 from public.scoring_formula_bands x where x.item_id=item.id and x.display_order>band.display_order) then errors:=errors||to_jsonb('OPEN_BAND_NOT_LAST:'||item.item_key); end if;
     end loop;
   end loop;
+  for test in select * from public.scoring_formula_test_cases where formula_id=p_formula_id loop
+    if exists(select 1 from jsonb_object_keys(test.inputs) key
+      where not exists(select 1 from public.scoring_formula_items i where i.formula_id=p_formula_id and i.item_key=key))
+      or exists(select 1 from public.scoring_formula_items i where i.formula_id=p_formula_id and not (test.inputs ? i.item_key))
+      or exists(select 1 from jsonb_each(test.inputs) value where jsonb_typeof(value.value)<>'number') then
+      errors:=errors||to_jsonb('TEST_INPUT_KEYS_MISMATCH:'||test.case_key);
+    end if;
+  end loop;
   return errors;
 end $$;
+
+create function public.get_scoring_formula_access() returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare actor_role text; begin actor_role:=public.assert_assessment_review_access(false);
+return jsonb_build_object('role',actor_role,'canRead',true,'canReview',true,
+  'canMutate',actor_role='admin','canActivate',actor_role='admin'); end $$;
 
 create function public.list_scoring_formulas() returns jsonb language plpgsql stable security definer set search_path='' as $$
 begin perform public.assert_assessment_review_access(false);
@@ -271,6 +299,7 @@ returns jsonb language plpgsql security definer set search_path='' as $$
 declare actor uuid; current public.scoring_formulas%rowtype; before_value jsonb; v_item_id uuid;
 begin perform public.assert_assessment_review_access(true); actor:=auth.uid(); select * into current from public.scoring_formulas where id=p_formula_id for update;
 if not found then raise exception 'SCORING_FORMULA_NOT_FOUND'; end if; if current.revision<>p_expected_revision then raise exception 'SCORING_STALE_REVISION'; end if;
+if current.status='ACTIVE' then raise exception 'SCORING_VERSION_PUBLISHED'; end if;
 if current.status not in ('DRAFT','IN_REVIEW') then raise exception 'SCORING_VERSION_IMMUTABLE'; end if; if length(trim(p_reason))<3 then raise exception 'REASON_REQUIRED'; end if;
 before_value:=public.scoring_formula_snapshot(p_formula_id);
 if p_action='UPDATE_METADATA' then update public.scoring_formulas set name=coalesce(p_payload->>'name',name),description=coalesce(p_payload->>'description',description),
@@ -344,7 +373,8 @@ insert into public.scoring_formula_audit_logs(formula_id,action,actor_user_id,re
 return public.scoring_formula_snapshot(p_formula_id); end $$;
 
 create function public.get_active_scoring_formula(p_target text) returns jsonb language sql stable security definer set search_path='' as $$
-select jsonb_set(public.scoring_formula_snapshot(id),'{testCases}','[]'::jsonb,true) - 'history'
+select jsonb_set(jsonb_set(public.scoring_formula_snapshot(id),'{testCases}','[]'::jsonb,true),'{history}','[]'::jsonb,true)
+  - 'actors' - 'hasDraft' - 'draftVersion'
 from public.scoring_formulas where target=p_target and status='ACTIVE' and published_to_users limit 1 $$;
 create function public.evaluate_active_scoring_formula(p_target text,p_inputs jsonb) returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare formula_id uuid; begin select id into formula_id from public.scoring_formulas where target=p_target and status='ACTIVE' and published_to_users limit 1;
@@ -382,20 +412,20 @@ begin
   return jsonb_build_object('status','INSERTED','formulaId',formula_id,'dryRun',false);
 end $$;
 
-revoke all on function public.scoring_formula_snapshot(uuid), public.evaluate_scoring_formula_snapshot(uuid,jsonb), public.validate_scoring_formula(uuid),
- public.list_scoring_formulas(), public.get_scoring_formula_detail(uuid), public.get_scoring_formula_audit(uuid),
+revoke all on function public.scoring_formula_actor(uuid), public.scoring_formula_snapshot(uuid), public.evaluate_scoring_formula_snapshot(uuid,jsonb), public.validate_scoring_formula(uuid),
+ public.get_scoring_formula_access(), public.list_scoring_formulas(), public.get_scoring_formula_detail(uuid), public.get_scoring_formula_audit(uuid),
  public.review_scoring_formula(uuid),
  public.create_scoring_formula_draft(jsonb,text), public.clone_scoring_formula_version(uuid,text,text),
  public.mutate_scoring_formula_draft(uuid,bigint,text,jsonb,text), public.request_scoring_formula_review(uuid,bigint,text),
  public.activate_scoring_formula(uuid,bigint,boolean,text), public.retire_scoring_formula(uuid,bigint,text),
  public.get_active_scoring_formula(text), public.evaluate_active_scoring_formula(text,jsonb), public.seed_scoring_formula_package(jsonb,boolean) from public, anon, authenticated;
-grant execute on function public.list_scoring_formulas(), public.get_scoring_formula_detail(uuid), public.get_scoring_formula_audit(uuid),
+grant execute on function public.get_scoring_formula_access(), public.list_scoring_formulas(), public.get_scoring_formula_detail(uuid), public.get_scoring_formula_audit(uuid),
  public.review_scoring_formula(uuid),
  public.create_scoring_formula_draft(jsonb,text), public.clone_scoring_formula_version(uuid,text,text),
  public.mutate_scoring_formula_draft(uuid,bigint,text,jsonb,text), public.request_scoring_formula_review(uuid,bigint,text),
  public.activate_scoring_formula(uuid,bigint,boolean,text), public.retire_scoring_formula(uuid,bigint,text) to authenticated;
 grant execute on function public.get_active_scoring_formula(text), public.evaluate_active_scoring_formula(text,jsonb) to anon, authenticated;
-grant execute on function public.scoring_formula_snapshot(uuid), public.evaluate_scoring_formula_snapshot(uuid,jsonb), public.validate_scoring_formula(uuid) to service_role;
+grant execute on function public.scoring_formula_actor(uuid), public.scoring_formula_snapshot(uuid), public.evaluate_scoring_formula_snapshot(uuid,jsonb), public.validate_scoring_formula(uuid) to service_role;
 grant execute on function public.seed_scoring_formula_package(jsonb,boolean) to service_role;
 
 commit;

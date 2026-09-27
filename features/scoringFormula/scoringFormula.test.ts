@@ -177,6 +177,9 @@ test('시드 패키지는 결정적이고 IN_REVIEW·비공개로 고정된다',
   assert.equal(first.formula.publishedToUsers, false);
   assert.doesNotThrow(() => verifyScoringSeedPackage(first));
   assert.throws(() => verifyScoringSeedPackage({ ...first, sourcePackageHash: '0'.repeat(64) }), /STALE_SCORING_SEED_PACKAGE/);
+  const wrongKeyFormula = structuredClone(standard);
+  wrongKeyFormula.testCases[0].inputs = { noHomeMonths: 180, dependentCount: 6, subscriptionMonths: 180 };
+  assert.throws(() => verifyScoringSeedPackage(buildScoringSeedPackage(wrongKeyFormula)), /SCORING_TEST_INPUT_KEYS_MISMATCH/);
 });
 
 test('검수 전 산식은 사용자에게 내보내지 않는다', () => {
@@ -263,7 +266,7 @@ test('산식 저장소 계약이 migration 과 같은 이름을 쓴다', async (
     assert.ok(sql.includes(`function public.${name}(`), `${name} 이 migration 에 없다`);
   }
   // 저장소가 돌려줄 수 있는 오류는 전부 운영자 말로 옮겨 둔다.
-  for (const code of ['SCORING_VERSION_IMMUTABLE', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
+  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
     assert.ok(sql.includes(code), `${code} 를 내는 곳이 migration 에 없다`);
     assert.notEqual(scoringErrorMessage(code), `처리하지 못했어요 (${code}).`, `${code} 의 안내 문구가 없다`);
   }

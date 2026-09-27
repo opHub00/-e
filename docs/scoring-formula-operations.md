@@ -28,7 +28,7 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## RPC
 
-읽기: `list_scoring_formulas`, `get_scoring_formula_detail`, `get_scoring_formula_audit`, `get_active_scoring_formula`, `evaluate_active_scoring_formula`.
+읽기: `get_scoring_formula_access`, `list_scoring_formulas`, `get_scoring_formula_detail`, `get_scoring_formula_audit`, `get_active_scoring_formula`, `evaluate_active_scoring_formula`. 관리자 목록/detail snapshot에는 같은 slug의 초안 존재 여부(`hasDraft`, `draftVersion`)와 생성·수정·활성화 actor가 포함된다.
 
 운영: `create_scoring_formula_draft`, `clone_scoring_formula_version`, `mutate_scoring_formula_draft`, `request_scoring_formula_review`, `activate_scoring_formula`, `retire_scoring_formula`.
 
@@ -38,7 +38,7 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## 권한과 RLS
 
-기존 `assert_assessment_review_access`를 재사용한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw draft/test/audit를 읽거나 쓸 수 없다. 사용자 읽기는 `ACTIVE AND published_to_users` formula/item/band와 제한된 active read/evaluate RPC뿐이며, 공개 active snapshot에서는 test case와 내부 history를 제거한다.
+기존 `assert_assessment_review_access`를 재사용한다. `get_scoring_formula_access`는 UI에 `canRead`, `canReview`, `canMutate`, `canActivate` capability를 제공한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw draft/test/audit를 읽거나 쓸 수 없다. 사용자 읽기는 `ACTIVE AND published_to_users` formula/item/band와 제한된 active read/evaluate RPC뿐이며, 공개 active snapshot에서는 test case, actor, 초안 존재 여부와 내부 history를 제거한다.
 
 모든 SECURITY DEFINER 함수는 `search_path=''`와 schema-qualified object를 사용한다. 함수 기본 실행권은 회수하고 필요한 role에만 다시 부여한다. service-role seed는 server script에만 있으며 client bundle에 import되지 않는다.
 

@@ -3,15 +3,37 @@ import { calculateScore, componentMax, type ScoringBand, type ScoringComponent, 
   type ScoringTarget, type ScoringTestCase } from './domain.ts';
 
 export type PersistedScoringStatus = 'DRAFT' | 'IN_REVIEW' | 'ACTIVE' | 'RETIRED';
+export type ScoringActorRole = 'reviewer' | 'admin';
+export type ScoringActor = { userId: string; email: string | null; role: ScoringActorRole | null };
+export type ScoringAccess = {
+  role: ScoringActorRole;
+  canRead: true;
+  canReview: true;
+  canMutate: boolean;
+  canActivate: boolean;
+};
+export type ScoringDraftVersion = { id: string; version: string; status: 'DRAFT' | 'IN_REVIEW'; updatedAt: string };
 export type FormulaMutation = { expectedRevision: number; reason: string };
 export type FormulaMetadataPatch = Partial<Pick<ScoringFormula, 'name' | 'description' | 'legalBasis' | 'interpretations'>>;
 export type FormulaAuditEntry = { id: number; action: string; actorUserId: string | null; reason: string; before: unknown; after: unknown; revision: number; createdAt: string };
-export type StoredScoringFormula = Omit<ScoringFormula, 'status'> & { status: PersistedScoringStatus; slug: string; target: ScoringTarget; scopeKey: string; revision: number; audit?: FormulaAuditEntry[] };
+export type StoredScoringFormula = Omit<ScoringFormula, 'status'> & {
+  status: PersistedScoringStatus;
+  slug: string;
+  target: ScoringTarget;
+  scopeKey: string;
+  revision: number;
+  hasDraft: boolean;
+  draftVersion: ScoringDraftVersion | null;
+  actors: { created: ScoringActor | null; updated: ScoringActor | null; activated: ScoringActor | null };
+  audit?: FormulaAuditEntry[];
+};
+export type PublishedScoringFormula = Omit<StoredScoringFormula, 'hasDraft' | 'draftVersion' | 'actors' | 'audit'>;
 export type FormulaReviewResult = { validation: string[]; testCases: Array<{ id: string; expectedTotal: number; actualTotal: number | null; passed: boolean }> };
 export type CreateFormulaDraftInput = Pick<StoredScoringFormula, 'slug' | 'version' | 'name' | 'description' | 'target' | 'scopeKey' | 'legalBasis' | 'interpretations'>
   & { applicableScope?: Record<string, unknown> };
 
 export interface ScoringFormulaRepository {
+  getAccess(): Promise<ScoringAccess>;
   list(): Promise<StoredScoringFormula[]>;
   get(id: string): Promise<StoredScoringFormula>;
   createDraft(input: CreateFormulaDraftInput, reason: string): Promise<StoredScoringFormula>;
@@ -31,16 +53,17 @@ export interface ScoringFormulaRepository {
   activate(id: string, publishToUsers: boolean, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   retire(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   auditHistory(id: string): Promise<FormulaAuditEntry[]>;
-  getActiveFormula(target: ScoringTarget): Promise<StoredScoringFormula | null>;
+  getActiveFormula(target: ScoringTarget): Promise<PublishedScoringFormula | null>;
   evaluateActiveFormula(target: ScoringTarget, input: Record<string, number | null>): Promise<ScoringResult | null>;
 }
 
 export type ScoringRepositoryError =
-  | 'SCORING_VERSION_IMMUTABLE' | 'SCORING_SCOPE_ALREADY_ACTIVE' | 'SCORING_FORMULA_NOT_FOUND'
+  | 'SCORING_VERSION_PUBLISHED' | 'SCORING_VERSION_IMMUTABLE' | 'SCORING_SCOPE_ALREADY_ACTIVE' | 'SCORING_FORMULA_NOT_FOUND'
   | 'SCORING_STALE_REVISION' | 'SCORING_VALIDATION_FAILED' | 'SCORING_TEST_CASE_FAILED'
   | 'SCORING_STATUS_INVALID' | 'AUTH_REQUIRED' | 'FORBIDDEN';
 
 export const SCORING_ERROR_MESSAGE: Record<ScoringRepositoryError, string> = {
+  SCORING_VERSION_PUBLISHED: '이미 발행된 버전이라 직접 고칠 수 없어요. 새 초안 버전을 만들어 주세요.',
   SCORING_VERSION_IMMUTABLE: '활성화되었거나 종료된 버전은 고칠 수 없어요. 새 버전을 만들어 주세요.',
   SCORING_SCOPE_ALREADY_ACTIVE: '같은 적용 범위에 이미 활성 산식이 있어요.',
   SCORING_FORMULA_NOT_FOUND: '산식을 찾지 못했어요.',
@@ -54,7 +77,7 @@ export const SCORING_ERROR_MESSAGE: Record<ScoringRepositoryError, string> = {
 export const scoringErrorMessage = (code: string): string => SCORING_ERROR_MESSAGE[code as ScoringRepositoryError] ?? `처리하지 못했어요 (${code}).`;
 
 export const SCORING_RPC = {
-  list: 'list_scoring_formulas', detail: 'get_scoring_formula_detail', createDraft: 'create_scoring_formula_draft',
+  access: 'get_scoring_formula_access', list: 'list_scoring_formulas', detail: 'get_scoring_formula_detail', createDraft: 'create_scoring_formula_draft',
   cloneVersion: 'clone_scoring_formula_version', mutate: 'mutate_scoring_formula_draft', requestReview: 'request_scoring_formula_review',
   review: 'review_scoring_formula',
   activate: 'activate_scoring_formula', retire: 'retire_scoring_formula', audit: 'get_scoring_formula_audit',
@@ -78,6 +101,7 @@ export class SupabaseScoringFormulaRepository implements ScoringFormulaRepositor
     const { data, error } = await this.client.rpc(name, args);
     return result<T>(data, error);
   }
+  getAccess() { return this.call<ScoringAccess>(SCORING_RPC.access); }
   list() { return this.call<StoredScoringFormula[]>(SCORING_RPC.list); }
   get(id: string) { return this.call<StoredScoringFormula>(SCORING_RPC.detail, { p_formula_id: id }); }
   createDraft(input: CreateFormulaDraftInput, reason: string) { return this.call<StoredScoringFormula>(SCORING_RPC.createDraft, { p_input: input, p_reason: reason }); }

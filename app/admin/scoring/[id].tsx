@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
@@ -12,12 +12,16 @@ import {
 } from '../../../features/adminPortal/ui/AdminKit';
 import { scoringFormula } from '../../../features/scoringFormula/registry';
 import {
-  activationChecks, addBand, canActivate, clearDraft, editBand, removeBand, removeTestCase, setPublished,
-  setStatus, upsertTestCase, withDraft, writeDraft,
+  activationChecks, addBand, editBand, removeBand, removeTestCase, setPublished, setStatus, upsertTestCase,
 } from '../../../features/scoringFormula/draftStore';
 import {
+  activationBlock, createScoringRepository, discardLocalDraft, editabilityOf, hasLocalDraft, newVersionFrom,
+  runScoring, scoringPermission, scoringSource,
+} from '../../../features/scoringFormula/adapter';
+import {
   SCORING_STATUS_LABEL, SCORING_TARGET_LABEL, calculateScore, componentMax, formulaMax, isServiceReady,
-  runTestCases, validateFormula, type ScoringBand, type ScoringComponent, type ScoringFormula, type ScoringTestCase,
+  runTestCases, validateFormula, type ScoringBand, type ScoringComponent, type ScoringFormula, type ScoringStatus,
+  type ScoringTestCase,
 } from '../../../features/scoringFormula/domain';
 
 type Tab = 'overview' | 'bands' | 'wording' | 'tests' | 'simulator' | 'history';
@@ -69,10 +73,10 @@ export default function ScoringDetailRoute() {
   const title = !attached ? '가점 계산식' : id === 'new' ? '새 산식 추가' : formula?.name ?? '가점 계산식';
   return (
     <AdminShell title={title} subtitle={id === 'new' ? '새 배점표를 만드는 방법이에요.' : '배점 항목과 구간, 해석 문구를 확인해요.'}>
-      {() => {
+      {access => {
         if (!attached) return <SectionCard title="불러오는 중이에요" description="산식을 여는 중이에요." >{null}</SectionCard>;
         if (id === 'new') return <CreateGuide />;
-        return formula ? <Detail formula={formula} /> : <NotFound id={String(id)} />;
+        return formula ? <Detail formula={formula} role={access.role} /> : <NotFound id={String(id)} />;
       }}
     </AdminShell>
   );
@@ -113,24 +117,59 @@ function CreateGuide() {
   );
 }
 
-function Detail({ formula: published }: { formula: ScoringFormula }) {
+function Detail({ formula: published, role }: { formula: ScoringFormula; role: 'admin' | 'reviewer' }) {
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string }>();
   const initial = TABS.some(item => item.key === params.tab) ? (params.tab as Tab) : 'overview';
   const [tab, setTab] = useState<Tab>(initial);
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
-  // 편집 결과는 브라우저 초안에만 쌓인다. 배포본은 그대로 둔다.
-  const [loaded, setLoaded] = useState(() => withDraft(published));
-  const formula = loaded.formula;
-  const edit = (next: ScoringFormula) => { writeDraft(next); setLoaded({ formula: next, isDraft: true }); };
-  const discard = () => { clearDraft(published.id); setLoaded({ formula: published, isDraft: false }); setConfirmDiscard(false); };
+  const [error, setError] = useState<string | null>(null);
+  // 저장은 어댑터를 거친다. 지금은 브라우저 초안이고, 서버 구현이 끼워지면 화면은 그대로 둔 채 바뀐다.
+  const repository = createScoringRepository();
+  const [current, setCurrent] = useState<ScoringFormula>(published);
+  const [isDraft, setIsDraft] = useState(() => hasLocalDraft(published.id));
+  const formula = current;
+
+  useEffect(() => {
+    let alive = true;
+    void repository.list().then(list => {
+      const found = list.find(item => item.id === published.id);
+      if (alive && found) { setCurrent(found); setIsDraft(hasLocalDraft(published.id)); }
+    });
+    return () => { alive = false; };
+  }, [published.id]);
+
+  const permission = scoringPermission(role);
+  const editability = editabilityOf(formula, permission);
+
+  const edit = (next: ScoringFormula) => {
+    void runScoring(() => repository.save(next)).then(outcome => {
+      if (outcome.ok) { setCurrent(next); setIsDraft(true); setError(null); }
+      else setError(outcome.message);
+    });
+  };
+  const changeStatus = (next: ScoringStatus) => {
+    void runScoring(() => repository.setStatus(formula.id, next, `상태를 ${next} 로 바꿨어요.`)).then(outcome => {
+      if (outcome.ok) { setCurrent(setStatus(formula, next)); setIsDraft(true); setError(null); }
+      else setError(outcome.message);
+    });
+  };
+  const discard = () => { discardLocalDraft(published.id); setCurrent(published); setIsDraft(false); setConfirmDiscard(false); };
+  const createNewVersion = () => {
+    const next = newVersionFrom(formula);
+    void runScoring(() => repository.save(next)).then(outcome => {
+      if (outcome.ok) { setCurrent(next); setIsDraft(true); setError(null); }
+      else setError(outcome.message);
+    });
+  };
 
   const problems = useMemo(() => validateFormula(formula), [formula]);
   const runs = useMemo(() => runTestCases(formula), [formula]);
   const checks = useMemo(() => activationChecks(formula), [formula]);
   const ready = isServiceReady(formula);
-  const activatable = canActivate(formula);
+  const activationReason = activationBlock(formula, permission);
+  const activatable = activationReason === null;
 
   return (
     <>
@@ -140,15 +179,33 @@ function Detail({ formula: published }: { formula: ScoringFormula }) {
         actions={
           <>
             <AdminButton label="목록" tone="quiet" icon="arrow-back" onPress={() => router.push('/admin/scoring' as Href)} />
-            {loaded.isDraft ? <AdminButton label="초안 버리기" tone="danger" icon="undo" onPress={() => setConfirmDiscard(true)} /> : null}
-            <AdminButton label="사용자에게 공개" icon="visibility" onPress={() => setConfirmPublish(true)} disabled={!ready} />
+            {isDraft && scoringSource() === 'local-draft'
+              ? <AdminButton label="초안 버리기" tone="danger" icon="undo" onPress={() => setConfirmDiscard(true)} />
+              : null}
+            {editability.mustCreateNewVersion
+              ? <AdminButton label="새 버전 만들기" icon="content-copy" onPress={createNewVersion} />
+              : null}
+            <AdminButton
+              label="사용자에게 공개"
+              icon="visibility"
+              onPress={() => setConfirmPublish(true)}
+              disabled={!ready || !permission.canEdit}
+            />
           </>
         }
       />
 
-      {loaded.isDraft ? (
+      {error ? <Notice tone="pink" icon="error-outline">{error}</Notice> : null}
+
+      {isDraft && scoringSource() === 'local-draft' ? (
         <Notice tone="amber" icon="edit-note">
           지금 보고 있는 것은 이 브라우저에만 저장된 초안이에요. 서비스에는 아직 반영되지 않았어요.
+        </Notice>
+      ) : null}
+
+      {editability.notice ? (
+        <Notice tone={editability.mustCreateNewVersion ? 'amber' : 'neutral'} icon={editability.mustCreateNewVersion ? 'history' : 'lock'}>
+          {editability.notice}
         </Notice>
       ) : null}
 
@@ -188,14 +245,14 @@ function Detail({ formula: published }: { formula: ScoringFormula }) {
       >
         <View style={styles.statusRow}>
           {(['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'] as const).map(next => {
-            const blocked = next === 'ACTIVE' && !activatable;
+            const blocked = (next === 'ACTIVE' && !activatable) || !permission.canEdit;
             return (
               <AdminButton
                 key={next}
                 label={SCORING_STATUS_LABEL[next]}
                 tone={formula.status === next ? 'primary' : 'quiet'}
                 disabled={blocked || formula.status === next}
-                onPress={() => edit(setStatus(formula, next))}
+                onPress={() => changeStatus(next)}
               />
             );
           })}
@@ -203,6 +260,7 @@ function Detail({ formula: published }: { formula: ScoringFormula }) {
             label={formula.publishedToUsers ? '사용자 공개 끄기' : '사용자 공개 켜기'}
             tone="quiet"
             icon={formula.publishedToUsers ? 'visibility-off' : 'visibility'}
+            disabled={!permission.canEdit}
             onPress={() => edit(setPublished(formula, !formula.publishedToUsers))}
           />
         </View>
@@ -219,15 +277,13 @@ function Detail({ formula: published }: { formula: ScoringFormula }) {
             },
           ]}
         />
-        {!activatable ? (
-          <Notice tone="amber" icon="block">통과하지 못한 검사가 있어 활성으로 바꿀 수 없어요.</Notice>
-        ) : null}
+        {activationReason ? <Notice tone="amber" icon="block">{activationReason}</Notice> : null}
       </SectionCard>
 
       {tab === 'overview' ? <><ScopeNote /><Overview formula={formula} problems={problems} /></> : null}
-      {tab === 'bands' ? <Bands formula={formula} onEdit={edit} /> : null}
+      {tab === 'bands' ? <Bands formula={formula} onEdit={edit} editable={editability.canEditBands} /> : null}
       {tab === 'wording' ? <Wording formula={formula} /> : null}
-      {tab === 'tests' ? <Tests formula={formula} onEdit={edit} /> : null}
+      {tab === 'tests' ? <Tests formula={formula} onEdit={edit} editable={permission.canEdit} /> : null}
       {tab === 'simulator' ? <Simulator formula={formula} /> : null}
       {tab === 'history' ? <History formula={formula} /> : null}
 
@@ -282,7 +338,9 @@ function Overview({ formula, problems }: { formula: ScoringFormula; problems: Re
   );
 }
 
-function Bands({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: ScoringFormula) => void }) {
+function Bands({ formula, onEdit, editable }: {
+  formula: ScoringFormula; onEdit: (next: ScoringFormula) => void; editable: boolean;
+}) {
   const [advanced, setAdvanced] = useState(false);
   const components = [...formula.components].sort((left, right) => left.order - right.order);
   return (
@@ -292,6 +350,7 @@ function Bands({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: Sc
           key={component.id}
           component={component}
           advanced={advanced}
+          editable={editable}
           onToggleAdvanced={() => setAdvanced(value => !value)}
           onEditBand={(index, patch) => onEdit(editBand(formula, component.id, index, patch))}
           onAddBand={() => onEdit(addBand(formula, component.id))}
@@ -302,9 +361,10 @@ function Bands({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: Sc
   );
 }
 
-function ComponentCard({ component, advanced, onToggleAdvanced, onEditBand, onAddBand, onRemoveBand }: {
+function ComponentCard({ component, advanced, editable, onToggleAdvanced, onEditBand, onAddBand, onRemoveBand }: {
   component: ScoringComponent;
   advanced: boolean;
+  editable: boolean;
   onToggleAdvanced: () => void;
   onEditBand: (index: number, patch: Partial<ScoringBand>) => void;
   onAddBand: () => void;
@@ -315,7 +375,7 @@ function ComponentCard({ component, advanced, onToggleAdvanced, onEditBand, onAd
     <SectionCard
       title={`${component.label} · 최대 ${componentMax(component)}점`}
       description={component.description}
-      action={<AdminButton label="구간 추가" tone="quiet" icon="add" onPress={onAddBand} />}
+      action={<AdminButton label="구간 추가" tone="quiet" icon="add" onPress={onAddBand} disabled={!editable} />}
     >
       <DataList
         rows={component.bands.map((band, index) => ({ band, index }))}
@@ -360,9 +420,15 @@ function ComponentCard({ component, advanced, onToggleAdvanced, onEditBand, onAd
             <AdminButton
               label={editing === row.index ? '완료' : '수정'}
               tone="quiet"
+              disabled={!editable}
               onPress={() => setEditing(editing === row.index ? null : row.index)}
             />
-            <AdminButton label="삭제" tone="danger" onPress={() => { setEditing(null); onRemoveBand(row.index); }} />
+            <AdminButton
+              label="삭제"
+              tone="danger"
+              disabled={!editable}
+              onPress={() => { setEditing(null); onRemoveBand(row.index); }}
+            />
           </>
         )}
       />
@@ -398,7 +464,9 @@ function Wording({ formula }: { formula: ScoringFormula }) {
   );
 }
 
-function Tests({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: ScoringFormula) => void }) {
+function Tests({ formula, onEdit, editable }: {
+  formula: ScoringFormula; onEdit: (next: ScoringFormula) => void; editable: boolean;
+}) {
   const runs = runTestCases(formula);
   const components = [...formula.components].sort((left, right) => left.order - right.order);
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -456,7 +524,7 @@ function Tests({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: Sc
             },
           ]}
           actions={run => (
-            <AdminButton label="삭제" tone="danger" onPress={() => onEdit(removeTestCase(formula, run.testCase.id))} />
+            <AdminButton label="삭제" tone="danger" disabled={!editable} onPress={() => onEdit(removeTestCase(formula, run.testCase.id))} />
           )}
         />
       </SectionCard>
@@ -493,7 +561,7 @@ function Tests({ formula, onEdit }: { formula: ScoringFormula; onEdit: (next: Sc
         ) : (
           <Notice tone="green" icon="check-circle">지금 배점표로 계산하면 {preview.total}점이에요. 이 값을 기대 점수로 저장해요.</Notice>
         )}
-        <AdminButton label="예시 저장" icon="add" onPress={add} disabled={preview.total === null} />
+        <AdminButton label="예시 저장" icon="add" onPress={add} disabled={preview.total === null || !editable} />
       </SectionCard>
     </>
   );

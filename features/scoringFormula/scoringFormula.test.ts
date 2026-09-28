@@ -13,6 +13,11 @@ import {
 import { SCORING_RPC, scoringErrorMessage } from './repository.ts';
 import { buildScoringSeedPackage, verifyScoringSeedPackage } from './seedPackage.ts';
 
+const readScoringMigrations = async (): Promise<string> => (await Promise.all([
+  '../../supabase/migrations/20260927120000_scoring_formulas.sql',
+  '../../supabase/migrations/20260928075225_scoring_formula_production_hardening.sql',
+].map(path => readFile(new URL(path, import.meta.url), 'utf8')))).join('\n');
+
 const component = (over: Partial<ScoringComponent> = {}): ScoringComponent => ({
   id: 'period', label: '무주택 기간', description: '', unit: '개월', fact: 'noHomeMonths', order: 1,
   bands: [
@@ -260,21 +265,26 @@ test('활성화는 여섯 가지 검사를 모두 통과해야 열린다', () =>
   assert.equal(canActivate(badTest), false);
 });
 
-test('산식 저장소 계약이 migration 과 같은 이름을 쓴다', async () => {
-  const sql = await readFile(new URL('../../supabase/migrations/20260927120000_scoring_formulas.sql', import.meta.url), 'utf8');
+test('산식 저장소 계약이 base + correction migration 과 같은 이름을 쓴다', async () => {
+  const sql = await readScoringMigrations();
   for (const name of Object.values(SCORING_RPC)) {
     assert.ok(sql.includes(`function public.${name}(`), `${name} 이 migration 에 없다`);
   }
   // 저장소가 돌려줄 수 있는 오류는 전부 운영자 말로 옮겨 둔다.
-  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
+  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_VERSION_CONFLICT', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
     assert.ok(sql.includes(code), `${code} 를 내는 곳이 migration 에 없다`);
     assert.notEqual(scoringErrorMessage(code), `처리하지 못했어요 (${code}).`, `${code} 의 안내 문구가 없다`);
   }
-  assert.match(scoringErrorMessage('UNKNOWN_CODE'), /처리하지 못했어요/);
+  const raisedCodes = [...sql.matchAll(/raise exception(?: using message=)?\s*'([A-Z][A-Z0-9_]+)'|message='([A-Z][A-Z0-9_]+)'/g)]
+    .map(match => match[1] || match[2]);
+  for (const code of new Set(raisedCodes)) {
+    assert.notEqual(scoringErrorMessage(code), scoringErrorMessage('UNKNOWN_CODE'), `${code}가 generic 오류로 누락됐다`);
+  }
+  assert.equal(scoringErrorMessage('UNKNOWN_CODE'), '산식 저장소에서 처리하지 못한 오류가 발생했어요.');
 });
 
 test('migration 이 발행본 불변·적용범위당 활성 하나·감사 로그를 지킨다', async () => {
-  const sql = await readFile(new URL('../../supabase/migrations/20260927120000_scoring_formulas.sql', import.meta.url), 'utf8');
+  const sql = await readScoringMigrations();
   for (const table of ['scoring_formulas', 'scoring_formula_items', 'scoring_formula_bands', 'scoring_formula_test_cases', 'scoring_formula_audit_logs']) {
     assert.ok(sql.includes(`create table public.${table}`), `${table} 표가 없다`);
     assert.ok(sql.includes(`alter table public.${table} enable row level security`), `${table} 에 RLS 가 없다`);
@@ -289,4 +299,7 @@ test('migration 이 발행본 불변·적용범위당 활성 하나·감사 로�
   assert.ok(sql.includes("status in ('DRAFT','IN_REVIEW','ACTIVE','RETIRED')"));
   assert.ok(sql.includes("pg_advisory_xact_lock"), '활성화 경쟁을 직렬화하지 않는다');
   assert.ok(sql.includes("grant execute on function public.seed_scoring_formula_package(jsonb,boolean) to service_role"));
+  assert.ok(sql.includes('return_scoring_formula_to_draft'), '검토본을 안전하게 초안으로 되돌리는 RPC가 없다');
+  assert.ok(sql.includes("if current.status<>'IN_REVIEW' then raise exception 'SCORING_STATUS_INVALID'"), 'DRAFT가 review를 건너뛰고 활성화될 수 있다');
+  assert.ok(sql.includes('revoke select on public.scoring_formulas'), 'public direct table read가 actor metadata를 노출한다');
 });

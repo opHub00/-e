@@ -6,7 +6,7 @@
 
 ## 상태와 버전
 
-DB 상태는 `DRAFT → IN_REVIEW → ACTIVE → RETIRED`다. `(slug, version)`은 유일하다. ACTIVE 또는 RETIRED snapshot과 그 item/band/test case는 직접 수정할 수 없다. 변경은 ACTIVE v1을 `clone_scoring_formula_version`으로 DRAFT v2로 복제한 뒤 검토·활성화한다.
+DB 상태는 `DRAFT → IN_REVIEW → ACTIVE → RETIRED`다. 검토에서 수정 요청이 생기면 `IN_REVIEW → DRAFT`만 `return_scoring_formula_to_draft`로 되돌릴 수 있다. `ACTIVE → DRAFT`와 `RETIRED → ACTIVE`는 금지한다. 이미 발행된 snapshot을 되살리거나 수정하지 않고 `clone_scoring_formula_version`으로 새 DRAFT version을 만든 뒤 다시 검토·활성화한다. `(slug, version)`은 유일하다.
 
 한 formula version은 한 `target`과 한 `scope_key`를 가진다. ACTIVE `scope_key`에는 partial unique index가 있어 동시 요청에서도 두 ACTIVE version이 생기지 않는다. 향후 지역·공급 단계 같은 qualifier는 `applicable_scope`와 이를 정규화한 `scope_key`로 확장한다.
 
@@ -28,9 +28,11 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## RPC
 
-읽기: `get_scoring_formula_access`, `list_scoring_formulas`, `get_scoring_formula_detail`, `get_scoring_formula_audit`, `get_active_scoring_formula`, `evaluate_active_scoring_formula`. 관리자 목록/detail snapshot에는 같은 slug의 초안 존재 여부(`hasDraft`, `draftVersion`)와 생성·수정·활성화 actor가 포함된다.
+읽기: `get_scoring_formula_access`, `list_scoring_formulas`, `get_scoring_formula_detail`, `get_scoring_formula_audit`, `get_active_scoring_formula`, `evaluate_active_scoring_formula`. 관리자 목록/detail snapshot에는 같은 slug의 초안 존재 여부(`hasDraft`, `draftVersion`)와 생성·수정·활성화 actor가 포함된다. 보호된 audit RPC는 actor email/display label을 반환하지만 public active snapshot과 raw public table access에는 actor 정보가 없다.
 
-운영: `create_scoring_formula_draft`, `clone_scoring_formula_version`, `mutate_scoring_formula_draft`, `request_scoring_formula_review`, `activate_scoring_formula`, `retire_scoring_formula`.
+운영: `create_scoring_formula_draft`, `clone_scoring_formula_version`, `mutate_scoring_formula_draft`, `request_scoring_formula_review`, `return_scoring_formula_to_draft`, `activate_scoring_formula`, `retire_scoring_formula`.
+
+같은 `(slug, version)` 생성/복제 경쟁은 raw unique violation 대신 `SCORING_VERSION_CONFLICT`를 반환한다. 안전한 error detail에는 기존 version과, 해당 version이 초안이면 `existingDraft` 식별 정보만 들어간다. repository는 알려진 stable code만 UI로 전달하고 미분류 DB message/detail은 `SCORING_UNEXPECTED_ERROR`로 치환한다.
 
 서버 전용: `seed_scoring_formula_package`. `mutate_scoring_formula_draft`는 metadata/item/band/test case CRUD를 action/payload로 transaction 안에서 처리하고 매번 expected revision과 audit를 기록한다.
 
@@ -38,7 +40,7 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## 권한과 RLS
 
-기존 `assert_assessment_review_access`를 재사용한다. `get_scoring_formula_access`는 UI에 `canRead`, `canReview`, `canMutate`, `canActivate` capability를 제공한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw draft/test/audit를 읽거나 쓸 수 없다. 사용자 읽기는 `ACTIVE AND published_to_users` formula/item/band와 제한된 active read/evaluate RPC뿐이며, 공개 active snapshot에서는 test case, actor, 초안 존재 여부와 내부 history를 제거한다.
+기존 `assert_assessment_review_access`를 재사용한다. `get_scoring_formula_access`는 UI에 `canRead`, `canReview`, `canMutate`, `canActivate` capability를 제공한다. reviewer/admin은 관리 RPC로 목록과 detail을 읽을 수 있다. reviewer는 검토와 테스트 결과를 읽을 수 있지만 mutation/activation RPC는 admin을 요구한다. anon과 일반 authenticated 사용자는 raw formula/item/band/test/audit table을 직접 읽거나 쓸 수 없다. 사용자 읽기는 제한된 `get_active_scoring_formula` / `evaluate_active_scoring_formula` RPC뿐이며, 공개 active snapshot에서는 test case, actor, 초안 존재 여부와 내부 history를 제거한다.
 
 모든 SECURITY DEFINER 함수는 `search_path=''`와 schema-qualified object를 사용한다. 함수 기본 실행권은 회수하고 필요한 role에만 다시 부여한다. service-role seed는 server script에만 있으며 client bundle에 import되지 않는다.
 
@@ -50,7 +52,7 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## migration과 rollback
 
-적용 전 staging backup과 migration history를 확인하고 격리 staging에서 먼저 실행한다. 아직 사용자 연결 전 rollback은 새 RPC execute 권한을 revoke한 뒤 scoring 전용 함수·trigger·table을 dependency 역순으로 drop하는 후속 migration으로 수행한다. 적용 뒤 데이터가 생겼다면 down SQL로 삭제하지 않고 backup/point-in-time restore 또는 correction migration을 사용한다. 기존 assessment rule table에는 FK나 trigger를 추가하지 않으므로 영향 범위는 scoring 전용 객체에 한정된다.
+`20260927120000_scoring_formulas.sql`은 원격 브랜치 계보에 포함된 뒤 여러 번 수정되어 DB 적용 이력이 없다고 증명할 수 없다. 따라서 production-preflight 수정은 원본을 다시 바꾸지 않고 `20260928075225_scoring_formula_production_hardening.sql` correction migration으로 분리했다. 적용 전 staging의 `supabase_migrations.schema_migrations`와 backup을 확인하고 base가 이미 있으면 correction만, clean DB면 base 다음 correction을 실행한다. 아직 사용자 연결 전 rollback은 새 RPC execute 권한을 revoke한 뒤 correction에서 교체한 함수/권한을 이전 정의로 되돌리는 후속 migration으로 수행한다. 적용 뒤 데이터가 생겼다면 down SQL로 삭제하지 않고 backup/point-in-time restore 또는 새 correction migration을 사용한다. 기존 assessment rule table에는 FK나 trigger를 추가하지 않으므로 영향 범위는 scoring 전용 객체에 한정된다.
 
 ## production 승인 전 checklist
 

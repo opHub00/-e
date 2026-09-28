@@ -340,7 +340,8 @@ export async function createNextFormulaVersion(repository: ScoringFormulaReposit
   return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
 }
 export async function changeFormulaStatus(repository: ScoringFormulaRepository, formula: ScoringFormulaView, next: ScoringStatus): Promise<ScoringFormulaView> {
-  const reason = `산식 상태를 ${next} 상태로 변경`;
+  const statusWord: Record<ScoringStatus, string> = { DRAFT: '초안', REVIEW: '검토 중', ACTIVE: '활성', SUSPENDED: '중지' };
+  const reason = `상태를 ${statusWord[next]}(으)로 바꿨어요`;
   let stored: StoredScoringFormula;
   if (next === 'REVIEW' && formula.status === 'DRAFT') stored = await repository.requestReview(formula.id, formulaMutation(formula, reason));
   else if (next === 'DRAFT' && formula.status === 'REVIEW') stored = await repository.returnToDraft(formula.id, formulaMutation(formula, reason));

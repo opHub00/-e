@@ -114,8 +114,29 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
   }
 
   async getAccess() { return clone(this.access); }
-  async list() { return [...this.formulas.values()].map(clone); }
-  async get(id: string) { return clone(this.read(id)); }
+  /**
+   * 운영 SQL 과 같은 방식으로 후속 초안을 계산한다.
+   *
+   * 서버는 같은 slug 에 DRAFT·검토 중 버전이 있는지 매번 조회한다.
+   * 픽스처가 저장 시점의 값을 그대로 들고 있으면, 초안을 만든 뒤에도 "초안 없음"으로 보여
+   * 중복 초안 방지 동선이 테스트에서 한 번도 걸리지 않는다.
+   */
+  private withDraftState(formula: StoredScoringFormula): StoredScoringFormula {
+    // SQL 과 같은 조건: 같은 slug 에 초안·검토 중 버전이 있는가(자기 자신도 포함).
+    // 가장 최근에 손댄 것을 고른다.
+    const draft = [...this.formulas.values()]
+      .filter(other => other.slug === formula.slug && (other.status === 'DRAFT' || other.status === 'IN_REVIEW'))
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0];
+    return {
+      ...clone(formula),
+      hasDraft: Boolean(draft),
+      draftVersion: draft
+        ? { id: draft.id, version: draft.version, status: draft.status as 'DRAFT' | 'IN_REVIEW', updatedAt: draft.updatedAt }
+        : null,
+    };
+  }
+  async list() { return [...this.formulas.values()].map(value => this.withDraftState(value)); }
+  async get(id: string) { return this.withDraftState(this.read(id)); }
   async createDraft(input: Parameters<ScoringFormulaRepository['createDraft']>[0], reason: string) {
     this.requireAdmin();
     if (!reason.trim()) throw new Error('SCORING_VALIDATION_FAILED');
@@ -319,7 +340,9 @@ export async function createNextFormulaVersion(repository: ScoringFormulaReposit
   return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
 }
 export async function changeFormulaStatus(repository: ScoringFormulaRepository, formula: ScoringFormulaView, next: ScoringStatus): Promise<ScoringFormulaView> {
-  const reason = `산식 상태를 ${next} 상태로 변경`;
+  const STATUS_WORD: Record<ScoringStatus, string> = { DRAFT: '초안', REVIEW: '검토 중', ACTIVE: '활성', SUSPENDED: '중지' };
+  // 사유는 감사 기록에 그대로 남아 운영자가 읽는다. 내부 enum 을 적지 않는다.
+  const reason = `상태를 ${STATUS_WORD[next]}(으)로 바꿨어요`;
   let stored: StoredScoringFormula;
   if (next === 'REVIEW' && formula.status === 'DRAFT') stored = await repository.requestReview(formula.id, formulaMutation(formula, reason));
   else if (next === 'ACTIVE' && formula.status === 'REVIEW') stored = await repository.activate(formula.id, formula.publishedToUsers, formulaMutation(formula, reason));

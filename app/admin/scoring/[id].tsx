@@ -16,6 +16,9 @@ import {
   scoringPermission, scoringSource, statusTransitionAllowed, type ScoringFormulaView,
 } from '../../../features/scoringFormula/adapter';
 import { createConfiguredScoringRepository } from '../../../features/scoringFormula/configuredRepository';
+import {
+  actorName, auditRows, operatorError, testInputMismatchMessage, transitionReason, type OperatorError,
+} from '../../../features/scoringFormula/operatorCopy';
 import type { ScoringAccess, ScoringFormulaRepository } from '../../../features/scoringFormula/repository';
 import {
   SCORING_STATUS_LABEL, SCORING_TARGET_LABEL, calculateScore, componentMax, formulaMax, isServiceReady,
@@ -114,7 +117,8 @@ function Detail({ formulaId }: { formulaId: string }) {
   const initial = TABS.some(item => item.key === params.tab) ? (params.tab as Tab) : 'overview';
   const [tab, setTab] = useState<Tab>(initial);
   const [confirmPublish, setConfirmPublish] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<OperatorError | null>(null);
+  const [errorDetail, setErrorDetail] = useState(false);
   const repository = useMemo<ScoringFormulaRepository | null>(() => {
     try { return createConfiguredScoringRepository(); } catch { return null; }
   }, []);
@@ -123,18 +127,18 @@ function Detail({ formulaId }: { formulaId: string }) {
 
   useEffect(() => {
     let alive = true;
-    if (!repository) { setError('산식 운영 저장소에 연결하지 못했어요.'); return () => { alive = false; }; }
+    if (!repository) { setError(operatorError('SCORING_REPOSITORY_UNAVAILABLE')); return () => { alive = false; }; }
     void runScoring(() => loadScoringFormulaDetail(formulaId, repository)).then(outcome => {
       if (!alive) return;
       if (outcome.ok) { setCurrent(outcome.value.formula); setAccess(outcome.value.access); setError(null); }
-      else setError(outcome.message);
+      else setError(operatorError(outcome.code));
     });
     return () => { alive = false; };
   }, [formulaId, repository]);
 
   if (!current || !repository) {
     return error
-      ? <SectionCard title="산식을 불러오지 못했어요" description={error}><AdminButton label="목록" onPress={() => router.push('/admin/scoring' as Href)} /></SectionCard>
+      ? <SectionCard title="산식을 불러오지 못했어요" description={error.message}><AdminButton label="목록" onPress={() => router.push('/admin/scoring' as Href)} /></SectionCard>
       : <SectionCard title="불러오는 중이에요" description="서버에서 산식과 변경 이력을 확인하고 있어요.">{null}</SectionCard>;
   }
   const formula = current;
@@ -145,13 +149,18 @@ function Detail({ formulaId }: { formulaId: string }) {
   const adopt = (task: () => Promise<ScoringFormulaView>) => {
     void runScoring(task).then(outcome => {
       if (outcome.ok) { setCurrent(outcome.value); setError(null); }
-      else setError(outcome.message);
+      else setError(operatorError(outcome.code));
     });
   };
   const changeStatus = (next: ScoringStatus) => {
     adopt(() => changeFormulaStatus(repository, formula, next));
   };
+  const openExistingDraft = () => {
+    if (formula.draftVersion) router.replace(`/admin/scoring/${formula.draftVersion.id}` as Href);
+  };
   const createNewVersion = () => {
+    // 이미 초안이 있으면 새로 뜨지 않는다. 버전만 하나씩 늘어나고 어느 것을 고쳐야 할지 헷갈린다.
+    if (formula.hasDraft) { setError(operatorError('SCORING_DUPLICATE_DRAFT')); return; }
     adopt(async () => {
       const next = await createNextFormulaVersion(repository, formula);
       router.replace(`/admin/scoring/${next.id}` as Href);
@@ -165,6 +174,11 @@ function Detail({ formulaId }: { formulaId: string }) {
   const ready = problems.length === 0 && runs.length > 0 && runs.every(run => run.passed);
   const activationReason = activationBlock(formula, permission);
   const activatable = activationReason === null;
+  // 비활성 버튼만 두면 고장으로 읽힌다. 왜 못 누르는지와 대신 할 일을 함께 적는다.
+  const blockedTransitions = (['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'] as const)
+    .filter(next => next !== formula.status && !statusTransitionAllowed(formula.status, next))
+    .map(next => ({ status: next, reason: transitionReason(formula.status, next, permission.canEdit) }))
+    .filter((item): item is { status: ScoringStatus; reason: string } => Boolean(item.reason));
 
   return (
     <>
@@ -174,7 +188,10 @@ function Detail({ formulaId }: { formulaId: string }) {
         actions={
           <>
             <AdminButton label="목록" tone="quiet" icon="arrow-back" onPress={() => router.push('/admin/scoring' as Href)} />
-            {editability.mustCreateNewVersion
+            {editability.mustCreateNewVersion && formula.hasDraft
+              ? <AdminButton label="초안 열기" icon="edit-note" onPress={openExistingDraft} />
+              : null}
+            {editability.mustCreateNewVersion && !formula.hasDraft
               ? <AdminButton label="새 버전 만들기" icon="content-copy" onPress={createNewVersion} />
               : null}
             <AdminButton
@@ -187,13 +204,29 @@ function Detail({ formulaId }: { formulaId: string }) {
         }
       />
 
-      {error ? <Notice tone="pink" icon="error-outline">{error}</Notice> : null}
+      {error ? (
+        <SectionCard title="처리하지 못했어요" description={error.message}>
+          {error.detail ? (
+            <Disclosure label="고급 정보" open={errorDetail} onToggle={() => setErrorDetail(value => !value)}>
+              <Text style={styles.hint}>{error.detail}</Text>
+              <Text style={styles.hint}>개발자에게 전달할 때 이 내용을 함께 알려 주세요.</Text>
+            </Disclosure>
+          ) : null}
+        </SectionCard>
+      ) : null}
 
       {scoringSource() === 'fixture-repository' ? (
         <Notice icon="info">로컬 테스트용 메모리 저장소입니다. 모든 변경은 repository contract를 거치며 새로고침하면 초기화돼요.</Notice>
       ) : null}
 
-      {editability.notice ? (
+      {editability.mustCreateNewVersion && formula.hasDraft ? (
+        <SectionCard
+          title={`이미 ${formula.draftVersion?.version ?? ''} 초안이 있습니다`.replace('  ', ' ')}
+          description="새로 만들지 말고 그 초안을 이어서 고쳐 주세요. 버전이 여러 개로 갈라지면 어느 것을 활성화할지 알기 어려워요."
+        >
+          <AdminButton label="초안 열기" icon="edit-note" onPress={openExistingDraft} />
+        </SectionCard>
+      ) : editability.notice ? (
         <Notice tone={editability.mustCreateNewVersion ? 'amber' : 'neutral'} icon={editability.mustCreateNewVersion ? 'history' : 'lock'}>
           {editability.notice}
         </Notice>
@@ -268,6 +301,15 @@ function Detail({ formulaId }: { formulaId: string }) {
             },
           ]}
         />
+        {blockedTransitions.length ? (
+          <View style={styles.reasonList}>
+            {blockedTransitions.map(item => (
+              <Text key={item.status} style={styles.reasonLine}>
+                · {SCORING_STATUS_LABEL[item.status]}으로 바꿀 수 없어요 — {item.reason}
+              </Text>
+            ))}
+          </View>
+        ) : null}
         {activationReason ? <Notice tone="amber" icon="block">{activationReason}</Notice> : null}
       </SectionCard>
 
@@ -282,7 +324,15 @@ function Detail({ formulaId }: { formulaId: string }) {
       {tab === 'tests' ? <Tests
         formula={formula}
         editable={permission.canEdit}
-        onCreate={testCase => adopt(() => createFormulaTestCase(repository, formula, testCase))}
+        onCreate={testCase => {
+          // 예시 입력이 배점 항목과 어긋나면, 코드 대신 어떤 항목이 빠졌는지 이름으로 알려 준다.
+          void runScoring(() => createFormulaTestCase(repository, formula, testCase)).then(outcome => {
+            if (outcome.ok) { setCurrent(outcome.value); setError(null); return; }
+            setError(/KEYS_MISMATCH|VALIDATION_FAILED/.test(outcome.code)
+              ? { message: testInputMismatchMessage(formula.components, testCase.inputs), detail: outcome.code }
+              : operatorError(outcome.code));
+          });
+        }}
         onDelete={testCaseId => adopt(() => deleteFormulaTestCase(repository, formula, testCaseId))}
       /> : null}
       {tab === 'simulator' ? <Simulator formula={formula} /> : null}
@@ -310,7 +360,7 @@ function Overview({ formula, problems }: { formula: ScoringFormulaView; problems
           <LabeledValue label="상태" value={SCORING_STATUS_LABEL[formula.status]} />
           <LabeledValue label="사용자 노출" value={formula.publishedToUsers ? '공개' : '내부용'} hint={formula.publishedToUsers ? undefined : '서비스 화면에는 나오지 않아요'} />
           <LabeledValue label="최근 수정" value={dateLabel(formula.updatedAt) ?? '—'} />
-          <LabeledValue label="최근 수정자" value={actorLabel(formula.actors.updated)} />
+          <LabeledValue label="최근 수정자" value={actorName(formula.actors.updated)} />
           <LabeledValue label="후속 초안" value={formula.hasDraft ? formula.draftVersion?.version ?? '있음' : '없음'} />
         </View>
         <FormSection title="기준이 된 근거" description="근거가 없는 배점표는 서비스에 쓰지 않아요.">
@@ -661,19 +711,34 @@ function Simulator({ formula }: { formula: ScoringFormula }) {
   );
 }
 
-function History({ formula }: { formula: ScoringFormula }) {
+function History({ formula }: { formula: ScoringFormulaView }) {
+  const [advanced, setAdvanced] = useState(false);
+  const rows = auditRows(formula.audit, formula.actors);
   return (
-    <SectionCard title="변경 이력" description="누가 언제 무엇을 바꿨는지 남겨요.">
+    <SectionCard title="변경 이력" description="누가 언제 무엇을 바꿨는지 남겨요. 최근 변경이 위에 있어요.">
       <DataList
-        rows={[...formula.history].reverse()}
-        keyOf={item => `${item.at}-${item.summary}`}
+        rows={rows}
+        keyOf={row => row.key}
         empty={{ title: '기록된 변경이 없어요', body: '산식을 고치면 여기에 남아요.' }}
         columns={[
-          { key: 'at', header: '시각', flex: 1, render: item => <CellText>{dateLabel(item.at) ?? item.at}</CellText> },
-          { key: 'actor', header: '변경자', flex: 1.2, render: item => <CellText strong>{item.actor}</CellText> },
-          { key: 'summary', header: '내용', flex: 4, render: item => <CellText>{item.summary}</CellText> },
+          { key: 'at', header: '시각', flex: 1.2, render: row => <CellText>{dateLabel(row.at) ?? row.at}</CellText> },
+          { key: 'actor', header: '변경자', flex: 1.6, render: row => <CellText strong>{row.actor}</CellText> },
+          { key: 'action', header: '한 일', flex: 1.4, render: row => <CellText strong>{row.action}</CellText> },
+          { key: 'reason', header: '사유', flex: 3, render: row => <CellText>{row.reason || '—'}</CellText> },
         ]}
       />
+      <Disclosure label="고급 정보" open={advanced} onToggle={() => setAdvanced(value => !value)}>
+        <DataList
+          rows={rows}
+          keyOf={row => `raw-${row.key}`}
+          empty={{ title: '기록이 없어요', body: '' }}
+          columns={[
+            { key: 'revision', header: 'revision', flex: 0.8, render: row => <CellText>{row.raw.revision}</CellText> },
+            { key: 'action', header: 'action', flex: 1.6, render: row => <CellText>{row.raw.action}</CellText> },
+            { key: 'actor', header: 'actorUserId', flex: 3, render: row => <CellText muted>{row.raw.actorUserId ?? '—'}</CellText> },
+          ]}
+        />
+      </Disclosure>
     </SectionCard>
   );
 }
@@ -692,6 +757,8 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   totalValue: { ...type.display, color: colors.primary },
   statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  reasonList: { gap: 4 },
+  reasonLine: { ...type.bodySm, color: colors.textMuted, lineHeight: 20 },
   scopeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   scopeCard: { flex: 1, minWidth: 220, gap: 3, padding: spacing.md, borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceHigh, backgroundColor: colors.surfaceLow },
   scopeCardActive: { borderColor: colors.primaryFixed, backgroundColor: colors.lavender },

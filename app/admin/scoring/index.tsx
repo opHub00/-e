@@ -7,10 +7,11 @@ import {
   AdminButton, CellText, DataList, KpiGrid, Notice, PageIntro, SearchFilterBar, SectionCard, StatusBadge,
 } from '../../../features/adminPortal/ui/AdminKit';
 import {
-  actorLabel, loadScoringFormulaList, runScoring, scoringPermission, scoringSource,
+  loadScoringFormulaList, runScoring, scoringPermission, scoringSource,
   type ScoringFormulaView,
 } from '../../../features/scoringFormula/adapter';
 import type { ScoringFormula } from '../../../features/scoringFormula/domain';
+import { actorName, operatorError } from '../../../features/scoringFormula/operatorCopy';
 import type { ScoringAccess } from '../../../features/scoringFormula/repository';
 import { createConfiguredScoringRepository } from '../../../features/scoringFormula/configuredRepository';
 import {
@@ -60,14 +61,15 @@ function ScoringList() {
     void outcome.then(result => {
       if (!alive) return;
       if (result.ok) { setFormulas(result.value.formulas); setAccess(result.value.access); setError(null); }
-      else setError(result.message);
+      // 저장소 원문이 아니라 운영자 문구만 화면에 싣는다.
+      else setError(operatorError(result.code).message);
     });
     return () => { alive = false; };
   }, []);
 
   const summaries = useMemo(() => formulas.map(formula => ({
     ...summarizeFormula(formula), hasDraft: formula.hasDraft, draftVersion: formula.draftVersion,
-    updatedBy: actorLabel(formula.actors.updated),
+    updatedBy: actorName(formula.actors.updated),
   })), [formulas]);
   const serviceReady = formulas.filter(isServiceReady).length;
   const published = formulas.filter(formula => formula.publishedToUsers && isServiceReady(formula)).length;

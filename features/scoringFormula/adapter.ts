@@ -1,5 +1,6 @@
 import { loadFormulas } from './registry.ts';
 import {
+  ScoringRepositoryException,
   scoringErrorMessage,
   type FormulaAuditEntry,
   type FormulaMutation,
@@ -45,13 +46,13 @@ export function toScoringFormulaView(formula: StoredScoringFormula, audit = form
     audit: clone(audit),
     history: audit.map(entry => ({
       at: entry.createdAt,
-      actor: entry.actorUserId ?? '시스템',
+      actor: entry.actor?.displayLabel ?? entry.actorUserId ?? '시스템',
       summary: entry.reason || entry.action,
     })),
   };
 }
 
-const localActor = { userId: 'local-admin', email: 'local-admin@example.test', role: 'admin' as const };
+const localActor = { userId: 'local-admin', email: 'local-admin@example.test', displayLabel: 'local-admin@example.test', role: 'admin' as const };
 
 /** E2E와 로컬 개발 전용 repository. 브라우저 storage를 사용하지 않는다. */
 export class InMemoryScoringFormulaRepository implements ScoringFormulaRepository {
@@ -84,10 +85,20 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
   }
 
   private requireAdmin(): void { if (!this.access.canMutate) throw new Error('FORBIDDEN'); }
+  private withDraftState(value: StoredScoringFormula): StoredScoringFormula {
+    const draft = [...this.formulas.values()]
+      .filter(candidate => candidate.slug === value.slug && (candidate.status === 'DRAFT' || candidate.status === 'IN_REVIEW'))
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0];
+    return {
+      ...value,
+      hasDraft: Boolean(draft),
+      draftVersion: draft ? { id: draft.id, version: draft.version, status: draft.status as 'DRAFT' | 'IN_REVIEW', updatedAt: draft.updatedAt } : null,
+    };
+  }
   private read(id: string): StoredScoringFormula {
     const value = this.formulas.get(id);
     if (!value) throw new Error('SCORING_FORMULA_NOT_FOUND');
-    return value;
+    return this.withDraftState(value);
   }
   private mutation(id: string, mutation: FormulaMutation): StoredScoringFormula {
     this.requireAdmin();
@@ -106,7 +117,7 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     };
     this.formulas.set(updated.id, updated);
     const entry: FormulaAuditEntry = {
-      id: ++this.auditId, action, actorUserId: localActor.userId, reason,
+      id: ++this.auditId, action, actorUserId: localActor.userId, actor: localActor, reason,
       before: clone(current), after: clone(updated), revision, createdAt: updated.updatedAt,
     };
     this.logs.set(updated.id, [...(this.logs.get(updated.id) ?? []), entry]);
@@ -114,13 +125,13 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
   }
 
   async getAccess() { return clone(this.access); }
-  async list() { return [...this.formulas.values()].map(clone); }
+  async list() { return [...this.formulas.values()].map(value => clone(this.withDraftState(value))); }
   async get(id: string) { return clone(this.read(id)); }
   async createDraft(input: Parameters<ScoringFormulaRepository['createDraft']>[0], reason: string) {
     this.requireAdmin();
     if (!reason.trim()) throw new Error('SCORING_VALIDATION_FAILED');
     const id = `${input.slug}@${input.version}`;
-    if (this.formulas.has(id)) throw new Error('SCORING_STATUS_INVALID');
+    if (this.formulas.has(id)) throw new Error('SCORING_VERSION_CONFLICT');
     const now = new Date().toISOString();
     const formula: StoredScoringFormula = {
       id, slug: input.slug, version: input.version, name: input.name, description: input.description,
@@ -136,7 +147,7 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     this.requireAdmin();
     const current = this.read(id);
     const nextId = `${current.slug}@${version}`;
-    if (this.formulas.has(nextId)) throw new Error('SCORING_STATUS_INVALID');
+    if (this.formulas.has(nextId)) throw new Error('SCORING_VERSION_CONFLICT');
     const now = new Date().toISOString();
     const next: StoredScoringFormula = {
       ...clone(current), id: nextId, version, status: 'DRAFT', publishedToUsers: false, revision: 1,
@@ -145,7 +156,7 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     };
     this.formulas.set(nextId, next); this.logs.set(nextId, []);
     this.logs.set(id, [...(this.logs.get(id) ?? []), {
-      id: ++this.auditId, action: 'CLONE_VERSION', actorUserId: localActor.userId, reason,
+      id: ++this.auditId, action: 'CLONE_VERSION', actorUserId: localActor.userId, actor: localActor, reason,
       before: { id }, after: { id: nextId }, revision: current.revision, createdAt: now,
     }]);
     return clone(next);
@@ -217,6 +228,16 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
       ...current, status: 'IN_REVIEW',
       draftVersion: { id, version: current.version, status: 'IN_REVIEW', updatedAt: current.updatedAt },
     }, 'REQUEST_REVIEW', m.reason);
+  }
+  async returnToDraft(id: string, m: FormulaMutation) {
+    this.requireAdmin();
+    const current = this.read(id);
+    if (current.revision !== m.expectedRevision) throw new Error('SCORING_STALE_REVISION');
+    if (current.status !== 'IN_REVIEW') throw new Error('SCORING_STATUS_INVALID');
+    return this.save(current, {
+      ...current, status: 'DRAFT',
+      draftVersion: { id, version: current.version, status: 'DRAFT', updatedAt: current.updatedAt },
+    }, 'RETURN_TO_DRAFT', m.reason);
   }
   async review(id: string) {
     const current = this.read(id);
@@ -322,6 +343,7 @@ export async function changeFormulaStatus(repository: ScoringFormulaRepository, 
   const reason = `산식 상태를 ${next} 상태로 변경`;
   let stored: StoredScoringFormula;
   if (next === 'REVIEW' && formula.status === 'DRAFT') stored = await repository.requestReview(formula.id, formulaMutation(formula, reason));
+  else if (next === 'DRAFT' && formula.status === 'REVIEW') stored = await repository.returnToDraft(formula.id, formulaMutation(formula, reason));
   else if (next === 'ACTIVE' && formula.status === 'REVIEW') stored = await repository.activate(formula.id, formula.publishedToUsers, formulaMutation(formula, reason));
   else if (next === 'SUSPENDED' && formula.status === 'ACTIVE') stored = await repository.retire(formula.id, formulaMutation(formula, reason));
   else throw new Error('SCORING_STATUS_INVALID');
@@ -358,12 +380,17 @@ export async function deleteFormulaTestCase(repository: ScoringFormulaRepository
 
 export const scoringMessage = (code: string): string => code === 'SCORING_REPOSITORY_UNAVAILABLE'
   ? '산식 운영 저장소에 연결하지 못했어요.' : scoringErrorMessage(code);
-export type ScoringOutcome<T> = { ok: true; value: T } | { ok: false; code: string; message: string };
+export type ScoringOutcome<T> = { ok: true; value: T } | {
+  ok: false;
+  code: string;
+  message: string;
+  conflict: ScoringRepositoryException['context'];
+};
 export async function runScoring<T>(action: () => Promise<T>): Promise<ScoringOutcome<T>> {
   try { return { ok: true, value: await action() }; }
   catch (error) {
     const code = error instanceof Error ? error.message : 'UNKNOWN';
-    return { ok: false, code, message: scoringMessage(code) };
+    return { ok: false, code, message: scoringMessage(code), conflict: error instanceof ScoringRepositoryException ? error.context : null };
   }
 }
 export function nextVersion(version: string): string {
@@ -406,6 +433,7 @@ export function activationChecks(formula: ScoringFormula): ActivationCheck[] {
 }
 export const statusTransitionAllowed = (current: ScoringStatus, next: ScoringStatus): boolean =>
   (current === 'DRAFT' && next === 'REVIEW')
+  || (current === 'REVIEW' && next === 'DRAFT')
   || (current === 'REVIEW' && next === 'ACTIVE')
   || (current === 'ACTIVE' && next === 'SUSPENDED');
 export const actorLabel = (value: StoredScoringFormula['actors']['updated']): string => value?.email ?? value?.userId ?? '기록 없음';

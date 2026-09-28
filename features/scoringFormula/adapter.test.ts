@@ -78,6 +78,18 @@ test('ACTIVE 편집은 cloneVersion을 사용하고 서버 snapshot·audit을 �
   assert.equal(cloned.revision, 1);
   assert.notEqual(cloned.id, active.id);
   assert.deepEqual(cloned.components, active.components);
+  const sourceAfterClone = await repository.get(active.id);
+  assert.equal(sourceAfterClone.hasDraft, true, 'source ACTIVE snapshot also reports its sibling draft');
+  assert.equal(sourceAfterClone.draftVersion?.id, cloned.id);
+});
+
+test('검토본은 revision과 audit을 보존하며 초안으로 되돌릴 수 있다', async () => {
+  const repository = new InMemoryScoringFormulaRepository();
+  const review = (await loadScoringFormulaDetail('general-private-standard', repository)).formula;
+  const draft = await changeFormulaStatus(repository, review, 'DRAFT');
+  assert.equal(draft.status, 'DRAFT');
+  assert.equal(draft.revision, review.revision + 1);
+  assert.equal(draft.audit.at(-1)?.action, 'RETURN_TO_DRAFT');
 });
 
 test('test case inputs는 component.id(DB item_key) 집합과 정확히 같아야 한다', async () => {
@@ -134,7 +146,7 @@ function repositoryStub({ formula }: { formula: StoredScoringFormula }): Scoring
     createItem: unavailable, updateItem: unavailable, deleteItem: unavailable,
     createBand: unavailable, updateBand: unavailable, deleteBand: unavailable,
     createTestCase: unavailable, updateTestCase: unavailable, deleteTestCase: unavailable,
-    requestReview: unavailable, review: unavailable, activate: unavailable, retire: unavailable,
+    requestReview: unavailable, returnToDraft: unavailable, review: unavailable, activate: unavailable, retire: unavailable,
     auditHistory: async () => [], getActiveFormula: async () => null, evaluateActiveFormula: async () => null,
   } as ScoringFormulaRepository;
 }

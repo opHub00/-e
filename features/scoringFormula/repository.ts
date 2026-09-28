@@ -4,7 +4,7 @@ import { calculateScore, componentMax, type ScoringBand, type ScoringComponent, 
 
 export type PersistedScoringStatus = 'DRAFT' | 'IN_REVIEW' | 'ACTIVE' | 'RETIRED';
 export type ScoringActorRole = 'reviewer' | 'admin';
-export type ScoringActor = { userId: string; email: string | null; role: ScoringActorRole | null };
+export type ScoringActor = { userId: string; email: string | null; displayLabel: string; role: ScoringActorRole | null };
 export type ScoringAccess = {
   role: ScoringActorRole;
   canRead: true;
@@ -15,7 +15,7 @@ export type ScoringAccess = {
 export type ScoringDraftVersion = { id: string; version: string; status: 'DRAFT' | 'IN_REVIEW'; updatedAt: string };
 export type FormulaMutation = { expectedRevision: number; reason: string };
 export type FormulaMetadataPatch = Partial<Pick<ScoringFormula, 'name' | 'description' | 'legalBasis' | 'interpretations'>>;
-export type FormulaAuditEntry = { id: number; action: string; actorUserId: string | null; reason: string; before: unknown; after: unknown; revision: number; createdAt: string };
+export type FormulaAuditEntry = { id: number; action: string; actorUserId: string | null; actor: ScoringActor | null; reason: string; before: unknown; after: unknown; revision: number; createdAt: string };
 export type StoredScoringFormula = Omit<ScoringFormula, 'status'> & {
   status: PersistedScoringStatus;
   slug: string;
@@ -49,6 +49,7 @@ export interface ScoringFormulaRepository {
   updateTestCase(id: string, value: ScoringTestCase, order: number, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   deleteTestCase(id: string, testCaseId: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   requestReview(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
+  returnToDraft(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   review(id: string): Promise<FormulaReviewResult>;
   activate(id: string, publishToUsers: boolean, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   retire(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
@@ -57,12 +58,14 @@ export interface ScoringFormulaRepository {
   evaluateActiveFormula(target: ScoringTarget, input: Record<string, number | null>): Promise<ScoringResult | null>;
 }
 
-export type ScoringRepositoryError =
+export type ScoringErrorCode =
   | 'SCORING_VERSION_PUBLISHED' | 'SCORING_VERSION_IMMUTABLE' | 'SCORING_SCOPE_ALREADY_ACTIVE' | 'SCORING_FORMULA_NOT_FOUND'
   | 'SCORING_STALE_REVISION' | 'SCORING_VALIDATION_FAILED' | 'SCORING_TEST_CASE_FAILED'
-  | 'SCORING_STATUS_INVALID' | 'AUTH_REQUIRED' | 'FORBIDDEN';
+  | 'SCORING_STATUS_INVALID' | 'SCORING_VERSION_CONFLICT' | 'SCORING_INPUT_INVALID' | 'SCORING_ACTION_INVALID'
+  | 'SCORING_AUDIT_APPEND_ONLY' | 'SCORING_SEED_CONFLICT' | 'SCORING_SEED_HASH_INVALID'
+  | 'REASON_REQUIRED' | 'AUTH_REQUIRED' | 'FORBIDDEN' | 'SCORING_UNEXPECTED_ERROR';
 
-export const SCORING_ERROR_MESSAGE: Record<ScoringRepositoryError, string> = {
+export const SCORING_ERROR_MESSAGE: Record<ScoringErrorCode, string> = {
   SCORING_VERSION_PUBLISHED: '이미 발행된 버전이라 직접 고칠 수 없어요. 새 초안 버전을 만들어 주세요.',
   SCORING_VERSION_IMMUTABLE: '활성화되었거나 종료된 버전은 고칠 수 없어요. 새 버전을 만들어 주세요.',
   SCORING_SCOPE_ALREADY_ACTIVE: '같은 적용 범위에 이미 활성 산식이 있어요.',
@@ -71,25 +74,74 @@ export const SCORING_ERROR_MESSAGE: Record<ScoringRepositoryError, string> = {
   SCORING_VALIDATION_FAILED: '구간·만점·필수 값 검증을 통과하지 못했어요.',
   SCORING_TEST_CASE_FAILED: '저장된 검증 예시가 기대 점수와 달라요.',
   SCORING_STATUS_INVALID: '현재 상태에서 그 작업을 할 수 없어요.',
+  SCORING_VERSION_CONFLICT: '같은 버전의 산식이 이미 있어요. 기존 초안을 확인해 주세요.',
+  SCORING_INPUT_INVALID: '점수 계산 입력 형식이 올바르지 않아요.',
+  SCORING_ACTION_INVALID: '지원하지 않는 산식 작업이에요.',
+  SCORING_AUDIT_APPEND_ONLY: '감사 기록은 수정하거나 삭제할 수 없어요.',
+  SCORING_SEED_CONFLICT: '같은 버전의 seed 내용이 이미 다른 상태로 저장되어 있어요.',
+  SCORING_SEED_HASH_INVALID: '산식 seed 무결성 값이 올바르지 않아요.',
+  REASON_REQUIRED: '변경 사유를 입력해 주세요.',
   AUTH_REQUIRED: '관리자 계정으로 로그인해 주세요.',
   FORBIDDEN: '이 작업은 관리자만 할 수 있어요.',
+  SCORING_UNEXPECTED_ERROR: '산식 저장소에서 처리하지 못한 오류가 발생했어요.',
 };
-export const scoringErrorMessage = (code: string): string => SCORING_ERROR_MESSAGE[code as ScoringRepositoryError] ?? `처리하지 못했어요 (${code}).`;
+export const scoringErrorMessage = (code: string): string => SCORING_ERROR_MESSAGE[code as ScoringErrorCode] ?? SCORING_ERROR_MESSAGE.SCORING_UNEXPECTED_ERROR;
+
+export type ScoringVersionConflictContext = {
+  existingVersion: { id: string; version: string; status: PersistedScoringStatus; updatedAt: string } | null;
+  existingDraft: ScoringDraftVersion | null;
+};
+
+export class ScoringRepositoryException extends Error {
+  readonly code: ScoringErrorCode;
+  readonly safeMessage: string;
+  readonly context: ScoringVersionConflictContext | null;
+
+  constructor(code: ScoringErrorCode, context: ScoringVersionConflictContext | null = null) {
+    super(code);
+    this.name = 'ScoringRepositoryException';
+    this.code = code;
+    this.safeMessage = SCORING_ERROR_MESSAGE[code];
+    this.context = context;
+  }
+}
 
 export const SCORING_RPC = {
   access: 'get_scoring_formula_access', list: 'list_scoring_formulas', detail: 'get_scoring_formula_detail', createDraft: 'create_scoring_formula_draft',
   cloneVersion: 'clone_scoring_formula_version', mutate: 'mutate_scoring_formula_draft', requestReview: 'request_scoring_formula_review',
+  returnToDraft: 'return_scoring_formula_to_draft',
   review: 'review_scoring_formula',
   activate: 'activate_scoring_formula', retire: 'retire_scoring_formula', audit: 'get_scoring_formula_audit',
   getActive: 'get_active_scoring_formula', evaluateActive: 'evaluate_active_scoring_formula',
 } as const;
 
 type RpcClient = Pick<SupabaseClient, 'rpc'>;
-const result = <T>(data: unknown, error: { message?: string; details?: string } | null): T => {
+type ProviderError = { message?: string; details?: string; hint?: string; code?: string };
+const knownCodes = new Set<ScoringErrorCode>(Object.keys(SCORING_ERROR_MESSAGE) as ScoringErrorCode[]);
+const codeFrom = (error: ProviderError): ScoringErrorCode => {
+  const fields = [error.message, error.details, error.hint, error.code].filter((value): value is string => typeof value === 'string');
+  for (const field of fields) {
+    for (const token of field.match(/[A-Z][A-Z0-9_]+/g) ?? []) {
+      if (knownCodes.has(token as ScoringErrorCode)) return token as ScoringErrorCode;
+    }
+  }
+  return 'SCORING_UNEXPECTED_ERROR';
+};
+const conflictContextFrom = (details: string | undefined): ScoringVersionConflictContext | null => {
+  if (!details) return null;
+  try {
+    const value = JSON.parse(details) as Partial<ScoringVersionConflictContext> & { code?: string };
+    if (value.code !== 'SCORING_VERSION_CONFLICT') return null;
+    return {
+      existingVersion: value.existingVersion ?? null,
+      existingDraft: value.existingDraft ?? null,
+    } as ScoringVersionConflictContext;
+  } catch { return null; }
+};
+const result = <T>(data: unknown, error: ProviderError | null): T => {
   if (error) {
-    const text = `${error.message ?? ''} ${error.details ?? ''}`;
-    const known = Object.keys(SCORING_ERROR_MESSAGE).find(code => new RegExp(`(?:^|\\W)${code}(?:$|\\W)`).test(text));
-    throw new Error(known ?? `SCORING_DB_ERROR:${error.message ?? 'UNKNOWN'}`);
+    const code = codeFrom(error);
+    throw new ScoringRepositoryException(code, code === 'SCORING_VERSION_CONFLICT' ? conflictContextFrom(error.details) : null);
   }
   return data as T;
 };
@@ -118,6 +170,7 @@ export class SupabaseScoringFormulaRepository implements ScoringFormulaRepositor
   updateTestCase(id: string, testCase: ScoringTestCase, order: number, m: FormulaMutation) { return this.mutate(id, 'UPDATE_TEST_CASE', { testCase, order }, m); }
   deleteTestCase(id: string, testCaseId: string, m: FormulaMutation) { return this.mutate(id, 'DELETE_TEST_CASE', { testCaseId }, m); }
   requestReview(id: string, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.requestReview, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }
+  returnToDraft(id: string, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.returnToDraft, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }
   review(id: string) { return this.call<FormulaReviewResult>(SCORING_RPC.review, { p_formula_id: id }); }
   activate(id: string, publishToUsers: boolean, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.activate, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_publish_to_users: publishToUsers, p_reason: m.reason }); }
   retire(id: string, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.retire, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }

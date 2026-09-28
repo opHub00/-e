@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { SupabaseScoringFormulaRepository, SCORING_RPC } from './repository.ts';
+import { ScoringRepositoryException, SupabaseScoringFormulaRepository, SCORING_RPC } from './repository.ts';
 
 test('Supabase repository maps every operation to the canonical RPC contract', async () => {
   const calls: Array<{ name: string; args: Record<string, unknown> }> = [];
@@ -25,13 +25,41 @@ test('Supabase repository maps every operation to the canonical RPC contract', a
   await repository.createItem('f', { id: 'i', label: 'I', description: '', unit: 'x', fact: 'fact', order: 1, bands: [] }, mutation);
   await repository.createBand('f', 'i', { points: 1, label: 'one' }, 0, mutation);
   await repository.createTestCase('f', { id: 't', label: 'T', inputs: { i: 0 }, expectedTotal: 1 }, 0, mutation);
-  await repository.review('f'); await repository.requestReview('f', mutation); await repository.activate('f', false, mutation); await repository.retire('f', mutation);
+  await repository.review('f'); await repository.requestReview('f', mutation); await repository.returnToDraft('f', mutation);
+  await repository.activate('f', false, mutation); await repository.retire('f', mutation);
   await repository.auditHistory('f'); await repository.getActiveFormula('generalPrivate'); await repository.evaluateActiveFormula('generalPrivate', { i: null });
   assert.deepEqual(new Set(calls.map(call => call.name)), new Set([
     SCORING_RPC.access, SCORING_RPC.list, SCORING_RPC.detail, SCORING_RPC.mutate, SCORING_RPC.review, SCORING_RPC.requestReview, SCORING_RPC.activate,
-    SCORING_RPC.retire, SCORING_RPC.audit, SCORING_RPC.getActive, SCORING_RPC.evaluateActive,
+    SCORING_RPC.returnToDraft, SCORING_RPC.retire, SCORING_RPC.audit, SCORING_RPC.getActive, SCORING_RPC.evaluateActive,
   ]));
   assert.equal(calls.find(call => call.name === SCORING_RPC.activate)?.args.p_expected_revision, 2);
+});
+
+test('unknown provider errors never leak raw database text', async () => {
+  const client = { rpc: async () => ({ data: null, error: { message: 'duplicate key value violates unique constraint scoring_secret_idx', details: 'private row detail' } }) } as unknown as Pick<SupabaseClient, 'rpc'>;
+  await assert.rejects(
+    () => new SupabaseScoringFormulaRepository(client).get('f'),
+    error => error instanceof ScoringRepositoryException
+      && error.message === 'SCORING_UNEXPECTED_ERROR'
+      && error.safeMessage === '산식 저장소에서 처리하지 못한 오류가 발생했어요.'
+      && !error.message.includes('duplicate')
+      && !error.safeMessage.includes('private'),
+  );
+});
+
+test('version conflicts expose only the safe existing-draft context', async () => {
+  const details = JSON.stringify({
+    code: 'SCORING_VERSION_CONFLICT',
+    existingVersion: { id: 'draft-2', version: '2.0.0', status: 'DRAFT', updatedAt: '2026-09-28T00:00:00Z' },
+    existingDraft: { id: 'draft-2', version: '2.0.0', status: 'DRAFT', updatedAt: '2026-09-28T00:00:00Z' },
+  });
+  const client = { rpc: async () => ({ data: null, error: { message: 'SCORING_VERSION_CONFLICT', details } }) } as unknown as Pick<SupabaseClient, 'rpc'>;
+  await assert.rejects(
+    () => new SupabaseScoringFormulaRepository(client).cloneVersion('active-1', '2.0.0', 'new version'),
+    error => error instanceof ScoringRepositoryException
+      && error.code === 'SCORING_VERSION_CONFLICT'
+      && error.context?.existingDraft?.id === 'draft-2',
+  );
 });
 
 test('known database errors pass through unchanged', async () => {

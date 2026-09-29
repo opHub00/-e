@@ -12,7 +12,7 @@ DB 상태는 `DRAFT → IN_REVIEW → ACTIVE → RETIRED`다. IN_REVIEW snapshot
 
 ## canonical 평가 contract
 
-입력은 item의 `fact` key(`noHomeMonths`, `dependentCount`, `subscriptionMonths` 등)에 대응하는 숫자 또는 `null`이다. 기존 browser fixture를 위해 item key도 읽지만 신규 연결은 fact key를 쓴다. 출력은 `total`, `max`, item별 `breakdown`, `problems`, `interpretation`이다. 값이 없거나 구간이 유일하게 결정되지 않으면 `total=null`인 incomplete 결과다. unknown을 0점으로 계산하지 않는다.
+사용자 계산 입력은 item의 `fact` key(`noHomeMonths`, `dependentCount`, `subscriptionMonths` 등)에 대응하는 숫자 또는 `null`이다. 저장 test case의 `inputs`는 운영 편집 contract와 DB `item_key`에 맞춰 모든 `component.id`를 정확히 한 번씩 사용한다. SQL evaluator는 두 입력 형태를 같은 item으로 해석하지만 test case 저장 trigger는 fact key나 빠진/남는 key를 `TEST_INPUT_KEYS_MISMATCH`로 거절한다. 출력은 `total`, `max`, item별 `breakdown`, `problems`, `interpretation`이다. 값이 없거나 구간이 유일하게 결정되지 않으면 `total=null`인 incomplete 결과다. unknown을 0점으로 계산하지 않는다.
 
 TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 같은 inclusive boundary contract를 사용한다. activation RPC는 반드시 SQL evaluator로 저장 test case를 다시 실행한다. 경계 fixture는 두 구현에서 0개월, 모든 경계 전·경계·후, 최대 초과, null을 검증한다.
 
@@ -50,11 +50,13 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 `npm run seed:scoring:dry-run`은 네트워크 없이 package와 SHA-256을 출력한다. package는 property 순서를 고정한 canonical JSON으로 해시하고 항상 `IN_REVIEW`, `publishedToUsers=false`다. 동일 `(slug, version, sourcePackageHash)`는 `NO_CHANGE`, 같은 버전에 다른 hash는 `SCORING_SEED_CONFLICT`다.
 
-실제 staging seed 명령은 `npm run seed:staging:scoring`이다. 이 명령은 `WANPANE_ENV=staging`, staging URL/ref 일치, production ref 불일치, server-only staging service key를 모두 요구한다. 이 작업에서는 실행하지 않았다.
+실제 staging seed 명령은 `npm run seed:staging:scoring`이다. 이 명령은 `WANPANE_ENV=staging`, staging URL/ref 일치, production ref 불일치, server-only staging service key를 모두 요구한다. 2026-09-29 별도 `완판e-staging`에서 dry-run 후 한 번 삽입했고, 두 번째 실행은 `NO_CHANGE`를 반환했다. staging에는 `IN_REVIEW`, 비공개, revision 0 상태만 남겼다.
 
 ## migration과 rollback
 
-`20260927120000_scoring_formulas.sql`은 원격 브랜치 계보에 포함된 뒤 여러 번 수정되어 DB 적용 이력이 없다고 증명할 수 없다. 따라서 production-preflight 수정은 원본을 다시 바꾸지 않고 `20260928075225_scoring_formula_production_hardening.sql` correction migration으로 분리했다. 최종 publication/test-input 보강도 기존 correction을 다시 쓰지 않고 `20260928235028_scoring_formula_publication_control.sql`에 추가했다. 적용 순서는 base → production hardening → publication control이다. PGlite는 clean 전체 적용과 base가 적용된 DB의 순차 upgrade가 같은 scoring schema signature를 만들고 기존 row를 보존하는지 비교한다.
+`20260927120000_scoring_formulas.sql`은 원격 브랜치 계보에 포함된 뒤 여러 번 수정되어 DB 적용 이력이 없다고 증명할 수 없다. 따라서 production-preflight 수정은 원본을 다시 바꾸지 않고 `20260928075225_scoring_formula_production_hardening.sql` correction migration으로 분리했다. 최종 publication/test-input 보강도 기존 correction을 다시 쓰지 않고 `20260928235028_scoring_formula_publication_control.sql`에 추가했다. Staging 검증 중 확인한 actor label 우선순위와 sibling version clone 범위는 이미 적용된 파일을 고치지 않고 각각 `20260929002849_scoring_formula_actor_display_priority.sql`, `20260929003416_scoring_formula_clone_source_scope.sql`에 보정했다. 적용 순서는 이 timestamp 순서 그대로다. PGlite는 clean 전체 적용과 base가 적용된 DB의 순차 upgrade가 같은 scoring schema signature를 만들고 기존 row를 보존하는지 비교한다.
+
+Staging에서는 anon/일반 사용자/reviewer/admin/service-role 권한, draft mutation, 검토 복귀, activation, retire, publication toggle, stale revision, ACTIVE immutability, clone, audit append-only와 public snapshot 제거를 실제 DB transaction에서 검증했다. 별도 scope의 두 activation을 동시에 실행했을 때 두 요청은 advisory lock으로 직렬화됐고 ACTIVE 1개, RETIRED 1개, ACTIVATE audit 2개, 자동 retire audit 1개로 수렴했다. 검증용 산식은 삭제했고 seed만 안전 상태로 보존했다.
 
 적용 전 staging의 `supabase_migrations.schema_migrations`와 backup을 확인한다. 아직 사용자 연결 전 rollback은 `set_scoring_formula_publication` 실행권을 revoke하고 test-input trigger를 제거한 뒤, 교체한 actor 함수를 이전 정의로 되돌리는 **새 forward correction migration**으로 수행한다. 데이터가 생긴 뒤에는 timestamp migration을 삭제하거나 down SQL로 테이블을 제거하지 않고 backup/point-in-time restore 또는 새 correction migration을 사용한다. 기존 assessment rule table에는 FK나 trigger를 추가하지 않으므로 영향 범위는 scoring 전용 객체에 한정된다.
 
@@ -71,4 +73,4 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## UI 연결 contract
 
-Admin UI는 `ScoringFormulaRepository`만 사용한다. 모든 mutation은 `expectedRevision`과 `reason`을 전달하며 서버가 돌려준 snapshot만 채택한다. ACTIVE 편집은 `SCORING_VERSION_IMMUTABLE`을 받으면 clone-version flow로 전환한다. 사용자 서비스 연결점은 `getActiveFormula(target)`과 `evaluateActiveFormula(target,input)`이며, 현재 assessment에는 자동 연결하지 않는다.
+Admin UI는 `ScoringFormulaRepository`만 사용한다. 모든 mutation은 `expectedRevision`과 `reason`을 전달하며 서버가 돌려준 snapshot만 채택한다. ACTIVE 편집은 `SCORING_VERSION_PUBLISHED`를 받으면 clone-version flow로 전환한다. 사용자 서비스 연결점은 `getActiveFormula(target)`과 `evaluateActiveFormula(target,input)`이며, 현재 assessment에는 자동 연결하지 않는다.

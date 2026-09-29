@@ -29,6 +29,8 @@ const setupSql = `create role anon; create role authenticated; create role servi
 const baseSql = await readFile(new URL('../supabase/migrations/20260927120000_scoring_formulas.sql', import.meta.url), 'utf8');
 const hardeningSql = await readFile(new URL('../supabase/migrations/20260928075225_scoring_formula_production_hardening.sql', import.meta.url), 'utf8');
 const publicationSql = await readFile(new URL('../supabase/migrations/20260928235028_scoring_formula_publication_control.sql', import.meta.url), 'utf8');
+const actorDisplaySql = await readFile(new URL('../supabase/migrations/20260929002849_scoring_formula_actor_display_priority.sql', import.meta.url), 'utf8');
+const cloneScopeSql = await readFile(new URL('../supabase/migrations/20260929003416_scoring_formula_clone_source_scope.sql', import.meta.url), 'utf8');
 const schemaSignature = async database => ({
   columns: (await database.query(`select table_name,column_name,data_type,is_nullable,column_default
     from information_schema.columns where table_schema='public' and table_name like 'scoring_%'
@@ -51,12 +53,12 @@ const schemaSignature = async database => ({
     where schemaname='public' and tablename like 'scoring_%' order by tablename,policyname`)).rows,
 });
 try {
-  await db.exec(setupSql); await db.exec(baseSql); await db.exec(hardeningSql); await db.exec(publicationSql);
+  await db.exec(setupSql); await db.exec(baseSql); await db.exec(hardeningSql); await db.exec(publicationSql); await db.exec(actorDisplaySql); await db.exec(cloneScopeSql);
   await upgradeDb.exec(setupSql); await upgradeDb.exec(baseSql);
   await upgradeDb.exec(`set role service_role; insert into public.scoring_formulas(
     slug,version,name,description,target,scope_key,status,published_to_users,legal_basis
   ) values('upgrade-fixture','1.0.0','Upgrade fixture','','generalPrivate','upgrade-fixture','DRAFT',false,'fixture'); reset role;`);
-  await upgradeDb.exec(hardeningSql); await upgradeDb.exec(publicationSql);
+  await upgradeDb.exec(hardeningSql); await upgradeDb.exec(publicationSql); await upgradeDb.exec(actorDisplaySql); await upgradeDb.exec(cloneScopeSql);
   assert.deepEqual(await schemaSignature(upgradeDb), await schemaSignature(db)); checks += 1;
   ok(Number((await upgradeDb.query("select count(*) count from public.scoring_formulas where slug='upgrade-fixture'")).rows[0].count) === 1,
     'old-schema upgrade preserves existing scoring data');
@@ -92,7 +94,7 @@ try {
   ok(active.status === 'ACTIVE' && active.publishedToUsers === true, 'activation validates and publishes transactionally');
   ok(active.actors.updated.userId === admin && active.actors.activated.email === 'admin@example.test', 'detail exposes actor identity to review members');
   const activationAudit = (await db.query('select public.get_scoring_formula_audit($1) audit', [formulaId])).rows[0].audit;
-  ok(activationAudit.at(-1).actor.email === 'admin@example.test' && activationAudit.at(-1).actor.displayLabel === 'admin@example.test', 'review audit exposes the actor label only through the protected RPC');
+  ok(activationAudit.at(-1).actor.email === 'admin@example.test' && activationAudit.at(-1).actor.displayLabel === '관리자', 'review audit prefers the profile display name and exposes it only through the protected RPC');
   const hidden = (await db.query("select public.set_scoring_formula_publication($1,false,$2,'hide from users') result", [formulaId, active.revision])).rows[0].result;
   ok(hidden.status === 'ACTIVE' && hidden.publishedToUsers === false && hidden.revision === active.revision + 1, 'admin can hide an ACTIVE formula without changing score content');
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [reviewer]);
@@ -139,6 +141,8 @@ try {
   ok(Number((await db.query("select count(*) count from public.scoring_formulas where scope_key='generalPrivate' and status='ACTIVE'")).rows[0].count) === 1, 'partial unique scope keeps exactly one ACTIVE');
   await db.exec('reset role; set role authenticated'); await db.query("select set_config('request.jwt.claim.sub',$1,false)", [admin]);
   ok((await db.query('select public.get_scoring_formula_detail($1) detail', [formulaId])).rows[0].detail.status === 'RETIRED', 'prior ACTIVE retires in the same transaction');
+  const secondClone = (await db.query("select public.clone_scoring_formula_version($1,'1.0.2','clone with sibling versions') result", [cloned.id])).rows[0].result;
+  ok(secondClone.components.length === 3 && secondClone.components.every(item => item.bands.length > 0), 'clone copies bands only from the selected source when sibling versions exist');
   const retired = (await db.query("select public.retire_scoring_formula($1,$2,'retire after test') result", [cloned.id, replacement.revision])).rows[0].result;
   ok(retired.status === 'RETIRED' && !retired.publishedToUsers, 'retire preserves immutable history and unpublishes');
   await db.exec('reset role; set role anon');

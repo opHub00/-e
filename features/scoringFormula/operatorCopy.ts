@@ -30,16 +30,17 @@ const AUDIT_ACTION_LABEL: Record<string, string> = {
   ACTIVATE: '활성화',
   RETIRE: '중지',
   AUTO_RETIRE_FOR_REPLACEMENT: '새 버전으로 교체되며 중지',
+  RETURN_TO_DRAFT: '초안으로 되돌림',
+  PUBLISH_TO_USERS: '사용자에게 공개',
+  HIDE_FROM_USERS: '사용자에게 숨김',
 };
 
 /** 모르는 코드는 코드값 대신 '기타 변경'으로 적고, 원래 코드는 고급 정보에서 본다. */
 export const auditActionLabel = (action: string): string => AUDIT_ACTION_LABEL[action] ?? '기타 변경';
 
 /**
- * 감사 기록에 남은 사용자 id 를 사람이 아는 이름으로.
- *
- * 감사 기록은 id 만 들고 있다. 같은 산식의 actors(만든 사람·고친 사람·활성화한 사람)에는 이메일이 있으니
- * 그걸 사전으로 쓴다. 그래도 모르면 UUID 를 그대로 보여주는 대신 '확인할 수 없는 계정'이라고 적는다.
+ * 감사 RPC가 제공한 displayLabel을 우선 사용한다. 이전 fixture처럼 actor가
+ * 비어 있는 기록만 같은 산식의 actors를 fallback directory로 쓴다.
  * 운영자에게 36자리 UUID 는 이름이 아니다.
  */
 export function actorDirectory(actors: StoredScoringFormula['actors']): Map<string, string> {
@@ -51,7 +52,7 @@ export function actorDirectory(actors: StoredScoringFormula['actors']): Map<stri
 }
 
 export const actorName = (actor: ScoringActor | null): string =>
-  actor?.email ?? (actor?.userId ? '확인할 수 없는 계정' : '기록 없음');
+  actor?.displayLabel ?? actor?.email ?? (actor?.userId ? '확인할 수 없는 계정' : '기록 없음');
 
 export const auditActorLabel = (userId: string | null, directory: Map<string, string>): string => {
   if (!userId) return '시스템';
@@ -77,7 +78,7 @@ export function auditRows(entries: FormulaAuditEntry[], actors: StoredScoringFor
     .map(entry => ({
       key: String(entry.id),
       at: entry.createdAt,
-      actor: auditActorLabel(entry.actorUserId, directory),
+      actor: entry.actor?.displayLabel ?? auditActorLabel(entry.actorUserId, directory),
       action: auditActionLabel(entry.action),
       reason: entry.reason?.trim() ?? '',
       raw: { action: entry.action, actorUserId: entry.actorUserId, revision: entry.revision },
@@ -106,14 +107,12 @@ const EXTRA_MESSAGE: Record<string, string> = {
 export function operatorError(code: string): OperatorError {
   if (EXTRA_MESSAGE[code]) return { message: EXTRA_MESSAGE[code], detail: null };
 
-  // `SCORING_DB_ERROR:duplicate key value violates unique constraint ...`
-  if (code.startsWith('SCORING_DB_ERROR:')) {
-    const detail = code.slice('SCORING_DB_ERROR:'.length).trim();
-    if (/duplicate key|unique constraint/i.test(detail)) {
-      return { message: '같은 값이 이미 있어요. 목록을 새로 불러온 뒤 다시 시도해 주세요.', detail };
-    }
-    return { message: '저장소에서 처리하지 못했어요. 잠시 후 다시 시도하고, 계속되면 개발자에게 알려 주세요.', detail };
-  }
+  // Repository contract 밖의 DB 원문은 화면에 전달하지 않는다. 원문은
+  // server/debug telemetry에만 남고 운영자는 안정된 메시지만 본다.
+  if (code.startsWith('SCORING_DB_ERROR:')) return {
+    message: '저장소에서 처리하지 못했어요. 잠시 후 다시 시도하고, 계속되면 개발자에게 알려 주세요.',
+    detail: null,
+  };
 
   const known = scoringErrorMessage(code);
   // scoringErrorMessage 는 모르는 코드에 코드값을 끼워 돌려준다. 그 형태면 코드를 숨긴다.
@@ -147,7 +146,7 @@ export function testInputMismatchMessage(components: ScoringComponent[], inputs:
  * 상태 버튼이 막혀 있는 이유.
  *
  * 비활성 버튼만 두면 운영자는 고장으로 읽는다. 왜 못 누르는지, 대신 무엇을 하면 되는지 적는다.
- * 전이 규칙 자체는 서버가 정한다(활성화는 DRAFT·검토 중에서만). 여기서는 그 규칙을 설명만 한다.
+ * 전이 규칙 자체는 서버가 정한다(활성화는 검토 중에서만). 여기서는 그 규칙을 설명만 한다.
  */
 export function transitionReason(current: ScoringStatus, next: ScoringStatus, canEdit: boolean): string | null {
   if (current === next) return null;
@@ -157,9 +156,6 @@ export function transitionReason(current: ScoringStatus, next: ScoringStatus, ca
   }
   if (current === 'SUSPENDED') {
     return '중지된 버전은 되살리지 않아요. 새 버전을 만들어 활성화해 주세요.';
-  }
-  if (current === 'REVIEW' && next === 'DRAFT') {
-    return '검토 중인 버전은 초안으로 되돌릴 수 없어요. 고칠 내용이 있으면 새 버전을 만들어 주세요.';
   }
   if (current === 'DRAFT' && next === 'ACTIVE') {
     return '먼저 검토 요청을 거쳐야 활성화할 수 있어요.';

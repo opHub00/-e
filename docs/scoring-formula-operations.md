@@ -6,7 +6,7 @@
 
 ## 상태와 버전
 
-DB 상태는 `DRAFT → IN_REVIEW → ACTIVE → RETIRED`다. 검토에서 수정 요청이 생기면 `IN_REVIEW → DRAFT`만 `return_scoring_formula_to_draft`로 되돌릴 수 있다. `ACTIVE → DRAFT`와 `RETIRED → ACTIVE`는 금지한다. 이미 발행된 snapshot을 되살리거나 수정하지 않고 `clone_scoring_formula_version`으로 새 DRAFT version을 만든 뒤 다시 검토·활성화한다. `(slug, version)`은 유일하다.
+DB 상태는 `DRAFT → IN_REVIEW → ACTIVE → RETIRED`다. IN_REVIEW snapshot은 고정되며 수정이 필요하면 `return_scoring_formula_to_draft`로 먼저 `IN_REVIEW → DRAFT` 전환한다. `ACTIVE → DRAFT`와 `RETIRED → ACTIVE`는 금지한다. 이미 발행된 snapshot을 되살리거나 수정하지 않고 `clone_scoring_formula_version`으로 새 DRAFT version을 만든 뒤 다시 검토·활성화한다. `(slug, version)`은 유일하다.
 
 한 formula version은 한 `target`과 한 `scope_key`를 가진다. ACTIVE `scope_key`에는 partial unique index가 있어 동시 요청에서도 두 ACTIVE version이 생기지 않는다. 향후 지역·공급 단계 같은 qualifier는 `applicable_scope`와 이를 정규화한 `scope_key`로 확장한다.
 
@@ -30,7 +30,9 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 읽기: `get_scoring_formula_access`, `list_scoring_formulas`, `get_scoring_formula_detail`, `get_scoring_formula_audit`, `get_active_scoring_formula`, `evaluate_active_scoring_formula`. 관리자 목록/detail snapshot에는 같은 slug의 초안 존재 여부(`hasDraft`, `draftVersion`)와 생성·수정·활성화 actor가 포함된다. 보호된 audit RPC는 actor email/display label을 반환하지만 public active snapshot과 raw public table access에는 actor 정보가 없다.
 
-운영: `create_scoring_formula_draft`, `clone_scoring_formula_version`, `mutate_scoring_formula_draft`, `request_scoring_formula_review`, `return_scoring_formula_to_draft`, `activate_scoring_formula`, `retire_scoring_formula`.
+운영: `create_scoring_formula_draft`, `clone_scoring_formula_version`, `mutate_scoring_formula_draft`, `request_scoring_formula_review`, `return_scoring_formula_to_draft`, `activate_scoring_formula`, `set_scoring_formula_publication`, `retire_scoring_formula`.
+
+사용자 노출 여부는 ACTIVE 내용과 분리한다. `set_scoring_formula_publication`은 admin, ACTIVE, 현재 revision, 변경 사유를 모두 확인하고 `published_to_users`만 바꾼 뒤 감사 로그를 남긴다. 산식 내용과 상태는 건드리지 않으며 reviewer는 실행할 수 없다. 따라서 운영 중 긴급 비공개는 기존 ACTIVE snapshot을 훼손하거나 RETIRED로 만들지 않고 수행할 수 있다.
 
 같은 `(slug, version)` 생성/복제 경쟁은 raw unique violation 대신 `SCORING_VERSION_CONFLICT`를 반환한다. 안전한 error detail에는 기존 version과, 해당 version이 초안이면 `existingDraft` 식별 정보만 들어간다. repository는 알려진 stable code만 UI로 전달하고 미분류 DB message/detail은 `SCORING_UNEXPECTED_ERROR`로 치환한다.
 
@@ -52,7 +54,9 @@ TypeScript `calculateScore()`와 SQL `evaluate_scoring_formula_snapshot()`은 �
 
 ## migration과 rollback
 
-`20260927120000_scoring_formulas.sql`은 원격 브랜치 계보에 포함된 뒤 여러 번 수정되어 DB 적용 이력이 없다고 증명할 수 없다. 따라서 production-preflight 수정은 원본을 다시 바꾸지 않고 `20260928075225_scoring_formula_production_hardening.sql` correction migration으로 분리했다. 적용 전 staging의 `supabase_migrations.schema_migrations`와 backup을 확인하고 base가 이미 있으면 correction만, clean DB면 base 다음 correction을 실행한다. 아직 사용자 연결 전 rollback은 새 RPC execute 권한을 revoke한 뒤 correction에서 교체한 함수/권한을 이전 정의로 되돌리는 후속 migration으로 수행한다. 적용 뒤 데이터가 생겼다면 down SQL로 삭제하지 않고 backup/point-in-time restore 또는 새 correction migration을 사용한다. 기존 assessment rule table에는 FK나 trigger를 추가하지 않으므로 영향 범위는 scoring 전용 객체에 한정된다.
+`20260927120000_scoring_formulas.sql`은 원격 브랜치 계보에 포함된 뒤 여러 번 수정되어 DB 적용 이력이 없다고 증명할 수 없다. 따라서 production-preflight 수정은 원본을 다시 바꾸지 않고 `20260928075225_scoring_formula_production_hardening.sql` correction migration으로 분리했다. 최종 publication/test-input 보강도 기존 correction을 다시 쓰지 않고 `20260928235028_scoring_formula_publication_control.sql`에 추가했다. 적용 순서는 base → production hardening → publication control이다. PGlite는 clean 전체 적용과 base가 적용된 DB의 순차 upgrade가 같은 scoring schema signature를 만들고 기존 row를 보존하는지 비교한다.
+
+적용 전 staging의 `supabase_migrations.schema_migrations`와 backup을 확인한다. 아직 사용자 연결 전 rollback은 `set_scoring_formula_publication` 실행권을 revoke하고 test-input trigger를 제거한 뒤, 교체한 actor 함수를 이전 정의로 되돌리는 **새 forward correction migration**으로 수행한다. 데이터가 생긴 뒤에는 timestamp migration을 삭제하거나 down SQL로 테이블을 제거하지 않고 backup/point-in-time restore 또는 새 correction migration을 사용한다. 기존 assessment rule table에는 FK나 trigger를 추가하지 않으므로 영향 범위는 scoring 전용 객체에 한정된다.
 
 ## production 승인 전 checklist
 

@@ -26,13 +26,14 @@ test('Supabase repository maps every operation to the canonical RPC contract', a
   await repository.createBand('f', 'i', { points: 1, label: 'one' }, 0, mutation);
   await repository.createTestCase('f', { id: 't', label: 'T', inputs: { i: 0 }, expectedTotal: 1 }, 0, mutation);
   await repository.review('f'); await repository.requestReview('f', mutation); await repository.returnToDraft('f', mutation);
-  await repository.activate('f', false, mutation); await repository.retire('f', mutation);
+  await repository.activate('f', false, mutation); await repository.setPublication('f', true, mutation); await repository.retire('f', mutation);
   await repository.auditHistory('f'); await repository.getActiveFormula('generalPrivate'); await repository.evaluateActiveFormula('generalPrivate', { i: null });
   assert.deepEqual(new Set(calls.map(call => call.name)), new Set([
     SCORING_RPC.access, SCORING_RPC.list, SCORING_RPC.detail, SCORING_RPC.mutate, SCORING_RPC.review, SCORING_RPC.requestReview, SCORING_RPC.activate,
-    SCORING_RPC.returnToDraft, SCORING_RPC.retire, SCORING_RPC.audit, SCORING_RPC.getActive, SCORING_RPC.evaluateActive,
+    SCORING_RPC.returnToDraft, SCORING_RPC.setPublication, SCORING_RPC.retire, SCORING_RPC.audit, SCORING_RPC.getActive, SCORING_RPC.evaluateActive,
   ]));
   assert.equal(calls.find(call => call.name === SCORING_RPC.activate)?.args.p_expected_revision, 2);
+  assert.equal(calls.find(call => call.name === SCORING_RPC.setPublication)?.args.p_published_to_users, true);
 });
 
 test('unknown provider errors never leak raw database text', async () => {
@@ -65,6 +66,11 @@ test('version conflicts expose only the safe existing-draft context', async () =
 test('known database errors pass through unchanged', async () => {
   const client = { rpc: async () => ({ data: null, error: { message: 'STALE: SCORING_STALE_REVISION' } }) } as unknown as Pick<SupabaseClient, 'rpc'>;
   await assert.rejects(() => new SupabaseScoringFormulaRepository(client).get('f'), /SCORING_STALE_REVISION/);
+});
+
+test('test input contract errors pass through unchanged', async () => {
+  const client = { rpc: async () => ({ data: null, error: { message: 'TEST_INPUT_KEYS_MISMATCH' } }) } as unknown as Pick<SupabaseClient, 'rpc'>;
+  await assert.rejects(() => new SupabaseScoringFormulaRepository(client).get('f'), /TEST_INPUT_KEYS_MISMATCH/);
 });
 
 test('published-version errors reach the repository unchanged', async () => {

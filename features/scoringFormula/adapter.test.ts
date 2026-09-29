@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   InMemoryScoringFormulaRepository,
+  activateAndPublishFormula,
   activationBlock,
   changeFormulaStatus,
   createFormulaTestCase,
@@ -15,6 +16,7 @@ import {
   scoringMessage,
   scoringPermission,
   scoringSource,
+  setFormulaPublication,
   toScoringFormulaView,
   useServerScoringRepository,
 } from './adapter.ts';
@@ -94,13 +96,14 @@ test('검토본은 revision과 audit을 보존하며 초안으로 되돌릴 수 
 
 test('test case inputs는 component.id(DB item_key) 집합과 정확히 같아야 한다', async () => {
   const repository = new InMemoryScoringFormulaRepository();
-  const formula = (await loadScoringFormulaDetail('general-private-standard', repository)).formula;
+  const review = (await loadScoringFormulaDetail('general-private-standard', repository)).formula;
+  const formula = await changeFormulaStatus(repository, review, 'DRAFT');
   const inputs = Object.fromEntries(formula.components.map(component => [component.id, 0]));
   const saved = await createFormulaTestCase(repository, formula, { id: 'case-contract', label: '계약 확인', inputs, expectedTotal: 6 });
   assert.deepEqual(Object.keys(saved.testCases.at(-1)!.inputs).sort(), formula.components.map(component => component.id).sort());
   await assert.rejects(
     () => createFormulaTestCase(repository, saved, { id: 'case-wrong', label: '잘못된 키', inputs: { noHomeMonths: 0 }, expectedTotal: 2 }),
-    /SCORING_VALIDATION_FAILED/,
+    /TEST_INPUT_KEYS_MISMATCH/,
   );
 });
 
@@ -121,6 +124,20 @@ test('상태 mutation은 expectedRevision과 reason을 전달하고 서버 snaps
   assert.equal(after.revision, before.revision + 1);
   assert.equal(after.audit.at(-1)?.action, 'ACTIVATE');
   await assert.rejects(() => changeFormulaStatus(repository, before, 'ACTIVE'), /SCORING_STALE_REVISION/);
+});
+
+test('ACTIVE 공개 여부는 내용 수정 없이 revision과 audit을 남긴다', async () => {
+  const repository = new InMemoryScoringFormulaRepository();
+  const review = (await loadScoringFormulaDetail('general-private-standard', repository)).formula;
+  const active = await activateAndPublishFormula(repository, review);
+  const hidden = await setFormulaPublication(repository, active, false);
+  assert.equal(hidden.status, 'ACTIVE');
+  assert.equal(hidden.publishedToUsers, false);
+  assert.equal(hidden.revision, active.revision + 1);
+  assert.equal(hidden.audit.at(-1)?.action, 'HIDE_FROM_USERS');
+  const visible = await setFormulaPublication(repository, hidden, true);
+  assert.equal(visible.publishedToUsers, true);
+  assert.equal(visible.audit.at(-1)?.action, 'PUBLISH_TO_USERS');
 });
 
 test('오류 문구와 활성화 guard는 안전하게 유지된다', () => {
@@ -146,7 +163,7 @@ function repositoryStub({ formula }: { formula: StoredScoringFormula }): Scoring
     createItem: unavailable, updateItem: unavailable, deleteItem: unavailable,
     createBand: unavailable, updateBand: unavailable, deleteBand: unavailable,
     createTestCase: unavailable, updateTestCase: unavailable, deleteTestCase: unavailable,
-    requestReview: unavailable, returnToDraft: unavailable, review: unavailable, activate: unavailable, retire: unavailable,
+    requestReview: unavailable, returnToDraft: unavailable, review: unavailable, activate: unavailable, setPublication: unavailable, retire: unavailable,
     auditHistory: async () => [], getActiveFormula: async () => null, evaluateActiveFormula: async () => null,
   } as ScoringFormulaRepository;
 }

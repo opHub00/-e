@@ -16,6 +16,7 @@ import { buildScoringSeedPackage, verifyScoringSeedPackage } from './seedPackage
 const readScoringMigrations = async (): Promise<string> => (await Promise.all([
   '../../supabase/migrations/20260927120000_scoring_formulas.sql',
   '../../supabase/migrations/20260928075225_scoring_formula_production_hardening.sql',
+  '../../supabase/migrations/20260928235028_scoring_formula_publication_control.sql',
 ].map(path => readFile(new URL(path, import.meta.url), 'utf8')))).join('\n');
 
 const component = (over: Partial<ScoringComponent> = {}): ScoringComponent => ({
@@ -271,7 +272,7 @@ test('산식 저장소 계약이 base + correction migration 과 같은 이름�
     assert.ok(sql.includes(`function public.${name}(`), `${name} 이 migration 에 없다`);
   }
   // 저장소가 돌려줄 수 있는 오류는 전부 운영자 말로 옮겨 둔다.
-  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_VERSION_CONFLICT', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED']) {
+  for (const code of ['SCORING_VERSION_PUBLISHED', 'SCORING_VERSION_IMMUTABLE', 'SCORING_VERSION_CONFLICT', 'SCORING_SCOPE_ALREADY_ACTIVE', 'SCORING_FORMULA_NOT_FOUND', 'SCORING_STALE_REVISION', 'SCORING_VALIDATION_FAILED', 'SCORING_TEST_CASE_FAILED', 'TEST_INPUT_KEYS_MISMATCH']) {
     assert.ok(sql.includes(code), `${code} 를 내는 곳이 migration 에 없다`);
     assert.notEqual(scoringErrorMessage(code), `처리하지 못했어요 (${code}).`, `${code} 의 안내 문구가 없다`);
   }
@@ -302,4 +303,6 @@ test('migration 이 발행본 불변·적용범위당 활성 하나·감사 로�
   assert.ok(sql.includes('return_scoring_formula_to_draft'), '검토본을 안전하게 초안으로 되돌리는 RPC가 없다');
   assert.ok(sql.includes("if current.status<>'IN_REVIEW' then raise exception 'SCORING_STATUS_INVALID'"), 'DRAFT가 review를 건너뛰고 활성화될 수 있다');
   assert.ok(sql.includes('revoke select on public.scoring_formulas'), 'public direct table read가 actor metadata를 노출한다');
+  assert.ok(sql.includes('set_scoring_formula_publication'), 'ACTIVE 내용과 분리된 사용자 공개 제어 RPC가 없다');
+  assert.ok(sql.includes('guard_scoring_test_input_keys'), 'test case item_key 계약을 DB 저장 전에 강제하지 않는다');
 });

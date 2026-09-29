@@ -52,6 +52,7 @@ export interface ScoringFormulaRepository {
   returnToDraft(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   review(id: string): Promise<FormulaReviewResult>;
   activate(id: string, publishToUsers: boolean, mutation: FormulaMutation): Promise<StoredScoringFormula>;
+  setPublication(id: string, publishedToUsers: boolean, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   retire(id: string, mutation: FormulaMutation): Promise<StoredScoringFormula>;
   auditHistory(id: string): Promise<FormulaAuditEntry[]>;
   getActiveFormula(target: ScoringTarget): Promise<PublishedScoringFormula | null>;
@@ -62,6 +63,7 @@ export type ScoringErrorCode =
   | 'SCORING_VERSION_PUBLISHED' | 'SCORING_VERSION_IMMUTABLE' | 'SCORING_SCOPE_ALREADY_ACTIVE' | 'SCORING_FORMULA_NOT_FOUND'
   | 'SCORING_STALE_REVISION' | 'SCORING_VALIDATION_FAILED' | 'SCORING_TEST_CASE_FAILED'
   | 'SCORING_STATUS_INVALID' | 'SCORING_VERSION_CONFLICT' | 'SCORING_INPUT_INVALID' | 'SCORING_ACTION_INVALID'
+  | 'TEST_INPUT_KEYS_MISMATCH'
   | 'SCORING_AUDIT_APPEND_ONLY' | 'SCORING_SEED_CONFLICT' | 'SCORING_SEED_HASH_INVALID'
   | 'REASON_REQUIRED' | 'AUTH_REQUIRED' | 'FORBIDDEN' | 'SCORING_UNEXPECTED_ERROR';
 
@@ -77,6 +79,7 @@ export const SCORING_ERROR_MESSAGE: Record<ScoringErrorCode, string> = {
   SCORING_VERSION_CONFLICT: '같은 버전의 산식이 이미 있어요. 기존 초안을 확인해 주세요.',
   SCORING_INPUT_INVALID: '점수 계산 입력 형식이 올바르지 않아요.',
   SCORING_ACTION_INVALID: '지원하지 않는 산식 작업이에요.',
+  TEST_INPUT_KEYS_MISMATCH: '검증 예시의 입력이 배점 항목과 맞지 않아요.',
   SCORING_AUDIT_APPEND_ONLY: '감사 기록은 수정하거나 삭제할 수 없어요.',
   SCORING_SEED_CONFLICT: '같은 버전의 seed 내용이 이미 다른 상태로 저장되어 있어요.',
   SCORING_SEED_HASH_INVALID: '산식 seed 무결성 값이 올바르지 않아요.',
@@ -111,7 +114,7 @@ export const SCORING_RPC = {
   cloneVersion: 'clone_scoring_formula_version', mutate: 'mutate_scoring_formula_draft', requestReview: 'request_scoring_formula_review',
   returnToDraft: 'return_scoring_formula_to_draft',
   review: 'review_scoring_formula',
-  activate: 'activate_scoring_formula', retire: 'retire_scoring_formula', audit: 'get_scoring_formula_audit',
+  activate: 'activate_scoring_formula', setPublication: 'set_scoring_formula_publication', retire: 'retire_scoring_formula', audit: 'get_scoring_formula_audit',
   getActive: 'get_active_scoring_formula', evaluateActive: 'evaluate_active_scoring_formula',
 } as const;
 
@@ -173,6 +176,7 @@ export class SupabaseScoringFormulaRepository implements ScoringFormulaRepositor
   returnToDraft(id: string, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.returnToDraft, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }
   review(id: string) { return this.call<FormulaReviewResult>(SCORING_RPC.review, { p_formula_id: id }); }
   activate(id: string, publishToUsers: boolean, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.activate, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_publish_to_users: publishToUsers, p_reason: m.reason }); }
+  setPublication(id: string, publishedToUsers: boolean, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.setPublication, { p_formula_id: id, p_published_to_users: publishedToUsers, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }
   retire(id: string, m: FormulaMutation) { return this.call<StoredScoringFormula>(SCORING_RPC.retire, { p_formula_id: id, p_expected_revision: m.expectedRevision, p_reason: m.reason }); }
   auditHistory(id: string) { return this.call<FormulaAuditEntry[]>(SCORING_RPC.audit, { p_formula_id: id }); }
   getActiveFormula(target: ScoringTarget) { return this.call<StoredScoringFormula | null>(SCORING_RPC.getActive, { p_target: target }); }

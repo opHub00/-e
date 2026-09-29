@@ -107,6 +107,7 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     if (current.revision !== mutation.expectedRevision) throw new Error('SCORING_STALE_REVISION');
     if (current.status === 'ACTIVE') throw new Error('SCORING_VERSION_PUBLISHED');
     if (current.status === 'RETIRED') throw new Error('SCORING_VERSION_IMMUTABLE');
+    if (current.status !== 'DRAFT') throw new Error('SCORING_STATUS_INVALID');
     return current;
   }
   private save(current: StoredScoringFormula, next: StoredScoringFormula, action: string, reason: string): StoredScoringFormula {
@@ -131,7 +132,13 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     this.requireAdmin();
     if (!reason.trim()) throw new Error('SCORING_VALIDATION_FAILED');
     const id = `${input.slug}@${input.version}`;
-    if (this.formulas.has(id)) throw new Error('SCORING_VERSION_CONFLICT');
+    const existing = this.formulas.get(id);
+    if (existing) throw new ScoringRepositoryException('SCORING_VERSION_CONFLICT', {
+      existingVersion: { id: existing.id, version: existing.version, status: existing.status, updatedAt: existing.updatedAt },
+      existingDraft: existing.status === 'DRAFT' || existing.status === 'IN_REVIEW'
+        ? { id: existing.id, version: existing.version, status: existing.status, updatedAt: existing.updatedAt }
+        : null,
+    });
     const now = new Date().toISOString();
     const formula: StoredScoringFormula = {
       id, slug: input.slug, version: input.version, name: input.name, description: input.description,
@@ -147,7 +154,13 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
     this.requireAdmin();
     const current = this.read(id);
     const nextId = `${current.slug}@${version}`;
-    if (this.formulas.has(nextId)) throw new Error('SCORING_VERSION_CONFLICT');
+    const existing = this.formulas.get(nextId);
+    if (existing) throw new ScoringRepositoryException('SCORING_VERSION_CONFLICT', {
+      existingVersion: { id: existing.id, version: existing.version, status: existing.status, updatedAt: existing.updatedAt },
+      existingDraft: existing.status === 'DRAFT' || existing.status === 'IN_REVIEW'
+        ? { id: existing.id, version: existing.version, status: existing.status, updatedAt: existing.updatedAt }
+        : null,
+    });
     const now = new Date().toISOString();
     const next: StoredScoringFormula = {
       ...clone(current), id: nextId, version, status: 'DRAFT', publishedToUsers: false, revision: 1,
@@ -263,6 +276,15 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
       actors: { ...current.actors, activated: localActor },
     }, 'ACTIVATE', m.reason);
   }
+  async setPublication(id: string, publishedToUsers: boolean, m: FormulaMutation) {
+    this.requireAdmin();
+    const current = this.read(id);
+    if (current.revision !== m.expectedRevision) throw new Error('SCORING_STALE_REVISION');
+    if (current.status !== 'ACTIVE') throw new Error('SCORING_STATUS_INVALID');
+    if (!m.reason.trim()) throw new Error('REASON_REQUIRED');
+    if (current.publishedToUsers === publishedToUsers) return clone(current);
+    return this.save(current, { ...current, publishedToUsers }, publishedToUsers ? 'PUBLISH_TO_USERS' : 'HIDE_FROM_USERS', m.reason);
+  }
   async retire(id: string, m: FormulaMutation) {
     this.requireAdmin();
     const current = this.read(id);
@@ -283,7 +305,7 @@ export class InMemoryScoringFormulaRepository implements ScoringFormulaRepositor
 function assertTestInputKeys(formula: StoredScoringFormula, testCase: ScoringTestCase): void {
   const actual = Object.keys(testCase.inputs).sort();
   const expected = formula.components.map(item => item.id).sort();
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('SCORING_VALIDATION_FAILED');
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('TEST_INPUT_KEYS_MISMATCH');
 }
 
 function bandRecordId(band: ScoringBand, itemId: string, index: number): string {
@@ -354,6 +376,18 @@ export async function activateAndPublishFormula(repository: ScoringFormulaReposi
   const stored = await repository.activate(formula.id, true, formulaMutation(formula, '검증을 통과한 산식을 활성화하고 사용자에게 공개'));
   return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
 }
+export async function createFormulaDraft(
+  repository: ScoringFormulaRepository,
+  input: Parameters<ScoringFormulaRepository['createDraft']>[0],
+): Promise<ScoringFormulaView> {
+  const stored = await repository.createDraft(input, '관리자 화면에서 새 가점 산식 초안 생성');
+  return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
+}
+export async function setFormulaPublication(repository: ScoringFormulaRepository, formula: ScoringFormulaView, publishedToUsers: boolean): Promise<ScoringFormulaView> {
+  const reason = publishedToUsers ? '활성 산식을 사용자에게 공개' : '활성 산식을 사용자 화면에서 숨김';
+  const stored = await repository.setPublication(formula.id, publishedToUsers, formulaMutation(formula, reason));
+  return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
+}
 export async function saveBand(repository: ScoringFormulaRepository, formula: ScoringFormulaView, componentId: string, index: number, band: ScoringBand): Promise<ScoringFormulaView> {
   const component = formula.components.find(item => item.id === componentId);
   if (!component) throw new Error('SCORING_VALIDATION_FAILED');
@@ -361,6 +395,30 @@ export async function saveBand(repository: ScoringFormulaRepository, formula: Sc
   const stored = current
     ? await repository.updateBand(formula.id, bandRecordId(current, componentId, index), band, index, formulaMutation(formula, `${component.label} ${index + 1}번째 구간 수정`))
     : await repository.createBand(formula.id, componentId, band, index, formulaMutation(formula, `${component.label} 구간 추가`));
+  return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
+}
+export async function saveScoringComponent(repository: ScoringFormulaRepository, formula: ScoringFormulaView, component: ScoringComponent): Promise<ScoringFormulaView> {
+  const stored = await repository.updateItem(
+    formula.id,
+    component,
+    formulaMutation(formula, `${component.label} 배점 항목 정보 수정`),
+  );
+  return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
+}
+export async function createScoringComponent(repository: ScoringFormulaRepository, formula: ScoringFormulaView, component: ScoringComponent): Promise<ScoringFormulaView> {
+  const stored = await repository.createItem(
+    formula.id,
+    component,
+    formulaMutation(formula, `${component.label} 배점 항목 추가`),
+  );
+  return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
+}
+export async function deleteScoringComponent(repository: ScoringFormulaRepository, formula: ScoringFormulaView, component: ScoringComponent): Promise<ScoringFormulaView> {
+  const stored = await repository.deleteItem(
+    formula.id,
+    component.id,
+    formulaMutation(formula, `${component.label} 배점 항목 삭제`),
+  );
   return toScoringFormulaView(stored, await repository.auditHistory(stored.id));
 }
 export async function deleteFormulaBand(repository: ScoringFormulaRepository, formula: ScoringFormulaView, componentId: string, index: number): Promise<ScoringFormulaView> {
@@ -407,6 +465,11 @@ export function editabilityOf(formula: ScoringFormula, permission: ScoringPermis
     canEditBands: false, mustCreateNewVersion: true,
     notice: '이 버전은 이미 발행됐어요. 배점을 바꾸려면 서버에 새 초안 버전을 만들어야 해요.',
   };
+  if (formula.status === 'REVIEW') return {
+    canEditBands: false,
+    mustCreateNewVersion: false,
+    notice: '검토 중인 버전은 그대로 보존해요. 수정하려면 먼저 초안으로 되돌려 주세요.',
+  };
   return { canEditBands: true, mustCreateNewVersion: false, notice: null };
 }
 export function activationBlock(formula: ScoringFormula, permission: ScoringPermission): string | null {
@@ -437,4 +500,4 @@ export const statusTransitionAllowed = (current: ScoringStatus, next: ScoringSta
   || (current === 'REVIEW' && next === 'DRAFT')
   || (current === 'REVIEW' && next === 'ACTIVE')
   || (current === 'ACTIVE' && next === 'SUSPENDED');
-export const actorLabel = (value: StoredScoringFormula['actors']['updated']): string => value?.email ?? value?.userId ?? '기록 없음';
+export const actorLabel = (value: StoredScoringFormula['actors']['updated']): string => value?.displayLabel ?? value?.email ?? '기록 없음';

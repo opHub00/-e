@@ -8,24 +8,24 @@ import type { ScoringComponent } from './domain.ts';
 
 const UUID = '3f7b1b6e-2c4d-4a55-9f0e-1b2c3d4e5f60';
 const actors: StoredScoringFormula['actors'] = {
-  created: { userId: UUID, email: 'jo@wanpane.test', role: 'admin' },
-  updated: { userId: UUID, email: 'jo@wanpane.test', role: 'admin' },
+  created: { userId: UUID, email: 'jo@wanpane.test', displayLabel: '조 운영자', role: 'admin' },
+  updated: { userId: UUID, email: 'jo@wanpane.test', displayLabel: '조 운영자', role: 'admin' },
   activated: null,
 };
 
 const entry = (over: Partial<FormulaAuditEntry> = {}): FormulaAuditEntry => ({
   id: 1, action: 'ACTIVATE', actorUserId: UUID, reason: '검토를 마쳐 활성화', before: null, after: null,
-  revision: 2, createdAt: '2026-09-28T01:00:00.000Z',
+  actor: actors.updated, revision: 2, createdAt: '2026-09-28T01:00:00.000Z',
   ...over,
 });
 
 test('감사 기록에 UUID 를 그대로 보여주지 않는다', () => {
   const [row] = auditRows([entry()], actors);
-  assert.equal(row.actor, 'jo@wanpane.test');
+  assert.equal(row.actor, '조 운영자');
   assert.doesNotMatch(row.actor, /[0-9a-f]{8}-[0-9a-f]{4}/, 'UUID 가 화면에 나오면 안 된다');
 
   // 같은 산식의 actors 에 없는 사용자라도 UUID 를 노출하지 않는다.
-  const [unknown] = auditRows([entry({ actorUserId: 'ffffffff-0000-4000-8000-000000000000' })], actors);
+  const [unknown] = auditRows([entry({ actorUserId: 'ffffffff-0000-4000-8000-000000000000', actor: null })], actors);
   assert.equal(unknown.actor, '확인할 수 없는 계정');
   assert.doesNotMatch(unknown.actor, /ffffffff/);
 
@@ -34,7 +34,7 @@ test('감사 기록에 UUID 를 그대로 보여주지 않는다', () => {
 
   assert.equal(auditActorLabel(null, new Map()), '시스템');
   assert.equal(actorName(null), '기록 없음');
-  assert.equal(actorName({ userId: UUID, email: null, role: 'admin' }), '확인할 수 없는 계정');
+  assert.equal(actorName({ userId: UUID, email: null, displayLabel: '조 운영자', role: 'admin' }), '조 운영자');
 });
 
 test('action 코드를 운영자 말로 바꾼다', () => {
@@ -45,6 +45,8 @@ test('action 코드를 운영자 말로 바꾼다', () => {
   assert.equal(auditActionLabel('RETIRE'), '중지');
   assert.equal(auditActionLabel('CREATE_BAND'), '구간 추가');
   assert.equal(auditActionLabel('AUTO_RETIRE_FOR_REPLACEMENT'), '새 버전으로 교체되며 중지');
+  assert.equal(auditActionLabel('PUBLISH_TO_USERS'), '사용자에게 공개');
+  assert.equal(auditActionLabel('HIDE_FROM_USERS'), '사용자에게 숨김');
   // 모르는 코드도 코드값을 그대로 보여주지 않는다.
   assert.equal(auditActionLabel('SOME_NEW_ACTION'), '기타 변경');
 });
@@ -62,13 +64,13 @@ test('감사 기록은 최근 것이 위에 오고, 사유를 그대로 싣는�
 
 test('DB 원문과 제약 이름은 기본 화면에 내보내지 않는다', () => {
   const duplicate = operatorError('SCORING_DB_ERROR:duplicate key value violates unique constraint "scoring_formulas_slug_version_key"');
-  assert.match(duplicate.message, /같은 값이 이미 있어요/);
+  assert.match(duplicate.message, /저장소에서 처리하지 못했어요/);
   assert.doesNotMatch(duplicate.message, /unique constraint|duplicate key|scoring_formulas_slug/);
-  assert.match(duplicate.detail ?? '', /unique constraint/, '원문은 고급 정보에 남긴다');
+  assert.equal(duplicate.detail, null, 'DB 원문은 화면 contract에 남기지 않는다');
 
   const other = operatorError('SCORING_DB_ERROR:null value in column "slug" violates not-null constraint');
   assert.doesNotMatch(other.message, /null value|column|constraint/);
-  assert.ok(other.detail);
+  assert.equal(other.detail, null);
 
   // 계약에 있는 코드는 계약 문구를 그대로 쓴다.
   const known = operatorError('SCORING_STALE_REVISION');
@@ -78,7 +80,7 @@ test('DB 원문과 제약 이름은 기본 화면에 내보내지 않는다', ()
   // 계약에 없는 코드도 코드값을 화면에 싣지 않는다.
   const unknown = operatorError('SOMETHING_ELSE');
   assert.doesNotMatch(unknown.message, /SOMETHING_ELSE/);
-  assert.equal(unknown.detail, 'SOMETHING_ELSE');
+  assert.equal(unknown.detail, null);
 
   assert.match(operatorError('SCORING_DUPLICATE_DRAFT').message, /이미 만들어 둔 초안/);
   assert.match(operatorError('REASON_REQUIRED').message, /사유를 적어/);
@@ -104,7 +106,7 @@ test('검증 예시 입력이 어긋나면 배점 항목 이름으로 알려준�
 test('막힌 상태 전이는 이유와 대안을 함께 말한다', () => {
   assert.match(transitionReason('ACTIVE', 'DRAFT', true) ?? '', /새 버전을 만들어/);
   assert.match(transitionReason('SUSPENDED', 'ACTIVE', true) ?? '', /되살리지 않아요/);
-  assert.match(transitionReason('REVIEW', 'DRAFT', true) ?? '', /초안으로 되돌릴 수 없어요/);
+  assert.equal(transitionReason('REVIEW', 'DRAFT', true), null);
   assert.match(transitionReason('DRAFT', 'ACTIVE', true) ?? '', /검토 요청을 거쳐야/);
   // 권한이 없으면 전이 규칙보다 먼저 그 사실을 말한다.
   assert.match(transitionReason('DRAFT', 'REVIEW', false) ?? '', /관리자만/);

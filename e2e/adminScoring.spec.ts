@@ -28,3 +28,29 @@ test('admin scoring list, detail and simulator use the explicit test repository'
   await expect(page.getByText('84점', { exact: true }).first()).toBeVisible();
   expect(databaseRequests).toEqual([]);
 });
+
+test('admin can create a draft and return a review version to draft', async ({ page }) => {
+  await page.goto('/admin/scoring/new');
+  await page.getByPlaceholder('예: general-private-score').fill('custom-score');
+  await page.getByPlaceholder('예: 1.0.0').fill('1.0.0');
+  await page.getByPlaceholder('예: 민영주택 일반공급 가점').fill('운영 검증 산식');
+  await page.getByPlaceholder('법령 또는 공식 공고 조항').fill('운영 검증 근거');
+  await page.getByRole('button', { name: '초안 만들기' }).click();
+  await expect(page.getByRole('heading', { name: '운영 검증 산식' })).toBeVisible();
+  await expect(page.getByText('초안', { exact: true }).first()).toBeVisible();
+
+  await page.goto(`/admin/scoring/${ID}`);
+  await page.getByRole('button', { name: '초안', exact: true }).click();
+  await expect(page.getByText('초안', { exact: true }).first()).toBeVisible();
+});
+
+test('admin publication toggle is server-snapshot driven and audited', async ({ page }) => {
+  await page.goto(`/admin/scoring/${ID}`);
+  await page.getByRole('button', { name: '활성', exact: true }).click();
+  await expect(page.getByRole('button', { name: '사용자에게 공개하기' })).toBeEnabled();
+  await page.getByRole('button', { name: '사용자에게 공개하기' }).click();
+  await page.getByRole('button', { name: '공개하기', exact: true }).click();
+  await expect(page.getByRole('button', { name: '사용자에게 숨기기' })).toBeVisible();
+  await page.getByText('변경 이력', { exact: true }).click();
+  await expect(page.getByText('사용자에게 공개', { exact: true })).toBeVisible();
+});

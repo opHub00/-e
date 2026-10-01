@@ -64,6 +64,14 @@ export type AssessmentResultPersistenceMetadata = {
   calculatedAt: string;
 };
 
+export type AssessmentResultFreshness = {
+  profileRevision: number;
+  ruleSetId: string | null;
+  ruleSetVersion: string | null;
+  sourceDocumentHash: string | null;
+  engineVersion: string;
+};
+
 export function buildPersistedAssessmentResult(
   entry: AssessmentPortfolioEntry,
   metadata: AssessmentResultPersistenceMetadata,
@@ -97,4 +105,18 @@ export function markAssessmentResultStale(
   detectedAt: string,
 ): PersistedUserAssessmentResult {
   return { ...result, stale: { isStale: true, reason, detectedAt } };
+}
+
+/** 가장 직접적인 원인을 우선해, 삭제 없이 재계산 필요 여부를 판정한다. */
+export function detectAssessmentResultStaleness(
+  result: PersistedUserAssessmentResult,
+  current: AssessmentResultFreshness,
+): AssessmentResultStaleReason | null {
+  if (result.profileRevision !== current.profileRevision) return 'PROFILE_CHANGED';
+  if (result.ruleSetId !== current.ruleSetId || result.ruleSetVersion !== current.ruleSetVersion) {
+    return 'RULE_SET_CHANGED';
+  }
+  if (result.sourceDocumentHash !== current.sourceDocumentHash) return 'SOURCE_DOCUMENT_CHANGED';
+  if (result.engineVersion !== current.engineVersion) return 'ENGINE_CHANGED';
+  return null;
 }

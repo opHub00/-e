@@ -23,6 +23,7 @@ import {
   type ProfileConflictPreference,
 } from './syncDomain';
 import { getSupabaseClient } from './supabaseClient';
+import { clearAssessmentDraftsForOwner } from '../applicationAssessment/questionnaire/draft';
 
 export type CloudSyncStatus =
   | 'idle'
@@ -122,9 +123,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     });
   };
 
-  const clearPrivateCache = async () => {
+  const clearPrivateCache = async (ownerId?: string | null) => {
     suppressCloudWrites = true;
     try {
+      if (ownerId) clearAssessmentDraftsForOwner(ownerId);
       await Promise.all([
         useUserStore.getState().clearPrivateProfileCache(),
         useDiscoveryStore.getState().clearSavedListings(),
@@ -207,7 +209,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
   const processSession = async (session: Session | null, force = false) => {
     if (!session) {
-      const hadSignedInUser = currentUserId !== null;
+      const previousUserId = currentUserId;
       currentUserId = null;
       lastSyncedUserId = null;
       initialSyncComplete = false;
@@ -219,16 +221,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
         profileConflict: null,
         errorMessage: null,
       });
-      if (hadSignedInUser) await clearPrivateCache();
+      if (previousUserId) await clearPrivateCache(previousUserId);
       return;
     }
 
     if (shouldClearPrivateCacheForSession(currentUserId, session.user.id)) {
+      const previousUserId = currentUserId;
       currentUserId = null;
       lastSyncedUserId = null;
       initialSyncComplete = false;
       syncPaused = false;
-      await clearPrivateCache();
+      await clearPrivateCache(previousUserId);
     }
     currentUserId = session.user.id;
     set({ session, email: session.user.email ?? null });
@@ -278,7 +281,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             persistedSession?.user.id ?? null,
           )
         ) {
-          await clearPrivateCache();
+          await clearPrivateCache(cacheOwner);
         }
         await processSession(persistedSession);
         client.auth.onAuthStateChange((_event, session) => {

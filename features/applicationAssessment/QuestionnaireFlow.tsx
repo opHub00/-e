@@ -20,6 +20,7 @@ type Props = {
   supply: SupplyType;
   profile: ApplicantProfileV2;
   listingId: string;
+  draftOwnerId?: string | null;
   residenceRegion?: { short: string; profile: string } | null;
   onProfileChange: (profile: ApplicantProfileV2) => void;
   onComplete: (details: AssessmentInput['details'], profile: ApplicantProfileV2) => void;
@@ -111,7 +112,7 @@ function QuestionBlock({ question, answers, error, bounds, onChange, onTouch }: 
  * 이 화면은 한 번에 한 카테고리만 보여주고, 답을 로컬에 저장하고, 마지막에 기존 판정 입력(details)으로
  * 바꿔 넘길 뿐이다. 규칙 엔진에는 아무 조건도 넣지 않는다.
  */
-export function QuestionnaireFlow({ rules, supply, profile, listingId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange }: Props) {
+export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwnerId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange }: Props) {
   const announcementDate = rules?.announcementDate ?? null;
   const restored = useRef(false);
   const [answers, setAnswers] = useState<Answers>({});
@@ -132,17 +133,17 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
   useEffect(() => {
     if (restored.current || !listingId) return;
     restored.current = true;
-    const draft = readDraft(listingId, supply);
+    const draft = readDraft(listingId, supply, undefined, draftOwnerId);
     const base = draft?.answers ?? {};
     const seeded = buildQuestionnaire({ rules, supply, profile, answers: base, announcementDate, residenceRegion });
     const filled = applyPrefill(seeded, base);
     setAnswers(filled);
     setStepIndex(firstIncompleteStep(buildSteps(seeded, filled)));
-  }, [listingId, supply, rules, profile, announcementDate, residenceRegion]);
+  }, [listingId, supply, rules, profile, announcementDate, residenceRegion, draftOwnerId]);
 
   useEffect(() => {
-    if (restored.current && listingId) writeDraft(listingId, supply, { answers, index: stepIndex });
-  }, [answers, stepIndex, listingId, supply]);
+    if (restored.current && listingId) writeDraft(listingId, supply, { answers, index: stepIndex }, undefined, draftOwnerId);
+  }, [answers, stepIndex, listingId, supply, draftOwnerId]);
 
   const index = Math.min(stepIndex, Math.max(steps.length - 1, 0));
   const step = steps[index];
@@ -164,7 +165,7 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, residence
   const finish = () => {
     const update = profileUpdatesFromAnswers(profile, answers, announcementDate ?? new Date().toISOString().slice(0, 10));
     if (update.changed.length) onProfileChange(update.profile);
-    clearDraft(listingId, supply);
+    clearDraft(listingId, supply, undefined, draftOwnerId);
     onComplete(details, update.profile);
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
+import { useAuthStore } from '../auth/useAuthStore';
 import { getSupabaseClient } from '../auth/supabaseClient';
 import { assessApplication } from '../applicationAssessment/engine';
 import { createSupabaseRuleRepository } from '../applicationAssessment/data/supabaseRuleRepository';
@@ -29,10 +30,10 @@ const lookup = async (listingId: string): Promise<RuleLookupResult> => {
 export const listingRuleCache = new ListingRuleCache(lookup);
 
 /** 저장된 프로필 + 이 기기의 임시 답변으로 공급유형별 판정을 돌린다. 서버 호출은 없다. */
-export function assessWithSavedAnswers(rules: AnnouncementRules, profile: ApplicantProfileV2, listingId: string): ApplicationAssessmentResult[] {
+export function assessWithSavedAnswers(rules: AnnouncementRules, profile: ApplicantProfileV2, listingId: string, ownerId?: string | null): ApplicationAssessmentResult[] {
   const out: ApplicationAssessmentResult[] = [];
   for (const supply of rules.supplies) {
-    const draft = readDraft(listingId, supply.type);
+    const draft = readDraft(listingId, supply.type, undefined, ownerId);
     const answers = draft?.answers ?? {};
     const questions = buildQuestionnaire({ rules, supply: supply.type, profile, answers, announcementDate: rules.announcementDate });
     const bounds = rules.announcementDate ? { notAfter: rules.announcementDate } : undefined;
@@ -55,6 +56,7 @@ export type ListingInsightState =
  */
 export function useListingInsight(listingId: string | undefined, enabled: boolean, provided?: AnnouncementRules | undefined): ListingInsightState {
   const profile = useUserStore(s => s.applicantProfile);
+  const draftOwnerId = useAuthStore(s => s.session?.user.id ?? null);
   const hydrated = useUserStore(s => s.profileHydrated);
   const [fetched, setFetched] = useState<{ listingId: string; value: RuleLookupResult } | null>(null);
 
@@ -76,8 +78,8 @@ export function useListingInsight(listingId: string | undefined, enabled: boolea
       return { phase: 'NONE' };
     }
     if (!hydrated) return { phase: 'LOADING' };
-    const results = assessWithSavedAnswers(rules, profile, listingId);
+    const results = assessWithSavedAnswers(rules, profile, listingId, draftOwnerId);
     const primary = pickPrimaryInsight(results);
     return primary ? { phase: 'READY', insight: primary, all: results.map(buildListingInsight) } : { phase: 'NONE' };
-  }, [enabled, listingId, hydrated, fetched, provided, profile]);
+  }, [enabled, listingId, hydrated, fetched, provided, profile, draftOwnerId]);
 }

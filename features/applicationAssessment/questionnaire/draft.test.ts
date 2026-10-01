@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { clearDraft, createMemoryDraftStorage, draftKey, readDraft, writeDraft } from './draft.ts';
+import { clearAssessmentDraftsForOwner, clearDraft, createMemoryDraftStorage, draftKey, readDraft, writeDraft } from './draft.ts';
 
 test('8. 중간에 나갔다 돌아와도 답한 값과 위치가 남는다', () => {
   const storage = createMemoryDraftStorage();
@@ -52,4 +52,22 @@ test('저장 크기를 제한한다', () => {
   const restored = readDraft('listing-a', 'newlywed', storage)!;
   assert.ok(Object.keys(restored.answers).length <= 60);
   assert.equal(restored.answers.longOne, undefined);
+});
+
+test('로그인 사용자별 draft가 서로 섞이지 않는다', () => {
+  const storage = createMemoryDraftStorage();
+  writeDraft('listing-a', 'youth', { answers: { birthDate: '1990-01-01' }, index: 1 }, storage, 'user-a');
+  writeDraft('listing-a', 'youth', { answers: { birthDate: '2000-01-01' }, index: 2 }, storage, 'user-b');
+  assert.equal(readDraft('listing-a', 'youth', storage, 'user-a')?.answers.birthDate, '1990-01-01');
+  assert.equal(readDraft('listing-a', 'youth', storage, 'user-b')?.answers.birthDate, '2000-01-01');
+  assert.notEqual(draftKey('listing-a', 'youth', 'user-a'), draftKey('listing-a', 'youth', 'user-b'));
+});
+
+test('로그아웃 시 해당 사용자 draft만 제거한다', () => {
+  const storage = createMemoryDraftStorage();
+  writeDraft('listing-a', 'youth', { answers: { birthDate: '1990-01-01' }, index: 1 }, storage, 'user-a');
+  writeDraft('listing-a', 'youth', { answers: { birthDate: '2000-01-01' }, index: 2 }, storage, 'user-b');
+  clearAssessmentDraftsForOwner('user-a', storage);
+  assert.equal(readDraft('listing-a', 'youth', storage, 'user-a'), null);
+  assert.ok(readDraft('listing-a', 'youth', storage, 'user-b'));
 });

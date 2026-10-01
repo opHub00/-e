@@ -8,6 +8,7 @@ import { WanpanCard } from '../../components/WanpanCard';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { colors, radius, size, spacing, type } from '../../design/tokens';
 import { useUserStore } from '../../store/useUserStore';
+import { useAuthStore } from '../auth/useAuthStore';
 import { useListingDataset } from '../discovery/data/useListingDataset';
 import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
@@ -34,6 +35,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const profile = useUserStore(s => s.applicantProfile);
   const hydrated = useUserStore(s => s.profileHydrated);
   const setApplicantProfile = useUserStore(s => s.setApplicantProfile);
+  const draftOwnerId = useAuthStore(s => s.session?.user.id ?? null);
   const dataset = useListingDataset();
   const [selected, setSelected] = useState(listingId ?? '');
   const [supply, setSupply] = useState<SupplyType>('youth');
@@ -119,7 +121,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       {step === 2 ? <>
         <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
         <QuestionnaireFlow
-          rules={rules} supply={supply} profile={profile} listingId={selected} residenceRegion={residenceRegion}
+          rules={rules} supply={supply} profile={profile} listingId={selected} draftOwnerId={draftOwnerId} residenceRegion={residenceRegion}
           onProfileChange={setApplicantProfile}
           onComplete={details => { if (!rules) return; setQuestionnaireDetails(details); setSubmitted(true); move(3); }}
           onBack={() => move(1)}

@@ -16,7 +16,7 @@
     "test:auth": "node --experimental-strip-types features/auth/authSync.test.ts && node --experimental-strip-types features/auth/authStorage.test.ts && node --experimental-strip-types --test features/auth/supabaseTarget.test.ts",
     "test:motion": "node components/motion/motion.test.mjs",
     "test:tokens": "node design/tokens.test.mjs",
-    "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts",
+    "test:edge": "npx --yes deno@2 run --allow-read supabase/functions/ai/eligibility.test.ts && npx --yes deno@2 check supabase/functions/user-assessment/index.ts",
     "test": "npm run test:import-target && npm run test:semantic && npm run test:extraction-v3 && npm run test:extraction-v4 && npm run test:extraction-v4-1 && npm run test:extraction && npm run test:ingestion && npm run test:assessment && npm run test:user-centric-persistence && npm run test:assessment-review && npm run test:scoring-db && npm run test:domain && npm run test:discovery && npm run test:news && npm run test:profile && npm run test:auth && npm run test:motion && npm run test:tokens && npm run test:build-config && npm run test:hardcode-guard && npm run test:edge",
     "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/userCentricDomain.test.ts && node --experimental-strip-types features/applicationAssessment/ruleRegion.test.ts && node --experimental-strip-types features/applicationAssessment/secondAnnouncement.test.ts && node --experimental-strip-types features/applicationAssessment/genericFacts.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts && node --experimental-strip-types --test features/applicationAssessment/server/demoAnnouncements.test.ts features/applicationAssessment/server/demoActivationGate.test.ts features/applicationAssessment/server/geomamAssessment.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/consultation.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/interpreter.regression.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/newlywedUtterances.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/newlywedChat.test.ts && node --experimental-strip-types features/assessmentConsultation/engineAdapter.test.ts && node --experimental-strip-types --test features/applicationAssessment/questionnaire/dateInput.test.ts features/applicationAssessment/questionnaire/questionnaire.test.ts features/applicationAssessment/questionnaire/categories.test.ts features/applicationAssessment/questionnaire/draft.test.ts",
     "test:import-target": "node --experimental-strip-types features/applicationAssessment/server/importTarget.test.ts && node --test scripts/assessment-rules-cli.test.mjs",
@@ -26,6 +26,7 @@
     "test:e2e:desktop": "node e2e/runPlaywright.mjs --project=desktop-1440x900",
     "test:build-config": "node --test scripts/web-build.test.mjs",
     "build:web": "node scripts/export-web.mjs production",
+    "build": "npm run build:web",
     "build:web:staging": "node scripts/export-web.mjs staging",
     "build:web:release": "node scripts/export-web.mjs production --require-target",
     "preflight:web:production": "node scripts/export-web.mjs production --require-target --out .cache/preflight/production-dist",
@@ -72,10 +73,11 @@
     "benchmark:samdo:evaluate-v4": "node --experimental-strip-types scripts/evaluate-samdo-v4.mjs",
     "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs",
     "test:hardcode-guard": "node --test scripts/announcement-hardcode-guard.test.mjs",
-    "test:user-centric-persistence": "node --experimental-strip-types --test features/profile/v3Repository.test.ts features/applicationAssessment/resultRepository.test.ts && node --experimental-strip-types scripts/check-user-centric-persistence.mjs",
+    "test:user-centric-persistence": "node --experimental-strip-types --test features/profile/v3Repository.test.ts features/profile/v3Bridge.test.ts features/profile/v3Session.test.ts features/userCentricAssessment/featureFlags.test.ts features/applicationAssessment/resultRepository.test.ts features/applicationAssessment/serverExecution.test.ts features/applicationAssessment/userCentricService.test.ts && node --experimental-strip-types scripts/check-user-centric-persistence.mjs",
     "backfill:profiles:v3:dry-run": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/backfill-applicant-profiles-v3.mjs",
     "backfill:profiles:v3": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/backfill-applicant-profiles-v3.mjs --apply",
-    "test:staging:user-centric-persistence": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-staging.mjs"
+    "test:staging:user-centric-persistence": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-staging.mjs",
+    "test:staging:user-centric-flow": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-assessment-flow.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

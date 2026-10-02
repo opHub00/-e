@@ -64,17 +64,30 @@ try {
       announcement_id uuid not null references public.announcements(id),
       document_id uuid references public.announcement_documents(id),
       version text not null,
-      is_active boolean not null default false
+      source_status text not null default 'REFERENCE',
+      is_active boolean not null default false,
+      is_public boolean not null default false,
+      approved_at timestamptz
+    );
+    create table public.announcement_listing_bindings(
+      listing_id text primary key,
+      announcement_id uuid not null references public.announcements(id),
+      bound_rule_set_id uuid references public.assessment_rule_sets(id)
     );
   `);
   const migration = await readFile(new URL('../supabase/migrations/20261001071555_user_centric_assessment_persistence.sql', import.meta.url), 'utf8');
   await db.exec(migration);
   const correction = await readFile(new URL('../supabase/migrations/20261001073009_user_centric_assessment_service_role_fix.sql', import.meta.url), 'utf8');
   await db.exec(correction);
+  const serverExecution = await readFile(new URL('../supabase/migrations/20261001080049_user_centric_assessment_server_execution.sql', import.meta.url), 'utf8');
+  await db.exec(serverExecution);
+  const serverReuseFix = await readFile(new URL('../supabase/migrations/20261001081655_user_centric_assessment_server_reuse_fix.sql', import.meta.url), 'utf8');
+  await db.exec(serverReuseFix);
   await db.query('insert into auth.users(id) values($1),($2)', [ids.a, ids.b]);
   await db.query('insert into public.announcements(id,title) values($1,$2)', [ids.announcement, '검증 공고']);
   await db.query('insert into public.announcement_documents(id,announcement_id,sha256) values($1,$2,$3)', [ids.document, ids.announcement, sourceHash]);
-  await db.query('insert into public.assessment_rule_sets(id,announcement_id,document_id,version,is_active) values($1,$2,$3,$4,true)', [ids.ruleSet, ids.announcement, ids.document, '1.0.0']);
+  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,is_active,is_public,approved_at) values($1,$2,$3,$4,'DRAFT_SOURCE_VERIFIED',true,true,now())", [ids.ruleSet, ids.announcement, ids.document, '1.0.0']);
+  await db.query('insert into public.announcement_listing_bindings(listing_id,announcement_id,bound_rule_set_id) values($1,$2,$3)', ['listing-1', ids.announcement, ids.ruleSet]);
   await db.query('insert into public.user_profiles(user_id,profile_json,updated_at) values($1,$2,$3)', [ids.b, v2, '2026-10-01T00:00:00Z']);
 
   await db.exec('set role service_role');
@@ -118,8 +131,23 @@ try {
     missingUserFields: [], missingAnnouncementFields: [], blockers: [], warnings: [], evidence: [],
     engineResult: null, calculatedAt: '2026-10-01T00:00:00Z', stale: { isStale: false },
   };
-  const saved = (await db.query('select public.save_user_assessment_result($1) result', [storedResult])).rows[0].result;
+  await rejects(
+    () => db.query('select public.save_user_assessment_result($1)', [storedResult]),
+    'authenticated clients cannot submit calculated result snapshots',
+  );
+  await db.exec('reset role; set role service_role');
+  await db.query("select set_config('request.jwt.claim.role','service_role',false)");
+  const saved = (await db.query('select public.save_user_assessment_result_server($1,$2) result', [ids.a, storedResult])).rows[0].result;
   ok(saved.id === ids.result && saved.user_id === ids.a, 'result RPC preserves provenance and owner');
+  await db.query("update public.user_assessment_results set stale_at=now(), stale_reason='ENGINE_CHANGED' where id=$1", [ids.result]);
+  const recalculatedId = '77777777-7777-4777-8777-777777777777';
+  const recalculated = (await db.query(
+    'select public.save_user_assessment_result_server($1,$2) result',
+    [ids.a, { ...storedResult, id: recalculatedId }],
+  )).rows[0].result;
+  ok(recalculated.id === recalculatedId, 'stale exact-match row is superseded instead of reused');
+  await db.exec('reset role; set role authenticated');
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids.a]);
   await rejects(
     () => db.query('insert into public.user_assessment_results(id) values(gen_random_uuid())'),
     'authenticated clients cannot insert arbitrary results',
@@ -129,7 +157,7 @@ try {
     'select public.save_applicant_profile_v3(1,$1,null,null) result', [{ ...empty, revision: 1 }],
   )).rows[0].result;
   ok(response.revision === 2, 'matching expected revision increments atomically');
-  rows = (await db.query('select stale_reason from public.user_assessment_results')).rows;
+  rows = (await db.query('select stale_reason from public.user_assessment_results where superseded_at is null')).rows;
   ok(rows.length === 1 && rows[0].stale_reason === 'PROFILE_CHANGED', 'profile update marks current results stale');
 
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids.b]);

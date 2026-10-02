@@ -114,23 +114,40 @@ try {
   if (demoReadError) throw demoReadError;
   ok(demoV3.length === 0, 'demo seed is not automatically promoted to V3');
 
-  const { data: announcement, error: announcementError } = await service
-    .from('announcements').select('id').limit(1).maybeSingle();
-  if (announcementError) throw announcementError;
-  assert.ok(announcement?.id, 'STAGING_ANNOUNCEMENT_REQUIRED_FOR_RESULT_TEST');
+  const { data: activeSet, error: activeSetError } = await service
+    .from('assessment_rule_sets')
+    .select('id,announcement_id,document_id,version,source_status')
+    .eq('is_active', true).eq('is_public', true).not('approved_at', 'is', null).limit(1).single();
+  if (activeSetError) throw activeSetError;
+  const { data: binding, error: bindingError } = await service
+    .from('announcement_listing_bindings').select('listing_id')
+    .eq('announcement_id', activeSet.announcement_id).limit(1).maybeSingle();
+  if (bindingError) throw bindingError;
+  const listingId = binding?.listing_id ?? `announcement:${activeSet.announcement_id}`;
+  let activeDocumentHash = null;
+  if (activeSet.document_id) {
+    const { data: document, error: documentError } = await service.from('announcement_documents')
+      .select('sha256').eq('id', activeSet.document_id).single();
+    if (documentError) throw documentError;
+    activeDocumentHash = document.sha256;
+  }
   const resultId = randomUUID();
   const result = {
-    id: resultId, userId: owner.id, announcementId: announcement.id,
-    listingId: `staging-check-${resultId}`, supplyType: 'youth',
-    ruleSetId: null, ruleSetVersion: null, sourceStatus: 'REFERENCE',
-    sourceDocumentId: null, sourceDocumentHash: null, profileRevision: 1,
+    id: resultId, userId: owner.id, announcementId: activeSet.announcement_id,
+    listingId, supplyType: 'youth',
+    ruleSetId: activeSet.id, ruleSetVersion: activeSet.version, sourceStatus: activeSet.source_status,
+    sourceDocumentId: activeSet.document_id, sourceDocumentHash: activeDocumentHash, profileRevision: 1,
     engineVersion: 'staging-verification-v1', inputHash: createHash('sha256').update(resultId).digest('hex'),
     portfolioStatus: 'UNAVAILABLE', eligibilityStatus: null, scoringStatus: 'UNAVAILABLE',
     stage: null, score: null, missingUserFields: [], missingAnnouncementFields: ['ruleSet'],
     blockers: [], warnings: ['verification'], evidence: [], engineResult: null,
     calculatedAt: new Date().toISOString(), stale: { isStale: false },
   };
-  const { data: savedResult, error: saveResultError } = await owner.client.rpc('save_user_assessment_result', { p_result: result });
+  const { error: forgedResultError } = await owner.client.rpc('save_user_assessment_result', { p_result: result });
+  ok(Boolean(forgedResultError), 'authenticated client cannot submit calculated result');
+  const { data: savedResult, error: saveResultError } = await service.rpc('save_user_assessment_result_server', {
+    p_user_id: owner.id, p_result: result,
+  });
   if (saveResultError) throw saveResultError;
   ok(savedResult.id === resultId && savedResult.user_id === owner.id, 'assessment result saves with owner and provenance');
   const { data: hiddenResults, error: hiddenError } = await legacy.client

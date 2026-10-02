@@ -38,7 +38,7 @@ export type PersistedUserAssessmentResult = {
   inputHash: string;
   portfolioStatus: AssessmentPortfolioStatus;
   eligibilityStatus: Status | null;
-  scoringStatus: ApplicationAssessmentResult['scoring'] | 'UNAVAILABLE';
+  scoringStatus: 'SCORED' | 'PENDING' | 'NOT_APPLICABLE' | 'UNAVAILABLE';
   stage: Stage | null;
   score: ApplicationAssessmentResult['score'] | null;
   missingUserFields: string[];
@@ -86,7 +86,7 @@ export function buildPersistedAssessmentResult(
     ruleSetVersion,
     portfolioStatus: entry.status,
     eligibilityStatus: entry.eligibilityStatus,
-    scoringStatus: entry.scoringStatus,
+    scoringStatus: entry.scoringStatus === 'AVAILABLE' ? 'SCORED' : entry.scoringStatus,
     stage: entry.stage,
     score: entry.score,
     missingUserFields: [...entry.missingUserFields],

@@ -20,6 +20,11 @@ import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/
 import { AssessmentResult } from './AssessmentResult';
 import { registerAssessmentConsultationSeed } from '../assessmentConsultation/seedStore';
 import type { ApplicationAssessmentResult, AssessmentInput, SupplyType } from './types';
+import { userCentricFeatureFlags } from '../userCentricAssessment/featureFlags';
+import { getSupabaseClient } from '../auth/supabaseClient';
+import { createUserCentricAssessmentService } from './userCentricService';
+import { saveReusableAssessmentDetailsToV3 } from '../profile/useApplicantProfileV3Store';
+import { ApplicantProfileV3RepositoryError } from '../profile/v3Repository';
 
 const profileValue = (field: ProfileFieldState<unknown>) => field.status !== 'known' ? '확인 전' : typeof field.value === 'boolean' ? (field.value ? '예' : '아니요') : ({ single: '미혼', married: '기혼', 'no-home': '무주택', 'owns-home': '주택 보유' }[String(field.value)] ?? String(field.value));
 
@@ -36,6 +41,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const hydrated = useUserStore(s => s.profileHydrated);
   const setApplicantProfile = useUserStore(s => s.setApplicantProfile);
   const draftOwnerId = useAuthStore(s => s.session?.user.id ?? null);
+  const flags = userCentricFeatureFlags();
   const dataset = useListingDataset();
   const [selected, setSelected] = useState(listingId ?? '');
   const [supply, setSupply] = useState<SupplyType>('youth');
@@ -43,6 +49,9 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const [questionnaireDetails, setQuestionnaireDetails] = useState<AssessmentInput['details']>({});
   // 판정은 "마지막으로 제출한 답변 + 지금의 프로필"로 계산한다. 프로필이 바뀌면 다시 계산하고, 오래된 결과를 남기지 않는다.
   const [submitted, setSubmitted] = useState(false);
+  const [serverResult, setServerResult] = useState<ApplicationAssessmentResult | null>(null);
+  const [serverStatus, setServerStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [profileSaveBlock, setProfileSaveBlock] = useState<'conflict' | 'error' | null>(null);
   const scroll = useRef<ScrollView>(null);
   const ruleLoad = useAssessmentRules(selected);
   const rules = ruleLoad.rules;
@@ -53,12 +62,45 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   }, [rules, supply]);
   const selectedListing = dataset.listings.find(l => l.id === selected);
   const title = rules?.title ?? selectedListing?.complexName;
-  const result: ApplicationAssessmentResult | null = useMemo(
+  const localResult: ApplicationAssessmentResult | null = useMemo(
     () => (submitted && rules ? assessApplication(rules, { profile, details: questionnaireDetails }, selected).find(r => r.supplyType === supply) ?? null : null),
     [submitted, rules, profile, questionnaireDetails, selected, supply],
   );
+  const useServerResult = flags.userCentricAssessmentResults
+    && Boolean(draftOwnerId)
+    && rules?.verification !== 'REFERENCE_ONLY';
+  useEffect(() => {
+    let current = true;
+    if (!submitted || !rules || !draftOwnerId || !useServerResult) {
+      if (!useServerResult) { setServerResult(null); setServerStatus('idle'); }
+      return () => { current = false; };
+    }
+    const client = getSupabaseClient();
+    if (!client) { setServerStatus('error'); return () => { current = false; }; }
+    setServerStatus('loading');
+    void createUserCentricAssessmentService({ client }).loadOrRecalculate({
+      userId: draftOwnerId,
+      listingId: selected,
+      supplyType: supply,
+      announcementDetails: questionnaireDetails,
+    }).then(response => {
+      if (!current) return;
+      setServerResult(response.result.engineResult);
+      setServerStatus(response.result.engineResult ? 'ready' : 'error');
+    }).catch(() => {
+      if (current) { setServerResult(null); setServerStatus('error'); }
+    });
+    return () => { current = false; };
+  }, [submitted, rules, draftOwnerId, useServerResult, selected, supply, questionnaireDetails]);
+  const result = useServerResult ? serverResult : localResult;
   const move = (next: number) => { setStep(next); scroll.current?.scrollTo({ y: 0, animated: false }); };
-  const resetAnswers = () => { setQuestionnaireDetails({}); setSubmitted(false); };
+  const resetAnswers = () => {
+    setQuestionnaireDetails({});
+    setSubmitted(false);
+    setServerResult(null);
+    setServerStatus('idle');
+    setProfileSaveBlock(null);
+  };
   const choose = (id: string) => { setSelected(id); resetAnswers(); };
   const editProfile = () => router.push('/profile');
   const askAboutResult = () => {
@@ -123,17 +165,47 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         <QuestionnaireFlow
           rules={rules} supply={supply} profile={profile} listingId={selected} draftOwnerId={draftOwnerId} residenceRegion={residenceRegion}
           onProfileChange={setApplicantProfile}
-          onComplete={details => { if (!rules) return; setQuestionnaireDetails(details); setSubmitted(true); move(3); }}
+          onComplete={details => {
+            if (!rules) return;
+            void (async () => {
+              if (flags.userCentricProfileV3 && draftOwnerId) {
+                await saveReusableAssessmentDetailsToV3(details);
+              }
+              setProfileSaveBlock(null);
+              setQuestionnaireDetails(details);
+              setSubmitted(true);
+              move(3);
+            })().catch(error => {
+              setProfileSaveBlock(
+                error instanceof ApplicantProfileV3RepositoryError
+                  && error.code === 'PROFILE_V3_REVISION_CONFLICT'
+                  ? 'conflict'
+                  : 'error',
+              );
+              setQuestionnaireDetails(details);
+              setSubmitted(false);
+              setServerResult(null);
+              setServerStatus('error');
+              move(3);
+            });
+          }}
           onBack={() => move(1)}
           onStepChange={() => scroll.current?.scrollTo({ y: 0, animated: false })}
         />
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
-        {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : <>
-          <Text style={styles.body}>이 공고의 판정 기준을 불러오지 못했어요.</Text>
+        {useServerResult && serverStatus === 'loading' ? <Text style={styles.body}>저장된 결과와 최신 기준을 확인하고 있어요.</Text> : null}
+        {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : serverStatus !== 'loading' ? <>
+          <Text style={styles.body}>{profileSaveBlock === 'conflict'
+            ? '다른 기기에서 프로필이 먼저 변경됐어요. 최신 정보를 확인한 뒤 다시 판정해 주세요.'
+            : profileSaveBlock === 'error'
+              ? '프로필을 저장하지 못해 판정을 시작하지 않았어요. 잠시 후 다시 시도해 주세요.'
+              : useServerResult
+                ? '서버 판정을 완료하지 못했어요. 프로필 저장 상태를 확인한 뒤 다시 시도해 주세요.'
+                : '이 공고의 판정 기준을 불러오지 못했어요.'}</Text>
           <PrimaryButton label="질문으로 돌아가기" onPress={() => move(2)} />
-        </>}
+        </> : null}
         <Text style={styles.notice}>입력한 정보를 기준으로 한 예상 판정이며, 최종 자격은 사업주체 및 청약기관 심사를 통해 확정됩니다.</Text>
         {/* 확인 필요 결과에서 다시 판정을 첫 행동으로 두면, 공고 기준이 없는 동안 같은 입력을 되풀이하게 된다. 누락 항목별 수정은 결과 카드 안에 있다. */}
         <PrimaryButton label="준비 단계로 이어가기" onPress={() => router.push('/preparation')} />

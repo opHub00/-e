@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { detectAssessmentResultStaleness, type PersistedUserAssessmentResult } from './resultPersistence.ts';
-import { createSupabaseAssessmentResultRepository } from './resultRepository.ts';
+import { readFileSync } from 'node:fs';
 
 const result: PersistedUserAssessmentResult = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -16,13 +16,10 @@ const result: PersistedUserAssessmentResult = {
   stale: { isStale: false },
 };
 
-test('result repository adopts the RPC row snapshot', async () => {
-  const row = {
-    id: result.id, user_id: result.userId, result_snapshot: result,
-    calculated_at: result.calculatedAt, stale_at: null, stale_reason: null,
-  };
-  const client = { rpc: async () => ({ data: row, error: null }) } as never;
-  assert.deepEqual(await createSupabaseAssessmentResultRepository(client).save(result), result);
+test('authenticated clients cannot call the legacy result-save RPC', () => {
+  const sql = readFileSync(new URL('../../supabase/migrations/20261001080049_user_centric_assessment_server_execution.sql', import.meta.url), 'utf8');
+  assert.match(sql, /revoke all on function public\.save_user_assessment_result\(jsonb\)[\s\S]*from public, anon, authenticated/);
+  assert.match(sql, /save_user_assessment_result_server\(uuid, jsonb\)[\s\S]*to service_role/);
 });
 
 test('stale detection identifies all four provenance changes in priority order', () => {

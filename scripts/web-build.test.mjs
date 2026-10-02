@@ -104,6 +104,7 @@ test('staging build maps only public staging values and strips server-only keys'
     RULE_REVIEW_STAGING_RULE_SET_ID: '00000000-0000-4000-8000-000000000000',
     EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3: 'true',
     EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS: 'true',
+    EXPO_PUBLIC_USER_CENTRIC_PORTFOLIO: 'true',
   }));
   assert.equal(env.EXPO_PUBLIC_WANPANE_ENV, 'staging');
   assert.equal(env.WANPANE_METRO_CACHE_NAMESPACE, 'staging');
@@ -113,6 +114,7 @@ test('staging build maps only public staging values and strips server-only keys'
   assert.equal(env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID, '00000000-0000-4000-8000-000000000000');
   assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3, 'true');
   assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS, 'true');
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PORTFOLIO, 'true');
   assert.equal(env.KEEP, 'yes');
   assert.deepEqual(Object.keys(env).filter(key => /SERVICE_ROLE|ALLOW_WRITE|ACCESS_TOKEN|^SUPABASE_|^RULE_REVIEW_STAGING_/.test(key)), []);
   assert.equal(source.SUPABASE_SERVICE_ROLE_KEY, 'x', 'parent environment is not mutated');
@@ -142,6 +144,7 @@ test('production build never targets or names the staging project', () => {
   assert.equal(env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID, undefined);
   assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3, undefined);
   assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS, undefined);
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PORTFOLIO, undefined);
   assert.equal(env.SUPABASE_STAGING_SERVICE_ROLE_KEY, undefined);
 });
 

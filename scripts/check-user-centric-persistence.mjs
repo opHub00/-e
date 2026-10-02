@@ -83,6 +83,9 @@ try {
   await db.exec(serverExecution);
   const serverReuseFix = await readFile(new URL('../supabase/migrations/20261001081655_user_centric_assessment_server_reuse_fix.sql', import.meta.url), 'utf8');
   await db.exec(serverReuseFix);
+  const concurrencyLock = await readFile(new URL('../supabase/migrations/20261002042012_user_assessment_result_concurrency_lock.sql', import.meta.url), 'utf8');
+  ok(/pg_advisory_xact_lock[\s\S]*userId|pg_advisory_xact_lock[\s\S]*p_user_id/.test(concurrencyLock), 'result persistence serializes duplicate Portfolio writes');
+  await db.exec(concurrencyLock);
   await db.query('insert into auth.users(id) values($1),($2)', [ids.a, ids.b]);
   await db.query('insert into public.announcements(id,title) values($1,$2)', [ids.announcement, '검증 공고']);
   await db.query('insert into public.announcement_documents(id,announcement_id,sha256) values($1,$2,$3)', [ids.document, ids.announcement, sourceHash]);
@@ -139,6 +142,8 @@ try {
   await db.query("select set_config('request.jwt.claim.role','service_role',false)");
   const saved = (await db.query('select public.save_user_assessment_result_server($1,$2) result', [ids.a, storedResult])).rows[0].result;
   ok(saved.id === ids.result && saved.user_id === ids.a, 'result RPC preserves provenance and owner');
+  const reused = (await db.query('select public.save_user_assessment_result_server($1,$2) result', [ids.a, { ...storedResult, id: '88888888-8888-4888-8888-888888888888' }])).rows[0].result;
+  ok(reused.id === ids.result, 'duplicate Portfolio calculation reuses the canonical current result');
   await db.query("update public.user_assessment_results set stale_at=now(), stale_reason='ENGINE_CHANGED' where id=$1", [ids.result]);
   const recalculatedId = '77777777-7777-4777-8777-777777777777';
   const recalculated = (await db.query(

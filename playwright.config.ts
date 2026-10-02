@@ -6,6 +6,7 @@ const externallyManagedServer = process.env.WANPANE_E2E_EXTERNAL_SERVER === '1';
 /** Browser smoke coverage for the assessment flow. Runs against the static web export. */
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: '**/staging/**',
   outputDir: './e2e/.artifacts/runs',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

@@ -164,6 +164,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
         <QuestionnaireFlow
           rules={rules} supply={supply} profile={profile} listingId={selected} draftOwnerId={draftOwnerId} residenceRegion={residenceRegion}
+          skipKnownProfileFacts={flags.userCentricProfileV3 && Boolean(draftOwnerId)}
           onProfileChange={setApplicantProfile}
           onComplete={details => {
             if (!rules) return;

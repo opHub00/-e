@@ -28,6 +28,11 @@ export type Question = {
   prefill?: { value: string; source: string };
 };
 
+/** V3 장기 fact가 이미 있으면 공고 질문지에서 같은 질문을 다시 보여주지 않는다. */
+export function questionsRequiringUserInput(questions: Question[], skipKnownProfileFacts: boolean): Question[] {
+  return skipKnownProfileFacts ? questions.filter(question => !question.prefill) : questions;
+}
+
 type ProfileField<T> = ProfileFieldState<T>;
 const known = <T>(field: ProfileField<T> | undefined): T | undefined => (field?.status === 'known' ? field.value : undefined);
 

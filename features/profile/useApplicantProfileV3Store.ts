@@ -128,7 +128,10 @@ export function stopApplicantProfileV3Session(): void {
   useApplicantProfileV3Store.setState(initial);
 }
 
-async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3Record | null> {
+async function saveProfile(
+  next: ApplicantProfileV3,
+  metadata: { completedAt?: string | null; consentVersion?: string | null } = {},
+): Promise<ApplicantProfileV3Record | null> {
   const state = useApplicantProfileV3Store.getState();
   const activeRepository = repository;
   const ownGeneration = generation;
@@ -137,6 +140,8 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
     state.record
     && state.profile
     && canonicalSerialize(profileValueSnapshot(state.profile)) === canonicalSerialize(profileValueSnapshot(next))
+    && (metadata.completedAt === undefined || metadata.completedAt === state.record.completedAt)
+    && (metadata.consentVersion === undefined || metadata.consentVersion === state.record.consentVersion)
   ) {
     return state.record;
   }
@@ -145,6 +150,8 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
     const saved = await activeRepository.update({
       expectedRevision: state.record?.revision ?? 0,
       profile: next,
+      completedAt: metadata.completedAt,
+      consentVersion: metadata.consentVersion,
     });
     if (ownGeneration === generation && useApplicantProfileV3Store.getState().userId === saved.userId) {
       useApplicantProfileV3Store.setState({
@@ -168,7 +175,7 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
         status: 'conflict',
         cacheState: 'STALE',
         errorCode: error.code,
-        conflict: { base: state.profile ?? next, local: next, server },
+        conflict: { base: state.record?.profile ?? state.profile ?? next, local: next, server },
       });
     } else {
       useApplicantProfileV3Store.setState({
@@ -179,6 +186,67 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
     }
     throw error;
   }
+}
+
+/** Explicit V3 editor entry point. All writes still use the repository revision gate. */
+export async function saveApplicantProfileV3(
+  next: ApplicantProfileV3,
+  metadata: { completedAt?: string | null; consentVersion?: string | null } = {},
+): Promise<ApplicantProfileV3Record | null> {
+  const task = saveQueue.catch(() => null).then(() => saveProfile(next, metadata));
+  saveQueue = task;
+  return task;
+}
+
+/** Reloads the authoritative server profile after a conflict or explicit retry. */
+export async function reloadApplicantProfileV3FromServer(): Promise<ApplicantProfileV3Record | null> {
+  const state = useApplicantProfileV3Store.getState();
+  const activeRepository = repository;
+  const ownGeneration = generation;
+  if (!state.userId || !activeRepository) return null;
+  useApplicantProfileV3Store.setState({ status: 'loading', errorCode: null });
+  try {
+    const record = await activeRepository.read(state.userId);
+    if (ownGeneration === generation && useApplicantProfileV3Store.getState().userId === state.userId) {
+      useApplicantProfileV3Store.setState({
+        profile: record?.profile ?? null,
+        record,
+        status: 'ready',
+        cacheState: record ? 'FRESH' : null,
+        source: record ? 'V3' : 'NONE',
+        errorCode: null,
+        conflict: null,
+      });
+    }
+    return record;
+  } catch (error) {
+    if (ownGeneration === generation) {
+      useApplicantProfileV3Store.setState({
+        status: 'error',
+        cacheState: 'STALE',
+        errorCode: error instanceof ApplicantProfileV3RepositoryError ? error.code : 'PROFILE_V3_READ_FAILED',
+      });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Keeps the user's local edit in memory while adopting only the latest server
+ * revision. It is never auto-saved; the next explicit save remains revision-gated.
+ */
+export function keepLocalApplicantProfileV3ConflictDraft(): void {
+  const state = useApplicantProfileV3Store.getState();
+  if (!state.conflict) return;
+  useApplicantProfileV3Store.setState({
+    profile: state.conflict.local,
+    record: state.conflict.server,
+    status: 'ready',
+    cacheState: 'STALE',
+    source: state.conflict.server ? 'V3' : state.source,
+    errorCode: null,
+    conflict: null,
+  });
 }
 
 export async function saveExplicitV2ProfileEditToV3(

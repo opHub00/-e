@@ -12,7 +12,7 @@ import { koreanMoneyHint } from './form';
 import { assessmentDetails, profileUpdatesFromAnswers } from './questionnaire/adapter';
 import { clearDraft, readDraft, writeDraft } from './questionnaire/draft';
 import { displayDate, formatDateInput, formatDateListInput, normalizeDateInput } from './questionnaire/dateInput';
-import { applyPrefill, buildQuestionnaire, questionnaireProgress, type Answers, type Question } from './questionnaire/questions';
+import { applyPrefill, buildQuestionnaire, questionnaireProgress, questionsRequiringUserInput, type Answers, type Question } from './questionnaire/questions';
 import { buildSteps, firstIncompleteStep } from './questionnaire/categories';
 
 type Props = {
@@ -25,6 +25,8 @@ type Props = {
   onProfileChange: (profile: ApplicantProfileV2) => void;
   onComplete: (details: AssessmentInput['details'], profile: ApplicantProfileV2) => void;
   onBack: () => void;
+  /** V3가 source of truth일 때 이미 저장된 장기 fact 질문을 화면에서 생략한다. */
+  skipKnownProfileFacts?: boolean;
   /** 단계가 바뀌면 부모 화면을 맨 위로 올린다. 스크롤 영역은 부모 하나만 둔다. */
   onStepChange?: () => void;
 };
@@ -112,7 +114,7 @@ function QuestionBlock({ question, answers, error, bounds, onChange, onTouch }: 
  * 이 화면은 한 번에 한 카테고리만 보여주고, 답을 로컬에 저장하고, 마지막에 기존 판정 입력(details)으로
  * 바꿔 넘길 뿐이다. 규칙 엔진에는 아무 조건도 넣지 않는다.
  */
-export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwnerId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange }: Props) {
+export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwnerId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange, skipKnownProfileFacts = false }: Props) {
   const announcementDate = rules?.announcementDate ?? null;
   const restored = useRef(false);
   const [answers, setAnswers] = useState<Answers>({});
@@ -120,8 +122,11 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwne
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const questions = useMemo(
-    () => buildQuestionnaire({ rules, supply, profile, answers, announcementDate, residenceRegion }),
-    [rules, supply, profile, answers, announcementDate, residenceRegion],
+    () => questionsRequiringUserInput(
+      buildQuestionnaire({ rules, supply, profile, answers, announcementDate, residenceRegion }),
+      skipKnownProfileFacts,
+    ),
+    [rules, supply, profile, answers, announcementDate, residenceRegion, skipKnownProfileFacts],
   );
   const bounds = announcementDate ? { notAfter: announcementDate, notAfterLabel: `공고일(${displayDate(announcementDate)})` } : undefined;
   const { details, errors } = useMemo(() => assessmentDetails(questions, answers, supply, bounds), [questions, answers, supply, announcementDate]);
@@ -135,11 +140,14 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwne
     restored.current = true;
     const draft = readDraft(listingId, supply, undefined, draftOwnerId);
     const base = draft?.answers ?? {};
-    const seeded = buildQuestionnaire({ rules, supply, profile, answers: base, announcementDate, residenceRegion });
+    const seeded = questionsRequiringUserInput(
+      buildQuestionnaire({ rules, supply, profile, answers: base, announcementDate, residenceRegion }),
+      skipKnownProfileFacts,
+    );
     const filled = applyPrefill(seeded, base);
     setAnswers(filled);
     setStepIndex(firstIncompleteStep(buildSteps(seeded, filled)));
-  }, [listingId, supply, rules, profile, announcementDate, residenceRegion, draftOwnerId]);
+  }, [listingId, supply, rules, profile, announcementDate, residenceRegion, draftOwnerId, skipKnownProfileFacts]);
 
   useEffect(() => {
     if (restored.current && listingId) writeDraft(listingId, supply, { answers, index: stepIndex }, undefined, draftOwnerId);

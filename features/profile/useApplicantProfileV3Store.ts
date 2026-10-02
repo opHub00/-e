@@ -13,6 +13,7 @@ import {
   mergeReusableAssessmentDetailsIntoV3,
 } from './v3Bridge.ts';
 import type { AssessmentInput } from '../applicationAssessment/types.ts';
+import { canonicalSerialize } from '../applicationAssessment/serverExecution.ts';
 
 export type ApplicantProfileV3SyncStatus =
   | 'disabled'
@@ -32,7 +33,7 @@ export type ApplicantProfileV3SessionState = {
   cacheState: ApplicantProfileV3CacheState | null;
   source: ApplicantProfileReadResult['source'] | null;
   errorCode: ApplicantProfileV3RepositoryError['code'] | null;
-  conflict: { local: ApplicantProfileV3; server: ApplicantProfileV3Record | null } | null;
+  conflict: { base: ApplicantProfileV3; local: ApplicantProfileV3; server: ApplicantProfileV3Record | null } | null;
 };
 
 const initial: ApplicantProfileV3SessionState = {
@@ -51,6 +52,19 @@ export const useApplicantProfileV3Store = create<ApplicantProfileV3SessionState>
 let repository: ApplicantProfileV3Repository | null = null;
 let generation = 0;
 let saveQueue: Promise<ApplicantProfileV3Record | null> = Promise.resolve(null);
+
+function profileValueSnapshot(profile: ApplicantProfileV3): unknown {
+  const visit = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(visit);
+    if (!value || typeof value !== 'object') return value;
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([key]) => key !== 'observedAt')
+        .map(([key, child]) => [key, visit(child)]),
+    );
+  };
+  return visit(profile);
+}
 
 export async function startApplicantProfileV3Session(input: {
   userId: string;
@@ -119,6 +133,13 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
   const activeRepository = repository;
   const ownGeneration = generation;
   if (!state.userId || !activeRepository) return null;
+  if (
+    state.record
+    && state.profile
+    && canonicalSerialize(profileValueSnapshot(state.profile)) === canonicalSerialize(profileValueSnapshot(next))
+  ) {
+    return state.record;
+  }
   useApplicantProfileV3Store.setState({ status: 'saving', errorCode: null, conflict: null });
   try {
     const saved = await activeRepository.update({
@@ -147,7 +168,7 @@ async function saveProfile(next: ApplicantProfileV3): Promise<ApplicantProfileV3
         status: 'conflict',
         cacheState: 'STALE',
         errorCode: error.code,
-        conflict: { local: next, server },
+        conflict: { base: state.profile ?? next, local: next, server },
       });
     } else {
       useApplicantProfileV3Store.setState({

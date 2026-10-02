@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createEmptyApplicantProfileV3 } from './v3.ts';
+import { createEmptyApplicantProfileV3, knownProfileFact } from './v3.ts';
 import {
   saveReusableAssessmentDetailsToV3,
   startApplicantProfileV3Session,
@@ -67,5 +67,27 @@ test('revision conflict preserves the local edit and exposes the latest server r
   assert.equal(state.record?.revision, 2);
   assert.equal(state.conflict?.local.subscriptionAccount.recognizedPaymentCount.state, 'KNOWN');
   assert.equal(state.conflict?.server?.revision, 2);
+  stopApplicantProfileV3Session();
+});
+
+test('an unchanged questionnaire submission reuses the current profile revision', async () => {
+  stopApplicantProfileV3Session();
+  let writes = 0;
+  const existing = record('user-a');
+  existing.profile.identity.birthDate = knownProfileFact(
+    { value: '1995-01-01', precision: 'DAY' },
+    { source: 'USER', observedAt: now },
+  );
+  const repository: ApplicantProfileV3Repository = {
+    read: async () => existing,
+    update: async () => { writes += 1; throw new Error('unexpected write'); },
+  };
+  await startApplicantProfileV3Session({ userId: 'user-a', repository, v2, decodeV2 });
+  const saved = await saveReusableAssessmentDetailsToV3(
+    { birthDate: '1995-01-01' },
+    '2026-10-02T00:00:00.000Z',
+  );
+  assert.equal(saved?.revision, 1);
+  assert.equal(writes, 0);
   stopApplicantProfileV3Session();
 });

@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import type { Href } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
@@ -13,6 +14,22 @@ import { useDiscoveryStore } from '../features/discovery/useDiscoveryStore';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { dismissActiveFocus } from '../utils/webFocus';
+import { accessLevelForPath, authRouteFor } from '../features/userCentricAssessment/authPolicy';
+import { userCentricFeatureFlags } from '../features/userCentricAssessment/featureFlags';
+
+function UserCentricRouteGuard() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const hydrated = useAuthStore(state => state.authHydrated);
+  const session = useAuthStore(state => state.session);
+  useEffect(() => {
+    if (!hydrated || session || pathname === '/auth') return;
+    if (accessLevelForPath(pathname, userCentricFeatureFlags()) === 'AUTHENTICATED') {
+      router.replace(authRouteFor(pathname) as Href);
+    }
+  }, [hydrated, pathname, router, session]);
+  return null;
+}
 
 export default function RootLayout() {
   const reducedMotion = useReducedMotion();
@@ -37,6 +54,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="dark" />
+      <UserCentricRouteGuard />
       <Stack
         screenListeners={{
           blur: dismissActiveFocus,
@@ -57,6 +75,8 @@ export default function RootLayout() {
         <Stack.Screen name="future" options={{ headerShown: false }} />
         <Stack.Screen name="quiz" options={{ headerShown: false }} />
         <Stack.Screen name="profile" options={{ headerShown: false }} />
+        <Stack.Screen name="profile-onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="portfolio" options={{ headerShown: false }} />
         <Stack.Screen name="calendar" options={{ headerShown: false }} />
         <Stack.Screen name="newlywed" options={{ headerShown: false }} />
         <Stack.Screen name="benchmark" options={{ headerShown: false }} />

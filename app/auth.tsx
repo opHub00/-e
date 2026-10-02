@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -18,11 +19,14 @@ import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../
 import { duration } from '../design/motion';
 import { AUTH_SUCCESS_ROUTE, shouldNavigateAfterSignUp } from '../features/auth/authUx';
 import { useAuthStore } from '../features/auth/useAuthStore';
+import { safeAuthReturnTo } from '../features/userCentricAssessment/authPolicy';
 
 type Mode = 'login' | 'signup';
 
 export default function AuthRoute() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string | string[] }>();
+  const returnTo = safeAuthReturnTo(params.returnTo);
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -66,7 +70,7 @@ export default function AuthRoute() {
         if (shouldNavigateAfterSignUp(needsConfirmation)) {
           setNavigating(true);
           await new Promise((resolve) => setTimeout(resolve, duration.major));
-          router.replace(AUTH_SUCCESS_ROUTE);
+          router.replace((returnTo ?? AUTH_SUCCESS_ROUTE) as Href);
         } else {
           setMode('login');
         }
@@ -74,7 +78,7 @@ export default function AuthRoute() {
         await signIn(normalizedEmail, password);
         setNavigating(true);
         await new Promise((resolve) => setTimeout(resolve, duration.major));
-        router.replace(AUTH_SUCCESS_ROUTE);
+        router.replace((returnTo ?? AUTH_SUCCESS_ROUTE) as Href);
       }
     } catch {
       // 사용자용 오류는 store에서 안전한 문구로 변환한다.
@@ -101,7 +105,7 @@ export default function AuthRoute() {
             {mode === 'login' ? '다른 기기에서도 이어보세요' : '지금까지 입력한 정보를 지켜드릴게요'}
           </Text>
           <Text style={styles.subtitle}>
-            로그인하지 않아도 완판e의 모든 기능을 계속 사용할 수 있어요. 계정은 프로필과 저장 공고를 기기 간 동기화할 때만 사용해요.
+            공개 공고는 로그인 없이 볼 수 있어요. 내 프로필과 맞춤 분석은 계정에 안전하게 저장돼요.
           </Text>
 
           <View style={styles.segment}>
@@ -172,8 +176,8 @@ export default function AuthRoute() {
               <Text style={styles.continueText}>완판e로 돌아가기</Text>
             </MotionPressable>
           ) : (
-            <MotionPressable accessibilityRole="button" onPress={close} style={styles.continueButton}>
-              <Text style={styles.continueText}>나중에 · 게스트로 계속하기</Text>
+            <MotionPressable accessibilityRole="button" onPress={() => returnTo ? router.replace('/home') : close()} style={styles.continueButton}>
+              <Text style={styles.continueText}>{returnTo ? '공개 화면으로 돌아가기' : '나중에 · 공개 공고 둘러보기'}</Text>
             </MotionPressable>
           )}
 

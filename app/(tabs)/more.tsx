@@ -11,6 +11,7 @@ import { travel } from '../../design/motion';
 import { colors, radius, size, spacing, tint, tracking, type } from '../../design/tokens';
 import { useAuthStore, type CloudSyncStatus } from '../../features/auth/useAuthStore';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
+import { userCentricFeatureFlags } from '../../features/userCentricAssessment/featureFlags';
 
 type CategoryName = '내 청약' | '청약 찾기' | '준비하기' | '배우기' | '상담';
 
@@ -22,11 +23,22 @@ type FeatureItem = {
   tone: keyof typeof tint;
   route: Href;
   keywords: string[];
+  requiresPortfolio?: boolean;
 };
 
 const CATEGORY_ORDER: CategoryName[] = ['내 청약', '청약 찾기', '준비하기', '배우기', '상담'];
 
 const FEATURES: FeatureItem[] = [
+  {
+    category: '내 청약',
+    title: '청약 Portfolio',
+    description: '내 정보로 여러 공고의 분석 상태를 한눈에 봐요',
+    icon: 'auto-graph',
+    tone: 'purple',
+    route: '/portfolio' as Href,
+    keywords: ['포트폴리오', '자동 분석', '여러 공고', '결과'],
+    requiresPortfolio: true,
+  },
   {
     category: '내 청약',
     title: '내 청약 프로필',
@@ -117,19 +129,20 @@ export default function MoreRoute() {
   const restoreCloudAfterDemoReset = useAuthStore((state) => state.restoreCloudAfterDemoReset);
   const [query, setQuery] = useState('');
   const { canInstall, install, installing, installMode, showIosInstructions } = usePwaInstall();
+  const portfolioEnabled = userCentricFeatureFlags().userCentricPortfolio;
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const visibleFeatures = useMemo(
     () =>
       normalizedQuery
-        ? FEATURES.filter((feature) =>
+        ? FEATURES.filter(feature => !feature.requiresPortfolio || portfolioEnabled).filter((feature) =>
             [feature.title, feature.description, feature.category, ...feature.keywords]
               .join(' ')
               .toLocaleLowerCase('ko-KR')
               .includes(normalizedQuery),
           )
-        : FEATURES,
-    [normalizedQuery],
+        : FEATURES.filter(feature => !feature.requiresPortfolio || portfolioEnabled),
+    [normalizedQuery, portfolioEnabled],
   );
 
   const restart = async () => {

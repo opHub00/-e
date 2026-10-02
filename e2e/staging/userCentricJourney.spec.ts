@@ -7,7 +7,11 @@ const anonKey = process.env.SUPABASE_STAGING_ANON_KEY!;
 const serviceKey = process.env.SUPABASE_STAGING_SERVICE_ROLE_KEY!;
 const ids: string[] = [];
 const password = `Staging-${Date.now()}-aA1!`;
-const emails = [`portfolio-a-${Date.now()}@example.invalid`, `portfolio-b-${Date.now()}@example.invalid`];
+const emails = [
+  `portfolio-a-${Date.now()}@example.invalid`,
+  `portfolio-b-${Date.now()}@example.invalid`,
+  `portfolio-flow-${Date.now()}@example.invalid`,
+];
 
 async function admin(path: string, init: RequestInit = {}) {
   const response = await fetch(`${url}${path}`, { ...init, headers: {
@@ -90,6 +94,48 @@ async function currentResults(userId: string) {
   >;
 }
 
+async function profileRevision(userId: string) {
+  const rows = await admin(`/rest/v1/applicant_profiles_v3?select=revision&user_id=eq.${userId}`) as Array<{ revision: number }>;
+  return rows[0]?.revision ?? 0;
+}
+
+async function completeInitialPortfolioProfile(page: Page) {
+  await page.goto('/assessment');
+  await expect(page).toHaveURL(/profile-onboarding/, { timeout: 30_000 });
+  await page.getByLabel('생년월일').fill('19950101');
+  await page.getByRole('button', { name: '저장하고 다음' }).click();
+  await page.getByRole('radio', { name: '제주' }).click();
+  await page.getByRole('radio', { name: '예' }).click();
+  await page.getByRole('radio', { name: '미혼' }).click();
+  await page.getByRole('radio', { name: '무주택' }).click();
+  await expect(page).toHaveURL(/assessment/, { timeout: 30_000 });
+  await expect(page.getByText('청약 Portfolio', { exact: true })).toBeVisible();
+  const intro = page.getByRole('button', { name: '내 공고 분석 보기' });
+  if (await intro.isVisible().catch(() => false)) await intro.click();
+  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+}
+
+async function completeSuggestedProfileFact(page: Page) {
+  const action = page.getByRole('button', { name: /입력하기$/ }).first();
+  await expect(action).toBeVisible({ timeout: 60_000 });
+  await action.click();
+  await expect(page).toHaveURL(/profile-onboarding/);
+  const textbox = page.getByRole('textbox');
+  if (await textbox.count()) {
+    const label = await textbox.first().getAttribute('aria-label');
+    const value = label?.includes('시작일') || label?.includes('가입일') ? '20200101'
+      : label?.includes('금액') || label?.includes('소득') || label?.includes('자산') || label?.includes('가액') ? '1000000'
+        : '2';
+    await textbox.first().fill(value);
+    await page.getByRole('button', { name: '저장하고 계속하기' }).click();
+  } else {
+    const preferred = page.getByRole('radio', { name: /아니요|예|주택청약종합저축/ }).first();
+    await preferred.click();
+  }
+  await expect(page).toHaveURL(/assessment/, { timeout: 30_000 });
+  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+}
+
 test.beforeAll(async () => {
   if (process.env.WANPANE_STAGING_BROWSER_CONFIRMED !== '1') throw new Error('STAGING_BROWSER_CONFIRMATION_REQUIRED');
   for (const email of emails) {
@@ -145,4 +191,27 @@ test('deployed staging browser keeps profile and trusted results isolated across
   expect(await currentResults(ids[1])).toEqual([]);
   const draftKeys = await page.evaluate(() => Object.keys(localStorage).filter(key => /questionnaire|assessment.*draft/i.test(key)));
   expect(draftKeys.every(key => key.includes(ids[1]))).toBe(true);
+});
+
+test('new member completes onboarding, Portfolio progressive input and result restore', async ({ page }) => {
+  await login(page, emails[2]);
+  await completeInitialPortfolioProfile(page);
+  const initialRevision = await profileRevision(ids[2]);
+  expect(initialRevision).toBeGreaterThan(0);
+  await expect(page.getByText(/추가 정보 필요|계산 가능|자격조건 미충족|분석 불가/).first()).toBeVisible();
+
+  await completeSuggestedProfileFact(page);
+  const nextRevision = await profileRevision(ids[2]);
+  expect(nextRevision).toBeGreaterThan(initialRevision);
+  await expect.poll(async () => {
+    const current = (await currentResults(ids[2])).find(row => !row.superseded_at);
+    return current?.profile_revision ?? 0;
+  }, { timeout: 60_000 }).toBe(nextRevision);
+
+  await logout(page);
+  await login(page, emails[2]);
+  await page.goto('/assessment');
+  await expect(page.getByText('청약 Portfolio', { exact: true })).toBeVisible();
+  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole('button', { name: '내 공고 분석 보기' })).toHaveCount(0);
 });

@@ -24,6 +24,7 @@ export const STAGING_ENV_FILE = '.env.staging.local';
 const STAGING_IDENTITY_KEYS = [
   'SUPABASE_STAGING_URL', 'SUPABASE_STAGING_PROJECT_REF', 'SUPABASE_STAGING_ANON_KEY',
   'SUPABASE_PRODUCTION_PROJECT_REF', 'RULE_REVIEW_STAGING_RULE_SET_ID',
+  'EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3', 'EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS',
 ];
 const PROJECT_REF = /^[a-z0-9]{20}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -72,6 +73,10 @@ export function createStagingBuildEnvironment(source = process.env, identity = r
   assertPublicKey(key);
   const ruleSetId = identity.RULE_REVIEW_STAGING_RULE_SET_ID;
   if (ruleSetId && !UUID.test(ruleSetId)) throw new Error('STAGING_RULE_SET_ID_INVALID');
+  const profileV3 = identity.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3?.toLowerCase();
+  const assessmentResults = identity.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS?.toLowerCase();
+  if (profileV3 && !['true', 'false'].includes(profileV3)) throw new Error('STAGING_PROFILE_V3_FLAG_INVALID');
+  if (assessmentResults && !['true', 'false'].includes(assessmentResults)) throw new Error('STAGING_ASSESSMENT_RESULTS_FLAG_INVALID');
   const env = createReleaseBuildEnvironment('staging', source);
   for (const name of Object.keys(env)) if (/^EXPO_PUBLIC_(?:SUPABASE_|RULE_REVIEW_)/.test(name)) delete env[name];
   return {
@@ -81,6 +86,8 @@ export function createStagingBuildEnvironment(source = process.env, identity = r
     EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF: ref,
     EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF: production,
     ...(ruleSetId ? { EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID: ruleSetId } : {}),
+    EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3: profileV3 ?? 'false',
+    EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS: assessmentResults ?? 'false',
   };
 }
 
@@ -117,6 +124,8 @@ export function createProductionBuildEnvironment(source = process.env, identity 
   const env = createReleaseBuildEnvironment('production', { ...source, ...values });
   delete env.EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF;
   delete env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID;
+  delete env.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3;
+  delete env.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS;
   const staging = identity.SUPABASE_STAGING_PROJECT_REF?.toLowerCase();
   const production = (values.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF || values.SUPABASE_PRODUCTION_PROJECT_REF
     || identity.SUPABASE_PRODUCTION_PROJECT_REF)?.toLowerCase();

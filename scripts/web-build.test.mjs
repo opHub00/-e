@@ -100,13 +100,19 @@ test('staging build maps only public staging values and strips server-only keys'
     RULE_REVIEW_STAGING_ALLOW_WRITE: 'true',
     RULE_REVIEW_STAGING_ACCESS_TOKEN: 'x',
   };
-  const env = createStagingBuildEnvironment(source, identity({ RULE_REVIEW_STAGING_RULE_SET_ID: '00000000-0000-4000-8000-000000000000' }));
+  const env = createStagingBuildEnvironment(source, identity({
+    RULE_REVIEW_STAGING_RULE_SET_ID: '00000000-0000-4000-8000-000000000000',
+    EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3: 'true',
+    EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS: 'true',
+  }));
   assert.equal(env.EXPO_PUBLIC_WANPANE_ENV, 'staging');
   assert.equal(env.WANPANE_METRO_CACHE_NAMESPACE, 'staging');
   assert.equal(env.EXPO_PUBLIC_SUPABASE_URL, `https://${STAGING}.supabase.co`, 'an inherited production URL is replaced');
   assert.equal(env.EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF, STAGING);
   assert.equal(env.EXPO_PUBLIC_SUPABASE_PRODUCTION_PROJECT_REF, PRODUCTION);
   assert.equal(env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID, '00000000-0000-4000-8000-000000000000');
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3, 'true');
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS, 'true');
   assert.equal(env.KEEP, 'yes');
   assert.deepEqual(Object.keys(env).filter(key => /SERVICE_ROLE|ALLOW_WRITE|ACCESS_TOKEN|^SUPABASE_|^RULE_REVIEW_STAGING_/.test(key)), []);
   assert.equal(source.SUPABASE_SERVICE_ROLE_KEY, 'x', 'parent environment is not mutated');
@@ -119,6 +125,7 @@ test('staging build refuses incomplete, mismatched, production or secret identit
   assert.throws(() => createStagingBuildEnvironment({}, identity({ SUPABASE_STAGING_ANON_KEY: jwt('service_role') })), /STAGING_KEY_IS_NOT_PUBLIC/);
   assert.throws(() => createStagingBuildEnvironment({}, identity({ SUPABASE_STAGING_ANON_KEY: 'sb_secret_x' })), /STAGING_KEY_IS_NOT_PUBLIC/);
   assert.throws(() => createStagingBuildEnvironment({}, identity({ RULE_REVIEW_STAGING_RULE_SET_ID: 'nope' })), /STAGING_RULE_SET_ID_INVALID/);
+  assert.throws(() => createStagingBuildEnvironment({}, identity({ EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3: 'yes' })), /STAGING_PROFILE_V3_FLAG_INVALID/);
   assert.equal(createStagingBuildEnvironment({}, identity({ SUPABASE_STAGING_ANON_KEY: 'sb_publishable_x' })).EXPO_PUBLIC_SUPABASE_ANON_KEY, 'sb_publishable_x');
 });
 
@@ -133,6 +140,8 @@ test('production build never targets or names the staging project', () => {
   assert.equal(env.EXPO_PUBLIC_WANPANE_ENV, 'production');
   assert.equal(env.EXPO_PUBLIC_SUPABASE_STAGING_PROJECT_REF, undefined);
   assert.equal(env.EXPO_PUBLIC_RULE_REVIEW_RULE_SET_ID, undefined);
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_PROFILE_V3, undefined);
+  assert.equal(env.EXPO_PUBLIC_USER_CENTRIC_ASSESSMENT_RESULTS, undefined);
   assert.equal(env.SUPABASE_STAGING_SERVICE_ROLE_KEY, undefined);
 });
 

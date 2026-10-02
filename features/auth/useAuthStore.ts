@@ -24,6 +24,14 @@ import {
 } from './syncDomain';
 import { getSupabaseClient } from './supabaseClient';
 import { clearAssessmentDraftsForOwner } from '../applicationAssessment/questionnaire/draft';
+import { userCentricFeatureFlags } from '../userCentricAssessment/featureFlags';
+import { createSupabaseApplicantProfileV3Repository } from '../profile/v3Repository';
+import {
+  saveExplicitV2ProfileEditToV3,
+  startApplicantProfileV3Session,
+  stopApplicantProfileV3Session,
+} from '../profile/useApplicantProfileV3Store';
+import { applicantProfileV2FromV3 } from '../applicationAssessment/v3Adapter';
 
 export type CloudSyncStatus =
   | 'idle'
@@ -85,6 +93,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
         .then(async () => {
           set({ syncStatus: 'syncing', errorMessage: null });
           await repository?.writeProfile(userId, nextProfile);
+          if (userCentricFeatureFlags().userCentricProfileV3) {
+            await saveExplicitV2ProfileEditToV3(nextProfile);
+          }
           if (currentUserId === userId && !syncPaused) set({ syncStatus: 'synced' });
         })
         .catch(() => {
@@ -181,6 +192,31 @@ export const useAuthStore = create<AuthState>((set, get) => {
         : Promise.resolve(),
     ]);
 
+    if (userCentricFeatureFlags().userCentricProfileV3) {
+      const client = getSupabaseClient();
+      if (!client) throw new Error('V3 profile repository unavailable');
+      const v3 = await startApplicantProfileV3Session({
+        userId,
+        repository: createSupabaseApplicantProfileV3Repository(client),
+        v2: repository,
+        decodeV2: value => isApplicantProfileV2Payload(value)
+          ? migrateApplicantProfile(value, defaultProfile)
+          : null,
+      });
+      if (v3.source === 'V3') {
+        suppressCloudWrites = true;
+        try {
+          await useUserStore.getState().restoreApplicantProfile(
+            applicantProfileV2FromV3(v3.record.profile, new Date().toISOString().slice(0, 10)),
+          );
+        } finally {
+          suppressCloudWrites = false;
+        }
+      }
+    } else {
+      stopApplicantProfileV3Session();
+    }
+
     await cloudCacheOwnerStorage.write(userId);
     currentUserId = userId;
     lastSyncedUserId = userId;
@@ -214,6 +250,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       lastSyncedUserId = null;
       initialSyncComplete = false;
       syncPaused = false;
+      stopApplicantProfileV3Session();
       set({
         session: null,
         email: null,

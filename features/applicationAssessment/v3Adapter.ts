@@ -56,7 +56,7 @@ const ageAt = (birthDate: string | undefined, asOf: string | null | undefined): 
   return Math.max(15, Math.min(99, year - birthYear - (month < birthMonth || (month === birthMonth && day < birthDay) ? 1 : 0)));
 };
 
-function toLegacyProfile(profile: ApplicantProfileV3, announcementDate?: string | null): ApplicantProfileV2 {
+export function applicantProfileV2FromV3(profile: ApplicantProfileV3, announcementDate?: string | null): ApplicantProfileV2 {
   const birth = exactDate(profileFactValue(profile.identity.birthDate));
   return {
     version: 2,
@@ -197,7 +197,7 @@ export function assessmentInputFromApplicantProfileV3(
   assign('vehicleValue', profileFactValue(profile.assets.vehicleValue));
 
   return {
-    profile: toLegacyProfile(profile, options.announcementDate),
+    profile: applicantProfileV2FromV3(profile, options.announcementDate),
     details: { ...details, ...(options.announcementDetails ?? {}) },
   };
 }

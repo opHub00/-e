@@ -12,6 +12,7 @@ import {
   isTestFixtureAnnouncement,
 } from '../features/applicationAssessment/coverageAnalysis.ts';
 import { assessmentInputFromApplicantProfileV3 } from '../features/applicationAssessment/v3Adapter.ts';
+import { COVERAGE_PROFILE_REGIONS } from '../features/applicationAssessment/fixtures/coverageProfiles.fixture.ts';
 import { validateImportPackage } from '../features/applicationAssessment/server/importPackage.ts';
 import { createEmptyApplicantProfileV3, knownProfileFact } from '../features/profile/v3.ts';
 import { profileFieldForAssessmentFact } from '../features/profile/v3Completeness.ts';
@@ -56,7 +57,9 @@ assert.deepEqual(tableErrors, [], `STAGING_METADATA_READ_FAILED:${JSON.stringify
 const fullProfile = ({ partial = false, newlywed = false } = {}) => {
   const p = createEmptyApplicantProfileV3();
   p.identity.birthDate = knownProfileFact({ value: '1993-05-05', precision: 'DAY' });
-  p.residence.currentRegion = knownProfileFact(newlywed ? '경기도' : '제주특별자치도');
+  p.residence.currentRegion = knownProfileFact(
+    newlywed ? COVERAGE_PROFILE_REGIONS.newlywed : COVERAGE_PROFILE_REGIONS.general,
+  );
   p.family.marriageStatus = knownProfileFact(newlywed ? 'married' : 'single');
   p.housing.currentOwnership = knownProfileFact('no-home');
   p.subscriptionAccount.hasAccount = knownProfileFact(true);

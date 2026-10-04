@@ -29,17 +29,28 @@ test('V3 raw facts map to AssessmentInput without approximate values', () => {
   const v3 = migrateApplicantProfileV2ToV3(original.profile, { source: 'PERSISTED_USER' });
   v3.residence.startedAt = knownProfileFact({ value: '2024-09-14', precision: 'DAY' });
   v3.subscriptionAccount.openedAt = knownProfileFact({ value: '2024-01-01', precision: 'DAY' });
+  v3.subscriptionAccount.kind = knownProfileFact('HOUSING_SUBSCRIPTION');
   v3.subscriptionAccount.recognizedPaymentCount = knownProfileFact(24);
   v3.subscriptionAccount.recognizedDepositAmount = knownProfileFact(6_000_000);
   v3.income.monthlyApplicantIncome = knownProfileFact(2_669_354);
   v3.assets.totalApplicantAssets = knownProfileFact(100_000_000);
+  v3.household.memberCount = knownProfileFact(3);
   const input = assessmentInputFromApplicantProfileV3(v3, { announcementDate: '2026-09-14' });
   assert.equal(input.details.residenceStartDate, '2024-09-14');
   assert.equal(input.details.subscriptionAccountOpenedAt, '2024-01-01');
+  assert.equal(input.details.accountKindEligible, true);
+  assert.equal(input.details.incomeHouseholdSize, 3);
   assert.equal(input.details.recognizedPaymentCount, 24);
   assert.equal(input.details.recognizedDepositAmount, 6_000_000);
   assert.equal(input.details.monthlyIncome, 2_669_354);
   assert.equal(input.details.totalAssets, 100_000_000);
+});
+
+test('V3 account kind mapping fails closed for unknown and rejects OTHER deterministically', () => {
+  const v3 = migrateApplicantProfileV2ToV3(samdoApplicant('youth').profile, { source: 'PERSISTED_USER' });
+  assert.equal(assessmentInputFromApplicantProfileV3(v3).details.accountKindEligible, undefined);
+  v3.subscriptionAccount.kind = knownProfileFact('OTHER');
+  assert.equal(assessmentInputFromApplicantProfileV3(v3).details.accountKindEligible, false);
 });
 
 const result = (status: ApplicationAssessmentResult['status'], missingInformation: string[] = []): ApplicationAssessmentResult => ({

@@ -162,6 +162,7 @@ export function assessmentInputFromApplicantProfileV3(
     })));
   }
   assign('isHouseholdHead', profileFactValue(profile.household.isHouseholdHead));
+  assign('incomeHouseholdSize', profileFactValue(profile.household.memberCount));
 
   const ownership = profileFactValue(profile.housing.ownershipHistory);
   if (ownership) {
@@ -181,6 +182,8 @@ export function assessmentInputFromApplicantProfileV3(
   assign('reWinningRestriction', profileFactValue(profile.housing.currentReWinningRestriction));
 
   assign('subscriptionAccountOpenedAt', exactDate(profileFactValue(profile.subscriptionAccount.openedAt)));
+  const accountKind = profileFactValue(profile.subscriptionAccount.kind);
+  assign('accountKindEligible', accountKind === undefined ? undefined : accountKind !== 'OTHER');
   assign('recognizedPaymentCount', profileFactValue(profile.subscriptionAccount.recognizedPaymentCount));
   assign('recognizedDepositAmount', profileFactValue(profile.subscriptionAccount.recognizedDepositAmount));
   assign('firstRank', profileFactValue(profile.subscriptionAccount.firstRank));

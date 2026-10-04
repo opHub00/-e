@@ -32,6 +32,9 @@ test('not-applicable account details are skipped when user has no account', () =
 test('portfolio missing facts map to reusable V3 facts but not announcement-only facts', () => {
   assert.equal(profileFieldForAssessmentFact('input:subscriptionAccountOpenedAt')?.id, 'subscriptionAccountOpenedAt');
   assert.equal(profileFieldForAssessmentFact('monthlyIncome')?.id, 'monthlyApplicantIncome');
+  assert.equal(profileFieldForAssessmentFact('incomeHouseholdSize')?.id, 'householdMemberCount');
+  assert.equal(profileFieldForAssessmentFact('accountKindEligible')?.id, 'subscriptionAccountKind');
+  assert.equal(profileFieldForAssessmentFact('householdNoWinningFiveYears'), null);
   assert.equal(profileFieldForAssessmentFact('plannedMarriageWithinDeadline'), null);
 });
 

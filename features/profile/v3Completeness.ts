@@ -69,7 +69,7 @@ export const applicantProfileV3Fields: ApplicantProfileFieldDefinition[] = [
   { id: 'previousOwnership', label: '과거 주택소유 이력', help: '과거 본인 주택소유 이력이 있는지 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['neverOwned'] },
   { id: 'householdHasHome', label: '세대 주택 보유 여부', help: '현재 세대원 전체의 주택 상태를 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['householdNoHome'] },
   { id: 'hasSpecialSupplyRestriction', label: '특별공급 제한 여부', help: '특별공급 재신청 제한 여부를 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['noSpecialRestriction'] },
-  { id: 'currentReWinningRestriction', label: '현재 재당첨 제한 여부', help: '현재 적용 중인 재당첨 제한을 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['noReWinningRestriction', 'householdNoWinningFiveYears'] },
+  { id: 'currentReWinningRestriction', label: '현재 재당첨 제한 여부', help: '현재 적용 중인 재당첨 제한을 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['noReWinningRestriction'] },
   { id: 'householdMemberCount', label: '세대원 수', help: '세대 기준 소득과 자격을 확인해요.', kind: 'INTEGER', initial: false, assessmentFacts: ['householdMemberCount', 'incomeHouseholdSize'] },
   { id: 'isHouseholdHead', label: '세대주 여부', help: '세대주 요건이 있는 공고를 확인해요.', kind: 'BOOLEAN', initial: false, assessmentFacts: ['isHouseholdHead'] },
   { id: 'monthlyApplicantIncome', label: '본인 월소득', help: '세전 월소득 금액을 원 단위로 입력해요.', kind: 'MONEY', initial: false, assessmentFacts: ['monthlyIncome'] },

@@ -33,6 +33,33 @@ test('empty portfolio refreshes once and adopts server-confirmed snapshot', asyn
   stopPortfolioSession();
 });
 
+test('not-calculated candidate placeholders trigger the first bounded refresh', async () => {
+  let refreshes = 0;
+  const initial = {
+    ...snapshot('user-a'),
+    items: [{ listingId: 'one', failureCode: 'NOT_CALCULATED' } as never],
+  };
+  const repository: AssessmentPortfolioRepository = {
+    getPortfolio: async () => initial,
+    refreshPortfolio: async () => {
+      refreshes += 1;
+      return {
+        portfolio: { ...initial, items: [{ listingId: 'one', analysisStatus: 'NEEDS_USER_INPUT' } as never] },
+        refresh: { considered: 1, reused: 0, recalculated: 1, failed: 0 },
+      };
+    },
+    getMissingProfileFacts: async () => [], getPortfolioResult: async () => null,
+  };
+  await startPortfolioSession({
+    userId: 'user-a',
+    repository,
+    introStorage: { read: async () => true, write: async () => undefined },
+  });
+  assert.equal(refreshes, 1);
+  assert.equal(usePortfolioSessionStore.getState().lastRefresh?.recalculated, 1);
+  stopPortfolioSession();
+});
+
 test('late response from previous account cannot replace current portfolio', async () => {
   let release!: (value: AssessmentPortfolioSnapshot) => void;
   const slow = new Promise<AssessmentPortfolioSnapshot>(resolve => { release = resolve; });

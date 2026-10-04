@@ -41,7 +41,9 @@ A revision conflict keeps the local input and the latest server snapshot. The us
 
 The screen uses only `getPortfolio`, `refreshPortfolio`, `getMissingProfileFacts` and `getPortfolioResult`. It represents loading, empty, complete, needs-input, ineligible, unavailable, stale, offline, auth-required and server-error states separately.
 
-The first-entry explanation is stored per authenticated user. It contains no profile facts. A profile revision change restarts the Portfolio session; the server reuses fresh results and recalculates only stale or absent results.
+The first-entry explanation is stored per authenticated user. It contains no profile facts. A profile revision change restarts the Portfolio session; the server reuses fresh results and recalculates only stale or absent results. Candidate placeholders marked `NOT_CALCULATED` also trigger the initial bounded refresh, so their mere presence cannot suppress the first deterministic calculation.
+
+The deployed Staging browser journey covers profile creation, reload, trusted assessment persistence, logout/login restore, profile-revision staleness, recalculation and account isolation. A separate new-member journey covers initial onboarding, Portfolio batch calculation, progressive missing-fact input and result restoration.
 
 ## Feature and production safety
 

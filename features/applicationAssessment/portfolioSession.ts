@@ -60,6 +60,11 @@ const networkLike = (error: unknown) =>
   error instanceof TypeError || (error instanceof AssessmentPortfolioRepositoryError
     && ['PORTFOLIO_READ_FAILED', 'PORTFOLIO_REFRESH_FAILED'].includes(error.code));
 
+const needsInitialRefresh = (snapshot: AssessmentPortfolioSnapshot) =>
+  snapshot.items.length === 0
+  || snapshot.freshness.stale > 0
+  || snapshot.items.some(item => item.failureCode === 'NOT_CALCULATED');
+
 function fail(error: unknown, ownGeneration: number) {
   if (ownGeneration !== generation) return;
   const code = error instanceof AssessmentPortfolioRepositoryError ? error.code : 'PORTFOLIO_READ_FAILED';
@@ -92,7 +97,7 @@ export async function startPortfolioSession(input: {
       hasSeenIntro,
       introHydrated: true,
     });
-    if (input.autoRefresh !== false && (snapshot.items.length === 0 || snapshot.freshness.stale > 0)) {
+    if (input.autoRefresh !== false && needsInitialRefresh(snapshot)) {
       return (await refreshPortfolioSession()).snapshot;
     }
     return snapshot;

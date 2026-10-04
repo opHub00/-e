@@ -7,7 +7,7 @@ import {
   type ApplicantProfileV3Record,
   type ApplicantProfileV3Repository,
 } from './v3Repository.ts';
-import type { ApplicantProfileV3 } from './v3.ts';
+import { createEmptyApplicantProfileV3, type ApplicantProfileV3 } from './v3.ts';
 import {
   mergeExplicitV2ProfileEditIntoV3,
   mergeReusableAssessmentDetailsIntoV3,
@@ -254,7 +254,9 @@ export async function saveExplicitV2ProfileEditToV3(
   observedAt = new Date().toISOString(),
 ): Promise<ApplicantProfileV3Record | null> {
   const task = saveQueue.catch(() => null).then(() => {
-    const current = useApplicantProfileV3Store.getState().profile;
+    const state = useApplicantProfileV3Store.getState();
+    const current = state.profile
+      ?? (state.userId && state.source === 'NONE' ? createEmptyApplicantProfileV3() : null);
     return current ? saveProfile(mergeExplicitV2ProfileEditIntoV3(current, edited, observedAt)) : null;
   });
   saveQueue = task;

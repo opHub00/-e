@@ -81,3 +81,4 @@ __pycache__/
 
 # Playwright browser-run output (traces, screenshots).
 e2e/.artifacts/
+.env.local

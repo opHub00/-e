@@ -36,20 +36,15 @@ async function logout(page: Page) {
   await expect(page.getByText('로그인하고 이어보기', { exact: true })).toBeVisible();
 }
 
-async function saveBasicProfile(page: Page, name: string, birthDate: string, waitForV3Write = false) {
+async function saveBasicProfile(page: Page, name: string, birthDate: string) {
   await page.goto('/profile?bundle=BASIC');
   const inputs = page.getByRole('textbox');
   await inputs.first().fill(name);
-  await page.getByLabel('생년월일').fill(birthDate.replaceAll('-', ''));
   await page.getByRole('button', { name: '직장인' }).click();
-  const persisted = waitForV3Write
-    ? page.waitForResponse(response =>
-      response.url().includes('/rest/v1/rpc/save_applicant_profile_v3') && response.request().method() === 'POST',
-    )
-    : null;
+  await page.getByLabel('생년월일').fill(birthDate.replaceAll('-', ''));
+  await expect(page.getByLabel('생년월일')).toHaveValue(birthDate);
   await page.getByRole('button', { name: '입력한 정보 저장하기' }).click();
   await expect(page.getByText('내 청약 프로필', { exact: true })).toBeVisible({ timeout: 30_000 });
-  if (persisted) expect((await persisted).ok()).toBe(true);
 }
 
 async function firstAssessmentTarget() {
@@ -102,17 +97,39 @@ async function profileRevision(userId: string) {
 async function completeInitialPortfolioProfile(page: Page) {
   await page.goto('/assessment');
   await expect(page).toHaveURL(/profile-onboarding/, { timeout: 30_000 });
-  await page.getByLabel('생년월일').fill('19950101');
-  await page.getByRole('button', { name: '저장하고 다음' }).click();
-  await page.getByRole('radio', { name: '제주' }).click();
-  await page.getByRole('radio', { name: '예' }).click();
-  await page.getByRole('radio', { name: '미혼' }).click();
-  await page.getByRole('radio', { name: '무주택' }).click();
+  for (let step = 0; step < 6 && /profile-onboarding/.test(page.url()); step += 1) {
+    const birthDate = page.getByText('생년월일', { exact: true });
+    const region = page.getByText('현재 거주지역', { exact: true });
+    const account = page.getByText('청약통장 보유 여부', { exact: true });
+    const marriage = page.getByText('혼인 상태', { exact: true });
+    const housing = page.getByText('현재 주택 상태', { exact: true });
+    if (await birthDate.isVisible().catch(() => false)) {
+      await page.getByLabel('생년월일').fill('19950101');
+      await page.getByRole('button', { name: /저장하고 (다음|계속하기)/ }).click();
+      await expect(birthDate).not.toBeVisible({ timeout: 30_000 });
+    } else if (await region.isVisible().catch(() => false)) {
+      await page.getByRole('radio', { name: '제주' }).click();
+      await expect(region).not.toBeVisible({ timeout: 30_000 });
+    } else if (await account.isVisible().catch(() => false)) {
+      await page.getByRole('radio', { name: '예' }).click();
+      await expect(account).not.toBeVisible({ timeout: 30_000 });
+    } else if (await marriage.isVisible().catch(() => false)) {
+      await page.getByRole('radio', { name: '미혼' }).click();
+      await expect(marriage).not.toBeVisible({ timeout: 30_000 });
+    } else if (await housing.isVisible().catch(() => false)) {
+      await page.getByRole('radio', { name: '무주택' }).click();
+      await expect(housing).not.toBeVisible({ timeout: 30_000 });
+    } else {
+      throw new Error('UNEXPECTED_INITIAL_PROFILE_FIELD');
+    }
+  }
   await expect(page).toHaveURL(/assessment/, { timeout: 30_000 });
   await expect(page.getByText('청약 Portfolio', { exact: true })).toBeVisible();
   const intro = page.getByRole('button', { name: '내 공고 분석 보기' });
+  const summary = page.getByText('현재 분석 상태', { exact: true }).last();
+  await expect(intro.or(summary)).toBeVisible({ timeout: 60_000 });
   if (await intro.isVisible().catch(() => false)) await intro.click();
-  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(summary).toBeVisible({ timeout: 60_000 });
 }
 
 async function completeSuggestedProfileFact(page: Page) {
@@ -133,7 +150,7 @@ async function completeSuggestedProfileFact(page: Page) {
     await preferred.click();
   }
   await expect(page).toHaveURL(/assessment/, { timeout: 30_000 });
-  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText('현재 분석 상태', { exact: true }).last()).toBeVisible({ timeout: 60_000 });
 }
 
 test.beforeAll(async () => {
@@ -161,6 +178,7 @@ test('deployed staging browser keeps profile and trusted results isolated across
   const target = await firstAssessmentTarget();
   await login(page, emails[0]);
   await saveBasicProfile(page, '브라우저사용자A', '1995-01-01');
+  await expect.poll(() => profileRevision(ids[0]), { timeout: 30_000 }).toBeGreaterThan(0);
   await page.reload();
   await page.goto('/profile?bundle=BASIC');
   await expect(page.getByRole('textbox').first()).toHaveValue('브라우저사용자A');
@@ -176,7 +194,9 @@ test('deployed staging browser keeps profile and trusted results isolated across
   const reused = (await currentResults(ids[0])).find(row => !row.superseded_at);
   expect(reused?.id).toBe(first?.id);
 
-  await saveBasicProfile(page, '브라우저사용자A', '1994-01-01', true);
+  const beforeEditRevision = await profileRevision(ids[0]);
+  await saveBasicProfile(page, '브라우저사용자A', '1994-01-01');
+  await expect.poll(() => profileRevision(ids[0]), { timeout: 30_000 }).toBeGreaterThan(beforeEditRevision);
   const stale = (await currentResults(ids[0])).find(row => row.id === first?.id);
   expect(stale?.stale_at).toBeTruthy();
   await submitAssessment(page, target);
@@ -212,6 +232,6 @@ test('new member completes onboarding, Portfolio progressive input and result re
   await login(page, emails[2]);
   await page.goto('/assessment');
   await expect(page.getByText('청약 Portfolio', { exact: true })).toBeVisible();
-  await expect(page.getByText('현재 분석 상태', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText('현재 분석 상태', { exact: true }).last()).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole('button', { name: '내 공고 분석 보기' })).toHaveCount(0);
 });

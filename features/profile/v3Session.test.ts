@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createApplicantProfileFromLegacy } from './domain.ts';
 import { createEmptyApplicantProfileV3, knownProfileFact } from './v3.ts';
 import {
+  saveExplicitV2ProfileEditToV3,
   saveReusableAssessmentDetailsToV3,
   startApplicantProfileV3Session,
   stopApplicantProfileV3Session,
@@ -11,6 +13,7 @@ import {
   ApplicantProfileV3RepositoryError,
   type ApplicantProfileV3Record,
   type ApplicantProfileV3Repository,
+  type UpdateApplicantProfileV3Input,
 } from './v3Repository.ts';
 
 const now = '2026-10-01T00:00:00.000Z';
@@ -89,5 +92,45 @@ test('an unchanged questionnaire submission reuses the current profile revision'
   );
   assert.equal(saved?.revision, 1);
   assert.equal(writes, 0);
+  stopApplicantProfileV3Session();
+});
+
+test('an explicit V2 edit creates the first V3 record without promoting demo defaults', async () => {
+  stopApplicantProfileV3Session();
+  const updateInputs: UpdateApplicantProfileV3Input[] = [];
+  const repository: ApplicantProfileV3Repository = {
+    read: async () => null,
+    update: async input => {
+      updateInputs.push(input);
+      return {
+        ...record('user-a'),
+        profile: input.profile,
+      };
+    },
+  };
+  await startApplicantProfileV3Session({ userId: 'user-a', repository, v2, decodeV2 });
+  assert.equal(useApplicantProfileV3Store.getState().source, 'NONE');
+
+  const edited = createApplicantProfileFromLegacy({
+    name: '명시적 사용자',
+    age: 31,
+    region: '제주특별자치도',
+    occupation: 'worker',
+    hasSubscriptionAccount: false,
+    accountMonths: 0,
+    monthlyPayment: 0,
+    isNoHomeOwner: true,
+  });
+  const saved = await saveExplicitV2ProfileEditToV3(edited, now);
+
+  const updateInput = updateInputs[0];
+  assert.ok(updateInput);
+  assert.equal(updateInput.expectedRevision, 0);
+  assert.equal(updateInput.profile.identity.displayName.state, 'KNOWN');
+  if (updateInput.profile.identity.displayName.state === 'KNOWN') {
+    assert.equal(updateInput.profile.identity.displayName.value, '명시적 사용자');
+  }
+  assert.equal(saved?.revision, 1);
+  assert.equal(useApplicantProfileV3Store.getState().source, 'V3');
   stopApplicantProfileV3Session();
 });

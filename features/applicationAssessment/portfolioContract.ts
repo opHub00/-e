@@ -2,6 +2,7 @@ import type { AssessmentPortfolioStatus } from './portfolio.ts';
 import type { PersistedUserAssessmentResult } from './resultPersistence.ts';
 import type { AssessmentResultFreshnessStatus } from './serverExecution.ts';
 import type { Stage, Status, SupplyType } from './types.ts';
+import type { PortfolioItemFailureCode } from './portfolioFailure.ts';
 
 export type PortfolioCandidatePriority = 'SAVED' | 'PREFERRED_REGION' | 'OTHER_ACTIVE';
 
@@ -40,7 +41,7 @@ export type AssessmentPortfolioItem = {
   freshness: AssessmentResultFreshnessStatus;
   calculatedAt: string | null;
   provenance: PortfolioProvenanceReference;
-  failureCode?: string;
+  failureCode?: PortfolioItemFailureCode;
 };
 
 export type MissingProfileFactImpact = {

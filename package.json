@@ -79,7 +79,7 @@
     "test:staging:user-centric-persistence": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-staging.mjs",
     "test:staging:user-centric-flow": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-assessment-flow.mjs",
     "test:staging:user-centric-portfolio": "node --env-file-if-exists=.env.staging.local --experimental-strip-types scripts/verify-user-centric-portfolio-staging.mjs",
-    "test:user-centric-portfolio": "node --experimental-strip-types --test features/applicationAssessment/portfolioOrchestration.test.ts features/applicationAssessment/portfolioRepository.test.ts features/applicationAssessment/portfolioSession.test.ts features/applicationAssessment/questionnaire/profileReuse.test.ts features/profile/v3Conflict.test.ts features/profile/v3Completeness.test.ts features/userCentricAssessment/authPolicy.test.ts",
+    "test:user-centric-portfolio": "node --experimental-strip-types --test features/applicationAssessment/portfolioFailure.test.ts features/applicationAssessment/portfolioOrchestration.test.ts features/applicationAssessment/portfolioRepository.test.ts features/applicationAssessment/portfolioSession.test.ts features/applicationAssessment/questionnaire/profileReuse.test.ts features/profile/v3Conflict.test.ts features/profile/v3Completeness.test.ts features/userCentricAssessment/authPolicy.test.ts",
     "test:staging:user-centric-browser": "node --env-file-if-exists=.env.staging.local e2e/runUserCentricStaging.mjs"
   },
   "dependencies": {

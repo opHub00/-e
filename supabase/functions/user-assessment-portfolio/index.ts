@@ -17,6 +17,7 @@ import {
   USER_CENTRIC_ASSESSMENT_ENGINE_VERSION,
 } from '../../../features/applicationAssessment/serverExecution.ts';
 import type { SupplyType } from '../../../features/applicationAssessment/types.ts';
+import { normalizePortfolioFailure, type PortfolioItemFailureCode } from '../../../features/applicationAssessment/portfolioFailure.ts';
 import type { ApplicantProfileV3 } from '../../../features/profile/v3.ts';
 
 const CORS = {
@@ -92,7 +93,7 @@ function resultFromRow(row: Record<string, unknown>): PersistedUserAssessmentRes
   };
 }
 
-function emptyItem(candidate: PortfolioCandidate, profileRevision: number, code: string): AssessmentPortfolioItem {
+function emptyItem(candidate: PortfolioCandidate, profileRevision: number, code: PortfolioItemFailureCode): AssessmentPortfolioItem {
   return {
     listingId: candidate.listing.listingId,
     announcementId: candidate.listing.announcementId,
@@ -203,7 +204,13 @@ async function buildPortfolio(input: {
   const items = settled.map((outcome, index) => {
     if (outcome.status === 'fulfilled') return outcome.value;
     failed += 1;
-    const reason = outcome.reason instanceof Error ? outcome.reason.message : 'PORTFOLIO_ITEM_FAILED';
+    const reason = normalizePortfolioFailure(outcome.reason);
+    console.error('portfolio item failed', {
+      listingId: selection.candidates[index].listing.listingId,
+      supplyType: selection.candidates[index].supplyType,
+      code: reason,
+      detail: outcome.reason instanceof Error ? outcome.reason.message : 'UNKNOWN_ERROR',
+    });
     return emptyItem(selection.candidates[index], input.profileRow.revision, reason);
   });
   const portfolio: AssessmentPortfolioSnapshot = {

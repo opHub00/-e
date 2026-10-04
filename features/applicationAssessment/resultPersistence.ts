@@ -11,6 +11,7 @@ import type {
 
 export type AssessmentResultStaleReason =
   | 'PROFILE_CHANGED'
+  | 'LISTING_INPUT_CHANGED'
   | 'RULE_SET_CHANGED'
   | 'SOURCE_DOCUMENT_CHANGED'
   | 'ENGINE_CHANGED';

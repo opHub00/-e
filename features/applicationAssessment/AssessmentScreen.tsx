@@ -25,6 +25,17 @@ import { getSupabaseClient } from '../auth/supabaseClient';
 import { createUserCentricAssessmentService } from './userCentricService';
 import { saveReusableAssessmentDetailsToV3 } from '../profile/useApplicantProfileV3Store';
 import { ApplicantProfileV3RepositoryError } from '../profile/v3Repository';
+import {
+  createSupabaseListingAssessmentInputRepository,
+  ListingInputRepositoryError,
+} from './listingInputRepository';
+import {
+  listingInputDraftScope,
+  reusableListingAnswers,
+  selectListingScopedAnswers,
+  type ListingAssessmentInputRecord,
+  type ListingInputReference,
+} from './listingInputs';
 
 const profileValue = (field: ProfileFieldState<unknown>) => field.status !== 'known' ? '확인 전' : typeof field.value === 'boolean' ? (field.value ? '예' : '아니요') : ({ single: '미혼', married: '기혼', 'no-home': '무주택', 'owns-home': '주택 보유' }[String(field.value)] ?? String(field.value));
 
@@ -51,7 +62,9 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const [submitted, setSubmitted] = useState(false);
   const [serverResult, setServerResult] = useState<ApplicationAssessmentResult | null>(null);
   const [serverStatus, setServerStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
-  const [profileSaveBlock, setProfileSaveBlock] = useState<'conflict' | 'error' | null>(null);
+  const [profileSaveBlock, setProfileSaveBlock] = useState<'conflict' | 'listing-conflict' | 'error' | null>(null);
+  const [listingInputRecord, setListingInputRecord] = useState<ListingAssessmentInputRecord | null>(null);
+  const [listingInputStatus, setListingInputStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const scroll = useRef<ScrollView>(null);
   const ruleLoad = useAssessmentRules(selected);
   const rules = ruleLoad.rules;
@@ -69,6 +82,39 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
   const useServerResult = flags.userCentricAssessmentResults
     && Boolean(draftOwnerId)
     && rules?.verification !== 'REFERENCE_ONLY';
+  const listingInputReference: ListingInputReference | null = rules?.provenance?.announcementId ? {
+    listingId: selected,
+    announcementId: rules.provenance.announcementId,
+    supplyType: supply,
+    ruleSetId: rules.id,
+    ruleSetVersion: rules.version,
+    sourceDocumentId: rules.provenance.documentId,
+  } : null;
+  const useListingInputs = useServerResult && Boolean(listingInputReference);
+  useEffect(() => {
+    let current = true;
+    if (!useListingInputs || !draftOwnerId || !listingInputReference) {
+      setListingInputRecord(null);
+      setListingInputStatus('idle');
+      return () => { current = false; };
+    }
+    const client = getSupabaseClient();
+    if (!client) { setListingInputStatus('error'); return () => { current = false; }; }
+    setListingInputStatus('loading');
+    void createSupabaseListingAssessmentInputRepository(client)
+      .read({ ...listingInputReference, userId: draftOwnerId })
+      .then(record => {
+        if (!current) return;
+        setListingInputRecord(record);
+        setListingInputStatus('ready');
+      })
+      .catch(() => {
+        if (!current) return;
+        setListingInputRecord(null);
+        setListingInputStatus('error');
+      });
+    return () => { current = false; };
+  }, [useListingInputs, draftOwnerId, selected, supply, rules?.id, rules?.version]);
   useEffect(() => {
     let current = true;
     if (!submitted || !rules || !draftOwnerId || !useServerResult) {
@@ -162,23 +208,45 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       </> : null}
       {step === 2 ? <>
         <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
-        <QuestionnaireFlow
+        {useListingInputs && listingInputStatus === 'loading'
+          ? <Text style={styles.body}>이 공고에서 저장한 답변을 불러오고 있어요.</Text>
+          : <QuestionnaireFlow
+          key={`${selected}:${supply}:${rules?.id ?? 'none'}:${rules?.version ?? 'none'}:${rules?.provenance?.documentId ?? 'no-document'}:${listingInputStatus}`}
           rules={rules} supply={supply} profile={profile} listingId={selected} draftOwnerId={draftOwnerId} residenceRegion={residenceRegion}
           skipKnownProfileFacts={flags.userCentricProfileV3 && Boolean(draftOwnerId)}
+          savedListingAnswers={listingInputReference
+            ? reusableListingAnswers(listingInputRecord, listingInputReference).answers
+            : {}}
+          listingDraftScope={listingInputReference ? listingInputDraftScope(listingInputReference) : undefined}
           onProfileChange={setApplicantProfile}
-          onComplete={details => {
+          onComplete={(details, _updatedProfile, rawAnswers) => {
             if (!rules) return;
             void (async () => {
               if (flags.userCentricProfileV3 && draftOwnerId) {
                 await saveReusableAssessmentDetailsToV3(details);
+              }
+              const scopedAnswers = selectListingScopedAnswers(rawAnswers);
+              if (useListingInputs && draftOwnerId && listingInputReference && Object.keys(scopedAnswers).length) {
+                const client = getSupabaseClient();
+                if (!client) throw new Error('LISTING_INPUT_CLIENT_UNAVAILABLE');
+                const saved = await createSupabaseListingAssessmentInputRepository(client).save({
+                  ...listingInputReference,
+                  userId: draftOwnerId,
+                  expectedRevision: listingInputRecord?.revision ?? 0,
+                  answers: scopedAnswers,
+                });
+                setListingInputRecord(saved);
+                setListingInputStatus('ready');
               }
               setProfileSaveBlock(null);
               setQuestionnaireDetails(details);
               setSubmitted(true);
               move(3);
             })().catch(error => {
-              setProfileSaveBlock(
-                error instanceof ApplicantProfileV3RepositoryError
+              setProfileSaveBlock(error instanceof ListingInputRepositoryError
+                && error.code === 'LISTING_INPUT_REVISION_CONFLICT'
+                ? 'listing-conflict'
+                : error instanceof ApplicantProfileV3RepositoryError
                   && error.code === 'PROFILE_V3_REVISION_CONFLICT'
                   ? 'conflict'
                   : 'error',
@@ -192,7 +260,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
           }}
           onBack={() => move(1)}
           onStepChange={() => scroll.current?.scrollTo({ y: 0, animated: false })}
-        />
+        />}
       </> : null}
       {step === 3 ? <>
         <Text style={styles.strong}>{title}</Text>
@@ -200,6 +268,8 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         {result ? <AssessmentResult result={result} onEditProfile={editProfile} onEditAnswers={() => move(2)} onAskAboutResult={askAboutResult} /> : serverStatus !== 'loading' ? <>
           <Text style={styles.body}>{profileSaveBlock === 'conflict'
             ? '다른 기기에서 프로필이 먼저 변경됐어요. 최신 정보를 확인한 뒤 다시 판정해 주세요.'
+            : profileSaveBlock === 'listing-conflict'
+              ? '다른 기기에서 이 공고의 답변이 먼저 변경됐어요. 저장된 답변을 다시 불러온 뒤 확인해 주세요.'
             : profileSaveBlock === 'error'
               ? '프로필을 저장하지 못해 판정을 시작하지 않았어요. 잠시 후 다시 시도해 주세요.'
               : useServerResult

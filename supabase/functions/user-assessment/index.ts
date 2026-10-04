@@ -5,6 +5,7 @@ import {
   USER_CENTRIC_ASSESSMENT_ENGINE_VERSION,
 } from '../../../features/applicationAssessment/serverExecution.ts';
 import type { AssessmentInput, SupplyType } from '../../../features/applicationAssessment/types.ts';
+import { assessmentDetailsFromListingAnswers } from '../../../features/applicationAssessment/listingInputs.ts';
 import type { ApplicantProfileV3 } from '../../../features/profile/v3.ts';
 
 const CORS = {
@@ -170,13 +171,40 @@ Deno.serve(async (request: Request) => {
       if (!sourceDocumentHash) return json({ code: 'SOURCE_DOCUMENT_MISMATCH' }, 409);
     }
 
+    const listingInputRows = await serviceFetch<Array<{
+      answers: Record<string, string>;
+      rule_set_id: string;
+      rule_set_version: string;
+      source_document_id: string | null;
+      source_document_hash: string | null;
+      stale_at: string | null;
+    }>>(
+      env,
+      `/rest/v1/user_listing_assessment_inputs?select=answers,rule_set_id,rule_set_version,source_document_id,source_document_hash,stale_at`
+        + `&user_id=eq.${encodeURIComponent(userId)}&listing_id=eq.${encodeURIComponent(input.listingId)}`
+        + `&supply_type=eq.${encodeURIComponent(input.supplyType)}&limit=1`,
+    );
+    const listingInput = listingInputRows[0];
+    const savedDetails = listingInput
+      && listingInput.stale_at === null
+      && listingInput.rule_set_id === decoded.rules.id
+      && listingInput.rule_set_version === decoded.rules.version
+      && listingInput.source_document_id === sourceDocumentId
+      && listingInput.source_document_hash === sourceDocumentHash
+      ? assessmentDetailsFromListingAnswers(listingInput.answers, input.supplyType)
+      : {};
+    // Listing answers are trusted only after the owner-scoped RPC has validated
+    // and persisted them. A client payload can request a calculation but cannot
+    // inject transient facts into a server-persisted result.
+    const announcementDetails = savedDetails;
+
     const profile = profileRow.profile_json as unknown as ApplicantProfileV3;
     const inputHash = await trustedAssessmentInputHash({
       listingId: input.listingId,
       supplyType: input.supplyType,
       profileRevision: profileRow.revision,
       profile,
-      announcementDetails: input.announcementDetails,
+      announcementDetails,
       ruleSetId: decoded.rules.id,
       ruleSetVersion: decoded.rules.version,
       sourceDocumentHash,
@@ -206,7 +234,7 @@ Deno.serve(async (request: Request) => {
       profile,
       rules: decoded.rules,
       supplyType: input.supplyType,
-      announcementDetails: input.announcementDetails,
+      announcementDetails,
       sourceDocumentHash,
     });
     const saved = await serviceFetch<Record<string, unknown>>(env, '/rest/v1/rpc/save_user_assessment_result_server', {

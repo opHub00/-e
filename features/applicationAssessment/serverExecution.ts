@@ -92,6 +92,7 @@ export async function executeTrustedAssessment(input: {
 export type AssessmentResultFreshnessStatus =
   | 'FRESH'
   | 'STALE_PROFILE'
+  | 'STALE_INPUT'
   | 'STALE_RULE'
   | 'STALE_DOCUMENT'
   | 'STALE_ENGINE';
@@ -100,6 +101,7 @@ export function staleReasonToUiState(
   reason: PersistedUserAssessmentResult['stale']['reason'],
 ): AssessmentResultFreshnessStatus {
   return reason === 'PROFILE_CHANGED' ? 'STALE_PROFILE'
+    : reason === 'LISTING_INPUT_CHANGED' ? 'STALE_INPUT'
     : reason === 'RULE_SET_CHANGED' ? 'STALE_RULE'
       : reason === 'SOURCE_DOCUMENT_CHANGED' ? 'STALE_DOCUMENT'
         : reason === 'ENGINE_CHANGED' ? 'STALE_ENGINE'

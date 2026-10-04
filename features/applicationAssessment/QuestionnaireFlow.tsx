@@ -11,6 +11,7 @@ import type { AnnouncementRules, AssessmentInput, SupplyType } from './types';
 import { koreanMoneyHint } from './form';
 import { assessmentDetails, profileUpdatesFromAnswers } from './questionnaire/adapter';
 import { clearDraft, readDraft, writeDraft } from './questionnaire/draft';
+import { mergeSavedAnswersWithDraft } from './listingInputs';
 import { displayDate, formatDateInput, formatDateListInput, normalizeDateInput } from './questionnaire/dateInput';
 import { applyPrefill, buildQuestionnaire, questionnaireProgress, questionsRequiringUserInput, type Answers, type Question } from './questionnaire/questions';
 import { buildSteps, firstIncompleteStep } from './questionnaire/categories';
@@ -23,10 +24,14 @@ type Props = {
   draftOwnerId?: string | null;
   residenceRegion?: { short: string; profile: string } | null;
   onProfileChange: (profile: ApplicantProfileV2) => void;
-  onComplete: (details: AssessmentInput['details'], profile: ApplicantProfileV2) => void;
+  onComplete: (details: AssessmentInput['details'], profile: ApplicantProfileV2, answers: Answers) => void;
   onBack: () => void;
   /** V3가 source of truth일 때 이미 저장된 장기 fact 질문을 화면에서 생략한다. */
   skipKnownProfileFacts?: boolean;
+  /** Last server-confirmed answers for this exact listing/supply/rule context. */
+  savedListingAnswers?: Answers;
+  /** Exact RuleSet/document scope used only for the unfinished local draft. */
+  listingDraftScope?: string;
   /** 단계가 바뀌면 부모 화면을 맨 위로 올린다. 스크롤 영역은 부모 하나만 둔다. */
   onStepChange?: () => void;
 };
@@ -114,8 +119,9 @@ function QuestionBlock({ question, answers, error, bounds, onChange, onTouch }: 
  * 이 화면은 한 번에 한 카테고리만 보여주고, 답을 로컬에 저장하고, 마지막에 기존 판정 입력(details)으로
  * 바꿔 넘길 뿐이다. 규칙 엔진에는 아무 조건도 넣지 않는다.
  */
-export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwnerId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange, skipKnownProfileFacts = false }: Props) {
+export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwnerId, residenceRegion, onProfileChange, onComplete, onBack, onStepChange, skipKnownProfileFacts = false, savedListingAnswers = {}, listingDraftScope }: Props) {
   const announcementDate = rules?.announcementDate ?? null;
+  const localDraftListingId = listingDraftScope ?? listingId;
   const restored = useRef(false);
   const [answers, setAnswers] = useState<Answers>({});
   const [stepIndex, setStepIndex] = useState(0);
@@ -138,8 +144,8 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwne
   useEffect(() => {
     if (restored.current || !listingId) return;
     restored.current = true;
-    const draft = readDraft(listingId, supply, undefined, draftOwnerId);
-    const base = draft?.answers ?? {};
+    const draft = readDraft(localDraftListingId, supply, undefined, draftOwnerId);
+    const base = mergeSavedAnswersWithDraft(savedListingAnswers, draft?.answers ?? {});
     const seeded = questionsRequiringUserInput(
       buildQuestionnaire({ rules, supply, profile, answers: base, announcementDate, residenceRegion }),
       skipKnownProfileFacts,
@@ -147,11 +153,11 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwne
     const filled = applyPrefill(seeded, base);
     setAnswers(filled);
     setStepIndex(firstIncompleteStep(buildSteps(seeded, filled)));
-  }, [listingId, supply, rules, profile, announcementDate, residenceRegion, draftOwnerId, skipKnownProfileFacts]);
+  }, [listingId, localDraftListingId, supply, rules, profile, announcementDate, residenceRegion, draftOwnerId, skipKnownProfileFacts, savedListingAnswers]);
 
   useEffect(() => {
-    if (restored.current && listingId) writeDraft(listingId, supply, { answers, index: stepIndex }, undefined, draftOwnerId);
-  }, [answers, stepIndex, listingId, supply, draftOwnerId]);
+    if (restored.current && listingId) writeDraft(localDraftListingId, supply, { answers, index: stepIndex }, undefined, draftOwnerId);
+  }, [answers, stepIndex, listingId, localDraftListingId, supply, draftOwnerId]);
 
   const index = Math.min(stepIndex, Math.max(steps.length - 1, 0));
   const step = steps[index];
@@ -173,8 +179,8 @@ export function QuestionnaireFlow({ rules, supply, profile, listingId, draftOwne
   const finish = () => {
     const update = profileUpdatesFromAnswers(profile, answers, announcementDate ?? new Date().toISOString().slice(0, 10));
     if (update.changed.length) onProfileChange(update.profile);
-    clearDraft(listingId, supply, undefined, draftOwnerId);
-    onComplete(details, update.profile);
+    clearDraft(localDraftListingId, supply, undefined, draftOwnerId);
+    onComplete(details, update.profile, answers);
   };
 
   if (!questions.length) {

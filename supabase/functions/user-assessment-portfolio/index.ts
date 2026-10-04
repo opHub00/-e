@@ -19,6 +19,7 @@ import {
 import type { SupplyType } from '../../../features/applicationAssessment/types.ts';
 import { normalizePortfolioFailure, type PortfolioItemFailureCode } from '../../../features/applicationAssessment/portfolioFailure.ts';
 import type { ApplicantProfileV3 } from '../../../features/profile/v3.ts';
+import { assessmentDetailsFromListingAnswers } from '../../../features/applicationAssessment/listingInputs.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -39,6 +40,11 @@ type RuleSetRow = {
 };
 type AnnouncementRow = { id: string; title: string; region_name: string | null; announcement_date: string | null };
 type BindingRow = { listing_id: string; announcement_id: string; bound_rule_set_id: string | null };
+type ListingInputRow = {
+  listing_id: string; supply_type: SupplyType; answers: Record<string, string>;
+  rule_set_id: string; rule_set_version: string; source_document_id: string | null;
+  source_document_hash: string | null; stale_at: string | null;
+};
 
 function projectRef(url: string): string | null {
   try { return new URL(url).hostname.match(/^([a-z0-9]+)\.supabase\.co$/)?.[1] ?? null; }
@@ -154,8 +160,12 @@ async function buildPortfolio(input: {
   env: Environment; userId: string; profileRow: ProfileRow; action: 'get' | 'refresh';
 }): Promise<{ portfolio: AssessmentPortfolioSnapshot; refresh: { considered: number; reused: number; recalculated: number; failed: number } }> {
   const selection = await candidateSources(input.env, input.userId, input.profileRow.profile_json);
-  const rows = await serviceFetch<Record<string, unknown>[]>(input.env,
-    `/rest/v1/user_assessment_results?select=id,result_snapshot,calculated_at,stale_at,stale_reason&user_id=eq.${input.userId}&superseded_at=is.null&order=calculated_at.desc`);
+  const [rows, listingInputs] = await Promise.all([
+    serviceFetch<Record<string, unknown>[]>(input.env,
+      `/rest/v1/user_assessment_results?select=id,result_snapshot,calculated_at,stale_at,stale_reason&user_id=eq.${input.userId}&superseded_at=is.null&order=calculated_at.desc`),
+    serviceFetch<ListingInputRow[]>(input.env,
+      `/rest/v1/user_listing_assessment_inputs?select=listing_id,supply_type,answers,rule_set_id,rule_set_version,source_document_id,source_document_hash,stale_at&user_id=eq.${input.userId}`),
+  ]);
   const results = rows.map(resultFromRow);
   let reused = 0, recalculated = 0, failed = 0;
   const settled = await mapWithConcurrency(selection.candidates, 2, async candidate => {
@@ -185,6 +195,17 @@ async function buildPortfolio(input: {
       ? { announcementId: candidate.listing.announcementId }
       : { listingId: candidate.listing.listingId });
     if (decoded.status !== 'AVAILABLE') throw new Error(decoded.status);
+    const listingInput = listingInputs.find(row => row.listing_id === candidate.listing.listingId
+      && row.supply_type === candidate.supplyType);
+    const sourceDocumentId = decoded.rules.provenance?.documentId ?? null;
+    const announcementDetails = listingInput
+      && listingInput.stale_at === null
+      && listingInput.rule_set_id === candidate.ruleSetId
+      && listingInput.rule_set_version === candidate.ruleSetVersion
+      && listingInput.source_document_id === sourceDocumentId
+      && listingInput.source_document_hash === candidate.sourceDocumentHash
+      ? assessmentDetailsFromListingAnswers(listingInput.answers, candidate.supplyType)
+      : {};
     const result = await executeTrustedAssessment({
       userId: input.userId,
       announcementId: candidate.listing.announcementId,
@@ -192,7 +213,7 @@ async function buildPortfolio(input: {
       profile: input.profileRow.profile_json,
       rules: decoded.rules,
       supplyType: candidate.supplyType,
-      announcementDetails: {},
+      announcementDetails,
       sourceDocumentHash: candidate.sourceDocumentHash,
     });
     const saved = await serviceFetch<Record<string, unknown>>(input.env, '/rest/v1/rpc/save_user_assessment_result_server', {

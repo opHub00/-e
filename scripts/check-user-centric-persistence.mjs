@@ -68,6 +68,7 @@ try {
       is_active boolean not null default false,
       is_public boolean not null default false,
       approved_at timestamptz
+      ,config jsonb not null default '{}'::jsonb
     );
     create table public.announcement_listing_bindings(
       listing_id text primary key,
@@ -86,10 +87,12 @@ try {
   const concurrencyLock = await readFile(new URL('../supabase/migrations/20261002042012_user_assessment_result_concurrency_lock.sql', import.meta.url), 'utf8');
   ok(/pg_advisory_xact_lock[\s\S]*userId|pg_advisory_xact_lock[\s\S]*p_user_id/.test(concurrencyLock), 'result persistence serializes duplicate Portfolio writes');
   await db.exec(concurrencyLock);
+  const listingInputs = await readFile(new URL('../supabase/migrations/20261005090000_user_listing_assessment_inputs.sql', import.meta.url), 'utf8');
+  await db.exec(listingInputs);
   await db.query('insert into auth.users(id) values($1),($2)', [ids.a, ids.b]);
   await db.query('insert into public.announcements(id,title) values($1,$2)', [ids.announcement, '검증 공고']);
   await db.query('insert into public.announcement_documents(id,announcement_id,sha256) values($1,$2,$3)', [ids.document, ids.announcement, sourceHash]);
-  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,is_active,is_public,approved_at) values($1,$2,$3,$4,'DRAFT_SOURCE_VERIFIED',true,true,now())", [ids.ruleSet, ids.announcement, ids.document, '1.0.0']);
+  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,is_active,is_public,approved_at,config) values($1,$2,$3,$4,'DRAFT_SOURCE_VERIFIED',true,true,now(),$5)", [ids.ruleSet, ids.announcement, ids.document, '1.0.0', { supplies: [{ type: 'youth' }] }]);
   await db.query('insert into public.announcement_listing_bindings(listing_id,announcement_id,bound_rule_set_id) values($1,$2,$3)', ['listing-1', ids.announcement, ids.ruleSet]);
   await db.query('insert into public.user_profiles(user_id,profile_json,updated_at) values($1,$2,$3)', [ids.b, v2, '2026-10-01T00:00:00Z']);
 
@@ -165,12 +168,57 @@ try {
   rows = (await db.query('select stale_reason from public.user_assessment_results where superseded_at is null')).rows;
   ok(rows.length === 1 && rows[0].stale_reason === 'PROFILE_CHANGED', 'profile update marks current results stale');
 
+  response = (await db.query(
+    "select public.save_user_listing_assessment_input('listing-1','youth',$1,0,1,$2) result",
+    [ids.ruleSet, { exceptions: 'no', youthPriorityTarget: 'yes' }],
+  )).rows[0].result;
+  ok(response.revision === 1 && response.compatibility === 'CURRENT', 'owner creates a listing-scoped answer snapshot');
+  ok(response.answers.exceptions === 'no' && response.answers.birthDate === undefined, 'only allowed raw listing answers persist');
+  response = (await db.query(
+    "select public.read_user_listing_assessment_input('listing-1','youth',$1) result", [ids.ruleSet],
+  )).rows[0].result;
+  ok(response.userId === ids.a && response.compatibility === 'CURRENT', 'owner reads a compatible listing-scoped snapshot');
+  await rejects(
+    () => db.query("select public.save_user_listing_assessment_input('listing-1','youth',$1,0,1,$2)", [ids.ruleSet, { exceptions: 'yes' }]),
+    'listing-scoped answer revision conflicts are rejected',
+  );
+  await rejects(
+    () => db.query("select public.save_user_listing_assessment_input('listing-1','youth',$1,1,1,$2)", [ids.ruleSet, { exceptionsClear: 'true' }]),
+    'derived facts cannot be persisted as user answers',
+  );
+  await rejects(
+    () => db.query("insert into public.user_listing_assessment_inputs(user_id,listing_id,announcement_id,supply_type,answers,rule_set_id,rule_set_version) values($1,'forged',$2,'youth','{}',$3,'1.0.0')", [ids.b, ids.announcement, ids.ruleSet]),
+    'authenticated clients cannot forge a listing answer owner',
+  );
+  await db.exec('reset role');
+  await db.query("update public.assessment_rule_sets set version='2.0.0' where id=$1", [ids.ruleSet]);
+  await db.exec('reset role; set role authenticated');
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids.a]);
+  response = (await db.query(
+    "select public.read_user_listing_assessment_input('listing-1','youth',$1) result", [ids.ruleSet],
+  )).rows[0].result;
+  ok(response.compatibility === 'STALE_RULE_SET' && response.staleReason === 'STALE_RULE_SET', 'RuleSet changes make saved answers stale');
+  await db.exec('reset role');
+  await db.query("update public.user_assessment_results set stale_at=null, stale_reason=null where user_id=$1 and superseded_at is null", [ids.a]);
+  await db.exec('reset role; set role authenticated');
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids.a]);
+  response = (await db.query(
+    "select public.save_user_listing_assessment_input('listing-1','youth',$1,1,1,$2) result",
+    [ids.ruleSet, { exceptions: 'no' }],
+  )).rows[0].result;
+  ok(response.revision === 2 && response.ruleSetVersion === '2.0.0', 'confirmed answers can be resaved against the new RuleSet');
+  rows = (await db.query('select stale_reason from public.user_assessment_results where superseded_at is null')).rows;
+  ok(rows.length === 1 && rows[0].stale_reason === 'LISTING_INPUT_CHANGED', 'listing answer updates mark prior trusted results stale');
+
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ids.b]);
   rows = (await db.query('select id from public.user_assessment_results')).rows;
   ok(rows.length === 0, 'another user cannot read assessment results');
+  rows = (await db.query('select id from public.user_listing_assessment_inputs')).rows;
+  ok(rows.length === 0, 'another user cannot read listing-scoped answers');
   await db.exec('reset role; set role anon');
   await rejects(() => db.query('select * from public.applicant_profiles_v3'), 'anon profile read denied');
   await rejects(() => db.query('select * from public.user_assessment_results'), 'anon result read denied');
+  await rejects(() => db.query('select * from public.user_listing_assessment_inputs'), 'anon listing input read denied');
   await db.exec('reset role');
 
   const v2Count = Number((await db.query('select count(*) count from public.user_profiles')).rows[0].count);

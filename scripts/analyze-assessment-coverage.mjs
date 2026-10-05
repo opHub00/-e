@@ -12,7 +12,8 @@ import {
   isTestFixtureAnnouncement,
 } from '../features/applicationAssessment/coverageAnalysis.ts';
 import { assessmentInputFromApplicantProfileV3 } from '../features/applicationAssessment/v3Adapter.ts';
-import { COVERAGE_PROFILE_REGIONS } from '../features/applicationAssessment/fixtures/coverageProfiles.fixture.ts';
+import { COVERAGE_LISTING_ANSWERS, COVERAGE_PROFILE_REGIONS } from '../features/applicationAssessment/fixtures/coverageProfiles.fixture.ts';
+import { assessmentDetailsFromListingAnswers, LISTING_SCOPED_ANSWER_FACTS } from '../features/applicationAssessment/listingInputs.ts';
 import { validateImportPackage } from '../features/applicationAssessment/server/importPackage.ts';
 import { createEmptyApplicantProfileV3, knownProfileFact } from '../features/profile/v3.ts';
 import { profileFieldForAssessmentFact } from '../features/profile/v3Completeness.ts';
@@ -120,6 +121,9 @@ for (const file of packageFiles) {
 }
 const assessmentRuns = [];
 const baselineRuns = [];
+const revisitRuns = [];
+const profileChangedRevisitRuns = [];
+const ruleChangedRuns = [];
 const decodedBindings = [];
 const runFromResult = (profileId, result) => {
   const entry = portfolioEntryFromAssessment(result);
@@ -153,6 +157,32 @@ for (const binding of rows.announcement_listing_bindings.data ?? []) {
     delete priorAdapterInput.details.incomeHouseholdSize;
     assessmentRuns.push(...assessApplication(decoded.rules, input, decoded.rules.listingId).map(result => runFromResult(fixture.id, result)));
     baselineRuns.push(...assessApplication(decoded.rules, priorAdapterInput, decoded.rules.listingId).map(result => runFromResult(fixture.id, result)));
+    for (const supplyRule of decoded.rules.supplies) {
+      const details = assessmentDetailsFromListingAnswers(COVERAGE_LISTING_ANSWERS[supplyRule.type], supplyRule.type);
+      const revisitInput = assessmentInputFromApplicantProfileV3(fixture.profile, {
+        announcementDate: decoded.rules.announcementDate,
+        announcementDetails: details,
+      });
+      const revisitResult = assessApplication(decoded.rules, revisitInput, decoded.rules.listingId)
+        .find(result => result.supplyType === supplyRule.type);
+      if (revisitResult) revisitRuns.push(runFromResult(fixture.id, revisitResult));
+      const changedProfile = structuredClone(fixture.profile);
+      changedProfile.revision += 1;
+      const changedInput = assessmentInputFromApplicantProfileV3(changedProfile, {
+        announcementDate: decoded.rules.announcementDate,
+        announcementDetails: details,
+      });
+      const changedResult = assessApplication(decoded.rules, changedInput, decoded.rules.listingId)
+        .find(result => result.supplyType === supplyRule.type);
+      if (changedResult) profileChangedRevisitRuns.push(runFromResult(fixture.id, changedResult));
+      const ruleChangedInput = assessmentInputFromApplicantProfileV3(fixture.profile, {
+        announcementDate: decoded.rules.announcementDate,
+        announcementDetails: {},
+      });
+      const ruleChangedResult = assessApplication(decoded.rules, ruleChangedInput, decoded.rules.listingId)
+        .find(result => result.supplyType === supplyRule.type);
+      if (ruleChangedResult) ruleChangedRuns.push(runFromResult(fixture.id, ruleChangedResult));
+    }
   }
 }
 
@@ -197,6 +227,15 @@ const missing = aggregateCoverageMissingFields(assessmentRuns).map(item => {
 });
 const missingCount = runs => runs.reduce((sum, run) => sum + run.missingUserFields.length, 0);
 const occurrence = (runs, field) => runs.filter(run => run.missingUserFields.map(item => item.replace(/^input:/, '')).includes(field)).length;
+const needsOccurrence = (runs, field) => occurrence(runs.filter(run => run.status === 'NEEDS_USER_INPUT'), field);
+const definitiveCount = runs => runs.filter(run => run.status === 'COMPLETE' || run.status === 'INELIGIBLE').length;
+const needsCount = runs => runs.filter(run => run.status === 'NEEDS_USER_INPUT').length;
+const repeatedQuestionsAvoided = assessmentRuns.reduce((total, run) => {
+  const missingFacts = new Set(run.missingUserFields.map(item => item.replace(/^input:/, '')));
+  const answers = COVERAGE_LISTING_ANSWERS[run.supplyType];
+  return total + Object.entries(LISTING_SCOPED_ANSWER_FACTS)
+    .filter(([question, facts]) => answers[question] !== undefined && facts.some(fact => missingFacts.has(fact))).length;
+}, 0);
 const supplyTypes = ['youth', 'newlywed', 'firstHome'];
 const supplyCoverage = Object.fromEntries(supplyTypes.map(type => {
   const sets = ruleSets.filter(row => row.config?.supplies?.some(item => item.type === type));
@@ -266,6 +305,41 @@ const report = {
       total: missingCount(baselineRuns) - missingCount(assessmentRuns),
     },
   },
+  listingScopedReuse: {
+    firstVisit: {
+      statuses: aggregatePortfolioRuns(assessmentRuns).statuses,
+      missingUserFactOccurrences: missingCount(assessmentRuns),
+      exceptionsClearOccurrences: needsOccurrence(assessmentRuns, 'exceptionsClear'),
+      needsUserInput: needsCount(assessmentRuns),
+      confirmedAssessments: definitiveCount(assessmentRuns),
+      staleListingAnswers: 0,
+    },
+    revisit: {
+      statuses: aggregatePortfolioRuns(revisitRuns).statuses,
+      missingUserFactOccurrences: missingCount(revisitRuns),
+      exceptionsClearOccurrences: needsOccurrence(revisitRuns, 'exceptionsClear'),
+      needsUserInput: needsCount(revisitRuns),
+      confirmedAssessments: definitiveCount(revisitRuns),
+      staleListingAnswers: 0,
+      repeatedQuestionsAvoided,
+    },
+    profileChanged: {
+      statuses: aggregatePortfolioRuns(profileChangedRevisitRuns).statuses,
+      missingUserFactOccurrences: missingCount(profileChangedRevisitRuns),
+      exceptionsClearOccurrences: needsOccurrence(profileChangedRevisitRuns, 'exceptionsClear'),
+      needsUserInput: needsCount(profileChangedRevisitRuns),
+      confirmedAssessments: definitiveCount(profileChangedRevisitRuns),
+      staleListingAnswers: 0,
+    },
+    ruleSetChanged: {
+      statuses: aggregatePortfolioRuns(ruleChangedRuns).statuses,
+      missingUserFactOccurrences: missingCount(ruleChangedRuns),
+      exceptionsClearOccurrences: needsOccurrence(ruleChangedRuns, 'exceptionsClear'),
+      needsUserInput: needsCount(ruleChangedRuns),
+      confirmedAssessments: definitiveCount(ruleChangedRuns),
+      staleListingAnswers: ruleChangedRuns.length,
+    },
+  },
   deterministicUnsupported: {
     invalidRuleSets: decodedBindings.filter(row => row.status === 'INVALID_RULE_SET').length,
     unsupportedSchemas: decodedBindings.filter(row => row.status === 'UNSUPPORTED_SCHEMA').length,
@@ -277,7 +351,7 @@ const report = {
     'Parsing success is NOT_MEASURED because no parsed-artifact status is persisted in the assessment registry.',
     'Extraction lineage is NOT_MEASURED because rule_extraction_jobs has no rows for the two active RuleSets.',
     'Stale result count is NOT_MEASURED because this audit intentionally does not read user result rows.',
-    'Fixture profiles use no real user personal data and pass no announcement-specific overrides.',
+    'Fixture profiles use no real user personal data. First-visit runs pass no listing answers; revisit runs use synthetic listing-scoped answers.',
   ],
 };
 

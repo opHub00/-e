@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "jeju-2026",
+  "regionLabel": "제주",
+  "copy": {
+    "brand": "완판e",
+    "landingTitle": "제주에서 나에게 맞는 청약을 찾아보세요.",
+    "landingSubtitle": "몇 분이면 내 조건으로 신청할 수 있는 공고를 한눈에 볼 수 있어요.",
+    "landingCta": "체험 시작하기",
+    "introSteps": [
+      "몇 가지 정보를 입력하면",
+      "제주 지역 청약을 분석하고",
+      "나에게 유리한 선택지를 한눈에 비교합니다."
+    ]
+  },
+  "idleResetSeconds": 150,
+  "idleWarningSeconds": 20,
+  "shareBaseUrl": null,
+  "listings": [
+    {
+      "listingId": "announcement:bade0617-63c6-4f61-86bf-6cd5ae17b101",
+      "title": "삼도이동 1지구 토지임대부 공공분양주택",
+      "district": "제주시",
+      "housingType": "공공분양 · 토지임대부",
+      "publisher": "제주특별자치도개발공사",
+      "address": "제주특별자치도 제주시 삼도이동 일원",
+      "households": null,
+      "announcementDate": "2026-09-14",
+      "recruitment": {
+        "status": "unknown",
+        "startDate": null,
+        "endDate": null
+      },
+      "winnerAnnouncementDate": null,
+      "sourceUrl": null,
+      "rulePackage": "primary",
+      "sourceNote": "모집공고 검토본을 기준으로 한 예상 결과예요. 최종 공고가 게시되면 기준이 달라질 수 있어요."
+    },
+    {
+      "listingId": "apt-2026000444-2026000444",
+      "title": "제주시 이도이동 아이린8차 아파트",
+      "district": "제주시",
+      "housingType": "민영 아파트",
+      "publisher": null,
+      "address": "제주특별자치도 제주시 이도이동 1045-3번지",
+      "households": 45,
+      "announcementDate": null,
+      "recruitment": {
+        "status": "upcoming",
+        "startDate": "2026-10-12",
+        "endDate": "2026-10-13"
+      },
+      "winnerAnnouncementDate": null,
+      "sourceUrl": "https://www.applyhome.co.kr",
+      "rulePackage": null,
+      "sourceNote": "청약홈에 게시된 공고예요. 완판e가 아직 이 공고의 분석 규칙을 확인하지 않았어요."
+    }
+  ],
+  "residenceRegion": "제주특별자치도"
+}

@@ -1,0 +1,185 @@
+{
+  "generatedAt": "2026-10-06T15:07:34.267Z",
+  "baseUrl": "http://127.0.0.1:4174",
+  "browsers": [
+    "Chromium"
+  ],
+  "personas": [
+    {
+      "personaId": "YOUNG_SINGLE",
+      "label": "20대 미혼 청년",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 3,
+        "review": 0,
+        "difficult": 6
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "collegeStudent",
+        "jobSeekerWithinTwoYears",
+        "benefitCategory",
+        "vehicleValueKrw",
+        "parentMonthlyIncomeKrw",
+        "parentVehicleValueKrw"
+      ],
+      "analysisMs": 6162,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "ENGAGED_COUPLE",
+      "label": "예비신혼부부",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 3,
+        "review": 0,
+        "difficult": 6
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
+      ],
+      "analysisMs": 4050,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "NEWLYWED_COUPLE",
+      "label": "신혼부부",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "distribution": {
+        "eligible": 3,
+        "review": 0,
+        "difficult": 6
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
+      ],
+      "analysisMs": 4013,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "NEWLYWED_ONE_CHILD",
+      "label": "신혼 + 자녀 1명",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 3,
+        "review": 0,
+        "difficult": 6
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
+      ],
+      "analysisMs": 4015,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "FIRST_HOME_COUPLE",
+      "label": "생애최초 부부",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 3,
+        "review": 0,
+        "difficult": 6
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
+      ],
+      "analysisMs": 4030,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "MULTI_CHILD",
+      "label": "다자녀 가구",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "distribution": {
+        "eligible": 4,
+        "review": 0,
+        "difficult": 5
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
+      ],
+      "analysisMs": 4006,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "GENERAL_NO_HOME",
+      "label": "일반 무주택 가구",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 1,
+        "review": 0,
+        "difficult": 8
+      },
+      "adaptiveQuestions": [
+        "eligibleResident",
+        "currentProgramTenant",
+        "benefitCategory"
+      ],
+      "analysisMs": 3977,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "CLEARLY_INELIGIBLE",
+      "label": "명확한 자격 미달 가구",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 0,
+        "difficult": 9
+      },
+      "adaptiveQuestions": [],
+      "analysisMs": 1940,
+      "qrTokenOnly": true
+    }
+  ],
+  "edges": {
+    "invalidToken": "PASS",
+    "emptyResults": "PASS",
+    "refreshPrivacy": "PASS",
+    "reducedViewportKeyboardCta": "PASS",
+    "idleReset": "PASS",
+    "adaptiveBackNavigation": "PASS"
+  },
+  "maxAnalysisMs": 6162,
+  "result": "PASS"
+}

@@ -68,6 +68,8 @@ export type EvaluationResult = {
   officialScore: OfficialScore;
   wanpanScore: WanpanScore;
   missingInformation: string[];
+  /** Raw Rule Package fact keys. Kept separate from user-facing labels for adaptive questioning. */
+  unresolvedFacts: string[];
   matchedRules: RuleTrace[];
   failedRules: RuleTrace[];
   warnings: string[];

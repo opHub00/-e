@@ -1,0 +1,1099 @@
+{
+  "generatedAt": "2026-10-06T15:08:09.710Z",
+  "dataset": {
+    "eventId": "wanpan-jeju-event-2026-10",
+    "version": "2026.10.0-rc1",
+    "fingerprint": "sha256:51aeeb22999594de30b2d032e2c885f3395cf18fb9dea2f43dacbb156fa0f5c8"
+  },
+  "coverage": {
+    "full": 16,
+    "partial": 7,
+    "none": 23,
+    "percent": 34.8
+  },
+  "inventory": [
+    {
+      "factKey": "applicant.age",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-24135-general-purchased-rental:GENERAL",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "신청자의 정확한 생년월일은 언제인가요?"
+    },
+    {
+      "factKey": "applicant.currentHomeCount",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "신청자 본인이 현재 보유한 주택이 있나요?"
+    },
+    {
+      "factKey": "applicant.isJejuResident",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "현재 제주특별자치도에 거주하고 있나요?"
+    },
+    {
+      "factKey": "applicant.maritalStatus",
+      "dataType": "ENUM",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "현재 혼인 상태는 어떻게 되나요?"
+    },
+    {
+      "factKey": "applicant.monthlyIncomeKrw",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "신청자 본인의 월평균 소득은 얼마인가요?"
+    },
+    {
+      "factKey": "applicant.recognizedPaymentCount",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "청약통장 인정 납입 횟수는 몇 회인가요?"
+    },
+    {
+      "factKey": "applicant.residenceMonths",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "제주에 계속 거주한 기간은 몇 개월인가요?"
+    },
+    {
+      "factKey": "applicant.totalAssetsKrw",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "APPLICANT",
+      "classification": "CORE",
+      "question": "신청자 본인의 총자산은 얼마인가요?"
+    },
+    {
+      "factKey": "event.applicantDisabilityPoints",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "EVIDENCE_ONLY",
+      "question": "공고 기준 장애인 가점은 몇 점인가요?"
+    },
+    {
+      "factKey": "event.applicantParentMaxVehicleValueKrw",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "본인과 부모님의 차량 중 가장 높은 차량가액은 얼마인가요?"
+    },
+    {
+      "factKey": "event.applicantParentMonthlyIncomeKrw",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "본인과 부모님의 월평균 소득 합계는 얼마인가요?"
+    },
+    {
+      "factKey": "event.applicantParentTotalAssetsKrw",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "본인과 부모님의 총자산 합계는 얼마인가요?"
+    },
+    {
+      "factKey": "event.benefitCategory",
+      "dataType": "ENUM",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "현재 해당하는 복지급여 또는 지원 자격이 있나요?"
+    },
+    {
+      "factKey": "event.collegeStudent",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "CONDITIONAL",
+      "question": "현재 대학생이거나 입학·복학 예정인가요?"
+    },
+    {
+      "factKey": "event.currentProgramTenant",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "CONDITIONAL",
+      "question": "현재 동일 지자체 청년매입임대에 계약·거주 중인가요?"
+    },
+    {
+      "factKey": "event.eligibleResident",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "CONDITIONAL",
+      "question": "국적 또는 외국인등록 기준상 신청 가능한 거주자인가요?"
+    },
+    {
+      "factKey": "event.generalRentalPriorityCategory",
+      "dataType": "ENUM",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "EVIDENCE_ONLY",
+      "question": "일반 매입임대의 공식 우선순위 증빙이 있나요?"
+    },
+    {
+      "factKey": "event.isHousingBenefitRecipient",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "lh-jeju-ildo-samdo-happy-housing-2026:HOUSING_BENEFIT"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "현재 주거급여 수급자인가요?"
+    },
+    {
+      "factKey": "event.jobSeekerWithinTwoYears",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "CONDITIONAL",
+      "question": "졸업·중퇴 후 2년 이내의 취업준비생인가요?"
+    },
+    {
+      "factKey": "event.lhCollegeIncomeEligible",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "EVIDENCE_ONLY",
+      "question": "본인·부모 합산 소득이 공고 기준 이하임을 확인했나요?"
+    },
+    {
+      "factKey": "event.marriageBeforeMoveIn",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "입주 전까지 혼인 사실을 증명할 수 있나요?"
+    },
+    {
+      "factKey": "event.rentBurdenPercent",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "EVIDENCE_ONLY",
+      "question": "월 소득 대비 임차료 부담률은 몇 퍼센트인가요?"
+    },
+    {
+      "factKey": "event.supportedSingleParent",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "한부모가족 증명서를 발급받을 수 있나요?"
+    },
+    {
+      "factKey": "event.workHistoryMonths",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "APPLICANT",
+      "classification": "CONDITIONAL",
+      "question": "소득이 있는 업무에 종사한 기간은 몇 개월인가요?"
+    },
+    {
+      "factKey": "family.marriageMonths",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "혼인신고일은 언제인가요?"
+    },
+    {
+      "factKey": "household.allNoHome",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL",
+        "lh-jeju-ildo-samdo-happy-housing-2026:HOUSING_BENEFIT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "본인과 세대원 모두 현재 무주택인가요?"
+    },
+    {
+      "factKey": "household.childUnder7Count",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "자녀의 정확한 생년월일은 언제인가요?"
+    },
+    {
+      "factKey": "household.dependentCount",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "신청자를 제외한 부양가족은 몇 명인가요?"
+    },
+    {
+      "factKey": "household.dualIncome",
+      "dataType": "BOOLEAN",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "신청자와 배우자 모두 소득이 있나요?"
+    },
+    {
+      "factKey": "household.maxVehicleValueKrw",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH",
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "세대가 보유한 차량 중 가장 높은 차량가액은 얼마인가요?"
+    },
+    {
+      "factKey": "household.memberCount",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "신청자를 포함한 세대원은 몇 명인가요?"
+    },
+    {
+      "factKey": "household.minorChildCount",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "자녀의 정확한 생년월일은 언제인가요?"
+    },
+    {
+      "factKey": "household.monthlyIncomeKrw",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "세대 전체 월평균 소득은 얼마인가요?"
+    },
+    {
+      "factKey": "household.newbornCountWithinTwoYears",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "자녀의 정확한 생년월일은 언제인가요?"
+    },
+    {
+      "factKey": "household.post20230328ChildCount",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "PARTIAL",
+      "uiInput": "PARTIAL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "자녀의 정확한 생년월일은 언제인가요?"
+    },
+    {
+      "factKey": "household.totalAssetsKrw",
+      "dataType": "NUMBER",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT",
+        "lh-jeju-ildo-samdo-happy-housing-2026:SENIOR",
+        "lh-jeju-ildo-samdo-happy-housing-2026:YOUTH"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "세대 전체 총자산은 얼마인가요?"
+    },
+    {
+      "factKey": "profile.composition",
+      "dataType": "ENUM",
+      "requirement": "REQUIRED",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "lh-jeju-ildo-samdo-happy-housing-2026:NEWLYWED_SINGLE_PARENT"
+      ],
+      "kioskAnswers": "FULL",
+      "uiInput": "FULL",
+      "scope": "HOUSEHOLD",
+      "classification": "CORE",
+      "question": "가구 형태는 어떻게 되나요?"
+    },
+    {
+      "factKey": "score.applicantDisabled",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "신청자 본인이 등록장애인인가요?"
+    },
+    {
+      "factKey": "score.benefit.jpdcMultiChild",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "현재 해당하는 복지급여 또는 지원 자격이 있나요?"
+    },
+    {
+      "factKey": "score.benefit.jpdcNewlywed",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "현재 해당하는 복지급여 또는 지원 자격이 있나요?"
+    },
+    {
+      "factKey": "score.benefit.jpdcYouth",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "CONDITIONAL",
+      "question": "현재 해당하는 복지급여 또는 지원 자격이 있나요?"
+    },
+    {
+      "factKey": "score.housingVulnerable",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24134-multichild-purchased-rental:MULTI_CHILD",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "주거취약계층 증빙을 받을 수 있나요?"
+    },
+    {
+      "factKey": "score.parentNoHome",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "부모님이 모두 무주택인가요?"
+    },
+    {
+      "factKey": "score.severeDisability",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "세대에 중증장애인이 있나요?"
+    },
+    {
+      "factKey": "score.supportsSeniorParent",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I",
+        "jpdc-24135-general-purchased-rental:GENERAL"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "만 65세 이상 직계존속을 부양하고 있나요?"
+    },
+    {
+      "factKey": "score.youthIncomeUnderHalf",
+      "dataType": "NUMBER",
+      "requirement": "CONDITIONAL",
+      "combinations": [
+        "jpdc-23972-youth-purchased-rental:YOUTH"
+      ],
+      "kioskAnswers": "NONE",
+      "uiInput": "NONE",
+      "scope": "HOUSEHOLD",
+      "classification": "EVIDENCE_ONLY",
+      "question": "청년 소득이 공고 기준의 50% 이하인가요?"
+    }
+  ],
+  "personas": [
+    {
+      "personaId": "YOUNG_SINGLE",
+      "label": "20대 미혼 청년",
+      "adaptiveQuestionCount": 8,
+      "questionIds": [
+        "vehicleValueKrw",
+        "collegeStudent",
+        "jobSeekerWithinTwoYears",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant",
+        "parentMonthlyIncomeKrw",
+        "parentVehicleValueKrw"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 5,
+        "INELIGIBLE": 4,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 3,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 6,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.applicantDisabilityPoints",
+        "event.generalRentalPriorityCategory",
+        "score.parentNoHome",
+        "score.youthIncomeUnderHalf"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "ENGAGED_COUPLE",
+      "label": "30대 예비신혼부부",
+      "adaptiveQuestionCount": 4,
+      "questionIds": [
+        "vehicleValueKrw",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 4,
+        "INELIGIBLE": 5,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 3,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 6,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory",
+        "score.applicantDisabled",
+        "score.supportsSeniorParent"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "NEWLYWED_COUPLE",
+      "label": "30대 신혼부부",
+      "adaptiveQuestionCount": 4,
+      "questionIds": [
+        "vehicleValueKrw",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 4,
+        "INELIGIBLE": 5,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 3,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 6,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory",
+        "score.applicantDisabled",
+        "score.supportsSeniorParent"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "NEWLYWED_ONE_CHILD",
+      "label": "신혼 + 자녀 1명",
+      "adaptiveQuestionCount": 4,
+      "questionIds": [
+        "vehicleValueKrw",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 4,
+        "INELIGIBLE": 5,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 3,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 6,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory",
+        "score.applicantDisabled",
+        "score.supportsSeniorParent"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "FIRST_HOME_COUPLE",
+      "label": "생애최초 조건의 부부",
+      "adaptiveQuestionCount": 4,
+      "questionIds": [
+        "vehicleValueKrw",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 4,
+        "INELIGIBLE": 5,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 3,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 6,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory",
+        "score.applicantDisabled",
+        "score.supportsSeniorParent"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "MULTI_CHILD",
+      "label": "다자녀 가구",
+      "adaptiveQuestionCount": 4,
+      "questionIds": [
+        "vehicleValueKrw",
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 5,
+        "INELIGIBLE": 4,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 4,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 5,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory",
+        "score.applicantDisabled",
+        "score.housingVulnerable",
+        "score.supportsSeniorParent"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "GENERAL_NO_HOME",
+      "label": "일반 무주택 가구",
+      "adaptiveQuestionCount": 3,
+      "questionIds": [
+        "benefitCategory",
+        "eligibleResident",
+        "currentProgramTenant"
+      ],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 2,
+        "INELIGIBLE": 7,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 1,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 8,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [
+        "event.generalRentalPriorityCategory"
+      ],
+      "remainingAskableQuestions": []
+    },
+    {
+      "personaId": "CLEARLY_INELIGIBLE",
+      "label": "명확한 자격 미달 가구",
+      "adaptiveQuestionCount": 0,
+      "questionIds": [],
+      "before": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 9,
+        "UNAVAILABLE": 0
+      },
+      "after": {
+        "COMPLETE": 0,
+        "NEEDS_USER_INPUT": 0,
+        "INELIGIBLE": 9,
+        "UNAVAILABLE": 0
+      },
+      "remainingEvidenceOnlyFacts": [],
+      "remainingAskableQuestions": []
+    }
+  ],
+  "unresolvedEvidenceOnlyFacts": [
+    "event.applicantDisabilityPoints",
+    "event.generalRentalPriorityCategory",
+    "score.applicantDisabled",
+    "score.housingVulnerable",
+    "score.parentNoHome",
+    "score.supportsSeniorParent",
+    "score.youthIncomeUnderHalf"
+  ],
+  "browser": {
+    "generatedAt": "2026-10-06T15:07:34.267Z",
+    "baseUrl": "http://127.0.0.1:4174",
+    "browsers": [
+      "Chromium"
+    ],
+    "personas": [
+      {
+        "personaId": "YOUNG_SINGLE",
+        "label": "20대 미혼 청년",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "distribution": {
+          "eligible": 3,
+          "review": 0,
+          "difficult": 6
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "collegeStudent",
+          "jobSeekerWithinTwoYears",
+          "benefitCategory",
+          "vehicleValueKrw",
+          "parentMonthlyIncomeKrw",
+          "parentVehicleValueKrw"
+        ],
+        "analysisMs": 6162,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "ENGAGED_COUPLE",
+        "label": "예비신혼부부",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "distribution": {
+          "eligible": 3,
+          "review": 0,
+          "difficult": 6
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory",
+          "vehicleValueKrw"
+        ],
+        "analysisMs": 4050,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "NEWLYWED_COUPLE",
+        "label": "신혼부부",
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "distribution": {
+          "eligible": 3,
+          "review": 0,
+          "difficult": 6
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory",
+          "vehicleValueKrw"
+        ],
+        "analysisMs": 4013,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "NEWLYWED_ONE_CHILD",
+        "label": "신혼 + 자녀 1명",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "distribution": {
+          "eligible": 3,
+          "review": 0,
+          "difficult": 6
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory",
+          "vehicleValueKrw"
+        ],
+        "analysisMs": 4015,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "FIRST_HOME_COUPLE",
+        "label": "생애최초 부부",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "distribution": {
+          "eligible": 3,
+          "review": 0,
+          "difficult": 6
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory",
+          "vehicleValueKrw"
+        ],
+        "analysisMs": 4030,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "MULTI_CHILD",
+        "label": "다자녀 가구",
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "distribution": {
+          "eligible": 4,
+          "review": 0,
+          "difficult": 5
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory",
+          "vehicleValueKrw"
+        ],
+        "analysisMs": 4006,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "GENERAL_NO_HOME",
+        "label": "일반 무주택 가구",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "distribution": {
+          "eligible": 1,
+          "review": 0,
+          "difficult": 8
+        },
+        "adaptiveQuestions": [
+          "eligibleResident",
+          "currentProgramTenant",
+          "benefitCategory"
+        ],
+        "analysisMs": 3977,
+        "qrTokenOnly": true
+      },
+      {
+        "personaId": "CLEARLY_INELIGIBLE",
+        "label": "명확한 자격 미달 가구",
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "distribution": {
+          "eligible": 0,
+          "review": 0,
+          "difficult": 9
+        },
+        "adaptiveQuestions": [],
+        "analysisMs": 1940,
+        "qrTokenOnly": true
+      }
+    ],
+    "edges": {
+      "invalidToken": "PASS",
+      "emptyResults": "PASS",
+      "refreshPrivacy": "PASS",
+      "reducedViewportKeyboardCta": "PASS",
+      "idleReset": "PASS",
+      "adaptiveBackNavigation": "PASS"
+    },
+    "maxAnalysisMs": 6162,
+    "result": "PASS"
+  },
+  "decision": "GO"
+}

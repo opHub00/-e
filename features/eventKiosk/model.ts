@@ -71,10 +71,47 @@ export type HouseholdInfo = {
   childrenCount: number | null;
   /** 자녀별 출생 연도. 길이는 childrenCount 와 같다. 모르는 자녀는 null. */
   childBirthYears: (number | null)[];
+  /** 자녀별 정확한 생년월일. 기존 연도 필드는 이전 저장 구조와의 호환을 위해 유지한다. */
+  childBirthDates: string[];
   /** 세대 총자산(원). 모르면 null. */
   totalAssets: number | null;
   /** 부모 총자산(원). 청년 공급에서만 쓴다. */
   parentAssets: number | null;
+};
+
+export type BenefitCategory =
+  | 'NONE'
+  | 'BASIC_LIVELIHOOD'
+  | 'BASIC_MEDICAL'
+  | 'BASIC_HOUSING'
+  | 'BASIC_EDUCATION'
+  | 'NEAR_POOR'
+  | 'SUPPORTED_SINGLE_PARENT';
+
+export type GeneralRentalPriorityCategory = 'NONE' | 'PRIORITY_1' | 'UDO_PRIORITY_2';
+
+/** 1차 판정 뒤 실제로 남은 Rule Package fact에만 답하는 값. */
+export type AdaptiveInfo = {
+  eligibleResident: YesNo;
+  currentProgramTenant: YesNo;
+  collegeStudent: YesNo;
+  jobSeekerWithinTwoYears: YesNo;
+  benefitCategory: BenefitCategory | null;
+  vehicleValueKrw: number | null;
+  applicantTotalAssetsKrw: number | null;
+  parentMonthlyIncomeKrw: number | null;
+  parentVehicleValueKrw: number | null;
+  parentNoHome: YesNo;
+  applicantDisabilityPoints: number | null;
+  youthIncomeUnderHalfThreshold: YesNo;
+  housingVulnerable: YesNo;
+  severeDisabilityInHousehold: YesNo;
+  supportsSeniorParent: YesNo;
+  applicantRegisteredDisabled: YesNo;
+  rentBurdenPercent: number | null;
+  workHistoryMonths: number | null;
+  generalRentalPriorityCategory: GeneralRentalPriorityCategory | null;
+  lhCollegeIncomeEligible: YesNo;
 };
 
 /** 통장 종류를 함께 물어, 있는지와 신청에 쓸 수 있는 통장인지를 한 번에 안다. */
@@ -97,6 +134,7 @@ export type KioskAnswers = {
   applicant: ApplicantInfo;
   household: HouseholdInfo;
   subscription: SubscriptionInfo;
+  adaptive: AdaptiveInfo;
 };
 
 export const emptyAnswers = (): KioskAnswers => ({
@@ -125,6 +163,7 @@ export const emptyAnswers = (): KioskAnswers => ({
     householdSize: null,
     childrenCount: null,
     childBirthYears: [],
+    childBirthDates: [],
     totalAssets: null,
     parentAssets: null,
   },
@@ -134,6 +173,28 @@ export const emptyAnswers = (): KioskAnswers => ({
     paymentCount: null,
     depositAmount: null,
     firstRank: null,
+  },
+  adaptive: {
+    eligibleResident: null,
+    currentProgramTenant: null,
+    collegeStudent: null,
+    jobSeekerWithinTwoYears: null,
+    benefitCategory: null,
+    vehicleValueKrw: null,
+    applicantTotalAssetsKrw: null,
+    parentMonthlyIncomeKrw: null,
+    parentVehicleValueKrw: null,
+    parentNoHome: null,
+    applicantDisabilityPoints: null,
+    youthIncomeUnderHalfThreshold: null,
+    housingVulnerable: null,
+    severeDisabilityInHousehold: null,
+    supportsSeniorParent: null,
+    applicantRegisteredDisabled: null,
+    rentBurdenPercent: null,
+    workHistoryMonths: null,
+    generalRentalPriorityCategory: null,
+    lhCollegeIncomeEligible: null,
   },
 });
 
@@ -179,6 +240,9 @@ export function stepBlocker(answers: KioskAnswers, step: InputStep): string | nu
   if (step === 'family' && answers.household.marriageRegistered === true && answers.household.marriageDate && !isIsoDate(answers.household.marriageDate)) {
     return '혼인신고일을 날짜 형식으로 입력하거나 비워 주세요.';
   }
+  if (step === 'family' && answers.household.childBirthDates.some(value => value && !isIsoDate(value))) {
+    return '자녀 생년월일을 날짜 형식으로 입력하거나 비워 주세요.';
+  }
   if (step === 'subscription' && answers.subscription.openedAt && !isIsoDate(answers.subscription.openedAt)) {
     return '가입일을 날짜 형식으로 입력하거나 비워 주세요.';
   }
@@ -189,4 +253,9 @@ export function stepBlocker(answers: KioskAnswers, step: InputStep): string | nu
 export function resizeChildren(years: (number | null)[], count: number | null): (number | null)[] {
   const n = Math.max(0, Math.min(10, count ?? 0));
   return Array.from({ length: n }, (_, i) => years[i] ?? null);
+}
+
+export function resizeChildDates(dates: string[], count: number | null): string[] {
+  const n = Math.max(0, Math.min(10, count ?? 0));
+  return Array.from({ length: n }, (_, i) => dates[i] ?? '');
 }

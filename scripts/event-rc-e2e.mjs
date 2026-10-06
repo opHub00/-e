@@ -7,9 +7,9 @@ const personas = [
   { id: 'YOUNG_SINGLE', label: '20대 미혼 청년', household: 'single', birth: '20010410', income: '250', assets: '6000', parentAssets: '6000', viewport: { width: 1440, height: 900 } },
   { id: 'ENGAGED_COUPLE', label: '예비신혼부부', household: 'couple', engaged: true, birth: '19920410', income: '280', householdIncome: '490', assets: '13000', parentAssets: '6000', size: 2, viewport: { width: 768, height: 1024 } },
   { id: 'NEWLYWED_COUPLE', label: '신혼부부', household: 'couple', birth: '19910410', income: '280', householdIncome: '490', assets: '13000', size: 2, viewport: { width: 1024, height: 768 } },
-  { id: 'NEWLYWED_ONE_CHILD', label: '신혼 + 자녀 1명', household: 'withChildren', birth: '19910410', income: '260', householdIncome: '470', assets: '13000', size: 3, children: [2025], viewport: { width: 1440, height: 900 } },
+  { id: 'NEWLYWED_ONE_CHILD', label: '신혼 + 자녀 1명', household: 'withChildren', birth: '19910410', income: '260', householdIncome: '470', assets: '13000', size: 3, children: ['20250115'], viewport: { width: 1440, height: 900 } },
   { id: 'FIRST_HOME_COUPLE', label: '생애최초 부부', household: 'couple', birth: '19900410', income: '270', householdIncome: '480', assets: '12000', size: 2, viewport: { width: 768, height: 1024 } },
-  { id: 'MULTI_CHILD', label: '다자녀 가구', household: 'withChildren', birth: '19880410', income: '220', householdIncome: '430', assets: '12000', size: 5, children: [2018, 2021, 2025], viewport: { width: 1024, height: 768 } },
+  { id: 'MULTI_CHILD', label: '다자녀 가구', household: 'withChildren', birth: '19880410', income: '220', householdIncome: '430', assets: '12000', size: 5, children: ['20180101', '20210101', '20250101'], viewport: { width: 1024, height: 768 } },
   { id: 'GENERAL_NO_HOME', label: '일반 무주택 가구', household: 'couple', birth: '19800410', income: '200', householdIncome: '390', assets: '12000', size: 2, marriageDate: '20100501', viewport: { width: 1440, height: 900 } },
   { id: 'CLEARLY_INELIGIBLE', label: '명확한 자격 미달 가구', household: 'single', birth: '19750410', income: '1500', assets: '90000', parentAssets: '90000', ownsHome: true, winning: true, noAccount: true, viewport: { width: 768, height: 1024 } },
 ];
@@ -53,6 +53,56 @@ async function setStepper(page, testId, label, value) {
   for (let index = 0; index < value; index += 1) await page.getByTestId(testId).getByRole('button', { name: `${label} 늘리기` }).click();
 }
 
+const adaptiveValues = {
+  eligibleResident: { type: 'choice', label: '예' },
+  currentProgramTenant: { type: 'choice', label: '아니요' },
+  collegeStudent: { type: 'choice', label: '아니요' },
+  jobSeekerWithinTwoYears: { type: 'choice', label: '아니요' },
+  benefitCategory: { type: 'choice', label: '해당 없음' },
+  vehicleValueKrw: { type: 'input', value: '1500' },
+  applicantTotalAssetsKrw: { type: 'input', value: '8000' },
+  parentMonthlyIncomeKrw: { type: 'input', value: '200' },
+  parentVehicleValueKrw: { type: 'input', value: '800' },
+  workHistoryMonths: { type: 'input', value: '36' },
+};
+
+const waitForAdaptiveDestination = page => Promise.race([
+  page.getByTestId('adaptive-assessment').waitFor().then(() => 'adaptive'),
+  page.getByTestId('results-title').waitFor().then(() => 'results'),
+]);
+
+async function completeAdaptive(page, verifyBackNavigation = false) {
+  const asked = new Set();
+  let backVerified = false;
+  for (let round = 0; round < 4; round += 1) {
+    const destination = await waitForAdaptiveDestination(page);
+    if (destination === 'results') return [...asked];
+    const currentRound = [];
+    for (const [id, response] of Object.entries(adaptiveValues)) {
+      const question = page.getByTestId(`adaptive-question-${id}`);
+      if (!(await question.count())) continue;
+      asked.add(id);
+      currentRound.push(id);
+      if (response.type === 'choice') await page.getByTestId(`q-adaptive-${id}`).getByRole('radio', { name: response.label, exact: true }).click();
+      else await page.getByTestId(`input-adaptive-${id}`).fill(response.value);
+    }
+    if (verifyBackNavigation && !backVerified) {
+      await page.getByRole('button', { name: '이전', exact: true }).click();
+      await page.getByTestId('input-paymentCount').last().waitFor();
+      await page.getByRole('button', { name: /^(다음|분석 시작하기)$/ }).last().click();
+      const nextDestination = await waitForAdaptiveDestination(page);
+      if (nextDestination === 'results') return [...asked];
+      for (const id of currentRound) {
+        if (await page.getByTestId(`adaptive-question-${id}`).count()) throw new Error(`adaptive back navigation lost ${id}`);
+      }
+      backVerified = true;
+      continue;
+    }
+    await page.getByTestId('adaptive-submit').click();
+  }
+  throw new Error('adaptive assessment did not converge');
+}
+
 async function enterPersona(page, persona, verifyBack) {
   await page.goto(`${baseUrl}/event`);
   await page.getByTestId('event-start').click();
@@ -81,7 +131,7 @@ async function enterPersona(page, persona, verifyBack) {
     else await page.getByTestId('input-marriageDate').fill(persona.marriageDate ?? '20240501');
     if (persona.household === 'withChildren') {
       await setStepper(page, 'q-household-childrenCount', '자녀 수', persona.children.length);
-      for (let index = 0; index < persona.children.length; index += 1) await page.getByTestId(`input-childYear-${index}`).fill(String(persona.children[index]));
+      for (let index = 0; index < persona.children.length; index += 1) await page.getByTestId(`input-childBirthDate-${index}`).fill(String(persona.children[index]));
     }
     await next(page);
   }
@@ -109,12 +159,12 @@ async function enterPersona(page, persona, verifyBack) {
   }
   const started = Date.now();
   await next(page);
-  await page.getByTestId('results-title').waitFor();
-  return Date.now() - started;
+  const adaptiveQuestions = await completeAdaptive(page, persona.id === 'YOUNG_SINGLE');
+  return { analysisMs: Date.now() - started, adaptiveQuestions };
 }
 
 async function verifyFullFlow(page, persona, browser) {
-  const analysisMs = await enterPersona(page, persona, persona.id === 'YOUNG_SINGLE');
+  const { analysisMs, adaptiveQuestions } = await enterPersona(page, persona, persona.id === 'YOUNG_SINGLE');
   await noOverflow(page, `${persona.id}:results`);
   await touchTargets(page, `${persona.id}:results`);
   const title = await page.getByTestId('results-title').innerText();
@@ -129,6 +179,8 @@ async function verifyFullFlow(page, persona, browser) {
     const text = await page.getByTestId(`bucket-${bucket}`).innerText();
     distribution[bucket] = Number(text.match(/(\d+)개/)?.[1] ?? -1);
   }
+  if (persona.id !== 'CLEARLY_INELIGIBLE' && distribution.eligible < 1) throw new Error(`${persona.id}: adaptive answers produced no COMPLETE result`);
+  if (persona.id === 'CLEARLY_INELIGIBLE' && distribution.eligible !== 0) throw new Error(`${persona.id}: ineligible persona was relaxed`);
 
   await page.getByTestId('detail-1').click();
   await page.getByTestId('listing-detail').waitFor();
@@ -169,7 +221,7 @@ async function verifyFullFlow(page, persona, browser) {
 
   await page.getByTestId('summary-reset').click();
   await page.getByTestId('event-landing').waitFor();
-  return { personaId: persona.id, label: persona.label, viewport: persona.viewport, distribution, analysisMs, qrTokenOnly: true };
+  return { personaId: persona.id, label: persona.label, viewport: persona.viewport, distribution, adaptiveQuestions, analysisMs, qrTokenOnly: true };
 }
 
 async function edgeCases(browser) {
@@ -213,7 +265,7 @@ async function edgeCases(browser) {
   await page.waitForTimeout(800);
   await page.getByTestId('event-landing').waitFor();
   await context.close();
-  return { invalidToken: 'PASS', emptyResults: 'PASS', refreshPrivacy: 'PASS', reducedViewportKeyboardCta: 'PASS', idleReset: 'PASS' };
+  return { invalidToken: 'PASS', emptyResults: 'PASS', refreshPrivacy: 'PASS', reducedViewportKeyboardCta: 'PASS', idleReset: 'PASS', adaptiveBackNavigation: 'PASS' };
 }
 
 const browser = await chromium.launch({ headless: true });

@@ -55,6 +55,8 @@ export function buildHouseholdFacts(profile: UserProfile, asOfDate: string): Fac
   const declaredEverOwned = profile.household.declaredTotals ? readKnown(profile.household.declaredTotals.everOwnedHomeByAnyMember) : undefined;
   const declaredSpecialSupplyHistory = profile.household.declaredTotals ? readKnown(profile.household.declaredTotals.specialSupplyHistoryByAnyMember) : undefined;
   const declaredReWinningRestriction = profile.household.declaredTotals ? readKnown(profile.household.declaredTotals.reWinningRestrictionByAnyMember) : undefined;
+  const declaredDualIncome = profile.household.declaredTotals?.dualIncome ? readKnown(profile.household.declaredTotals.dualIncome) : undefined;
+  const declaredMaxVehicle = profile.household.declaredTotals?.maxVehicleValueKrw ? readKnown(profile.household.declaredTotals.maxVehicleValueKrw) : undefined;
   const specialSupplyHistory = aggregateBoolean(
     [applicant.specialSupplyHistory, ...(spouse ? [spouse.specialSupplyHistory] : [])],
     'ANY',
@@ -126,14 +128,14 @@ export function buildHouseholdFacts(profile: UserProfile, asOfDate: string): Fac
     'household.everOwnedHomeByAnyMember': declaredEverOwned,
     'household.monthlyIncomeKrw': declaredHouseholdIncome ?? householdIncome?.reduce((sum, value) => sum + value, 0),
     'household.totalAssetsKrw': declaredHouseholdAssets ?? householdAssets?.reduce((sum, value) => sum + value, 0),
-    'household.dualIncome': spouse === undefined || applicantIncome === undefined || spouseIncome === undefined
+    'household.dualIncome': declaredDualIncome ?? (spouse === undefined || applicantIncome === undefined || spouseIncome === undefined
       ? spouse === undefined ? false : undefined
-      : applicantIncome > 0 && spouseIncome > 0,
+      : applicantIncome > 0 && spouseIncome > 0),
     'household.specialSupplyHistory': declaredSpecialSupplyHistory ?? specialSupplyHistory,
     'household.noSpecialSupplyHistory': (declaredSpecialSupplyHistory ?? specialSupplyHistory) === undefined ? undefined : !(declaredSpecialSupplyHistory ?? specialSupplyHistory),
     'household.reWinningRestriction': declaredReWinningRestriction ?? reWinningRestriction,
     'household.noReWinningRestriction': (declaredReWinningRestriction ?? reWinningRestriction) === undefined ? undefined : !(declaredReWinningRestriction ?? reWinningRestriction),
-    'household.maxVehicleValueKrw': vehicleValues ? Math.max(...vehicleValues) : undefined,
+    'household.maxVehicleValueKrw': declaredMaxVehicle ?? (vehicleValues ? Math.max(...vehicleValues) : undefined),
     'household.dependentCount': (spouse ? 1 : 0) + members.length,
     'household.newbornCountWithinTwoYears': newbornCount,
     'household.post20230328ChildCount': post20230328ChildCount,

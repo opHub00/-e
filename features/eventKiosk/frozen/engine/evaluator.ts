@@ -75,6 +75,11 @@ function evaluateSupply(input: {
     officialScore,
     supply,
   );
+  const unresolvedFacts = [...new Set([
+    ...candidate.missingFacts,
+    ...allTraces.filter(trace => trace.outcome === 'UNKNOWN').flatMap(trace => trace.missingFacts),
+    ...(officialScore.status === 'PENDING' ? officialScore.missingInformation : []),
+  ])];
   const warnings = buildWarnings(rulePackage, eligibility, candidate);
   const matchedRules = allTraces.filter(trace => trace.outcome === 'PASS');
   const failedRules = allTraces.filter(trace => trace.outcome === 'FAIL' || trace.outcome === 'REVIEW');
@@ -97,6 +102,7 @@ function evaluateSupply(input: {
     priority,
     officialScore,
     missingInformation,
+    unresolvedFacts,
     matchedRules,
     failedRules,
     warnings,

@@ -1,10 +1,13 @@
 import { create } from 'zustand';
 import { defaultChatOutcome, sendChat, startChat, type KioskChat } from './consult.ts';
 import { evaluateEvent, type KioskEvaluation } from './evaluate.ts';
+import { createAdaptiveQuestionPlan, type AdaptiveQuestionPlan } from './adaptiveAssessment.ts';
 import type { LoadedEvent } from './eventConfig.ts';
 import {
   emptyAnswers,
+  resizeChildDates,
   resizeChildren,
+  type AdaptiveInfo,
   type ApplicantInfo,
   type HouseholdInfo,
   type HouseholdType,
@@ -28,6 +31,7 @@ type KioskState = {
   analysis: AnalysisState;
   analysisError: string | null;
   evaluation: KioskEvaluation | null;
+  adaptivePlan: AdaptiveQuestionPlan | null;
   /** 결과를 계산한 뒤 답을 고치면 true. 결과 화면이 다시 분석하라고 알려 준다. */
   stale: boolean;
   favorites: string[];
@@ -40,6 +44,7 @@ type KioskState = {
   patchApplicant: (patch: Partial<ApplicantInfo>) => void;
   patchHousehold: (patch: Partial<HouseholdInfo>) => void;
   patchSubscription: (patch: Partial<SubscriptionInfo>) => void;
+  patchAdaptive: (patch: Partial<AdaptiveInfo>) => void;
   runAnalysis: (event: LoadedEvent) => Promise<void>;
   markAnswered: (key: string) => void;
   toggleFavorite: (outcomeId: string) => void;
@@ -56,6 +61,7 @@ const initial = () => ({
   analysis: 'idle' as AnalysisState,
   analysisError: null,
   evaluation: null,
+  adaptivePlan: null,
   stale: false,
   favorites: [] as string[],
   chat: null,
@@ -83,6 +89,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     if (type === 'single' || type === 'couple' || type === 'other') {
       answers.household.childrenCount = null;
       answers.household.childBirthYears = [];
+      answers.household.childBirthDates = [];
     }
     if (type === 'single') answers.household.householdSize = null;
     return { answers, stale: state.evaluation !== null };
@@ -93,11 +100,18 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
   })),
   patchHousehold: (patch) => set(state => {
     const household = { ...state.answers.household, ...patch };
-    if ('childrenCount' in patch) household.childBirthYears = resizeChildren(household.childBirthYears, household.childrenCount);
+    if ('childrenCount' in patch) {
+      household.childBirthYears = resizeChildren(household.childBirthYears, household.childrenCount);
+      household.childBirthDates = resizeChildDates(household.childBirthDates, household.childrenCount);
+    }
     return { answers: { ...state.answers, household }, stale: state.evaluation !== null };
   }),
   patchSubscription: (patch) => set(state => ({
     answers: { ...state.answers, subscription: { ...state.answers.subscription, ...patch } },
+    stale: state.evaluation !== null,
+  })),
+  patchAdaptive: (patch) => set(state => ({
+    answers: { ...state.answers, adaptive: { ...state.answers.adaptive, ...patch } },
     stale: state.evaluation !== null,
   })),
 
@@ -106,7 +120,9 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     set({ analysis: 'running', analysisError: null });
     const started = Date.now();
     try {
-      const evaluation = evaluateEvent(event, get().answers);
+      const current = get();
+      const evaluation = evaluateEvent(event, current.answers);
+      const adaptivePlan = createAdaptiveQuestionPlan(evaluation.assessment.results, current.answers, current.answered);
       await wait(Math.max(0, MIN_ANALYSIS_MS - (Date.now() - started)));
       // 분석 중에 reset 됐다면 이전 방문자의 결과를 새 세션에 넣지 않는다.
       if (get().sessionKey !== sessionKey) return;
@@ -114,6 +130,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
       set(state => ({
         analysis: 'done',
         evaluation,
+        adaptivePlan,
         stale: false,
         favorites: state.favorites.filter(id => known.has(id)),
         chat: null,

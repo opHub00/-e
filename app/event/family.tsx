@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { hasSpouse } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { HouseholdYesNo, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
-import { ChoiceGroup, DateInput, NumberInput, Question, Section, Stepper } from '../../features/eventKiosk/ui/controls';
+import { ChoiceGroup, DateInput, Question, Section, Stepper } from '../../features/eventKiosk/ui/controls';
 import { StepScreen } from '../../features/eventKiosk/ui/StepScreen';
 import { k } from '../../features/eventKiosk/ui/theme';
 
@@ -64,24 +64,24 @@ export default function FamilyStep() {
           <Question title="함께 사는 미성년 자녀는 몇 명인가요?" hint="태아는 빼고 세어 주세요.">
             <Stepper testID="q-household-childrenCount" accessibilityLabel="자녀 수" value={household.childrenCount} onChange={childrenCount => patch({ childrenCount })} max={6} unit="명" />
           </Question>
-          {household.childBirthYears.length ? (
-            <Question title="자녀가 태어난 해" hint="연도만 알면 돼요. 만 7세 미만 자녀가 있는지 확인해요.">
+          {household.childBirthDates.length ? (
+            <Question title="자녀 생년월일" hint="공고일 기준 자녀 나이와 출산일 경계를 정확히 확인해요.">
               <View style={styles.children}>
-                {household.childBirthYears.map((year, index) => (
+                {household.childBirthDates.map((birthDate, index) => (
                   <View key={index} style={styles.child}>
                     <Text style={styles.childLabel}>{index + 1}번째 자녀</Text>
-                    <NumberInput
-                      testID={`input-childYear-${index}`}
-                      accessibilityLabel={`${index + 1}번째 자녀 출생 연도`}
-                      value={year}
-                      unit="년"
-                      placeholder="예) 2021"
-                      max={2100}
-                      grouping={false}
+                    <DateInput
+                      testID={`input-childBirthDate-${index}`}
+                      accessibilityLabel={`${index + 1}번째 자녀 생년월일`}
+                      value={birthDate}
+                      placeholder="예) 20210315"
                       onChange={next => {
-                        const years = [...useKioskStore.getState().answers.household.childBirthYears];
-                        years[index] = next !== null && next >= 1900 ? next : null;
-                        patch({ childBirthYears: years });
+                        const current = useKioskStore.getState().answers.household;
+                        const dates = [...current.childBirthDates];
+                        const years = [...current.childBirthYears];
+                        dates[index] = next;
+                        years[index] = /^\d{4}/.test(next) ? Number(next.slice(0, 4)) : null;
+                        patch({ childBirthDates: dates, childBirthYears: years });
                       }}
                     />
                   </View>

@@ -92,7 +92,8 @@ function adultBase(answers: KioskAnswers, role: 'APPLICANT' | 'SPOUSE', referenc
       monthlyIncomeKrw: numberKnowledge(answers.applicant.monthlyIncome),
       earnedOrBusinessIncome: answers.applicant.taxPaymentYears === null ? unknown<boolean>() : known(answers.applicant.taxPaymentYears > 0),
       incomeTaxPaymentYears: numberKnowledge(answers.applicant.taxPaymentYears),
-      totalAssetsKrw: singleApplicant ? numberKnowledge(answers.household.totalAssets) : unknown<number>(),
+      totalAssetsKrw: numberKnowledge(answers.adaptive.applicantTotalAssetsKrw ?? (singleApplicant ? answers.household.totalAssets : null)),
+      vehicleValueKrw: numberKnowledge(answers.adaptive.vehicleValueKrw),
     } : {
       monthlyIncomeKrw: unknown<number>(), earnedOrBusinessIncome: unknown<boolean>(),
       incomeTaxPaymentYears: unknown<number>(), totalAssetsKrw: unknown<number>(),
@@ -103,11 +104,12 @@ function adultBase(answers: KioskAnswers, role: 'APPLICANT' | 'SPOUSE', referenc
 }
 
 function memberProfiles(answers: KioskAnswers): HouseholdMemberProfile[] {
-  const children = answers.household.childBirthYears.map((year, index) => ({
+  const childCount = Math.max(answers.household.childBirthYears.length, answers.household.childBirthDates.length);
+  const children = Array.from({ length: childCount }, (_, index) => ({
     id: `child-${index + 1}`,
     relationship: 'CHILD' as const,
-    // The prototype asks only for a year. Do not fabricate an exact birthday.
-    birthDate: unknown<string>(),
+    // A year-only legacy answer stays unknown. Phase 4 records the exact date.
+    birthDate: dateKnowledge(answers.household.childBirthDates[index] ?? ''),
     unborn: false,
     coResident: known(true),
     currentHomeCount: answers.applicant.householdNoHome === true ? known(0) : unknown<number>(),
@@ -157,12 +159,38 @@ export function toUserProfile(answers: KioskAnswers, referenceDate = new Date())
         everOwnedHomeByAnyMember: answers.applicant.neverOwnedHome === null ? unknown<boolean>() : known(!answers.applicant.neverOwnedHome),
         specialSupplyHistoryByAnyMember: boolKnowledge(answers.applicant.winningHistory),
         reWinningRestrictionByAnyMember: boolKnowledge(answers.applicant.winningHistory),
+        dualIncome: boolKnowledge(answers.household.dualIncome),
+        maxVehicleValueKrw: numberKnowledge(answers.adaptive.vehicleValueKrw),
       },
     },
     eventQualifications: {
-      marriageBeforeMoveIn: boolKnowledge(answers.household.plannedMarriageWithinDeadline),
-      supportedSingleParent: boolKnowledge(answers.household.singleParentQualified),
+      marriageBeforeMoveIn: compositionOf(answers) === 'ENGAGED_COUPLE'
+        ? boolKnowledge(answers.household.plannedMarriageWithinDeadline)
+        : known(false),
+      supportedSingleParent: compositionOf(answers) === 'SINGLE_PARENT'
+        ? boolKnowledge(answers.household.singleParentQualified)
+        : known(false),
       parentTotalAssetsKrw: numberKnowledge(answers.household.parentAssets),
+      eligibleResident: boolKnowledge(answers.adaptive.eligibleResident),
+      currentProgramTenant: boolKnowledge(answers.adaptive.currentProgramTenant),
+      collegeStudent: boolKnowledge(answers.adaptive.collegeStudent),
+      jobSeekerWithinTwoYears: boolKnowledge(answers.adaptive.jobSeekerWithinTwoYears),
+      benefitCategory: answers.adaptive.benefitCategory === null ? unknown() : known(answers.adaptive.benefitCategory),
+      parentMonthlyIncomeKrw: numberKnowledge(answers.adaptive.parentMonthlyIncomeKrw),
+      parentVehicleValueKrw: numberKnowledge(answers.adaptive.parentVehicleValueKrw),
+      parentNoHome: boolKnowledge(answers.adaptive.parentNoHome),
+      applicantDisabilityPoints: numberKnowledge(answers.adaptive.applicantDisabilityPoints),
+      youthIncomeUnderHalfThreshold: boolKnowledge(answers.adaptive.youthIncomeUnderHalfThreshold),
+      housingVulnerable: boolKnowledge(answers.adaptive.housingVulnerable),
+      severeDisabilityInHousehold: boolKnowledge(answers.adaptive.severeDisabilityInHousehold),
+      supportsSeniorParent: boolKnowledge(answers.adaptive.supportsSeniorParent),
+      applicantRegisteredDisabled: boolKnowledge(answers.adaptive.applicantRegisteredDisabled),
+      rentBurdenPercent: numberKnowledge(answers.adaptive.rentBurdenPercent),
+      workHistoryMonths: numberKnowledge(answers.adaptive.workHistoryMonths),
+      generalRentalPriorityCategory: answers.adaptive.generalRentalPriorityCategory === null
+        ? unknown()
+        : known(answers.adaptive.generalRentalPriorityCategory),
+      lhCollegeIncomeEligible: boolKnowledge(answers.adaptive.lhCollegeIncomeEligible),
     },
     consent: { assessment: true, temporaryResultSession: true },
   };

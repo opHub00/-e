@@ -103,6 +103,9 @@ export type HouseholdProfile = {
     everOwnedHomeByAnyMember: Knowledge<boolean>;
     specialSupplyHistoryByAnyMember: Knowledge<boolean>;
     reWinningRestrictionByAnyMember: Knowledge<boolean>;
+    /** Optional Phase 4 additions keep schemaVersion 1 profiles backward compatible. */
+    dualIncome?: Knowledge<boolean>;
+    maxVehicleValueKrw?: Knowledge<number>;
   };
 };
 

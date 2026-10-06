@@ -19,6 +19,7 @@ export default function AnalysisScreen() {
   const householdType = useKioskStore(state => state.answers.householdType);
   const analysis = useKioskStore(state => state.analysis);
   const error = useKioskStore(state => state.analysisError);
+  const adaptivePlan = useKioskStore(state => state.adaptivePlan);
   const runAnalysis = useKioskStore(state => state.runAnalysis);
   const started = useRef(false);
   // 이전 결과가 'done' 으로 남아 있을 수 있다. 이 화면에서 시작한 분석이 끝났을 때만 넘어간다.
@@ -39,8 +40,10 @@ export default function AnalysisScreen() {
 
   useEffect(() => {
     if (analysis === 'running') sawRunning.current = true;
-    if (analysis === 'done' && sawRunning.current) router.replace('/event/results' as never);
-  }, [analysis]);
+    if (analysis === 'done' && sawRunning.current) {
+      router.replace((adaptivePlan?.questions.length ? '/event/adaptive' : '/event/results') as never);
+    }
+  }, [adaptivePlan, analysis]);
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;

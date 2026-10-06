@@ -8,6 +8,7 @@ import {
   type KioskBucket,
   type KioskOutcome,
   type OfficialScore,
+  type OfficialScoreState,
   type WanpanIndicator,
 } from '../evaluate';
 import { useKioskStore } from '../useKioskStore';
@@ -94,6 +95,25 @@ export function OfficialScoreBlock({ score, compact }: { score: OfficialScore; c
   );
 }
 
+/** 공식 배점이 없거나 아직 계산할 수 없을 때 0점으로 보이지 않게 상태를 그대로 표시한다. */
+export function OfficialScoreStateBlock({ state, compact }: { state: Exclude<OfficialScoreState, { status: 'AVAILABLE' }>; compact?: boolean }) {
+  const unavailable = state.status === 'NOT_APPLICABLE';
+  return (
+    <View
+      style={[styles.official, compact && styles.blockCompact]}
+      testID={`official-score-${state.status.toLowerCase()}`}
+      accessibilityLabel={unavailable ? '공식 배점 해당 없음' : '공식 배점 계산 정보 확인 필요'}
+    >
+      <View style={styles.blockHead}>
+        <MaterialIcons name="gavel" size={20} color={k.colors.text} />
+        <Text style={styles.blockTitle}>공식 배점</Text>
+      </View>
+      <Text style={styles.officialState}>{unavailable ? '해당 없음' : '정보 확인 필요'}</Text>
+      {compact ? null : <Text style={styles.blockNote}>{state.reason}</Text>}
+    </View>
+  );
+}
+
 /** 완판e 추천도. 숫자 대신 수준과 막대로. 공고 점수가 아니라는 것을 늘 함께 적는다. */
 export function WanpanBlock({ wanpan, compact }: { wanpan: WanpanIndicator; compact?: boolean }) {
   const label = WANPAN_LEVEL_LABELS[wanpan.level];
@@ -166,7 +186,9 @@ export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
         {outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}
       </View>
       <View style={styles.scores}>
-        {outcome.officialScore ? <OfficialScoreBlock score={outcome.officialScore} compact /> : null}
+        {outcome.officialScore
+          ? <OfficialScoreBlock score={outcome.officialScore} compact />
+          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} compact />}
         <WanpanBlock wanpan={outcome.wanpan} compact />
       </View>
       {outcome.advantages.length ? (
@@ -218,6 +240,7 @@ const styles = StyleSheet.create({
   blockNote: { ...k.type.caption, color: k.colors.textMuted },
   officialValue: { ...k.type.title, color: k.colors.text },
   officialMax: { ...k.type.bodyLgStrong, color: k.colors.textMuted },
+  officialState: { ...k.type.bodyLgStrong, color: k.colors.text },
   wanpanValue: { ...k.type.section, color: k.colors.primary },
   meter: { height: 10, borderRadius: 5, backgroundColor: k.colors.surface, overflow: 'hidden' },
   meterFill: { height: 10, borderRadius: 5, backgroundColor: k.colors.primary },

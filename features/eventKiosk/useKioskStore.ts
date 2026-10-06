@@ -133,13 +133,13 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
   })),
 
   openChat: (event, outcomeId) => {
-    const { chat, evaluation, answers } = get();
+    const { chat, evaluation } = get();
     if (chat && chat.context.outcomeId === outcomeId) return;
     const outcomes = evaluation?.outcomes ?? [];
     // 공고를 정하지 않고 상담을 열면 결과에서 가장 앞에 있는, 판정할 수 있는 공급으로 시작한다.
     const outcome = outcomeId ? outcomes.find(item => item.id === outcomeId) ?? null : defaultChatOutcome(outcomes);
     if (chat && outcome && chat.context.outcomeId === outcome.id) return;
-    set({ chat: startChat(event, answers, outcome) });
+    set({ chat: startChat(event, evaluation, outcome) });
   },
 
   ask: async (event, message) => {

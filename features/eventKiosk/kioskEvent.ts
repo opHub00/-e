@@ -1,4 +1,4 @@
-import { activeEventConfig, activeEventRulePackages } from '../../data/events/activeEvent.ts';
+import { activeEventDataset } from '../../data/events/activeEvent.ts';
 import { loadEvent, type LoadedEvent } from './eventConfig.ts';
 
 /**
@@ -12,7 +12,7 @@ let cached: KioskEventLoad | null = null;
 export function kioskEvent(): KioskEventLoad {
   if (cached) return cached;
   try {
-    cached = { ok: true, event: loadEvent(activeEventConfig, activeEventRulePackages) };
+    cached = { ok: true, event: loadEvent(activeEventDataset) };
   } catch (error) {
     cached = { ok: false, error: error instanceof Error ? error.message : 'EVENT_LOAD_FAILED' };
   }

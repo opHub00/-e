@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-10-06T14:26:17.647Z",
+  "baseUrl": "http://127.0.0.1:4173",
+  "browsers": [
+    "Chromium"
+  ],
+  "personas": [
+    {
+      "personaId": "YOUNG_SINGLE",
+      "label": "20대 미혼 청년",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 5,
+        "difficult": 4
+      },
+      "analysisMs": 1956,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "ENGAGED_COUPLE",
+      "label": "예비신혼부부",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 4,
+        "difficult": 5
+      },
+      "analysisMs": 1924,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "NEWLYWED_COUPLE",
+      "label": "신혼부부",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 4,
+        "difficult": 5
+      },
+      "analysisMs": 1937,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "NEWLYWED_ONE_CHILD",
+      "label": "신혼 + 자녀 1명",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 5,
+        "difficult": 4
+      },
+      "analysisMs": 1922,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "FIRST_HOME_COUPLE",
+      "label": "생애최초 부부",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 4,
+        "difficult": 5
+      },
+      "analysisMs": 1935,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "MULTI_CHILD",
+      "label": "다자녀 가구",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 5,
+        "difficult": 4
+      },
+      "analysisMs": 1934,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "GENERAL_NO_HOME",
+      "label": "일반 무주택 가구",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 3,
+        "difficult": 6
+      },
+      "analysisMs": 1926,
+      "qrTokenOnly": true
+    },
+    {
+      "personaId": "CLEARLY_INELIGIBLE",
+      "label": "명확한 자격 미달 가구",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "distribution": {
+        "eligible": 0,
+        "review": 0,
+        "difficult": 9
+      },
+      "analysisMs": 1932,
+      "qrTokenOnly": true
+    }
+  ],
+  "edges": {
+    "invalidToken": "PASS",
+    "emptyResults": "PASS",
+    "refreshPrivacy": "PASS",
+    "reducedViewportKeyboardCta": "PASS",
+    "idleReset": "PASS"
+  },
+  "maxAnalysisMs": 1956,
+  "result": "PASS"
+}

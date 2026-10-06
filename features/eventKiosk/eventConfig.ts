@@ -1,36 +1,33 @@
-import { validateImportPackage } from '../applicationAssessment/server/importPackage.ts';
-import type { AnnouncementRules } from '../applicationAssessment/types.ts';
+import { assertDatasetBindings } from './frozen/engine/batch.ts';
+import type { FrozenListingDataset, Listing } from './frozen/domain/rules.ts';
 
-/**
- * 행사 설정.
- *
- * 지역 이름, 화면 문구, 공고 목록은 전부 데이터에서 온다. 이 파일은 그 데이터를 검사해 타입을 붙일 뿐이다.
- * 잘못된 설정으로 행사 화면이 반쯤 그려지는 것보다, 처음부터 무엇이 잘못됐는지 알리는 편이 낫다.
- */
 export type RecruitmentStatus = 'open' | 'upcoming' | 'closed' | 'unknown';
 
 export type EventListing = {
   listingId: string;
+  sourceId: string;
   title: string;
   district: string;
   housingType: string;
-  publisher: string | null;
-  address: string | null;
+  publisher: string;
+  address: string;
   households: number | null;
-  announcementDate: string | null;
-  recruitment: { status: RecruitmentStatus; startDate: string | null; endDate: string | null };
-  winnerAnnouncementDate: string | null;
-  sourceUrl: string | null;
-  /** 판정 규칙 패키지 키. 없으면 완판e 가 아직 이 공고를 분석할 수 없다. */
-  rulePackage: string | null;
-  /** 이 공고의 결과를 어떻게 읽어야 하는지. 화면이 그대로 보여준다. */
+  announcementDate: string;
+  recruitment: { status: RecruitmentStatus; startDate: string; endDate: string };
+  winnerAnnouncementDate: null;
+  sourceUrl: string;
   sourceNote: string;
+  reviewStatus: Listing['reviewStatus'];
+  sourceDocumentIds: string[];
 };
 
 export type EventConfig = {
   id: string;
+  datasetVersion: string;
+  frozenAt: string;
+  fingerprint: string;
+  sourceFingerprint: string;
   regionLabel: string;
-  /** 규칙이 기대하는 거주지 표기. 엔진 입력에 그대로 들어간다. */
   residenceRegion: string;
   copy: {
     brand: string;
@@ -41,103 +38,89 @@ export type EventConfig = {
   };
   idleResetSeconds: number;
   idleWarningSeconds: number;
-  /**
-   * 휴대폰으로 가져가는 링크의 주소 앞부분(예: https://example.com).
-   * 비우면 지금 화면의 주소를 쓴다. 행사 기기를 내부 주소로 띄우면 휴대폰이 열 수 없으니 이 값을 채운다.
-   */
   shareBaseUrl: string | null;
   listings: EventListing[];
 };
 
 export type LoadedEvent = {
   config: EventConfig;
-  /** listingId → 규칙. 규칙이 없는 공고는 들어 있지 않다. */
-  rulesByListing: Map<string, AnnouncementRules>;
+  dataset: FrozenListingDataset;
+  listingsById: Map<string, EventListing>;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
-const text = (value: unknown, path: string): string => {
-  if (typeof value !== 'string' || !value.trim()) throw new Error(`EVENT_CONFIG_INVALID:${path}`);
-  return value;
-};
-const optionalText = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value : null);
-const optionalNumber = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? value : null);
-const RECRUITMENT = new Set<RecruitmentStatus>(['open', 'upcoming', 'closed', 'unknown']);
 
-function decodeListing(raw: unknown, index: number): EventListing {
-  if (!isRecord(raw)) throw new Error(`EVENT_CONFIG_INVALID:listings.${index}`);
-  const recruitment = isRecord(raw.recruitment) ? raw.recruitment : {};
-  const status = String(recruitment.status ?? 'unknown') as RecruitmentStatus;
+function recruitmentStatus(listing: Listing, eventDate: string): RecruitmentStatus {
+  if (eventDate < listing.applicationStartDate) return 'upcoming';
+  if (eventDate > listing.applicationEndDate) return 'closed';
+  return 'open';
+}
+
+function housingLabel(kind: Listing['housingKind']): string {
+  return kind === 'PUBLIC_RENTAL' ? '행복주택 · 공공임대' : '매입임대';
+}
+
+function districtOf(listing: Listing): string {
+  const location = listing.locations[0] ?? '제주특별자치도';
+  if (location.includes('서귀포')) return '서귀포시';
+  if (location.includes('제주')) return '제주시';
+  return '제주특별자치도';
+}
+
+function eventListing(listing: Listing, dataset: FrozenListingDataset): EventListing {
   return {
-    listingId: text(raw.listingId, `listings.${index}.listingId`),
-    title: text(raw.title, `listings.${index}.title`),
-    district: text(raw.district, `listings.${index}.district`),
-    housingType: text(raw.housingType, `listings.${index}.housingType`),
-    publisher: optionalText(raw.publisher),
-    address: optionalText(raw.address),
-    households: optionalNumber(raw.households),
-    announcementDate: optionalText(raw.announcementDate),
+    listingId: listing.id,
+    sourceId: listing.sourceId,
+    title: listing.title,
+    district: districtOf(listing),
+    housingType: housingLabel(listing.housingKind),
+    publisher: listing.publisher,
+    address: listing.locations.join(' · '),
+    households: null,
+    announcementDate: listing.announcementDate,
     recruitment: {
-      status: RECRUITMENT.has(status) ? status : 'unknown',
-      startDate: optionalText(recruitment.startDate),
-      endDate: optionalText(recruitment.endDate),
+      status: recruitmentStatus(listing, dataset.eventDate),
+      startDate: listing.applicationStartDate,
+      endDate: listing.applicationEndDate,
     },
-    winnerAnnouncementDate: optionalText(raw.winnerAnnouncementDate),
-    sourceUrl: optionalText(raw.sourceUrl),
-    rulePackage: optionalText(raw.rulePackage),
-    sourceNote: text(raw.sourceNote, `listings.${index}.sourceNote`),
+    winnerAnnouncementDate: null,
+    sourceUrl: listing.officialUrl,
+    sourceNote: `공식 원문 검수 완료 · 행사 데이터 ${dataset.datasetVersion}`,
+    reviewStatus: listing.reviewStatus,
+    sourceDocumentIds: [...listing.sourceDocumentIds],
   };
 }
 
-export function decodeEventConfig(raw: unknown): EventConfig {
-  if (!isRecord(raw)) throw new Error('EVENT_CONFIG_INVALID:root');
-  const copy = isRecord(raw.copy) ? raw.copy : {};
-  const steps = Array.isArray(copy.introSteps) ? copy.introSteps.filter((step): step is string => typeof step === 'string') : [];
-  if (!steps.length) throw new Error('EVENT_CONFIG_INVALID:copy.introSteps');
-  const listings = Array.isArray(raw.listings) ? raw.listings.map(decodeListing) : [];
-  if (!listings.length) throw new Error('EVENT_CONFIG_INVALID:listings');
-  const ids = new Set<string>();
-  for (const listing of listings) {
-    if (ids.has(listing.listingId)) throw new Error(`EVENT_CONFIG_INVALID:duplicate ${listing.listingId}`);
-    ids.add(listing.listingId);
+export function loadEvent(raw: unknown): LoadedEvent {
+  if (!isRecord(raw)) throw new Error('EVENT_DATASET_INVALID:root');
+  const dataset = raw as unknown as FrozenListingDataset;
+  assertDatasetBindings(dataset);
+  if (dataset.eventId !== 'wanpan-jeju-event-2026-10') throw new Error('EVENT_DATASET_INVALID:eventId');
+  if (dataset.datasetVersion !== '2026.10.0-rc1') throw new Error('EVENT_DATASET_INVALID:datasetVersion');
+  if (dataset.fingerprint !== 'sha256:51aeeb22999594de30b2d032e2c885f3395cf18fb9dea2f43dacbb156fa0f5c8') {
+    throw new Error('EVENT_DATASET_INVALID:fingerprint');
   }
-  return {
-    id: text(raw.id, 'id'),
-    regionLabel: text(raw.regionLabel, 'regionLabel'),
-    residenceRegion: text(raw.residenceRegion, 'residenceRegion'),
+  const listings = dataset.listings.map(listing => eventListing(listing, dataset));
+  const config: EventConfig = {
+    id: dataset.eventId,
+    datasetVersion: dataset.datasetVersion,
+    frozenAt: dataset.frozenAt,
+    fingerprint: dataset.fingerprint,
+    sourceFingerprint: dataset.sourceFingerprint,
+    regionLabel: '제주',
+    residenceRegion: dataset.region,
     copy: {
-      brand: text(copy.brand, 'copy.brand'),
-      landingTitle: text(copy.landingTitle, 'copy.landingTitle'),
-      landingSubtitle: text(copy.landingSubtitle, 'copy.landingSubtitle'),
-      landingCta: text(copy.landingCta, 'copy.landingCta'),
-      introSteps: steps,
+      brand: '완판e',
+      landingTitle: '제주에서 나에게 맞는 청약을 찾아보세요.',
+      landingSubtitle: '한 번 입력하면 공식 제주 공고 5개와 공급유형 9개를 한눈에 비교해요.',
+      landingCta: '체험 시작하기',
+      introSteps: ['가구와 신청자 정보를 입력하고', '검수 완료된 제주 공고 9개 공급을 분석한 뒤', '자격·순위·공식 배점·완판e 추천을 나눠 비교합니다.'],
     },
-    idleResetSeconds: optionalNumber(raw.idleResetSeconds) ?? 150,
-    idleWarningSeconds: optionalNumber(raw.idleWarningSeconds) ?? 20,
-    shareBaseUrl: optionalText(raw.shareBaseUrl)?.replace(/\/+$/, '') ?? null,
+    idleResetSeconds: 150,
+    idleWarningSeconds: 20,
+    shareBaseUrl: null,
     listings,
   };
-}
-
-/**
- * 설정과 규칙 패키지를 함께 읽는다.
- *
- * 규칙은 공고와 묶여 있어야 한다. 패키지의 listingId 와 설정의 listingId 가 다르면 판정 엔진이
- * "다른 공고의 규칙"으로 보고 결과를 내지 않는다. 그 실수를 행사장이 아니라 여기서 잡는다.
- */
-export function loadEvent(rawConfig: unknown, rulePackages: Record<string, unknown>): LoadedEvent {
-  const config = decodeEventConfig(rawConfig);
-  const rulesByListing = new Map<string, AnnouncementRules>();
-  for (const listing of config.listings) {
-    if (!listing.rulePackage) continue;
-    const raw = rulePackages[listing.rulePackage];
-    if (!raw) throw new Error(`EVENT_RULE_PACKAGE_MISSING:${listing.rulePackage}`);
-    const { rules } = validateImportPackage(raw);
-    if (rules.listingId !== listing.listingId) {
-      throw new Error(`EVENT_RULE_LISTING_MISMATCH:${listing.listingId}`);
-    }
-    rulesByListing.set(listing.listingId, rules);
-  }
-  return { config, rulesByListing };
+  return { config, dataset, listingsById: new Map(listings.map(listing => [listing.listingId, listing])) };
 }

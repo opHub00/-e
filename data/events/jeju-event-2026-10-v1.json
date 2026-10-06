@@ -1,0 +1,4524 @@
+{
+  "schemaVersion": 1,
+  "eventId": "wanpan-jeju-event-2026-10",
+  "datasetVersion": "2026.10.0-rc1",
+  "region": "제주특별자치도",
+  "frozenAt": "2026-10-06T18:00:00.000+09:00",
+  "eventDate": "2026-10-29",
+  "sourceFingerprint": "sha256:b9393c78bc6d893c4ab8623f6421a9b8fcfb3e916ce592a1c083997d5bc6b4e9",
+  "fingerprint": "sha256:51aeeb22999594de30b2d032e2c885f3395cf18fb9dea2f43dacbb156fa0f5c8",
+  "sourceDocuments": [
+    {
+      "id": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+      "sourceId": "lh:pan:2015122300020804",
+      "fileName": "lh-2026-09-18-jeju-ildo-samdo-happy-housing.pdf",
+      "format": "PDF",
+      "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+      "officialUrl": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68665434",
+      "publisher": "한국토지주택공사",
+      "verifiedAt": "2026-10-06T18:00:00.000+09:00"
+    },
+    {
+      "id": "sha256:b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d",
+      "sourceId": "jpdc:notice:23972",
+      "fileName": "jpdc-2026-232-youth.hwpx",
+      "format": "HWPX",
+      "sha256": "b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=download&no=1&seq=23972",
+      "publisher": "제주특별자치도개발공사",
+      "verifiedAt": "2026-10-06T18:00:00.000+09:00"
+    },
+    {
+      "id": "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+      "sourceId": "jpdc:notice:23973",
+      "fileName": "jpdc-2026-233-newlywed-newborn-1.hwpx",
+      "format": "HWPX",
+      "sha256": "e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=download&no=1&seq=23973",
+      "publisher": "제주특별자치도개발공사",
+      "verifiedAt": "2026-10-06T18:00:00.000+09:00"
+    },
+    {
+      "id": "sha256:dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f",
+      "sourceId": "jpdc:notice:24134",
+      "fileName": "jpdc-2026-288-multichild.hwpx",
+      "format": "HWPX",
+      "sha256": "dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=download&no=1&seq=24134",
+      "publisher": "제주특별자치도개발공사",
+      "verifiedAt": "2026-10-06T18:00:00.000+09:00"
+    },
+    {
+      "id": "sha256:1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d",
+      "sourceId": "jpdc:notice:24135",
+      "fileName": "jpdc-2026-289-general.hwpx",
+      "format": "HWPX",
+      "sha256": "1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=download&no=1&seq=24135",
+      "publisher": "제주특별자치도개발공사",
+      "verifiedAt": "2026-10-06T18:00:00.000+09:00"
+    }
+  ],
+  "listings": [
+    {
+      "id": "lh-jeju-ildo-samdo-happy-housing-2026",
+      "sourceId": "lh:pan:2015122300020804",
+      "officialTitle": "제주 일도.삼도행복주택 예비입주자 모집",
+      "title": "제주 일도·삼도 행복주택",
+      "publisher": "한국토지주택공사",
+      "region": "제주특별자치도",
+      "locations": [
+        "제주시 일도이동",
+        "제주시 삼도이동 H-1BL",
+        "제주시 삼도이동 H-2BL"
+      ],
+      "housingKind": "PUBLIC_RENTAL",
+      "announcementDate": "2026-09-18",
+      "applicationStartDate": "2026-10-01",
+      "applicationEndDate": "2026-10-02",
+      "officialUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+      "sourceDocumentIds": [
+        "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+      ],
+      "supplyTypes": [
+        "COLLEGE_STUDENT",
+        "YOUTH",
+        "NEWLYWED_SINGLE_PARENT",
+        "SENIOR",
+        "HOUSING_BENEFIT"
+      ],
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "summary": "대학생·청년·신혼부부/한부모·고령자·주거급여수급자 행복주택 예비입주자 모집"
+    },
+    {
+      "id": "jpdc-23972-youth-purchased-rental",
+      "sourceId": "jpdc:notice:23972",
+      "officialTitle": "제주특별자치도개발공사 청년매입임대주택 예비입주자 모집 공고",
+      "title": "JPDC 청년 매입임대",
+      "publisher": "제주특별자치도개발공사",
+      "region": "제주특별자치도",
+      "locations": [
+        "제주시 동 지역",
+        "제주시 우도면",
+        "서귀포시 동 지역"
+      ],
+      "housingKind": "PURCHASED_RENTAL",
+      "announcementDate": "2026-06-30",
+      "applicationStartDate": "2026-07-14",
+      "applicationEndDate": "2026-07-15",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23972",
+      "sourceDocumentIds": [
+        "sha256:b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d"
+      ],
+      "supplyTypes": [
+        "YOUTH"
+      ],
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "summary": "19~39세·대학생·취업준비생 대상 매입임대"
+    },
+    {
+      "id": "jpdc-23973-newlywed-newborn-i",
+      "sourceId": "jpdc:notice:23973",
+      "officialTitle": "제주특별자치도개발공사 신혼·신생아 매입임대주택Ⅰ 예비입주자 모집 공고",
+      "title": "JPDC 신혼·신생아 매입임대Ⅰ",
+      "publisher": "제주특별자치도개발공사",
+      "region": "제주특별자치도",
+      "locations": [
+        "제주시",
+        "애월읍",
+        "조천읍",
+        "서귀포시 표선면"
+      ],
+      "housingKind": "PURCHASED_RENTAL",
+      "announcementDate": "2026-06-30",
+      "applicationStartDate": "2026-07-14",
+      "applicationEndDate": "2026-07-15",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23973",
+      "sourceDocumentIds": [
+        "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823"
+      ],
+      "supplyTypes": [
+        "NEWLYWED_NEWBORN_I"
+      ],
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "summary": "신생아·신혼·예비신혼·한부모·유자녀 혼인가구 매입임대"
+    },
+    {
+      "id": "jpdc-24134-multichild-purchased-rental",
+      "sourceId": "jpdc:notice:24134",
+      "officialTitle": "제주특별자치도개발공사 다자녀 매입임대주택 예비입주자 모집 공고",
+      "title": "JPDC 다자녀 매입임대",
+      "publisher": "제주특별자치도개발공사",
+      "region": "제주특별자치도",
+      "locations": [
+        "제주시",
+        "서귀포시",
+        "대정읍"
+      ],
+      "housingKind": "PURCHASED_RENTAL",
+      "announcementDate": "2026-08-31",
+      "applicationStartDate": "2026-09-10",
+      "applicationEndDate": "2026-09-11",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24134",
+      "sourceDocumentIds": [
+        "sha256:dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f"
+      ],
+      "supplyTypes": [
+        "MULTI_CHILD"
+      ],
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "summary": "미성년 직계비속 2명 이상 다자녀 가구 매입임대"
+    },
+    {
+      "id": "jpdc-24135-general-purchased-rental",
+      "sourceId": "jpdc:notice:24135",
+      "officialTitle": "2026년 제주특별자치도개발공사 일반 매입임대주택 예비입주자 모집 공고",
+      "title": "JPDC 일반 매입임대",
+      "publisher": "제주특별자치도개발공사",
+      "region": "제주특별자치도",
+      "locations": [
+        "제주시",
+        "서귀포시",
+        "우도면"
+      ],
+      "housingKind": "PURCHASED_RENTAL",
+      "announcementDate": "2026-08-31",
+      "applicationStartDate": "2026-09-10",
+      "applicationEndDate": "2026-09-11",
+      "officialUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24135",
+      "sourceDocumentIds": [
+        "sha256:1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d"
+      ],
+      "supplyTypes": [
+        "GENERAL"
+      ],
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "summary": "복지·주거취약·저소득 장애인 등 일반 매입임대"
+    }
+  ],
+  "rulePackages": [
+    {
+      "schemaVersion": 1,
+      "id": "rules:lh-jeju-ildo-samdo-2026-09-18",
+      "version": "2026.10.event.1",
+      "listingId": "lh-jeju-ildo-samdo-happy-housing-2026",
+      "announcementDate": "2026-09-18",
+      "sourceStatus": "OFFICIAL_VERIFIED",
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "reviewedAt": "2026-10-06T18:00:00.000+09:00",
+      "reviewedBy": "wanpan-event-dataset-review-v1",
+      "parameters": {},
+      "evidence": [
+        {
+          "id": "lh-common",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "공통 신청자격",
+          "section": "2. 신청자격",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 3
+        },
+        {
+          "id": "lh-college",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "대학생 계층",
+          "section": "3-1. 대학생 계층",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 5
+        },
+        {
+          "id": "lh-youth",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "청년 계층",
+          "section": "3-2. 청년 계층",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 7
+        },
+        {
+          "id": "lh-newlywed",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "신혼부부·한부모가족 계층",
+          "section": "3-3. 신혼부부·한부모가족 계층",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 9
+        },
+        {
+          "id": "lh-senior",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "고령자",
+          "section": "3-4. 고령자",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 12
+        },
+        {
+          "id": "lh-benefit",
+          "documentId": "sha256:76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "label": "주거급여수급자",
+          "section": "3-5. 주거급여수급자",
+          "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+          "locator": {
+            "kind": "PDF_PAGE"
+          },
+          "page": 14
+        }
+      ],
+      "supplies": [
+        {
+          "supplyType": "COLLEGE_STUDENT",
+          "label": "대학생 계층",
+          "selectionMethod": "PRIORITY",
+          "candidateWhen": {
+            "any": [
+              {
+                "fact": "event.collegeStudent",
+                "op": "EQ",
+                "value": true
+              },
+              {
+                "fact": "event.jobSeekerWithinTwoYears",
+                "op": "EQ",
+                "value": true
+              }
+            ]
+          },
+          "eligibility": [
+            {
+              "id": "lh.college.category",
+              "label": "대학생 또는 취업준비생",
+              "expression": {
+                "any": [
+                  {
+                    "fact": "event.collegeStudent",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  {
+                    "fact": "event.jobSeekerWithinTwoYears",
+                    "op": "EQ",
+                    "value": true
+                  }
+                ]
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "재학·입학예정 또는 졸업·중퇴 후 2년 이내 취업준비 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.college.single",
+              "label": "미혼",
+              "expression": {
+                "fact": "applicant.maritalStatus",
+                "op": "EQ",
+                "value": "SINGLE"
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "혼인 상태",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.college.no-home",
+              "label": "신청자 무주택",
+              "expression": {
+                "fact": "applicant.currentHomeCount",
+                "op": "EQ",
+                "value": 0
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "신청자 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.college.income",
+              "label": "본인·부모 소득기준",
+              "expression": {
+                "fact": "event.lhCollegeIncomeEligible",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "본인·부모 합산 소득과 가구원수",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.college.assets",
+              "label": "신청자 총자산 1억800만원 이하",
+              "expression": {
+                "fact": "applicant.totalAssetsKrw",
+                "op": "LTE",
+                "value": 108000000
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "신청자 총자산",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.college.vehicle",
+              "label": "자동차 미소유",
+              "expression": {
+                "fact": "household.maxVehicleValueKrw",
+                "op": "LTE",
+                "value": 0
+              },
+              "evidenceId": "lh-college",
+              "missingInformationLabel": "신청자 자동차 보유가액",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "JEJU_LOCAL",
+              "label": "1순위 제주 거주·재학·소득근거지",
+              "conditions": [
+                {
+                  "id": "lh.college.local",
+                  "label": "제주 지역 우선요건",
+                  "expression": {
+                    "fact": "applicant.isJejuResident",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  "evidenceId": "lh-college",
+                  "missingInformationLabel": "제주 거주·재학·소득근거지 여부",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": null
+            },
+            {
+              "rank": 2,
+              "code": "OTHER",
+              "label": "2순위 기타",
+              "conditions": [],
+              "officialScore": null
+            }
+          ]
+        },
+        {
+          "supplyType": "YOUTH",
+          "label": "청년 계층",
+          "selectionMethod": "PRIORITY",
+          "candidateWhen": {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "applicant.age",
+                    "op": "GTE",
+                    "value": 19
+                  },
+                  {
+                    "fact": "applicant.age",
+                    "op": "LTE",
+                    "value": 39
+                  }
+                ]
+              },
+              {
+                "fact": "event.workHistoryMonths",
+                "op": "LTE",
+                "value": 60
+              }
+            ]
+          },
+          "eligibility": [
+            {
+              "id": "lh.youth.category",
+              "label": "19~39세 또는 사회초년생",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "applicant.age",
+                        "op": "GTE",
+                        "value": 19
+                      },
+                      {
+                        "fact": "applicant.age",
+                        "op": "LTE",
+                        "value": 39
+                      }
+                    ]
+                  },
+                  {
+                    "fact": "event.workHistoryMonths",
+                    "op": "LTE",
+                    "value": 60
+                  }
+                ]
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "연령 또는 소득 있는 업무 종사기간",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.youth.single",
+              "label": "미혼",
+              "expression": {
+                "fact": "applicant.maritalStatus",
+                "op": "EQ",
+                "value": "SINGLE"
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "혼인 상태",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.youth.no-home",
+              "label": "신청자 무주택",
+              "expression": {
+                "fact": "applicant.currentHomeCount",
+                "op": "EQ",
+                "value": 0
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "신청자 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.youth.income",
+              "label": "가구원수별 소득기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 4576036
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 6452897
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 3
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 8168429
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 4
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 8802202
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 5
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 9326985
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 6
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 9906263
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "가구원수와 월평균소득",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.youth.assets",
+              "label": "청년 총자산 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 251000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 276000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 301000000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "총자산과 2023-03-28 이후 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.youth.vehicle",
+              "label": "청년 자동차 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 45420000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 49960000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 54510000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-youth",
+              "missingInformationLabel": "자동차가액과 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "JEJU_LOCAL",
+              "label": "1순위 제주 거주·재학·소득근거지",
+              "conditions": [
+                {
+                  "id": "lh.youth.local",
+                  "label": "제주 지역 우선요건",
+                  "expression": {
+                    "fact": "applicant.isJejuResident",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  "evidenceId": "lh-youth",
+                  "missingInformationLabel": "제주 거주·재학·소득근거지 여부",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": null
+            },
+            {
+              "rank": 2,
+              "code": "OTHER",
+              "label": "2순위 기타",
+              "conditions": [],
+              "officialScore": null
+            }
+          ]
+        },
+        {
+          "supplyType": "NEWLYWED_SINGLE_PARENT",
+          "label": "신혼부부·한부모가족 계층",
+          "selectionMethod": "PRIORITY",
+          "candidateWhen": {
+            "fact": "profile.composition",
+            "op": "IN",
+            "value": [
+              "COUPLE",
+              "COUPLE_WITH_CHILDREN",
+              "ENGAGED_COUPLE",
+              "SINGLE_PARENT"
+            ]
+          },
+          "eligibility": [
+            {
+              "id": "lh.newlywed.family",
+              "label": "신혼·예비신혼·한부모",
+              "expression": {
+                "any": [
+                  {
+                    "fact": "family.marriageMonths",
+                    "op": "LTE",
+                    "value": 84
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "profile.composition",
+                        "op": "EQ",
+                        "value": "ENGAGED_COUPLE"
+                      },
+                      {
+                        "fact": "event.marriageBeforeMoveIn",
+                        "op": "EQ",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "profile.composition",
+                        "op": "EQ",
+                        "value": "SINGLE_PARENT"
+                      },
+                      {
+                        "fact": "household.childUnder7Count",
+                        "op": "GTE",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-newlywed",
+              "missingInformationLabel": "혼인일·입주 전 혼인계획 또는 6세 이하 자녀",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.newlywed.no-home",
+              "label": "가구 무주택",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "lh-newlywed",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.newlywed.income",
+              "label": "가구원수·맞벌이별 소득기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.dualIncome",
+                        "op": "EQ",
+                        "value": false
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6452897
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 3
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 8168429
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 4
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 8802202
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 5
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 9326985
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 6
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 9906263
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.dualIncome",
+                        "op": "EQ",
+                        "value": true
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 7626151
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 3
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 9802115
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 4
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 10562642
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 5
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 11192382
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 6
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 11887516
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-newlywed",
+              "missingInformationLabel": "가구원수·맞벌이 여부·월평균소득",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.newlywed.assets",
+              "label": "신혼 총자산 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 345000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 379000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 413000000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-newlywed",
+              "missingInformationLabel": "총자산과 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.newlywed.vehicle",
+              "label": "신혼 자동차 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 45420000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 49960000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 54510000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-newlywed",
+              "missingInformationLabel": "자동차가액과 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "JEJU_LOCAL",
+              "label": "1순위 제주 거주·재학·소득근거지",
+              "conditions": [
+                {
+                  "id": "lh.newlywed.local",
+                  "label": "제주 지역 우선요건",
+                  "expression": {
+                    "fact": "applicant.isJejuResident",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  "evidenceId": "lh-newlywed",
+                  "missingInformationLabel": "제주 거주·재학·소득근거지 여부",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": null
+            },
+            {
+              "rank": 2,
+              "code": "OTHER",
+              "label": "2순위 기타",
+              "conditions": [],
+              "officialScore": null
+            }
+          ]
+        },
+        {
+          "supplyType": "SENIOR",
+          "label": "고령자",
+          "selectionMethod": "LOTTERY",
+          "candidateWhen": {
+            "fact": "applicant.age",
+            "op": "GTE",
+            "value": 65
+          },
+          "eligibility": [
+            {
+              "id": "lh.senior.age",
+              "label": "만 65세 이상",
+              "expression": {
+                "fact": "applicant.age",
+                "op": "GTE",
+                "value": 65
+              },
+              "evidenceId": "lh-senior",
+              "missingInformationLabel": "신청자 생년월일",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.senior.no-home",
+              "label": "가구 무주택",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "lh-senior",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.senior.income",
+              "label": "가구원수별 소득기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 4576036
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 6452897
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 3
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 8168429
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 4
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 8802202
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 5
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 9326985
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.memberCount",
+                        "op": "EQ",
+                        "value": 6
+                      },
+                      {
+                        "fact": "household.monthlyIncomeKrw",
+                        "op": "LTE",
+                        "value": 9906263
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-senior",
+              "missingInformationLabel": "가구원수와 월평균소득",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.senior.assets",
+              "label": "고령자 총자산 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 345000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 379000000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.totalAssetsKrw",
+                        "op": "LTE",
+                        "value": 413000000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-senior",
+              "missingInformationLabel": "총자산과 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.senior.vehicle",
+              "label": "고령자 자동차 기준",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 45420000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "EQ",
+                        "value": 1
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 49960000
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "household.post20230328ChildCount",
+                        "op": "GTE",
+                        "value": 2
+                      },
+                      {
+                        "fact": "household.maxVehicleValueKrw",
+                        "op": "LTE",
+                        "value": 54510000
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "lh-senior",
+              "missingInformationLabel": "자동차가액과 출산자녀 수",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": []
+        },
+        {
+          "supplyType": "HOUSING_BENEFIT",
+          "label": "주거급여수급자",
+          "selectionMethod": "LOTTERY",
+          "candidateWhen": {
+            "fact": "event.isHousingBenefitRecipient",
+            "op": "EQ",
+            "value": true
+          },
+          "eligibility": [
+            {
+              "id": "lh.benefit.recipient",
+              "label": "주거급여 수급자",
+              "expression": {
+                "fact": "event.isHousingBenefitRecipient",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "lh-benefit",
+              "missingInformationLabel": "주거급여 수급자 증명",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "lh.benefit.no-home",
+              "label": "가구 무주택",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "lh-benefit",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": []
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rules:jpdc-23972-youth-2026",
+      "version": "2026.10.event.1",
+      "listingId": "jpdc-23972-youth-purchased-rental",
+      "announcementDate": "2026-06-30",
+      "sourceStatus": "OFFICIAL_VERIFIED",
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "reviewedAt": "2026-10-06T18:00:00.000+09:00",
+      "reviewedBy": "wanpan-event-dataset-review-v1",
+      "parameters": {},
+      "evidence": [
+        {
+          "id": "jpdc-youth-162",
+          "documentId": "sha256:b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d",
+          "label": "2. 신청자격",
+          "section": "2. 신청자격",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23972",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 162
+          },
+          "excerpt": "공고일 현재 미혼인 무주택자"
+        },
+        {
+          "id": "jpdc-youth-183",
+          "documentId": "sha256:b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d",
+          "label": "신청순위 및 소득·자산 기준",
+          "section": "신청순위 및 소득·자산 기준",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23972",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 183
+          },
+          "excerpt": "1순위·2순위·3순위"
+        },
+        {
+          "id": "jpdc-youth-270",
+          "documentId": "sha256:b0fdfde6c414f76b3350e1779baa44028c65780037a8d740fbe40bc72181440d",
+          "label": "예비입주자 선정기준",
+          "section": "예비입주자 선정기준",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23972",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 270
+          },
+          "excerpt": "신청순위 → 배점 총점 → 동점 기준 → 추첨"
+        }
+      ],
+      "supplies": [
+        {
+          "supplyType": "YOUTH",
+          "label": "청년 매입임대",
+          "selectionMethod": "MIXED",
+          "priorityExhaustion": "INELIGIBLE",
+          "candidateWhen": {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "applicant.age",
+                    "op": "GTE",
+                    "value": 19
+                  },
+                  {
+                    "fact": "applicant.age",
+                    "op": "LTE",
+                    "value": 39
+                  }
+                ]
+              },
+              {
+                "fact": "event.collegeStudent",
+                "op": "EQ",
+                "value": true
+              },
+              {
+                "fact": "event.jobSeekerWithinTwoYears",
+                "op": "EQ",
+                "value": true
+              }
+            ]
+          },
+          "eligibility": [
+            {
+              "id": "jpdc.youth.resident",
+              "label": "공고의 신청 가능 거주자",
+              "expression": {
+                "fact": "event.eligibleResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-youth-162",
+              "missingInformationLabel": "국적·외국인등록 등 신청 가능 거주자 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.youth.not-tenant",
+              "label": "동일 지자체 청년매입임대 기계약·거주 아님",
+              "expression": {
+                "fact": "event.currentProgramTenant",
+                "op": "EQ",
+                "value": false
+              },
+              "evidenceId": "jpdc-youth-162",
+              "missingInformationLabel": "동일 지자체 청년매입임대 계약·거주 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.youth.single",
+              "label": "미혼",
+              "expression": {
+                "fact": "applicant.maritalStatus",
+                "op": "EQ",
+                "value": "SINGLE"
+              },
+              "evidenceId": "jpdc-youth-162",
+              "missingInformationLabel": "혼인 상태",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.youth.no-home",
+              "label": "신청자 무주택",
+              "expression": {
+                "fact": "applicant.currentHomeCount",
+                "op": "EQ",
+                "value": 0
+              },
+              "evidenceId": "jpdc-youth-162",
+              "missingInformationLabel": "신청자 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.youth.category",
+              "label": "19~39세·대학생·취업준비생",
+              "expression": {
+                "any": [
+                  {
+                    "all": [
+                      {
+                        "fact": "applicant.age",
+                        "op": "GTE",
+                        "value": 19
+                      },
+                      {
+                        "fact": "applicant.age",
+                        "op": "LTE",
+                        "value": 39
+                      }
+                    ]
+                  },
+                  {
+                    "fact": "event.collegeStudent",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  {
+                    "fact": "event.jobSeekerWithinTwoYears",
+                    "op": "EQ",
+                    "value": true
+                  }
+                ]
+              },
+              "evidenceId": "jpdc-youth-162",
+              "missingInformationLabel": "연령·재학·취업준비 여부",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "BENEFIT",
+              "label": "1순위 수급자·차상위·지원대상 한부모",
+              "conditions": [
+                {
+                  "id": "jpdc.youth.tier1",
+                  "label": "1순위 복지자격",
+                  "expression": {
+                    "fact": "event.benefitCategory",
+                    "op": "IN",
+                    "value": [
+                      "BASIC_LIVELIHOOD",
+                      "BASIC_MEDICAL",
+                      "BASIC_HOUSING",
+                      "NEAR_POOR",
+                      "SUPPORTED_SINGLE_PARENT"
+                    ]
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "수급자·차상위·지원대상 한부모 증명",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.youth.score.benefit",
+                  "label": "수급자 등 여부",
+                  "fact": "score.benefit.jpdcYouth",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.parent-home",
+                  "label": "부모 무주택",
+                  "fact": "score.parentNoHome",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.disability",
+                  "label": "본인·부모 장애 여부",
+                  "fact": "event.applicantDisabilityPoints",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.income-half",
+                  "label": "소득 기준 50% 이하",
+                  "fact": "score.youthIncomeUnderHalf",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                }
+              ]
+            },
+            {
+              "rank": 2,
+              "code": "PARENT_MEANS",
+              "label": "2순위 본인·부모 소득자산",
+              "conditions": [
+                {
+                  "id": "jpdc.youth.tier2.income",
+                  "label": "본인·부모 소득 100% 이하",
+                  "expression": {
+                    "fact": "event.applicantParentMonthlyIncomeKrw",
+                    "op": "LTE",
+                    "value": 8168429
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인·부모 합산 월평균소득",
+                  "onFailure": "INELIGIBLE"
+                },
+                {
+                  "id": "jpdc.youth.tier2.assets",
+                  "label": "본인·부모 총자산 3억4500만원 이하",
+                  "expression": {
+                    "fact": "event.applicantParentTotalAssetsKrw",
+                    "op": "LTE",
+                    "value": 345000000
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인·부모 합산 총자산",
+                  "onFailure": "INELIGIBLE"
+                },
+                {
+                  "id": "jpdc.youth.tier2.vehicle",
+                  "label": "본인·부모 자동차 4542만원 이하",
+                  "expression": {
+                    "fact": "event.applicantParentMaxVehicleValueKrw",
+                    "op": "LTE",
+                    "value": 45420000
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인·부모 자동차가액",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.youth.score.benefit",
+                  "label": "수급자 등 여부",
+                  "fact": "score.benefit.jpdcYouth",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.parent-home",
+                  "label": "부모 무주택",
+                  "fact": "score.parentNoHome",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.disability",
+                  "label": "본인·부모 장애 여부",
+                  "fact": "event.applicantDisabilityPoints",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.income-half",
+                  "label": "소득 기준 50% 이하",
+                  "fact": "score.youthIncomeUnderHalf",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                }
+              ]
+            },
+            {
+              "rank": 3,
+              "code": "SELF_MEANS",
+              "label": "3순위 본인 소득자산",
+              "conditions": [
+                {
+                  "id": "jpdc.youth.tier3.income",
+                  "label": "본인 소득 100% 이하",
+                  "expression": {
+                    "fact": "applicant.monthlyIncomeKrw",
+                    "op": "LTE",
+                    "value": 4576036
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인 월평균소득",
+                  "onFailure": "INELIGIBLE"
+                },
+                {
+                  "id": "jpdc.youth.tier3.assets",
+                  "label": "본인 총자산 2억5100만원 이하",
+                  "expression": {
+                    "fact": "applicant.totalAssetsKrw",
+                    "op": "LTE",
+                    "value": 251000000
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인 총자산",
+                  "onFailure": "INELIGIBLE"
+                },
+                {
+                  "id": "jpdc.youth.tier3.vehicle",
+                  "label": "본인 자동차 4542만원 이하",
+                  "expression": {
+                    "fact": "household.maxVehicleValueKrw",
+                    "op": "LTE",
+                    "value": 45420000
+                  },
+                  "evidenceId": "jpdc-youth-183",
+                  "missingInformationLabel": "본인 자동차가액",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.youth.score.benefit",
+                  "label": "수급자 등 여부",
+                  "fact": "score.benefit.jpdcYouth",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.parent-home",
+                  "label": "부모 무주택",
+                  "fact": "score.parentNoHome",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.disability",
+                  "label": "본인·부모 장애 여부",
+                  "fact": "event.applicantDisabilityPoints",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.income-half",
+                  "label": "소득 기준 50% 이하",
+                  "fact": "score.youthIncomeUnderHalf",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                },
+                {
+                  "id": "jpdc.youth.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-youth-270"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rules:jpdc-23973-newlywed-newborn-i-2026",
+      "version": "2026.10.event.1",
+      "listingId": "jpdc-23973-newlywed-newborn-i",
+      "announcementDate": "2026-06-30",
+      "sourceStatus": "OFFICIAL_VERIFIED",
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "reviewedAt": "2026-10-06T18:00:00.000+09:00",
+      "reviewedBy": "wanpan-event-dataset-review-v1",
+      "parameters": {},
+      "evidence": [
+        {
+          "id": "jpdc-newlywed-170",
+          "documentId": "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+          "label": "2. 신청자격",
+          "section": "2. 신청자격",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23973",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 170
+          },
+          "excerpt": "신혼·신생아Ⅰ 신청자격"
+        },
+        {
+          "id": "jpdc-newlywed-200",
+          "documentId": "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+          "label": "신청순위",
+          "section": "신청순위",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23973",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 200
+          },
+          "excerpt": "1순위부터 4순위"
+        },
+        {
+          "id": "jpdc-newlywed-266",
+          "documentId": "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+          "label": "소득 및 자산 기준",
+          "section": "소득 및 자산 기준",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23973",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 266
+          },
+          "excerpt": "70%·맞벌이 90%와 자산 기준"
+        },
+        {
+          "id": "jpdc-newlywed-339",
+          "documentId": "sha256:e7e0b325b262b315a18a36eadfedc93c412b6e677db4dbd44c7004934334f823",
+          "label": "예비입주자 선정기준",
+          "section": "예비입주자 선정기준",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=23973",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 339
+          },
+          "excerpt": "신청순위 → 배점 → 추첨"
+        }
+      ],
+      "supplies": [
+        {
+          "supplyType": "NEWLYWED_NEWBORN_I",
+          "label": "신혼·신생아 매입임대Ⅰ",
+          "selectionMethod": "MIXED",
+          "priorityExhaustion": "INELIGIBLE",
+          "candidateWhen": {
+            "fact": "profile.composition",
+            "op": "IN",
+            "value": [
+              "COUPLE",
+              "COUPLE_WITH_CHILDREN",
+              "ENGAGED_COUPLE",
+              "SINGLE_PARENT"
+            ]
+          },
+          "eligibility": [
+            {
+              "id": "jpdc.newlywed.resident",
+              "label": "공고의 신청 가능 거주자",
+              "expression": {
+                "fact": "event.eligibleResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-newlywed-170",
+              "missingInformationLabel": "국적·외국인등록 등 신청 가능 거주자 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.newlywed.no-home",
+              "label": "무주택세대구성원",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-newlywed-170",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.newlywed.family",
+              "label": "신생아·신혼·예비신혼·한부모·유자녀 혼인가구",
+              "expression": {
+                "any": [
+                  {
+                    "fact": "household.newbornCountWithinTwoYears",
+                    "op": "GTE",
+                    "value": 1
+                  },
+                  {
+                    "fact": "event.supportedSingleParent",
+                    "op": "EQ",
+                    "value": true
+                  },
+                  {
+                    "fact": "family.marriageMonths",
+                    "op": "LTE",
+                    "value": 84
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "profile.composition",
+                        "op": "EQ",
+                        "value": "ENGAGED_COUPLE"
+                      },
+                      {
+                        "fact": "event.marriageBeforeMoveIn",
+                        "op": "EQ",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "fact": "profile.composition",
+                        "op": "IN",
+                        "value": [
+                          "SINGLE_PARENT",
+                          "COUPLE_WITH_CHILDREN"
+                        ]
+                      },
+                      {
+                        "fact": "household.childUnder7Count",
+                        "op": "GTE",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "jpdc-newlywed-170",
+              "missingInformationLabel": "혼인·신생아·한부모·6세 이하 자녀 정보",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.newlywed.means",
+              "label": "소득·자산 기준 또는 검증 면제 복지자격",
+              "expression": {
+                "any": [
+                  {
+                    "fact": "event.benefitCategory",
+                    "op": "IN",
+                    "value": [
+                      "BASIC_LIVELIHOOD",
+                      "BASIC_MEDICAL",
+                      "BASIC_HOUSING",
+                      "BASIC_EDUCATION",
+                      "NEAR_POOR",
+                      "SUPPORTED_SINGLE_PARENT"
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.dualIncome",
+                                "op": "EQ",
+                                "value": false
+                              },
+                              {
+                                "any": [
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 2
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 4693016
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 3
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 5717900
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 4
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 6161541
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 5
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 6528890
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.dualIncome",
+                                "op": "EQ",
+                                "value": true
+                              },
+                              {
+                                "any": [
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 2
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 5866270
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 3
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 7351586
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 4
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 7921982
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "all": [
+                                      {
+                                        "fact": "household.memberCount",
+                                        "op": "EQ",
+                                        "value": 5
+                                      },
+                                      {
+                                        "fact": "household.monthlyIncomeKrw",
+                                        "op": "LTE",
+                                        "value": 8394287
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 345000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 379000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 413000000
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 45420000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 49960000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 54510000
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "jpdc-newlywed-266",
+              "missingInformationLabel": "가구 소득·총자산·자동차 및 면제 복지자격",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "NEWBORN_OR_SUPPORTED_PARENT",
+              "label": "1순위 신생아·지원대상 한부모",
+              "conditions": [
+                {
+                  "id": "jpdc.newlywed.tier1",
+                  "label": "신생아 또는 지원대상 한부모",
+                  "expression": {
+                    "any": [
+                      {
+                        "fact": "household.newbornCountWithinTwoYears",
+                        "op": "GTE",
+                        "value": 1
+                      },
+                      {
+                        "fact": "event.supportedSingleParent",
+                        "op": "EQ",
+                        "value": true
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-newlywed-200",
+                  "missingInformationLabel": "2년 내 출산·입양·태아 또는 지원대상 한부모",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.newlywed.score.benefit",
+                  "label": "신청자 수급자 등",
+                  "fact": "score.benefit.jpdcNewlywed",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 2
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 3
+                    },
+                    {
+                      "min": 3,
+                      "points": 4
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.disabled",
+                  "label": "신청자 장애 등록",
+                  "fact": "score.applicantDisabled",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                }
+              ]
+            },
+            {
+              "rank": 2,
+              "code": "NEWLYWED_WITH_CHILD",
+              "label": "2순위 자녀 있는 신혼·예비신혼·한부모",
+              "conditions": [
+                {
+                  "id": "jpdc.newlywed.tier2",
+                  "label": "미성년 또는 6세 이하 자녀 요건",
+                  "expression": {
+                    "any": [
+                      {
+                        "all": [
+                          {
+                            "any": [
+                              {
+                                "fact": "family.marriageMonths",
+                                "op": "LTE",
+                                "value": 84
+                              },
+                              {
+                                "fact": "profile.composition",
+                                "op": "EQ",
+                                "value": "ENGAGED_COUPLE"
+                              }
+                            ]
+                          },
+                          {
+                            "fact": "household.minorChildCount",
+                            "op": "GTE",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "all": [
+                          {
+                            "fact": "profile.composition",
+                            "op": "EQ",
+                            "value": "SINGLE_PARENT"
+                          },
+                          {
+                            "fact": "household.childUnder7Count",
+                            "op": "GTE",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-newlywed-200",
+                  "missingInformationLabel": "가구형태와 자녀 연령",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.newlywed.score.benefit",
+                  "label": "신청자 수급자 등",
+                  "fact": "score.benefit.jpdcNewlywed",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 2
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 3
+                    },
+                    {
+                      "min": 3,
+                      "points": 4
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.disabled",
+                  "label": "신청자 장애 등록",
+                  "fact": "score.applicantDisabled",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                }
+              ]
+            },
+            {
+              "rank": 3,
+              "code": "NEWLYWED_NO_CHILD",
+              "label": "3순위 자녀 없는 신혼·예비신혼",
+              "conditions": [
+                {
+                  "id": "jpdc.newlywed.tier3",
+                  "label": "미성년 자녀 없는 신혼·예비신혼",
+                  "expression": {
+                    "all": [
+                      {
+                        "any": [
+                          {
+                            "fact": "family.marriageMonths",
+                            "op": "LTE",
+                            "value": 84
+                          },
+                          {
+                            "fact": "profile.composition",
+                            "op": "EQ",
+                            "value": "ENGAGED_COUPLE"
+                          }
+                        ]
+                      },
+                      {
+                        "fact": "household.minorChildCount",
+                        "op": "EQ",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-newlywed-200",
+                  "missingInformationLabel": "혼인·예비혼인과 미성년 자녀수",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.newlywed.score.benefit",
+                  "label": "신청자 수급자 등",
+                  "fact": "score.benefit.jpdcNewlywed",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 2
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 3
+                    },
+                    {
+                      "min": 3,
+                      "points": 4
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.disabled",
+                  "label": "신청자 장애 등록",
+                  "fact": "score.applicantDisabled",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                }
+              ]
+            },
+            {
+              "rank": 4,
+              "code": "MARRIED_WITH_YOUNG_CHILD",
+              "label": "4순위 6세 이하 자녀 혼인가구",
+              "conditions": [
+                {
+                  "id": "jpdc.newlywed.tier4",
+                  "label": "6세 이하 자녀가 있는 혼인가구",
+                  "expression": {
+                    "all": [
+                      {
+                        "fact": "profile.composition",
+                        "op": "EQ",
+                        "value": "COUPLE_WITH_CHILDREN"
+                      },
+                      {
+                        "fact": "household.childUnder7Count",
+                        "op": "GTE",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-newlywed-200",
+                  "missingInformationLabel": "혼인가구와 6세 이하 자녀",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.newlywed.score.benefit",
+                  "label": "신청자 수급자 등",
+                  "fact": "score.benefit.jpdcNewlywed",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 2
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 3
+                    },
+                    {
+                      "min": 3,
+                      "points": 4
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.disabled",
+                  "label": "신청자 장애 등록",
+                  "fact": "score.applicantDisabled",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                },
+                {
+                  "id": "jpdc.newlywed.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-newlywed-339"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rules:jpdc-24134-multichild-2026",
+      "version": "2026.10.event.1",
+      "listingId": "jpdc-24134-multichild-purchased-rental",
+      "announcementDate": "2026-08-31",
+      "sourceStatus": "OFFICIAL_VERIFIED",
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "reviewedAt": "2026-10-06T18:00:00.000+09:00",
+      "reviewedBy": "wanpan-event-dataset-review-v1",
+      "parameters": {},
+      "evidence": [
+        {
+          "id": "jpdc-multi-124",
+          "documentId": "sha256:dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f",
+          "label": "신청자격",
+          "section": "신청자격",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24134",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 124
+          },
+          "excerpt": "미성년 직계비속 2명 이상 다자녀 가구"
+        },
+        {
+          "id": "jpdc-multi-174",
+          "documentId": "sha256:dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f",
+          "label": "신청순위·소득자산",
+          "section": "신청순위·소득자산",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24134",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 174
+          },
+          "excerpt": "1·2·3순위와 3순위 소득자산"
+        },
+        {
+          "id": "jpdc-multi-262",
+          "documentId": "sha256:dd28c5d630dfe37fd8dd9113febfacfe48e855d65d3cca42be029a9137905e9f",
+          "label": "예비입주자 선정기준",
+          "section": "예비입주자 선정기준",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24134",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 262
+          },
+          "excerpt": "다자녀 배점항목표"
+        }
+      ],
+      "supplies": [
+        {
+          "supplyType": "MULTI_CHILD",
+          "label": "다자녀 매입임대",
+          "selectionMethod": "MIXED",
+          "priorityExhaustion": "INELIGIBLE",
+          "candidateWhen": {
+            "fact": "household.minorChildCount",
+            "op": "GTE",
+            "value": 2
+          },
+          "eligibility": [
+            {
+              "id": "jpdc.multi.resident",
+              "label": "공고의 신청 가능 거주자",
+              "expression": {
+                "fact": "event.eligibleResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-multi-124",
+              "missingInformationLabel": "국적·외국인등록 등 신청 가능 거주자 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.multi.local",
+              "label": "제주시·서귀포시 주민등록",
+              "expression": {
+                "fact": "applicant.isJejuResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-multi-124",
+              "missingInformationLabel": "공고일 현재 주민등록 지역",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.multi.no-home",
+              "label": "무주택세대구성원",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-multi-124",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.multi.children",
+              "label": "미성년 직계비속 2명 이상",
+              "expression": {
+                "fact": "household.minorChildCount",
+                "op": "GTE",
+                "value": 2
+              },
+              "evidenceId": "jpdc-multi-124",
+              "missingInformationLabel": "태아 포함 미성년 자녀 생년월일",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.multi.means",
+              "label": "복지자격 또는 3순위 소득·자산 기준",
+              "expression": {
+                "any": [
+                  {
+                    "fact": "event.benefitCategory",
+                    "op": "IN",
+                    "value": [
+                      "BASIC_LIVELIHOOD",
+                      "BASIC_MEDICAL",
+                      "BASIC_HOUSING",
+                      "BASIC_EDUCATION",
+                      "NEAR_POOR",
+                      "SUPPORTED_SINGLE_PARENT"
+                    ]
+                  },
+                  {
+                    "all": [
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 3
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 5717900
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 4
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6161541
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 5
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6528890
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 6
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6934384
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 7
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 7339879
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 345000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 379000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 413000000
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 45420000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 49960000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 54510000
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "evidenceId": "jpdc-multi-174",
+              "missingInformationLabel": "복지자격 또는 가구원수별 소득·자산·자동차",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "NEWBORN_BENEFIT",
+              "label": "1순위 신생아 복지가구",
+              "conditions": [
+                {
+                  "id": "jpdc.multi.tier1",
+                  "label": "신생아이며 수급자·차상위·지원대상 한부모",
+                  "expression": {
+                    "all": [
+                      {
+                        "fact": "household.newbornCountWithinTwoYears",
+                        "op": "GTE",
+                        "value": 1
+                      },
+                      {
+                        "fact": "event.benefitCategory",
+                        "op": "IN",
+                        "value": [
+                          "BASIC_LIVELIHOOD",
+                          "BASIC_MEDICAL",
+                          "BASIC_HOUSING",
+                          "BASIC_EDUCATION",
+                          "NEAR_POOR",
+                          "SUPPORTED_SINGLE_PARENT"
+                        ]
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-multi-174",
+                  "missingInformationLabel": "신생아와 복지자격",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.multi.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 1,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 1
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    },
+                    {
+                      "min": 4,
+                      "points": 5
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.vulnerable",
+                  "label": "주거취약계층",
+                  "fact": "score.housingVulnerable",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.benefit",
+                  "label": "수급자 등",
+                  "fact": "score.benefit.jpdcMultiChild",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                }
+              ]
+            },
+            {
+              "rank": 2,
+              "code": "BENEFIT",
+              "label": "2순위 복지가구",
+              "conditions": [
+                {
+                  "id": "jpdc.multi.tier2",
+                  "label": "수급자·차상위·지원대상 한부모",
+                  "expression": {
+                    "fact": "event.benefitCategory",
+                    "op": "IN",
+                    "value": [
+                      "BASIC_LIVELIHOOD",
+                      "BASIC_MEDICAL",
+                      "BASIC_HOUSING",
+                      "BASIC_EDUCATION",
+                      "NEAR_POOR",
+                      "SUPPORTED_SINGLE_PARENT"
+                    ]
+                  },
+                  "evidenceId": "jpdc-multi-174",
+                  "missingInformationLabel": "복지자격",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.multi.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 1,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 1
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    },
+                    {
+                      "min": 4,
+                      "points": 5
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.vulnerable",
+                  "label": "주거취약계층",
+                  "fact": "score.housingVulnerable",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.benefit",
+                  "label": "수급자 등",
+                  "fact": "score.benefit.jpdcMultiChild",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                }
+              ]
+            },
+            {
+              "rank": 3,
+              "code": "INCOME_70",
+              "label": "3순위 소득 70% 이하",
+              "conditions": [
+                {
+                  "id": "jpdc.multi.tier3",
+                  "label": "소득·자산 기준 충족",
+                  "expression": {
+                    "all": [
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 3
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 5717900
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 4
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6161541
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 5
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6528890
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 6
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 6934384
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.memberCount",
+                                "op": "EQ",
+                                "value": 7
+                              },
+                              {
+                                "fact": "household.monthlyIncomeKrw",
+                                "op": "LTE",
+                                "value": 7339879
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 345000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 379000000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.totalAssetsKrw",
+                                "op": "LTE",
+                                "value": 413000000
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "any": [
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 0
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 45420000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "EQ",
+                                "value": 1
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 49960000
+                              }
+                            ]
+                          },
+                          {
+                            "all": [
+                              {
+                                "fact": "household.post20230328ChildCount",
+                                "op": "GTE",
+                                "value": 2
+                              },
+                              {
+                                "fact": "household.maxVehicleValueKrw",
+                                "op": "LTE",
+                                "value": 54510000
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "evidenceId": "jpdc-multi-174",
+                  "missingInformationLabel": "가구원수별 소득·자산·자동차",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.multi.score.children",
+                  "label": "미성년 자녀 수",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 1,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 1
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    },
+                    {
+                      "min": 4,
+                      "points": 5
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.vulnerable",
+                  "label": "주거취약계층",
+                  "fact": "score.housingVulnerable",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.benefit",
+                  "label": "수급자 등",
+                  "fact": "score.benefit.jpdcMultiChild",
+                  "bands": [
+                    {
+                      "min": 0,
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 3,
+                      "max": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                },
+                {
+                  "id": "jpdc.multi.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-multi-262"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rules:jpdc-24135-general-2026",
+      "version": "2026.10.event.1",
+      "listingId": "jpdc-24135-general-purchased-rental",
+      "announcementDate": "2026-08-31",
+      "sourceStatus": "OFFICIAL_VERIFIED",
+      "reviewStatus": "APPROVED_FOR_EVENT",
+      "reviewedAt": "2026-10-06T18:00:00.000+09:00",
+      "reviewedBy": "wanpan-event-dataset-review-v1",
+      "parameters": {},
+      "evidence": [
+        {
+          "id": "jpdc-general-165",
+          "documentId": "sha256:1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d",
+          "label": "신청자격",
+          "section": "신청자격",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24135",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 165
+          },
+          "excerpt": "사업대상지역 성년 무주택세대구성원"
+        },
+        {
+          "id": "jpdc-general-18",
+          "documentId": "sha256:1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d",
+          "label": "순위 자격",
+          "section": "순위 자격",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24135",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 18
+          },
+          "excerpt": "1순위와 우도면 2순위"
+        },
+        {
+          "id": "jpdc-general-372",
+          "documentId": "sha256:1235046774e8cde8fa364a36711865aaf8d96b0db4ae0f0a8f45a7e0ef42fa9d",
+          "label": "배점항목",
+          "section": "배점항목",
+          "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&seq=24135",
+          "locator": {
+            "kind": "HWPX_PARAGRAPH",
+            "paragraph": 372
+          },
+          "excerpt": "거주기간·부양가족·납입·주거취약·임차료"
+        }
+      ],
+      "supplies": [
+        {
+          "supplyType": "GENERAL",
+          "label": "일반 매입임대",
+          "selectionMethod": "OFFICIAL_SCORE",
+          "priorityExhaustion": "INELIGIBLE",
+          "eligibility": [
+            {
+              "id": "jpdc.general.resident",
+              "label": "공고의 신청 가능 거주자",
+              "expression": {
+                "fact": "event.eligibleResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-general-165",
+              "missingInformationLabel": "국적·외국인등록 등 신청 가능 거주자 여부",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.general.adult",
+              "label": "성년",
+              "expression": {
+                "fact": "applicant.age",
+                "op": "GTE",
+                "value": 19
+              },
+              "evidenceId": "jpdc-general-165",
+              "missingInformationLabel": "신청자 생년월일",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.general.local",
+              "label": "제주시·서귀포시 주민등록",
+              "expression": {
+                "fact": "applicant.isJejuResident",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-general-165",
+              "missingInformationLabel": "공고일 현재 주민등록 지역",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.general.no-home",
+              "label": "무주택세대구성원",
+              "expression": {
+                "fact": "household.allNoHome",
+                "op": "EQ",
+                "value": true
+              },
+              "evidenceId": "jpdc-general-165",
+              "missingInformationLabel": "가구원 전체 주택 보유 현황",
+              "onFailure": "INELIGIBLE"
+            },
+            {
+              "id": "jpdc.general.not-tenant",
+              "label": "일반매입임대 기입주자 아님",
+              "expression": {
+                "fact": "event.currentProgramTenant",
+                "op": "EQ",
+                "value": false
+              },
+              "evidenceId": "jpdc-general-165",
+              "missingInformationLabel": "일반매입임대 입주 여부",
+              "onFailure": "INELIGIBLE"
+            }
+          ],
+          "priorityTiers": [
+            {
+              "rank": 1,
+              "code": "PRIORITY_1",
+              "label": "1순위 복지·주거취약·저소득 장애인 등",
+              "conditions": [
+                {
+                  "id": "jpdc.general.tier1",
+                  "label": "1순위 자격",
+                  "expression": {
+                    "fact": "event.generalRentalPriorityCategory",
+                    "op": "EQ",
+                    "value": "PRIORITY_1"
+                  },
+                  "evidenceId": "jpdc-general-18",
+                  "missingInformationLabel": "일반 매입임대 1순위 증명자격",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.general.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.dependents",
+                  "label": "부양가족 수",
+                  "fact": "household.dependentCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.children",
+                  "label": "미성년 자녀 추가가점",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.disability",
+                  "label": "중증장애인 세대원",
+                  "fact": "score.severeDisability",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.vulnerable",
+                  "label": "주거취약계층",
+                  "fact": "score.housingVulnerable",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.rent",
+                  "label": "소득 대비 임차료 비율",
+                  "fact": "event.rentBurdenPercent",
+                  "bands": [
+                    {
+                      "max": 29.999,
+                      "points": 0
+                    },
+                    {
+                      "min": 30,
+                      "max": 49.999,
+                      "points": 2
+                    },
+                    {
+                      "min": 50,
+                      "max": 64.999,
+                      "points": 3
+                    },
+                    {
+                      "min": 65,
+                      "max": 79.999,
+                      "points": 4
+                    },
+                    {
+                      "min": 80,
+                      "points": 5
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                }
+              ]
+            },
+            {
+              "rank": 2,
+              "code": "UDO_PRIORITY_2",
+              "label": "2순위 우도면 소득·장애인",
+              "conditions": [
+                {
+                  "id": "jpdc.general.tier2",
+                  "label": "우도면 한정 2순위 자격",
+                  "expression": {
+                    "fact": "event.generalRentalPriorityCategory",
+                    "op": "EQ",
+                    "value": "UDO_PRIORITY_2"
+                  },
+                  "evidenceId": "jpdc-general-18",
+                  "missingInformationLabel": "우도면 신청과 2순위 소득·장애인 자격",
+                  "onFailure": "INELIGIBLE"
+                }
+              ],
+              "officialScore": [
+                {
+                  "id": "jpdc.general.score.residence",
+                  "label": "사업대상지역 연속 거주기간",
+                  "fact": "applicant.residenceMonths",
+                  "bands": [
+                    {
+                      "max": 35,
+                      "points": 1
+                    },
+                    {
+                      "min": 36,
+                      "max": 59,
+                      "points": 2
+                    },
+                    {
+                      "min": 60,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.dependents",
+                  "label": "부양가족 수",
+                  "fact": "household.dependentCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.children",
+                  "label": "미성년 자녀 추가가점",
+                  "fact": "household.minorChildCount",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    },
+                    {
+                      "min": 3,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.senior-parent",
+                  "label": "65세 이상 직계존속 부양",
+                  "fact": "score.supportsSeniorParent",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.disability",
+                  "label": "중증장애인 세대원",
+                  "fact": "score.severeDisability",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 1,
+                      "max": 1,
+                      "points": 1
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.account",
+                  "label": "청약저축 납입횟수",
+                  "fact": "applicant.recognizedPaymentCount",
+                  "bands": [
+                    {
+                      "max": 5,
+                      "points": 0
+                    },
+                    {
+                      "min": 6,
+                      "max": 11,
+                      "points": 1
+                    },
+                    {
+                      "min": 12,
+                      "max": 23,
+                      "points": 2
+                    },
+                    {
+                      "min": 24,
+                      "points": 3
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.vulnerable",
+                  "label": "주거취약계층",
+                  "fact": "score.housingVulnerable",
+                  "bands": [
+                    {
+                      "max": 0,
+                      "points": 0
+                    },
+                    {
+                      "min": 2,
+                      "max": 2,
+                      "points": 2
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                },
+                {
+                  "id": "jpdc.general.score.rent",
+                  "label": "소득 대비 임차료 비율",
+                  "fact": "event.rentBurdenPercent",
+                  "bands": [
+                    {
+                      "max": 29.999,
+                      "points": 0
+                    },
+                    {
+                      "min": 30,
+                      "max": 49.999,
+                      "points": 2
+                    },
+                    {
+                      "min": 50,
+                      "max": 64.999,
+                      "points": 3
+                    },
+                    {
+                      "min": 65,
+                      "max": 79.999,
+                      "points": 4
+                    },
+                    {
+                      "min": 80,
+                      "points": 5
+                    }
+                  ],
+                  "evidenceId": "jpdc-general-372"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "unresolvedRules": [
+    {
+      "id": "unresolved:lh-college-parent-household",
+      "sourceId": "lh:pan:2015122300020804",
+      "supplyType": "COLLEGE_STUDENT",
+      "status": "NEEDS_USER_INPUT",
+      "description": "대학생 계층의 본인·부모 소득 범위와 가구원수는 증빙 기준 입력이 필요함",
+      "evidenceId": "lh-college"
+    },
+    {
+      "id": "unresolved:jpdc-general-category",
+      "sourceId": "jpdc:notice:24135",
+      "supplyType": "GENERAL",
+      "status": "NEEDS_USER_INPUT",
+      "description": "일반 매입임대 1·2순위의 복지·장애·주거취약 증명자격은 사용자가 증빙 기준으로 선택해야 함",
+      "evidenceId": "jpdc-general-18"
+    },
+    {
+      "id": "unresolved:official-score-evidence",
+      "sourceId": "event:all",
+      "supplyType": "GENERAL",
+      "status": "NEEDS_USER_INPUT",
+      "description": "배점 항목은 증빙 입력이 없으면 0점으로 가정하지 않고 PENDING으로 유지함",
+      "evidenceId": "jpdc-general-372"
+    }
+  ]
+}

@@ -1,21 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
-import { decodeSummary, type ResultSummary } from '../../features/eventKiosk/summary';
+import { isOpaqueResultToken, readResultSession } from '../../features/eventKiosk/resultSessionClient';
+import type { ResultSummary } from '../../features/eventKiosk/summary';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
 
 /**
- * 방문자 휴대폰에서 열리는 요약. 행사 기기의 저장소와 상관없이 주소의 # 뒤만 읽는다.
- * # 뒤는 서버로 가지 않으므로 이 화면은 서버 없이 그려진다.
+ * 방문자 휴대폰에서 열리는 요약. URL에는 opaque token만 있고, 개인정보를
+ * 제외한 임시 요약은 행사 RC 서버 메모리에서 6시간 동안만 조회한다.
  */
 export default function TakeAway() {
   const [state, setState] = useState<{ status: 'loading' } | { status: 'invalid' } | { status: 'ok'; summary: ResultSummary }>({ status: 'loading' });
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') { setState({ status: 'invalid' }); return; }
-    const match = window.location.hash.match(/(?:^#|&)d=([A-Za-z0-9_-]+)/);
-    const summary = match ? decodeSummary(match[1]) : null;
-    setState(summary ? { status: 'ok', summary } : { status: 'invalid' });
+    const token = new URLSearchParams(window.location.search).get('token') ?? '';
+    if (!isOpaqueResultToken(token)) { setState({ status: 'invalid' }); return; }
+    let active = true;
+    void readResultSession(window.location.origin, token)
+      .then(summary => { if (active) setState(summary ? { status: 'ok', summary } : { status: 'invalid' }); })
+      .catch(() => { if (active) setState({ status: 'invalid' }); });
+    return () => { active = false; };
   }, []);
 
   return (
@@ -26,7 +31,7 @@ export default function TakeAway() {
         {state.status === 'invalid' ? (
           <View style={styles.card} testID="take-invalid">
             <Text style={styles.title}>요약을 읽을 수 없어요</Text>
-            <Text style={styles.muted}>QR 코드를 다시 찍어 주세요. 링크 일부가 잘리면 요약을 열 수 없어요.</Text>
+            <Text style={styles.muted}>token이 잘못되었거나 임시 결과가 만료됐어요. 행사 기기에서 QR을 다시 만들어 주세요.</Text>
           </View>
         ) : null}
         {state.status === 'ok' ? <Summary summary={state.summary} /> : null}

@@ -5,7 +5,8 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useAttached } from '../../features/adminPortal/useIsWide';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
-import { buildSummary, encodeSummary, type SummaryItem } from '../../features/eventKiosk/summary';
+import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
+import { buildSummary, type SummaryItem } from '../../features/eventKiosk/summary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
@@ -23,17 +24,28 @@ export default function SummaryScreen() {
   const evaluation = useKioskStore(state => state.evaluation);
   const favorites = useKioskStore(state => state.favorites);
   const householdType = useKioskStore(state => state.answers.householdType);
-  const [showQr, setShowQr] = useState(false);
+  const [session, setSession] = useState<
+    { status: 'idle' } | { status: 'creating' } | { status: 'ready'; link: string; expiresAt: string } | { status: 'error' }
+  >({ status: 'idle' });
 
   const summary = useMemo(
     () => (load.ok && evaluation ? buildSummary({ eventId: load.event.config.id, householdType, evaluation, favoriteIds: favorites }) : null),
     [evaluation, favorites, householdType, load],
   );
-  const link = useMemo(() => {
-    if (!summary || !attached || !load.ok) return null;
+  const showQr = session.status === 'ready';
+
+  const makeQr = async () => {
+    if (!summary || !attached || !load.ok || session.status === 'creating') return;
     const base = load.event.config.shareBaseUrl ?? (Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : null);
-    return base ? `${base}/event/take#d=${encodeSummary(summary)}` : null;
-  }, [attached, load, summary]);
+    if (!base) { setSession({ status: 'error' }); return; }
+    setSession({ status: 'creating' });
+    try {
+      const created = await createResultSession(base, summary);
+      setSession({ status: 'ready', link: created.url, expiresAt: created.expiresAt });
+    } catch {
+      setSession({ status: 'error' });
+    }
+  };
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
@@ -48,18 +60,18 @@ export default function SummaryScreen() {
   const qrPanel = (
           <View style={styles.qrPanel} testID="summary-qr-panel">
             <Text style={styles.qrTitle}>휴대폰 카메라로 찍어 주세요</Text>
-            {link ? (
+            {session.status === 'ready' ? (
               <>
                 {/* data-link: 자동 점검이 QR 이 담은 주소를 그대로 따라가 볼 수 있게. */}
-                <View style={styles.qrBox} {...({ dataSet: { link } } as object)}><QrCode value={link} size={300} testID="summary-qr-code" /></View>
-                <Text style={styles.qrHint}>요약이 휴대폰 화면에 열려요. 앱 설치가 필요 없어요.</Text>
+                <View style={styles.qrBox} {...({ dataSet: { link: session.link } } as object)}><QrCode value={session.link} size={300} testID="summary-qr-code" /></View>
+                <Text style={styles.qrHint}>요약이 휴대폰 화면에 열려요. 앱 설치가 필요 없고 6시간 뒤 만료돼요.</Text>
               </>
             ) : (
               <Notice tone="warn">이 기기에서는 휴대폰 링크를 만들 수 없어요. 행사 설정의 공유 주소를 확인해 주세요.</Notice>
             )}
             <View style={styles.privacy}>
               <MaterialIcons name="lock" size={22} color={k.colors.textMuted} />
-              <Text style={styles.muted}>링크에는 이름·생년월일·소득·자산 같은 개인 정보가 들어가지 않아요. 서버에 저장하지도 않아요.</Text>
+              <Text style={styles.muted}>QR에는 임시 결과를 찾는 무작위 token만 들어가요. 이름·생년월일·소득·자산은 임시 요약에도 저장하지 않아요.</Text>
             </View>
           </View>
   );
@@ -78,11 +90,19 @@ export default function SummaryScreen() {
         ) : (
           <>
             <KioskButton label="결과 목록" variant="ghost" icon="arrow-back" onPress={() => goBack('/event/results')} />
-            <KioskButton testID="summary-qr" label="휴대폰으로 가져가기" icon="smartphone" onPress={() => setShowQr(true)} large />
+            <KioskButton
+              testID="summary-qr"
+              label={session.status === 'creating' ? '임시 링크 만드는 중…' : '휴대폰으로 가져가기'}
+              icon="smartphone"
+              onPress={() => void makeQr()}
+              disabled={session.status === 'creating'}
+              large
+            />
           </>
         )
       }
     >
+      {session.status === 'error' ? <Notice tone="warn">임시 결과 링크를 만들지 못했어요. 행사 RC 서버가 실행 중인지 확인한 뒤 다시 시도해 주세요.</Notice> : null}
       <View style={[styles.layout, wide && styles.layoutWide]}>
         {/* 좁은 화면에서는 QR 을 맨 위에 둔다. 버튼을 누른 뒤 스크롤하지 않아도 바로 보이게. */}
         {showQr && !wide ? qrPanel : null}

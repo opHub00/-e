@@ -9,7 +9,8 @@ import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { chatPath, goBack, resetToHome } from '../../features/eventKiosk/ui/navigation';
-import { EmptyState, FavoriteToggle, OfficialScoreBlock, StageBadge, StatusBadge, WanpanBlock } from '../../features/eventKiosk/ui/resultParts';
+import { EmptyState, FavoriteToggle, OfficialScoreBlock, OfficialScoreStateBlock, StageBadge, StatusBadge, WanpanBlock } from '../../features/eventKiosk/ui/resultParts';
+import type { OfficialScoreState } from '../../features/eventKiosk/evaluate';
 import { k } from '../../features/eventKiosk/ui/theme';
 
 /** 공고 상세. 왜 이 결과인지, 왜 이 순서인지, 공고의 어디에 근거하는지. */
@@ -78,7 +79,9 @@ function Header({ outcome }: { outcome: KioskOutcome }) {
         {outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}
       </View>
       <View style={styles.scores}>
-        {outcome.officialScore ? <OfficialScoreBlock score={outcome.officialScore} /> : null}
+        {outcome.officialScore
+          ? <OfficialScoreBlock score={outcome.officialScore} />
+          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} />}
         <WanpanBlock wanpan={outcome.wanpan} />
       </View>
       <Notice>{listing.sourceNote}</Notice>

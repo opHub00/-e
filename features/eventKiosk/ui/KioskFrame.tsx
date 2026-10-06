@@ -38,7 +38,8 @@ export function KioskFrame({
   scrollKey?: string;
 }) {
   const width = useKioskWidth();
-  const gutter = width >= 900 ? 40 : k.gutter;
+  const compactTop = width < 600;
+  const gutter = width >= 900 ? 40 : compactTop ? 12 : k.gutter;
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -48,17 +49,17 @@ export function KioskFrame({
           <View style={styles.brandMark}><Text style={styles.brandMarkText}>e</Text></View>
           <Text style={styles.brand}>{brand}</Text>
         </View>
-        <View style={styles.topActions}>
+        <View style={[styles.topActions, compactTop && styles.topActionsCompact]}>
           {hideChat ? null : (
             <MotionPressable
               testID="kiosk-chat-button"
               accessibilityRole="button"
               accessibilityLabel="AI 상담 열기"
               onPress={() => router.push(chatPath(chatContextId ?? null) as never)}
-              style={[styles.topButton, styles.chatButton]}
+              style={[styles.topButton, styles.chatButton, compactTop && styles.topButtonCompact]}
             >
               <MaterialIcons name="forum" size={24} color={k.colors.onPrimary} />
-              <Text style={[styles.topButtonLabel, { color: k.colors.onPrimary }]}>AI 상담</Text>
+              {compactTop ? null : <Text style={[styles.topButtonLabel, { color: k.colors.onPrimary }]}>AI 상담</Text>}
             </MotionPressable>
           )}
           <MotionPressable
@@ -66,10 +67,10 @@ export function KioskFrame({
             accessibilityRole="button"
             accessibilityLabel="처음으로"
             onPress={() => (confirmHome ? setConfirming(true) : resetToHome())}
-            style={styles.topButton}
+            style={[styles.topButton, compactTop && styles.topButtonCompact]}
           >
             <MaterialIcons name="home" size={24} color={k.colors.primary} />
-            <Text style={styles.topButtonLabel}>처음으로</Text>
+            {compactTop ? null : <Text style={styles.topButtonLabel}>처음으로</Text>}
           </MotionPressable>
         </View>
       </View>
@@ -83,7 +84,7 @@ export function KioskFrame({
         <View style={styles.inner}>{children}</View>
       </ScrollView>
       {footer ? (
-        <View style={[styles.footer, { paddingHorizontal: gutter }]}>
+        <View testID="kiosk-footer" style={[styles.footer, { paddingHorizontal: gutter }]}>
           <View style={[styles.inner, styles.footerInner]}>{footer}</View>
         </View>
       ) : null}
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
   brandMarkText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 26 },
   brand: { ...k.type.section, color: k.colors.primary },
   topActions: { flexDirection: 'row', gap: 12 },
+  topActionsCompact: { gap: 8 },
   topButton: {
     minHeight: 56,
     paddingHorizontal: 20,
@@ -165,6 +167,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chatButton: { backgroundColor: k.colors.primary },
+  topButtonCompact: { width: 56, paddingHorizontal: 0, justifyContent: 'center' },
   topButtonLabel: { ...k.type.bodyStrong, color: k.colors.primary },
   progress: { paddingVertical: 14, backgroundColor: k.colors.surface, borderBottomWidth: 1, borderBottomColor: k.colors.surfaceHigh },
   progressLabel: { ...k.type.bodyStrong, color: k.colors.textMuted },

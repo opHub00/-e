@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T15:07:34.267Z",
-  "baseUrl": "http://127.0.0.1:4174",
+  "generatedAt": "2026-10-08T07:37:21.303Z",
+  "baseUrl": "http://127.0.0.1:4173",
   "browsers": [
     "Chromium"
   ],
@@ -20,14 +20,13 @@
       "adaptiveQuestions": [
         "eligibleResident",
         "currentProgramTenant",
-        "collegeStudent",
-        "jobSeekerWithinTwoYears",
+        "youthStudyStatus",
         "benefitCategory",
         "vehicleValueKrw",
         "parentMonthlyIncomeKrw",
         "parentVehicleValueKrw"
       ],
-      "analysisMs": 6162,
+      "analysisMs": 6201,
       "qrTokenOnly": true
     },
     {
@@ -48,7 +47,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4050,
+      "analysisMs": 4029,
       "qrTokenOnly": true
     },
     {
@@ -69,7 +68,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4013,
+      "analysisMs": 4034,
       "qrTokenOnly": true
     },
     {
@@ -90,7 +89,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4015,
+      "analysisMs": 4074,
       "qrTokenOnly": true
     },
     {
@@ -111,7 +110,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4030,
+      "analysisMs": 4038,
       "qrTokenOnly": true
     },
     {
@@ -132,7 +131,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4006,
+      "analysisMs": 4057,
       "qrTokenOnly": true
     },
     {
@@ -152,7 +151,7 @@
         "currentProgramTenant",
         "benefitCategory"
       ],
-      "analysisMs": 3977,
+      "analysisMs": 3971,
       "qrTokenOnly": true
     },
     {
@@ -168,7 +167,7 @@
         "difficult": 9
       },
       "adaptiveQuestions": [],
-      "analysisMs": 1940,
+      "analysisMs": 1935,
       "qrTokenOnly": true
     }
   ],
@@ -178,8 +177,9 @@
     "refreshPrivacy": "PASS",
     "reducedViewportKeyboardCta": "PASS",
     "idleReset": "PASS",
-    "adaptiveBackNavigation": "PASS"
+    "adaptiveBackNavigation": "PASS",
+    "resetVisitorIsolation": "PASS"
   },
-  "maxAnalysisMs": 6162,
+  "maxAnalysisMs": 6201,
   "result": "PASS"
 }

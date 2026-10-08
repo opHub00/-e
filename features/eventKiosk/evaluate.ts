@@ -5,16 +5,13 @@ import { assessFrozenDataset, type BatchAssessment } from './frozen/engine/batch
 import { toUserProfile } from './engineInput.ts';
 import type { EventListing, LoadedEvent } from './eventConfig.ts';
 import type { KioskAnswers } from './model.ts';
+import { BUCKET_LABELS, WANPAN_LEVEL_LABELS, userFacingFactLabel, userFacingLabels } from './presentation.ts';
 
 export type KioskStatus = 'COMPLETE' | 'NEEDS_USER_INPUT' | 'INELIGIBLE' | 'UNAVAILABLE';
 export type KioskUnavailableReason = 'NO_ACTIVE_RULE_SET' | 'MISSING_ANNOUNCEMENT_FACTS' | 'ASSESSMENT_FAILED';
 export type KioskBucket = 'eligible' | 'review' | 'difficult';
 
-export const BUCKET_LABELS: Record<KioskBucket, string> = {
-  eligible: '신청 가능',
-  review: '추가 확인 필요',
-  difficult: '신청 어려움',
-};
+export { BUCKET_LABELS, WANPAN_LEVEL_LABELS } from './presentation.ts';
 
 export type OfficialScore = {
   total: number;
@@ -32,13 +29,6 @@ export type WanpanIndicator = {
   value: number;
   level: WanpanLevel;
   factors: { label: string; effect: number }[];
-};
-
-export const WANPAN_LEVEL_LABELS: Record<WanpanLevel, string> = {
-  high: '적극 검토',
-  medium: '검토 가능',
-  low: '조건 확인 필요',
-  none: '신청 어려움',
 };
 
 export type KioskEvidence = Pick<Evidence, 'id' | 'label' | 'section' | 'page' | 'sourceUrl'> & {
@@ -103,12 +93,12 @@ export function wanpanIndicator(input: { status: KioskStatus; score: number; bre
   return {
     value: input.status === 'INELIGIBLE' || input.status === 'UNAVAILABLE' ? 0 : input.score,
     level: wanpanLevel(input.status, input.score),
-    factors: (input.breakdown ?? []).map(item => ({ label: item.explanation, effect: item.points })),
+    factors: (input.breakdown ?? []).map(item => ({ label: userFacingFactLabel(item.explanation), effect: item.points })),
   };
 }
 
 const unique = (items: string[]): string[] => [...new Set(items.filter(Boolean))];
-export const missingCaution = (label: string): string => `확인 필요 · ${label}`;
+export const missingCaution = (label: string): string => `확인 필요 · ${userFacingFactLabel(label)}`;
 
 function officialScoreOf(score: DomainOfficialScore): { score: OfficialScore | null; state: OfficialScoreState } {
   if (score.status === 'AVAILABLE') {
@@ -116,24 +106,24 @@ function officialScoreOf(score: DomainOfficialScore): { score: OfficialScore | n
       score: {
         total: score.total,
         max: score.max,
-        items: score.breakdown.map(item => ({ label: item.label, points: item.points, max: item.max })),
+        items: score.breakdown.map(item => ({ label: userFacingFactLabel(item.label), points: item.points, max: item.max })),
       },
       state: { status: 'AVAILABLE', reason: null },
     };
   }
-  return { score: null, state: { status: score.status, reason: score.reason } };
+  return { score: null, state: { status: score.status, reason: userFacingFactLabel(score.reason) } };
 }
 
 function stageOf(result: EvaluationResult): Pick<KioskOutcome, 'stage' | 'stageLabel' | 'stageExplanation'> {
   if (result.priority.status === 'DETERMINED') {
     return {
       stage: result.priority.rank === 1 ? 'PRIORITY' : 'GENERAL',
-      stageLabel: result.priority.label,
-      stageExplanation: `${result.priority.rank}순위 · ${result.priority.code}`,
+      stageLabel: userFacingFactLabel(result.priority.label),
+      stageExplanation: `${result.priority.rank}순위로 판정되었습니다.`,
     };
   }
-  if (result.selectionMethod === 'LOTTERY') return { stage: 'LOTTERY', stageLabel: '추첨', stageExplanation: result.priority.reason };
-  return { stage: null, stageLabel: null, stageExplanation: result.priority.reason };
+  if (result.selectionMethod === 'LOTTERY') return { stage: 'LOTTERY', stageLabel: '추첨', stageExplanation: userFacingFactLabel(result.priority.reason) };
+  return { stage: null, stageLabel: null, stageExplanation: userFacingFactLabel(result.priority.reason) };
 }
 
 function evidenceFor(event: LoadedEvent, result: EvaluationResult): KioskEvidence[] {
@@ -142,7 +132,7 @@ function evidenceFor(event: LoadedEvent, result: EvaluationResult): KioskEvidenc
   const wanted = new Set(result.evidenceIds);
   return rulePackage.evidence.filter(item => wanted.has(item.id)).map(item => ({
     id: item.id,
-    label: item.label,
+    label: userFacingFactLabel(item.label),
     section: item.section,
     ...(item.page === undefined ? {} : { page: item.page }),
     ...(item.sourceUrl === undefined ? {} : { sourceUrl: item.sourceUrl }),
@@ -156,10 +146,11 @@ function outcomeFromResult(event: LoadedEvent, result: EvaluationResult): Omit<K
   const { status, reason } = statusFromResult(result);
   const official = officialScoreOf(result.officialScore);
   const stage = stageOf(result);
-  const satisfied = unique(result.matchedRules.map(rule => rule.label));
-  const failed = unique(result.failedRules.filter(rule => rule.outcome === 'FAIL').map(rule => rule.label));
-  const review = unique(result.failedRules.filter(rule => rule.outcome === 'REVIEW').map(rule => `${rule.label}(증빙으로 확인)`));
-  const missing = unique([...result.missingInformation, ...review]);
+  const satisfied = userFacingLabels(result.matchedRules.map(rule => rule.label));
+  const failed = userFacingLabels(result.failedRules.filter(rule => rule.outcome === 'FAIL').map(rule => rule.label));
+  const review = userFacingLabels(result.failedRules.filter(rule => rule.outcome === 'REVIEW').map(rule => rule.label))
+    .map(label => `${label}(증빙으로 확인)`);
+  const missing = unique([...userFacingLabels(result.missingInformation), ...review]);
   return {
     id: result.evaluationId,
     listing,
@@ -178,7 +169,7 @@ function outcomeFromResult(event: LoadedEvent, result: EvaluationResult): Omit<K
     satisfied,
     failed,
     missing,
-    warnings: unique(result.warnings),
+    warnings: userFacingLabels(result.warnings),
     requiredDocuments: [],
     evidence: evidenceFor(event, result),
     result,

@@ -173,8 +173,12 @@ export function toUserProfile(answers: KioskAnswers, referenceDate = new Date())
       parentTotalAssetsKrw: numberKnowledge(answers.household.parentAssets),
       eligibleResident: boolKnowledge(answers.adaptive.eligibleResident),
       currentProgramTenant: boolKnowledge(answers.adaptive.currentProgramTenant),
-      collegeStudent: boolKnowledge(answers.adaptive.collegeStudent),
-      jobSeekerWithinTwoYears: boolKnowledge(answers.adaptive.jobSeekerWithinTwoYears),
+      collegeStudent: answers.adaptive.youthStudyStatus === null
+        ? boolKnowledge(answers.adaptive.collegeStudent)
+        : known(answers.adaptive.youthStudyStatus === 'COLLEGE_STUDENT' || answers.adaptive.youthStudyStatus === 'BOTH'),
+      jobSeekerWithinTwoYears: answers.adaptive.youthStudyStatus === null
+        ? boolKnowledge(answers.adaptive.jobSeekerWithinTwoYears)
+        : known(answers.adaptive.youthStudyStatus === 'JOB_SEEKER' || answers.adaptive.youthStudyStatus === 'BOTH'),
       benefitCategory: answers.adaptive.benefitCategory === null ? unknown() : known(answers.adaptive.benefitCategory),
       parentMonthlyIncomeKrw: numberKnowledge(answers.adaptive.parentMonthlyIncomeKrw),
       parentVehicleValueKrw: numberKnowledge(answers.adaptive.parentVehicleValueKrw),

@@ -11,17 +11,14 @@ import {
   type OfficialScoreState,
   type WanpanIndicator,
 } from '../evaluate';
+import { kioskStatusLabel, officialScoreStatusLabel } from '../presentation';
 import { useKioskStore } from '../useKioskStore';
 import { KioskButton } from './controls';
 import { chatPath, listingPath } from './navigation';
 import { bucketTone, k } from './theme';
 
 /** UNAVAILABLE 은 이유에 따라 다르게 읽는다. 규칙이 없으면 '분석 전', 공고·증빙 확인이 남았으면 '추가 확인 필요'. */
-const statusText = (outcome: KioskOutcome): string =>
-  outcome.status === 'COMPLETE' ? '신청 가능'
-    : outcome.status === 'INELIGIBLE' ? '신청 어려움'
-    : outcome.unavailableReason === 'NO_ACTIVE_RULE_SET' ? '분석 전 공고'
-    : '추가 확인 필요';
+const statusText = (outcome: KioskOutcome): string => kioskStatusLabel(outcome.status, outcome.unavailableReason);
 
 /** 대시보드 맨 위 세 칸. 멀리서도 숫자가 먼저 보이게. */
 export function BucketTiles({ counts, selected, onSelect }: {
@@ -97,18 +94,18 @@ export function OfficialScoreBlock({ score, compact }: { score: OfficialScore; c
 
 /** 공식 배점이 없거나 아직 계산할 수 없을 때 0점으로 보이지 않게 상태를 그대로 표시한다. */
 export function OfficialScoreStateBlock({ state, compact }: { state: Exclude<OfficialScoreState, { status: 'AVAILABLE' }>; compact?: boolean }) {
-  const unavailable = state.status === 'NOT_APPLICABLE';
+  const label = officialScoreStatusLabel(state.status);
   return (
     <View
       style={[styles.official, compact && styles.blockCompact]}
       testID={`official-score-${state.status.toLowerCase()}`}
-      accessibilityLabel={unavailable ? '공식 배점 해당 없음' : '공식 배점 계산 정보 확인 필요'}
+      accessibilityLabel={`공식 배점 ${label}`}
     >
       <View style={styles.blockHead}>
         <MaterialIcons name="gavel" size={20} color={k.colors.text} />
         <Text style={styles.blockTitle}>공식 배점</Text>
       </View>
-      <Text style={styles.officialState}>{unavailable ? '해당 없음' : '정보 확인 필요'}</Text>
+      <Text style={styles.officialState}>{label}</Text>
       {compact ? null : <Text style={styles.blockNote}>{state.reason}</Text>}
     </View>
   );

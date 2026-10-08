@@ -1,13 +1,13 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { createReadStream, existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve } from 'node:path';
+import { InMemoryResultSessionStore, RESULT_SESSION_TTL_MS, isValidResultSummary } from './event-result-session-store.mjs';
 
 const root = resolve(process.argv[2] ?? 'dist');
 const port = Number(process.env.EVENT_RC_PORT ?? 4173);
-const ttlMs = 6 * 60 * 60 * 1000;
-const sessions = new Map();
+const sessions = new InMemoryResultSessionStore({ ttlMs: RESULT_SESSION_TTL_MS });
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 
 function json(response, status, body) {
@@ -26,12 +26,6 @@ async function body(request) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-function validSummary(value) {
-  if (!value || value.v !== 1 || typeof value.event !== 'string' || typeof value.date !== 'string') return false;
-  const raw = JSON.stringify(value);
-  return raw.length <= 48_000 && !/(displayName|birthDate|monthlyIncome|totalAssets|profileId|personId)/i.test(raw);
-}
-
 function originOf(request) {
   const host = request.headers.host;
   if (!host || /[\r\n]/.test(host)) throw new Error('INVALID_HOST');
@@ -41,22 +35,16 @@ function originOf(request) {
 async function api(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/event-api/result-sessions') {
     const payload = await body(request);
-    if (!validSummary(payload.summary)) return json(response, 400, { error: 'INVALID_SUMMARY' });
-    const token = randomBytes(32).toString('hex');
-    const createdAt = new Date();
-    const expiresAt = new Date(createdAt.getTime() + ttlMs);
-    sessions.set(token, { summary: structuredClone(payload.summary), expiresAt: expiresAt.getTime() });
-    return json(response, 201, { token, expiresAt: expiresAt.toISOString(), url: `${originOf(request)}/event/take?token=${token}` });
+    if (!isValidResultSummary(payload.summary)) return json(response, 400, { error: 'INVALID_SUMMARY' });
+    const session = sessions.create(payload.summary);
+    return json(response, 201, { ...session, url: `${originOf(request)}/event/take?token=${session.token}` });
   }
   const match = url.pathname.match(/^\/event-api\/result-sessions\/([a-f0-9]{64})$/);
   if (request.method === 'GET' && match) {
-    const record = sessions.get(match[1]);
-    if (!record) return json(response, 404, { error: 'NOT_FOUND' });
-    if (record.expiresAt <= Date.now()) {
-      sessions.delete(match[1]);
-      return json(response, 410, { error: 'EXPIRED' });
-    }
-    return json(response, 200, { summary: record.summary, expiresAt: new Date(record.expiresAt).toISOString() });
+    const record = sessions.read(match[1]);
+    if (record.status === 'expired') return json(response, 410, { error: 'EXPIRED' });
+    if (record.status !== 'ok') return json(response, 404, { error: 'NOT_FOUND' });
+    return json(response, 200, { summary: record.summary, expiresAt: record.expiresAt });
   }
   return false;
 }

@@ -15,14 +15,14 @@ const status = value => `${value.COMPLETE}/${value.NEEDS_USER_INPUT}/${value.INE
 const inventoryRows = inventory.map(row => `| \`${row.factKey}\` | ${row.dataType} | ${row.requirement} | ${row.combinations.join('<br>')} | ${row.kioskAnswers}/${row.uiInput} | ${row.scope} | ${row.classification} | ${row.question} |`).join('\n');
 const personaRows = personas.map(row => `| ${row.label} | ${row.adaptiveQuestionCount} | ${row.questionIds.map(id => `\`${id}\``).join(', ') || '-'} | ${status(row.before)} | ${status(row.after)} |`).join('\n');
 
-const report = `# 제주 행사 Demo Phase 4 보고서
+const report = `# 제주 행사 Demo 토요일 시연 안정화 보고서
 
 ## 결론
 
-**Phase 4 GO** — Rule Package와 평가 기준을 완화하지 않고 adaptive UI 입력 coverage를 확장했다. 7개 유효 persona가 모두 최소 1개 이상의 COMPLETE 결과를 만들고, 명확한 미달 persona는 COMPLETE 0 / INELIGIBLE 9를 유지한다.
+**행사 시연 GO** — Rule Package와 평가 기준을 완화하지 않고 질문 중복과 사용자 표시 계약을 안정화했다. 7개 유효 persona가 모두 최소 1개 이상의 COMPLETE 결과를 만들고, 명확한 미달 persona는 COMPLETE 0 / INELIGIBLE 9를 유지한다.
 
-- branch: \`integration/jeju-event-phase4\`
-- base: RC1 \`110f863\`
+- branch: \`ui/jeju-event-figma-v1\`
+- base: Figma v1 \`2f92d1b\`
 - dataset: \`${event.dataset.eventId}\` / \`${event.dataset.datasetVersion}\`
 - fingerprint: \`${event.dataset.fingerprint}\`
 - production DB, Supabase, production branch, deployment 변경 없음
@@ -91,13 +91,14 @@ ${unresolved.map(fact => `- \`${fact}\``).join('\n')}
 ## Regression / browser
 
 - typecheck: PASS
-- event domain/integration: 18/18 PASS
+- event domain/integration/session/presentation: 29/29 PASS
 - assessment regression: PASS
 - core domain regression: PASS
 - production fail-closed web export: PASS
 - Chromium 8 persona adaptive full flow: PASS
 - desktop 1440×900, iPad portrait 768×1024, iPad landscape 1024×768, mobile QR 390×844: PASS
-- QR opaque token, reset, refresh privacy, invalid token, idle reset, reduced-height CTA, adaptive back-navigation 답변 유지: PASS
+- QR opaque token, reset, refresh privacy, invalid/expired token, idle reset, visitor isolation, reduced-height CTA, adaptive back-navigation 답변 유지: PASS
+- dashboard/mobile QR raw domain key 노출 검사: PASS
 - browser result: ${browser.result}
 
 ## 전체 Rule fact inventory

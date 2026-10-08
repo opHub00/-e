@@ -1,6 +1,7 @@
 import type { EvaluationResult } from './frozen/domain/evaluation.ts';
 import type { Expression, FrozenListingDataset, SupplyRuleSet } from './frozen/domain/rules.ts';
 import type { AdaptiveInfo, KioskAnswers } from './model.ts';
+import { userFacingFactLabel } from './presentation.ts';
 
 export type FactClassification = 'CORE' | 'CONDITIONAL' | 'EVIDENCE_ONLY';
 export type FactScope = 'APPLICANT' | 'SPOUSE' | 'HOUSEHOLD';
@@ -88,7 +89,7 @@ const QUESTION_TEXT: Record<string, string> = {
   'event.applicantParentTotalAssetsKrw': '본인과 부모님의 총자산 합계는 얼마인가요?',
   'event.benefitCategory': '현재 해당하는 복지급여 또는 지원 자격이 있나요?',
   'event.collegeStudent': '현재 대학생이거나 입학·복학 예정인가요?',
-  'event.currentProgramTenant': '현재 동일 지자체 청년매입임대에 계약·거주 중인가요?',
+  'event.currentProgramTenant': '지원하려는 매입임대 유형에 현재 계약 중이거나 거주 중인가요?',
   'event.eligibleResident': '국적 또는 외국인등록 기준상 신청 가능한 거주자인가요?',
   'event.generalRentalPriorityCategory': '일반 매입임대의 공식 우선순위 증빙이 있나요?',
   'event.isHousingBenefitRecipient': '현재 주거급여 수급자인가요?',
@@ -127,6 +128,16 @@ const QUESTION_DEFINITIONS: Record<keyof AdaptiveInfo, Omit<AdaptiveQuestion, 's
   currentProgramTenant: { id: 'currentProgramTenant', kind: 'BOOLEAN', title: QUESTION_TEXT['event.currentProgramTenant'], hint: '현재 계약 중이거나 거주 중인 경우를 포함합니다.' },
   collegeStudent: { id: 'collegeStudent', kind: 'BOOLEAN', title: QUESTION_TEXT['event.collegeStudent'], hint: '재학, 입학 예정, 복학 예정 여부를 확인해 주세요.' },
   jobSeekerWithinTwoYears: { id: 'jobSeekerWithinTwoYears', kind: 'BOOLEAN', title: QUESTION_TEXT['event.jobSeekerWithinTwoYears'], hint: '졸업 또는 중퇴한 날부터 공고일까지의 기간입니다.' },
+  youthStudyStatus: {
+    id: 'youthStudyStatus', kind: 'SELECT', title: '현재 학업·취업준비 상태는 어디에 해당하나요?', hint: '대학생 자격과 졸업·중퇴 후 2년 이내 취업준비생 자격을 한 번에 확인해요.',
+    options: [
+      { value: 'COLLEGE_STUDENT', label: '대학생·입학·복학 예정' },
+      { value: 'JOB_SEEKER', label: '졸업·중퇴 후 2년 이내 취업준비생' },
+      { value: 'BOTH', label: '두 조건 모두 해당' },
+      { value: 'NEITHER', label: '둘 다 해당 없음' },
+      { value: null, label: '잘 모르겠어요' },
+    ],
+  },
   benefitCategory: {
     id: 'benefitCategory', kind: 'SELECT', title: QUESTION_TEXT['event.benefitCategory'], hint: '해당하는 가장 구체적인 항목 하나를 골라 주세요.',
     options: [
@@ -162,8 +173,8 @@ const FACT_TO_ADAPTIVE: Record<string, ReadonlyArray<keyof AdaptiveInfo>> = {
   'household.maxVehicleValueKrw': ['vehicleValueKrw'],
   'event.eligibleResident': ['eligibleResident'],
   'event.currentProgramTenant': ['currentProgramTenant'],
-  'event.collegeStudent': ['collegeStudent'],
-  'event.jobSeekerWithinTwoYears': ['jobSeekerWithinTwoYears'],
+  'event.collegeStudent': ['youthStudyStatus'],
+  'event.jobSeekerWithinTwoYears': ['youthStudyStatus'],
   'event.benefitCategory': ['benefitCategory'],
   'event.isHousingBenefitRecipient': ['benefitCategory'],
   'event.workHistoryMonths': ['workHistoryMonths'],
@@ -241,14 +252,14 @@ export function buildRuleFactInventory(dataset: FrozenListingDataset): FactInven
       uiInput: coverage,
       scope: scopeOf(factKey),
       classification: EVIDENCE_ONLY_FACTS.has(factKey) ? 'EVIDENCE_ONLY' : factKey.startsWith('event.') || factKey.startsWith('score.') ? 'CONDITIONAL' : 'CORE',
-      question: QUESTION_TEXT[factKey] ?? `${factKey} 값을 확인해 주세요.`,
+      question: QUESTION_TEXT[factKey] ?? `${userFacingFactLabel(factKey)} 정보를 확인해 주세요.`,
     };
   });
 }
 
 function adaptiveValueKnown(answers: KioskAnswers, id: keyof AdaptiveInfo): boolean {
   const value = answers.adaptive[id];
-  return value !== null;
+  return value !== null && value !== undefined;
 }
 
 export function createAdaptiveQuestionPlan(
@@ -281,11 +292,17 @@ export function createAdaptiveQuestionPlan(
     }
   }
 
+  const order: ReadonlyArray<keyof AdaptiveInfo> = [
+    'eligibleResident', 'currentProgramTenant', 'youthStudyStatus',
+    'benefitCategory', 'workHistoryMonths', 'applicantTotalAssetsKrw', 'vehicleValueKrw',
+    'parentMonthlyIncomeKrw', 'parentVehicleValueKrw',
+  ];
+  const priority = new Map(order.map((id, index) => [id, index]));
   const questions = [...byQuestion.entries()].map(([id, usage]) => ({
     ...QUESTION_DEFINITIONS[id],
     sourceFacts: [...usage.facts].sort(),
     combinations: [...usage.combinations].sort(),
-  }));
+  })).sort((left, right) => (priority.get(left.id) ?? 999) - (priority.get(right.id) ?? 999));
   return { questions, evidenceOnlyFacts: [...evidenceOnlyFacts].sort(), excludedIneligible };
 }
 

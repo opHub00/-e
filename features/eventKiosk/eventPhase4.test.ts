@@ -8,7 +8,7 @@ import { buildHouseholdFacts } from './frozen/engine/facts.ts';
 import { readKnown } from './frozen/domain/profile.ts';
 import { evaluateEvent } from './evaluate.ts';
 import { evaluatePhase4Personas, mergeAdaptivePlan, phase4Personas } from './phase4Personas.ts';
-import { emptyAnswers } from './model.ts';
+import { emptyAnswers, type KioskAnswers } from './model.ts';
 
 const event = loadEvent(activeEventDataset);
 const REF = new Date('2026-10-29T09:00:00+09:00');
@@ -36,10 +36,15 @@ test('conditional questions are generated only for supplies still reviewable by 
   const couple = phase4Personas.find(item => item.id === 'NEWLYWED_COUPLE')!;
   const youngPlan = createAdaptiveQuestionPlan(evaluateEvent(event, young.initialAnswers, REF).assessment.results, young.initialAnswers);
   const couplePlan = createAdaptiveQuestionPlan(evaluateEvent(event, couple.initialAnswers, REF).assessment.results, couple.initialAnswers);
-  assert.ok(youngPlan.questions.some(question => question.id === 'collegeStudent'));
-  assert.ok(youngPlan.questions.some(question => question.id === 'jobSeekerWithinTwoYears'));
-  assert.ok(!couplePlan.questions.some(question => question.id === 'collegeStudent'));
-  assert.ok(!couplePlan.questions.some(question => question.id === 'jobSeekerWithinTwoYears'));
+  const youthStatus = youngPlan.questions.find(question => question.id === 'youthStudyStatus');
+  assert.ok(youthStatus);
+  assert.deepEqual(youthStatus.sourceFacts, ['event.collegeStudent', 'event.jobSeekerWithinTwoYears']);
+  assert.ok(!couplePlan.questions.some(question => question.id === 'youthStudyStatus'));
+
+  const legacyAnswers = structuredClone(young.initialAnswers) as KioskAnswers;
+  delete (legacyAnswers.adaptive as Partial<KioskAnswers['adaptive']>).youthStudyStatus;
+  const legacyPlan = createAdaptiveQuestionPlan(evaluateEvent(event, legacyAnswers, REF).assessment.results, legacyAnswers);
+  assert.ok(legacyPlan.questions.some(question => question.id === 'youthStudyStatus'));
 });
 
 test('already-ineligible listing/supply combinations never generate adaptive questions', () => {
@@ -56,6 +61,8 @@ test('adaptive answers map to Applicant and Household without fabricating Spouse
   const youngProfile = toUserProfile(mergeAdaptivePlan(young, createAdaptiveQuestionPlan(youngInitial.assessment.results, young.initialAnswers)), REF);
   assert.equal(readKnown(youngProfile.applicant.financial.totalAssetsKrw), 60_000_000);
   assert.equal(readKnown(youngProfile.applicant.financial.vehicleValueKrw!), 15_000_000);
+  assert.equal(readKnown(youngProfile.eventQualifications!.collegeStudent!), false);
+  assert.equal(readKnown(youngProfile.eventQualifications!.jobSeekerWithinTwoYears!), false);
 
   const couple = phase4Personas.find(item => item.id === 'NEWLYWED_COUPLE')!;
   const coupleInitial = evaluateEvent(event, couple.initialAnswers, REF);

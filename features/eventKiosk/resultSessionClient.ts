@@ -12,12 +12,13 @@ export function isOpaqueResultToken(value: string): boolean {
   return TOKEN.test(value);
 }
 
-export function assertOpaqueResultUrl(value: string): void {
+export function assertOpaqueResultUrl(value: string, expectedToken?: string): void {
   const url = new URL(value);
   const token = url.searchParams.get('token') ?? '';
   if (url.hash || [...url.searchParams.keys()].some(key => key !== 'token') || !isOpaqueResultToken(token)) {
     throw new Error('RESULT_SESSION_URL_INVALID');
   }
+  if (expectedToken && token !== expectedToken) throw new Error('RESULT_SESSION_URL_TOKEN_MISMATCH');
   if (url.pathname !== '/event/take') throw new Error('RESULT_SESSION_URL_INVALID');
 }
 
@@ -31,7 +32,8 @@ export async function createResultSession(baseUrl: string, summary: ResultSummar
   if (!response.ok) throw new Error(`RESULT_SESSION_CREATE_FAILED:${response.status}`);
   const body = await response.json() as ResultSessionResponse;
   if (!isOpaqueResultToken(body.token)) throw new Error('RESULT_SESSION_TOKEN_INVALID');
-  assertOpaqueResultUrl(body.url);
+  if (!Number.isFinite(Date.parse(body.expiresAt))) throw new Error('RESULT_SESSION_EXPIRY_INVALID');
+  assertOpaqueResultUrl(body.url, body.token);
   return body;
 }
 

@@ -153,6 +153,24 @@ test('QR session URL contains only an opaque token and the stored summary has no
   assert.equal(await readResultSession('http://localhost:4173', 'bad-token', fakeFetch as typeof fetch), null);
 });
 
+test('QR session client rejects a response whose URL does not match its opaque token', async () => {
+  const value = answers('single');
+  const evaluation = evaluateEvent(event, value, REF);
+  const summary = buildSummary({ eventId: event.config.id, householdType: value.householdType, evaluation, favoriteIds: [] });
+  const token = 'a'.repeat(64);
+  const otherToken = 'b'.repeat(64);
+  const fakeFetch = async () => new Response(JSON.stringify({ token, expiresAt: '2026-10-29T15:00:00.000Z', url: `http://localhost:4173/event/take?token=${otherToken}` }), { status: 201, headers: { 'content-type': 'application/json' } });
+  await assert.rejects(createResultSession('http://localhost:4173', summary, fakeFetch as typeof fetch), /RESULT_SESSION_URL_TOKEN_MISMATCH/);
+});
+
+test('QR session client treats missing and expired sessions as invalid', async () => {
+  const token = 'a'.repeat(64);
+  for (const status of [404, 410]) {
+    const fakeFetch = async () => new Response(JSON.stringify({ error: status === 410 ? 'EXPIRED' : 'NOT_FOUND' }), { status });
+    assert.equal(await readResultSession('http://localhost:4173', token, fakeFetch as typeof fetch), null);
+  }
+});
+
 test('reset removes answers, results, favorites and AI context from memory', async () => {
   const { useKioskStore } = await import('./useKioskStore.ts');
   useKioskStore.getState().reset();

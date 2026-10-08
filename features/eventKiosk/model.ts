@@ -89,6 +89,7 @@ export type BenefitCategory =
   | 'SUPPORTED_SINGLE_PARENT';
 
 export type GeneralRentalPriorityCategory = 'NONE' | 'PRIORITY_1' | 'UDO_PRIORITY_2';
+export type YouthStudyStatus = 'COLLEGE_STUDENT' | 'JOB_SEEKER' | 'BOTH' | 'NEITHER';
 
 /** 1차 판정 뒤 실제로 남은 Rule Package fact에만 답하는 값. */
 export type AdaptiveInfo = {
@@ -96,6 +97,8 @@ export type AdaptiveInfo = {
   currentProgramTenant: YesNo;
   collegeStudent: YesNo;
   jobSeekerWithinTwoYears: YesNo;
+  /** 두 개의 상호 연관된 청년 자격 질문을 한 번에 받는다. 기존 boolean 필드는 저장 호환용으로 유지한다. */
+  youthStudyStatus: YouthStudyStatus | null;
   benefitCategory: BenefitCategory | null;
   vehicleValueKrw: number | null;
   applicantTotalAssetsKrw: number | null;
@@ -179,6 +182,7 @@ export const emptyAnswers = (): KioskAnswers => ({
     currentProgramTenant: null,
     collegeStudent: null,
     jobSeekerWithinTwoYears: null,
+    youthStudyStatus: null,
     benefitCategory: null,
     vehicleValueKrw: null,
     applicantTotalAssetsKrw: null,

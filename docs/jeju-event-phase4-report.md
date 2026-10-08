@@ -1,11 +1,11 @@
-# 제주 행사 Demo Phase 4 보고서
+# 제주 행사 Demo 토요일 시연 안정화 보고서
 
 ## 결론
 
-**Phase 4 GO** — Rule Package와 평가 기준을 완화하지 않고 adaptive UI 입력 coverage를 확장했다. 7개 유효 persona가 모두 최소 1개 이상의 COMPLETE 결과를 만들고, 명확한 미달 persona는 COMPLETE 0 / INELIGIBLE 9를 유지한다.
+**행사 시연 GO** — Rule Package와 평가 기준을 완화하지 않고 질문 중복과 사용자 표시 계약을 안정화했다. 7개 유효 persona가 모두 최소 1개 이상의 COMPLETE 결과를 만들고, 명확한 미달 persona는 COMPLETE 0 / INELIGIBLE 9를 유지한다.
 
-- branch: `integration/jeju-event-phase4`
-- base: RC1 `110f863`
+- branch: `ui/jeju-event-figma-v1`
+- base: Figma v1 `2f92d1b`
 - dataset: `wanpan-jeju-event-2026-10` / `2026.10.0-rc1`
 - fingerprint: `sha256:51aeeb22999594de30b2d032e2c885f3395cf18fb9dea2f43dacbb156fa0f5c8`
 - production DB, Supabase, production branch, deployment 변경 없음
@@ -63,13 +63,13 @@ Evidence-only는 질문으로 COMPLETE를 강제하지 않고 서류 확인 필�
 
 | Persona | 질문 수 | 질문 ID | Before | After |
 |---|---:|---|---:|---:|
-| 20대 미혼 청년 | 8 | `vehicleValueKrw`, `collegeStudent`, `jobSeekerWithinTwoYears`, `benefitCategory`, `eligibleResident`, `currentProgramTenant`, `parentMonthlyIncomeKrw`, `parentVehicleValueKrw` | 0/5/4/0 | 3/0/6/0 |
-| 30대 예비신혼부부 | 4 | `vehicleValueKrw`, `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/4/5/0 | 3/0/6/0 |
-| 30대 신혼부부 | 4 | `vehicleValueKrw`, `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/4/5/0 | 3/0/6/0 |
-| 신혼 + 자녀 1명 | 4 | `vehicleValueKrw`, `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/4/5/0 | 3/0/6/0 |
-| 생애최초 조건의 부부 | 4 | `vehicleValueKrw`, `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/4/5/0 | 3/0/6/0 |
-| 다자녀 가구 | 4 | `vehicleValueKrw`, `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/5/4/0 | 4/0/5/0 |
-| 일반 무주택 가구 | 3 | `benefitCategory`, `eligibleResident`, `currentProgramTenant` | 0/2/7/0 | 1/0/8/0 |
+| 20대 미혼 청년 | 7 | `eligibleResident`, `currentProgramTenant`, `youthStudyStatus`, `benefitCategory`, `vehicleValueKrw`, `parentMonthlyIncomeKrw`, `parentVehicleValueKrw` | 0/5/4/0 | 3/0/6/0 |
+| 30대 예비신혼부부 | 4 | `eligibleResident`, `currentProgramTenant`, `benefitCategory`, `vehicleValueKrw` | 0/4/5/0 | 3/0/6/0 |
+| 30대 신혼부부 | 4 | `eligibleResident`, `currentProgramTenant`, `benefitCategory`, `vehicleValueKrw` | 0/4/5/0 | 3/0/6/0 |
+| 신혼 + 자녀 1명 | 4 | `eligibleResident`, `currentProgramTenant`, `benefitCategory`, `vehicleValueKrw` | 0/4/5/0 | 3/0/6/0 |
+| 생애최초 조건의 부부 | 4 | `eligibleResident`, `currentProgramTenant`, `benefitCategory`, `vehicleValueKrw` | 0/4/5/0 | 3/0/6/0 |
+| 다자녀 가구 | 4 | `eligibleResident`, `currentProgramTenant`, `benefitCategory`, `vehicleValueKrw` | 0/5/4/0 | 4/0/5/0 |
+| 일반 무주택 가구 | 3 | `eligibleResident`, `currentProgramTenant`, `benefitCategory` | 0/2/7/0 | 1/0/8/0 |
 | 명확한 자격 미달 가구 | 0 | - | 0/0/9/0 | 0/0/9/0 |
 
 ## 남은 evidence-only facts
@@ -87,13 +87,14 @@ Evidence-only는 질문으로 COMPLETE를 강제하지 않고 서류 확인 필�
 ## Regression / browser
 
 - typecheck: PASS
-- event domain/integration: 18/18 PASS
+- event domain/integration/session/presentation: 29/29 PASS
 - assessment regression: PASS
 - core domain regression: PASS
 - production fail-closed web export: PASS
 - Chromium 8 persona adaptive full flow: PASS
 - desktop 1440×900, iPad portrait 768×1024, iPad landscape 1024×768, mobile QR 390×844: PASS
-- QR opaque token, reset, refresh privacy, invalid token, idle reset, reduced-height CTA, adaptive back-navigation 답변 유지: PASS
+- QR opaque token, reset, refresh privacy, invalid/expired token, idle reset, visitor isolation, reduced-height CTA, adaptive back-navigation 답변 유지: PASS
+- dashboard/mobile QR raw domain key 노출 검사: PASS
 - browser result: PASS
 
 ## 전체 Rule fact inventory
@@ -116,7 +117,7 @@ Evidence-only는 질문으로 COMPLETE를 강제하지 않고 서류 확인 필�
 | `event.applicantParentTotalAssetsKrw` | NUMBER | CONDITIONAL | jpdc-23972-youth-purchased-rental:YOUTH | PARTIAL/PARTIAL | HOUSEHOLD | CONDITIONAL | 본인과 부모님의 총자산 합계는 얼마인가요? |
 | `event.benefitCategory` | ENUM | REQUIRED | jpdc-23972-youth-purchased-rental:YOUTH<br>jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I<br>jpdc-24134-multichild-purchased-rental:MULTI_CHILD | NONE/NONE | HOUSEHOLD | CONDITIONAL | 현재 해당하는 복지급여 또는 지원 자격이 있나요? |
 | `event.collegeStudent` | BOOLEAN | REQUIRED | jpdc-23972-youth-purchased-rental:YOUTH<br>lh-jeju-ildo-samdo-happy-housing-2026:COLLEGE_STUDENT | NONE/NONE | APPLICANT | CONDITIONAL | 현재 대학생이거나 입학·복학 예정인가요? |
-| `event.currentProgramTenant` | BOOLEAN | REQUIRED | jpdc-23972-youth-purchased-rental:YOUTH<br>jpdc-24135-general-purchased-rental:GENERAL | NONE/NONE | APPLICANT | CONDITIONAL | 현재 동일 지자체 청년매입임대에 계약·거주 중인가요? |
+| `event.currentProgramTenant` | BOOLEAN | REQUIRED | jpdc-23972-youth-purchased-rental:YOUTH<br>jpdc-24135-general-purchased-rental:GENERAL | NONE/NONE | APPLICANT | CONDITIONAL | 지원하려는 매입임대 유형에 현재 계약 중이거나 거주 중인가요? |
 | `event.eligibleResident` | BOOLEAN | REQUIRED | jpdc-23972-youth-purchased-rental:YOUTH<br>jpdc-23973-newlywed-newborn-i:NEWLYWED_NEWBORN_I<br>jpdc-24134-multichild-purchased-rental:MULTI_CHILD<br>jpdc-24135-general-purchased-rental:GENERAL | NONE/NONE | APPLICANT | CONDITIONAL | 국적 또는 외국인등록 기준상 신청 가능한 거주자인가요? |
 | `event.generalRentalPriorityCategory` | ENUM | CONDITIONAL | jpdc-24135-general-purchased-rental:GENERAL | NONE/NONE | APPLICANT | EVIDENCE_ONLY | 일반 매입임대의 공식 우선순위 증빙이 있나요? |
 | `event.isHousingBenefitRecipient` | BOOLEAN | REQUIRED | lh-jeju-ildo-samdo-happy-housing-2026:HOUSING_BENEFIT | NONE/NONE | HOUSEHOLD | CONDITIONAL | 현재 주거급여 수급자인가요? |

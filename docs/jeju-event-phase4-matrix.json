@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:08:09.710Z",
+  "generatedAt": "2026-10-08T07:37:59.758Z",
   "dataset": {
     "eventId": "wanpan-jeju-event-2026-10",
     "version": "2026.10.0-rc1",
@@ -226,7 +226,7 @@
       "uiInput": "NONE",
       "scope": "APPLICANT",
       "classification": "CONDITIONAL",
-      "question": "현재 동일 지자체 청년매입임대에 계약·거주 중인가요?"
+      "question": "지원하려는 매입임대 유형에 현재 계약 중이거나 거주 중인가요?"
     },
     {
       "factKey": "event.eligibleResident",
@@ -677,14 +677,13 @@
     {
       "personaId": "YOUNG_SINGLE",
       "label": "20대 미혼 청년",
-      "adaptiveQuestionCount": 8,
+      "adaptiveQuestionCount": 7,
       "questionIds": [
-        "vehicleValueKrw",
-        "collegeStudent",
-        "jobSeekerWithinTwoYears",
-        "benefitCategory",
         "eligibleResident",
         "currentProgramTenant",
+        "youthStudyStatus",
+        "benefitCategory",
+        "vehicleValueKrw",
         "parentMonthlyIncomeKrw",
         "parentVehicleValueKrw"
       ],
@@ -713,10 +712,10 @@
       "label": "30대 예비신혼부부",
       "adaptiveQuestionCount": 4,
       "questionIds": [
-        "vehicleValueKrw",
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
       ],
       "before": {
         "COMPLETE": 0,
@@ -742,10 +741,10 @@
       "label": "30대 신혼부부",
       "adaptiveQuestionCount": 4,
       "questionIds": [
-        "vehicleValueKrw",
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
       ],
       "before": {
         "COMPLETE": 0,
@@ -771,10 +770,10 @@
       "label": "신혼 + 자녀 1명",
       "adaptiveQuestionCount": 4,
       "questionIds": [
-        "vehicleValueKrw",
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
       ],
       "before": {
         "COMPLETE": 0,
@@ -800,10 +799,10 @@
       "label": "생애최초 조건의 부부",
       "adaptiveQuestionCount": 4,
       "questionIds": [
-        "vehicleValueKrw",
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
       ],
       "before": {
         "COMPLETE": 0,
@@ -829,10 +828,10 @@
       "label": "다자녀 가구",
       "adaptiveQuestionCount": 4,
       "questionIds": [
-        "vehicleValueKrw",
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory",
+        "vehicleValueKrw"
       ],
       "before": {
         "COMPLETE": 0,
@@ -859,9 +858,9 @@
       "label": "일반 무주택 가구",
       "adaptiveQuestionCount": 3,
       "questionIds": [
-        "benefitCategory",
         "eligibleResident",
-        "currentProgramTenant"
+        "currentProgramTenant",
+        "benefitCategory"
       ],
       "before": {
         "COMPLETE": 0,
@@ -911,8 +910,8 @@
     "score.youthIncomeUnderHalf"
   ],
   "browser": {
-    "generatedAt": "2026-10-06T15:07:34.267Z",
-    "baseUrl": "http://127.0.0.1:4174",
+    "generatedAt": "2026-10-08T07:37:21.303Z",
+    "baseUrl": "http://127.0.0.1:4173",
     "browsers": [
       "Chromium"
     ],
@@ -932,14 +931,13 @@
         "adaptiveQuestions": [
           "eligibleResident",
           "currentProgramTenant",
-          "collegeStudent",
-          "jobSeekerWithinTwoYears",
+          "youthStudyStatus",
           "benefitCategory",
           "vehicleValueKrw",
           "parentMonthlyIncomeKrw",
           "parentVehicleValueKrw"
         ],
-        "analysisMs": 6162,
+        "analysisMs": 6201,
         "qrTokenOnly": true
       },
       {
@@ -960,7 +958,7 @@
           "benefitCategory",
           "vehicleValueKrw"
         ],
-        "analysisMs": 4050,
+        "analysisMs": 4029,
         "qrTokenOnly": true
       },
       {
@@ -981,7 +979,7 @@
           "benefitCategory",
           "vehicleValueKrw"
         ],
-        "analysisMs": 4013,
+        "analysisMs": 4034,
         "qrTokenOnly": true
       },
       {
@@ -1002,7 +1000,7 @@
           "benefitCategory",
           "vehicleValueKrw"
         ],
-        "analysisMs": 4015,
+        "analysisMs": 4074,
         "qrTokenOnly": true
       },
       {
@@ -1023,7 +1021,7 @@
           "benefitCategory",
           "vehicleValueKrw"
         ],
-        "analysisMs": 4030,
+        "analysisMs": 4038,
         "qrTokenOnly": true
       },
       {
@@ -1044,7 +1042,7 @@
           "benefitCategory",
           "vehicleValueKrw"
         ],
-        "analysisMs": 4006,
+        "analysisMs": 4057,
         "qrTokenOnly": true
       },
       {
@@ -1064,7 +1062,7 @@
           "currentProgramTenant",
           "benefitCategory"
         ],
-        "analysisMs": 3977,
+        "analysisMs": 3971,
         "qrTokenOnly": true
       },
       {
@@ -1080,7 +1078,7 @@
           "difficult": 9
         },
         "adaptiveQuestions": [],
-        "analysisMs": 1940,
+        "analysisMs": 1935,
         "qrTokenOnly": true
       }
     ],
@@ -1090,9 +1088,10 @@
       "refreshPrivacy": "PASS",
       "reducedViewportKeyboardCta": "PASS",
       "idleReset": "PASS",
-      "adaptiveBackNavigation": "PASS"
+      "adaptiveBackNavigation": "PASS",
+      "resetVisitorIsolation": "PASS"
     },
-    "maxAnalysisMs": 6162,
+    "maxAnalysisMs": 6201,
     "result": "PASS"
   },
   "decision": "GO"

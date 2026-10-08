@@ -17,7 +17,7 @@ export default function EventLayout() {
     return (
       <View style={styles.error} accessibilityRole="alert">
         <Text style={k.type.title}>행사 화면을 준비하지 못했어요</Text>
-        <Text style={[k.type.bodyLg, { color: k.colors.textMuted }]}>행사 설정을 확인해 주세요. ({load.error})</Text>
+        <Text style={[k.type.bodyLg, { color: k.colors.textMuted }]}>행사 설정을 확인해 주세요.</Text>
       </View>
     );
   }

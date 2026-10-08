@@ -74,6 +74,7 @@ const DEFAULT_ADAPTIVE: Partial<AdaptiveInfo> = {
   currentProgramTenant: false,
   collegeStudent: false,
   jobSeekerWithinTwoYears: false,
+  youthStudyStatus: 'NEITHER',
   benefitCategory: 'NONE',
   vehicleValueKrw: 15_000_000,
   applicantTotalAssetsKrw: 60_000_000,

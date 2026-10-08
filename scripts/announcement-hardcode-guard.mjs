@@ -20,6 +20,8 @@ export const ALLOWLIST = [
   { pattern: /(^|\/)fixtures\//, reason: 'fixture layer' },
   { pattern: /\.fixture\.ts$/, reason: 'regression dataset' },
   { pattern: /^features\/discovery\/regions\.ts$/, reason: 'region registry: the single source of truth for every region', file: true },
+  { pattern: /^app\/event\//, reason: 'standalone frozen Jeju event demo UI' },
+  { pattern: /^features\/eventKiosk\//, reason: 'standalone frozen Jeju event demo domain and presentation' },
   { pattern: /^features\/applicationAssessment\/reference\//, reason: 'LEGACY/REFERENCE_ONLY sample, explicitly selected and labelled', dir: 'features/applicationAssessment/reference' },
   { pattern: /^features\/ruleExtraction\/server\/v4\/scorecard\.ts$/, reason: 'Samdo retrieval benchmark oracle; not on the import path', file: true },
   { pattern: /^features\/ruleExtraction\/server\/v4_1\/benchmarkPack\.ts$/, reason: 'frozen Samdo benchmark pack identity', file: true },
@@ -29,6 +31,7 @@ export const ALLOWLIST = [
   { pattern: /^scripts\/check-assessment-[a-z-]+\.mjs$/, reason: 'local database checks with synthetic, labelled rows' },
   { pattern: /^scripts\/export-assessment-reference\.mjs$/, reason: 'exports the legacy reference sample', file: true },
   { pattern: /^scripts\/audit-extraction-samples\.mjs$/, reason: 'archived extraction audit', file: true },
+  { pattern: /^scripts\/event-phase4-report\.mjs$/, reason: 'frozen Jeju event QA report generator', file: true },
   { pattern: /^scripts\/announcement-hardcode-guard\.mjs$/, reason: 'this guard', file: true },
 ];
 

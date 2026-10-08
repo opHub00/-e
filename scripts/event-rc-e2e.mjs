@@ -58,6 +58,7 @@ const adaptiveValues = {
   currentProgramTenant: { type: 'choice', label: '아니요' },
   collegeStudent: { type: 'choice', label: '아니요' },
   jobSeekerWithinTwoYears: { type: 'choice', label: '아니요' },
+  youthStudyStatus: { type: 'choice', label: '둘 다 해당 없음' },
   benefitCategory: { type: 'choice', label: '해당 없음' },
   vehicleValueKrw: { type: 'input', value: '1500' },
   applicantTotalAssetsKrw: { type: 'input', value: '8000' },
@@ -171,6 +172,7 @@ async function verifyFullFlow(page, persona, browser) {
   if (!title.includes('공고 5개, 공급 9건')) throw new Error(`${persona.id}: wrong inventory ${title}`);
   if (await visibleListingCardCount(page) !== 9) throw new Error(`${persona.id}: expected 9 visible cards`);
   const body = await page.locator('body').innerText();
+  if (/\b(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.-]+/.test(body)) throw new Error(`${persona.id}: raw domain key exposed`);
   if (/공고 배점\s*0\s*(?:\/|점)/.test(body)) throw new Error(`${persona.id}: NOT_APPLICABLE rendered as zero`);
   if (!body.includes('완판e 추천도') || !['적극 검토', '검토 가능', '조건 확인 필요', '신청 어려움'].some(label => body.includes(label))) throw new Error(`${persona.id}: qualitative wanpan label missing`);
 
@@ -215,12 +217,15 @@ async function verifyFullFlow(page, persona, browser) {
   const mobile = await mobileContext.newPage();
   await mobile.goto(link);
   await mobile.getByTestId('take-summary').waitFor();
+  if (/\b(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.-]+/.test(await mobile.locator('body').innerText())) throw new Error(`${persona.id}: raw domain key exposed on mobile QR`);
   await noOverflow(mobile, `${persona.id}:mobile-qr`);
   await touchTargets(mobile, `${persona.id}:mobile-qr`);
   await mobileContext.close();
 
   await page.getByTestId('summary-reset').click();
   await page.getByTestId('event-landing').waitFor();
+  await page.goto(`${baseUrl}/event/results`);
+  await page.getByTestId('kiosk-empty').waitFor();
   return { personaId: persona.id, label: persona.label, viewport: persona.viewport, distribution, adaptiveQuestions, analysisMs, qrTokenOnly: true };
 }
 
@@ -265,7 +270,7 @@ async function edgeCases(browser) {
   await page.waitForTimeout(800);
   await page.getByTestId('event-landing').waitFor();
   await context.close();
-  return { invalidToken: 'PASS', emptyResults: 'PASS', refreshPrivacy: 'PASS', reducedViewportKeyboardCta: 'PASS', idleReset: 'PASS', adaptiveBackNavigation: 'PASS' };
+  return { invalidToken: 'PASS', emptyResults: 'PASS', refreshPrivacy: 'PASS', reducedViewportKeyboardCta: 'PASS', idleReset: 'PASS', adaptiveBackNavigation: 'PASS', resetVisitorIsolation: 'PASS' };
 }
 
 const browser = await chromium.launch({ headless: true });

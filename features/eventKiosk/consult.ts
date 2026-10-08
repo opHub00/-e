@@ -4,6 +4,7 @@ import type { Listing } from './frozen/domain/rules.ts';
 import type { UserProfile } from './frozen/domain/profile.ts';
 import type { KioskEvaluation, KioskOutcome } from './evaluate.ts';
 import type { LoadedEvent } from './eventConfig.ts';
+import { KIOSK_STATUS_LABELS, userFacingFactLabel, userFacingLabels } from './presentation.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -80,32 +81,39 @@ function answer(chat: KioskChat, message: string): { text: string; detail?: stri
     };
   }
   if (/공식\s*(배점|점수)|배점/.test(message)) {
-    if (result.officialScore.status === 'NOT_APPLICABLE') return { text: '이 공급에는 적용되는 공식 배점표가 없어요.', detail: [result.officialScore.reason] };
-    if (result.officialScore.status === 'PENDING') return { text: '공식 배점을 0점으로 처리하지 않았어요. 필요한 정보를 확인하면 계산할 수 있어요.', detail: [result.officialScore.reason, ...result.officialScore.missingInformation] };
+    if (result.officialScore.status === 'NOT_APPLICABLE') return { text: '이 공급에는 적용되는 공식 배점표가 없어요.', detail: [userFacingFactLabel(result.officialScore.reason)] };
+    if (result.officialScore.status === 'PENDING') return {
+      text: '공식 배점을 0점으로 처리하지 않았어요. 필요한 정보를 확인하면 계산할 수 있어요.',
+      detail: [userFacingFactLabel(result.officialScore.reason), ...userFacingLabels(result.officialScore.missingInformation)],
+    };
     return {
       text: `공식 공고 배점은 ${result.officialScore.total} / ${result.officialScore.max}점이에요. 완판e 추천과는 별도예요.`,
-      detail: result.officialScore.breakdown.map(item => `${item.label}: ${item.points} / ${item.max}점`),
+      detail: result.officialScore.breakdown.map(item => `${userFacingFactLabel(item.label)}: ${item.points} / ${item.max}점`),
     };
   }
   if (/근거|공고문|원문|출처/.test(message)) {
     const evidence = chat.assessmentContext.evidence.filter(item => item.listingId === result.listingId && result.evidenceIds.includes(item.id));
     return {
       text: `${chat.listing.publisher} 공고의 검수된 근거 ${evidence.length}개를 연결했어요.`,
-      detail: evidence.slice(0, 5).map(item => `${item.section}${item.page ? ` · ${item.page}쪽` : ''} · ${item.label}`),
+      detail: evidence.slice(0, 5).map(item => `${userFacingFactLabel(item.section)}${item.page ? ` · ${item.page}쪽` : ''} · ${userFacingFactLabel(item.label)}`),
     };
   }
   if (/확인|조건|준비|서류/.test(message)) {
-    const details = [...result.missingInformation, ...result.failedRules.map(rule => rule.label)];
+    const details = userFacingLabels([...result.missingInformation, ...result.failedRules.map(rule => rule.label)]);
     return details.length
       ? { text: '다음 조건을 확인해 주세요. 모르는 값은 불리하다고 가정하지 않고 확인 필요로 남겼어요.', detail: details.slice(0, 6) }
-      : { text: '현재 입력으로 자격 조건 판정은 완료됐어요.', detail: result.matchedRules.slice(0, 5).map(rule => rule.label) };
+      : { text: '현재 입력으로 자격 조건 판정은 완료됐어요.', detail: userFacingLabels(result.matchedRules.slice(0, 5).map(rule => rule.label)) };
   }
-  const status = result.eligibility === 'ELIGIBLE' ? '신청 가능' : result.eligibility === 'INELIGIBLE' ? '신청 어려움' : '추가 확인 필요';
+  const status = result.eligibility === 'ELIGIBLE'
+    ? KIOSK_STATUS_LABELS.COMPLETE
+    : result.eligibility === 'INELIGIBLE'
+      ? KIOSK_STATUS_LABELS.INELIGIBLE
+      : KIOSK_STATUS_LABELS.NEEDS_USER_INPUT;
   return {
     text: `현재 판정은 “${status}”예요. 공고 규칙을 새로 추측하지 않고 저장된 판정 결과만 설명하고 있어요.`,
     detail: result.eligibility === 'ELIGIBLE'
-      ? result.matchedRules.slice(0, 5).map(rule => rule.label)
-      : [...result.failedRules.map(rule => rule.label), ...result.missingInformation].slice(0, 6),
+      ? userFacingLabels(result.matchedRules.slice(0, 5).map(rule => rule.label))
+      : userFacingLabels([...result.failedRules.map(rule => rule.label), ...result.missingInformation]).slice(0, 6),
   };
 }
 

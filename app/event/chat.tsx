@@ -13,6 +13,9 @@ import { KioskButton } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { goBack } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
+import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 
 /**
  * AI 상담. 일반 챗봇처럼 보이지만, 방문자가 입력한 정보·지금 공고·그 공고의 판정 결과를 이어받아
@@ -110,13 +113,14 @@ export default function ChatScreen() {
 
       <ScrollView ref={scroll} style={styles.thread} contentContainerStyle={styles.threadContent} testID="chat-thread">
         {chat.messages.map((message, index) => (
-          <View key={index} style={[styles.bubbleRow, message.role === 'user' && styles.bubbleRowUser]}>
+          // 새 메시지만 짧게 떠오른다. 이미 있던 메시지는 다시 움직이지 않는다(key 가 그대로라서).
+          <Appear key={index} distance={travel.sm} style={[styles.bubbleRow, message.role === 'user' && styles.bubbleRowUser]}>
             {message.role === 'assistant' ? <View style={styles.avatar}><MaterialIcons name="auto-awesome" size={22} color={k.colors.onPrimary} /></View> : null}
             <View style={[styles.bubble, message.role === 'user' ? styles.bubbleUser : styles.bubbleBot]} testID={`chat-message-${message.role}`}>
               <Text style={[styles.bubbleText, message.role === 'user' && { color: k.colors.onPrimary }]}>{message.text}</Text>
               {message.detail?.map(line => <Text key={line} style={styles.detail}>· {line}</Text>)}
             </View>
-          </View>
+          </Appear>
         ))}
         {busy ? (
           <View style={styles.bubbleRow}>
@@ -126,13 +130,13 @@ export default function ChatScreen() {
         ) : null}
       </ScrollView>
 
-      <View style={styles.suggestions} testID="chat-suggestions">
+      <StaggerList key={chat.context.outcomeId ?? 'none'} style={styles.suggestions} testID="chat-suggestions">
         {experienceSuggestedQuestions(outcome).map(question => (
           <MotionPressable key={question} accessibilityRole="button" accessibilityLabel={question} onPress={() => send(question)} style={styles.suggestion} disabled={busy}>
             <Text style={styles.suggestionText}>{question}</Text>
           </MotionPressable>
         ))}
-      </View>
+      </StaggerList>
       <Text style={styles.disclaimer}>입력하신 정보와 공고 규칙만으로 답해요. 상담에서 새로 말씀하신 내용은 이 상담에서만 쓰고, 끝나면 지워져요.</Text>
     </KioskFrame>
   );

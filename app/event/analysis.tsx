@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
-import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
+import { MIN_ANALYSIS_MS, useKioskStore } from '../../features/eventKiosk/useKioskStore';
+import { AnalysisSteps } from '../../features/eventKiosk/motion/AnalysisSteps';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
@@ -10,7 +11,6 @@ import { resetToHome, stepPath } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
 import { useAttached } from '../../features/adminPortal/useIsWide';
 
-const PHASES = ['입력한 정보를 정리하고 있어요', '공고별 신청 조건을 확인하고 있어요', '나에게 유리한 순서로 정리하고 있어요'];
 
 /** 분석 중 화면. 계산은 금방 끝나지만, 무엇을 하는지 보여 줄 시간을 조금 둔다. */
 export default function AnalysisScreen() {
@@ -23,19 +23,12 @@ export default function AnalysisScreen() {
   const started = useRef(false);
   // 이전 결과가 'done' 으로 남아 있을 수 있다. 이 화면에서 시작한 분석이 끝났을 때만 넘어간다.
   const sawRunning = useRef(false);
-  const [phase, setPhase] = useState(0);
 
   useEffect(() => {
     if (!load.ok || !householdType || started.current) return;
     started.current = true;
     void runAnalysis(load.event);
   }, [householdType, load, runAnalysis]);
-
-  useEffect(() => {
-    if (analysis !== 'running') return;
-    const timer = setInterval(() => setPhase(current => Math.min(PHASES.length - 1, current + 1)), 550);
-    return () => clearInterval(timer);
-  }, [analysis]);
 
   useEffect(() => {
     if (analysis === 'running') sawRunning.current = true;
@@ -78,11 +71,8 @@ export default function AnalysisScreen() {
         <View style={styles.spinner}><ActivityIndicator size="large" color={k.colors.primary} /></View>
         <Text style={styles.title}>분석하고 있어요</Text>
         <View style={styles.phases}>
-          {PHASES.map((text, index) => (
-            <Text key={text} style={[styles.phase, index <= phase && styles.phaseOn]}>
-              {index < phase ? '✓ ' : index === phase ? '• ' : '  '}{text}
-            </Text>
-          ))}
+          {/* 분석의 최소 표시 시간 안에서만 단계를 보여 준다. 분석이 끝나면 기다리지 않고 결과로 간다. */}
+          <AnalysisSteps regionLabel={load.event.config.regionLabel} totalMs={MIN_ANALYSIS_MS} />
         </View>
       </View>
     </KioskFrame>
@@ -94,7 +84,5 @@ const styles = StyleSheet.create({
   spinner: { width: 112, height: 112, borderRadius: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: k.colors.primaryFixed },
   title: { ...k.type.hero, color: k.colors.text },
   phases: { width: '100%', maxWidth: 520, gap: 12, padding: 24, borderRadius: 20, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
-  phase: { ...k.type.bodyLg, color: k.colors.textSubtle },
-  phaseOn: { color: k.colors.text },
   actions: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', justifyContent: 'center' },
 });

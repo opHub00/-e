@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
+import { Pop } from '../../components/motion/Pop';
 import { HOUSEHOLD_TYPES, type HouseholdType } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { StepScreen } from '../../features/eventKiosk/ui/StepScreen';
@@ -41,7 +42,9 @@ export default function HouseholdStep() {
                 <Text style={[styles.label, selected && styles.labelSelected]}>{type.label}</Text>
                 <Text style={styles.hint}>{type.hint}</Text>
               </View>
-              <MaterialIcons name={selected ? 'check-circle' : 'radio-button-unchecked'} size={32} color={selected ? k.colors.primary : k.colors.outline} />
+              <Pop active={selected}>
+                <MaterialIcons name={selected ? 'check-circle' : 'radio-button-unchecked'} size={32} color={selected ? k.colors.primary : k.colors.outline} />
+              </Pop>
             </MotionPressable>
           );
         })}

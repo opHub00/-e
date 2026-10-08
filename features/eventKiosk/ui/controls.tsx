@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useEffect, useState, type ReactNode } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
+import { Pop } from '../../../components/motion/Pop';
 import { tracking } from '../../../design/tokens';
 import { k } from './theme';
 
@@ -96,11 +97,13 @@ export function ChoiceGroup<T extends string | number | boolean | null>({
             style={[styles.choice, { flexBasis: `${Math.floor(100 / columns) - 2}%` }, selected && styles.choiceSelected]}
           >
             <View style={styles.choiceRow}>
-              <MaterialIcons
-                name={selected ? 'radio-button-checked' : 'radio-button-unchecked'}
-                size={24}
-                color={selected ? k.colors.primary : k.colors.outline}
-              />
+              <Pop active={selected}>
+                <MaterialIcons
+                  name={selected ? 'radio-button-checked' : 'radio-button-unchecked'}
+                  size={24}
+                  color={selected ? k.colors.primary : k.colors.outline}
+                />
+              </Pop>
               <Text style={[styles.choiceLabel, selected && styles.choiceLabelSelected]}>{choice.label}</Text>
             </View>
             {choice.hint ? <Text style={styles.choiceHint}>{choice.hint}</Text> : null}

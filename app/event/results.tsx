@@ -10,6 +10,11 @@ import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { BucketTiles, EmptyState, ListingCard } from '../../features/eventKiosk/ui/resultParts';
 import { resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
+import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
+import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
+import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
 
 /** 결과 대시보드. 위에 세 묶음의 수, 아래에 모든 공고를 추천 순서대로. */
 export default function ResultsScreen() {
@@ -20,6 +25,7 @@ export default function ResultsScreen() {
   const householdType = useKioskStore(state => state.answers.householdType);
   const sessionKey = useKioskStore(state => state.sessionKey);
   const [filter, setFilter] = useState<KioskBucket | null>(null);
+  const replay = useFocusReplay();
 
   const outcomes = useMemo(
     () => (evaluation?.outcomes ?? []).filter(outcome => !filter || outcome.bucket === filter),
@@ -71,7 +77,10 @@ export default function ResultsScreen() {
         </View>
       ) : null}
 
-      <BucketTiles counts={evaluation.counts} selected={filter} onSelect={setFilter} />
+      {/* 요약 숫자가 먼저, 결과 카드는 그다음 차례로. 필터를 바꿀 때도 같은 순서로 다시 보인다. */}
+      <Appear replayKey={replay} distance={travel.sm}>
+        <BucketTiles counts={evaluation.counts} selected={filter} onSelect={setFilter} />
+      </Appear>
 
       <View style={styles.listHead}>
         <Text style={styles.section} accessibilityRole="header">
@@ -84,9 +93,9 @@ export default function ResultsScreen() {
       </Text>
 
       {outcomes.length ? (
-        <View style={styles.list} testID="results-list">
+        <StaggerList key={filter ?? 'all'} after={eventMotion.sequence} style={styles.list} itemStyle={styles.listItem} testID="results-list">
           {outcomes.map(outcome => <ListingCard key={outcome.id} outcome={outcome} />)}
-        </View>
+        </StaggerList>
       ) : (
         evaluation.outcomes.length
           ? <EmptyState title={`${filter ? BUCKET_LABELS[filter] : ''} 공고가 없어요`} body="다른 묶음을 눌러 보세요." action={{ label: '전체 보기', onPress: () => setFilter(null) }} />
@@ -110,6 +119,9 @@ const styles = StyleSheet.create({
   section: { ...k.type.title, color: k.colors.text },
   orderNote: { ...k.type.body, color: k.colors.textMuted, marginTop: 6, marginBottom: 20 },
   list: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
+  /** 카드(resultParts)의 flex 몫과 같게. 감싸는 등장 래퍼 때문에 줄 배치가 바뀌지 않게. */
+  // 래퍼를 row 로 두어야 카드의 flexBasis 가 높이가 아니라 폭으로 읽힌다.
+  listItem: { flexGrow: 1, flexBasis: 360, flexDirection: 'row' },
   notes: { gap: 6, marginTop: 32 },
   note: { ...k.type.caption, color: k.colors.textMuted },
   footerAction: { flex: 1, maxWidth: 520, flexDirection: 'row' },

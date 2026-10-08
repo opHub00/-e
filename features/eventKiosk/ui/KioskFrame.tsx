@@ -7,6 +7,8 @@ import { STEP_LABELS, type InputStep } from '../model';
 import { KioskButton } from './controls';
 import { chatPath, resetToHome } from './navigation';
 import { k } from './theme';
+import { ProgressFill } from '../motion/ProgressFill';
+import { ScreenReveal } from '../motion/ScreenReveal';
 import { router } from 'expo-router';
 
 /**
@@ -81,7 +83,7 @@ export function KioskFrame({
         contentContainerStyle={[styles.content, { paddingHorizontal: gutter }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.inner}>{children}</View>
+        <View style={styles.inner}><ScreenReveal>{children}</ScreenReveal></View>
       </ScrollView>
       {footer ? (
         <View testID="kiosk-footer" style={[styles.footer, { paddingHorizontal: gutter }]}>
@@ -129,7 +131,9 @@ function Progress({ progress, gutter }: { progress: { steps: InputStep[]; curren
       <View style={styles.progressTrack}>
         {progress.steps.map((step, i) => (
           <View key={step} style={styles.progressItem}>
-            <View style={[styles.progressBar, i <= index && styles.progressBarDone]} />
+            <View style={[styles.progressBar, i < index && styles.progressBarDone]}>
+              {i === index ? <ProgressFill style={styles.progressFill} /> : null}
+            </View>
             <Text style={[styles.progressStep, i === index && styles.progressStepCurrent, i < index && styles.progressStepDone]} numberOfLines={1}>
               {i + 1}. {STEP_LABELS[step]}
             </Text>
@@ -173,7 +177,8 @@ const styles = StyleSheet.create({
   progressLabel: { ...k.type.bodyStrong, color: k.colors.textMuted },
   progressTrack: { flexDirection: 'row', gap: 12 },
   progressItem: { flex: 1, gap: 8 },
-  progressBar: { height: 4, borderRadius: 2, backgroundColor: k.colors.surfaceHighest },
+  progressBar: { height: 4, borderRadius: 2, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 999, backgroundColor: k.colors.primary },
   progressBarDone: { backgroundColor: k.colors.primary },
   progressStep: { ...k.type.caption, color: k.colors.textSubtle },
   progressStepCurrent: { fontFamily: k.type.label.fontFamily, color: k.colors.primary },

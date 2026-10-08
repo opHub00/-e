@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
+import { Pop } from '../../../components/motion/Pop';
 import {
   BUCKET_LABELS,
   WANPAN_LEVEL_LABELS,
@@ -149,8 +150,11 @@ export function FavoriteToggle({ outcomeId, compact }: { outcomeId: string; comp
       onPress={() => toggle(outcomeId)}
       style={[styles.favorite, active && styles.favoriteActive, compact && styles.favoriteCompact]}
     >
-      <MaterialIcons name={active ? 'star' : 'star-border'} size={compact ? 24 : 28} color={active ? '#B26A00' : k.colors.textMuted} />
-      {/* 별만 있으면 담겼는지 헷갈린다. 좁은 카드에서도 상태를 글로 함께 보여 준다. */}
+      {/* 담는 순간에만 짧게 눌렸다 펴진다. 뺄 때는 조용히. */}
+      <Pop active={active}>
+        <MaterialIcons name={active ? 'star' : 'star-border'} size={compact ? 24 : 28} color={active ? '#B26A00' : k.colors.textMuted} />
+      </Pop>
+      {/* 좁은 카드에서도 선택 상태를 글로 함께 보여 준다. */}
       <Text style={[compact ? k.type.label : k.type.bodyStrong, { color: active ? '#8A4900' : k.colors.textMuted }]}>
         {active ? (compact ? '담김' : '관심 공고에 담김') : (compact ? '담기' : '관심 공고 담기')}
       </Text>

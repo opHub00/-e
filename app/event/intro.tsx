@@ -5,6 +5,8 @@ import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { KioskButton } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
 
 const STEP_MS = 700;
 
@@ -40,12 +42,16 @@ export default function EventIntro() {
         <Text style={styles.title} accessibilityRole="header">내 조건에 맞는 제주 청약을{`\n`}한 번에 비교해 보세요.</Text>
       </View>
       <View style={styles.list} testID="event-intro">
-        {steps.map((sentence, index) => (
-          <View key={sentence} style={[styles.row, index >= shown && styles.hidden]} aria-hidden={index >= shown}>
-            <View style={styles.badge}><Text style={styles.badgeText}>0{index + 1}</Text></View>
-            <Text style={styles.sentence}>{sentence}</Text>
-          </View>
-        ))}
+        {steps.map((sentence, index) => {
+          const row = (
+            <View style={[styles.row, index >= shown && styles.hidden]} aria-hidden={index >= shown}>
+              <View style={styles.badge}><Text style={styles.badgeText}>0{index + 1}</Text></View>
+              <Text style={styles.sentence}>{sentence}</Text>
+            </View>
+          );
+          // 보이게 되는 순간 짧게 떠오른다. 자리는 미리 잡아 두어 아래 문장이 밀리지 않는다.
+          return index < shown ? <Appear key={sentence} distance={travel.md}>{row}</Appear> : <View key={sentence}>{row}</View>;
+        })}
       </View>
     </KioskFrame>
   );

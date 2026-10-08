@@ -1,4 +1,8 @@
-import { fetchApplyHomeListings } from '../../discovery/server/ApplyHomeApi.ts';
+import * as applyHomeApi from '../../discovery/server/ApplyHomeApi.ts';
+
+const applyHomeNamespace = applyHomeApi as typeof applyHomeApi & { default?: typeof applyHomeApi };
+const fetchApplyHomeListings = applyHomeNamespace.fetchApplyHomeListings
+  ?? applyHomeNamespace.default?.fetchApplyHomeListings;
 
 export type OfficialListingFetchOptions = {
   now: Date;

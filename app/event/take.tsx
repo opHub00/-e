@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { isOpaqueResultToken, readResultSession } from '../../features/eventKiosk/resultSessionClient';
@@ -26,10 +27,11 @@ export default function TakeAway() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <View style={styles.inner}>
-        <Text style={styles.brand}>완판e</Text>
+        <View style={styles.brandRow}><View style={styles.mark}><Text style={styles.markText}>e</Text></View><Text style={styles.brand}>완판e</Text></View>
         {state.status === 'loading' ? <Text style={styles.muted}>요약을 여는 중이에요…</Text> : null}
         {state.status === 'invalid' ? (
           <View style={styles.card} testID="take-invalid">
+            <View style={styles.invalidIcon}><MaterialIcons name="link-off" size={28} color={k.colors.primary} /></View>
             <Text style={styles.title}>요약을 읽을 수 없어요</Text>
             <Text style={styles.muted}>token이 잘못되었거나 임시 결과가 만료됐어요. 행사 기기에서 QR을 다시 만들어 주세요.</Text>
           </View>
@@ -81,8 +83,11 @@ function Group({ title, items, empty }: { title: string; items: ResultSummary['r
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background },
-  content: { padding: 16, alignItems: 'center' },
+  content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 48, alignItems: 'center' },
   inner: { width: '100%', maxWidth: 560, gap: 16 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingBottom: 8 },
+  mark: { width: 40, height: 40, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
+  markText: { ...k.type.bodyLgStrong, color: k.colors.onPrimary },
   brand: { ...k.type.section, color: k.colors.primary },
   stack: { gap: 14 },
   title: { ...k.type.title, color: k.colors.text },
@@ -90,11 +95,12 @@ const styles = StyleSheet.create({
   body: { ...k.type.body, color: k.colors.text },
   muted: { ...k.type.caption, color: k.colors.textMuted },
   note: { ...k.type.caption, color: k.tint.amber.fg },
-  card: { backgroundColor: k.colors.surface, borderRadius: 18, padding: 18, gap: 10, borderWidth: 1, borderColor: k.colors.surfaceHigh },
+  card: { backgroundColor: k.colors.surface, borderRadius: 20, padding: 20, gap: 10, borderWidth: 1, borderColor: k.colors.outline },
   counts: { flexDirection: 'row', gap: 8 },
-  count: { flex: 1, borderRadius: 14, padding: 12, gap: 2 },
+  count: { flex: 1, borderRadius: 12, padding: 12, gap: 2 },
   countValue: { ...k.type.section },
   countLabel: { ...k.type.caption },
   item: { gap: 2, paddingVertical: 6 },
   itemTitle: { ...k.type.bodyStrong, color: k.colors.text },
+  invalidIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
 });

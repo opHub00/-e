@@ -35,7 +35,7 @@ export default function FavoritesScreen() {
       footer={
         <>
           <KioskButton label="결과 목록" variant="ghost" icon="arrow-back" onPress={() => goBack('/event/results')} />
-          <KioskButton testID="favorites-summary" label="결과 요약 받기" icon="qr-code-2" onPress={() => router.push('/event/summary' as never)} large />
+          <View style={styles.footerAction}><KioskButton testID="favorites-summary" label="결과 요약 받기" icon="qr-code-2" onPress={() => router.push('/event/summary' as never)} large grow /></View>
         </>
       }
     >
@@ -59,4 +59,5 @@ const styles = StyleSheet.create({
   title: { ...k.type.hero, color: k.colors.text },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   list: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
+  footerAction: { flex: 1, maxWidth: 520, flexDirection: 'row' },
 });

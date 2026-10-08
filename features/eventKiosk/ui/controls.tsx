@@ -9,7 +9,7 @@ type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
 /** 행사 화면의 큰 버튼. */
 export function KioskButton({
-  label, onPress, variant = 'primary', icon, disabled, large, testID, accessibilityLabel,
+  label, onPress, variant = 'primary', icon, disabled, large, grow, testID, accessibilityLabel,
 }: {
   label: string;
   onPress: () => void;
@@ -17,10 +17,13 @@ export function KioskButton({
   icon?: IconName;
   disabled?: boolean;
   large?: boolean;
+  grow?: boolean;
   testID?: string;
   accessibilityLabel?: string;
 }) {
   const fg = variant === 'primary' ? k.colors.onPrimary : k.colors.primary;
+  const trailingIcon = icon === 'arrow-forward' || icon === 'chevron-right';
+  const iconNode = icon ? <MaterialIcons name={icon} size={large ? 28 : 24} color={fg} /> : null;
   return (
     <MotionPressable
       testID={testID}
@@ -32,13 +35,15 @@ export function KioskButton({
       style={[
         styles.button,
         large && styles.buttonLarge,
+        grow && styles.buttonGrow,
         variant === 'soft' && styles.buttonSoft,
         variant === 'ghost' && styles.buttonGhost,
         disabled && styles.buttonDisabled,
       ]}
     >
-      {icon ? <MaterialIcons name={icon} size={large ? 28 : 24} color={fg} /> : null}
+      {!trailingIcon ? iconNode : null}
       <Text style={[large ? k.type.section : k.type.bodyLgStrong, { color: fg }]}>{label}</Text>
+      {trailingIcon ? iconNode : null}
     </MotionPressable>
   );
 }
@@ -288,39 +293,47 @@ export function Notice({ tone = 'info', children, icon }: { tone?: 'info' | 'war
 const styles = StyleSheet.create({
   button: {
     minHeight: k.touch,
-    paddingHorizontal: 28,
-    borderRadius: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     backgroundColor: k.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
   },
-  buttonLarge: { minHeight: k.touchLarge, paddingHorizontal: 40, borderRadius: 20 },
+  buttonLarge: { minHeight: k.touchLarge, paddingHorizontal: 32 },
+  buttonGrow: { flex: 1 },
   buttonSoft: { backgroundColor: k.colors.primaryFixed },
-  buttonGhost: { backgroundColor: 'transparent', borderWidth: 2, borderColor: k.colors.outline },
+  buttonGhost: { backgroundColor: 'transparent', borderWidth: 1, borderColor: k.colors.outline },
   buttonDisabled: { opacity: 0.4 },
-  section: { gap: 20 },
-  sectionTitle: { ...k.type.section, color: k.colors.primary },
-  sectionBody: { gap: 28 },
-  question: { gap: 8 },
+  section: {
+    gap: 20,
+    padding: 28,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: k.colors.outline,
+    backgroundColor: k.colors.surface,
+  },
+  sectionTitle: { ...k.type.section, color: k.colors.text },
+  sectionBody: { gap: 24 },
+  question: { gap: 10 },
   questionTitle: { ...k.type.question, color: k.colors.text },
   questionHint: { ...k.type.caption, color: k.colors.textMuted },
-  questionBody: { marginTop: 8 },
+  questionBody: { marginTop: 6 },
   choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   choice: {
     flexGrow: 1,
-    minHeight: k.touch,
-    paddingHorizontal: 18,
+    minHeight: 68,
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 2,
+    borderRadius: 12,
+    borderWidth: 1,
     borderColor: k.colors.surfaceHighest,
     backgroundColor: k.colors.surface,
     justifyContent: 'center',
     gap: 4,
   },
-  choiceSelected: { borderColor: k.colors.primary, backgroundColor: k.colors.lavender },
+  choiceSelected: { borderColor: k.colors.primary, borderWidth: 2, backgroundColor: k.colors.lavender },
   choiceRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   choiceLabel: { ...k.type.bodyLgStrong, color: k.colors.text, flexShrink: 1 },
   choiceLabelSelected: { color: k.colors.primary },
@@ -328,23 +341,23 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   input: {
     minHeight: k.touch,
-    borderRadius: 16,
-    borderWidth: 2,
+    borderRadius: 12,
+    borderWidth: 1,
     borderColor: k.colors.surfaceHighest,
     backgroundColor: k.colors.surface,
     paddingHorizontal: 20,
     ...k.type.section,
     color: k.colors.text,
   },
-  inputDate: { width: 260, letterSpacing: tracking.wide },
-  inputNumber: { width: 240, textAlign: 'right' },
+  inputDate: { flex: 1, minWidth: 220, letterSpacing: tracking.wide },
+  inputNumber: { flex: 1, minWidth: 180, textAlign: 'right' },
   unit: { ...k.type.bodyLgStrong, color: k.colors.textMuted },
-  clear: { width: k.touch, height: k.touch, alignItems: 'center', justifyContent: 'center', borderRadius: 16 },
+  clear: { width: k.touch, height: k.touch, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   stepButton: {
     width: k.touch,
     height: k.touch,
-    borderRadius: 16,
+    borderRadius: 12,
     backgroundColor: k.colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
@@ -353,13 +366,13 @@ const styles = StyleSheet.create({
   unknown: {
     minHeight: k.touch,
     paddingHorizontal: 18,
-    borderRadius: 16,
-    borderWidth: 2,
+    borderRadius: 12,
+    borderWidth: 1,
     borderColor: k.colors.surfaceHighest,
     backgroundColor: k.colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  notice: { flexDirection: 'row', gap: 12, padding: 18, borderRadius: 16, alignItems: 'flex-start' },
+  notice: { flexDirection: 'row', gap: 12, padding: 20, borderRadius: 12, alignItems: 'flex-start' },
 });

@@ -29,14 +29,20 @@ export default function EventIntro() {
       footer={
         <>
           <View />
-          <KioskButton testID="intro-next" label="정보 입력 시작" icon="arrow-forward" onPress={() => router.push('/event/household' as never)} large />
+          <View style={styles.footerAction}>
+            <KioskButton testID="intro-next" label="정보 입력 시작" icon="arrow-forward" onPress={() => router.push('/event/household' as never)} large grow />
+          </View>
         </>
       }
     >
+      <View style={styles.head}>
+        <Text style={styles.eyebrow}>이렇게 진행해요</Text>
+        <Text style={styles.title} accessibilityRole="header">내 조건에 맞는 제주 청약을{`\n`}한 번에 비교해 보세요.</Text>
+      </View>
       <View style={styles.list} testID="event-intro">
         {steps.map((sentence, index) => (
           <View key={sentence} style={[styles.row, index >= shown && styles.hidden]} aria-hidden={index >= shown}>
-            <View style={styles.badge}><Text style={styles.badgeText}>{index + 1}</Text></View>
+            <View style={styles.badge}><Text style={styles.badgeText}>0{index + 1}</Text></View>
             <Text style={styles.sentence}>{sentence}</Text>
           </View>
         ))}
@@ -46,10 +52,14 @@ export default function EventIntro() {
 }
 
 const styles = StyleSheet.create({
-  list: { gap: 36, paddingVertical: 48 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 24 },
+  head: { gap: 10, marginBottom: 28 },
+  eyebrow: { ...k.type.label, color: k.colors.primary },
+  title: { ...k.type.hero, color: k.colors.text },
+  list: { gap: 16 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 20, padding: 24, borderRadius: 20, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface },
   hidden: { opacity: 0 },
-  badge: { width: 64, height: 64, borderRadius: 32, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  badgeText: { ...k.type.title, color: k.colors.onPrimary },
-  sentence: { ...k.type.hero, color: k.colors.text, flex: 1 },
+  badge: { width: 56, height: 56, borderRadius: 16, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  badgeText: { ...k.type.bodyLgStrong, color: k.colors.primary },
+  sentence: { ...k.type.question, color: k.colors.text, flex: 1 },
+  footerAction: { flex: 1, maxWidth: 520, flexDirection: 'row' },
 });

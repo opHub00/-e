@@ -87,8 +87,10 @@ export default function AdaptiveAssessmentScreen() {
       scrollKey="adaptive-assessment"
       footer={
         <>
-          <KioskButton label="이전" variant="soft" icon="arrow-back" onPress={() => router.replace('/event/subscription' as never)} />
-          <KioskButton testID="adaptive-submit" label="답변 반영하고 다시 분석" icon="refresh" large onPress={() => router.replace('/event/analysis' as never)} />
+          <KioskButton label="이전" variant="ghost" icon="arrow-back" onPress={() => router.replace('/event/subscription' as never)} />
+          <View style={styles.footerAction}>
+            <KioskButton testID="adaptive-submit" label="답변 반영하고 다시 분석" icon="refresh" large grow onPress={() => router.replace('/event/analysis' as never)} />
+          </View>
         </>
       }
     >
@@ -120,4 +122,5 @@ const styles = StyleSheet.create({
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   numberControl: { gap: 8, alignItems: 'flex-start' },
   inlineAction: { marginTop: 20, alignItems: 'flex-start' },
+  footerAction: { flex: 1, flexDirection: 'row' },
 });

@@ -39,7 +39,7 @@ export function KioskFrame({
 }) {
   const width = useKioskWidth();
   const compactTop = width < 600;
-  const gutter = width >= 900 ? 40 : compactTop ? 12 : k.gutter;
+  const gutter = width >= 900 ? 40 : compactTop ? 20 : k.gutter;
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -56,10 +56,10 @@ export function KioskFrame({
               accessibilityRole="button"
               accessibilityLabel="AI 상담 열기"
               onPress={() => router.push(chatPath(chatContextId ?? null) as never)}
-              style={[styles.topButton, styles.chatButton, compactTop && styles.topButtonCompact]}
+              style={[styles.topButton, compactTop && styles.topButtonCompact]}
             >
-              <MaterialIcons name="forum" size={24} color={k.colors.onPrimary} />
-              {compactTop ? null : <Text style={[styles.topButtonLabel, { color: k.colors.onPrimary }]}>AI 상담</Text>}
+              <MaterialIcons name="chat-bubble-outline" size={24} color={k.colors.primary} />
+              {compactTop ? null : <Text style={styles.topButtonLabel}>AI 상담</Text>}
             </MotionPressable>
           )}
           <MotionPressable
@@ -91,6 +91,7 @@ export function KioskFrame({
       <Modal visible={confirming} transparent animationType="fade" onRequestClose={() => setConfirming(false)}>
         <View style={styles.scrim}>
           <View style={styles.dialog} accessibilityRole="alert">
+            <View style={styles.dialogIcon}><MaterialIcons name="delete-outline" size={32} color={k.colors.primary} /></View>
             <Text style={k.type.title}>처음 화면으로 돌아갈까요?</Text>
             <Text style={[k.type.bodyLg, { color: k.colors.textMuted }]}>입력한 정보와 결과가 모두 지워져요.</Text>
             <View style={styles.dialogActions}>
@@ -142,7 +143,7 @@ function Progress({ progress, gutter }: { progress: { steps: InputStep[]; curren
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background, minHeight: '100%' as unknown as number },
   top: {
-    minHeight: 84,
+    minHeight: 88,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -152,37 +153,37 @@ const styles = StyleSheet.create({
     backgroundColor: k.colors.surface,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  brandMark: { width: 40, height: 40, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  brandMarkText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 26 },
-  brand: { ...k.type.section, color: k.colors.primary },
+  brandMark: { width: 44, height: 44, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
+  brandMarkText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 30 },
+  brand: { ...k.type.section, color: k.colors.primary, fontSize: 25 },
   topActions: { flexDirection: 'row', gap: 12 },
   topActionsCompact: { gap: 8 },
   topButton: {
-    minHeight: 56,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    backgroundColor: k.colors.primaryFixed,
+    minHeight: 48,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  chatButton: { backgroundColor: k.colors.primary },
-  topButtonCompact: { width: 56, paddingHorizontal: 0, justifyContent: 'center' },
+  topButtonCompact: { width: 48, paddingHorizontal: 0, justifyContent: 'center' },
   topButtonLabel: { ...k.type.bodyStrong, color: k.colors.primary },
-  progress: { paddingVertical: 14, backgroundColor: k.colors.surface, borderBottomWidth: 1, borderBottomColor: k.colors.surfaceHigh },
+  progress: { paddingVertical: 20, backgroundColor: k.colors.surface, borderBottomWidth: 1, borderBottomColor: k.colors.surfaceHigh },
   progressLabel: { ...k.type.bodyStrong, color: k.colors.textMuted },
-  progressTrack: { flexDirection: 'row', gap: 8 },
+  progressTrack: { flexDirection: 'row', gap: 12 },
   progressItem: { flex: 1, gap: 8 },
-  progressBar: { height: 8, borderRadius: 4, backgroundColor: k.colors.surfaceHighest },
+  progressBar: { height: 4, borderRadius: 2, backgroundColor: k.colors.surfaceHighest },
   progressBarDone: { backgroundColor: k.colors.primary },
   progressStep: { ...k.type.caption, color: k.colors.textSubtle },
   progressStepCurrent: { fontFamily: k.type.label.fontFamily, color: k.colors.primary },
   progressStepDone: { color: k.colors.textMuted },
   scroll: { flex: 1 },
-  content: { paddingTop: 32, paddingBottom: 48, alignItems: 'center' },
+  content: { paddingTop: 36, paddingBottom: 40, alignItems: 'center' },
   inner: { width: '100%', maxWidth: k.contentMax },
   footer: {
-    paddingVertical: 16,
+    minHeight: 108,
+    paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: k.colors.surfaceHigh,
     backgroundColor: k.colors.surface,
@@ -190,6 +191,7 @@ const styles = StyleSheet.create({
   },
   footerInner: { flexDirection: 'row', gap: 12, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' },
   scrim: { flex: 1, backgroundColor: 'rgba(28,27,34,0.45)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  dialog: { width: '100%', maxWidth: 560, backgroundColor: k.colors.surface, borderRadius: 24, padding: 32, gap: 16 },
+  dialog: { width: '100%', maxWidth: 560, backgroundColor: k.colors.surface, borderRadius: 20, padding: 32, gap: 16 },
+  dialogIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
   dialogActions: { flexDirection: 'row', gap: 12, justifyContent: 'flex-end', marginTop: 8, flexWrap: 'wrap' },
 });

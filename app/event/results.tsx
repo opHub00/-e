@@ -53,7 +53,7 @@ export default function ResultsScreen() {
       footer={
         <>
           <KioskButton testID="open-favorites" label={`관심 공고 ${favorites.length}개`} icon="star" variant="soft" onPress={() => router.push('/event/favorites' as never)} />
-          <KioskButton testID="open-summary" label="결과 요약 받기" icon="qr-code-2" onPress={() => router.push('/event/summary' as never)} large />
+          <View style={styles.footerAction}><KioskButton testID="open-summary" label="결과 요약 받기" icon="qr-code-2" onPress={() => router.push('/event/summary' as never)} large grow /></View>
         </>
       }
     >
@@ -100,7 +100,7 @@ export default function ResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  head: { gap: 8, marginBottom: 24 },
+  head: { gap: 8, marginBottom: 28 },
   title: { ...k.type.hero, color: k.colors.text },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   block: { gap: 12, marginBottom: 24, alignItems: 'flex-start' },
@@ -110,4 +110,5 @@ const styles = StyleSheet.create({
   list: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
   notes: { gap: 6, marginTop: 32 },
   note: { ...k.type.caption, color: k.colors.textMuted },
+  footerAction: { flex: 1, maxWidth: 520, flexDirection: 'row' },
 });

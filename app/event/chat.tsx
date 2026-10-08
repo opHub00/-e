@@ -131,18 +131,18 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  context: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 20, backgroundColor: k.colors.lavender, flexWrap: 'wrap' },
+  context: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, borderRadius: 20, backgroundColor: k.colors.lavender, flexWrap: 'wrap' },
   contextLabel: { ...k.type.caption, color: k.colors.textMuted },
   contextValue: { ...k.type.bodyLgStrong, color: k.colors.primary },
   picker: { gap: 8, marginTop: 12 },
-  pick: { minHeight: k.touch, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 16, backgroundColor: k.colors.surface, borderWidth: 2, borderColor: k.colors.surfaceHighest },
+  pick: { minHeight: k.touch, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 12, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
   pickText: { ...k.type.bodyStrong, color: k.colors.text },
   thread: { marginTop: 20, maxHeight: 640 },
   threadContent: { gap: 16, paddingBottom: 8 },
   bubbleRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   bubbleRowUser: { justifyContent: 'flex-end' },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  bubble: { maxWidth: '82%', borderRadius: 22, paddingVertical: 14, paddingHorizontal: 18, gap: 6 },
+  bubble: { maxWidth: '82%', borderRadius: 20, paddingVertical: 14, paddingHorizontal: 18, gap: 6 },
   bubbleBot: { backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.surfaceHigh, borderTopLeftRadius: 6 },
   bubbleUser: { backgroundColor: k.colors.primary, borderTopRightRadius: 6 },
   bubbleText: { ...k.type.bodyLg, color: k.colors.text },
@@ -152,5 +152,5 @@ const styles = StyleSheet.create({
   suggestionText: { ...k.type.bodyStrong, color: k.colors.primary },
   disclaimer: { ...k.type.caption, color: k.colors.textSubtle, marginTop: 16 },
   composer: { flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center' },
-  input: { flex: 1, minHeight: k.touch, borderRadius: 16, borderWidth: 2, borderColor: k.colors.surfaceHighest, backgroundColor: k.colors.surface, paddingHorizontal: 20, ...k.type.bodyLg, color: k.colors.text },
+  input: { flex: 1, minHeight: k.touch, borderRadius: 12, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, paddingHorizontal: 20, ...k.type.bodyLg, color: k.colors.text },
 });

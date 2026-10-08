@@ -48,6 +48,7 @@ export function StepScreen({ step, title, subtitle, children }: {
               icon={isLast ? 'auto-awesome' : 'arrow-forward'}
               onPress={next}
               large
+              grow
             />
           </View>
         </>
@@ -69,11 +70,11 @@ export function StepScreen({ step, title, subtitle, children }: {
 }
 
 const styles = StyleSheet.create({
-  head: { gap: 8, marginBottom: 32 },
+  head: { gap: 8, marginBottom: 28 },
   title: { ...k.type.hero, color: k.colors.text },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
-  body: { gap: 48 },
-  footerRight: { flexDirection: 'row', alignItems: 'center', gap: 16, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
+  body: { gap: 24 },
+  footerRight: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 16, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
   blocker: { ...k.type.bodyStrong, color: k.colors.error, flexShrink: 1, maxWidth: 420 },
   link: { color: k.colors.primary, textDecorationLine: 'underline' },
   skipHint: { ...k.type.caption, color: k.colors.textSubtle, marginTop: 40 },

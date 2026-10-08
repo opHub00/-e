@@ -258,14 +258,14 @@ function Evidence({ outcome }: { outcome: KioskOutcome }) {
 }
 
 const styles = StyleSheet.create({
-  footerRight: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', alignItems: 'center' },
+  footerRight: { flex: 1, flexDirection: 'row', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end' },
   header: { gap: 14 },
   title: { ...k.type.hero, color: k.colors.text },
   meta: { ...k.type.bodyLg, color: k.colors.textMuted },
   badges: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   scores: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   sections: { gap: 20, marginTop: 32 },
-  block: { backgroundColor: k.colors.surface, borderRadius: 24, padding: 24, gap: 14, borderWidth: 1, borderColor: k.colors.surfaceHigh },
+  block: { backgroundColor: k.colors.surface, borderRadius: 20, padding: 24, gap: 14, borderWidth: 1, borderColor: k.colors.outline },
   blockHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   blockTitle: { ...k.type.section, color: k.colors.text },
   blockBody: { gap: 12 },

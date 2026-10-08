@@ -75,7 +75,7 @@ export default function AnalysisScreen() {
   return (
     <KioskFrame brand={brand} hideChat confirmHome={false}>
       <View style={styles.center} testID="analysis-running" accessibilityLiveRegion="polite">
-        <ActivityIndicator size="large" color={k.colors.primary} />
+        <View style={styles.spinner}><ActivityIndicator size="large" color={k.colors.primary} /></View>
         <Text style={styles.title}>분석하고 있어요</Text>
         <View style={styles.phases}>
           {PHASES.map((text, index) => (
@@ -90,9 +90,10 @@ export default function AnalysisScreen() {
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', gap: 24, paddingVertical: 80 },
+  center: { alignItems: 'center', gap: 24, paddingVertical: 64, paddingHorizontal: 24 },
+  spinner: { width: 112, height: 112, borderRadius: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: k.colors.primaryFixed },
   title: { ...k.type.hero, color: k.colors.text },
-  phases: { gap: 12 },
+  phases: { width: '100%', maxWidth: 520, gap: 12, padding: 24, borderRadius: 20, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
   phase: { ...k.type.bodyLg, color: k.colors.textSubtle },
   phaseOn: { color: k.colors.text },
   actions: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', justifyContent: 'center' },

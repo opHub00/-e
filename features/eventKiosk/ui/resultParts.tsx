@@ -19,6 +19,8 @@ import { KioskButton } from './controls';
 import { ListingMediaView } from './ListingMediaView';
 import { chatPath, listingPath } from './navigation';
 import { bucketTone, k } from './theme';
+import { listingMediaOf } from '../media/listingMedia';
+import { ListingThumb } from '../media/ListingMediaView';
 
 /** UNAVAILABLE 은 이유에 따라 다르게 읽는다. 규칙이 없으면 '분석 전', 공고·증빙 확인이 남았으면 '추가 확인 필요'. */
 const statusText = (outcome: KioskOutcome): string => kioskStatusLabel(outcome.status, outcome.unavailableReason);
@@ -190,6 +192,8 @@ export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
       <ListingMediaView media={listing.media} variant="card" />
       <View style={styles.cardTop}>
         <View style={styles.rank}><Text style={styles.rankText}>{outcome.rank}</Text></View>
+        {/* 작은 썸네일만. 결과 카드의 주인공은 판정 상태라 사진을 키우지 않는다. */}
+        <ListingThumb media={listingMediaOf(listing as unknown as { title: string } & Record<string, unknown>)} housingType={listing.housingType} district={listing.district} />
         <View style={styles.cardTitleBox}>
           <Text style={styles.cardTitle} numberOfLines={2}>{listing.title}</Text>
           <Text style={styles.cardMeta} numberOfLines={1}>

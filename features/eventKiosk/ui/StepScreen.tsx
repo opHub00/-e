@@ -8,6 +8,7 @@ import { KioskButton, Notice } from './controls';
 import { KioskFrame } from './KioskFrame';
 import { goBack, nextAfter, stepPath } from './navigation';
 import { k } from './theme';
+import { StepSlide } from '../motion/StepSlide';
 
 /** 입력 단계 화면 틀. 제목, 질문들, 아래 이전/다음. */
 export function StepScreen({ step, title, subtitle, children }: {
@@ -54,6 +55,7 @@ export function StepScreen({ step, title, subtitle, children }: {
         </>
       }
     >
+      <StepSlide index={index}>
       <View style={styles.head}>
         <Text style={styles.title} accessibilityRole="header">{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -65,6 +67,7 @@ export function StepScreen({ step, title, subtitle, children }: {
       {step === 'household' ? null : (
         <Text style={styles.skipHint}>모르는 질문은 비워 두거나 ‘잘 모르겠어요’를 골라도 돼요. 결과에서 무엇을 더 확인하면 되는지 알려 드려요.</Text>
       )}
+      </StepSlide>
     </KioskFrame>
   );
 }

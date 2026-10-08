@@ -7,6 +7,10 @@ import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { ChoiceGroup, KioskButton, Notice, NumberInput, Question, Section, YesNoUnknown } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
+import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
+import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 
 function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
   const value = useKioskStore(state => state.answers.adaptive[question.id]);
@@ -94,18 +98,25 @@ export default function AdaptiveAssessmentScreen() {
         </>
       }
     >
+      {/* 일반 입력 단계와 다르게 들어온다: 안내 문구가 먼저, 몇 개 남았는지, 그다음 질문 카드가 차례로. */}
       <View style={styles.head} testID="adaptive-assessment">
-        <Text style={styles.title} accessibilityRole="header">정확한 판정을 위해 몇 가지만 더 확인할게요.</Text>
-        <Text style={styles.count}>{questions.length}개만 더 확인하면 됩니다.</Text>
-        <Text style={styles.subtitle}>이미 신청이 어려운 공급은 제외했고, 여러 공고가 함께 쓰는 정보는 한 번만 물어요.</Text>
+        <Appear distance={travel.md}>
+          <Text style={styles.title} accessibilityRole="header">정확한 판정을 위해 몇 가지만 더 확인할게요.</Text>
+        </Appear>
+        <Appear delay={eventMotion.sequence} distance={travel.sm}>
+          <Text style={styles.count}>{questions.length}개만 더 확인하면 됩니다.</Text>
+          <Text style={styles.subtitle}>이미 신청이 어려운 공급은 제외했고, 여러 공고가 함께 쓰는 정보는 한 번만 물어요.</Text>
+        </Appear>
       </View>
 
       <Section title="추가 확인">
-        {questions.map((question, index) => (
-          <Question key={question.id} testID={`adaptive-question-${question.id}`} title={`${index + 1}. ${question.title}`} hint={question.hint}>
-            <AdaptiveControl question={question} />
-          </Question>
-        ))}
+        <StaggerList after={eventMotion.sequence * 2} style={styles.questions}>
+          {questions.map((question, index) => (
+            <Question key={question.id} testID={`adaptive-question-${question.id}`} title={`${index + 1}. ${question.title}`} hint={question.hint}>
+              <AdaptiveControl question={question} />
+            </Question>
+          ))}
+        </StaggerList>
       </Section>
 
       {evidenceOnlyFacts.length ? (
@@ -123,4 +134,5 @@ const styles = StyleSheet.create({
   numberControl: { gap: 8, alignItems: 'flex-start' },
   inlineAction: { marginTop: 20, alignItems: 'flex-start' },
   footerAction: { flex: 1, flexDirection: 'row' },
+  questions: { gap: 24 },
 });

@@ -14,6 +14,9 @@ import { goBack, resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { QrCode } from '../../features/eventKiosk/ui/QrCode';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
+import { Emphasis } from '../../features/eventKiosk/motion/Emphasis';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
 
 /** 최종 요약. 휴대폰으로 가져갈 수 있게 QR 을 만들고, 끝나면 처음 화면으로. */
@@ -57,7 +60,10 @@ export default function SummaryScreen() {
     );
   }
   const wide = width >= 1000;
+  // QR 이 만들어지면 패널이 떠오르고 테두리가 한 번 강조된다. 크기를 키우거나 흔들지 않는다.
   const qrPanel = (
+        <Appear distance={travel.md} style={styles.qrWrap}>
+        <Emphasis color={k.colors.primary} radius={20} testID="summary-qr-emphasis">
           <View style={styles.qrPanel} testID="summary-qr-panel">
             <Text style={styles.qrTitle}>휴대폰 카메라로 찍어 주세요</Text>
             {session.status === 'ready' ? (
@@ -74,6 +80,8 @@ export default function SummaryScreen() {
               <Text style={styles.muted}>QR에는 임시 결과를 찾는 무작위 token만 들어가요. 이름·생년월일·소득·자산은 임시 요약에도 저장하지 않아요.</Text>
             </View>
           </View>
+        </Emphasis>
+        </Appear>
   );
 
   return (
@@ -191,7 +199,8 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   dot: { width: 12, height: 12, borderRadius: 6, marginTop: 9 },
   itemTitle: { ...k.type.bodyLgStrong, color: k.colors.text },
-  qrPanel: { width: '100%', maxWidth: 420, alignSelf: 'center', backgroundColor: k.colors.surface, borderRadius: 20, padding: 28, gap: 18, alignItems: 'center', borderWidth: 1, borderColor: k.colors.outline },
+  qrWrap: { width: '100%', maxWidth: 420, alignSelf: 'center' },
+  qrPanel: { width: '100%', backgroundColor: k.colors.surface, borderRadius: 20, padding: 28, gap: 18, alignItems: 'center', borderWidth: 1, borderColor: k.colors.outline },
   qrTitle: { ...k.type.section, color: k.colors.text, textAlign: 'center' },
   qrBox: { padding: 8, backgroundColor: '#FFFFFF', borderRadius: 12 },
   qrHint: { ...k.type.body, color: k.colors.textMuted, textAlign: 'center' },

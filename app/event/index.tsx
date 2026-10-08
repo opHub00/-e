@@ -7,11 +7,16 @@ import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton } from '../../features/eventKiosk/ui/controls';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { Appear } from '../../components/motion/Appear';
+import { travel } from '../../design/motion';
+import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
+import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
 
 /** 첫 화면. 행사장 화면에 계속 떠 있는 대기 화면이기도 하다. */
 export default function EventLanding() {
   const load = kioskEvent();
   const width = useKioskWidth();
+  const replay = useFocusReplay();
   if (!load.ok) return null;
   const { copy, listings } = load.event.config;
   const wide = width >= 900;
@@ -33,11 +38,14 @@ export default function EventLanding() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.inner, wide && styles.innerWide]}>
           <View style={[styles.hero, wide && styles.heroWide]}>
+            <Appear replayKey={replay} distance={travel.md}>
             <View style={styles.heroCopy}>
               <Text style={styles.eyebrow}>2026 제주 청약 체험</Text>
               <Text style={[styles.title, wide && styles.titleWide]} accessibilityRole="header">{copy.landingTitle}</Text>
               <Text style={styles.subtitle}>{copy.landingSubtitle}</Text>
             </View>
+            </Appear>
+            <Appear replayKey={replay} delay={eventMotion.sequence} style={styles.heroRest}>
             <View style={styles.facts}>
               <Fact value={`${listings.length}개`} label="분석하는 공고" />
               <Fact value="약 3분" label="입력 시간" />
@@ -50,15 +58,16 @@ export default function EventLanding() {
               <MaterialIcons name="verified-user" size={22} color={k.colors.primary} />
               <Text style={styles.privacy}>입력한 정보는 이 기기에 저장하지 않고, 체험을 마치면 바로 지워져요.</Text>
             </View>
+            </Appear>
           </View>
-          <View style={[styles.preview, wide && styles.previewWide]}>
+          <Appear replayKey={replay} delay={eventMotion.sequence * 2} style={[styles.preview, wide && styles.previewWide]}>
             <Text style={styles.previewLabel}>한 번 입력하고 한눈에 비교해요</Text>
             <View style={styles.previewRows}>
               <PreviewRow icon="check-circle" title="신청 가능 여부" detail="자격·순위·추가 확인 사항" />
               <PreviewRow icon="account-balance" title="공식 점수" detail="공식 배점이 있을 때만 표시" />
               <PreviewRow icon="auto-awesome" title="완판e 추천" detail="적극 검토·검토 가능·조건 확인" />
             </View>
-          </View>
+          </Appear>
         </View>
       </ScrollView>
       <View style={styles.footer}><Text style={styles.footerText}>완판e 제주 청약 체험 · 행사 전용 데모</Text></View>
@@ -93,6 +102,7 @@ const styles = StyleSheet.create({
   hero: { gap: 28 },
   heroWide: { flex: 1.2 },
   heroCopy: { gap: 12 },
+  heroRest: { gap: 28 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   mark: { width: 44, height: 44, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
   markText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 30 },

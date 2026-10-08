@@ -11,7 +11,8 @@ import {
   type OfficialScoreState,
   type WanpanIndicator,
 } from '../evaluate';
-import { kioskStatusLabel, officialScoreStatusLabel } from '../presentation';
+import { humanize, humanizeAll, kioskStatusLabel, officialScoreStatusLabel } from '../presentation';
+import { cautionLines, useListingExplanation } from '../experience/useExplanation';
 import { useKioskStore } from '../useKioskStore';
 import { KioskButton } from './controls';
 import { chatPath, listingPath } from './navigation';
@@ -68,7 +69,7 @@ export function StageBadge({ label }: { label: string }) {
   return (
     <View style={[styles.badge, styles.stage]}>
       <MaterialIcons name="flag" size={20} color={k.colors.primary} />
-      <Text style={[k.type.label, { color: k.colors.primary }]}>{label}</Text>
+      <Text style={[k.type.label, { color: k.colors.primary }]}>{humanize(label)}</Text>
     </View>
   );
 }
@@ -93,20 +94,26 @@ export function OfficialScoreBlock({ score, compact }: { score: OfficialScore; c
 }
 
 /** 공식 배점이 없거나 아직 계산할 수 없을 때 0점으로 보이지 않게 상태를 그대로 표시한다. */
-export function OfficialScoreStateBlock({ state, compact }: { state: Exclude<OfficialScoreState, { status: 'AVAILABLE' }>; compact?: boolean }) {
-  const label = officialScoreStatusLabel(state.status);
+export function OfficialScoreStateBlock({ state, compact, title, note }: {
+  state: Exclude<OfficialScoreState, { status: 'AVAILABLE' }>;
+  compact?: boolean;
+  /** 설명 계층이 정한 상태 이름('서류 확인 필요' 등). 없으면 기본 문구. */
+  title?: string;
+  note?: string;
+}) {
+  const stateTitle = title ?? officialScoreStatusLabel(state.status);
   return (
     <View
       style={[styles.official, compact && styles.blockCompact]}
       testID={`official-score-${state.status.toLowerCase()}`}
-      accessibilityLabel={`공식 배점 ${label}`}
+      accessibilityLabel={`공식 배점 ${stateTitle}`}
     >
       <View style={styles.blockHead}>
         <MaterialIcons name="gavel" size={20} color={k.colors.text} />
         <Text style={styles.blockTitle}>공식 배점</Text>
       </View>
-      <Text style={styles.officialState}>{label}</Text>
-      {compact ? null : <Text style={styles.blockNote}>{state.reason}</Text>}
+      <Text style={styles.officialState}>{stateTitle}</Text>
+      {compact ? null : <Text style={styles.blockNote}>{note ?? humanize(state.reason)}</Text>}
     </View>
   );
 }
@@ -142,8 +149,11 @@ export function FavoriteToggle({ outcomeId, compact }: { outcomeId: string; comp
       onPress={() => toggle(outcomeId)}
       style={[styles.favorite, active && styles.favoriteActive, compact && styles.favoriteCompact]}
     >
-      <MaterialIcons name={active ? 'star' : 'star-border'} size={28} color={active ? '#B26A00' : k.colors.textMuted} />
-      {compact ? null : <Text style={[k.type.bodyStrong, { color: active ? '#8A4900' : k.colors.textMuted }]}>{active ? '관심 공고' : '관심 담기'}</Text>}
+      <MaterialIcons name={active ? 'star' : 'star-border'} size={compact ? 24 : 28} color={active ? '#B26A00' : k.colors.textMuted} />
+      {/* 별만 있으면 담겼는지 헷갈린다. 좁은 카드에서도 상태를 글로 함께 보여 준다. */}
+      <Text style={[compact ? k.type.label : k.type.bodyStrong, { color: active ? '#8A4900' : k.colors.textMuted }]}>
+        {active ? (compact ? '담김' : '관심 공고에 담김') : (compact ? '담기' : '관심 공고 담기')}
+      </Text>
     </MotionPressable>
   );
 }
@@ -166,8 +176,12 @@ function Bullets({ items, kind }: { items: string[]; kind: 'good' | 'caution' })
 /** 결과 목록의 카드 한 장. 공고 + 공급 하나. */
 export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
   const { listing } = outcome;
+  const explanation = useListingExplanation(outcome);
+  const favorite = useKioskStore(state => state.favorites.includes(outcome.id));
+  const cautions = cautionLines(explanation);
+  const advantages = humanizeAll(outcome.advantages);
   return (
-    <View style={styles.card} testID={`listing-card-${outcome.rank}`}>
+    <View style={[styles.card, favorite && styles.cardFavorite]} testID={`listing-card-${outcome.rank}`}>
       <View style={styles.cardTop}>
         <View style={styles.rank}><Text style={styles.rankText}>{outcome.rank}</Text></View>
         <View style={styles.cardTitleBox}>
@@ -185,19 +199,19 @@ export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
       <View style={styles.scores}>
         {outcome.officialScore
           ? <OfficialScoreBlock score={outcome.officialScore} compact />
-          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} compact />}
+          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} title={explanation.score.title} compact />}
         <WanpanBlock wanpan={outcome.wanpan} compact />
       </View>
-      {outcome.advantages.length ? (
+      {advantages.length ? (
         <View style={styles.group}>
           <Text style={styles.groupTitle}>유리한 조건</Text>
-          <Bullets items={outcome.advantages.slice(0, 2)} kind="good" />
+          <Bullets items={advantages.slice(0, 2)} kind="good" />
         </View>
       ) : null}
-      {outcome.cautions.length ? (
+      {cautions.length ? (
         <View style={styles.group}>
-          <Text style={styles.groupTitle}>주의할 조건</Text>
-          <Bullets items={outcome.cautions.slice(0, 2)} kind="caution" />
+          <Text style={styles.groupTitle}>{outcome.status === 'INELIGIBLE' ? '충족하지 못한 조건' : '확인할 조건'}</Text>
+          <Bullets items={cautions.slice(0, 2)} kind="caution" />
         </View>
       ) : null}
       <View style={styles.cardActions}>
@@ -244,11 +258,12 @@ const styles = StyleSheet.create({
   meterNone: { backgroundColor: k.colors.outline },
   favorite: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: k.touch, paddingHorizontal: 18, borderRadius: 12, borderWidth: 1, borderColor: k.colors.surfaceHighest, backgroundColor: k.colors.surface },
   favoriteActive: { borderColor: '#E7A64B', backgroundColor: '#FFF4E5' },
-  favoriteCompact: { width: k.touch, paddingHorizontal: 0, justifyContent: 'center' },
+  favoriteCompact: { minWidth: k.touch, paddingHorizontal: 12, gap: 4, justifyContent: 'center' },
   bullets: { gap: 6 },
   bullet: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
   bulletText: { ...k.type.body, color: k.colors.text, flex: 1 },
   card: { flexGrow: 1, flexBasis: 360, backgroundColor: k.colors.surface, borderRadius: 20, padding: 24, gap: 16, borderWidth: 1, borderColor: k.colors.outline },
+  cardFavorite: { borderColor: '#E7A64B', borderWidth: 2 },
   cardTop: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
   rank: { width: 44, height: 44, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
   rankText: { ...k.type.bodyLgStrong, color: k.colors.onPrimary },

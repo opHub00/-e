@@ -61,7 +61,8 @@ export default function AnalysisScreen() {
     return (
       <KioskFrame brand={brand} hideChat>
         <View style={styles.center} testID="analysis-error">
-          <Notice tone="error">분석하는 중에 문제가 생겼어요. 입력한 정보는 그대로 남아 있어요.</Notice>
+          {/* 내부 오류 코드는 보여 주지 않는다. 방문자가 할 수 있는 일만 안내한다. */}
+          <Notice tone="error">분석하는 중에 문제가 생겼어요. 입력한 정보는 그대로 남아 있어요. 다시 분석하거나, 입력을 확인한 뒤 다시 시도해 주세요.</Notice>
           <View style={styles.actions}>
             <KioskButton label="입력 고치기" variant="soft" icon="edit" onPress={() => router.replace(stepPath('subscription') as never)} />
             <KioskButton label="다시 분석하기" icon="refresh" onPress={() => { started.current = true; void runAnalysis(load.event); }} large />

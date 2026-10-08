@@ -99,31 +99,58 @@ export const FACT_LABELS: Record<string, string> = {
 };
 
 const RAW_KEY = /^(?:(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.-]+|(?:input|rule|fact):[A-Za-z0-9_.-]+|[A-Z][A-Z0-9_]{2,})$/;
-const EMBEDDED_RAW_KEY = /\b(?:(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.-]+|(?:input|rule|fact):[A-Za-z0-9_.-]+)/g;
+export const UNKNOWN_FACT_LABEL = '추가 자격 정보';
+
+const FACT_KEY = /(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.]*[A-Za-z0-9_]/g;
+const PREFIXED_KEY = /(?:input|rule|fact|review):[A-Za-z0-9_.]*[A-Za-z0-9_]/g;
+const ENUM_CODE = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g;
 
 export function isRawDomainKey(value: string): boolean {
   return RAW_KEY.test(value.trim());
 }
 
 export function containsRawDomainKey(value: string): boolean {
-  return isRawDomainKey(value) || value.search(EMBEDDED_RAW_KEY) >= 0;
+  return isRawDomainKey(value)
+    || new RegExp(FACT_KEY.source).test(value)
+    || new RegExp(PREFIXED_KEY.source).test(value)
+    || new RegExp(ENUM_CODE.source).test(value);
 }
 
-export function userFacingFactLabel(value: string): string {
+export function factLabel(value: string): string {
   const trimmed = value.trim();
-  if (!trimmed) return '추가 자격 정보';
+  if (!trimmed) return UNKNOWN_FACT_LABEL;
   const direct = FACT_LABELS[trimmed];
   if (direct) return direct;
-  const unwrapped = trimmed.replace(/^(?:input|rule|fact):/, '');
+  const unwrapped = trimmed.replace(/^(?:input|rule|fact|review):/, '');
   const normalized = FACT_LABELS[unwrapped];
   if (normalized) return normalized;
-  if (isRawDomainKey(trimmed)) return '추가 자격 정보';
-  return trimmed.replace(EMBEDDED_RAW_KEY, key => FACT_LABELS[key] ?? '추가 자격 정보');
+  return UNKNOWN_FACT_LABEL;
 }
 
-export function userFacingLabels(values: readonly string[]): string[] {
-  return [...new Set(values.map(userFacingFactLabel).filter(Boolean))];
+/** 화면에 나갈 문장에서 기계용 키와 enum 코드를 제거한다. */
+export function humanize(value: string): string {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) return '';
+  const replaced = trimmed
+    .replace(PREFIXED_KEY, key => factLabel(key))
+    .replace(FACT_KEY, key => factLabel(key))
+    .replace(ENUM_CODE, '')
+    .replace(/\s*·\s*(?=·|$)/g, '')
+    .replace(/^\s*·\s*/, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return replaced || UNKNOWN_FACT_LABEL;
 }
+
+export function humanizeAll(values: readonly string[]): string[] {
+  return [...new Set(values.map(humanize).filter(Boolean))];
+}
+
+/** Backward-compatible names used by the stabilization contract. */
+export const userFacingFactLabel = humanize;
+export const userFacingLabels = humanizeAll;
+export const containsRawKey = containsRawDomainKey;
 
 export function kioskStatusLabel(status: KioskStatus, reason: KioskUnavailableReason | null = null): string {
   return status === 'UNAVAILABLE' && reason ? UNAVAILABLE_REASON_LABELS[reason] : KIOSK_STATUS_LABELS[status];

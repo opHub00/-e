@@ -15,6 +15,8 @@ import { QrCode } from '../../features/eventKiosk/ui/QrCode';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
+import { SelectedListings } from '../../features/eventKiosk/experience/SelectedListings';
+import { evidenceOnlyFacts } from '../../features/eventKiosk/experience/explain';
 
 /** 최종 요약. 휴대폰으로 가져갈 수 있게 QR 을 만들고, 끝나면 처음 화면으로. */
 export default function SummaryScreen() {
@@ -29,10 +31,14 @@ export default function SummaryScreen() {
   >({ status: 'idle' });
 
   const summary = useMemo(
-    () => (load.ok && evaluation ? buildSummary({ eventId: load.event.config.id, householdType, evaluation, favoriteIds: favorites }) : null),
+    () => (load.ok && evaluation ? buildSummary({ eventId: load.event.config.id, householdType, evaluation, favoriteIds: favorites, evidenceOnly: evidenceOnlyFacts(load.event.dataset) }) : null),
     [evaluation, favorites, householdType, load],
   );
   const showQr = session.status === 'ready';
+  const selected = useMemo(
+    () => favorites.map(id => evaluation?.outcomes.find(outcome => outcome.id === id)).filter((outcome): outcome is NonNullable<typeof outcome> => Boolean(outcome)),
+    [evaluation, favorites],
+  );
 
   const makeQr = async () => {
     if (!summary || !attached || !load.ok || session.status === 'creating') return;
@@ -67,7 +73,7 @@ export default function SummaryScreen() {
                 <Text style={styles.qrHint}>요약이 휴대폰 화면에 열려요. 앱 설치가 필요 없고 6시간 뒤 만료돼요.</Text>
               </>
             ) : (
-              <Notice tone="warn">이 기기에서는 휴대폰 링크를 만들 수 없어요. 행사 설정의 공유 주소를 확인해 주세요.</Notice>
+              <Notice tone="warn">휴대폰 링크를 아직 만들지 못했어요. 잠시 후 다시 시도해 주세요.</Notice>
             )}
             <View style={styles.privacy}>
               <MaterialIcons name="lock" size={22} color={k.colors.textMuted} />
@@ -92,7 +98,7 @@ export default function SummaryScreen() {
             <KioskButton label="결과 목록" variant="ghost" icon="arrow-back" onPress={() => goBack('/event/results')} />
             <KioskButton
               testID="summary-qr"
-              label={session.status === 'creating' ? '임시 링크 만드는 중…' : '휴대폰으로 가져가기'}
+              label={session.status === 'creating' ? '임시 링크 만드는 중…' : session.status === 'error' ? '다시 시도하기' : '휴대폰으로 가져가기'}
               icon="smartphone"
               onPress={() => void makeQr()}
               disabled={session.status === 'creating'}
@@ -102,7 +108,11 @@ export default function SummaryScreen() {
         )
       }
     >
-      {session.status === 'error' ? <Notice tone="warn">임시 결과 링크를 만들지 못했어요. 행사 RC 서버가 실행 중인지 확인한 뒤 다시 시도해 주세요.</Notice> : null}
+      {session.status === 'error' ? (
+        <View testID="summary-qr-error">
+          <Notice tone="warn">휴대폰으로 보낼 링크를 지금 만들지 못했어요. 잠시 후 아래 ‘다시 시도하기’를 눌러 주세요. 계속 안 되면 화면을 사진으로 남기거나 행사 안내 직원에게 알려 주세요.</Notice>
+        </View>
+      ) : null}
       <View style={[styles.layout, wide && styles.layoutWide]}>
         {/* 좁은 화면에서는 QR 을 맨 위에 둔다. 버튼을 누른 뒤 스크롤하지 않아도 바로 보이게. */}
         {showQr && !wide ? qrPanel : null}
@@ -123,7 +133,9 @@ export default function SummaryScreen() {
             <Items items={summary.recommended} empty="지금 정보로 바로 신청할 수 있는 공고는 없어요. 추가 확인이 필요한 공고를 먼저 살펴보세요." />
           </Card>
           <Card title={`선택한 관심 공고 ${summary.favorites.length}개`} icon="star">
-            <Items items={summary.favorites} empty="담은 관심 공고가 없어요." />
+            {selected.length
+              ? <SelectedListings outcomes={selected} />
+              : <Items items={summary.favorites} empty="담은 관심 공고가 없어요. 결과 목록에서 별표를 눌러 담을 수 있어요." />}
             {summary.favorites.length ? null : <KioskButton label="관심 공고 담으러 가기" variant="soft" onPress={() => router.push('/event/results' as never)} />}
           </Card>
           <Card title="주요 주의사항" icon="report-problem">

@@ -51,6 +51,11 @@ type KioskState = {
   openChat: (event: LoadedEvent, outcomeId: string | null) => void;
   ask: (event: LoadedEvent, message: string) => Promise<void>;
   reset: () => void;
+  /**
+   * 개발·QA 전용. 시연 persona 의 답을 한 번에 넣는다. 화면 흐름(분석 → 질문 → 결과)은 그대로 거친다.
+   * 행사용 빌드의 화면에서는 부르는 곳이 없다(/event/qa 는 개발 빌드에서만 동작).
+   */
+  qaLoadAnswers: (answers: KioskAnswers, answeredKeys: string[]) => void;
 };
 
 /** 분석 화면이 너무 빨리 지나가면 방문자가 무슨 일이 있었는지 모른다. 최소한 이만큼은 보여 준다. */
@@ -181,4 +186,11 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
   },
 
   reset: () => set(state => ({ sessionKey: state.sessionKey + 1, ...initial() })),
+
+  qaLoadAnswers: (answers, answeredKeys) => set(state => ({
+    sessionKey: state.sessionKey + 1,
+    ...initial(),
+    answers: structuredClone(answers),
+    answered: [...new Set(answeredKeys)],
+  })),
 }));

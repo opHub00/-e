@@ -6,18 +6,10 @@
   "cleanUrls": true,
   "functions": {
     "api/event-api/listings.ts": {
-      "includeFiles": [
-        "data/events/*.json",
-        "features/discovery/server/ApplyHomeApi.ts",
-        "features/eventKiosk/frozen/domain/rules.ts",
-        "features/eventKiosk/live/**"
-      ]
+      "includeFiles": "{data/events/*.json,features/discovery/server/ApplyHomeApi.ts,features/eventKiosk/frozen/domain/rules.ts,features/eventKiosk/live/**}"
     },
     "api/event-api/result-sessions/**/*.ts": {
-      "includeFiles": [
-        "features/eventKiosk/server/**",
-        "scripts/event-result-session-store.mjs"
-      ]
+      "includeFiles": "{features/eventKiosk/server/**,scripts/event-result-session-store.mjs}"
     }
   },
   "headers": [

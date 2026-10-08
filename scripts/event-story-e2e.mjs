@@ -46,19 +46,34 @@ async function overflow(page) {
 
 for (const viewport of VIEWPORTS) {
   const { context, page, errors } = await open(viewport);
+  // 첫 진입: 앱 공통 브랜드 인트로가 Story 앞에 따로 돌지 않아야 한다.
+  let sawBrandEntrance = false;
+  await page.exposeFunction('__brandSeen', () => { sawBrandEntrance = true; });
+  await context.addInitScript(() => {
+    new MutationObserver(() => { if (document.querySelector('[data-testid="brand-entrance"]')) (window).__brandSeen?.(); })
+      .observe(document, { childList: true, subtree: true });
+  });
   await page.goto(`${BASE}/event`, { waitUntil: 'networkidle' });
   const opened = await tid(page, 'product-story').waitFor({ timeout: 8000 }).then(() => true).catch(() => false);
   check(`${viewport.name}: first visit auto-plays the story`, opened);
   const started = Date.now();
+  check(`${viewport.name}: brand cover lifted once the story is on screen`, !(await page.evaluate(() => document.documentElement.hasAttribute('data-entrance'))));
+  // 장면별 '그림 완성' 시점 직후에 찍는다.
+  const CAPTURE_AT = [1250, 1500, 3050, 2400, 1500];
   for (const [index, scene] of SCENES.entries()) {
     await tid(page, `story-scene-${scene}`).waitFor({ timeout: 8000 });
-    await page.waitForTimeout(index === SCENES.length - 1 ? 2200 : 2600);
+    const sceneStart = Date.now();
+    await page.waitForTimeout(CAPTURE_AT[index]);
     await page.screenshot({ path: `${SHOT}/${viewport.name}-${index + 1}-${scene}.png` });
+    if (index < SCENES.length - 1) await page.waitForTimeout(0);
+    void sceneStart;
     const { pageOver, clipped } = await overflow(page);
     check(`${viewport.name} scene ${index + 1}: no overflow or clipped text`, pageOver <= 1 && clipped.length === 0, `${pageOver}px ${clipped.join('|')}`);
   }
   const reachedMs = Date.now() - started;
-  check(`${viewport.name}: reaches the final CTA within 20s`, reachedMs < 20_000, `${reachedMs}ms`);
+  // 자동 재생 11.7초 + 캡처·검사 시간 여유.
+  check(`${viewport.name}: reaches the final CTA within 13s (+ capture overhead)`, reachedMs < 14_500, `${reachedMs}ms`);
+  check(`${viewport.name}: no separate brand intro before the story`, !sawBrandEntrance);
   check(`${viewport.name}: final scene shows CTA and replay`, (await tid(page, 'story-start').count()) === 1 && (await tid(page, 'story-replay').count()) === 1);
   // 다시 보기
   await tid(page, 'story-replay').click();

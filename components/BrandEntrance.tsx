@@ -6,6 +6,7 @@ import { BrandMark } from './BrandMark';
 import { duration, easing, stagger, travel, useNative } from '../design/motion';
 import { colors, overlay, spacing, tracking, type } from '../design/tokens';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { storyOwnsEntrance } from '../features/eventKiosk/story/storyEntrance';
 import {
   brandEntranceElapsedMs,
   chooseBrandEntranceVariant,
@@ -76,6 +77,13 @@ export function BrandEntrance() {
     const session = getBrandEntranceSession();
     if (!shouldPlayBrandEntrance(session)) {
       clearBrandEntranceCover();
+      setPhase('done');
+      return;
+    }
+    // 행사 첫 화면의 Product Story 가 진입을 맡는 경우: 인트로를 따로 틀지 않는다(두 번 열리는 느낌 방지).
+    // 문서의 브랜드 표지는 Story 가 화면에 올라온 뒤 걷고, 늦어도 문서 쪽 예산 타이머가 걷는다.
+    if (storyOwnsEntrance()) {
+      markBrandEntrancePlayed(session);
       setPhase('done');
       return;
     }

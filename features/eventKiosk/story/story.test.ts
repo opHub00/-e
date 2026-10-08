@@ -5,14 +5,17 @@ import { listingMediaOf, normalizeListingMedia } from '../media/listingMedia.ts'
 import { storyDataFrom, STORY_PROFILE_FIELDS } from './storyData.ts';
 import { forgetStorySeen, hasSeenStory, markStorySeen, STORY_SEEN_KEY } from './storyPreference.ts';
 import { isLastScene, nextSceneIndex, STORY_AUTOPLAY_MS, STORY_SCENES } from './storyScript.ts';
+import { storyOwnsEntrance } from './storyEntrance.ts';
 
 const load = kioskEvent();
 if (!load.ok) throw new Error(load.error);
 
-test('story is five scenes, 10–20 seconds to the final CTA, one message each', () => {
+test('story is five scenes, 10–13 seconds to the final CTA, core scenes get the most time', () => {
   assert.deepEqual(STORY_SCENES.map(scene => scene.id), ['complexity', 'profile', 'analysis', 'sorting', 'action']);
   const lastBuild = STORY_SCENES.at(-1)!.buildMs;
-  assert.ok(STORY_AUTOPLAY_MS + lastBuild >= 10_000 && STORY_AUTOPLAY_MS + lastBuild <= 20_000, `${STORY_AUTOPLAY_MS + lastBuild}ms`);
+  assert.ok(STORY_AUTOPLAY_MS + lastBuild >= 10_000 && STORY_AUTOPLAY_MS + lastBuild <= 13_000, `${STORY_AUTOPLAY_MS + lastBuild}ms`);
+  const hold = Object.fromEntries(STORY_SCENES.map(scene => [scene.id, scene.holdMs]));
+  assert.ok(Math.min(hold.analysis, hold.sorting) > Math.max(hold.complexity, hold.profile), 'scenes 3·4 stay longer than 1·2');
   for (const scene of STORY_SCENES.slice(0, -1)) assert.ok(scene.buildMs < scene.holdMs, `${scene.id}: picture completes before the scene moves on`);
   assert.equal(STORY_SCENES.at(-1)!.holdMs, 0, 'last scene waits for the CTA');
   assert.equal(nextSceneIndex(STORY_SCENES.length - 1), null);
@@ -71,4 +74,24 @@ test('listing media accepts only safe, well-formed images and is empty for today
     assert.deepEqual(listingMediaOf(listing as unknown as { title: string } & Record<string, unknown>), []);
   }
   assert.equal(listingMediaOf({ title: '테스트', media: [{ uri: 'https://example.com/x.jpg' }] })[0].alt, '테스트 대표 이미지');
+});
+
+test('the story owns the first entrance only on the event landing for a new browser, or on the story route', () => {
+  forgetStorySeen();
+  assert.equal(storyOwnsEntrance('/event'), true);
+  assert.equal(storyOwnsEntrance('/event/'), true);
+  assert.equal(storyOwnsEntrance('/event/story'), true);
+  assert.equal(storyOwnsEntrance('/event/results'), false);
+  assert.equal(storyOwnsEntrance('/home'), false);
+  assert.equal(storyOwnsEntrance(null), false);
+  markStorySeen();
+  assert.equal(storyOwnsEntrance('/event'), false, 'returning browsers get the regular brand entrance, not the story');
+  assert.equal(storyOwnsEntrance('/event/story'), true);
+  forgetStorySeen();
+});
+
+test('featured listing carries a media slot for Codex images', () => {
+  const data = storyDataFrom(load.event);
+  assert.deepEqual(data.featured.media, []);
+  assert.ok(data.featured.housingType && data.featured.district);
 });

@@ -13,17 +13,12 @@ import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
 import { ProductStory } from '../../features/eventKiosk/story/ProductStory';
-import { hasSeenStory, markStorySeen } from '../../features/eventKiosk/story/storyPreference';
-import { STORY_AUTOPLAY_MS } from '../../features/eventKiosk/story/storyScript';
+import { markStorySeen } from '../../features/eventKiosk/story/storyPreference';
+import { storyOwnsEntrance } from '../../features/eventKiosk/story/storyEntrance';
+import { STORY_AUTOPLAY_MS, STORY_SCENES } from '../../features/eventKiosk/story/storyScript';
 
-/**
- * 처음 온 브라우저에서만 Product Story 를 자동으로 연다. 자동화 브라우저(회귀 점검)는 기존 흐름을 그대로 검사하도록 자동 재생하지 않는다.
- * 소개는 첫 화면의 '완판e 소개 보기'나 /event/story 로 언제든 다시 볼 수 있다.
- */
-function shouldAutoplayStory(): boolean {
-  if (typeof navigator !== 'undefined' && (navigator as { webdriver?: boolean }).webdriver) return false;
-  return !hasSeenStory();
-}
+/** 소개 버튼에 적는 길이. 마지막 장면 그림까지 포함한 대략의 초. */
+const STORY_SECONDS = Math.round((STORY_AUTOPLAY_MS + STORY_SCENES[STORY_SCENES.length - 1].buildMs) / 1000);
 
 /** 첫 화면. 행사장 화면에 계속 떠 있는 대기 화면이기도 하다. */
 export default function EventLanding() {
@@ -32,7 +27,8 @@ export default function EventLanding() {
   const replay = useFocusReplay();
   // 정적으로 그린 화면과 첫 화면이 같도록, 저장된 '봤음' 표시는 붙은 뒤에 읽는다.
   const [storyOpen, setStoryOpen] = useState(false);
-  useEffect(() => { if (shouldAutoplayStory()) setStoryOpen(true); }, []);
+  // 처음 온 브라우저에서만 자동으로 연다. 소개는 '완판e 소개 보기'나 /event/story 로 언제든 다시 볼 수 있다.
+  useEffect(() => { if (storyOwnsEntrance()) setStoryOpen(true); }, []);
   if (!load.ok) return null;
   const { copy, listings } = load.event.config;
   const wide = width >= 900;
@@ -71,7 +67,7 @@ export default function EventLanding() {
               <KioskButton testID="event-start" label={copy.landingCta} icon="arrow-forward" onPress={start} large grow />
             </View>
             <View style={styles.storyLink}>
-              <KioskButton testID="landing-story" label={`완판e 소개 보기 · ${Math.round(STORY_AUTOPLAY_MS / 1000)}초`} icon="play-circle-outline" variant="ghost" onPress={() => setStoryOpen(true)} />
+              <KioskButton testID="landing-story" label={`완판e 소개 보기 · ${STORY_SECONDS}초`} icon="play-circle-outline" variant="ghost" onPress={() => setStoryOpen(true)} />
             </View>
             <View style={styles.privacyRow}>
               <MaterialIcons name="verified-user" size={22} color={k.colors.primary} />

@@ -1,4 +1,5 @@
 import type { LoadedEvent } from '../eventConfig.ts';
+import { listingMediaOf, type ListingMedia } from '../media/listingMedia.ts';
 
 /**
  * Story 에 들어가는 그림 재료. 실제 행사 공고에서 가져오되, 방문자의 개인정보나 판정 결과는 쓰지 않는다.
@@ -17,7 +18,17 @@ export type StoryData = {
   /** 분류 장면에 흩어졌다 모이는 공급유형 칩. 실제 공급유형 이름. */
   supplies: string[];
   /** 마지막 장면에서 커지는 주택. */
-  featured: { listingId: string; title: string; meta: string; schedule: string; supplyLabel: string };
+  featured: {
+    listingId: string;
+    title: string;
+    meta: string;
+    housingType: string;
+    district: string;
+    schedule: string;
+    supplyLabel: string;
+    /** Codex 가 공고 이미지를 붙이면 여기로 들어온다. 없으면 빈 배열 → placeholder. */
+    media: ListingMedia[];
+  };
 };
 
 /** 공고마다 붙어 있는 조건 태그. 판정 값이 아니라 '조건이 많다'를 보여 주는 이름뿐이다. */
@@ -65,6 +76,9 @@ export function storyDataFrom(event: LoadedEvent): StoryData {
       listingId: featuredSource.listingId,
       title: featuredSource.title,
       meta: `${featuredSource.housingType} · ${featuredSource.district}`,
+      housingType: featuredSource.housingType,
+      district: featuredSource.district,
+      media: listingMediaOf(featuredSource as unknown as { title: string } & Record<string, unknown>),
       schedule: `접수 ${dot(featuredSource.recruitment.startDate)} ~ ${dot(featuredSource.recruitment.endDate)}`,
       supplyLabel: featuredSupply,
     },

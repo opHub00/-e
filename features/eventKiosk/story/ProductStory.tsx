@@ -7,11 +7,12 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import { kioskEvent } from '../kioskEvent';
 import { KioskButton } from '../ui/controls';
 import { k } from '../ui/theme';
-import { storyDataFrom, type StoryData } from './storyData';
+import { storyDataFrom } from './storyData';
 import { isLastScene, nextSceneIndex, STORY_SCENES, type StorySceneId } from './storyScript';
-import { SceneAction, SceneAnalysis, SceneComplexity, SceneProfile, SceneSorting, STAGE } from './StoryScenes';
+import { SceneAction, SceneAnalysis, SceneComplexity, SceneProfile, SceneSorting, STAGES, type SceneProps, type StoryLayout } from './StoryScenes';
+import { clearBrandEntranceCover } from '../../brandEntrance/session';
 
-const SCENE_VIEWS: Record<StorySceneId, ComponentType<{ p: Animated.Value; data: StoryData }>> = {
+const SCENE_VIEWS: Record<StorySceneId, ComponentType<SceneProps>> = {
   complexity: SceneComplexity,
   profile: SceneProfile,
   analysis: SceneAnalysis,
@@ -21,6 +22,8 @@ const SCENE_VIEWS: Record<StorySceneId, ComponentType<{ p: Animated.Value; data:
 
 /** 무대를 화면에 맞추는 최대 배율. 데스크톱에서 그림만 거대해지지 않게. */
 const MAX_STAGE_SCALE = 1.5;
+/** 이보다 좁으면 휴대폰 구도(세로 배치, 요소 감축)를 쓴다. */
+const COMPACT_BELOW = 560;
 
 /**
  * Product Story. 서비스를 '이해시키는' 서사 계층이다(실제 사용 중 상태 피드백인 UI Motion 과 별개).
@@ -44,6 +47,11 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   const progress = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(1)).current;
   const bar = useRef(new Animated.Value(0)).current;
+  const [rootWidth, setRootWidth] = useState(0);
+  const layout: StoryLayout = rootWidth && rootWidth < COMPACT_BELOW ? 'compact' : 'wide';
+
+  // 문서의 브랜드 표지(로고)는 Story 가 화면에 올라온 뒤에 걷는다. 그래서 '브랜드 → Story' 가 한 번의 진입으로 이어진다.
+  useEffect(() => { clearBrandEntranceCover(); }, []);
 
   // 장면 하나: 그림이 완성되는 동안 progress 0→1, 막대는 holdMs 동안 채워지고 다음 장면으로.
   useEffect(() => {
@@ -71,6 +79,7 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
 
   if (!data) return null;
   const SceneView = SCENE_VIEWS[scene.id];
+  const STAGE = STAGES[layout];
   const scale = stage.width && stage.height ? Math.min(stage.width / STAGE.width, stage.height / STAGE.height, MAX_STAGE_SCALE) : 0;
   const onStageLayout = (event: LayoutChangeEvent) => setStage({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
   const last = isLastScene(index);
@@ -80,7 +89,7 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   };
 
   return (
-    <View style={styles.root} testID={testID} accessibilityViewIsModal>
+    <View style={styles.root} testID={testID} accessibilityViewIsModal onLayout={event => setRootWidth(event.nativeEvent.layout.width)}>
       <View style={styles.top}>
         <View style={styles.brandRow}>
           <View style={styles.mark}><Text style={styles.markText}>e</Text></View>
@@ -113,14 +122,14 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
       </View>
 
       <Animated.View style={[styles.messageBox, { opacity: fade }]} accessibilityLiveRegion="polite">
-        <Text style={styles.message} accessibilityRole="header" testID="story-message">{scene.message(data.region)}</Text>
+        <Text style={[styles.message, layout === 'compact' && styles.messageCompact]} accessibilityRole="header" testID="story-message">{scene.message(data.region)}</Text>
       </Animated.View>
 
       <View style={styles.stageArea} onLayout={onStageLayout} accessibilityLabel={scene.description(data.region)} testID={`story-scene-${scene.id}`}>
         {scale ? (
           <Animated.View style={{ width: STAGE.width * scale, height: STAGE.height * scale, opacity: fade }}>
             <View style={{ width: STAGE.width, height: STAGE.height, transform: [{ translateX: (STAGE.width * scale - STAGE.width) / 2 }, { translateY: (STAGE.height * scale - STAGE.height) / 2 }, { scale }] }}>
-              <SceneView key={`${scene.id}-${round}`} p={progress} data={data} />
+              <SceneView key={`${scene.id}-${round}-${layout}`} p={progress} data={data} layout={layout} />
             </View>
           </Animated.View>
         ) : null}
@@ -166,6 +175,8 @@ const styles = StyleSheet.create({
   segmentFill: { height: 4, borderRadius: 2, backgroundColor: k.colors.primary },
   messageBox: { width: '100%', maxWidth: 980, alignSelf: 'center', minHeight: 88, justifyContent: 'center' },
   message: { ...k.type.hero, color: k.colors.text },
+  /** 휴대폰: 문장이 세 줄을 넘지 않게 한 단계 작게. */
+  messageCompact: { ...k.type.title },
   stageArea: { flex: 1, minHeight: 200, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', maxWidth: 980, alignSelf: 'center', flexWrap: 'wrap' },
   footerHint: { ...k.type.bodyStrong, color: k.colors.textSubtle },

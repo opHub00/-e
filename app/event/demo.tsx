@@ -8,6 +8,7 @@ import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { listingPath, resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { forgetStorySeen } from '../../features/eventKiosk/story/storyPreference';
 
 /**
  * 행사 운영용 Demo Mode. 개발 빌드나 EXPO_PUBLIC_EVENT_DEMO_MODE=1 빌드에서만 동작한다.
@@ -87,6 +88,12 @@ export default function EventDemo() {
           ))}
         </View>
         {!evaluation ? <Text style={styles.hint}>Adaptive·Dashboard·Detail·QR 은 persona 를 넣어 분석한 뒤에 열려요.</Text> : null}
+
+        <Text style={styles.section}>Product Story</Text>
+        <View style={styles.actions}>
+          <KioskButton label="소개 보기" variant="ghost" icon="play-circle-outline" onPress={() => router.push('/event/story' as never)} testID="demo-story" />
+          <KioskButton label="첫 화면 자동 재생 다시 켜기" variant="ghost" icon="replay" onPress={forgetStorySeen} testID="demo-story-reset" />
+        </View>
 
         <Text style={styles.section}>세션</Text>
         <KioskButton label="전체 세션 reset" icon="restart-alt" variant="soft" onPress={resetToHome} testID="demo-reset" />

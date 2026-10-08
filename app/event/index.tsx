@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
@@ -11,12 +12,27 @@ import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
+import { ProductStory } from '../../features/eventKiosk/story/ProductStory';
+import { hasSeenStory, markStorySeen } from '../../features/eventKiosk/story/storyPreference';
+import { STORY_AUTOPLAY_MS } from '../../features/eventKiosk/story/storyScript';
+
+/**
+ * 처음 온 브라우저에서만 Product Story 를 자동으로 연다. 자동화 브라우저(회귀 점검)는 기존 흐름을 그대로 검사하도록 자동 재생하지 않는다.
+ * 소개는 첫 화면의 '완판e 소개 보기'나 /event/story 로 언제든 다시 볼 수 있다.
+ */
+function shouldAutoplayStory(): boolean {
+  if (typeof navigator !== 'undefined' && (navigator as { webdriver?: boolean }).webdriver) return false;
+  return !hasSeenStory();
+}
 
 /** 첫 화면. 행사장 화면에 계속 떠 있는 대기 화면이기도 하다. */
 export default function EventLanding() {
   const load = kioskEvent();
   const width = useKioskWidth();
   const replay = useFocusReplay();
+  // 정적으로 그린 화면과 첫 화면이 같도록, 저장된 '봤음' 표시는 붙은 뒤에 읽는다.
+  const [storyOpen, setStoryOpen] = useState(false);
+  useEffect(() => { if (shouldAutoplayStory()) setStoryOpen(true); }, []);
   if (!load.ok) return null;
   const { copy, listings } = load.event.config;
   const wide = width >= 900;
@@ -54,6 +70,9 @@ export default function EventLanding() {
             <View style={styles.cta}>
               <KioskButton testID="event-start" label={copy.landingCta} icon="arrow-forward" onPress={start} large grow />
             </View>
+            <View style={styles.storyLink}>
+              <KioskButton testID="landing-story" label={`완판e 소개 보기 · ${Math.round(STORY_AUTOPLAY_MS / 1000)}초`} icon="play-circle-outline" variant="ghost" onPress={() => setStoryOpen(true)} />
+            </View>
             <View style={styles.privacyRow}>
               <MaterialIcons name="verified-user" size={22} color={k.colors.primary} />
               <Text style={styles.privacy}>입력한 정보는 이 기기에 저장하지 않고, 체험을 마치면 바로 지워져요.</Text>
@@ -71,6 +90,14 @@ export default function EventLanding() {
         </View>
       </ScrollView>
       <View style={styles.footer}><Text style={styles.footerText}>완판e 제주 청약 체험 · 행사 전용 데모</Text></View>
+      {storyOpen ? (
+        <View style={StyleSheet.absoluteFill}>
+          <ProductStory
+            onStart={() => { markStorySeen(); setStoryOpen(false); start(); }}
+            onSkip={() => { markStorySeen(); setStoryOpen(false); }}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -94,6 +121,7 @@ function Fact({ value, label }: { value: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
+  storyLink: { flexDirection: 'row' },
   root: { flex: 1, backgroundColor: k.colors.surface, minHeight: '100%' as unknown as number },
   header: { minHeight: 88, paddingHorizontal: 32, justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: k.colors.hairline },
   scroll: { flexGrow: 1, paddingHorizontal: 48, paddingTop: 40, paddingBottom: 32, alignItems: 'center' },

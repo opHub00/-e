@@ -12,6 +12,8 @@ import { chatPath, goBack, resetToHome } from '../../features/eventKiosk/ui/navi
 import { EmptyState, FavoriteToggle, OfficialScoreBlock, OfficialScoreStateBlock, StageBadge, StatusBadge, WanpanBlock } from '../../features/eventKiosk/ui/resultParts';
 import type { OfficialScoreState } from '../../features/eventKiosk/evaluate';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { listingMediaOf } from '../../features/eventKiosk/media/listingMedia';
+import { ListingGallery } from '../../features/eventKiosk/media/ListingMediaView';
 import { ConditionsSection, OrderSection, ScoreSection, SourcesSection, VerdictSection } from '../../features/eventKiosk/experience/ExplanationSections';
 import type { ListingExplanation } from '../../features/eventKiosk/experience/explain';
 import { useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
@@ -91,6 +93,13 @@ function Header({ outcome, explanation }: { outcome: KioskOutcome; explanation: 
         <StatusBadge outcome={outcome} large />
         {outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}
       </View>
+      {/* 판정 상태를 먼저 보여 준 다음, 신청할 집을 실제로 본다. 이미지가 없으면 placeholder. */}
+      <ListingGallery
+        media={listingMediaOf(listing as unknown as { title: string } & Record<string, unknown>)}
+        housingType={listing.housingType}
+        district={listing.district}
+        title={listing.title}
+      />
       <View style={styles.scores}>
         {outcome.officialScore
           ? <OfficialScoreBlock score={outcome.officialScore} />

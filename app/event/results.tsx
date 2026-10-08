@@ -15,6 +15,8 @@ import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
+import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
+import { LiveListingCard } from '../../features/eventKiosk/ui/LiveListingCard';
 
 /** 결과 대시보드. 위에 세 묶음의 수, 아래에 모든 공고를 추천 순서대로. */
 export default function ResultsScreen() {
@@ -26,6 +28,7 @@ export default function ResultsScreen() {
   const sessionKey = useKioskStore(state => state.sessionKey);
   const [filter, setFilter] = useState<KioskBucket | null>(null);
   const replay = useFocusReplay();
+  const { portfolio: servicePortfolio, loading: liveLoading } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
 
   const outcomes = useMemo(
     () => (evaluation?.outcomes ?? []).filter(outcome => !filter || outcome.bucket === filter),
@@ -34,6 +37,10 @@ export default function ResultsScreen() {
   const notes = useMemo(
     () => [...new Set((evaluation?.outcomes ?? []).map(outcome => outcome.listing.sourceNote))],
     [evaluation],
+  );
+  const liveInformationOnly = useMemo(
+    () => (servicePortfolio?.listings ?? []).filter(listing => listing.origin === 'LIVE' && listing.assessmentAvailability === 'INFORMATION_ONLY'),
+    [servicePortfolio],
   );
 
   if (!load.ok) return null;
@@ -102,6 +109,19 @@ export default function ResultsScreen() {
           : <EmptyState title="분석할 수 있는 공고를 찾지 못했어요" body="입력을 다시 확인하거나 처음부터 다시 시작해 주세요. 계속되면 행사 안내 직원에게 알려 주세요." action={{ label: '처음부터 시작하기', onPress: resetToHome }} />
       )}
 
+      <View style={styles.liveSection} testID="live-listings-section">
+        <View style={styles.listHead}>
+          <Text style={styles.section} accessibilityRole="header">최신 제주 공고</Text>
+          <Text style={styles.liveCount}>{liveLoading ? '확인 중' : `${liveInformationOnly.length}개`}</Text>
+        </View>
+        <Text style={styles.orderNote}>공식 source에서 가져온 최신 공고예요. 검수된 Rule Package가 없는 공고는 정보만 제공하고 현재 판정 결과에는 섞지 않아요.</Text>
+        {liveInformationOnly.length ? (
+          <View style={styles.list}>{liveInformationOnly.map(listing => <LiveListingCard key={listing.canonicalKey} listing={listing} />)}</View>
+        ) : (
+          <Notice tone="info">현재 새로 연결된 제주 공고가 없거나 공식 source를 확인하는 중이에요. 위 판정은 검수된 frozen dataset으로 계속 이용할 수 있어요.</Notice>
+        )}
+      </View>
+
       <View style={styles.notes}>
         {notes.map(note => <Text key={note} style={styles.note}>· {note}</Text>)}
         <Text style={styles.note}>· 이 결과는 입력한 정보로 계산한 예상이에요. 실제 신청 자격은 모집공고와 증빙 서류로 확정돼요.</Text>
@@ -125,4 +145,6 @@ const styles = StyleSheet.create({
   notes: { gap: 6, marginTop: 32 },
   note: { ...k.type.caption, color: k.colors.textMuted },
   footerAction: { flex: 1, maxWidth: 520, flexDirection: 'row' },
+  liveSection: { gap: 12, marginTop: 40 },
+  liveCount: { ...k.type.bodyStrong, color: k.colors.primary },
 });

@@ -16,6 +16,7 @@ import { humanize, humanizeAll, kioskStatusLabel, officialScoreStatusLabel } fro
 import { cautionLines, useListingExplanation } from '../experience/useExplanation';
 import { useKioskStore } from '../useKioskStore';
 import { KioskButton } from './controls';
+import { ListingMediaView } from './ListingMediaView';
 import { chatPath, listingPath } from './navigation';
 import { bucketTone, k } from './theme';
 
@@ -186,6 +187,7 @@ export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
   const advantages = humanizeAll(outcome.advantages);
   return (
     <View style={[styles.card, favorite && styles.cardFavorite]} testID={`listing-card-${outcome.rank}`}>
+      <ListingMediaView media={listing.media} variant="card" />
       <View style={styles.cardTop}>
         <View style={styles.rank}><Text style={styles.rankText}>{outcome.rank}</Text></View>
         <View style={styles.cardTitleBox}>

@@ -21,6 +21,18 @@
   ],
   "rewrites": [
     {
+      "source": "/event-api/listings",
+      "destination": "/api/event-api/listings"
+    },
+    {
+      "source": "/event-api/result-sessions",
+      "destination": "/api/event-api/result-sessions"
+    },
+    {
+      "source": "/event-api/result-sessions/:token",
+      "destination": "/api/event-api/result-sessions/:token"
+    },
+    {
       "source": "/discovery/:id",
       "destination": "/discovery/[id]"
     },

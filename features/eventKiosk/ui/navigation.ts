@@ -16,6 +16,7 @@ export function nextAfter(type: HouseholdType | null, step: InputStep): string {
 }
 
 export const listingPath = (outcomeId: string) => `/event/listing?id=${encodeURIComponent(outcomeId)}`;
+export const liveListingPath = (canonicalKey: string) => `/event/live-listing?id=${encodeURIComponent(canonicalKey)}`;
 export const chatPath = (outcomeId: string | null) => (outcomeId ? `/event/chat?id=${encodeURIComponent(outcomeId)}` : '/event/chat');
 
 /** 뒤로 갈 곳이 없으면(주소로 바로 열었을 때) 지정한 곳으로 간다. */

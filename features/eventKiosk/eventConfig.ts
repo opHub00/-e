@@ -1,5 +1,7 @@
 import { assertDatasetBindings } from './frozen/engine/batch.ts';
 import type { FrozenListingDataset, Listing } from './frozen/domain/rules.ts';
+import { emptyListingMedia } from './live/portfolio.ts';
+import type { ListingMedia } from './live/types.ts';
 
 export type RecruitmentStatus = 'open' | 'upcoming' | 'closed' | 'unknown';
 
@@ -19,6 +21,9 @@ export type EventListing = {
   sourceNote: string;
   reviewStatus: Listing['reviewStatus'];
   sourceDocumentIds: string[];
+  origin: 'FROZEN_REFERENCE';
+  assessmentAvailability: 'ASSESSABLE';
+  media: ListingMedia;
 };
 
 export type EventConfig = {
@@ -89,6 +94,9 @@ function eventListing(listing: Listing, dataset: FrozenListingDataset): EventLis
     sourceNote: `공식 원문 검수 완료 · 행사 데이터 ${dataset.datasetVersion}`,
     reviewStatus: listing.reviewStatus,
     sourceDocumentIds: [...listing.sourceDocumentIds],
+    origin: 'FROZEN_REFERENCE',
+    assessmentAvailability: 'ASSESSABLE',
+    media: emptyListingMedia(listing.title),
   };
 }
 

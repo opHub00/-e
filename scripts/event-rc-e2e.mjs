@@ -171,6 +171,11 @@ async function verifyFullFlow(page, persona, browser) {
   const title = await page.getByTestId('results-title').innerText();
   if (!title.includes('공고 5개, 공급 9건')) throw new Error(`${persona.id}: wrong inventory ${title}`);
   if (await visibleListingCardCount(page) !== 9) throw new Error(`${persona.id}: expected 9 visible cards`);
+  const liveCards = page.locator('[data-testid^="live-listing-"]');
+  if (await liveCards.count() !== 1) throw new Error(`${persona.id}: expected one current official Jeju listing`);
+  if (!(await page.getByTestId('live-listings-section').innerText()).includes('공고 정보만 제공')) {
+    throw new Error(`${persona.id}: unreviewed live listing was not marked information-only`);
+  }
   const body = await page.locator('body').innerText();
   if (/\b(?:applicant|spouse|household|family|profile|event|score)\.[A-Za-z0-9_.-]+/.test(body)) throw new Error(`${persona.id}: raw domain key exposed`);
   if (/공고 배점\s*0\s*(?:\/|점)/.test(body)) throw new Error(`${persona.id}: NOT_APPLICABLE rendered as zero`);
@@ -183,6 +188,20 @@ async function verifyFullFlow(page, persona, browser) {
   }
   if (persona.id !== 'CLEARLY_INELIGIBLE' && distribution.eligible < 1) throw new Error(`${persona.id}: adaptive answers produced no COMPLETE result`);
   if (persona.id === 'CLEARLY_INELIGIBLE' && distribution.eligible !== 0) throw new Error(`${persona.id}: ineligible persona was relaxed`);
+
+  if (persona.id === 'YOUNG_SINGLE') {
+    await liveCards.first().getByRole('button', { name: '공고 정보 보기' }).click();
+    await page.getByTestId('live-listing-detail').waitFor();
+    if (!(await page.getByTestId('live-listing-detail').innerText()).includes('검수된 Rule Package가 없어')) {
+      throw new Error('live listing detail did not preserve RULE_PENDING semantics');
+    }
+    if (!(await page.getByTestId('live-listing-media').innerText()).includes('공식 주택 이미지 준비 중')) {
+      throw new Error('live listing image fallback missing');
+    }
+    await noOverflow(page, 'YOUNG_SINGLE:live-listing-detail');
+    await page.getByRole('button', { name: '결과 목록' }).click();
+    await page.getByTestId('results-title').waitFor();
+  }
 
   await page.getByTestId('detail-1').click();
   await page.getByTestId('listing-detail').waitFor();

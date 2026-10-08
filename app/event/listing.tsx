@@ -15,6 +15,7 @@ import { k } from '../../features/eventKiosk/ui/theme';
 import { ConditionsSection, OrderSection, ScoreSection, SourcesSection, VerdictSection } from '../../features/eventKiosk/experience/ExplanationSections';
 import type { ListingExplanation } from '../../features/eventKiosk/experience/explain';
 import { useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
+import { ListingMediaView } from '../../features/eventKiosk/ui/ListingMediaView';
 
 /** 공고 상세. 왜 이 결과인지, 왜 이 순서인지, 공고의 어디에 근거하는지. */
 export default function ListingDetail() {
@@ -83,6 +84,7 @@ function Header({ outcome, explanation }: { outcome: KioskOutcome; explanation: 
   const { listing } = outcome;
   return (
     <View style={styles.header} testID="listing-detail">
+      <ListingMediaView media={listing.media} variant="detail" testID="listing-detail-media" />
       <Text style={styles.title} accessibilityRole="header">{listing.title}</Text>
       <Text style={styles.meta}>
         {outcome.supplyType ? `${outcome.supplyLabel} · ` : ''}{listing.housingType} · {listing.address ?? listing.district}

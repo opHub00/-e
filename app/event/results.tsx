@@ -88,7 +88,9 @@ export default function ResultsScreen() {
           {outcomes.map(outcome => <ListingCard key={outcome.id} outcome={outcome} />)}
         </View>
       ) : (
-        <EmptyState title={`${filter ? BUCKET_LABELS[filter] : ''} 공고가 없어요`} body="다른 묶음을 눌러 보세요." action={{ label: '전체 보기', onPress: () => setFilter(null) }} />
+        evaluation.outcomes.length
+          ? <EmptyState title={`${filter ? BUCKET_LABELS[filter] : ''} 공고가 없어요`} body="다른 묶음을 눌러 보세요." action={{ label: '전체 보기', onPress: () => setFilter(null) }} />
+          : <EmptyState title="분석할 수 있는 공고를 찾지 못했어요" body="입력을 다시 확인하거나 처음부터 다시 시작해 주세요. 계속되면 행사 안내 직원에게 알려 주세요." action={{ label: '처음부터 시작하기', onPress: resetToHome }} />
       )}
 
       <View style={styles.notes}>

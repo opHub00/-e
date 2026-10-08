@@ -4,6 +4,8 @@ import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { isOpaqueResultToken, readResultSession } from '../../features/eventKiosk/resultSessionClient';
 import type { ResultSummary } from '../../features/eventKiosk/summary';
+import { isRenderableSummary } from '../../features/eventKiosk/experience/safeSummary';
+import { MotionPressable } from '../../components/motion/MotionPressable';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
 
 /**
@@ -11,7 +13,8 @@ import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
  * 제외한 임시 요약은 행사 RC 서버 메모리에서 6시간 동안만 조회한다.
  */
 export default function TakeAway() {
-  const [state, setState] = useState<{ status: 'loading' } | { status: 'invalid' } | { status: 'ok'; summary: ResultSummary }>({ status: 'loading' });
+  const [state, setState] = useState<{ status: 'loading' } | { status: 'invalid' } | { status: 'unreachable' } | { status: 'ok'; summary: ResultSummary }>({ status: 'loading' });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') { setState({ status: 'invalid' }); return; }
@@ -19,10 +22,11 @@ export default function TakeAway() {
     if (!isOpaqueResultToken(token)) { setState({ status: 'invalid' }); return; }
     let active = true;
     void readResultSession(window.location.origin, token)
-      .then(summary => { if (active) setState(summary ? { status: 'ok', summary } : { status: 'invalid' }); })
-      .catch(() => { if (active) setState({ status: 'invalid' }); });
+      .then(summary => { if (active) setState(summary && isRenderableSummary(summary) ? { status: 'ok', summary } : { status: 'invalid' }); })
+      // 링크가 잘못된 것과 잠깐 연결이 안 되는 것은 다르다. 연결 문제면 다시 시도할 수 있게 둔다.
+      .catch(() => { if (active) setState({ status: 'unreachable' }); });
     return () => { active = false; };
-  }, []);
+  }, [attempt]);
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
@@ -33,7 +37,18 @@ export default function TakeAway() {
           <View style={styles.card} testID="take-invalid">
             <View style={styles.invalidIcon}><MaterialIcons name="link-off" size={28} color={k.colors.primary} /></View>
             <Text style={styles.title}>요약을 읽을 수 없어요</Text>
-            <Text style={styles.muted}>token이 잘못되었거나 임시 결과가 만료됐어요. 행사 기기에서 QR을 다시 만들어 주세요.</Text>
+            <Text style={styles.muted}>링크가 잘못되었거나 임시 결과 보관 시간이 지났어요. 결과는 개인정보 보호를 위해 잠시만 보관돼요. 행사장에서 QR을 다시 받아 주세요.</Text>
+          </View>
+        ) : null}
+        {state.status === 'unreachable' ? (
+          <View style={styles.card} testID="take-unreachable">
+            <View style={styles.invalidIcon}><MaterialIcons name="wifi-off" size={28} color={k.colors.primary} /></View>
+            <Text style={styles.title}>요약을 불러오지 못했어요</Text>
+            <Text style={styles.muted}>인터넷 연결을 확인한 뒤 다시 시도해 주세요.</Text>
+            <MotionPressable accessibilityRole="button" accessibilityLabel="다시 시도" onPress={() => { setState({ status: 'loading' }); setAttempt(value => value + 1); }} style={styles.retry}>
+              <MaterialIcons name="refresh" size={22} color={k.colors.onPrimary} />
+              <Text style={styles.retryText}>다시 시도</Text>
+            </MotionPressable>
           </View>
         ) : null}
         {state.status === 'ok' ? <Summary summary={state.summary} /> : null}
@@ -102,5 +117,7 @@ const styles = StyleSheet.create({
   countLabel: { ...k.type.caption },
   item: { gap: 2, paddingVertical: 6 },
   itemTitle: { ...k.type.bodyStrong, color: k.colors.text },
+  retry: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 52, borderRadius: 12, backgroundColor: k.colors.primary, marginTop: 4 },
+  retryText: { ...k.type.bodyStrong, color: k.colors.onPrimary },
   invalidIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
 });

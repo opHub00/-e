@@ -4,6 +4,8 @@ import type { Listing } from './frozen/domain/rules.ts';
 import type { UserProfile } from './frozen/domain/profile.ts';
 import type { KioskEvaluation, KioskOutcome } from './evaluate.ts';
 import type { LoadedEvent } from './eventConfig.ts';
+import { experienceAnswer, sanitizeReply } from './experience/chatAnswers.ts';
+import { evidenceOnlyFacts } from './experience/explain.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -109,10 +111,11 @@ function answer(chat: KioskChat, message: string): { text: string; detail?: stri
   };
 }
 
-export async function sendChat(_event: LoadedEvent, chat: KioskChat, message: string): Promise<KioskChat> {
+export async function sendChat(event: LoadedEvent, chat: KioskChat, message: string): Promise<KioskChat> {
   const text = message.trim();
   if (!text) return chat;
-  const response = answer(chat, text);
+  // 자주 묻는 질문은 방문자의 판정 결과로 먼저 답하고, 어떤 답이든 기계용 키를 지운 뒤 내보낸다.
+  const response = sanitizeReply(experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
   return {
     ...chat,
     messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response }],

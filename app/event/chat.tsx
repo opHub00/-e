@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useAttached } from '../../features/adminPortal/useIsWide';
-import { suggestedQuestions } from '../../features/eventKiosk/consult';
+import { BUCKET_LABELS } from '../../features/eventKiosk/evaluate';
+import { experienceSuggestedQuestions } from '../../features/eventKiosk/experience/chatAnswers';
+import { humanize } from '../../features/eventKiosk/experience/labels';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton } from '../../features/eventKiosk/ui/controls';
@@ -80,6 +82,12 @@ export default function ChatScreen() {
           <Text style={styles.contextValue} numberOfLines={2}>
             {chat.context.listingTitle ? `${chat.context.listingTitle} · ${chat.context.supplyLabel}` : '아직 분석 결과가 없어요'}
           </Text>
+          {/* 어떤 결과를 기준으로 답하는지 늘 보이게 한다. */}
+          {outcome ? (
+            <Text style={styles.contextMeta} testID="chat-context-verdict">
+              내 판정: {BUCKET_LABELS[outcome.bucket]}{outcome.stageLabel ? ` · ${humanize(outcome.stageLabel)}` : ''} · 입력하신 정보와 공고 근거 기준
+            </Text>
+          ) : null}
         </View>
         {choices.length ? <KioskButton label="공고 바꾸기" variant="soft" onPress={() => setPicking(value => !value)} testID="chat-switch" /> : null}
         <KioskButton label="돌아가기" variant="ghost" icon="arrow-back" onPress={() => goBack(evaluation ? '/event/results' : '/event')} />
@@ -119,7 +127,7 @@ export default function ChatScreen() {
       </ScrollView>
 
       <View style={styles.suggestions} testID="chat-suggestions">
-        {suggestedQuestions(outcome).map(question => (
+        {experienceSuggestedQuestions(outcome).map(question => (
           <MotionPressable key={question} accessibilityRole="button" accessibilityLabel={question} onPress={() => send(question)} style={styles.suggestion} disabled={busy}>
             <Text style={styles.suggestionText}>{question}</Text>
           </MotionPressable>
@@ -134,6 +142,7 @@ const styles = StyleSheet.create({
   context: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, borderRadius: 20, backgroundColor: k.colors.lavender, flexWrap: 'wrap' },
   contextLabel: { ...k.type.caption, color: k.colors.textMuted },
   contextValue: { ...k.type.bodyLgStrong, color: k.colors.primary },
+  contextMeta: { ...k.type.caption, color: k.colors.textMuted, marginTop: 2 },
   picker: { gap: 8, marginTop: 12 },
   pick: { minHeight: k.touch, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 12, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
   pickText: { ...k.type.bodyStrong, color: k.colors.text },

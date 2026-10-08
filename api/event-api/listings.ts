@@ -1,5 +1,5 @@
-import activeDataset from '../../data/events/jeju-event-2026-10-v1.json' with { type: 'json' };
-import reference from '../../data/events/jeju-live-reference-2026-10-09.json' with { type: 'json' };
+import activeDataset from '../../data/events/jeju-event-2026-10-v1.json';
+import reference from '../../data/events/jeju-live-reference-2026-10-09.json';
 import { buildServiceListingPortfolio } from '../../features/eventKiosk/live/portfolio.ts';
 import { fetchOfficialJejuListings } from '../../features/eventKiosk/live/source.ts';
 import type { FrozenListingDataset } from '../../features/eventKiosk/frozen/domain/rules.ts';

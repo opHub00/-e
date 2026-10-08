@@ -1,5 +1,17 @@
-import { PersistentResultSessionService } from '../../../features/eventKiosk/server/persistentResultSession.ts';
-import { UpstashResultSessionRepository } from '../../../features/eventKiosk/server/upstashResultSession.ts';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+type SessionModule = typeof import('../../../features/eventKiosk/server/persistentResultSession.ts');
+type RepositoryModule = typeof import('../../../features/eventKiosk/server/upstashResultSession.ts');
+const nativeImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<unknown>;
+
+async function loadSessionModules(): Promise<[SessionModule, RepositoryModule]> {
+  const root = process.cwd();
+  return Promise.all([
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/server/persistentResultSession.ts')).href) as Promise<SessionModule>,
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/server/upstashResultSession.ts')).href) as Promise<RepositoryModule>,
+  ]);
+}
 
 type ApiRequest = { method?: string; query?: Record<string, string | string[] | undefined> };
 type ApiResponse = {
@@ -13,6 +25,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   const raw = request.query?.token;
   const token = Array.isArray(raw) ? raw[0] ?? '' : raw ?? '';
   try {
+    const [{ PersistentResultSessionService }, { UpstashResultSessionRepository }] = await loadSessionModules();
     const service = new PersistentResultSessionService(new UpstashResultSessionRepository());
     if (request.method === 'DELETE') {
       const deleted = await service.delete(token);

@@ -1,8 +1,20 @@
 import activeDataset from '../../data/events/jeju-event-2026-10-v1.json';
 import reference from '../../data/events/jeju-live-reference-2026-10-09.json';
-import { buildServiceListingPortfolio } from '../../features/eventKiosk/live/portfolio.ts';
-import { fetchOfficialJejuListings } from '../../features/eventKiosk/live/source.ts';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { FrozenListingDataset } from '../../features/eventKiosk/frozen/domain/rules.ts';
+
+type PortfolioModule = typeof import('../../features/eventKiosk/live/portfolio.ts');
+type SourceModule = typeof import('../../features/eventKiosk/live/source.ts');
+const nativeImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<unknown>;
+
+async function loadListingModules(): Promise<[PortfolioModule, SourceModule]> {
+  const root = process.cwd();
+  return Promise.all([
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/live/portfolio.ts')).href) as Promise<PortfolioModule>,
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/live/source.ts')).href) as Promise<SourceModule>,
+  ]);
+}
 
 type ApiRequest = { method?: string };
 type ApiResponse = {
@@ -19,6 +31,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=900');
   const now = new Date();
   try {
+    const [{ buildServiceListingPortfolio }, { fetchOfficialJejuListings }] = await loadListingModules();
     const official = await fetchOfficialJejuListings({ now });
     response.status(200).json({
       ...buildServiceListingPortfolio({
@@ -31,6 +44,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       transport: official.transport,
     });
   } catch {
+    const [{ buildServiceListingPortfolio }] = await loadListingModules();
     response.status(200).json({
       ...buildServiceListingPortfolio({
         now: now.toISOString(),

@@ -16,7 +16,8 @@ import { listingMediaOf } from '../../features/eventKiosk/media/listingMedia';
 import { ListingGallery } from '../../features/eventKiosk/media/ListingMediaView';
 import { ConditionsSection, OrderSection, ScoreSection, SourcesSection, VerdictSection } from '../../features/eventKiosk/experience/ExplanationSections';
 import type { ListingExplanation } from '../../features/eventKiosk/experience/explain';
-import { useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
+import { cautionLines, useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
+import { ListingHighlights, ListingPlace } from '../../features/eventKiosk/v2/ListingPlaceSections';
 
 /** 공고 상세. 왜 이 결과인지, 왜 이 순서인지, 공고의 어디에 근거하는지. */
 export default function ListingDetail() {
@@ -71,7 +72,10 @@ function DetailBody({ outcome }: { outcome: KioskOutcome }) {
       <Header outcome={outcome} explanation={explanation} />
       <View style={styles.sections}>
         <VerdictSection explanation={explanation} />
+        {/* 데이터가 들어오면 나타나는 V2 영역: 검증된 특징 ↔ 확인할 점, 위치·지도·주변 시설. */}
+        <ListingHighlights listing={outcome.listing as unknown as Record<string, unknown>} cautions={cautionLines(explanation)} />
         <ConditionsSection explanation={explanation} outcome={outcome} />
+        <ListingPlace listing={outcome.listing as unknown as Record<string, unknown>} title={outcome.listing.title} />
         <ScoreSection explanation={explanation} />
         <OrderSection explanation={explanation} outcome={outcome} />
         <Schedule outcome={outcome} />

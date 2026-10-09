@@ -15,6 +15,7 @@ import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
+import { useDensity } from '../../features/eventKiosk/layout/DensityContext';
 import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
 import { LiveListingCard } from '../../features/eventKiosk/ui/LiveListingCard';
 
@@ -28,6 +29,8 @@ export default function ResultsScreen() {
   const sessionKey = useKioskStore(state => state.sessionKey);
   const [filter, setFilter] = useState<KioskBucket | null>(null);
   const replay = useFocusReplay();
+  // 카드 기준 폭·간격은 밀도를 따른다: desktop 은 한 줄에 세 장, iPad 는 두 장, 휴대폰은 한 장.
+  const { d } = useDensity();
   const { portfolio: servicePortfolio, loading: liveLoading } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
 
   const outcomes = useMemo(
@@ -100,7 +103,7 @@ export default function ResultsScreen() {
       </Text>
 
       {outcomes.length ? (
-        <StaggerList key={filter ?? 'all'} after={eventMotion.sequence} style={styles.list} itemStyle={styles.listItem} testID="results-list">
+        <StaggerList key={filter ?? 'all'} after={eventMotion.sequence} style={[styles.list, { gap: d.gridGap }]} itemStyle={[styles.listItem, { flexBasis: d.cardBasis }]} testID="results-list">
           {outcomes.map(outcome => <ListingCard key={outcome.id} outcome={outcome} />)}
         </StaggerList>
       ) : (
@@ -116,7 +119,7 @@ export default function ResultsScreen() {
         </View>
         <Text style={styles.orderNote}>공식 source에서 가져온 최신 공고예요. 검수된 Rule Package가 없는 공고는 정보만 제공하고 현재 판정 결과에는 섞지 않아요.</Text>
         {liveInformationOnly.length ? (
-          <View style={styles.list}>{liveInformationOnly.map(listing => <LiveListingCard key={listing.canonicalKey} listing={listing} />)}</View>
+          <View style={[styles.list, { gap: d.gridGap }]}>{liveInformationOnly.map(listing => <LiveListingCard key={listing.canonicalKey} listing={listing} />)}</View>
         ) : (
           <Notice tone="info">현재 새로 연결된 제주 공고가 없거나 공식 source를 확인하는 중이에요. 위 판정은 검수된 frozen dataset으로 계속 이용할 수 있어요.</Notice>
         )}

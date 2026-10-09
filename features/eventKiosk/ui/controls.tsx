@@ -5,6 +5,7 @@ import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { Pop } from '../../../components/motion/Pop';
 import { tracking } from '../../../design/tokens';
 import { k } from './theme';
+import { useDensity } from '../layout/DensityContext';
 
 type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
@@ -23,8 +24,11 @@ export function KioskButton({
   accessibilityLabel?: string;
 }) {
   const fg = variant === 'primary' ? k.colors.onPrimary : k.colors.primary;
+  // 높이·여백·글자는 화면 밀도를 따른다(desktop 은 촘촘하게, iPad 는 지금 그대로). 누르는 영역은 항상 44px 이상.
+  const { density, d } = useDensity();
   const trailingIcon = icon === 'arrow-forward' || icon === 'chevron-right';
-  const iconNode = icon ? <MaterialIcons name={icon} size={large ? 28 : 24} color={fg} /> : null;
+  const iconSize = density === 'compact' ? (large ? 22 : 20) : large ? 28 : 24;
+  const iconNode = icon ? <MaterialIcons name={icon} size={iconSize} color={fg} /> : null;
   return (
     <MotionPressable
       testID={testID}
@@ -40,10 +44,13 @@ export function KioskButton({
         variant === 'soft' && styles.buttonSoft,
         variant === 'ghost' && styles.buttonGhost,
         disabled && styles.buttonDisabled,
+        large
+          ? { minHeight: d.controlLarge, paddingHorizontal: d.controlLargePaddingX }
+          : { minHeight: d.control, paddingHorizontal: d.controlPaddingX },
       ]}
     >
       {!trailingIcon ? iconNode : null}
-      <Text style={[large ? k.type.section : k.type.bodyLgStrong, { color: fg }]}>{label}</Text>
+      <Text style={[large ? d.type.buttonLarge : d.type.button, { color: fg }]}>{label}</Text>
       {trailingIcon ? iconNode : null}
     </MotionPressable>
   );

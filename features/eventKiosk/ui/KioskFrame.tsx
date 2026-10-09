@@ -10,6 +10,7 @@ import { k } from './theme';
 import { ProgressFill } from '../motion/ProgressFill';
 import { ScreenReveal } from '../motion/ScreenReveal';
 import { router } from 'expo-router';
+import { DensityProvider, useDensity } from '../layout/DensityContext';
 
 /**
  * 행사 화면 공통 틀.
@@ -41,12 +42,16 @@ export function KioskFrame({
 }) {
   const width = useKioskWidth();
   const compactTop = width < 600;
-  const gutter = width >= 900 ? 40 : compactTop ? 20 : k.gutter;
+  // 밀도(desktop=compact / iPad=comfortable / mobile=touch)가 여백과 본문 폭을 정한다. 안쪽 component 도 같은 값을 읽는다.
+  const { density, d } = useDensity();
+  const gutter = d.gutter;
+  const inner = [styles.inner, { maxWidth: d.contentMax }];
   const [confirming, setConfirming] = useState(false);
 
   return (
+    <DensityProvider density={density}>
     <View style={styles.root}>
-      <View style={[styles.top, { paddingHorizontal: gutter }]}>
+      <View style={[styles.top, density === 'compact' && styles.topCompact, { paddingHorizontal: gutter }]}>
         <View style={styles.brandRow}>
           <View style={styles.brandMark}><Text style={styles.brandMarkText}>e</Text></View>
           <Text style={styles.brand}>{brand}</Text>
@@ -83,11 +88,11 @@ export function KioskFrame({
         contentContainerStyle={[styles.content, { paddingHorizontal: gutter }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.inner}><ScreenReveal>{children}</ScreenReveal></View>
+        <View style={inner}><ScreenReveal>{children}</ScreenReveal></View>
       </ScrollView>
       {footer ? (
         <View testID="kiosk-footer" style={[styles.footer, { paddingHorizontal: gutter }]}>
-          <View style={[styles.inner, styles.footerInner]}>{footer}</View>
+          <View style={[inner, styles.footerInner]}>{footer}</View>
         </View>
       ) : null}
       <Modal visible={confirming} transparent animationType="fade" onRequestClose={() => setConfirming(false)}>
@@ -109,6 +114,7 @@ export function KioskFrame({
         </View>
       </Modal>
     </View>
+    </DensityProvider>
   );
 }
 
@@ -146,6 +152,7 @@ function Progress({ progress, gutter }: { progress: { steps: InputStep[]; curren
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background, minHeight: '100%' as unknown as number },
+  topCompact: { minHeight: 64 },
   top: {
     minHeight: 88,
     flexDirection: 'row',

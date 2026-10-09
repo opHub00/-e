@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { Pop } from '../../../components/motion/Pop';
@@ -12,14 +13,15 @@ import {
   type OfficialScoreState,
   type WanpanIndicator,
 } from '../evaluate';
-import { humanize, humanizeAll, kioskStatusLabel, officialScoreStatusLabel } from '../presentation';
-import { cautionLines, useListingExplanation } from '../experience/useExplanation';
+import { humanize, kioskStatusLabel, officialScoreStatusLabel } from '../presentation';
+import { useListingExplanation } from '../experience/useExplanation';
 import { useKioskStore } from '../useKioskStore';
 import { KioskButton } from './controls';
 import { chatPath, listingPath } from './navigation';
 import { bucketTone, k } from './theme';
-import { listingMediaOf } from '../media/listingMedia';
-import { ListingThumb } from '../media/ListingMediaView';
+import { useDensity } from '../layout/DensityContext';
+import { cardModelFromOutcome } from '../v2/listingCardModel';
+import { ListingCardV2 } from '../v2/ListingCardV2';
 
 /** UNAVAILABLE 은 이유에 따라 다르게 읽는다. 규칙이 없으면 '분석 전', 공고·증빙 확인이 남았으면 '추가 확인 필요'. */
 const statusText = (outcome: KioskOutcome): string => kioskStatusLabel(outcome.status, outcome.unavailableReason);
@@ -30,6 +32,7 @@ export function BucketTiles({ counts, selected, onSelect }: {
   selected: KioskBucket | null;
   onSelect: (bucket: KioskBucket | null) => void;
 }) {
+  const compact = useDensity().density === 'compact';
   return (
     <View style={styles.tiles} testID="bucket-tiles">
       {(Object.keys(BUCKET_LABELS) as KioskBucket[]).map(bucket => {
@@ -44,13 +47,13 @@ export function BucketTiles({ counts, selected, onSelect }: {
             aria-pressed={active}
             accessibilityLabel={`${BUCKET_LABELS[bucket]} ${counts[bucket]}개${active ? ', 선택됨' : ''}`}
             onPress={() => onSelect(active ? null : bucket)}
-            style={[styles.tile, { backgroundColor: tone.bg }, active && { borderColor: tone.fg }]}
+            style={[styles.tile, compact && styles.tileCompact, { backgroundColor: tone.bg }, active && { borderColor: tone.fg }]}
           >
             <View style={styles.tileHead}>
               <MaterialIcons name={tone.icon} size={28} color={tone.fg} />
               <Text style={[styles.tileLabel, { color: tone.fg }]}>{BUCKET_LABELS[bucket]}</Text>
             </View>
-            <Text style={[styles.tileValue, { color: tone.fg }]}>{counts[bucket]}<Text style={styles.tileUnit}>개</Text></Text>
+            <Text style={[styles.tileValue, compact && styles.tileValueCompact, { color: tone.fg }]}>{counts[bucket]}<Text style={styles.tileUnit}>개</Text></Text>
           </MotionPressable>
         );
       })}
@@ -164,69 +167,25 @@ export function FavoriteToggle({ outcomeId, compact }: { outcomeId: string; comp
   );
 }
 
-function Bullets({ items, kind }: { items: string[]; kind: 'good' | 'caution' }) {
-  if (!items.length) return null;
-  const good = kind === 'good';
-  return (
-    <View style={styles.bullets}>
-      {items.map(item => (
-        <View key={item} style={styles.bullet}>
-          <MaterialIcons name={good ? 'check' : 'priority-high'} size={20} color={good ? k.tint.green.fg : k.tint.amber.fg} />
-          <Text style={styles.bulletText} numberOfLines={2}>{item}</Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
 /** 결과 목록의 카드 한 장. 공고 + 공급 하나. */
 export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
-  const { listing } = outcome;
+  // 카드 그림은 Listing Card V2 가 맡는다. 여기서는 판정 결과를 V2 화면 모델로 옮기고, 저장소·내비게이션을 slot 으로 붙인다.
   const explanation = useListingExplanation(outcome);
   const favorite = useKioskStore(state => state.favorites.includes(outcome.id));
-  const cautions = cautionLines(explanation);
-  const advantages = humanizeAll(outcome.advantages);
+  const model = useMemo(() => cardModelFromOutcome(outcome, explanation), [outcome, explanation]);
   return (
-    <View style={[styles.card, favorite && styles.cardFavorite]} testID={`listing-card-${outcome.rank}`}>
-      <View style={styles.cardTop}>
-        <View style={styles.rank}><Text style={styles.rankText}>{outcome.rank}</Text></View>
-        {/* 작은 썸네일만. 결과 카드의 주인공은 판정 상태라 사진을 키우지 않는다. */}
-        <ListingThumb media={listingMediaOf(listing)} housingType={listing.housingType} district={listing.district} />
-        <View style={styles.cardTitleBox}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{listing.title}</Text>
-          <Text style={styles.cardMeta} numberOfLines={1}>
-            {outcome.supplyType ? `${outcome.supplyLabel} · ` : ''}{listing.housingType} · {listing.district}
-          </Text>
-        </View>
-        <FavoriteToggle outcomeId={outcome.id} compact />
-      </View>
-      <View style={styles.badges}>
-        <StatusBadge outcome={outcome} />
-        {outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}
-      </View>
-      <View style={styles.scores}>
-        {outcome.officialScore
-          ? <OfficialScoreBlock score={outcome.officialScore} compact />
-          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} title={explanation.score.title} compact />}
-        <WanpanBlock wanpan={outcome.wanpan} compact />
-      </View>
-      {advantages.length ? (
-        <View style={styles.group}>
-          <Text style={styles.groupTitle}>유리한 조건</Text>
-          <Bullets items={advantages.slice(0, 2)} kind="good" />
-        </View>
-      ) : null}
-      {cautions.length ? (
-        <View style={styles.group}>
-          <Text style={styles.groupTitle}>{outcome.status === 'INELIGIBLE' ? '충족하지 못한 조건' : '확인할 조건'}</Text>
-          <Bullets items={cautions.slice(0, 2)} kind="caution" />
-        </View>
-      ) : null}
-      <View style={styles.cardActions}>
-        <KioskButton label="자세히 보기" icon="chevron-right" onPress={() => router.push(listingPath(outcome.id) as never)} testID={`detail-${outcome.rank}`} />
-        <KioskButton label="AI에게 묻기" icon="forum" variant="soft" onPress={() => router.push(chatPath(outcome.id) as never)} />
-      </View>
-    </View>
+    <ListingCardV2
+      model={model}
+      highlighted={favorite}
+      testID={`listing-card-${outcome.rank}`}
+      favoriteSlot={<FavoriteToggle outcomeId={outcome.id} compact />}
+      actions={(
+        <>
+          <KioskButton label="자세히 보기" icon="chevron-right" onPress={() => router.push(listingPath(outcome.id) as never)} testID={`detail-${outcome.rank}`} />
+          <KioskButton label="AI에게 묻기" icon="forum" variant="soft" onPress={() => router.push(chatPath(outcome.id) as never)} />
+        </>
+      )}
+    />
   );
 }
 
@@ -246,6 +205,9 @@ const styles = StyleSheet.create({
   tile: { flexGrow: 1, flexBasis: 220, minHeight: 132, borderRadius: 20, padding: 22, gap: 8, borderWidth: 2, borderColor: 'transparent', justifyContent: 'space-between' },
   tileHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tileLabel: { ...k.type.bodyLgStrong },
+  /** desktop: 요약 숫자 칸을 낮게. 결과 카드가 첫 화면에 더 들어오게. */
+  tileCompact: { minHeight: 0, padding: 14, flexBasis: 200 },
+  tileValueCompact: { fontSize: 32, lineHeight: 40 },
   tileValue: { ...k.type.metric },
   tileUnit: { ...k.type.section },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 999, alignSelf: 'flex-start' },

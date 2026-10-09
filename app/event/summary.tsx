@@ -3,23 +3,24 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useAttached } from '../../features/adminPortal/useIsWide';
-import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
-import { buildSummary, type SummaryItem } from '../../features/eventKiosk/summary';
+import { buildSummary } from '../../features/eventKiosk/summary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
-import { goBack, resetToHome } from '../../features/eventKiosk/ui/navigation';
+import { goBack, listingPath, resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { QrCode } from '../../features/eventKiosk/ui/QrCode';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
-import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
+import { k } from '../../features/eventKiosk/ui/theme';
 import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { Emphasis } from '../../features/eventKiosk/motion/Emphasis';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
 import { SelectedListings } from '../../features/eventKiosk/experience/SelectedListings';
-import { evidenceOnlyFacts } from '../../features/eventKiosk/experience/explain';
+import { evidenceOnlyFacts, explainOutcome } from '../../features/eventKiosk/experience/explain';
+import { buildRecommendationSummary } from '../../features/eventKiosk/v2/recommendationSummary';
+import { RecommendationSummaryV2View } from '../../features/eventKiosk/v2/RecommendationSummaryV2View';
 
 /** 최종 요약. 휴대폰으로 가져갈 수 있게 QR 을 만들고, 끝나면 처음 화면으로. */
 export default function SummaryScreen() {
@@ -38,6 +39,12 @@ export default function SummaryScreen() {
     [evaluation, favorites, householdType, load],
   );
   const showQr = session.status === 'ready';
+  const answers = useKioskStore(state => state.answers);
+  const summaryV2 = useMemo(() => {
+    if (!load.ok || !evaluation) return null;
+    const evidenceOnly = evidenceOnlyFacts(load.event.dataset);
+    return buildRecommendationSummary({ evaluation, favoriteIds: favorites, explain: outcome => explainOutcome(outcome, evidenceOnly), answers });
+  }, [answers, evaluation, favorites, load]);
   const selected = useMemo(
     () => favorites.map(id => evaluation?.outcomes.find(outcome => outcome.id === id)).filter((outcome): outcome is NonNullable<typeof outcome> => Boolean(outcome)),
     [evaluation, favorites],
@@ -58,7 +65,7 @@ export default function SummaryScreen() {
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
-  if (!summary) {
+  if (!summary || !summaryV2) {
     return (
       <KioskFrame brand={brand} confirmHome={false}>
         <EmptyState title="아직 분석한 결과가 없어요" body="처음부터 정보를 입력하면 결과 요약을 만들어 드려요." action={{ label: '처음부터 시작하기', onPress: resetToHome }} />
@@ -126,69 +133,18 @@ export default function SummaryScreen() {
         {showQr && !wide ? qrPanel : null}
         <View style={styles.main} testID="summary">
           <Text style={styles.title} accessibilityRole="header">나의 청약 분석 요약</Text>
-          <Card title="분석 요약" icon="person-search">
-            <Text style={styles.body}>{summary.household ? `${summary.household} 기준으로 ` : ''}공고별 신청 조건을 확인했어요.</Text>
-            <View style={styles.counts}>
-              {(Object.keys(BUCKET_LABELS) as KioskBucket[]).map(bucket => (
-                <View key={bucket} style={[styles.count, { backgroundColor: bucketTone[bucket].bg }]}>
-                  <Text style={[styles.countValue, { color: bucketTone[bucket].fg }]}>{summary.counts[bucket]}</Text>
-                  <Text style={[styles.countLabel, { color: bucketTone[bucket].fg }]}>{BUCKET_LABELS[bucket]}</Text>
-                </View>
-              ))}
-            </View>
-          </Card>
-          <Card title="추천 공고" icon="thumb-up">
-            <Items items={summary.recommended} empty="지금 정보로 바로 신청할 수 있는 공고는 없어요. 추가 확인이 필요한 공고를 먼저 살펴보세요." />
-          </Card>
-          <Card title={`선택한 관심 공고 ${summary.favorites.length}개`} icon="star">
-            {selected.length
-              ? <SelectedListings outcomes={selected} />
-              : <Items items={summary.favorites} empty="담은 관심 공고가 없어요. 결과 목록에서 별표를 눌러 담을 수 있어요." />}
-            {summary.favorites.length ? null : <KioskButton label="관심 공고 담으러 가기" variant="soft" onPress={() => router.push('/event/results' as never)} />}
-          </Card>
-          <Card title="주요 주의사항" icon="report-problem">
-            {summary.cautions.length
-              ? summary.cautions.map(item => <Text key={item} style={styles.body}>· {item}</Text>)
-              : <Text style={styles.muted}>따로 주의할 조건이 없어요.</Text>}
-            <Text style={styles.muted}>· 입력한 정보로 계산한 예상 결과예요. 실제 자격은 모집공고와 증빙 서류로 확정돼요.</Text>
-          </Card>
+          {/* Summary V2: 어디에 신청하면 되는지가 먼저, 내 입력 정보는 접힌 보조 영역. QR 요약 모양은 그대로다. */}
+          <RecommendationSummaryV2View
+            summary={summaryV2}
+            onOpen={outcomeId => router.push(listingPath(outcomeId) as never)}
+            favoritesSlot={selected.length ? <SelectedListings outcomes={selected} /> : undefined}
+          />
+          {summary.favorites.length ? null : <KioskButton label="관심 공고 담으러 가기" variant="soft" onPress={() => router.push('/event/results' as never)} />}
         </View>
 
         {showQr && wide ? qrPanel : null}
       </View>
     </KioskFrame>
-  );
-}
-
-function Card({ title, icon, children }: { title: string; icon: React.ComponentProps<typeof MaterialIcons>['name']; children: React.ReactNode }) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHead}>
-        <MaterialIcons name={icon} size={26} color={k.colors.primary} />
-        <Text style={styles.cardTitle} accessibilityRole="header">{title}</Text>
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function Items({ items, empty }: { items: SummaryItem[]; empty: string }) {
-  if (!items.length) return <Text style={styles.muted}>{empty}</Text>;
-  return (
-    <View style={styles.items}>
-      {items.map(item => (
-        <View key={`${item.title}-${item.supply}`} style={styles.item}>
-          <View style={[styles.dot, { backgroundColor: bucketTone[item.bucket].fg }]} />
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.muted}>
-              {item.supply} · {BUCKET_LABELS[item.bucket]}{item.stage ? ` · ${item.stage}` : ''}
-            </Text>
-            {item.note ? <Text style={styles.note}>{item.note}</Text> : null}
-          </View>
-        </View>
-      ))}
-    </View>
   );
 }
 

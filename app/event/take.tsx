@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { isOpaqueResultToken, readResultSession } from '../../features/eventKiosk/resultSessionClient';
 import type { ResultSummary } from '../../features/eventKiosk/summary';
 import { isRenderableSummary } from '../../features/eventKiosk/experience/safeSummary';
+import { OFFICIAL_SCORE_STATUS_LABELS } from '../../features/eventKiosk/presentation';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
 
@@ -90,6 +91,16 @@ function Group({ title, items, empty }: { title: string; items: ResultSummary['r
           <Text style={styles.itemTitle}>{item.title}</Text>
           <Text style={styles.muted}>{item.supply} · {BUCKET_LABELS[item.bucket]}{item.stage ? ` · ${item.stage}` : ''}</Text>
           {item.note ? <Text style={styles.note}>{item.note}</Text> : null}
+          {'whyMatched' in item ? (
+            <View style={styles.portfolioDetails}>
+              {item.applicationStart || item.applicationEnd ? <Text style={styles.muted}>신청 일정 · {item.applicationStart ?? '확인 필요'} ~ {item.applicationEnd ?? '확인 필요'}</Text> : null}
+              <Text style={styles.muted}>완판e 추천 · {item.wanpanRecommendation} · {OFFICIAL_SCORE_STATUS_LABELS[item.officialScoreStatus]}</Text>
+              {item.whyMatched.map(line => <Text key={`why-${line}`} style={styles.body}>· {line}</Text>)}
+              {item.cautions.slice(1).map(line => <Text key={`caution-${line}`} style={styles.note}>확인 · {line}</Text>)}
+              {item.nearbyHighlights.map(line => <Text key={`near-${line}`} style={styles.muted}>주변 · {line}</Text>)}
+              <Text accessibilityRole="link" style={styles.source} onPress={() => void Linking.openURL(item.sourceUrl)}>공식 출처 · {item.sourceLabel}</Text>
+            </View>
+          ) : null}
         </View>
       )) : <Text style={styles.muted}>{empty}</Text>}
     </View>
@@ -117,6 +128,8 @@ const styles = StyleSheet.create({
   countLabel: { ...k.type.caption },
   item: { gap: 2, paddingVertical: 6 },
   itemTitle: { ...k.type.bodyStrong, color: k.colors.text },
+  portfolioDetails: { gap: 4, paddingTop: 4 },
+  source: { ...k.type.caption, color: k.colors.primary, textDecorationLine: 'underline' },
   retry: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 52, borderRadius: 12, backgroundColor: k.colors.primary, marginTop: 4 },
   retryText: { ...k.type.bodyStrong, color: k.colors.onPrimary },
   invalidIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },

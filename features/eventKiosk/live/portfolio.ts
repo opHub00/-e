@@ -1,10 +1,13 @@
 import type { FrozenListingDataset, Listing, SourceDocument } from '../frozen/domain/rules.ts';
 import { listingMedia } from '../media/listingMedia.ts';
 import { officialListingMediaImages } from '../media/officialListingMedia.ts';
+import { locationFromOfficialRecord } from './location.ts';
+import { generateListingHighlights } from './nearby.ts';
 export { emptyListingMedia, imageFailureFallback, listingMedia } from '../media/listingMedia.ts';
 import type {
   ListingApplicationStatus,
   ListingMediaImage,
+  OfficialCatalogListing,
   ListingPortfolioOptions,
   ServiceListing,
   ServiceListingPortfolio,
@@ -78,14 +81,14 @@ export function normalizeApplyHomeListing(
   const provider = '한국부동산원 청약홈';
   const noticeId = `${operation}:${houseManageNo}:${pblancNo}`;
   const canonicalKey = canonicalListingKey(provider, noticeId);
-  const applicationStart = date(raw.RCEPT_BGNDE);
-  const applicationEnd = date(raw.RCEPT_ENDDE);
+  const applicationStart = date(raw.RCEPT_BGNDE ?? raw.SUBSCRPT_RCEPT_BGNDE);
+  const applicationEnd = date(raw.RCEPT_ENDDE ?? raw.SUBSCRPT_RCEPT_ENDDE);
   const status = applicationStatus(applicationStart, applicationEnd, now);
   const specialStart = date(raw.SPSPLY_RCEPT_BGNDE);
-  const supplyTypes = specialStart ? ['특별공급', '일반공급'] : ['일반공급'];
+  const supplyTypes = applyHomeSupplyTypes(operation, Boolean(specialStart));
   const households = number(raw.TOT_SUPLY_HSHLDCO);
 
-  return {
+  const listing: ServiceListing = {
     canonicalKey,
     origin: 'LIVE',
     source: 'APPLYHOME',
@@ -97,6 +100,7 @@ export function normalizeApplyHomeListing(
     housingName: title,
     region: '제주특별자치도',
     address: address || '제주특별자치도',
+    location: locationFromOfficialRecord(raw, address),
     announcementDate,
     applicationStart,
     applicationEnd,
@@ -111,8 +115,21 @@ export function normalizeApplyHomeListing(
     assessmentListingId: null,
     rulePackageId: null,
     media: listingMedia(images, title),
+    nearbyPois: [],
+    sellingPoints: [],
+    locationCautions: [],
     fetchedAt,
   };
+  const generated = generateListingHighlights(listing, []);
+  return { ...listing, sellingPoints: generated.sellingPoints, locationCautions: generated.cautions };
+}
+
+function applyHomeSupplyTypes(operation: string, hasSpecialSupply: boolean): string[] {
+  if (operation === 'getUrbtyOfctlLttotPblancDetail') return ['오피스텔·도시형생활주택·민간임대'];
+  if (operation === 'getRemndrLttotPblancDetail') return ['무순위·잔여세대'];
+  if (operation === 'getPblPvtRentLttotPblancDetail') return ['공공지원민간임대'];
+  if (operation === 'getOPTLttotPblancDetail') return ['임의공급'];
+  return hasSpecialSupply ? ['특별공급', '일반공급'] : ['일반공급'];
 }
 
 function sourceKind(sourceId: string): ServiceListing['source'] {
@@ -141,7 +158,7 @@ export function buildFrozenReferenceListings(
     const canonicalKey = canonicalListingKey(provider, noticeId);
     const rulePackage = packages.get(listing.id);
     const status = applicationStatus(listing.applicationStartDate, listing.applicationEndDate, now);
-    return {
+    const serviceListing: ServiceListing = {
       canonicalKey,
       origin: 'FROZEN_REFERENCE',
       source: sourceKind(listing.sourceId),
@@ -153,6 +170,7 @@ export function buildFrozenReferenceListings(
       housingName: listing.title,
       region: listing.region,
       address: listing.locations.join(' · '),
+      location: locationFromOfficialRecord({}, listing.locations.join(' · ')),
       announcementDate: listing.announcementDate,
       applicationStart: listing.applicationStartDate,
       applicationEnd: listing.applicationEndDate,
@@ -167,8 +185,58 @@ export function buildFrozenReferenceListings(
       assessmentListingId: listing.reviewStatus === 'APPROVED_FOR_EVENT' ? listing.id : null,
       rulePackageId: rulePackage?.reviewStatus === 'APPROVED_FOR_EVENT' ? rulePackage.id : null,
       media: listingMedia(mediaByCanonicalKey[canonicalKey] ?? officialListingMediaImages(listing.sourceId), listing.title),
+      nearbyPois: [],
+      sellingPoints: [],
+      locationCautions: [],
       fetchedAt: dataset.frozenAt,
-    } satisfies ServiceListing;
+    };
+    const generated = generateListingHighlights(serviceListing, []);
+    return { ...serviceListing, sellingPoints: generated.sellingPoints, locationCautions: generated.cautions };
+  });
+}
+
+export function buildOfficialCatalogListings(
+  catalog: readonly OfficialCatalogListing[],
+  now: string,
+  mediaByCanonicalKey: Readonly<Record<string, readonly ListingMediaImage[]>> = {},
+): ServiceListing[] {
+  return catalog.map(record => {
+    const canonicalKey = canonicalListingKey(record.provider, record.noticeId);
+    const status = applicationStatus(record.applicationStart, record.applicationEnd, now);
+    const listing: ServiceListing = {
+      canonicalKey,
+      origin: 'LIVE',
+      source: record.source,
+      sourceUrl: record.sourceUrl,
+      provider: record.provider,
+      noticeId: record.noticeId,
+      sourceId: record.sourceId,
+      title: record.title,
+      housingName: record.housingName,
+      region: '제주특별자치도',
+      address: record.address,
+      location: locationFromOfficialRecord({}, record.address),
+      announcementDate: record.announcementDate,
+      applicationStart: record.applicationStart,
+      applicationEnd: record.applicationEnd,
+      resultDate: record.resultDate,
+      supplyTypes: [...record.supplyTypes],
+      units: record.units.map(unit => ({ ...unit })),
+      eligibilitySource: record.sourceUrl,
+      originalDocuments: record.originalDocuments.map(document => ({ ...document })),
+      lifecycle: status === 'CLOSED' ? 'ARCHIVED' : 'RULE_PENDING',
+      applicationStatus: status,
+      assessmentAvailability: 'INFORMATION_ONLY',
+      assessmentListingId: null,
+      rulePackageId: null,
+      media: listingMedia(mediaByCanonicalKey[canonicalKey] ?? officialListingMediaImages(record.sourceId), record.title),
+      nearbyPois: [],
+      sellingPoints: [],
+      locationCautions: [],
+      fetchedAt: record.fetchedAt,
+    };
+    const generated = generateListingHighlights(listing, []);
+    return { ...listing, sellingPoints: generated.sellingPoints, locationCautions: generated.cautions };
   });
 }
 
@@ -191,33 +259,63 @@ export function deduplicateListings(listings: readonly ServiceListing[]): Servic
 
 export function buildServiceListingPortfolio(options: ListingPortfolioOptions): ServiceListingPortfolio {
   const frozen = buildFrozenReferenceListings(options.frozenDataset, options.now, options.mediaByCanonicalKey);
+  const catalog = buildOfficialCatalogListings(options.officialCatalog ?? [], options.now, options.mediaByCanonicalKey);
   const live = options.liveRecords.flatMap(raw => {
     const normalized = normalizeApplyHomeListing(raw, options.fetchedAt, options.now);
     return normalized ? [normalized] : [];
   });
-  const listings = deduplicateListings([...live, ...frozen]);
+  const listings = deduplicateListings([...live, ...catalog, ...frozen]);
   return {
     schemaVersion: 1,
     generatedAt: options.now,
     listings,
+    coverage: listingCoverage(listings, options.now),
     sources: [
       { source: '한국부동산원 청약홈 분양정보', status: options.liveSourceStatus, fetchedAt: options.fetchedAt, recordCount: live.length },
+      { source: 'LH·JPDC 공식 공고 catalog', status: 'STALE_REFERENCE', fetchedAt: options.fetchedAt, recordCount: catalog.length },
       { source: 'jeju-event-2026-10-v1', status: 'STALE_REFERENCE', fetchedAt: options.frozenDataset.frozenAt, recordCount: frozen.length },
     ],
     usedFrozenFallback: options.liveSourceStatus !== 'LIVE',
   };
 }
 
-export function frozenOnlyPortfolio(dataset: FrozenListingDataset, now: string, message: string): ServiceListingPortfolio {
+export function frozenOnlyPortfolio(
+  dataset: FrozenListingDataset,
+  now: string,
+  message: string,
+  officialCatalog: readonly OfficialCatalogListing[] = [],
+): ServiceListingPortfolio {
   const listings = buildFrozenReferenceListings(dataset, now);
+  const catalog = buildOfficialCatalogListings(officialCatalog, now);
+  const combined = deduplicateListings([...catalog, ...listings]);
   return {
     schemaVersion: 1,
     generatedAt: now,
-    listings,
+    listings: combined,
+    coverage: listingCoverage(combined, now),
     sources: [
       { source: '한국부동산원 청약홈 분양정보', status: 'FAILED', fetchedAt: now, recordCount: 0, message },
+      { source: 'LH·JPDC 공식 공고 catalog', status: 'STALE_REFERENCE', fetchedAt: now, recordCount: catalog.length },
       { source: 'jeju-event-2026-10-v1', status: 'STALE_REFERENCE', fetchedAt: dataset.frozenAt, recordCount: listings.length },
     ],
     usedFrozenFallback: true,
+  };
+}
+
+export function listingCoverage(listings: readonly ServiceListing[], now: string): ServiceListingPortfolio['coverage'] {
+  const cutoff = new Date(now);
+  cutoff.setUTCDate(cutoff.getUTCDate() - 180);
+  const cutoffDate = Number.isFinite(cutoff.getTime()) ? cutoff.toISOString().slice(0, 10) : '0000-00-00';
+  const byProvider: Record<string, number> = {};
+  for (const listing of listings) byProvider[listing.source] = (byProvider[listing.source] ?? 0) + 1;
+  return {
+    total: listings.length,
+    active: listings.filter(listing => listing.applicationStatus === 'OPEN').length,
+    upcoming: listings.filter(listing => listing.applicationStatus === 'UPCOMING').length,
+    recent: listings.filter(listing => listing.applicationStatus === 'CLOSED' && listing.announcementDate >= cutoffDate).length,
+    unknown: listings.filter(listing => listing.applicationStatus === 'UNKNOWN').length,
+    assessable: listings.filter(listing => listing.assessmentAvailability === 'ASSESSABLE').length,
+    informationOnly: listings.filter(listing => listing.assessmentAvailability === 'INFORMATION_ONLY').length,
+    byProvider,
   };
 }

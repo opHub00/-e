@@ -158,7 +158,7 @@ test('adapter reuses existing ApplyHome operations and reports truncated upstrea
   let calls = 0;
   const http = createHttp((async () => { calls++; return new Response(JSON.stringify({ data: [raw()], matchCount: 2 })); }) as typeof fetch, 0);
   const r = await createApplyHomeSource('test-key', http).fetchAnnouncements({ from: '2026-09-10', to: '2026-09-17' });
-  assert.equal(calls, 2); assert.equal(r.complete, false); assert.equal(r.records.length, 2);
+  assert.equal(calls, 5); assert.equal(r.complete, false); assert.equal(r.records.length, 5);
 });
 
 test('invalid normalized metadata is rejected before manifest persistence', () => {

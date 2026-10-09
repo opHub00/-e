@@ -5,7 +5,10 @@ export const RESULT_SESSION_TOKEN_PATTERN = /^[a-f0-9]{64}$/;
 
 const TOP_LEVEL_KEYS = ['cautions', 'counts', 'date', 'event', 'favorites', 'household', 'recommended', 'v'];
 const ITEM_KEYS = ['bucket', 'note', 'stage', 'supply', 'title'];
+const PORTFOLIO_ITEM_KEYS = ['applicationEnd', 'applicationStart', 'bucket', 'cautions', 'location', 'nearbyHighlights', 'note', 'officialScoreStatus', 'rank', 'sourceLabel', 'sourceUrl', 'stage', 'status', 'supply', 'title', 'wanpanRecommendation', 'whyMatched'];
 const BUCKETS = new Set(['eligible', 'review', 'difficult']);
+const ASSESSMENT_STATUSES = new Set(['COMPLETE', 'NEEDS_USER_INPUT', 'INELIGIBLE', 'UNAVAILABLE', 'INFORMATION_ONLY']);
+const SCORE_STATUSES = new Set(['AVAILABLE', 'PENDING', 'NOT_APPLICABLE']);
 const PRIVATE_KEY = /(?:displayName|birthDate|monthlyIncome|totalAssets|profileId|personId|applicant|spouse)/i;
 
 export function isOpaqueResultToken(value) {
@@ -30,15 +33,43 @@ function validItem(value) {
     && validText(value.note, 500, true);
 }
 
+function validTextArray(value, maxItems, maxLength = 500) {
+  return Array.isArray(value) && value.length <= maxItems && value.every(item => validText(item, maxLength));
+}
+
+function validPortfolioItem(value) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    && hasExactKeys(value, PORTFOLIO_ITEM_KEYS)
+    && validText(value.title, 300)
+    && validText(value.supply, 120)
+    && BUCKETS.has(value.bucket)
+    && validText(value.stage, 120, true)
+    && validText(value.note, 500, true)
+    && ASSESSMENT_STATUSES.has(value.status)
+    && Number.isInteger(value.rank) && value.rank > 0 && value.rank <= 1000
+    && SCORE_STATUSES.has(value.officialScoreStatus)
+    && validText(value.wanpanRecommendation, 120)
+    && validTextArray(value.whyMatched, 5)
+    && validTextArray(value.cautions, 5)
+    && validText(value.applicationStart, 10, true)
+    && validText(value.applicationEnd, 10, true)
+    && validText(value.location, 300, true)
+    && validTextArray(value.nearbyHighlights, 5)
+    && validText(value.sourceLabel, 120)
+    && validText(value.sourceUrl, 1000)
+    && /^https:\/\//.test(value.sourceUrl);
+}
+
 export function isValidResultSummary(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || !hasExactKeys(value, TOP_LEVEL_KEYS)) return false;
-  if (value.v !== 1 || !validText(value.event, 120) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date)) return false;
+  if ((value.v !== 1 && value.v !== 2) || !validText(value.event, 120) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date)) return false;
   if (!validText(value.household, 120, true)) return false;
   if (!value.counts || typeof value.counts !== 'object' || Array.isArray(value.counts)) return false;
   if (!hasExactKeys(value.counts, ['difficult', 'eligible', 'review'])) return false;
   if (!Object.values(value.counts).every(count => Number.isInteger(count) && count >= 0 && count <= 1000)) return false;
-  if (!Array.isArray(value.recommended) || value.recommended.length > 20 || !value.recommended.every(validItem)) return false;
-  if (!Array.isArray(value.favorites) || value.favorites.length > 20 || !value.favorites.every(validItem)) return false;
+  const validVersionItem = value.v === 1 ? validItem : validPortfolioItem;
+  if (!Array.isArray(value.recommended) || value.recommended.length > 20 || !value.recommended.every(validVersionItem)) return false;
+  if (!Array.isArray(value.favorites) || value.favorites.length > 20 || !value.favorites.every(validVersionItem)) return false;
   if (!Array.isArray(value.cautions) || value.cautions.length > 20 || !value.cautions.every(item => validText(item, 500))) return false;
   const raw = JSON.stringify(value);
   return raw.length <= 48_000 && !PRIVATE_KEY.test(raw);

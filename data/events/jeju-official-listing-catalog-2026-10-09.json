@@ -1,0 +1,116 @@
+{
+  "catalogVersion": "2026-10-09.1",
+  "fetchedAt": "2026-10-09T09:00:00.000+09:00",
+  "records": [
+    {
+      "source": "LH",
+      "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020842&uppAisTpCd=13",
+      "provider": "한국토지주택공사 제주지역본부",
+      "noticeId": "lh:pan:2015122300020842",
+      "sourceId": "lh:pan:2015122300020842",
+      "title": "제주지역본부 제주시 청년 매입임대주택 예비입주자 모집",
+      "housingName": "제주시 청년 매입임대주택",
+      "address": "제주특별자치도 제주시",
+      "announcementDate": "2026-10-02",
+      "applicationStart": "2026-10-13",
+      "applicationEnd": "2026-10-15",
+      "resultDate": null,
+      "supplyTypes": ["청년 매입임대"],
+      "units": [],
+      "originalDocuments": [{
+        "url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020842&uppAisTpCd=13",
+        "label": "LH청약플러스 공식 공고",
+        "sha256": null
+      }],
+      "fetchedAt": "2026-10-09T09:00:00.000+09:00"
+    },
+    {
+      "source": "LH",
+      "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020835&uppAisTpCd=13",
+      "provider": "한국토지주택공사 제주지역본부",
+      "noticeId": "lh:pan:2015122300020835",
+      "sourceId": "lh:pan:2015122300020835",
+      "title": "제주시 든든전세주택 전환형 예비입주자 모집",
+      "housingName": "제주시 든든전세주택",
+      "address": "제주특별자치도 제주시",
+      "announcementDate": "2026-09-30",
+      "applicationStart": "2026-10-08",
+      "applicationEnd": "2026-10-13",
+      "resultDate": null,
+      "supplyTypes": ["든든전세주택"],
+      "units": [],
+      "originalDocuments": [{
+        "url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020835&uppAisTpCd=13",
+        "label": "LH청약플러스 공식 공고",
+        "sha256": null
+      }],
+      "fetchedAt": "2026-10-09T09:00:00.000+09:00"
+    },
+    {
+      "source": "LH",
+      "sourceUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020787&uppAisTpCd=13",
+      "provider": "한국토지주택공사 제주지역본부",
+      "noticeId": "lh:pan:2015122300020787",
+      "sourceId": "lh:pan:2015122300020787",
+      "title": "서귀포시 든든전세주택 비전환형 예비입주자 모집",
+      "housingName": "서귀포시 든든전세주택",
+      "address": "제주특별자치도 서귀포시",
+      "announcementDate": "2026-09-30",
+      "applicationStart": "2026-10-08",
+      "applicationEnd": "2026-10-13",
+      "resultDate": null,
+      "supplyTypes": ["든든전세주택"],
+      "units": [],
+      "originalDocuments": [{
+        "url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=26&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020787&uppAisTpCd=13",
+        "label": "LH청약플러스 공식 공고",
+        "sha256": null
+      }],
+      "fetchedAt": "2026-10-09T09:00:00.000+09:00"
+    },
+    {
+      "source": "JPDC",
+      "sourceUrl": "https://www.jpdc.co.kr/housing/community/notice.htm?act=view&seq=23974",
+      "provider": "제주특별자치도개발공사",
+      "noticeId": "jpdc:notice:23974",
+      "sourceId": "jpdc:notice:23974",
+      "title": "2026년 신혼·신생아 매입임대주택Ⅱ 입주자 모집",
+      "housingName": "JPDC 신혼·신생아 매입임대Ⅱ",
+      "address": "제주특별자치도 제주시·서귀포시",
+      "announcementDate": "2026-06-30",
+      "applicationStart": "2026-07-14",
+      "applicationEnd": "2026-07-15",
+      "resultDate": "2026-10-15",
+      "supplyTypes": ["신혼·신생아 매입임대Ⅱ"],
+      "units": [],
+      "originalDocuments": [{
+        "url": "https://www.jpdc.co.kr/housing/community/notice.htm?act=view&seq=23974",
+        "label": "JPDC 공식 공고",
+        "sha256": null
+      }],
+      "fetchedAt": "2026-10-09T09:00:00.000+09:00"
+    },
+    {
+      "source": "JPDC",
+      "sourceUrl": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&page=4&seq=23806",
+      "provider": "제주특별자치도개발공사",
+      "noticeId": "jpdc:notice:23806",
+      "sourceId": "jpdc:notice:23806",
+      "title": "2026년 제주시 통합공공임대주택 입주자 모집",
+      "housingName": "제주시 통합공공임대주택",
+      "address": "제주특별자치도 제주시 일도이동·한림읍",
+      "announcementDate": "2026-04-30",
+      "applicationStart": "2026-05-20",
+      "applicationEnd": "2026-05-21",
+      "resultDate": "2026-09-03",
+      "supplyTypes": ["청년", "신혼부부·한부모", "고령자", "일반", "장애인"],
+      "units": [],
+      "originalDocuments": [{
+        "url": "https://www.jpdc.co.kr/open/news/notice.htm?act=view&page=4&seq=23806",
+        "label": "JPDC 공식 공고",
+        "sha256": null
+      }],
+      "fetchedAt": "2026-10-09T09:00:00.000+09:00"
+    }
+  ]
+}

@@ -1,18 +1,24 @@
 import activeDataset from '../../data/events/jeju-event-2026-10-v1.json';
 import reference from '../../data/events/jeju-live-reference-2026-10-09.json';
+import officialCatalog from '../../data/events/jeju-official-listing-catalog-2026-10-09.json';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { FrozenListingDataset } from '../../features/eventKiosk/frozen/domain/rules.ts';
+import type { OfficialCatalogListing } from '../../features/eventKiosk/live/types.ts';
+
+const catalogRecords = officialCatalog.records as OfficialCatalogListing[];
 
 type PortfolioModule = typeof import('../../features/eventKiosk/live/portfolio.ts');
 type SourceModule = typeof import('../../features/eventKiosk/live/source.ts');
+type EnrichmentModule = typeof import('../../features/eventKiosk/live/enrichment.ts');
 const nativeImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<unknown>;
 
-async function loadListingModules(): Promise<[PortfolioModule, SourceModule]> {
+async function loadListingModules(): Promise<[PortfolioModule, SourceModule, EnrichmentModule]> {
   const root = process.cwd();
   return Promise.all([
     nativeImport(pathToFileURL(join(root, 'features/eventKiosk/live/portfolio.ts')).href) as Promise<PortfolioModule>,
     nativeImport(pathToFileURL(join(root, 'features/eventKiosk/live/source.ts')).href) as Promise<SourceModule>,
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/live/enrichment.ts')).href) as Promise<EnrichmentModule>,
   ]);
 }
 
@@ -31,16 +37,18 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=900');
   const now = new Date();
   try {
-    const [{ buildServiceListingPortfolio }, { fetchOfficialJejuListings }] = await loadListingModules();
+    const [{ buildServiceListingPortfolio }, { fetchOfficialJejuListings }, { enrichServiceListingPortfolio }] = await loadListingModules();
     const official = await fetchOfficialJejuListings({ now });
-    response.status(200).json({
-      ...buildServiceListingPortfolio({
+    const portfolio = await enrichServiceListingPortfolio(buildServiceListingPortfolio({
         now: now.toISOString(),
         fetchedAt: official.fetchedAt,
         liveRecords: official.records,
         liveSourceStatus: 'LIVE',
         frozenDataset: activeDataset as FrozenListingDataset,
-      }),
+        officialCatalog: catalogRecords,
+      }));
+    response.status(200).json({
+      ...portfolio,
       transport: official.transport,
     });
   } catch {
@@ -52,6 +60,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         liveRecords: reference.records,
         liveSourceStatus: 'STALE_REFERENCE',
         frozenDataset: activeDataset as FrozenListingDataset,
+        officialCatalog: catalogRecords,
       }),
       transport: 'BUNDLED_REFERENCE',
     });

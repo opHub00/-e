@@ -12,11 +12,14 @@ export function isRenderableSummary(value: unknown): value is ResultSummary {
   const summary = value as Partial<ResultSummary>;
   const itemsOk = (items: unknown) => Array.isArray(items) && items.every(item =>
     item && typeof item === 'object' && isText((item as { title?: unknown }).title) && isText((item as { supply?: unknown }).supply) && BUCKETS.has((item as { bucket?: string }).bucket ?? ''));
-  return summary.v === 1
+  const portfolioItemsOk = (items: unknown) => itemsOk(items) && (items as Array<Record<string, unknown>>).every(item =>
+    isText(item.status) && typeof item.rank === 'number' && Array.isArray(item.whyMatched) && item.whyMatched.every(isText)
+    && Array.isArray(item.cautions) && item.cautions.every(isText) && isText(item.sourceUrl));
+  return (summary.v === 1 || summary.v === 2)
     && isText(summary.date)
     && !!summary.counts && typeof summary.counts === 'object'
     && ['eligible', 'review', 'difficult'].every(key => typeof (summary.counts as Record<string, unknown>)[key] === 'number')
-    && itemsOk(summary.recommended)
-    && itemsOk(summary.favorites)
+    && (summary.v === 1 ? itemsOk(summary.recommended) : portfolioItemsOk(summary.recommended))
+    && (summary.v === 1 ? itemsOk(summary.favorites) : portfolioItemsOk(summary.favorites))
     && Array.isArray(summary.cautions) && summary.cautions.every(isText);
 }

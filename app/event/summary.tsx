@@ -6,7 +6,9 @@ import { useAttached } from '../../features/adminPortal/useIsWide';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
-import { buildSummary, type SummaryItem } from '../../features/eventKiosk/summary';
+import { buildPortfolioSummary, buildSummary, type SummaryItem } from '../../features/eventKiosk/summary';
+import { buildRecommendationPortfolio } from '../../features/eventKiosk/live/recommendation';
+import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
@@ -29,14 +31,21 @@ export default function SummaryScreen() {
   const evaluation = useKioskStore(state => state.evaluation);
   const favorites = useKioskStore(state => state.favorites);
   const householdType = useKioskStore(state => state.answers.householdType);
+  const { portfolio: serviceListings } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
   const [session, setSession] = useState<
     { status: 'idle' } | { status: 'creating' } | { status: 'ready'; link: string; expiresAt: string } | { status: 'error' }
   >({ status: 'idle' });
 
-  const summary = useMemo(
-    () => (load.ok && evaluation ? buildSummary({ eventId: load.event.config.id, householdType, evaluation, favoriteIds: favorites, evidenceOnly: evidenceOnlyFacts(load.event.dataset) }) : null),
-    [evaluation, favorites, householdType, load],
-  );
+  const summary = useMemo(() => {
+    if (!load.ok || !evaluation) return null;
+    if (serviceListings) {
+      return buildPortfolioSummary({
+        eventId: load.event.config.id,
+        portfolio: buildRecommendationPortfolio({ listings: serviceListings, evaluation, favoriteIds: favorites }),
+      });
+    }
+    return buildSummary({ eventId: load.event.config.id, householdType, evaluation, favoriteIds: favorites, evidenceOnly: evidenceOnlyFacts(load.event.dataset) });
+  }, [evaluation, favorites, householdType, load, serviceListings]);
   const showQr = session.status === 'ready';
   const selected = useMemo(
     () => favorites.map(id => evaluation?.outcomes.find(outcome => outcome.id === id)).filter((outcome): outcome is NonNullable<typeof outcome> => Boolean(outcome)),

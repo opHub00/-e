@@ -10,7 +10,7 @@ export type OfficialListingFetchOptions = {
   env?: Readonly<Record<string, string | undefined>>;
 };
 
-function koreanRange(now: Date, days = 90) {
+function koreanRange(now: Date, days = 180) {
   const shifted = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const toDate = shifted.toISOString().slice(0, 10);
   const from = new Date(`${toDate}T00:00:00.000Z`);

@@ -103,7 +103,7 @@ const paged = await fetchApplyHomeListings({
   maxPages: 3,
   fetcher: pagedFetcher,
 });
-check(paged.records.length === 6, '두 operation의 페이지네이션 결과를 합쳐야 한다');
+check(paged.records.length === 15, '다섯 operation의 페이지네이션 결과를 합쳐야 한다');
 check(paged.operations.every((item) => item.pagesFetched === 2), 'matchCount까지 필요한 페이지만 호출해야 한다');
 
 for (const status of [400, 503]) {

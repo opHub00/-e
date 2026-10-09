@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import datasetJson from '../../../data/events/jeju-event-2026-10-v1.json' with { type: 'json' };
 import reference from '../../../data/events/jeju-live-reference-2026-10-09.json' with { type: 'json' };
+import officialCatalog from '../../../data/events/jeju-official-listing-catalog-2026-10-09.json' with { type: 'json' };
 import type { FrozenListingDataset } from '../frozen/domain/rules.ts';
+import type { OfficialCatalogListing } from './types.ts';
 import {
   buildFrozenReferenceListings,
   buildServiceListingPortfolio,
@@ -36,17 +38,44 @@ test('provider plus notice id deduplicates repeated source rows', () => {
   assert.equal(deduped[0]?.fetchedAt, newer.fetchedAt);
 });
 
-test('source failure can return the complete frozen reference dataset', () => {
+test('source failure preserves the frozen assessment set and bundled official catalog', () => {
   const portfolio = buildServiceListingPortfolio({
     now: NOW,
     fetchedAt: reference.fetchedAt,
     liveRecords: [],
     liveSourceStatus: 'FAILED',
     frozenDataset: dataset,
+    officialCatalog: officialCatalog.records as OfficialCatalogListing[],
   });
   assert.equal(portfolio.usedFrozenFallback, true);
-  assert.equal(portfolio.listings.length, 5);
-  assert.equal(portfolio.listings.every(listing => listing.origin === 'FROZEN_REFERENCE'), true);
+  assert.equal(portfolio.listings.length, 10);
+  assert.equal(portfolio.listings.filter(listing => listing.origin === 'FROZEN_REFERENCE').length, 5);
+  assert.equal(portfolio.listings.filter(listing => listing.assessmentAvailability === 'INFORMATION_ONLY').length, 5);
+});
+
+test('official catalog expands coverage without making unreviewed notices assessable', () => {
+  const portfolio = buildServiceListingPortfolio({
+    now: NOW,
+    fetchedAt: reference.fetchedAt,
+    liveRecords: reference.records,
+    liveSourceStatus: 'STALE_REFERENCE',
+    frozenDataset: dataset,
+    officialCatalog: officialCatalog.records as OfficialCatalogListing[],
+  });
+  assert.equal(portfolio.listings.length, 11);
+  assert.equal(portfolio.listings.filter(listing => listing.assessmentAvailability === 'ASSESSABLE').length, 5);
+  assert.equal(portfolio.listings.filter(listing => listing.assessmentAvailability === 'INFORMATION_ONLY').length, 6);
+  assert.deepEqual(
+    Object.fromEntries(['APPLYHOME', 'LH', 'JPDC'].map(source => [source, portfolio.listings.filter(listing => listing.source === source).length])),
+    { APPLYHOME: 1, LH: 4, JPDC: 6 },
+  );
+  assert.equal(portfolio.listings.filter(listing => listing.applicationStatus === 'OPEN').length, 2);
+  assert.equal(portfolio.listings.filter(listing => listing.applicationStatus === 'UPCOMING').length, 2);
+  assert.deepEqual(portfolio.coverage, {
+    total: 11, active: 2, upcoming: 2, recent: 7, unknown: 0,
+    assessable: 5, informationOnly: 6,
+    byProvider: { APPLYHOME: 1, LH: 4, JPDC: 6 },
+  });
 });
 
 test('expired live notices are archived without becoming assessable', () => {

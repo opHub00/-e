@@ -1,4 +1,4 @@
-import { fetchApplyHomeListings } from '../../discovery/server/ApplyHomeApi.ts';
+import { APPLYHOME_OPERATIONS, fetchApplyHomeListings } from '../../discovery/server/ApplyHomeApi.ts';
 import { canonicalUrl, validDate } from './domain.ts';
 import { allowedDocumentUrl, type IngestionHttp } from './http.ts';
 import type { AnnouncementSourceAdapter, NormalizedAnnouncement, RawAnnouncement } from './model.ts';
@@ -26,14 +26,15 @@ export function parseDocumentUrls(html: string, detailUrl: string): string[] {
 }
 export function normalizeApplyHome(raw: RawAnnouncement, retrievedAt: string): NormalizedAnnouncement {
   const operation = text(raw.__applyHomeOperation);
-  if (!['getAPTLttotPblancDetail', 'getRemndrLttotPblancDetail'].includes(operation)) throw new Error('UNKNOWN_OPERATION');
+  if (!(APPLYHOME_OPERATIONS as readonly string[]).includes(operation)) throw new Error('UNKNOWN_OPERATION');
   const date = text(raw.RCRIT_PBLANC_DE).replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
   const title = text(raw.HOUSE_NM), house = text(raw.HOUSE_MANAGE_NO), notice = text(raw.PBLANC_NO);
   if (!title || !validDate(date)) throw new Error('INVALID_SOURCE_RECORD');
   const detailUrl = text(raw.PBLANC_URL) ? allowedDocumentUrl(text(raw.PBLANC_URL)) : null;
   // Explicitly retained source fields only: never serialize API URLs, credentials or volatile enrichment.
   const keys = ['HOUSE_MANAGE_NO', 'PBLANC_NO', 'HOUSE_NM', 'BSNS_MBY_NM', 'CNSTRCT_ENTRPS_NM', 'RCRIT_PBLANC_DE',
-    'SUBSCRPT_AREA_CODE', 'SUBSCRPT_AREA_CODE_NM', 'HSSPLY_ADRES', 'TOT_SUPLY_HSHLDCO', 'RCEPT_BGNDE', 'RCEPT_ENDDE', 'PRZWNER_PRESNATN_DE', '__applyHomeOperation'];
+    'SUBSCRPT_AREA_CODE', 'SUBSCRPT_AREA_CODE_NM', 'HSSPLY_ADRES', 'TOT_SUPLY_HSHLDCO', 'RCEPT_BGNDE', 'RCEPT_ENDDE',
+    'SUBSCRPT_RCEPT_BGNDE', 'SUBSCRPT_RCEPT_ENDDE', 'PRZWNER_PRESNATN_DE', '__applyHomeOperation'];
   return { source: 'APT_APPLY', externalId: notice ? `${operation}:${house || 'unknown'}:${notice}` : null,
     housingManagementNumber: house || null, title, publisher: text(raw.BSNS_MBY_NM) || null, announcementDate: date,
     region: { code: text(raw.SUBSCRPT_AREA_CODE) || null, name: text(raw.SUBSCRPT_AREA_CODE_NM) || null },

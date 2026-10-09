@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import officialCatalog from '../../../data/events/jeju-official-listing-catalog-2026-10-09.json';
 import type { FrozenListingDataset } from '../frozen/domain/rules.ts';
 import { frozenOnlyPortfolio } from './portfolio.ts';
-import type { ServiceListingPortfolio } from './types.ts';
+import type { OfficialCatalogListing, ServiceListingPortfolio } from './types.ts';
 
 let cached: ServiceListingPortfolio | null = null;
 let cachedAt = 0;
@@ -21,7 +22,7 @@ function isPortfolio(value: unknown): value is ServiceListingPortfolio {
 export function useServiceListingPortfolio(dataset: FrozenListingDataset | null) {
   const freshCache = cached && Date.now() - cachedAt < CACHE_MS ? cached : null;
   const fallback = useMemo(
-    () => dataset ? frozenOnlyPortfolio(dataset, new Date().toISOString(), 'LIVE_SOURCE_NOT_LOADED') : null,
+    () => dataset ? frozenOnlyPortfolio(dataset, new Date().toISOString(), 'LIVE_SOURCE_NOT_LOADED', officialCatalog.records as OfficialCatalogListing[]) : null,
     [dataset],
   );
   const [portfolio, setPortfolio] = useState<ServiceListingPortfolio | null>(freshCache ?? fallback);

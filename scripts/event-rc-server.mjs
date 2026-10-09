@@ -6,6 +6,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { InMemoryResultSessionStore, RESULT_SESSION_TTL_MS, isValidResultSummary } from './event-result-session-store.mjs';
 import activeDataset from '../data/events/jeju-event-2026-10-v1.json' with { type: 'json' };
 import liveReference from '../data/events/jeju-live-reference-2026-10-09.json' with { type: 'json' };
+import officialCatalog from '../data/events/jeju-official-listing-catalog-2026-10-09.json' with { type: 'json' };
 import { buildServiceListingPortfolio } from '../features/eventKiosk/live/portfolio.ts';
 
 const root = resolve(process.argv[2] ?? 'dist');
@@ -44,6 +45,7 @@ async function api(request, response, url) {
         liveRecords: liveReference.records,
         liveSourceStatus: 'STALE_REFERENCE',
         frozenDataset: activeDataset,
+        officialCatalog: officialCatalog.records,
       }),
       transport: 'BUNDLED_REFERENCE',
     });

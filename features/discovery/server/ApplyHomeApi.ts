@@ -2,7 +2,10 @@ export const APPLYHOME_API_BASE = 'https://api.odcloud.kr/api/ApplyhomeInfoDetai
 
 export const APPLYHOME_OPERATIONS = [
   'getAPTLttotPblancDetail',
+  'getUrbtyOfctlLttotPblancDetail',
   'getRemndrLttotPblancDetail',
+  'getPblPvtRentLttotPblancDetail',
+  'getOPTLttotPblancDetail',
 ] as const;
 
 export type ApplyHomeOperation = (typeof APPLYHOME_OPERATIONS)[number];

@@ -82,11 +82,12 @@ test('live listing titles and schedules feed the story without creating a real e
   const live: ServiceListing = {
     canonicalKey: 'official:1', origin: 'LIVE', source: 'APPLYHOME', sourceUrl: 'https://official.example/notice', provider: '공식기관',
     noticeId: '1', sourceId: 'official:1', title: '실제 제주 최신 공고', housingName: '실제 제주 주택', region: '제주특별자치도', address: '제주시',
+    location: { normalizedAddress: '제주특별자치도 제주시', latitude: null, longitude: null, status: 'MISSING', source: 'UNAVAILABLE' },
     announcementDate: '2026-10-09', applicationStart: '2026-10-12', applicationEnd: '2026-10-13', resultDate: null, supplyTypes: ['일반공급'], units: [],
     eligibilitySource: 'https://official.example/notice', originalDocuments: [], lifecycle: 'RULE_PENDING', applicationStatus: 'UPCOMING',
-    assessmentAvailability: 'INFORMATION_ONLY', assessmentListingId: null, rulePackageId: null, media: emptyListingMedia('실제 제주 주택'), fetchedAt: '2026-10-09T00:00:00.000Z',
+    assessmentAvailability: 'INFORMATION_ONLY', assessmentListingId: null, rulePackageId: null, media: emptyListingMedia('실제 제주 주택'), nearbyPois: [], sellingPoints: [], locationCautions: [], fetchedAt: '2026-10-09T00:00:00.000Z',
   };
-  const portfolio: ServiceListingPortfolio = { schemaVersion: 1, generatedAt: live.fetchedAt, listings: [live], sources: [], usedFrozenFallback: false };
+  const portfolio: ServiceListingPortfolio = { schemaVersion: 1, generatedAt: live.fetchedAt, listings: [live], coverage: { total: 1, active: 0, upcoming: 1, recent: 0, unknown: 0, assessable: 0, informationOnly: 1, byProvider: { APPLYHOME: 1 } }, sources: [], usedFrozenFallback: false };
   const data = storyDataFrom(load.event, portfolio);
   assert.equal(data.listings[0]?.title, live.title);
   assert.equal(data.featured.title, live.title);

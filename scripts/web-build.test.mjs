@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -14,6 +14,14 @@ import {
   parseStagingIdentity,
   readProductionIdentity,
 } from './web-build.mjs';
+
+test('listings function packages only its required event media modules', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const includeFiles = config.functions?.['api/event-api/listings.ts']?.includeFiles ?? '';
+  assert.match(includeFiles, /features\/eventKiosk\/media\/listingMedia\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/media\/officialListingMedia\.ts/);
+  assert.doesNotMatch(includeFiles, /features\/\*\*/);
+});
 
 test('E2E environment is explicit and does not mutate its parent environment', () => {
   const parent = { KEEP: 'yes' };

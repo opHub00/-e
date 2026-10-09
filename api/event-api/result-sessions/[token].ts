@@ -18,6 +18,7 @@ type ApiResponse = {
   status(code: number): ApiResponse;
   setHeader(name: string, value: string): void;
   json(body: unknown): void;
+  end(): void;
 };
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
@@ -29,7 +30,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const service = new PersistentResultSessionService(new UpstashResultSessionRepository());
     if (request.method === 'DELETE') {
       const deleted = await service.delete(token);
-      response.status(deleted ? 200 : 400).json(deleted ? { deleted: true } : { error: 'INVALID_TOKEN' });
+      if (deleted) response.status(204).end();
+      else response.status(400).json({ error: 'INVALID_TOKEN' });
       return;
     }
     if (request.method !== 'GET') {

@@ -62,18 +62,31 @@ test('only APPROVED_FOR_EVENT frozen listings bind to approved rule packages', (
   assert.equal(listings.every(listing => Boolean(listing.rulePackageId)), true);
 });
 
+test('the exact LH frozen notice uses one official media contract for card, detail and story', () => {
+  const frozen = buildFrozenReferenceListings(dataset, NOW);
+  const listing = frozen.find(item => item.sourceId === 'lh:pan:2015122300020804');
+  assert.ok(listing);
+  assert.equal(listing.media.gallery.length, 3);
+  assert.equal(listing.media.primary?.sourceLabel, 'LH청약플러스');
+  assert.equal(listing.media.primary?.sourceUrl, listing.sourceUrl);
+  assert.match(listing.media.primary?.uri ?? '', /^https:\/\/apply\.lh\.or\.kr\/upload\//);
+  assert.equal(listing.media.primary?.kind, 'render');
+});
+
 test('media keeps official provenance and broken images collapse to housing fallback', () => {
   const media = listingMedia([{
-    imageUrl: 'https://official.example/housing.jpg',
+    uri: 'https://official.example/housing.jpg',
+    alt: '테스트 주택 전경',
     sourceUrl: 'https://official.example/project',
-    sourceName: '공식 단지 홈페이지',
+    sourceLabel: '공식 단지 홈페이지',
     attribution: '공식 제공',
     license: null,
+    kind: 'photo',
     primary: true,
   }], '테스트 주택');
-  assert.equal(media.primary?.imageUrl, 'https://official.example/housing.jpg');
+  assert.equal(media.primary?.uri, 'https://official.example/housing.jpg');
   assert.deepEqual(imageFailureFallback(media), emptyListingMedia('테스트 주택'));
-  assert.equal(listingMedia([{ ...media.primary!, imageUrl: 'http://unsafe.example/image.jpg' }], '테스트').primary, null);
+  assert.equal(listingMedia([{ ...media.primary!, uri: 'http://unsafe.example/image.jpg' }], '테스트').primary, null);
 });
 
 test('structured source fetch filters non-Jeju records and does not require HTML scraping', async () => {

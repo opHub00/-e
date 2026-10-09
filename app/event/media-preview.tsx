@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { isDemoModeEnabled } from '../../features/eventKiosk/demo/demoMode';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
-import { normalizeListingMedia } from '../../features/eventKiosk/media/listingMedia';
+import { emptyListingMedia, normalizeListingMedia } from '../../features/eventKiosk/media/listingMedia';
 import { ListingGallery, ListingThumb } from '../../features/eventKiosk/media/ListingMediaView';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
@@ -22,8 +22,8 @@ function toBase64(svg: string): string {
 
 const SAMPLE_MEDIA = normalizeListingMedia(
   [
-    { uri: sample('#6E6A9E', 'Sample 1'), alt: '예시 단지 전경', credit: '예시 이미지 · 실제 사진 아님', kind: 'photo' },
-    { uri: sample('#8A86B8', 'Sample 2'), alt: '예시 단지 조감도', credit: '예시 조감도', kind: 'render' },
+    { uri: sample('#6E6A9E', 'Sample 1'), alt: '예시 단지 전경', sourceLabel: '예시 이미지 · 실제 사진 아님', kind: 'photo' },
+    { uri: sample('#8A86B8', 'Sample 2'), alt: '예시 단지 조감도', sourceLabel: '예시 조감도', kind: 'render' },
     { uri: sample('#A9A6CC', 'Sample 3'), alt: '예시 위치', kind: 'map' },
   ],
   '예시 공고 이미지',
@@ -50,11 +50,11 @@ export default function MediaPreview() {
         <Text style={styles.section}>상세 · 이미지 여러 장</Text>
         <ListingGallery media={SAMPLE_MEDIA} housingType={listing.housingType} district={listing.district} title={listing.title} />
         <Text style={styles.section}>상세 · 이미지 없음</Text>
-        <ListingGallery media={[]} housingType={listing.housingType} district={listing.district} title={listing.title} />
+        <ListingGallery media={emptyListingMedia(listing.title)} housingType={listing.housingType} district={listing.district} title={listing.title} />
         <Text style={styles.section}>결과 카드 썸네일</Text>
         <View style={styles.row}>
           <ListingThumb media={SAMPLE_MEDIA} housingType={listing.housingType} district={listing.district} />
-          <ListingThumb media={[]} housingType={listing.housingType} district={listing.district} />
+          <ListingThumb media={emptyListingMedia(listing.title)} housingType={listing.housingType} district={listing.district} />
         </View>
       </View>
     </KioskFrame>

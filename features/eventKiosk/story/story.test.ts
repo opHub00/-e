@@ -1,7 +1,8 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { kioskEvent } from '../kioskEvent.ts';
-import { listingMediaOf, normalizeListingMedia } from '../media/listingMedia.ts';
+import { emptyListingMedia, listingMediaOf, normalizeListingMedia } from '../media/listingMedia.ts';
+import type { ServiceListing, ServiceListingPortfolio } from '../live/types.ts';
 import { storyDataFrom, STORY_PROFILE_FIELDS } from './storyData.ts';
 import { forgetStorySeen, hasSeenStory, markStorySeen, STORY_SEEN_KEY } from './storyPreference.ts';
 import { isLastScene, nextSceneIndex, STORY_AUTOPLAY_MS, STORY_SCENES } from './storyScript.ts';
@@ -51,24 +52,44 @@ test('story plays once per browser and survives storage failures', () => {
   forgetStorySeen(broken);
 });
 
-test('listing media accepts only safe, well-formed images and is empty for today’s dataset', () => {
+test('listing media accepts only official safe images and otherwise keeps the housing fallback', () => {
   const media = normalizeListingMedia([
-    { uri: 'https://example.com/a.jpg', alt: '전경', credit: 'LH', kind: 'photo' },
-    { url: 'https://example.com/b.jpg', sourceLabel: '제공처', kind: 'render' },
+    { uri: 'https://example.com/a.jpg', alt: '전경', sourceLabel: 'LH', sourceUrl: 'https://example.com/project', kind: 'photo', primary: true },
+    { url: 'https://example.com/b.jpg', sourceLabel: '제공처', sourceUrl: 'https://example.com/project', kind: 'render' },
     { uri: 'javascript:alert(1)' },
     { uri: 'http://evil.example/c.jpg' },
     { uri: 'data:text/html,hi' },
     'not-an-object',
     { alt: 'no uri' },
   ], '대표 이미지');
-  assert.deepEqual(media.map(item => [item.uri, item.alt, item.credit, item.kind]), [
+  assert.deepEqual(media.gallery.map(item => [item.uri, item.alt, item.sourceLabel, item.kind]), [
     ['https://example.com/a.jpg', '전경', 'LH', 'photo'],
     ['https://example.com/b.jpg', '대표 이미지', '제공처', 'render'],
   ]);
-  assert.equal(normalizeListingMedia(Array.from({ length: 20 }, (_, i) => ({ uri: `https://x.example/${i}.jpg` })), 'a').length, 8);
-  assert.deepEqual(normalizeListingMedia(null, 'a'), []);
-  for (const listing of load.event.config.listings) {
-    assert.deepEqual(listingMediaOf(listing as unknown as { title: string } & Record<string, unknown>), []);
+  assert.equal(normalizeListingMedia(Array.from({ length: 20 }, (_, i) => ({ uri: `https://x.example/${i}.jpg`, sourceLabel: '공식', sourceUrl: 'https://x.example/project' })), 'a').gallery.length, 8);
+  assert.deepEqual(normalizeListingMedia(null, 'a'), emptyListingMedia('a'));
+  const official = load.event.config.listings.find(listing => listing.sourceId === 'lh:pan:2015122300020804');
+  assert.ok(official);
+  assert.equal(listingMediaOf(official).gallery.length, 3);
+  assert.equal(listingMediaOf(official).primary?.sourceLabel, 'LH청약플러스');
+  for (const listing of load.event.config.listings.filter(item => item !== official)) {
+    assert.deepEqual(listingMediaOf(listing), emptyListingMedia(`${listing.title} 대표 이미지`));
   }
-  assert.equal(listingMediaOf({ title: '테스트', media: [{ uri: 'https://example.com/x.jpg' }] })[0].alt, '테스트 대표 이미지');
+  assert.equal(listingMediaOf({ title: '테스트', media: [{ uri: 'https://example.com/x.jpg', sourceLabel: '공식', sourceUrl: 'https://example.com/project' }] }).primary?.alt, '테스트 대표 이미지');
+});
+
+test('live listing titles and schedules feed the story without creating a real eligibility result', () => {
+  const live: ServiceListing = {
+    canonicalKey: 'official:1', origin: 'LIVE', source: 'APPLYHOME', sourceUrl: 'https://official.example/notice', provider: '공식기관',
+    noticeId: '1', sourceId: 'official:1', title: '실제 제주 최신 공고', housingName: '실제 제주 주택', region: '제주특별자치도', address: '제주시',
+    announcementDate: '2026-10-09', applicationStart: '2026-10-12', applicationEnd: '2026-10-13', resultDate: null, supplyTypes: ['일반공급'], units: [],
+    eligibilitySource: 'https://official.example/notice', originalDocuments: [], lifecycle: 'RULE_PENDING', applicationStatus: 'UPCOMING',
+    assessmentAvailability: 'INFORMATION_ONLY', assessmentListingId: null, rulePackageId: null, media: emptyListingMedia('실제 제주 주택'), fetchedAt: '2026-10-09T00:00:00.000Z',
+  };
+  const portfolio: ServiceListingPortfolio = { schemaVersion: 1, generatedAt: live.fetchedAt, listings: [live], sources: [], usedFrozenFallback: false };
+  const data = storyDataFrom(load.event, portfolio);
+  assert.equal(data.listings[0]?.title, live.title);
+  assert.equal(data.featured.title, live.title);
+  assert.equal(data.featured.schedule, '접수 10.12 ~ 10.13');
+  assert.equal(data.featured.origin, 'LIVE');
 });

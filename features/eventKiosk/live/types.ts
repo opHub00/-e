@@ -1,23 +1,10 @@
 import type { FrozenListingDataset } from '../frozen/domain/rules.ts';
+import type { ListingMedia, ListingMediaImage } from '../media/listingMedia.ts';
+export type { ListingMedia, ListingMediaImage } from '../media/listingMedia.ts';
 
 export type LiveListingLifecycle = 'LISTED' | 'RULE_PENDING' | 'ASSESSABLE' | 'ARCHIVED';
 export type ListingAssessmentAvailability = 'ASSESSABLE' | 'INFORMATION_ONLY';
 export type ListingApplicationStatus = 'OPEN' | 'UPCOMING' | 'CLOSED' | 'UNKNOWN';
-
-export type ListingMediaImage = {
-  imageUrl: string;
-  sourceUrl: string;
-  sourceName: string;
-  attribution: string | null;
-  license: string | null;
-  primary: boolean;
-};
-
-export type ListingMedia = {
-  primary: ListingMediaImage | null;
-  gallery: ListingMediaImage[];
-  placeholder: { kind: 'HOUSING'; label: string };
-};
 
 export type ListingUnitInformation = {
   label: string;

@@ -195,7 +195,7 @@ async function verifyFullFlow(page, persona, browser) {
     if (!(await page.getByTestId('live-listing-detail').innerText()).includes('검수된 Rule Package가 없어')) {
       throw new Error('live listing detail did not preserve RULE_PENDING semantics');
     }
-    if (!(await page.getByTestId('live-listing-media').innerText()).includes('공식 주택 이미지 준비 중')) {
+    if (!(await page.getByTestId('live-listing-media').innerText()).includes('대표 이미지 준비 중')) {
       throw new Error('live listing image fallback missing');
     }
     await noOverflow(page, 'YOUNG_SINGLE:live-listing-detail');

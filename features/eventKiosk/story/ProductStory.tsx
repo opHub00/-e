@@ -5,6 +5,7 @@ import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { duration, easing, useNative } from '../../../design/motion';
 import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import { kioskEvent } from '../kioskEvent';
+import { useServiceListingPortfolio } from '../live/useServiceListingPortfolio';
 import { KioskButton } from '../ui/controls';
 import { k } from '../ui/theme';
 import { storyDataFrom, type StoryData } from './storyData';
@@ -35,7 +36,8 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   testID?: string;
 }) {
   const load = kioskEvent();
-  const data = useMemo(() => (load.ok ? storyDataFrom(load.event) : null), [load]);
+  const { portfolio } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
+  const data = useMemo(() => (load.ok ? storyDataFrom(load.event, portfolio) : null), [load, portfolio]);
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [round, setRound] = useState(0);

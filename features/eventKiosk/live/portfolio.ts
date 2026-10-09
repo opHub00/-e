@@ -1,7 +1,9 @@
 import type { FrozenListingDataset, Listing, SourceDocument } from '../frozen/domain/rules.ts';
+import { listingMedia } from '../media/listingMedia.ts';
+import { officialListingMediaImages } from '../media/officialListingMedia.ts';
+export { emptyListingMedia, imageFailureFallback, listingMedia } from '../media/listingMedia.ts';
 import type {
   ListingApplicationStatus,
-  ListingMedia,
   ListingMediaImage,
   ListingPortfolioOptions,
   ServiceListing,
@@ -53,31 +55,6 @@ export function applicationStatus(
   if (end && today > end) return 'CLOSED';
   if (start && end) return 'OPEN';
   return 'UNKNOWN';
-}
-
-export function emptyListingMedia(label: string): ListingMedia {
-  return { primary: null, gallery: [], placeholder: { kind: 'HOUSING', label } };
-}
-
-function validMediaImage(value: ListingMediaImage): boolean {
-  return Boolean(
-    safeHttps(value.imageUrl)
-    && safeHttps(value.sourceUrl)
-    && value.sourceName.trim()
-    && (value.license === null || value.license.trim())
-    && (value.attribution === null || value.attribution.trim()),
-  );
-}
-
-export function listingMedia(images: readonly ListingMediaImage[] | undefined, label: string): ListingMedia {
-  const safe = (images ?? []).filter(validMediaImage);
-  const unique = [...new Map(safe.map(image => [image.imageUrl, image])).values()];
-  const chosen = unique.find(image => image.primary) ?? unique[0] ?? null;
-  return { primary: chosen, gallery: chosen ? [chosen, ...unique.filter(image => image.imageUrl !== chosen.imageUrl)] : [], placeholder: { kind: 'HOUSING', label } };
-}
-
-export function imageFailureFallback(media: ListingMedia): ListingMedia {
-  return emptyListingMedia(media.placeholder.label);
 }
 
 export function normalizeApplyHomeListing(
@@ -189,7 +166,7 @@ export function buildFrozenReferenceListings(
       assessmentAvailability: listing.reviewStatus === 'APPROVED_FOR_EVENT' ? 'ASSESSABLE' : 'INFORMATION_ONLY',
       assessmentListingId: listing.reviewStatus === 'APPROVED_FOR_EVENT' ? listing.id : null,
       rulePackageId: rulePackage?.reviewStatus === 'APPROVED_FOR_EVENT' ? rulePackage.id : null,
-      media: listingMedia(mediaByCanonicalKey[canonicalKey], listing.title),
+      media: listingMedia(mediaByCanonicalKey[canonicalKey] ?? officialListingMediaImages(listing.sourceId), listing.title),
       fetchedAt: dataset.frozenAt,
     } satisfies ServiceListing;
   });

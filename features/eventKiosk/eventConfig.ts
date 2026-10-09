@@ -1,7 +1,7 @@
 import { assertDatasetBindings } from './frozen/engine/batch.ts';
 import type { FrozenListingDataset, Listing } from './frozen/domain/rules.ts';
-import { emptyListingMedia } from './live/portfolio.ts';
-import type { ListingMedia } from './live/types.ts';
+import type { ListingMedia } from './media/listingMedia.ts';
+import { officialListingMedia } from './media/officialListingMedia.ts';
 
 export type RecruitmentStatus = 'open' | 'upcoming' | 'closed' | 'unknown';
 
@@ -96,7 +96,7 @@ function eventListing(listing: Listing, dataset: FrozenListingDataset): EventLis
     sourceDocumentIds: [...listing.sourceDocumentIds],
     origin: 'FROZEN_REFERENCE',
     assessmentAvailability: 'ASSESSABLE',
-    media: emptyListingMedia(listing.title),
+    media: officialListingMedia(listing.sourceId, listing.title),
   };
 }
 

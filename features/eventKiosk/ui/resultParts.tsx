@@ -16,7 +16,6 @@ import { humanize, humanizeAll, kioskStatusLabel, officialScoreStatusLabel } fro
 import { cautionLines, useListingExplanation } from '../experience/useExplanation';
 import { useKioskStore } from '../useKioskStore';
 import { KioskButton } from './controls';
-import { ListingMediaView } from './ListingMediaView';
 import { chatPath, listingPath } from './navigation';
 import { bucketTone, k } from './theme';
 import { listingMediaOf } from '../media/listingMedia';
@@ -189,11 +188,10 @@ export function ListingCard({ outcome }: { outcome: KioskOutcome }) {
   const advantages = humanizeAll(outcome.advantages);
   return (
     <View style={[styles.card, favorite && styles.cardFavorite]} testID={`listing-card-${outcome.rank}`}>
-      <ListingMediaView media={listing.media} variant="card" />
       <View style={styles.cardTop}>
         <View style={styles.rank}><Text style={styles.rankText}>{outcome.rank}</Text></View>
         {/* 작은 썸네일만. 결과 카드의 주인공은 판정 상태라 사진을 키우지 않는다. */}
-        <ListingThumb media={listingMediaOf(listing as unknown as { title: string } & Record<string, unknown>)} housingType={listing.housingType} district={listing.district} />
+        <ListingThumb media={listingMediaOf(listing)} housingType={listing.housingType} district={listing.district} />
         <View style={styles.cardTitleBox}>
           <Text style={styles.cardTitle} numberOfLines={2}>{listing.title}</Text>
           <Text style={styles.cardMeta} numberOfLines={1}>

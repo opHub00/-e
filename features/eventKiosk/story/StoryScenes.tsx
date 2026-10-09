@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { MediaPlaceholder } from '../media/ListingMediaView';
 import { bucketTone, k } from '../ui/theme';
 import { STORY_CONDITION_TAGS, STORY_PROFILE_FIELDS, type StoryData } from './storyData';
@@ -265,6 +266,14 @@ export function SceneSorting({ p, data }: SceneProps) {
 }
 
 /** Scene 5 — 선택한 주택 카드가 커지며 실제 상세 화면의 요소로 이어진다. */
+function FeaturedHousingMedia({ featured }: { featured: StoryData['featured'] }) {
+  const [failed, setFailed] = useState(false);
+  const image = failed ? null : featured.media.primary;
+  useEffect(() => setFailed(false), [featured.media.primary?.uri]);
+  if (!image) return <MediaPlaceholder housingType={featured.housingType} district={featured.district} />;
+  return <Image source={{ uri: image.uri }} style={styles.storyImage} resizeMode="cover" accessibilityLabel={image.alt} onError={() => setFailed(true)} />;
+}
+
 export function SceneAction({ p, data }: SceneProps) {
   const grow = seg(p, 0, 0.5);
   const details = seg(p, 0.45, 0.9);
@@ -284,7 +293,7 @@ export function SceneAction({ p, data }: SceneProps) {
         ]}
       >
         <View style={styles.detailMedia}>
-          <MediaPlaceholder housingType={data.featured.meta.split(' · ')[0]} district={data.featured.meta.split(' · ').slice(1).join(' · ')} />
+          <FeaturedHousingMedia featured={data.featured} />
         </View>
         <View style={styles.detailBody}>
           <View style={styles.detailBadges}>
@@ -359,6 +368,7 @@ const styles = StyleSheet.create({
   example: { fontFamily: k.type.caption.fontFamily, fontSize: 11, color: k.colors.textMuted, marginTop: 2 },
   detail: { backgroundColor: k.colors.surface, borderRadius: 20, borderWidth: 1, borderColor: k.colors.outline, overflow: 'hidden', boxShadow: '0 16px 36px rgba(59,48,158,0.14)' } as object,
   detailMedia: { height: 132 },
+  storyImage: { width: '100%', height: '100%' },
   detailBody: { padding: 16, gap: 6 },
   detailBadges: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 999 },

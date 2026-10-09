@@ -1,9 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { k } from '../ui/theme';
-import { MEDIA_KIND_LABELS, type ListingMedia } from './listingMedia';
+import { MEDIA_KIND_LABELS, withoutListingMediaImage, type ListingMedia } from './listingMedia';
 
 /**
  * 공고 이미지 UI.
@@ -33,12 +33,14 @@ export function MediaPlaceholder({ housingType, district, compact }: Placeholder
 }
 
 /** 결과 카드 왼쪽 작은 정사각 썸네일. 카드의 주인공은 판정 상태라 크기를 키우지 않는다. */
-export function ListingThumb({ media, housingType, district }: { media: ListingMedia[]; housingType: string; district: string }) {
-  const first = media[0];
+export function ListingThumb({ media, housingType, district }: { media: ListingMedia; housingType: string; district: string }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [media.primary?.uri]);
+  const first = failed ? null : media.primary;
   return (
     <View style={styles.thumb} testID={first ? 'listing-thumb-image' : 'listing-thumb-placeholder'}>
       {first ? (
-        <Image source={{ uri: first.uri }} style={styles.fill} resizeMode="cover" accessibilityLabel={first.alt} />
+        <Image source={{ uri: first.uri }} style={styles.fill} resizeMode="cover" accessibilityLabel={first.alt} onError={() => setFailed(true)} />
       ) : (
         <MediaPlaceholder housingType={housingType} district={district} compact />
       )}
@@ -50,7 +52,8 @@ export function ListingThumb({ media, housingType, district }: { media: ListingM
  * 공고 상세의 대표 이미지 / 갤러리.
  * 여러 장이면 좌우로 넘기거나(swipe) 아래 점·화살표를 눌러 이동한다. 출처는 사진 위 구석에 작게.
  */
-export function ListingGallery({ media, housingType, district, title }: { media: ListingMedia[]; housingType: string; district: string; title: string }) {
+export function ListingGallery({ media, housingType, district, title }: { media: ListingMedia; housingType: string; district: string; title: string }) {
+  const [shown, setShown] = useState(media);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const width = size.width;
   const [index, setIndex] = useState(0);
@@ -58,7 +61,7 @@ export function ListingGallery({ media, housingType, district, title }: { media:
   // 가로 스크롤 안에서는 '100%' 높이가 0 이 된다. 실제 크기를 재서 한 장씩 맞춘다.
   const onLayout = (event: LayoutChangeEvent) => setSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
   const go = (next: number) => {
-    const clamped = Math.max(0, Math.min(media.length - 1, next));
+    const clamped = Math.max(0, Math.min(shown.gallery.length - 1, next));
     setIndex(clamped);
     scroller.current?.scrollTo({ x: clamped * width, animated: true });
   };
@@ -67,7 +70,12 @@ export function ListingGallery({ media, housingType, district, title }: { media:
     setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
   };
 
-  if (!media.length) {
+  useEffect(() => {
+    setShown(media);
+    setIndex(0);
+  }, [media]);
+
+  if (!shown.gallery.length) {
     return (
       // 사진이 없을 때는 낮은 띠로만 둔다. 빈 사진 자리가 판정 정보를 화면 아래로 밀어내지 않게.
       <View style={[styles.hero, styles.heroEmpty]} testID="listing-gallery-empty">
@@ -76,9 +84,10 @@ export function ListingGallery({ media, housingType, district, title }: { media:
     );
   }
 
-  const current = media[Math.min(index, media.length - 1)];
+  const currentIndex = Math.min(index, shown.gallery.length - 1);
+  const current = shown.gallery[currentIndex];
   return (
-    <View style={styles.gallery} testID="listing-gallery" accessibilityLabel={`${title} 이미지 ${media.length}장 중 ${index + 1}번째`}>
+    <View style={styles.gallery} testID="listing-gallery" accessibilityLabel={`${title} 이미지 ${shown.gallery.length}장 중 ${currentIndex + 1}번째`}>
       <View style={styles.hero} onLayout={onLayout}>
         {width ? (
           <ScrollView
@@ -90,35 +99,35 @@ export function ListingGallery({ media, housingType, district, title }: { media:
             onScrollEndDrag={onScrollEnd}
             scrollEventThrottle={16}
           >
-            {media.map(item => (
-              <Image key={item.uri} source={{ uri: item.uri }} style={{ width, height: size.height }} resizeMode="cover" accessibilityLabel={item.alt} />
+            {shown.gallery.map(item => (
+              <Image key={item.uri} source={{ uri: item.uri }} style={{ width, height: size.height }} resizeMode="cover" accessibilityLabel={item.alt} onError={() => setShown(value => withoutListingMediaImage(value, item.uri))} />
             ))}
           </ScrollView>
         ) : null}
         <View style={styles.badge} pointerEvents="none">
-          <Text style={styles.badgeText}>{MEDIA_KIND_LABELS[current.kind]}{media.length > 1 ? ` ${index + 1}/${media.length}` : ''}</Text>
+          <Text style={styles.badgeText}>{MEDIA_KIND_LABELS[current.kind]}{shown.gallery.length > 1 ? ` ${currentIndex + 1}/${shown.gallery.length}` : ''}</Text>
         </View>
-        {current.credit ? (
+        {current.sourceLabel ? (
           <View style={styles.credit} pointerEvents="none">
-            <Text style={styles.creditText} numberOfLines={1}>출처 · {current.credit}</Text>
+            <Text style={styles.creditText} numberOfLines={1}>출처 · {current.sourceLabel}{current.attribution ? ` · ${current.attribution}` : ''}{current.license ? ` · ${current.license}` : ''}</Text>
           </View>
         ) : null}
-        {media.length > 1 ? (
+        {shown.gallery.length > 1 ? (
           <>
-            <MotionPressable accessibilityRole="button" accessibilityLabel="이전 사진" onPress={() => go(index - 1)} disabled={index === 0} style={[styles.arrow, styles.arrowLeft, index === 0 && styles.arrowHidden]}>
+            <MotionPressable accessibilityRole="button" accessibilityLabel="이전 사진" onPress={() => go(currentIndex - 1)} disabled={currentIndex === 0} style={[styles.arrow, styles.arrowLeft, currentIndex === 0 && styles.arrowHidden]}>
               <MaterialIcons name="chevron-left" size={28} color={k.colors.text} />
             </MotionPressable>
-            <MotionPressable accessibilityRole="button" accessibilityLabel="다음 사진" onPress={() => go(index + 1)} disabled={index === media.length - 1} style={[styles.arrow, styles.arrowRight, index === media.length - 1 && styles.arrowHidden]}>
+            <MotionPressable accessibilityRole="button" accessibilityLabel="다음 사진" onPress={() => go(currentIndex + 1)} disabled={currentIndex === shown.gallery.length - 1} style={[styles.arrow, styles.arrowRight, currentIndex === shown.gallery.length - 1 && styles.arrowHidden]}>
               <MaterialIcons name="chevron-right" size={28} color={k.colors.text} />
             </MotionPressable>
           </>
         ) : null}
       </View>
-      {media.length > 1 ? (
+      {shown.gallery.length > 1 ? (
         <View style={styles.dots}>
-          {media.map((item, position) => (
+          {shown.gallery.map((item, position) => (
             <MotionPressable key={item.uri} accessibilityRole="button" accessibilityLabel={`${position + 1}번째 사진 보기`} onPress={() => go(position)} style={styles.dotHit}>
-              <View style={[styles.dot, position === index && styles.dotActive]} />
+              <View style={[styles.dot, position === currentIndex && styles.dotActive]} />
             </MotionPressable>
           ))}
         </View>

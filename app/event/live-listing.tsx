@@ -2,9 +2,9 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
+import { ListingGallery } from '../../features/eventKiosk/media/ListingMediaView';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
-import { ListingMediaView } from '../../features/eventKiosk/ui/ListingMediaView';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { goBack } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
@@ -41,7 +41,9 @@ export default function LiveListingDetail() {
       }
     >
       <View style={styles.header} testID="live-listing-detail">
-        <ListingMediaView media={listing.media} variant="detail" testID="live-listing-media" />
+        <View testID="live-listing-media">
+          <ListingGallery media={listing.media} housingType={listing.supplyTypes.join(' · ')} district={listing.region} title={listing.title} />
+        </View>
         <View style={styles.badges}>
           <Text style={styles.liveBadge}>실제 최신 공고</Text>
           <Text style={styles.infoBadge}>공고 정보만 제공</Text>

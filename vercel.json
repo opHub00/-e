@@ -6,7 +6,7 @@
   "cleanUrls": true,
   "functions": {
     "api/event-api/listings.ts": {
-      "includeFiles": "{data/events/*.json,features/discovery/server/ApplyHomeApi.ts,features/discovery/server/package.json,features/eventKiosk/frozen/domain/rules.ts,features/eventKiosk/live/**,features/eventKiosk/media/*.ts}"
+      "includeFiles": "{data/events/*.json,features/discovery/server/ApplyHomeApi.ts,features/discovery/server/package.json,features/eventKiosk/frozen/domain/rules.ts,features/eventKiosk/live/**,features/eventKiosk/media/*.ts,features/eventKiosk/media/package.json}"
     },
     "api/event-api/result-sessions/**/*.ts": {
       "includeFiles": "{features/eventKiosk/server/**,scripts/event-result-session-store.mjs}"

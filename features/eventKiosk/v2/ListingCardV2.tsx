@@ -46,15 +46,9 @@ export function ListingCardV2({ model, favoriteSlot, actions, highlighted, testI
       testID={testID}
     >
       <View style={styles.top}>
-        {model.rank !== null ? (
-          <View style={[styles.rank, compact && styles.rankCompact]}><Text style={[d.type.label, { color: k.colors.onPrimary }]}>{model.rank}</Text></View>
-        ) : null}
-        <View style={{ width: d.thumb, height: d.thumb, borderRadius: 12, overflow: 'hidden' }}>
-          <ListingThumbSized media={model.media} housingType={model.housingType} district={model.district} size={d.thumb} />
-        </View>
         <View style={styles.titleBox}>
           <Text style={[d.type.cardTitle, { color: k.colors.text }]} numberOfLines={2}>{model.title}</Text>
-          {model.subtitle ? <Text style={[d.type.caption, { color: k.colors.textMuted }]} numberOfLines={1}>{model.subtitle}</Text> : null}
+          {model.subtitle ? <Text style={[d.type.caption, { color: k.colors.primary }]} numberOfLines={2}>{model.subtitle}</Text> : null}
         </View>
         {favoriteSlot}
       </View>
@@ -73,9 +67,19 @@ export function ListingCardV2({ model, favoriteSlot, actions, highlighted, testI
         ) : null}
       </View>
 
-      {meta.length ? (
+      {model.media || model.location || model.nearby.length ? (
+        <View style={[styles.mediaRow, !compact && styles.mediaRowComfortable]}>
+          <ListingThumbSized media={model.media} housingType={model.housingType} district={model.district} width={compact ? 124 : '100%'} height={compact ? 64 : 120} />
+          <View style={styles.mediaMeta}>
+            {model.location ? <View style={styles.metaRow} testID="card-location"><MaterialIcons name="place" size={16} color={k.colors.textMuted} /><Text style={[d.type.caption, { color: k.colors.text, flex: 1 }]} numberOfLines={2}>{model.location.label}</Text></View> : null}
+            {model.nearby.slice(0, compact ? 1 : 2).map(place => <View key={place.key} style={styles.metaRow} testID="card-nearby"><MaterialIcons name="near-me" size={16} color={k.colors.textMuted} /><Text style={[d.type.caption, { color: k.colors.text, flex: 1 }]} numberOfLines={1}>{place.label} · {place.distance}</Text></View>)}
+          </View>
+        </View>
+      ) : null}
+
+      {meta.filter(item => item.testID === 'card-application').length ? (
         <View style={styles.meta}>
-          {meta.map(item => (
+          {meta.filter(item => item.testID === 'card-application').map(item => (
             <View key={`${item.icon}-${item.text}`} style={styles.metaRow} testID={item.testID}>
               <MaterialIcons name={item.icon} size={16} color={item.strong ? k.colors.primary : k.colors.textMuted} />
               <Text style={[d.type.caption, { color: item.strong ? k.colors.primary : k.colors.text, flex: 1 }]} numberOfLines={1}>{item.text}</Text>
@@ -118,11 +122,10 @@ export function ListingCardV2({ model, favoriteSlot, actions, highlighted, testI
   );
 }
 
-function ListingThumbSized({ media, housingType, district, size }: { media: ListingCardModel['media']; housingType: string; district: string; size: number }) {
-  // ListingThumb 는 72px 기준이라, 밀도별 크기에 맞춰 감싼 상자 안에서 꽉 채운다.
+function ListingThumbSized({ media, housingType, district, width, height }: { media: ListingCardModel['media']; housingType: string; district: string; width: number | `${number}%`; height: number }) {
   return (
-    <View style={{ width: size, height: size }}>
-      {media ? <ListingThumb media={media} housingType={housingType} district={district} /> : <View style={styles.thumbEmpty}><MaterialIcons name="apartment" size={24} color={k.colors.textSubtle} /></View>}
+    <View style={{ width, height, borderRadius: 8, overflow: 'hidden' }}>
+      {media ? <ListingThumb media={media} housingType={housingType} district={district} width="100%" height={height} radius={8} /> : <View style={styles.thumbEmpty}><MaterialIcons name="apartment" size={24} color={k.colors.textSubtle} /></View>}
     </View>
   );
 }
@@ -144,19 +147,20 @@ function Lines({ title, items, tone }: { title: string; items: string[]; tone: '
 }
 
 const styles = StyleSheet.create({
-  card: { flexGrow: 1, backgroundColor: k.colors.surface, borderRadius: 18, borderWidth: 1, borderColor: k.colors.outline },
+  card: { flexGrow: 1, backgroundColor: k.colors.surface, borderRadius: 10, borderWidth: 1, borderColor: k.colors.outline },
   cardHighlighted: { borderColor: '#E7A64B', borderWidth: 2 },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  rank: { width: 36, height: 36, borderRadius: 10, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  rankCompact: { width: 28, height: 28, borderRadius: 8 },
   titleBox: { flex: 1, gap: 2 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   status: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, minHeight: 30, borderRadius: 999, maxWidth: '100%' },
   meta: { gap: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  mediaRow: { flexDirection: 'row', alignItems: 'stretch', gap: 10 },
+  mediaRowComfortable: { flexDirection: 'column' },
+  mediaMeta: { flex: 1, minWidth: 0, gap: 4, justifyContent: 'center' },
   scores: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  official: { flexGrow: 1, flexBasis: 120, borderRadius: 12, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, padding: 12, gap: 2 },
-  wanpan: { flexGrow: 1, flexBasis: 120, borderRadius: 12, backgroundColor: k.colors.lavender, padding: 12, gap: 2 },
+  official: { flexGrow: 1, flexBasis: 120, borderRadius: 6, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, padding: 12, gap: 2 },
+  wanpan: { flexGrow: 1, flexBasis: 120, borderRadius: 6, backgroundColor: k.colors.lavender, padding: 12, gap: 2 },
   scoreCompact: { padding: 10 },
   scoreHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   lines: { gap: 4 },

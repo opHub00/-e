@@ -168,11 +168,11 @@ async function verifyFullFlow(page, persona, browser) {
   const { analysisMs, adaptiveQuestions } = await enterPersona(page, persona, persona.id === 'YOUNG_SINGLE');
   await noOverflow(page, `${persona.id}:results`);
   await touchTargets(page, `${persona.id}:results`);
-  const title = await page.getByTestId('results-title').innerText();
-  if (!title.includes('공고 5개, 공급 9건')) throw new Error(`${persona.id}: wrong inventory ${title}`);
+  const inventory = await page.getByTestId('results-inventory').innerText();
+  if (!inventory.includes('공고 5개') || !inventory.includes('공급 9건')) throw new Error(`${persona.id}: wrong inventory ${inventory}`);
   if (await visibleListingCardCount(page) !== 9) throw new Error(`${persona.id}: expected 9 visible cards`);
-  const liveCards = page.locator('[data-testid^="live-listing-"]');
-  if (await liveCards.count() !== 1) throw new Error(`${persona.id}: expected one current official Jeju listing`);
+  const liveCards = page.locator('[data-testid^="live-listing-"]:not([data-testid="live-listings-section"])');
+  if (await liveCards.count() !== 6) throw new Error(`${persona.id}: expected six current official Jeju listings`);
   if (!(await page.getByTestId('live-listings-section').innerText()).includes('공고 정보만 제공')) {
     throw new Error(`${persona.id}: unreviewed live listing was not marked information-only`);
   }

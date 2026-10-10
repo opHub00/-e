@@ -20,6 +20,7 @@ import { cautionLines, useListingExplanation } from '../../features/eventKiosk/e
 import { ListingHighlights, ListingPlace } from '../../features/eventKiosk/v2/ListingPlaceSections';
 import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
 import type { ServiceListing } from '../../features/eventKiosk/live/types';
+import { useDensity } from '../../features/eventKiosk/layout/DensityContext';
 
 /** 공고 상세. 왜 이 결과인지, 왜 이 순서인지, 공고의 어디에 근거하는지. */
 export default function ListingDetail() {
@@ -71,25 +72,47 @@ export default function ListingDetail() {
 /** 판정 요약 → 조건 → 공식 점수 상태 → 순서 → 일정 → 근거. 문구는 모두 설명 계층에서 온다. */
 function DetailBody({ outcome, serviceListing }: { outcome: KioskOutcome; serviceListing: ServiceListing | null }) {
   const explanation = useListingExplanation(outcome);
+  const { density } = useDensity();
+  const compact = density === 'compact';
   return (
     <>
-      <Header outcome={outcome} explanation={explanation} serviceListing={serviceListing} />
-      <View style={styles.sections}>
-        <VerdictSection explanation={explanation} />
-        {/* 데이터가 들어오면 나타나는 V2 영역: 검증된 특징 ↔ 확인할 점, 위치·지도·주변 시설. */}
-        <ListingHighlights listing={serviceListing} cautions={cautionLines(explanation)} />
-        <ConditionsSection explanation={explanation} outcome={outcome} />
-        <ListingPlace listing={serviceListing} />
-        <ScoreSection explanation={explanation} />
-        <OrderSection explanation={explanation} outcome={outcome} />
-        <Schedule outcome={outcome} />
-        <SourcesSection explanation={explanation} />
-      </View>
+      <Header outcome={outcome} />
+      {compact ? (
+        <View style={styles.detailGrid}>
+          <View style={[styles.detailColumn, styles.detailMain]}>
+            <QualificationOverview outcome={outcome} explanation={explanation} />
+            <VerdictSection explanation={explanation} />
+            <ConditionsSection explanation={explanation} outcome={outcome} />
+            <ScoreSection explanation={explanation} />
+            <OrderSection explanation={explanation} outcome={outcome} />
+            <Schedule outcome={outcome} />
+            <SourcesSection explanation={explanation} />
+          </View>
+          <View style={[styles.detailColumn, styles.detailSide]}>
+            <PropertyMedia outcome={outcome} serviceListing={serviceListing} />
+            <ListingPlace listing={serviceListing} />
+            <ListingHighlights listing={serviceListing} cautions={cautionLines(explanation)} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.sections}>
+          <QualificationOverview outcome={outcome} explanation={explanation} />
+          <PropertyMedia outcome={outcome} serviceListing={serviceListing} />
+          <VerdictSection explanation={explanation} />
+          <ListingHighlights listing={serviceListing} cautions={cautionLines(explanation)} />
+          <ConditionsSection explanation={explanation} outcome={outcome} />
+          <ListingPlace listing={serviceListing} />
+          <ScoreSection explanation={explanation} />
+          <OrderSection explanation={explanation} outcome={outcome} />
+          <Schedule outcome={outcome} />
+          <SourcesSection explanation={explanation} />
+        </View>
+      )}
     </>
   );
 }
 
-function Header({ outcome, explanation, serviceListing }: { outcome: KioskOutcome; explanation: ListingExplanation; serviceListing: ServiceListing | null }) {
+function Header({ outcome }: { outcome: KioskOutcome }) {
   const { listing } = outcome;
   return (
     <View style={styles.header} testID="listing-detail">
@@ -97,24 +120,35 @@ function Header({ outcome, explanation, serviceListing }: { outcome: KioskOutcom
       <Text style={styles.meta}>
         {outcome.supplyType ? `${outcome.supplyLabel} · ` : ''}{listing.housingType} · {listing.address ?? listing.district}
       </Text>
-      <View style={styles.badges}>
-        <StatusBadge outcome={outcome} large />
-        {outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}
+    </View>
+  );
+}
+
+function QualificationOverview({ outcome, explanation }: { outcome: KioskOutcome; explanation: ListingExplanation }) {
+  return (
+    <View style={styles.qualification} testID="detail-qualification-overview">
+      <Text style={styles.blockTitle} accessibilityRole="header">신청 자격 결과</Text>
+      <View style={styles.badges}><StatusBadge outcome={outcome} large />{outcome.stageLabel ? <StageBadge label={outcome.stageLabel} /> : null}</View>
+      <View style={styles.scores}>
+        {outcome.officialScore ? <OfficialScoreBlock score={outcome.officialScore} /> : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} title={explanation.score.title} note={explanation.score.body} />}
+        <WanpanBlock wanpan={outcome.wanpan} />
       </View>
-      {/* 판정 상태를 먼저 보여 준 다음, 신청할 집을 실제로 본다. 이미지가 없으면 placeholder. */}
+      <Notice>{outcome.listing.sourceNote}</Notice>
+    </View>
+  );
+}
+
+function PropertyMedia({ outcome, serviceListing }: { outcome: KioskOutcome; serviceListing: ServiceListing | null }) {
+  const { listing } = outcome;
+  return (
+    <View style={styles.propertyMedia} testID="detail-property-media">
+      <Text style={styles.blockTitle} accessibilityRole="header">주택 둘러보기</Text>
       <ListingGallery
         media={serviceListing?.media ?? listingMediaOf(listing)}
         housingType={listing.housingType}
         district={listing.district}
         title={listing.title}
       />
-      <View style={styles.scores}>
-        {outcome.officialScore
-          ? <OfficialScoreBlock score={outcome.officialScore} />
-          : <OfficialScoreStateBlock state={outcome.officialScoreState as Exclude<OfficialScoreState, { status: 'AVAILABLE' }>} title={explanation.score.title} note={explanation.score.body} />}
-        <WanpanBlock wanpan={outcome.wanpan} />
-      </View>
-      <Notice>{listing.sourceNote}</Notice>
     </View>
   );
 }
@@ -166,6 +200,12 @@ const styles = StyleSheet.create({
   badges: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   scores: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   sections: { gap: 20, marginTop: 32 },
+  detailGrid: { flexDirection: 'row', alignItems: 'flex-start', gap: 20, marginTop: 20 },
+  detailColumn: { gap: 16, minWidth: 0 },
+  detailMain: { flex: 3 },
+  detailSide: { flex: 2 },
+  qualification: { backgroundColor: k.colors.surface, borderRadius: 10, padding: 18, gap: 12, borderWidth: 1, borderColor: k.colors.outline },
+  propertyMedia: { backgroundColor: k.colors.surface, borderRadius: 10, padding: 18, gap: 12, borderWidth: 1, borderColor: k.colors.outline },
   block: { backgroundColor: k.colors.surface, borderRadius: 20, padding: 24, gap: 14, borderWidth: 1, borderColor: k.colors.outline },
   blockHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   blockTitle: { ...k.type.section, color: k.colors.text },

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
+import { BUCKET_LABELS, WANPAN_LEVEL_LABELS, type KioskBucket, type KioskOutcome } from '../../features/eventKiosk/evaluate';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { HOUSEHOLD_TYPES } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
@@ -18,6 +18,7 @@ import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay'
 import { useDensity } from '../../features/eventKiosk/layout/DensityContext';
 import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
 import { LiveListingCard } from '../../features/eventKiosk/ui/LiveListingCard';
+import { humanize, kioskStatusLabel, officialScoreStatusLabel } from '../../features/eventKiosk/presentation';
 
 /** 결과 대시보드. 위에 세 묶음의 수, 아래에 모든 공고를 추천 순서대로. */
 export default function ResultsScreen() {
@@ -30,7 +31,7 @@ export default function ResultsScreen() {
   const [filter, setFilter] = useState<KioskBucket | null>(null);
   const replay = useFocusReplay();
   // 카드 기준 폭·간격은 밀도를 따른다: desktop 은 한 줄에 세 장, iPad 는 두 장, 휴대폰은 한 장.
-  const { d } = useDensity();
+  const { d, density } = useDensity();
   const { portfolio: servicePortfolio, loading: liveLoading } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
 
   const outcomes = useMemo(
@@ -64,6 +65,7 @@ export default function ResultsScreen() {
   const household = HOUSEHOLD_TYPES.find(type => type.key === householdType)?.label;
   const total = evaluation.outcomes.length;
   const listingCount = new Set(evaluation.outcomes.map(outcome => outcome.listing.listingId)).size;
+  const featured = evaluation.outcomes.find(outcome => outcome.bucket === 'eligible') ?? evaluation.outcomes[0] ?? null;
 
   return (
     <KioskFrame
@@ -79,9 +81,9 @@ export default function ResultsScreen() {
     >
       <View style={styles.head}>
         <Text style={styles.title} accessibilityRole="header" testID="results-title">
-          {load.event.config.regionLabel} 공고 {listingCount}개, 공급 {total}건을 분석했어요
+          나의 {load.event.config.regionLabel} 청약 분석 결과
         </Text>
-        <Text style={styles.subtitle}>{household ? `${household} 기준이에요. ` : ''}공고 하나에 공급이 여럿이면 공급마다 따로 보여 드려요.</Text>
+        <Text style={styles.subtitle} testID="results-inventory">공고 {listingCount}개 · 공급 {total}건을 분석했어요. {household ? `${household} 기준 · ` : ''}공급유형별로 비교해요.</Text>
       </View>
 
       {stale ? (
@@ -93,7 +95,10 @@ export default function ResultsScreen() {
 
       {/* 요약 숫자가 먼저, 결과 카드는 그다음 차례로. 필터를 바꿀 때도 같은 순서로 다시 보인다. */}
       <Appear replayKey={replay} distance={travel.sm}>
-        <BucketTiles counts={evaluation.counts} selected={filter} onSelect={setFilter} />
+        <View style={[styles.overview, density === 'compact' && styles.overviewWide]}>
+          {featured ? <FeaturedOutcome outcome={featured} /> : null}
+          <View style={styles.metrics}><BucketTiles counts={evaluation.counts} selected={filter} onSelect={setFilter} /></View>
+        </View>
       </Appear>
 
       <View style={styles.listHead}>
@@ -137,11 +142,33 @@ export default function ResultsScreen() {
   );
 }
 
+function FeaturedOutcome({ outcome }: { outcome: KioskOutcome }) {
+  const score = outcome.officialScore
+    ? `${outcome.officialScore.total} / ${outcome.officialScore.max}점`
+    : officialScoreStatusLabel(outcome.officialScoreState.status);
+  return (
+    <View style={styles.featured} testID="results-featured">
+      <Text style={styles.featuredTitle}>우선 검토 · {outcome.supplyLabel}</Text>
+      <Text style={styles.featuredStatus}>✓ {kioskStatusLabel(outcome.status, outcome.unavailableReason)} · {outcome.listing.title}</Text>
+      {outcome.stageLabel ? <Text style={styles.featuredLine}>{humanize(outcome.stageLabel)}</Text> : null}
+      <Text style={styles.featuredMeta}>공식 점수: {score} / 완판e 판단: {WANPAN_LEVEL_LABELS[outcome.wanpan.level]}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   head: { gap: 8, marginBottom: 28 },
   title: { ...k.type.hero, color: k.colors.text },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   block: { gap: 12, marginBottom: 24, alignItems: 'flex-start' },
+  overview: { gap: 16 },
+  overviewWide: { flexDirection: 'row', alignItems: 'stretch' },
+  featured: { flex: 2, minWidth: 0, borderRadius: 10, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.lavender, padding: 18, gap: 8 },
+  featuredTitle: { ...k.type.bodyLgStrong, color: k.colors.primary },
+  featuredStatus: { ...k.type.bodyStrong, color: k.colors.success },
+  featuredLine: { ...k.type.body, color: k.colors.text },
+  featuredMeta: { ...k.type.caption, color: k.colors.text },
+  metrics: { flex: 1, minWidth: 0 },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 40, gap: 12 },
   section: { ...k.type.title, color: k.colors.text },
   orderNote: { ...k.type.body, color: k.colors.textMuted, marginTop: 6, marginBottom: 20 },

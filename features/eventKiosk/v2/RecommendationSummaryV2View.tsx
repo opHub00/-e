@@ -23,45 +23,45 @@ export function RecommendationSummaryV2View({ portfolio, answers, favoritesSlot,
   const view = useMemo(() => portfolioView(portfolio, answers), [answers, portfolio]);
   return (
     <View style={{ gap: d.sectionGap }} testID="summary-v2">
-      <View style={[styles.split, wide && styles.splitWide, { gap: d.sectionGap }]}>
-        <View style={[styles.col, wide && styles.colMain]}>
-          <Section title="가장 추천하는 공고" icon="thumb-up" testID="summary-v2-top">
-            {view.top ? (
-              <View style={[styles.top, { padding: d.cardPadding, gap: d.cardGap }]}>
-                <ItemRow item={view.top} onOpen={onOpen} emphasis />
-                {view.top.whyMatched.length ? <View style={styles.list}>{view.top.whyMatched.map(reason => <Bullet key={reason} icon="check" color={k.tint.green.fg} text={reason} />)}</View> : null}
-              </View>
-            ) : <Empty text="지금 정보로 바로 신청할 수 있는 공고는 없어요. 함께 검토할 공고부터 살펴보세요." />}
+      <View style={[styles.collection, wide && styles.collectionWide, { gap: d.sectionGap }]}>
+        <View style={styles.collectionColumn}>
+          <Section title="나에게 가장 맞는 공고" icon="thumb-up" testID="summary-v2-top" emphasis>
+            {view.top ? <><ItemRow item={view.top} onOpen={onOpen} emphasis />{view.top.whyMatched.length ? <View style={styles.list}>{view.top.whyMatched.map(reason => <Bullet key={reason} icon="check" color={k.tint.green.fg} text={reason} />)}</View> : null}</> : <Empty text="지금 정보로 바로 신청할 수 있는 공고는 없어요. 함께 검토할 공고부터 살펴보세요." />}
           </Section>
-          <Section title={`관심 공고 ${view.favorites.length}개`} icon="star" testID="summary-v2-favorites">
-            {favoritesSlot ?? (view.favorites.length
-              ? view.favorites.map(item => <ItemRow key={item.id} item={item} onOpen={onOpen} />)
-              : <Empty text="담은 관심 공고가 없어요. 결과 목록에서 별표를 눌러 담을 수 있어요." />)}
-          </Section>
-          {view.alsoReview.length ? <Section title="함께 검토할 공고" icon="playlist-add-check" testID="summary-v2-also">{view.alsoReview.map(item => <ItemRow key={item.id} item={item} onOpen={onOpen} />)}</Section> : null}
         </View>
-        <View style={[styles.col, wide && styles.colSide]}>
-          {view.schedule.length ? (
-            <Section title="신청 일정" icon="event" testID="summary-v2-schedule">
-              {view.schedule.map(item => (
-                <View key={item.listing.canonicalKey} style={styles.scheduleRow}>
-                  <View style={[styles.dot, item.applicationDates.status === 'OPEN' && styles.dotOpen]} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={[d.type.bodyStrong, { color: k.colors.text }]} numberOfLines={1}>{item.listing.title}</Text>
-                    <Text style={[d.type.caption, { color: item.applicationDates.status === 'OPEN' ? k.colors.primary : k.colors.textMuted }]}>{applicationLabel(item)}</Text>
-                  </View>
-                </View>
-              ))}
-            </Section>
-          ) : null}
-          {view.why.length ? <Section title="왜 추천하나요" icon="lightbulb-outline" testID="summary-v2-why">{view.why.map(line => <Bullet key={line} icon="check-circle" color={k.tint.green.fg} text={line} />)}</Section> : null}
+        <View style={styles.collectionColumn}>
+          <Section title={`관심 공고 ${view.favorites.length}개`} icon="star" testID="summary-v2-favorites">
+            {favoritesSlot ?? (view.favorites.length ? view.favorites.map(item => <View key={item.id} testID="summary-selected-item"><ItemRow item={item} onOpen={onOpen} /></View>) : <Empty text="담은 관심 공고가 없어요. 결과 목록에서 별표를 눌러 담을 수 있어요." />)}
+          </Section>
+        </View>
+        <View style={styles.collectionColumn}>
+          <Section title="함께 검토할 공고" icon="playlist-add-check" testID="summary-v2-also">
+            {view.alsoReview.length ? view.alsoReview.map(item => <ItemRow key={item.id} item={item} onOpen={onOpen} />) : <Empty text="추가로 검토할 공고가 없어요." />}
+          </Section>
+        </View>
+      </View>
+      <View style={[styles.support, wide && styles.supportWide, { gap: d.sectionGap }]}>
+        <View style={styles.supportColumn}>
+          <Section title="신청 일정 · 다시 확인할 날짜" icon="event" testID="summary-v2-schedule">
+            {view.schedule.length ? view.schedule.map(item => (
+              <View key={item.listing.canonicalKey} style={styles.scheduleRow}>
+                <View style={[styles.dot, item.applicationDates.status === 'OPEN' && styles.dotOpen]} />
+                <View style={{ flex: 1 }}><Text style={[d.type.bodyStrong, { color: k.colors.text }]} numberOfLines={1}>{item.listing.title}</Text><Text style={[d.type.caption, { color: item.applicationDates.status === 'OPEN' ? k.colors.primary : k.colors.textMuted }]}>{applicationLabel(item)}</Text></View>
+              </View>
+            )) : <Empty text="확정된 신청 일정이 없어요." />}
+          </Section>
+        </View>
+        <View style={styles.supportColumn}>
+          <Section title="추가 확인사항 · 주변환경" icon="lightbulb-outline" testID="summary-v2-why">
+            {view.why.length ? view.why.map(line => <Bullet key={line} icon="check-circle" color={k.tint.green.fg} text={line} />) : <Empty text="표시할 추천 근거가 없어요." />}
+          </Section>
           <Section title="확인할 점" icon="error-outline" testID="summary-v2-cautions" tone="caution">
             {view.cautions.length ? view.cautions.map(line => <Bullet key={line} icon="priority-high" color={k.tint.amber.fg} text={line} />) : <Empty text="따로 확인할 점이 없어요." />}
             <Text style={[d.type.caption, { color: k.colors.textMuted }]}>입력한 정보로 계산한 예상 결과예요. 실제 자격은 모집공고와 증빙 서류로 확정돼요.</Text>
           </Section>
-          <ProfileDisclosure profile={view.profile} />
         </View>
       </View>
+      <ProfileDisclosure profile={view.profile} />
     </View>
   );
 }
@@ -115,9 +115,9 @@ function profileOf(answers: KioskAnswers | null): Profile {
   };
 }
 
-function Section({ title, icon, children, testID, tone }: { title: string; icon: IconName; children: ReactNode; testID?: string; tone?: 'caution' }) {
+function Section({ title, icon, children, testID, tone, emphasis }: { title: string; icon: IconName; children: ReactNode; testID?: string; tone?: 'caution'; emphasis?: boolean }) {
   const { d } = useDensity();
-  return <View style={[styles.section, tone === 'caution' && styles.sectionCaution, { padding: d.cardPadding, gap: d.cardGap }]} testID={testID}><View style={styles.head}><MaterialIcons name={icon} size={20} color={tone === 'caution' ? k.tint.amber.fg : k.colors.primary} /><Text style={[d.type.section, { color: k.colors.text }]} accessibilityRole="header">{title}</Text></View>{children}</View>;
+  return <View style={[styles.section, tone === 'caution' && styles.sectionCaution, emphasis && styles.sectionEmphasis, { padding: d.cardPadding, gap: d.cardGap }]} testID={testID}><View style={styles.head}><MaterialIcons name={icon} size={20} color={tone === 'caution' ? k.tint.amber.fg : k.colors.primary} /><Text style={[d.type.section, { color: k.colors.text }]} accessibilityRole="header">{title}</Text></View>{children}</View>;
 }
 
 function ItemRow({ item, onOpen, emphasis }: { item: RecommendationItem; onOpen?: (id: string) => void; emphasis?: boolean }) {
@@ -139,5 +139,5 @@ function ProfileDisclosure({ profile }: { profile: Profile }) {
 }
 
 const styles = StyleSheet.create({
-  split: { gap: 20 }, splitWide: { flexDirection: 'row', alignItems: 'flex-start' }, col: { gap: 16 }, colMain: { flex: 3 }, colSide: { flex: 2 }, section: { backgroundColor: k.colors.surface, borderRadius: 18, borderWidth: 1, borderColor: k.colors.outline }, sectionCaution: { backgroundColor: k.tint.amber.bg, borderColor: k.tint.amber.bg }, head: { flexDirection: 'row', alignItems: 'center', gap: 8 }, top: { borderRadius: 14, backgroundColor: k.tint.green.bg }, list: { gap: 6 }, item: { flexDirection: 'row', alignItems: 'center', gap: 10 }, itemHit: { minHeight: 44, justifyContent: 'center' }, status: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, minHeight: 28, borderRadius: 999 }, bullet: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 }, scheduleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: k.colors.outline }, dotOpen: { backgroundColor: k.colors.primary }, profile: { borderRadius: 18, backgroundColor: k.colors.surfaceLow }, disclosure: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 }, chip: { color: k.colors.text, backgroundColor: k.colors.surface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden' },
+  collection: { gap: 20 }, collectionWide: { flexDirection: 'row', alignItems: 'flex-start' }, collectionColumn: { flex: 1, minWidth: 0 }, support: { gap: 20 }, supportWide: { flexDirection: 'row', alignItems: 'flex-start' }, supportColumn: { flex: 1, minWidth: 0, gap: 16 }, section: { backgroundColor: k.colors.surface, borderRadius: 10, borderWidth: 1, borderColor: k.colors.outline }, sectionEmphasis: { backgroundColor: k.colors.lavender }, sectionCaution: { backgroundColor: k.tint.amber.bg, borderColor: k.tint.amber.bg }, head: { flexDirection: 'row', alignItems: 'center', gap: 8 }, list: { gap: 6 }, item: { flexDirection: 'row', alignItems: 'center', gap: 10 }, itemHit: { minHeight: 44, justifyContent: 'center' }, status: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, minHeight: 28, borderRadius: 6 }, bullet: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 }, scheduleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: k.colors.outline }, dotOpen: { backgroundColor: k.colors.primary }, profile: { borderRadius: 10, backgroundColor: k.colors.surfaceLow }, disclosure: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 }, chip: { color: k.colors.text, backgroundColor: k.colors.surface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden' },
 });

@@ -33,12 +33,19 @@ export function MediaPlaceholder({ housingType, district, compact }: Placeholder
 }
 
 /** 결과 카드 왼쪽 작은 정사각 썸네일. 카드의 주인공은 판정 상태라 크기를 키우지 않는다. */
-export function ListingThumb({ media, housingType, district }: { media: ListingMedia; housingType: string; district: string }) {
+export function ListingThumb({ media, housingType, district, width = 72, height = 72, radius = 14 }: {
+  media: ListingMedia;
+  housingType: string;
+  district: string;
+  width?: number | `${number}%`;
+  height?: number;
+  radius?: number;
+}) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [media.primary?.uri]);
   const first = failed ? null : media.primary;
   return (
-    <View style={styles.thumb} testID={first ? 'listing-thumb-image' : 'listing-thumb-placeholder'}>
+    <View style={[styles.thumb, { width, height, borderRadius: radius }]} testID={first ? 'listing-thumb-image' : 'listing-thumb-placeholder'}>
       {first ? (
         <Image source={{ uri: first.uri }} style={styles.fill} resizeMode="cover" accessibilityLabel={first.alt} onError={() => setFailed(true)} />
       ) : (

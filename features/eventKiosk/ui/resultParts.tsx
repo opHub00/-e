@@ -207,8 +207,8 @@ const styles = StyleSheet.create({
   tileHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tileLabel: { ...k.type.bodyLgStrong },
   /** desktop: 요약 숫자 칸을 낮게. 결과 카드가 첫 화면에 더 들어오게. */
-  tileCompact: { minHeight: 0, padding: 14, flexBasis: 200 },
-  tileValueCompact: { fontSize: 32, lineHeight: 40 },
+  tileCompact: { minHeight: 0, padding: 12, flexBasis: 104, borderRadius: 8 },
+  tileValueCompact: { fontSize: 26, lineHeight: 32 },
   tileValue: { ...k.type.metric },
   tileUnit: { ...k.type.section },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 999, alignSelf: 'flex-start' },

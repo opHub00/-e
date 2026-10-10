@@ -19,7 +19,6 @@ import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { Emphasis } from '../../features/eventKiosk/motion/Emphasis';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
-import { SelectedListings } from '../../features/eventKiosk/experience/SelectedListings';
 import { evidenceOnlyFacts } from '../../features/eventKiosk/experience/explain';
 import { RecommendationSummaryV2View } from '../../features/eventKiosk/v2/RecommendationSummaryV2View';
 
@@ -52,10 +51,6 @@ export default function SummaryScreen() {
   }, [evaluation, favorites, householdType, load, recommendationPortfolio]);
   const showQr = session.status === 'ready';
   const answers = useKioskStore(state => state.answers);
-  const selected = useMemo(
-    () => favorites.map(id => evaluation?.outcomes.find(outcome => outcome.id === id)).filter((outcome): outcome is NonNullable<typeof outcome> => Boolean(outcome)),
-    [evaluation, favorites],
-  );
 
   const makeQr = async () => {
     if (!summary || !attached || !load.ok || session.status === 'creating') return;
@@ -84,20 +79,22 @@ export default function SummaryScreen() {
   const qrPanel = (
         <Appear distance={travel.md} style={styles.qrWrap}>
         <Emphasis color={k.colors.primary} radius={20} testID="summary-qr-emphasis">
-          <View style={styles.qrPanel} testID="summary-qr-panel">
-            <Text style={styles.qrTitle}>휴대폰 카메라로 찍어 주세요</Text>
+          <View style={[styles.qrPanel, wide && styles.qrPanelWide]} testID="summary-qr-panel">
             {session.status === 'ready' ? (
-              <>
+              <View style={styles.qrVisual}>
                 {/* data-link: 자동 점검이 QR 이 담은 주소를 그대로 따라가 볼 수 있게. */}
                 <View style={styles.qrBox} {...({ dataSet: { link: session.link } } as object)}><QrCode value={session.link} size={300} testID="summary-qr-code" /></View>
-                <Text style={styles.qrHint}>요약이 휴대폰 화면에 열려요. 앱 설치가 필요 없고 6시간 뒤 만료돼요.</Text>
-              </>
+              </View>
             ) : (
               <Notice tone="warn">휴대폰 링크를 아직 만들지 못했어요. 잠시 후 다시 시도해 주세요.</Notice>
             )}
-            <View style={styles.privacy}>
-              <MaterialIcons name="lock" size={22} color={k.colors.textMuted} />
-              <Text style={styles.muted}>QR에는 임시 결과를 찾는 무작위 token만 들어가요. 이름·생년월일·소득·자산은 임시 요약에도 저장하지 않아요.</Text>
+            <View style={styles.qrCopy}>
+              <Text style={styles.qrTitle}>휴대폰 카메라로 찍어 주세요</Text>
+              <Text style={styles.qrHint}>추천·관심 공고와 다시 확인할 일정을 같은 구조로 이어서 볼 수 있어요. 앱 설치가 필요 없고 링크는 6시간 뒤 만료돼요.</Text>
+              <View style={styles.privacy}>
+                <MaterialIcons name="lock" size={22} color={k.colors.textMuted} />
+                <Text style={styles.muted}>QR에는 임시 결과를 찾는 무작위 token만 들어가요. 이름·생년월일·소득·자산은 저장하지 않아요.</Text>
+              </View>
             </View>
           </View>
         </Emphasis>
@@ -135,32 +132,29 @@ export default function SummaryScreen() {
           <Notice tone="warn">휴대폰으로 보낼 링크를 지금 만들지 못했어요. 잠시 후 아래 ‘다시 시도하기’를 눌러 주세요. 계속 안 되면 화면을 사진으로 남기거나 행사 안내 직원에게 알려 주세요.</Notice>
         </View>
       ) : null}
-      <View style={[styles.layout, wide && styles.layoutWide]}>
-        {/* 좁은 화면에서는 QR 을 맨 위에 둔다. 버튼을 누른 뒤 스크롤하지 않아도 바로 보이게. */}
-        {showQr && !wide ? qrPanel : null}
-        <View style={styles.main} testID="summary">
-          <Text style={styles.title} accessibilityRole="header">나의 청약 분석 요약</Text>
+      <View style={styles.pageHead}>
+        <Text style={styles.title} accessibilityRole="header">{showQr ? '휴대폰으로 공고 모음 가져가기' : '내가 다시 확인할 청약 공고 모음'}</Text>
+        <Text style={styles.subtitle}>{showQr ? '추천·관심·일정·확인사항을 휴대폰에서도 같은 구조로 이어서 봐요.' : '추천 공고와 관심 공고를 함께 가져가세요. 프로필이 아닌 공고 중심 요약입니다.'}</Text>
+      </View>
+      {showQr ? qrPanel : null}
+      <View style={styles.main} testID="summary">
           {/* Summary V2: 어디에 신청하면 되는지가 먼저, 내 입력 정보는 접힌 보조 영역. QR 요약 모양은 그대로다. */}
           <RecommendationSummaryV2View
             portfolio={recommendationPortfolio}
             answers={answers}
             onOpen={outcomeId => router.push(listingPath(outcomeId) as never)}
-            favoritesSlot={selected.length ? <SelectedListings outcomes={selected} /> : undefined}
           />
           {summary.favorites.length ? null : <KioskButton label="관심 공고 담으러 가기" variant="soft" onPress={() => router.push('/event/results' as never)} />}
-        </View>
-
-        {showQr && wide ? qrPanel : null}
       </View>
     </KioskFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  layout: { gap: 24 },
-  layoutWide: { flexDirection: 'row', alignItems: 'flex-start' },
+  pageHead: { gap: 6, marginBottom: 20 },
   main: { flex: 1, gap: 18 },
   title: { ...k.type.hero, color: k.colors.text, marginBottom: 8 },
+  subtitle: { ...k.type.body, color: k.colors.textMuted },
   card: { backgroundColor: k.colors.surface, borderRadius: 20, padding: 24, gap: 12, borderWidth: 1, borderColor: k.colors.outline },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   cardTitle: { ...k.type.section, color: k.colors.text },
@@ -175,9 +169,12 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   dot: { width: 12, height: 12, borderRadius: 6, marginTop: 9 },
   itemTitle: { ...k.type.bodyLgStrong, color: k.colors.text },
-  qrWrap: { width: '100%', maxWidth: 420, alignSelf: 'center' },
-  qrPanel: { width: '100%', backgroundColor: k.colors.surface, borderRadius: 20, padding: 28, gap: 18, alignItems: 'center', borderWidth: 1, borderColor: k.colors.outline },
-  qrTitle: { ...k.type.section, color: k.colors.text, textAlign: 'center' },
+  qrWrap: { width: '100%', alignSelf: 'center', marginBottom: 20 },
+  qrPanel: { width: '100%', backgroundColor: k.colors.surface, borderRadius: 10, padding: 20, gap: 18, alignItems: 'center', borderWidth: 1, borderColor: k.colors.outline },
+  qrPanelWide: { flexDirection: 'row', alignItems: 'stretch' },
+  qrVisual: { width: '100%', maxWidth: 320, alignItems: 'center', justifyContent: 'center' },
+  qrCopy: { flex: 1, minWidth: 0, gap: 12, justifyContent: 'center', alignItems: 'flex-start' },
+  qrTitle: { ...k.type.section, color: k.colors.text },
   qrBox: { padding: 8, backgroundColor: '#FFFFFF', borderRadius: 12 },
   qrHint: { ...k.type.body, color: k.colors.textMuted, textAlign: 'center' },
   privacy: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },

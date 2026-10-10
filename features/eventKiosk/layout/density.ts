@@ -38,7 +38,7 @@ export type DensityTokens = {
 /** 크기·간격 token. 글자 크기는 densityType.ts(글꼴 token 을 쓰는 화면 쪽)에 있다. */
 export const DENSITY: Record<Density, DensityTokens> = {
   compact: {
-    control: 44,
+    control: 48,
     controlLarge: 52,
     controlPaddingX: 16,
     controlLargePaddingX: 22,

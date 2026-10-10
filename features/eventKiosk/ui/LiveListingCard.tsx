@@ -31,6 +31,12 @@ export function LiveListingCard({ listing }: { listing: ServiceListing }) {
       <Text style={styles.period}>
         모집기간 {listing.applicationStart ?? '미정'} ~ {listing.applicationEnd ?? '미정'}
       </Text>
+      {listing.sellingPoints.length ? (
+        <View style={styles.nearby} testID="live-listing-nearby">
+          <Text style={styles.nearbyLabel}>주변 생활</Text>
+          {listing.sellingPoints.slice(0, 2).map(item => <Text key={`${item.category}:${item.text}`} style={styles.nearbyText}>· {item.text}</Text>)}
+        </View>
+      ) : null}
       <Text style={styles.notice}>검수된 Rule Package가 없어 자격 판정에는 포함하지 않아요.</Text>
       <KioskButton label="공고 정보 보기" icon="chevron-right" onPress={() => router.push(liveListingPath(listing.canonicalKey) as never)} />
     </View>
@@ -48,5 +54,8 @@ const styles = StyleSheet.create({
   title: { ...k.type.section, color: k.colors.text },
   meta: { ...k.type.body, color: k.colors.textMuted },
   period: { ...k.type.bodyStrong, color: k.colors.text },
+  nearby: { gap: 4, borderRadius: 12, backgroundColor: k.colors.surfaceLow, padding: 12 },
+  nearbyLabel: { ...k.type.label, color: k.colors.primary },
+  nearbyText: { ...k.type.caption, color: k.colors.text },
   notice: { ...k.type.caption, color: k.colors.textMuted },
 });

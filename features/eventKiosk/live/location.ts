@@ -1,6 +1,6 @@
-import type { ListingLocation, ServiceListing } from './types.ts';
+import type { ListingLocation, ListingLocationPrecision, ServiceListing } from './types.ts';
 
-export type GeocodeResult = { latitude: number; longitude: number; normalizedAddress?: string };
+export type GeocodeResult = { latitude: number; longitude: number; normalizedAddress?: string; precision?: ListingLocationPrecision };
 export type ListingLocationProvider = {
   readonly id: string;
   geocode(address: string): Promise<GeocodeResult | null>;
@@ -69,6 +69,7 @@ export function locationFromOfficialRecord(raw: Readonly<Record<string, unknown>
     longitude,
     status: latitude !== null && longitude !== null ? 'RESOLVED' : 'MISSING',
     source: latitude !== null && longitude !== null ? 'OFFICIAL_SOURCE' : 'UNAVAILABLE',
+    precision: latitude !== null && longitude !== null ? 'OFFICIAL' : 'UNKNOWN',
   };
 }
 
@@ -108,11 +109,13 @@ function withGeocode(listing: ServiceListing, result: GeocodeResult | null, prov
       longitude: result.longitude,
       status: 'RESOLVED',
       source: providerId === 'KAKAO_LOCAL' ? 'KAKAO_LOCAL' : 'OFFICIAL_SOURCE',
+      precision: result.precision ?? 'UNKNOWN',
     } : {
       ...listing.location,
       normalizedAddress: address,
       status: failed ? 'FAILED' : 'MISSING',
       source: 'UNAVAILABLE',
+      precision: 'UNKNOWN',
     },
   };
 }

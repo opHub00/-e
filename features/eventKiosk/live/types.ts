@@ -7,6 +7,7 @@ export type ListingAssessmentAvailability = 'ASSESSABLE' | 'INFORMATION_ONLY';
 export type ListingApplicationStatus = 'OPEN' | 'UPCOMING' | 'CLOSED' | 'UNKNOWN';
 export type ListingLocationStatus = 'RESOLVED' | 'MISSING' | 'FAILED';
 export type ListingLocationSource = 'OFFICIAL_SOURCE' | 'KAKAO_LOCAL' | 'UNAVAILABLE';
+export type ListingLocationPrecision = 'OFFICIAL' | 'ROAD_ADDRESS' | 'PARCEL_ADDRESS' | 'UNKNOWN';
 export type NearbyPoiCategory = 'TRANSIT' | 'EDUCATION' | 'HOSPITAL' | 'SHOPPING' | 'PARK' | 'GOVERNMENT' | 'LANDMARK';
 
 export type ListingLocation = {
@@ -15,6 +16,7 @@ export type ListingLocation = {
   longitude: number | null;
   status: ListingLocationStatus;
   source: ListingLocationSource;
+  precision?: ListingLocationPrecision;
 };
 
 export type NearbyPoi = {

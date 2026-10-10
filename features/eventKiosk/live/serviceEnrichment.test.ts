@@ -15,12 +15,13 @@ test('location normalization is Jeju-specific and provider-neutral', () => {
 
 test('location geocoding uses a TTL cache and preserves missing coordinates', async () => {
   let calls = 0;
-  const provider = { id: 'TEST', geocode: async () => { calls += 1; return { latitude: 33.5, longitude: 126.53 }; } };
+  const provider = { id: 'TEST', geocode: async () => { calls += 1; return { latitude: 33.5, longitude: 126.53, precision: 'ROAD_ADDRESS' as const }; } };
   const cache = new MemoryListingLocationCache();
   const first = await enrichListingLocations([base], provider, cache);
   const second = await enrichListingLocations([base], provider, cache);
   assert.equal(calls, 1);
   assert.equal(first[0]?.location.status, 'RESOLVED');
+  assert.equal(first[0]?.location.precision, 'ROAD_ADDRESS');
   assert.deepEqual(first[0]?.location, second[0]?.location);
 
   const failed = await enrichListingLocations([base], { id: 'FAIL', geocode: async () => { throw new Error('down'); } });

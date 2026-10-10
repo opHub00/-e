@@ -15,6 +15,8 @@ const browser = await chromium.launch();
 const tid = (page, id) => page.getByTestId(id).filter({ visible: true });
 const choice = (page, id, label) => tid(page, id).getByRole('radio', { name: label, exact: true }).click();
 const next = page => page.getByRole('button', { name: /^(다음|분석 시작하기)$/ }).filter({ visible: true }).click();
+const listingPortfolio = await fetch(`${BASE}/event-api/listings`).then(response => response.ok ? response.json() : null).catch(() => null);
+const locatedLive = listingPortfolio?.listings?.find(listing => listing.origin === 'LIVE' && listing.location?.status === 'RESOLVED') ?? null;
 
 const VIEWPORTS = [
   { name: 'desktop-1440', width: 1440, height: 900, density: 'compact' },
@@ -132,6 +134,20 @@ for (const viewport of VIEWPORTS) {
   await page.screenshot({ path: `${SHOT}/${viewport.name}-summary.png` });
   const summaryOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   check(`${viewport.name}: summary has no horizontal overflow`, summaryOverflow <= 1, `${summaryOverflow}`);
+  if (viewport.name === 'desktop-1440' && locatedLive) {
+    await page.getByRole('button', { name: '결과 목록', exact: true }).filter({ visible: true }).click();
+    await tid(page, 'results-title').waitFor();
+    const liveCard = tid(page, `live-listing-${locatedLive.noticeId}`);
+    check('desktop live card exposes verified nearby highlight', (await liveCard.getByTestId('live-listing-nearby').count()) === 1);
+    await liveCard.getByRole('button', { name: '공고 정보 보기', exact: true }).click();
+    await tid(page, 'live-listing-detail').waitFor();
+    check('live detail renders resolved coordinate', (await tid(page, 'location-coordinate').count()) === 1);
+    check('live detail renders map and nearby POIs', (await tid(page, 'listing-map').count()) === 1 && (await tid(page, 'nearby-places').count()) === 1);
+    check('live detail renders evidence-backed features', (await tid(page, 'listing-features').count()) === 1);
+    const liveOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    check('live detail has no horizontal overflow', liveOverflow <= 1, `${liveOverflow}`);
+    await page.screenshot({ path: `${SHOT}/${viewport.name}-live-location.png`, fullPage: true });
+  }
   check(`${viewport.name}: no runtime errors`, errors.length === 0, errors[0] ?? '');
   await context.close();
 }

@@ -8,6 +8,7 @@ import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { goBack } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
+import { ListingHighlights, ListingPlace } from '../../features/eventKiosk/v2/ListingPlaceSections';
 
 const fmt = (value: string | null) => value?.replace(/-/g, '.') ?? '미정';
 
@@ -61,6 +62,10 @@ export default function LiveListingDetail() {
         <Row label="공급유형" value={listing.supplyTypes.join(' · ')} />
         {listing.units[0]?.households !== null ? <Row label="공급 세대" value={`${listing.units[0]?.households}세대`} /> : null}
       </View>
+      <View style={styles.placeSections}>
+        <ListingPlace listing={listing} />
+        <ListingHighlights listing={listing} cautions={[]} />
+      </View>
       <View style={styles.block}>
         <Text style={styles.section}>공식 source</Text>
         <Text style={styles.body}>{listing.sourceUrl}</Text>
@@ -82,6 +87,7 @@ const styles = StyleSheet.create({
   title: { ...k.type.hero, color: k.colors.text },
   meta: { ...k.type.bodyLg, color: k.colors.textMuted },
   block: { marginTop: 24, borderRadius: 20, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, padding: 24, gap: 12 },
+  placeSections: { marginTop: 24, gap: 16 },
   section: { ...k.type.section, color: k.colors.text },
   row: { flexDirection: 'row', gap: 16, justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: k.colors.hairline },
   label: { ...k.type.body, color: k.colors.textMuted },

@@ -13,6 +13,8 @@ const CATEGORY_LABEL: Record<NearbyPoi['category'], string> = {
 const CATEGORY_ICON: Record<NearbyPoi['category'], IconName> = {
   TRANSIT: 'directions-bus', EDUCATION: 'school', HOSPITAL: 'local-hospital', SHOPPING: 'shopping-cart', PARK: 'park', GOVERNMENT: 'account-balance', LANDMARK: 'place',
 };
+const LOCATION_SOURCE = { OFFICIAL_SOURCE: '공식 공고', KAKAO_LOCAL: '카카오 로컬', UNAVAILABLE: '확인 필요' } as const;
+const LOCATION_PRECISION = { OFFICIAL: '공식 좌표', ROAD_ADDRESS: '도로명 주소', PARCEL_ADDRESS: '지번 주소', UNKNOWN: '좌표 정밀도 확인 필요' } as const;
 
 export const formatDistance = (meters: number) => meters >= 1_000 ? `${(meters / 1_000).toFixed(1)}km` : `${Math.max(10, Math.round(meters / 10) * 10)}m`;
 function mapUrl(location: ListingLocation, title: string): string | null {
@@ -27,6 +29,11 @@ export function LocationSummary({ location, nearby, title }: { location: Listing
     <View style={[styles.summary, { padding: d.cardPadding, gap: d.cardGap }]} testID="location-summary">
       <View style={styles.row}><MaterialIcons name="place" size={20} color={k.colors.primary} /><Text style={[d.type.section, { color: k.colors.text, flex: 1 }]} accessibilityRole="header">위치와 주변 생활</Text></View>
       {location.normalizedAddress ? <Text style={[d.type.body, { color: k.colors.text }]}>{location.normalizedAddress}</Text> : null}
+      {location.latitude !== null && location.longitude !== null ? (
+        <Text style={[d.type.caption, { color: k.colors.textMuted }]} testID="location-coordinate">
+          위도 {location.latitude.toFixed(6)} · 경도 {location.longitude.toFixed(6)} · {LOCATION_SOURCE[location.source]} · {LOCATION_PRECISION[location.precision ?? 'UNKNOWN']}
+        </Text>
+      ) : null}
       {nearby.length ? <View style={styles.chips}>{nearby.slice(0, 3).map(place => <View key={place.id} style={styles.chip}><MaterialIcons name={CATEGORY_ICON[place.category]} size={14} color={k.colors.primary} /><Text style={[d.type.caption, { color: k.colors.text }]}>{CATEGORY_LABEL[place.category]} {formatDistance(place.straightDistanceMeters)}</Text></View>)}</View> : null}
       {url ? <MotionPressable accessibilityRole="link" accessibilityLabel="지도 앱에서 위치 보기" onPress={() => void Linking.openURL(url)} style={styles.link}><MaterialIcons name="open-in-new" size={16} color={k.colors.primary} /><Text style={[d.type.label, { color: k.colors.primary }]}>지도 앱에서 보기</Text></MotionPressable> : null}
     </View>

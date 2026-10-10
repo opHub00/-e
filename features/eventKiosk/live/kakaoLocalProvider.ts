@@ -39,6 +39,7 @@ export class KakaoLocalProvider implements ListingLocationProvider, NearbyPoiPro
       latitude,
       longitude,
       normalizedAddress: text((first.road_address as KakaoDocument | null)?.address_name) || text(first.address_name) || address,
+      precision: first.road_address ? 'ROAD_ADDRESS' : 'PARCEL_ADDRESS',
     };
   }
 

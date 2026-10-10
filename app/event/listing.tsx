@@ -16,7 +16,10 @@ import { listingMediaOf } from '../../features/eventKiosk/media/listingMedia';
 import { ListingGallery } from '../../features/eventKiosk/media/ListingMediaView';
 import { ConditionsSection, OrderSection, ScoreSection, SourcesSection, VerdictSection } from '../../features/eventKiosk/experience/ExplanationSections';
 import type { ListingExplanation } from '../../features/eventKiosk/experience/explain';
-import { useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
+import { cautionLines, useListingExplanation } from '../../features/eventKiosk/experience/useExplanation';
+import { ListingHighlights, ListingPlace } from '../../features/eventKiosk/v2/ListingPlaceSections';
+import { useServiceListingPortfolio } from '../../features/eventKiosk/live/useServiceListingPortfolio';
+import type { ServiceListing } from '../../features/eventKiosk/live/types';
 
 /** 공고 상세. 왜 이 결과인지, 왜 이 순서인지, 공고의 어디에 근거하는지. */
 export default function ListingDetail() {
@@ -24,6 +27,7 @@ export default function ListingDetail() {
   const attached = useAttached();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const evaluation = useKioskStore(state => state.evaluation);
+  const { portfolio } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
   // 주소의 id 는 미리 그린 화면에 없다. 이어받은 뒤에 내용을 그린다.
@@ -41,6 +45,7 @@ export default function ListingDetail() {
       </KioskFrame>
     );
   }
+  const serviceListing = portfolio?.listings.find(item => item.assessmentListingId === outcome.listing.listingId) ?? null;
 
   return (
     <KioskFrame
@@ -58,20 +63,23 @@ export default function ListingDetail() {
         </>
       }
     >
-      <DetailBody outcome={outcome} />
+      <DetailBody outcome={outcome} serviceListing={serviceListing} />
     </KioskFrame>
   );
 }
 
 /** 판정 요약 → 조건 → 공식 점수 상태 → 순서 → 일정 → 근거. 문구는 모두 설명 계층에서 온다. */
-function DetailBody({ outcome }: { outcome: KioskOutcome }) {
+function DetailBody({ outcome, serviceListing }: { outcome: KioskOutcome; serviceListing: ServiceListing | null }) {
   const explanation = useListingExplanation(outcome);
   return (
     <>
-      <Header outcome={outcome} explanation={explanation} />
+      <Header outcome={outcome} explanation={explanation} serviceListing={serviceListing} />
       <View style={styles.sections}>
         <VerdictSection explanation={explanation} />
+        {/* 데이터가 들어오면 나타나는 V2 영역: 검증된 특징 ↔ 확인할 점, 위치·지도·주변 시설. */}
+        <ListingHighlights listing={serviceListing} cautions={cautionLines(explanation)} />
         <ConditionsSection explanation={explanation} outcome={outcome} />
+        <ListingPlace listing={serviceListing} />
         <ScoreSection explanation={explanation} />
         <OrderSection explanation={explanation} outcome={outcome} />
         <Schedule outcome={outcome} />
@@ -81,7 +89,7 @@ function DetailBody({ outcome }: { outcome: KioskOutcome }) {
   );
 }
 
-function Header({ outcome, explanation }: { outcome: KioskOutcome; explanation: ListingExplanation }) {
+function Header({ outcome, explanation, serviceListing }: { outcome: KioskOutcome; explanation: ListingExplanation; serviceListing: ServiceListing | null }) {
   const { listing } = outcome;
   return (
     <View style={styles.header} testID="listing-detail">
@@ -95,7 +103,7 @@ function Header({ outcome, explanation }: { outcome: KioskOutcome; explanation: 
       </View>
       {/* 판정 상태를 먼저 보여 준 다음, 신청할 집을 실제로 본다. 이미지가 없으면 placeholder. */}
       <ListingGallery
-        media={listingMediaOf(listing)}
+        media={serviceListing?.media ?? listingMediaOf(listing)}
         housingType={listing.housingType}
         district={listing.district}
         title={listing.title}

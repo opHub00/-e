@@ -138,7 +138,7 @@ for (const viewport of VIEWPORTS) {
     await page.getByRole('button', { name: '결과 목록', exact: true }).filter({ visible: true }).click();
     await tid(page, 'results-title').waitFor();
     const liveCard = tid(page, `live-listing-${locatedLive.noticeId}`);
-    check('desktop live card exposes verified nearby highlight', (await liveCard.getByTestId('live-listing-nearby').count()) === 1);
+    check('desktop live card exposes verified nearby highlight', (await liveCard.getByTestId('listing-nearby-highlight').count()) === 1);
     await liveCard.getByRole('button', { name: '공고 정보 보기', exact: true }).click();
     await tid(page, 'live-listing-detail').waitFor();
     check('live detail renders resolved coordinate', (await tid(page, 'location-coordinate').count()) === 1);

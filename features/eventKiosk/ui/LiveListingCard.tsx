@@ -32,7 +32,7 @@ export function LiveListingCard({ listing }: { listing: ServiceListing }) {
         모집기간 {listing.applicationStart ?? '미정'} ~ {listing.applicationEnd ?? '미정'}
       </Text>
       {listing.sellingPoints.length ? (
-        <View style={styles.nearby} testID="live-listing-nearby">
+        <View style={styles.nearby} testID="listing-nearby-highlight">
           <Text style={styles.nearbyLabel}>주변 생활</Text>
           {listing.sellingPoints.slice(0, 2).map(item => <Text key={`${item.category}:${item.text}`} style={styles.nearbyText}>· {item.text}</Text>)}
         </View>

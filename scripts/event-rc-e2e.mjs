@@ -172,6 +172,7 @@ async function verifyFullFlow(page, persona, browser) {
   if (!inventory.includes('공고 5개') || !inventory.includes('공급 9건')) throw new Error(`${persona.id}: wrong inventory ${inventory}`);
   if (await visibleListingCardCount(page) !== 9) throw new Error(`${persona.id}: expected 9 visible cards`);
   const liveCards = page.locator('[data-testid^="live-listing-"]:not([data-testid="live-listings-section"])');
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid^="live-listing-"]:not([data-testid="live-listings-section"])').length === 6, null, { timeout: 20_000 });
   if (await liveCards.count() !== 6) throw new Error(`${persona.id}: expected six current official Jeju listings`);
   if (!(await page.getByTestId('live-listings-section').innerText()).includes('공고 정보만 제공')) {
     throw new Error(`${persona.id}: unreviewed live listing was not marked information-only`);
@@ -230,7 +231,14 @@ async function verifyFullFlow(page, persona, browser) {
   await page.getByTestId('summary-qr').click();
   await page.getByTestId('summary-qr-panel').waitFor();
   const link = await page.getByTestId('summary-qr-code').locator('..').getAttribute('data-link');
-  if (!link || !/^http:\/\/[^/]+\/event\/take\?token=[a-f0-9]{64}$/.test(link)) throw new Error(`${persona.id}: QR is not opaque ${link}`);
+  const qrUrl = link ? new URL(link) : null;
+  if (!qrUrl
+    || qrUrl.origin !== new URL(baseUrl).origin
+    || qrUrl.pathname !== '/event/take'
+    || qrUrl.searchParams.size !== 1
+    || !/^[a-f0-9]{64}$/.test(qrUrl.searchParams.get('token') ?? '')) {
+    throw new Error(`${persona.id}: QR is not opaque ${link}`);
+  }
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobile = await mobileContext.newPage();

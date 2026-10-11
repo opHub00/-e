@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-08T16:12:52.722Z",
-  "baseUrl": "http://127.0.0.1:4173",
+  "generatedAt": "2026-10-10T08:04:52.987Z",
+  "baseUrl": "https://wanpan-98uccd6rk-ophub00s-projects.vercel.app",
   "browsers": [
     "Chromium"
   ],
@@ -26,7 +26,7 @@
         "parentMonthlyIncomeKrw",
         "parentVehicleValueKrw"
       ],
-      "analysisMs": 6656,
+      "analysisMs": 6344,
       "qrTokenOnly": true
     },
     {
@@ -47,7 +47,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4232,
+      "analysisMs": 4093,
       "qrTokenOnly": true
     },
     {
@@ -68,7 +68,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4144,
+      "analysisMs": 4068,
       "qrTokenOnly": true
     },
     {
@@ -89,7 +89,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4236,
+      "analysisMs": 4094,
       "qrTokenOnly": true
     },
     {
@@ -110,7 +110,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4120,
+      "analysisMs": 4048,
       "qrTokenOnly": true
     },
     {
@@ -131,7 +131,7 @@
         "benefitCategory",
         "vehicleValueKrw"
       ],
-      "analysisMs": 4137,
+      "analysisMs": 4049,
       "qrTokenOnly": true
     },
     {
@@ -151,7 +151,7 @@
         "currentProgramTenant",
         "benefitCategory"
       ],
-      "analysisMs": 4064,
+      "analysisMs": 4039,
       "qrTokenOnly": true
     },
     {
@@ -167,7 +167,7 @@
         "difficult": 9
       },
       "adaptiveQuestions": [],
-      "analysisMs": 1984,
+      "analysisMs": 1923,
       "qrTokenOnly": true
     }
   ],
@@ -180,6 +180,6 @@
     "adaptiveBackNavigation": "PASS",
     "resetVisitorIsolation": "PASS"
   },
-  "maxAnalysisMs": 6656,
+  "maxAnalysisMs": 6344,
   "result": "PASS"
 }

@@ -6,6 +6,7 @@ import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { HOUSEHOLD_TYPES } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
+import { SamdoEntryBanner } from '../../features/eventKiosk/samdoResult/SamdoEntryBanner';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { BucketTiles, EmptyState, ListingCard } from '../../features/eventKiosk/ui/resultParts';
 import { resetToHome } from '../../features/eventKiosk/ui/navigation';
@@ -92,6 +93,8 @@ export default function ResultsScreen() {
           <KioskButton testID="reanalyze" label="바뀐 정보로 다시 분석하기" icon="refresh" onPress={() => router.push('/event/analysis' as never)} />
         </View>
       ) : null}
+
+      <SamdoEntryBanner />
 
       {/* 요약 숫자가 먼저, 결과 카드는 그다음 차례로. 필터를 바꿀 때도 같은 순서로 다시 보인다. */}
       <Appear replayKey={replay} distance={travel.sm}>

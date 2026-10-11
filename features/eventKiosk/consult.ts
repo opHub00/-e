@@ -7,6 +7,7 @@ import type { LoadedEvent } from './eventConfig.ts';
 import { KIOSK_STATUS_LABELS, userFacingFactLabel, userFacingLabels } from './presentation.ts';
 import { experienceAnswer, sanitizeReply } from './experience/chatAnswers.ts';
 import { evidenceOnlyFacts } from './experience/explain.ts';
+import type { SamdoPresentationItem, SamdoPresentationRecommendation } from './samdo/index.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -22,6 +23,8 @@ export type KioskChat = {
   userProfile: UserProfile | null;
   listing: Listing | null;
   result: EvaluationResult | null;
+  /** 삼도 전용 화면에서 들어온 경우의 presentation-safe 판정 context. URL이나 서버에 저장하지 않는다. */
+  samdoRecommendation: SamdoPresentationRecommendation | null;
   messages: { role: 'user' | 'assistant'; text: string; detail?: string[] }[];
 };
 
@@ -55,6 +58,7 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
       userProfile: evaluation?.profile ?? null,
       listing: null,
       result: null,
+      samdoRecommendation: null,
       messages: [{ role: 'assistant', text: '분석을 마치면 입력하신 정보와 검수된 공고 근거를 기준으로 답해 드려요.' }],
     };
   }
@@ -65,7 +69,36 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
     userProfile: evaluation.profile,
     listing,
     result: outcome.result,
+    samdoRecommendation: null,
     messages: [{ role: 'assistant', text: `${outcome.listing.title} · ${outcome.supplyLabel} 결과와 공고 원문 근거를 기준으로 답해 드릴게요.` }],
+  };
+}
+
+const samdoFocus = (recommendation: SamdoPresentationRecommendation): SamdoPresentationItem | null =>
+  recommendation.recommendedType ?? recommendation.alternatives[0] ?? recommendation.lowerPriorityTypes[0] ?? null;
+
+/** 삼도 전용 결과를 기존 상담 화면에 연결한다. 판정을 다시 실행하거나 URL에 사용자 값을 넣지 않는다. */
+export function startSamdoChat(event: LoadedEvent, recommendation: SamdoPresentationRecommendation): KioskChat {
+  const focus = samdoFocus(recommendation);
+  return {
+    context: {
+      outcomeId: null,
+      listingTitle: '삼도이동 1지구 토지임대부 분양주택',
+      supplyLabel: focus?.supplyLabel ?? '공급유형 분석',
+      datasetVersion: event.dataset.datasetVersion,
+      datasetFingerprint: event.dataset.fingerprint,
+    },
+    assessmentContext: null,
+    userProfile: null,
+    listing: null,
+    result: null,
+    samdoRecommendation: recommendation,
+    messages: [{
+      role: 'assistant',
+      text: focus
+        ? `${focus.supplyLabel}을(를) 중심으로 삼도이동 1지구의 유형별 판정과 공고 근거를 설명해 드릴게요.`
+        : '삼도이동 1지구의 유형별 판정과 신청이 어려운 이유를 설명해 드릴게요.',
+    }],
   };
 }
 
@@ -119,11 +152,50 @@ function answer(chat: KioskChat, message: string): { text: string; detail?: stri
   };
 }
 
+function answerSamdo(recommendation: SamdoPresentationRecommendation, message: string): { text: string; detail?: string[] } {
+  const focus = samdoFocus(recommendation);
+  if (!focus) {
+    const rejected = recommendation.rejectedTypes.slice(0, 5).map(item => `${item.supplyLabel}: ${item.failedReasons[0] ?? '신청 조건을 충족하지 못했어요.'}`);
+    return { text: '현재 입력으로 자동 추천할 수 있는 공급유형이 없어요.', detail: rejected };
+  }
+  if (/서류|증빙|준비물|제출/.test(message)) {
+    return focus.evidenceRequired.length
+      ? { text: `${focus.supplyLabel}에서 서류로 확인해야 할 항목이에요.`, detail: focus.evidenceRequired.slice(0, 6) }
+      : { text: `${focus.supplyLabel} 판정에 남은 별도 증빙 항목은 없어요. 실제 접수 기본서류는 공고문에서 다시 확인해 주세요.` };
+  }
+  if (/비교|다른\s*(공급|유형)|어떤\s*게\s*나아/.test(message)) {
+    return {
+      text: `유형별 판정 순서는 저장된 추천 결과를 그대로 보여 드려요. 공급 세대수로 당첨 가능성을 추정하지 않았어요.`,
+      detail: recommendation.evaluations.slice(0, 6).map(item => `${item.rank}순위 · ${item.supplyLabel} · ${item.stageLabel}`),
+    };
+  }
+  if (/근거|공고문|원문|출처/.test(message)) {
+    return {
+      text: `${focus.supplyLabel} 판정에 연결된 공고문 근거예요.`,
+      detail: focus.evidence.slice(0, 5).map(item => `${item.section}${item.page ? ` · ${item.page}쪽` : ''} · ${item.label}`),
+    };
+  }
+  if (/확인|조건|중요|핵심/.test(message)) {
+    const checks = [...focus.cautions, ...focus.evidenceRequired];
+    return checks.length
+      ? { text: `${focus.supplyLabel}에서 먼저 확인할 조건이에요.`, detail: checks.slice(0, 6) }
+      : { text: `${focus.supplyLabel}의 입력 조건은 모두 확인됐어요.`, detail: focus.matchedAdvantages.slice(0, 5) };
+  }
+  return {
+    text: recommendation.recommendedType
+      ? `${focus.supplyLabel}이 현재 입력에서 가장 앞선 신청유형이에요. 경쟁률이나 당첨확률은 추정하지 않았어요.`
+      : `${focus.supplyLabel}은 추가 확인이 필요한 유형이에요. 아직 가장 유리한 신청유형으로 확정하지 않았어요.`,
+    detail: focus.reasons.slice(0, 5),
+  };
+}
+
 export async function sendChat(event: LoadedEvent, chat: KioskChat, message: string): Promise<KioskChat> {
   const text = message.trim();
   if (!text) return chat;
   // 자주 묻는 질문은 방문자의 판정 결과로 먼저 답하고, 어떤 답이든 기계용 키를 지운 뒤 내보낸다.
-  const response = sanitizeReply(experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
+  const response = sanitizeReply(chat.samdoRecommendation
+    ? answerSamdo(chat.samdoRecommendation, text)
+    : experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
   return {
     ...chat,
     messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response }],

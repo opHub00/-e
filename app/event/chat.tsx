@@ -54,6 +54,10 @@ export default function ChatScreen() {
     void ask(load.event, text);
   };
   const choices = (evaluation?.outcomes ?? []).filter(item => item.id !== chat.context.outcomeId);
+  const samdoFocus = chat.samdoRecommendation?.recommendedType
+    ?? chat.samdoRecommendation?.alternatives[0]
+    ?? chat.samdoRecommendation?.lowerPriorityTypes[0]
+    ?? null;
 
   return (
     <KioskFrame
@@ -90,10 +94,14 @@ export default function ChatScreen() {
             <Text style={styles.contextMeta} testID="chat-context-verdict">
               내 판정: {BUCKET_LABELS[outcome.bucket]}{outcome.stageLabel ? ` · ${humanize(outcome.stageLabel)}` : ''} · 입력하신 정보와 공고 근거 기준
             </Text>
+          ) : samdoFocus ? (
+            <Text style={styles.contextMeta} testID="chat-context-verdict">
+              삼도 전용 판정 · {samdoFocus.stageLabel} · 경쟁률·당첨확률 미추정
+            </Text>
           ) : null}
         </View>
         {choices.length ? <KioskButton label="공고 바꾸기" variant="soft" onPress={() => setPicking(value => !value)} testID="chat-switch" /> : null}
-        <KioskButton label="돌아가기" variant="ghost" icon="arrow-back" onPress={() => goBack(evaluation ? '/event/results' : '/event')} />
+        <KioskButton label="돌아가기" variant="ghost" icon="arrow-back" onPress={() => goBack(chat.samdoRecommendation ? '/event/samdo' : evaluation ? '/event/results' : '/event')} />
       </View>
       {picking ? (
         <View style={styles.picker}>
@@ -131,7 +139,13 @@ export default function ChatScreen() {
       </ScrollView>
 
       <StaggerList key={chat.context.outcomeId ?? 'none'} style={styles.suggestions} testID="chat-suggestions">
-        {experienceSuggestedQuestions(outcome).map(question => (
+        {(chat.samdoRecommendation ? [
+          '왜 이 신청유형을 먼저 추천하나요?',
+          '가장 중요한 조건은 무엇인가요?',
+          '제가 확인해야 할 서류는 무엇인가요?',
+          '다른 공급유형과 비교하면 어떤가요?',
+          '근거가 된 공고문 항목은 무엇인가요?',
+        ] : experienceSuggestedQuestions(outcome)).map(question => (
           <MotionPressable key={question} accessibilityRole="button" accessibilityLabel={question} onPress={() => send(question)} style={styles.suggestion} disabled={busy}>
             <Text style={styles.suggestionText}>{question}</Text>
           </MotionPressable>

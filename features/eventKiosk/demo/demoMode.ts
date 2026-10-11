@@ -68,4 +68,5 @@ export const DEMO_ROUTES = [
   { key: 'dashboard', label: 'Dashboard', path: '/event/results', needsResult: true },
   { key: 'detail', label: 'Detail (1순위 결과)', path: 'detail', needsResult: true },
   { key: 'qr', label: 'QR / Summary', path: '/event/summary', needsResult: true },
+  { key: 'samdo', label: '공고 전용 결과', path: '/event/samdo', needsResult: true },
 ] as const;

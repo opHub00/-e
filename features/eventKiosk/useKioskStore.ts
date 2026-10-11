@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { defaultChatOutcome, sendChat, startChat, type KioskChat } from './consult.ts';
+import { defaultChatOutcome, sendChat, startChat, startSamdoChat, type KioskChat } from './consult.ts';
+import type { SamdoPresentationRecommendation } from './samdo/index.ts';
 import { evaluateEvent, type KioskEvaluation } from './evaluate.ts';
 import { createAdaptiveQuestionPlan, type AdaptiveQuestionPlan } from './adaptiveAssessment.ts';
 import type { LoadedEvent } from './eventConfig.ts';
@@ -49,6 +50,7 @@ type KioskState = {
   markAnswered: (key: string) => void;
   toggleFavorite: (outcomeId: string) => void;
   openChat: (event: LoadedEvent, outcomeId: string | null) => void;
+  openSamdoChat: (event: LoadedEvent, recommendation: SamdoPresentationRecommendation) => void;
   ask: (event: LoadedEvent, message: string) => Promise<void>;
   reset: () => void;
   /**
@@ -163,6 +165,8 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     if (chat && outcome && chat.context.outcomeId === outcome.id) return;
     set({ chat: startChat(event, evaluation, outcome) });
   },
+
+  openSamdoChat: (event, recommendation) => set({ chat: startSamdoChat(event, recommendation) }),
 
   ask: async (event, message) => {
     const { chat, sessionKey } = get();

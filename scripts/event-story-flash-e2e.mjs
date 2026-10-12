@@ -169,7 +169,16 @@ for (const scenario of SCENARIOS) {
     const page = await context.newPage();
     await page.goto(`${BASE}/event/story`, { waitUntil: 'commit' });
     await page.getByTestId('story-message').filter({ visible: true }).waitFor({ timeout: 15000 });
-    await page.waitForTimeout(900);
+    // A remote Preview can hydrate later than the local 900ms baseline. Wait for the
+    // reduced-motion completed frame, while the recorder still verifies no in-between frame.
+    await page.waitForFunction(() => {
+      const message = document.querySelector('[data-testid="story-message"]');
+      const scene = document.querySelector('[data-testid^="story-scene-"]');
+      return message?.parentElement
+        && Number.parseFloat(getComputedStyle(message.parentElement).opacity || '0') >= 0.99
+        && scene?.firstElementChild;
+    }, null, { timeout: 15000 });
+    await page.waitForTimeout(100);
     const frames = await page.evaluate(() => window.__storyFrames);
     const problems = analyse(frames, { reduced: true });
     const lastFrame = frames.at(-1);

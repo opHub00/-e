@@ -20,15 +20,21 @@ const yes = (value: boolean | null | undefined) => (value === null || value === 
 
 function childrenOf(answers: KioskAnswers): Child[] | undefined {
   const { household, householdType } = answers;
-  // 기본 설문의 자녀 수는 화면 문구상 태아를 제외한다. 따라서 0명이라는 답만으로
-  // 태아·입양 예정까지 없다고 확정하지 않는다. 신생아 공급은 추가 확인으로 남긴다.
-  if (householdType === 'single' || household.childrenCount === 0) return undefined;
+  const expectation = household.childExpectationStatus;
+  // 입양 예정 자녀는 생년월일·입양일이 필요하므로 존재만으로 연령 조건을 확정하지 않는다.
+  if (expectation === 'ADOPTION' || expectation === 'BOTH' || expectation === 'DOES_NOT_KNOW') return undefined;
   const count = household.childrenCount ?? household.childBirthDates.length;
-  if (!count) return householdType === 'couple' ? [] : undefined;
+  if (!count) {
+    if (expectation === 'NONE') return [];
+    if (expectation === 'UNBORN') return [{ unborn: true }];
+    // 이전 저장 구조에는 태아·입양 질문이 없었다. 기존처럼 확정하지 않는다.
+    return householdType === 'couple' ? [] : undefined;
+  }
   const dates = Array.from({ length: count }, (_, index) => household.childBirthDates[index] ?? '');
   // 한 명이라도 생년월일을 모르면 자녀 정보 전체를 모름으로 둔다(2세 미만·미성년 자녀 수가 틀어지지 않게).
   if (!dates.every(isIsoDate)) return undefined;
-  return dates.map(birthDate => ({ birthDate, unborn: false }));
+  const born = dates.map(birthDate => ({ birthDate, unborn: false }));
+  return expectation === 'UNBORN' ? [...born, { unborn: true }] : born;
 }
 
 function familyCategoryOf(answers: KioskAnswers): AssessmentInput['details']['familyCategory'] {
@@ -79,6 +85,14 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
 
   const marriageDate = married && isIsoDate(household.marriageDate) ? household.marriageDate : undefined;
   const winning = applicant.winningHistory;
+  const specialSupplyHistory = applicant.specialSupplyHistory ?? (winning === false ? false : undefined);
+  const reWinningRestriction = applicant.reWinningRestriction ?? (winning === false ? false : undefined);
+  const householdNoWinningFiveYears = applicant.householdNoWinningFiveYears ?? (winning === false ? true : undefined);
+  const childExpectation = household.childExpectationStatus;
+  const explicitSpecialExceptions = applicant.specialException === false ? [] : applicant.specialException === true ? ['행사 답변: 공고 특례 해당'] : undefined;
+  const specialExceptions = childExpectation === 'UNBORN' || childExpectation === 'ADOPTION' || childExpectation === 'BOTH'
+    ? [...(explicitSpecialExceptions ?? []), '행사 답변: 태아·입양 증빙 확인 필요']
+    : childExpectation === 'DOES_NOT_KNOW' ? undefined : explicitSpecialExceptions;
   const details: AssessmentInput['details'] = defined({
     birthDate: isIsoDate(applicant.birthDate) ? applicant.birthDate : undefined,
     currentResidence: residence,
@@ -96,10 +110,10 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
     children: childrenOf(answers),
     housingDisposalDates: applicant.neverOwnedHome === true ? [] : undefined,
     // '당첨된 적 없어요'는 특별공급 당첨·재당첨 제한·5년 내 당첨이 모두 없다는 뜻이다(질문 문구 그대로).
-    specialSupplyHistory: winning === false ? false : undefined,
-    reWinningRestriction: winning === false ? false : undefined,
-    householdNoWinningFiveYears: winning === false ? true : undefined,
-    specialExceptions: applicant.specialException === false ? [] : applicant.specialException === true ? ['행사 답변: 공고 특례 해당'] : undefined,
+    specialSupplyHistory,
+    reWinningRestriction,
+    householdNoWinningFiveYears,
+    specialExceptions,
     accountKindEligible: subscription.accountKind === 'housing' ? true : subscription.accountKind === 'none' ? false : undefined,
     subscriptionAccountOpenedAt: isIsoDate(subscription.openedAt) ? subscription.openedAt : undefined,
     recognizedPaymentCount: subscription.paymentCount ?? undefined,
@@ -114,7 +128,9 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
     totalAssets: single
       ? answers.adaptive.applicantTotalAssetsKrw ?? household.totalAssets ?? undefined
       : household.totalAssets ?? undefined,
-    parentAssets: household.parentAssets ?? undefined,
+    parentAssets: household.parentInformationStatus == null || household.parentInformationStatus === 'KNOWN'
+      ? household.parentAssets ?? undefined
+      : undefined,
     vehicleValue: answers.adaptive.vehicleValueKrw ?? undefined,
   });
   return { profile, details };

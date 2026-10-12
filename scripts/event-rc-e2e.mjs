@@ -117,6 +117,7 @@ async function enterPersona(page, persona, verifyBack) {
   await choice(page, 'q-applicant-residenceMonths', '5년 이상');
   await choice(page, 'q-applicant-longOverseasStay', '없어요');
   await choice(page, 'q-applicant-specialException', '없어요');
+  await choice(page, 'q-household-childExpectationStatus', '없어요');
   if (verifyBack) {
     await page.getByRole('button', { name: '이전', exact: true }).click();
     await next(page);
@@ -145,12 +146,18 @@ async function enterPersona(page, persona, verifyBack) {
     await page.getByTestId('input-householdIncome').fill(persona.householdIncome);
   }
   await page.getByTestId('input-totalAssets').fill(persona.assets);
+  await page.getByTestId('input-vehicleValueKrw').fill(persona.id === 'CLEARLY_INELIGIBLE' ? '9000' : '1500');
+  if (await page.getByTestId('q-household-parentInformationStatus').count()) {
+    await choice(page, 'q-household-parentInformationStatus', '금액을 알고 있어요');
+  }
   if (await page.getByTestId('input-parentAssets').count()) await page.getByTestId('input-parentAssets').fill(persona.parentAssets ?? '6000');
   await next(page);
 
   await choice(page, 'q-applicant-householdNoHome', persona.ownsHome ? '있어요' : '모두 없어요');
   await choice(page, 'q-applicant-neverOwnedHome', persona.ownsHome ? '가진 적 있어요' : '가진 적 없어요');
-  await choice(page, 'q-applicant-winningHistory', persona.winning ? '있어요' : '없어요');
+  await choice(page, 'q-applicant-specialSupplyHistory', persona.winning ? '있어요' : '없어요');
+  await choice(page, 'q-applicant-reWinningRestriction', persona.winning ? '해당해요' : '아니에요');
+  await choice(page, 'q-applicant-householdNoWinningFiveYears', persona.winning ? '당첨 이력이 있어요' : '모두 없어요');
   await choice(page, 'q-subscription-accountKind', persona.noAccount ? '없어요' : '주택청약종합저축');
   if (!persona.noAccount) {
     await page.getByTestId('input-openedAt').fill('20180101');

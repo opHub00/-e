@@ -17,8 +17,11 @@ function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
   const answered = useKioskStore(state => state.answered.includes(`adaptive.${question.id}`));
   const patch = useKioskStore(state => state.patchAdaptive);
   const markAnswered = useKioskStore(state => state.markAnswered);
+  const markDoesNotKnow = useKioskStore(state => state.markDoesNotKnow);
+  const clearAnswerState = useKioskStore(state => state.clearAnswerState);
   const update = (next: AdaptiveInfo[typeof question.id]) => {
-    markAnswered(`adaptive.${question.id}`);
+    if (next === null) markDoesNotKnow(`adaptive.${question.id}`);
+    else markAnswered(`adaptive.${question.id}`);
     patch({ [question.id]: next } as Partial<AdaptiveInfo>);
   };
 
@@ -51,6 +54,7 @@ function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
         value={value as number | null}
         onChange={next => {
           if (next !== null) markAnswered(`adaptive.${question.id}`);
+          else clearAnswerState(`adaptive.${question.id}`);
           patch({ [question.id]: next } as Partial<AdaptiveInfo>);
         }}
         unit={question.unit ?? ''}

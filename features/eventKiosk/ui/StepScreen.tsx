@@ -20,6 +20,7 @@ export function StepScreen({ step, title, subtitle, children }: {
   const load = kioskEvent();
   const answers = useKioskStore(state => state.answers);
   const sessionKey = useKioskStore(state => state.sessionKey);
+  const finalizeStep = useKioskStore(state => state.finalizeStep);
   const [tried, setTried] = useState(false);
   const steps = inputSteps(answers.householdType);
   const blocker = stepBlocker(answers, step);
@@ -30,6 +31,7 @@ export function StepScreen({ step, title, subtitle, children }: {
   const next = () => {
     setTried(true);
     if (blocker) return;
+    finalizeStep(step);
     router.push(nextAfter(answers.householdType, step) as never);
   };
 

@@ -197,6 +197,20 @@ async function verifyFullFlow(page, persona, browser) {
   if (persona.id !== 'CLEARLY_INELIGIBLE' && distribution.eligible < 1) throw new Error(`${persona.id}: adaptive answers produced no COMPLETE result`);
   if (persona.id === 'CLEARLY_INELIGIBLE' && distribution.eligible !== 0) throw new Error(`${persona.id}: ineligible persona was relaxed`);
 
+  if (persona.id === 'NEWLYWED_ONE_CHILD') {
+    await page.getByTestId('open-samdo-result').click();
+    await page.getByTestId('samdo-hero').waitFor();
+    if (!(await page.getByTestId('samdo-character').count()) || !(await page.getByTestId('samdo-partner-logo').count())) {
+      throw new Error('Samdo visual polish assets are missing');
+    }
+    const samdoBody = await page.getByTestId('samdo-result').innerText();
+    if (/당첨\s*확률(?:이|은)?\s*(?:높|낮)/.test(samdoBody)) throw new Error('Samdo result invented winning probability');
+    await noOverflow(page, 'NEWLYWED_ONE_CHILD:samdo');
+    await touchTargets(page, 'NEWLYWED_ONE_CHILD:samdo');
+    await page.getByTestId('samdo-back').click();
+    await page.getByTestId('results-title').waitFor();
+  }
+
   if (persona.id === 'YOUNG_SINGLE') {
     await liveCards.first().getByRole('button', { name: '공고 정보 보기' }).click();
     await page.getByTestId('live-listing-detail').waitFor();

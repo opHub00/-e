@@ -38,6 +38,7 @@ async function enter(page) {
   await choice(page, 'q-applicant-residenceMonths', '5년 이상');
   await choice(page, 'q-applicant-longOverseasStay', '없어요');
   await choice(page, 'q-applicant-specialException', '없어요');
+  await choice(page, 'q-household-childExpectationStatus', '없어요');
   await next(page);
   await choice(page, 'q-household-marriageRegistered', '했어요');
   await tid(page, 'input-marriageDate').fill('20240501');
@@ -50,10 +51,13 @@ async function enter(page) {
   for (let i = 0; i < 3; i += 1) await tid(page, 'q-household-householdSize').getByRole('button', { name: '세대원 수 늘리기' }).click();
   await tid(page, 'input-householdIncome').fill('470');
   await tid(page, 'input-totalAssets').fill('13000');
+  await tid(page, 'input-vehicleValueKrw').fill('1500');
   await next(page);
   await choice(page, 'q-applicant-householdNoHome', '모두 없어요');
   await choice(page, 'q-applicant-neverOwnedHome', '가진 적 없어요');
-  await choice(page, 'q-applicant-winningHistory', '없어요');
+  await choice(page, 'q-applicant-specialSupplyHistory', '없어요');
+  await choice(page, 'q-applicant-reWinningRestriction', '아니에요');
+  await choice(page, 'q-applicant-householdNoWinningFiveYears', '모두 없어요');
   await choice(page, 'q-subscription-accountKind', '주택청약종합저축');
   await tid(page, 'input-openedAt').fill('20180101');
   await tid(page, 'input-paymentCount').fill('36');

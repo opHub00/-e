@@ -1,6 +1,7 @@
 import type { ApplicantInfo, HouseholdInfo, SubscriptionInfo } from '../model';
 import { useKioskStore } from '../useKioskStore';
-import { DateInput, NumberInput, UnknownToggle, YesNoUnknown } from './controls';
+import { DateInput, NumberInput, Stepper, UnknownToggle, YesNoUnknown } from './controls';
+import { doesNotKnowLabel } from '../questionPolicy';
 
 type BoolKeys<T> = { [K in keyof T]: T[K] extends boolean | null ? K : never }[keyof T];
 
@@ -15,6 +16,7 @@ export function ApplicantYesNo({ field, yes, no }: { field: BoolKeys<ApplicantIn
       answered={answered}
       yes={yes}
       no={no}
+      unknown={doesNotKnowLabel(`applicant.${field}`)}
       onChange={next => {
         const store = useKioskStore.getState();
         if (next === null) store.markDoesNotKnow(`applicant.${field}`);
@@ -35,6 +37,7 @@ export function HouseholdYesNo({ field, yes, no }: { field: BoolKeys<HouseholdIn
       answered={answered}
       yes={yes}
       no={no}
+      unknown={doesNotKnowLabel(`household.${field}`)}
       onChange={next => {
         const store = useKioskStore.getState();
         if (next === null) store.markDoesNotKnow(`household.${field}`);
@@ -55,6 +58,7 @@ export function SubscriptionYesNo({ field, yes, no }: { field: BoolKeys<Subscrip
       answered={answered}
       yes={yes}
       no={no}
+      unknown={doesNotKnowLabel(`subscription.${field}`)}
       onChange={next => {
         const store = useKioskStore.getState();
         if (next === null) store.markDoesNotKnow(`subscription.${field}`);
@@ -98,6 +102,8 @@ export function TrackedNumberInput({ questionKey, value, onChange, ...props }: {
       />
       <UnknownToggle
         active={unknown}
+        label={doesNotKnowLabel(questionKey)}
+        testID={`unknown-${questionKey}`}
         onPress={() => {
           const store = useKioskStore.getState();
           if (unknown) store.clearAnswerState(questionKey);
@@ -132,11 +138,51 @@ export function TrackedDateInput({ questionKey, value, onChange, ...props }: {
       />
       <UnknownToggle
         active={unknown}
+        label={doesNotKnowLabel(questionKey)}
+        testID={`unknown-${questionKey}`}
         onPress={() => {
           const store = useKioskStore.getState();
           if (unknown) store.clearAnswerState(questionKey);
           else store.markDoesNotKnow(questionKey);
           onChange('');
+        }}
+      />
+    </>
+  );
+}
+
+export function TrackedStepper({ questionKey, value, onChange, ...props }: {
+  questionKey: string;
+  value: number | null;
+  onChange: (value: number | null) => void;
+  min?: number;
+  max?: number;
+  unit: string;
+  testID?: string;
+  accessibilityLabel: string;
+}) {
+  const unknown = useKioskStore(state => state.answerStates[questionKey] === 'DOES_NOT_KNOW');
+  return (
+    <>
+      <Stepper
+        {...props}
+        value={value}
+        onChange={next => {
+          const store = useKioskStore.getState();
+          if (next === null) store.clearAnswerState(questionKey);
+          else store.markAnswered(questionKey);
+          onChange(next);
+        }}
+      />
+      <UnknownToggle
+        active={unknown}
+        label={doesNotKnowLabel(questionKey)}
+        testID={`unknown-${questionKey}`}
+        onPress={() => {
+          const store = useKioskStore.getState();
+          if (unknown) store.clearAnswerState(questionKey);
+          else store.markDoesNotKnow(questionKey);
+          onChange(null);
         }}
       />
     </>

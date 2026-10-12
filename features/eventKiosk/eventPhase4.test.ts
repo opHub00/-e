@@ -9,7 +9,9 @@ import { readKnown } from './frozen/domain/profile.ts';
 import { evaluateEvent } from './evaluate.ts';
 import { doesNotKnowPersona, evaluatePhase4Personas, mergeAdaptivePlan, phase4Personas } from './phase4Personas.ts';
 import { emptyAnswers, type KioskAnswers } from './model.ts';
-import { COMMON_REQUIRED_QUESTION_KEYS, visibleQuestionKeysForStep } from './questionPolicy.ts';
+import { COMMON_REQUIRED_QUESTION_KEYS, doesNotKnowLabel, visibleQuestionKeysForStep, type AnswerStateMap } from './questionPolicy.ts';
+import { buildSamdoRecommendation, buildSamdoQuestionPlan } from './samdo/index.ts';
+import { samdoRules } from './samdoResult/samdoEvaluate.ts';
 import { samdoInputFromAnswers } from './samdoResult/samdoInput.ts';
 
 const event = loadEvent(activeEventDataset);
@@ -218,4 +220,97 @@ test('does-not-know persona stays unresolved and never repeats the same base fac
   assert.equal(samdo.details.parentAssets, undefined);
   assert.equal(samdo.details.specialSupplyHistory, undefined);
   assert.equal(samdo.details.reWinningRestriction, undefined);
+});
+
+test('unknown UI copy matches the meaning of amount, date, history and verification questions', () => {
+  assert.equal(doesNotKnowLabel('applicant.monthlyIncome'), '정확히 몰라요');
+  assert.equal(doesNotKnowLabel('household.totalAssets'), '정확히 몰라요');
+  assert.equal(doesNotKnowLabel('subscription.openedAt'), '정확한 날짜를 몰라요');
+  assert.equal(doesNotKnowLabel('household.childBirthDates.0'), '정확한 날짜를 몰라요');
+  assert.equal(doesNotKnowLabel('applicant.specialSupplyHistory'), '기억나지 않아요');
+  assert.equal(doesNotKnowLabel('applicant.longOverseasStay'), '기억나지 않아요');
+  assert.equal(doesNotKnowLabel('applicant.reWinningRestriction'), '확인해 봐야 해요');
+});
+
+test('seven explicit-unknown QA personas remain reviewable without repeat questions or fabricated verdicts', () => {
+  const matrix = evaluatePhase4Personas(event, REF);
+  const young = matrix.find(item => item.personaId === 'YOUNG_SINGLE')!.finalAnswers;
+  const family = matrix.find(item => item.personaId === 'NEWLYWED_ONE_CHILD')!.finalAnswers;
+  const cases: Array<{
+    id: string;
+    source: KioskAnswers;
+    mutate: (answers: KioskAnswers) => void;
+    states: AnswerStateMap;
+    targetSupply: 'YOUTH' | 'GENERAL' | 'NEWBORN';
+    repeatedQuestionIds: string[];
+  }> = [
+    {
+      id: 'PARENT_ASSETS_UNKNOWN', source: young,
+      mutate: answers => { answers.household.parentInformationStatus = 'DOES_NOT_KNOW'; answers.household.parentAssets = null; },
+      states: { 'household.totalAssets': 'ANSWERED', 'household.parentInformationStatus': 'DOES_NOT_KNOW' }, targetSupply: 'YOUTH', repeatedQuestionIds: ['parentAssets'],
+    },
+    {
+      id: 'NO_PARENTS', source: young,
+      mutate: answers => { answers.household.parentInformationStatus = 'NO_PARENTS'; answers.household.parentAssets = null; },
+      states: { 'household.totalAssets': 'ANSWERED', 'household.parentInformationStatus': 'ANSWERED' }, targetSupply: 'YOUTH', repeatedQuestionIds: ['parentAssets'],
+    },
+    {
+      id: 'PARENT_CONTACT_DIFFICULT', source: young,
+      mutate: answers => { answers.household.parentInformationStatus = 'CANNOT_CONTACT'; answers.household.parentAssets = null; },
+      states: { 'household.totalAssets': 'ANSWERED', 'household.parentInformationStatus': 'ANSWERED' }, targetSupply: 'YOUTH', repeatedQuestionIds: ['parentAssets'],
+    },
+    {
+      id: 'PAYMENT_COUNT_UNKNOWN', source: young,
+      mutate: answers => { answers.subscription.paymentCount = null; },
+      states: { 'subscription.paymentCount': 'DOES_NOT_KNOW' }, targetSupply: 'YOUTH', repeatedQuestionIds: ['recognizedPaymentCount'],
+    },
+    {
+      id: 'WINNING_HISTORY_UNKNOWN', source: young,
+      mutate: answers => {
+        answers.applicant.winningHistory = null;
+        answers.applicant.specialSupplyHistory = null;
+        answers.applicant.reWinningRestriction = null;
+        answers.applicant.householdNoWinningFiveYears = null;
+      },
+      states: {
+        'applicant.specialSupplyHistory': 'DOES_NOT_KNOW',
+        'applicant.reWinningRestriction': 'DOES_NOT_KNOW',
+        'applicant.householdNoWinningFiveYears': 'DOES_NOT_KNOW',
+      },
+      targetSupply: 'GENERAL', repeatedQuestionIds: ['specialSupplyHistory', 'reWinningRestriction', 'householdNoWinningFiveYears'],
+    },
+    {
+      id: 'OVERSEAS_HISTORY_UNKNOWN', source: young,
+      mutate: answers => { answers.applicant.longOverseasStay = null; },
+      states: { 'applicant.longOverseasStay': 'DOES_NOT_KNOW' }, targetSupply: 'YOUTH', repeatedQuestionIds: ['overseasStayHistory'],
+    },
+    {
+      id: 'CHILD_DOB_PARTIAL_UNKNOWN', source: family,
+      mutate: answers => { answers.household.childBirthDates[0] = ''; answers.household.childBirthYears[0] = null; },
+      states: {
+        'household.childExpectationStatus': 'ANSWERED',
+        'household.childrenCount': 'ANSWERED',
+        'household.childBirthDates.0': 'DOES_NOT_KNOW',
+      },
+      targetSupply: 'NEWBORN', repeatedQuestionIds: ['children'],
+    },
+  ];
+
+  for (const item of cases) {
+    const answers = structuredClone(item.source);
+    item.mutate(answers);
+    const input = samdoInputFromAnswers(answers);
+    const recommendation = buildSamdoRecommendation(samdoRules(), input);
+    const target = recommendation.evaluations.find(evaluation => evaluation.supplyType === item.targetSupply)!;
+    assert.ok(['CONDITIONAL', 'EVIDENCE_REQUIRED'].includes(target.eligibility), `${item.id}: ${target.eligibility}`);
+    const plan = buildSamdoQuestionPlan(recommendation, item.states);
+    const questionIds = [...plan.questions, ...plan.evidenceOnly].map(question => question.id);
+    for (const id of item.repeatedQuestionIds) assert.ok(!questionIds.includes(id), `${item.id}: repeated ${id}`);
+
+    const frozen = evaluateEvent(event, answers, REF);
+    const adaptive = createAdaptiveQuestionPlan(frozen.assessment.results, answers, [], item.states);
+    const repeatedBaseAliases = adaptive.questions.filter(question =>
+      question.sourceFacts.some(fact => ['household.maxVehicleValueKrw', 'event.applicantParentTotalAssetsKrw'].includes(fact)));
+    if (item.id.startsWith('PARENT_') || item.id === 'NO_PARENTS') assert.equal(repeatedBaseAliases.length, 0, item.id);
+  }
 });

@@ -2,7 +2,7 @@ import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import type { ChildExpectationStatus } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { ApplicantYesNo, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
-import { ChoiceGroup, DateInput, Question, Section } from '../../features/eventKiosk/ui/controls';
+import { ChoiceGroup, DateInput, Question, Section, UnknownAcknowledgement } from '../../features/eventKiosk/ui/controls';
 import { StepScreen } from '../../features/eventKiosk/ui/StepScreen';
 
 /** 거주기간은 아래쪽 경계로 받는다. '2년 이상'은 24개월로 계산해, 실제보다 길게 잡지 않는다. */
@@ -12,7 +12,7 @@ const RESIDENCE_CHOICES = [
   { value: 12, label: '1년 이상' },
   { value: 24, label: '2년 이상' },
   { value: 60, label: '5년 이상' },
-  { value: null, label: '잘 모르겠어요' },
+  { value: null, label: '정확한 기간을 몰라요' },
 ] as const;
 
 export default function ApplicantStep() {
@@ -71,7 +71,7 @@ export default function ApplicantStep() {
               { value: 'UNBORN', label: '태아가 있어요' },
               { value: 'ADOPTION', label: '입양 절차 중이에요' },
               { value: 'BOTH', label: '둘 다 해당해요' },
-              { value: 'DOES_NOT_KNOW', label: '잘 모르겠어요' },
+              { value: 'DOES_NOT_KNOW', label: '확인해 봐야 해요' },
             ]}
             value={childExpectation}
             onChange={childExpectationStatus => {
@@ -81,6 +81,7 @@ export default function ApplicantStep() {
               patchHousehold({ childExpectationStatus });
             }}
           />
+          <UnknownAcknowledgement visible={childExpectation === 'DOES_NOT_KNOW'} />
         </Question>
       </Section>
     </StepScreen>

@@ -1,7 +1,7 @@
 import { hasSpouse, type ParentInformationStatus } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
-import { HouseholdYesNo, TrackedNumberInput, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
-import { ChoiceGroup, Question, Section, Stepper } from '../../features/eventKiosk/ui/controls';
+import { HouseholdYesNo, TrackedNumberInput, TrackedStepper, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
+import { ChoiceGroup, Question, Section, UnknownAcknowledgement } from '../../features/eventKiosk/ui/controls';
 import { StepScreen } from '../../features/eventKiosk/ui/StepScreen';
 
 const MAN = 10_000;
@@ -14,7 +14,7 @@ const TAX_CHOICES = [
   { value: 3, label: '3년' },
   { value: 4, label: '4년' },
   { value: 5, label: '5년 이상' },
-  { value: null, label: '잘 모르겠어요' },
+  { value: null, label: '정확한 기간을 몰라요' },
 ] as const;
 
 export default function FinanceStep() {
@@ -34,7 +34,7 @@ export default function FinanceStep() {
   const unmarried = !spouse || household.marriageRegistered === false;
 
   return (
-    <StepScreen step="finance" title="소득과 자산을 알려 주세요" subtitle="대략적인 금액이면 충분해요. 모르면 비워 두세요.">
+    <StepScreen step="finance" title="소득과 자산을 알려 주세요" subtitle="대략적인 금액이면 충분해요. 모르면 ‘정확히 몰라요’를 선택해 주세요.">
       <Section title="소득">
         <Question title="본인의 월 소득(세전)" hint="지난해 기준 한 달 평균이에요. 만원 단위로 입력해 주세요.">
           <TrackedNumberInput questionKey="applicant.monthlyIncome" testID="input-monthlyIncome" accessibilityLabel="본인 월 소득(만원)" value={applicant.monthlyIncome} unitScale={MAN} unit="만원" placeholder="예) 270" onChange={monthlyIncome => patchApplicant({ monthlyIncome })} />
@@ -63,10 +63,7 @@ export default function FinanceStep() {
       <Section title="세대">
         {single ? null : (
           <Question title="세대원 수(본인 포함)" hint="주민등록등본에 함께 올라 있는 사람 수예요.">
-            <Stepper testID="q-household-householdSize" accessibilityLabel="세대원 수" value={household.householdSize} onChange={householdSize => {
-              if (householdSize !== null) useKioskStore.getState().markAnswered('household.householdSize');
-              patchHousehold({ householdSize });
-            }} min={1} max={10} unit="명" />
+            <TrackedStepper questionKey="household.householdSize" testID="q-household-householdSize" accessibilityLabel="세대원 수" value={household.householdSize} onChange={householdSize => patchHousehold({ householdSize })} min={1} max={10} unit="명" />
           </Question>
         )}
         {single ? null : (
@@ -89,7 +86,7 @@ export default function FinanceStep() {
                 { value: 'KNOWN', label: '금액을 알고 있어요' },
                 { value: 'NO_PARENTS', label: '부모님이 안 계세요' },
                 { value: 'CANNOT_CONTACT', label: '연락·확인이 어려워요' },
-                { value: 'DOES_NOT_KNOW', label: '잘 모르겠어요' },
+                { value: 'DOES_NOT_KNOW', label: '정확히 몰라요' },
               ]}
               value={parentStatus}
               onChange={parentInformationStatus => {
@@ -98,6 +95,10 @@ export default function FinanceStep() {
                 else store.markAnswered('household.parentInformationStatus');
                 patchHousehold({ parentInformationStatus, ...(parentInformationStatus === 'KNOWN' ? {} : { parentAssets: null }) });
               }}
+            />
+            <UnknownAcknowledgement
+              visible={parentStatusValue === 'DOES_NOT_KNOW' || parentStatusValue === 'NO_PARENTS' || parentStatusValue === 'CANNOT_CONTACT'}
+              message="괜찮아요. 부모 자산은 결과에서 확인이 필요한 항목으로 표시할게요."
             />
           </Question>
         ) : null}

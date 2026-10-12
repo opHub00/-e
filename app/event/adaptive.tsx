@@ -4,17 +4,19 @@ import type { AdaptiveQuestion } from '../../features/eventKiosk/adaptiveAssessm
 import type { AdaptiveInfo } from '../../features/eventKiosk/model';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
-import { ChoiceGroup, KioskButton, Notice, NumberInput, Question, Section, YesNoUnknown } from '../../features/eventKiosk/ui/controls';
+import { ChoiceGroup, KioskButton, Notice, NumberInput, Question, Section, UnknownToggle, YesNoUnknown } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { k } from '../../features/eventKiosk/ui/theme';
 import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
+import { doesNotKnowLabel } from '../../features/eventKiosk/questionPolicy';
 
 function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
   const value = useKioskStore(state => state.answers.adaptive[question.id]);
   const answered = useKioskStore(state => state.answered.includes(`adaptive.${question.id}`));
+  const unknown = useKioskStore(state => state.answerStates[`adaptive.${question.id}`] === 'DOES_NOT_KNOW');
   const patch = useKioskStore(state => state.patchAdaptive);
   const markAnswered = useKioskStore(state => state.markAnswered);
   const markDoesNotKnow = useKioskStore(state => state.markDoesNotKnow);
@@ -31,6 +33,7 @@ function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
         testID={`q-adaptive-${question.id}`}
         value={value as boolean | null}
         answered={answered}
+        unknown={doesNotKnowLabel(`adaptive.${question.id}`)}
         onChange={next => update(next)}
       />
     );
@@ -61,11 +64,15 @@ function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
         unitScale={question.unitScale}
         placeholder="숫자로 입력"
       />
-      <KioskButton
+      <UnknownToggle
         testID={`unknown-adaptive-${question.id}`}
-        label="잘 모르겠어요"
-        variant="ghost"
-        onPress={() => update(null as AdaptiveInfo[typeof question.id])}
+        label={doesNotKnowLabel(`adaptive.${question.id}`)}
+        active={unknown}
+        onPress={() => {
+          if (unknown) clearAnswerState(`adaptive.${question.id}`);
+          else markDoesNotKnow(`adaptive.${question.id}`);
+          patch({ [question.id]: null } as Partial<AdaptiveInfo>);
+        }}
       />
     </View>
   );

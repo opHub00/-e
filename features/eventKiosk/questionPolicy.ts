@@ -23,6 +23,47 @@ export const COMMON_REQUIRED_QUESTION_KEYS = [
   'subscription.accountKind',
 ] as const;
 
+export const DOES_NOT_KNOW_ACKNOWLEDGEMENT = '괜찮아요. 결과에서 확인이 필요한 항목으로 표시할게요.';
+
+const DOES_NOT_KNOW_LABELS: Record<string, string> = {
+  'applicant.residenceMonths': '정확한 기간을 몰라요',
+  'applicant.longOverseasStay': '기억나지 않아요',
+  'applicant.specialException': '확인해 봐야 해요',
+  'applicant.monthlyIncome': '정확히 몰라요',
+  'applicant.taxPaymentYears': '정확한 기간을 몰라요',
+  'applicant.householdNoHome': '확인해 봐야 해요',
+  'applicant.neverOwnedHome': '기억나지 않아요',
+  'applicant.specialSupplyHistory': '기억나지 않아요',
+  'applicant.reWinningRestriction': '확인해 봐야 해요',
+  'applicant.householdNoWinningFiveYears': '기억나지 않아요',
+  'household.marriageRegistered': '확인해 봐야 해요',
+  'household.marriageDate': '정확한 날짜를 몰라요',
+  'household.plannedMarriageWithinDeadline': '확인해 봐야 해요',
+  'household.childrenCount': '정확히 몰라요',
+  'household.childExpectationStatus': '확인해 봐야 해요',
+  'household.householdIncome': '정확히 몰라요',
+  'household.householdSize': '정확히 몰라요',
+  'household.totalAssets': '정확히 몰라요',
+  'household.parentAssets': '정확히 몰라요',
+  'household.parentInformationStatus': '정확히 몰라요',
+  'adaptive.vehicleValueKrw': '정확히 몰라요',
+  'adaptive.applicantTotalAssetsKrw': '정확히 몰라요',
+  'adaptive.parentMonthlyIncomeKrw': '정확히 몰라요',
+  'adaptive.parentVehicleValueKrw': '정확히 몰라요',
+  'adaptive.workHistoryMonths': '정확한 기간을 몰라요',
+  'subscription.accountKind': '확인해 봐야 해요',
+  'subscription.openedAt': '정확한 날짜를 몰라요',
+  'subscription.paymentCount': '정확히 몰라요',
+  'subscription.depositAmount': '정확히 몰라요',
+  'subscription.firstRank': '확인해 봐야 해요',
+};
+
+/** UI copy varies by question, while every choice maps to the same DOES_NOT_KNOW state. */
+export function doesNotKnowLabel(questionKey: string): string {
+  if (questionKey.startsWith('household.childBirthDates.')) return '정확한 날짜를 몰라요';
+  return DOES_NOT_KNOW_LABELS[questionKey] ?? '확인해 봐야 해요';
+}
+
 const valuePresent = (value: unknown): boolean => value !== null && value !== undefined && value !== '';
 
 /** Questions visible in each base step. Leaving one blank and continuing records DOES_NOT_KNOW. */
@@ -131,6 +172,15 @@ const SAMDO_FACT_RESPONSE_KEYS: Record<string, readonly string[]> = {
 export function samdoFactWasAddressed(fact: string, states: AnswerStateMap): boolean {
   const normalized = fact.replace(/^(?:input|review|fact):/, '');
   const keys = SAMDO_FACT_RESPONSE_KEYS[normalized] ?? [];
+  if (['children', 'childUnderTwo', 'childbirthClear'].includes(normalized)) {
+    if (states['household.childExpectationStatus'] === 'DOES_NOT_KNOW') return true;
+    if (states['household.childrenCount'] === 'DOES_NOT_KNOW') return true;
+    const childDateStates = Object.entries(states).filter(([key]) => key.startsWith('household.childBirthDates.'));
+    if (childDateStates.some(([, state]) => state === 'DOES_NOT_KNOW')) return true;
+    // A no-children household has no count/date controls; the explicit expectation answer is sufficient.
+    if (states['household.childrenCount'] === undefined) return states['household.childExpectationStatus'] !== undefined;
+    return childDateStates.length > 0 && childDateStates.every(([, state]) => state !== undefined);
+  }
   if (normalized === 'parentAssets') {
     // A reason such as no parents / cannot contact is itself a completed response.
     // It must remain UNKNOWN in the evaluator, but the amount must not be asked again.

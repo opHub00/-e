@@ -41,7 +41,7 @@ export default function SubscriptionStep() {
               { value: 'housing', label: '주택청약종합저축' },
               { value: 'other', label: '다른 청약통장', hint: '청약저축·청약예금·청약부금' },
               { value: 'none', label: '없어요' },
-              { value: null, label: '잘 모르겠어요' },
+              { value: null, label: '확인해 봐야 해요' },
             ]}
             value={kind}
             onChange={accountKind => {

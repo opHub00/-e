@@ -2,6 +2,7 @@ import type { EvaluationResult } from './frozen/domain/evaluation.ts';
 import type { Expression, FrozenListingDataset, SupplyRuleSet } from './frozen/domain/rules.ts';
 import type { AdaptiveInfo, KioskAnswers } from './model.ts';
 import { userFacingFactLabel } from './presentation.ts';
+import { factWasExplicitlyAddressed, type AnswerStateMap } from './questionPolicy.ts';
 
 export type FactClassification = 'CORE' | 'CONDITIONAL' | 'EVIDENCE_ONLY';
 export type FactScope = 'APPLICANT' | 'SPOUSE' | 'HOUSEHOLD';
@@ -57,12 +58,13 @@ const FULL_COVERAGE = new Set([
   'applicant.maritalStatus', 'applicant.monthlyIncomeKrw', 'applicant.recognizedPaymentCount',
   'applicant.residenceMonths', 'family.marriageMonths', 'household.allNoHome',
   'household.dependentCount', 'household.memberCount', 'household.monthlyIncomeKrw',
-  'household.totalAssetsKrw', 'profile.composition', 'event.marriageBeforeMoveIn',
+  'household.totalAssetsKrw', 'household.maxVehicleValueKrw', 'profile.composition', 'event.marriageBeforeMoveIn',
+  'event.applicantParentMonthlyIncomeKrw', 'event.applicantParentTotalAssetsKrw', 'event.applicantParentMaxVehicleValueKrw',
   'event.supportedSingleParent',
 ]);
 
 const PARTIAL_COVERAGE = new Set([
-  'applicant.totalAssetsKrw', 'event.applicantParentTotalAssetsKrw', 'household.childUnder7Count',
+  'applicant.totalAssetsKrw', 'household.childUnder7Count',
   'household.dualIncome', 'household.minorChildCount', 'household.newbornCountWithinTwoYears',
   'household.post20230328ChildCount',
 ]);
@@ -135,7 +137,7 @@ const QUESTION_DEFINITIONS: Record<keyof AdaptiveInfo, Omit<AdaptiveQuestion, 's
       { value: 'JOB_SEEKER', label: '졸업·중퇴 후 2년 이내 취업준비생' },
       { value: 'BOTH', label: '두 조건 모두 해당' },
       { value: 'NEITHER', label: '둘 다 해당 없음' },
-      { value: null, label: '잘 모르겠어요' },
+      { value: null, label: '확인해 봐야 해요' },
     ],
   },
   benefitCategory: {
@@ -145,7 +147,7 @@ const QUESTION_DEFINITIONS: Record<keyof AdaptiveInfo, Omit<AdaptiveQuestion, 's
       { value: 'BASIC_MEDICAL', label: '의료급여' }, { value: 'BASIC_HOUSING', label: '주거급여' },
       { value: 'BASIC_EDUCATION', label: '교육급여' }, { value: 'NEAR_POOR', label: '차상위계층' },
       { value: 'SUPPORTED_SINGLE_PARENT', label: '지원대상 한부모' },
-      { value: null, label: '잘 모르겠어요' },
+      { value: null, label: '확인해 봐야 해요' },
     ],
   },
   vehicleValueKrw: { id: 'vehicleValueKrw', kind: 'NUMBER', title: QUESTION_TEXT['household.maxVehicleValueKrw'], hint: '보험개발원 차량기준가액 등 확인 가능한 금액을 입력해 주세요.', unit: '만원', unitScale: 10_000 },
@@ -266,6 +268,7 @@ export function createAdaptiveQuestionPlan(
   results: EvaluationResult[],
   answers: KioskAnswers,
   answeredKeys: readonly string[] = [],
+  answerStates: AnswerStateMap = {},
 ): AdaptiveQuestionPlan {
   const answered = new Set(answeredKeys);
   const byQuestion = new Map<keyof AdaptiveInfo, { facts: Set<string>; combinations: Set<string> }>();
@@ -283,7 +286,7 @@ export function createAdaptiveQuestionPlan(
         continue;
       }
       for (const id of FACT_TO_ADAPTIVE[fact] ?? []) {
-        if (adaptiveValueKnown(answers, id) || answered.has(`adaptive.${id}`)) continue;
+        if (adaptiveValueKnown(answers, id) || answered.has(`adaptive.${id}`) || factWasExplicitlyAddressed(fact, id, answerStates)) continue;
         const current = byQuestion.get(id) ?? { facts: new Set<string>(), combinations: new Set<string>() };
         current.facts.add(fact);
         current.combinations.add(result.evaluationId);

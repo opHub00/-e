@@ -3,6 +3,7 @@ import { createAdaptiveQuestionPlan } from './adaptiveAssessment.ts';
 import type { LoadedEvent } from './eventConfig.ts';
 import { evaluateEvent, type KioskStatus } from './evaluate.ts';
 import { emptyAnswers, resizeChildDates, resizeChildren, type AdaptiveInfo, type HouseholdType, type KioskAnswers } from './model.ts';
+import type { AnswerStateMap } from './questionPolicy.ts';
 
 export type Phase4PersonaId = 'YOUNG_SINGLE' | 'ENGAGED_COUPLE' | 'NEWLYWED_COUPLE' | 'NEWLYWED_ONE_CHILD' | 'FIRST_HOME_COUPLE' | 'MULTI_CHILD' | 'GENERAL_NO_HOME' | 'CLEARLY_INELIGIBLE';
 
@@ -43,6 +44,9 @@ function fromSeed(seed: Seed): KioskAnswers {
     householdNoHome: !seed.ownsHome,
     neverOwnedHome: !seed.ownsHome,
     winningHistory: seed.winningHistory ?? false,
+    specialSupplyHistory: seed.winningHistory ?? false,
+    reWinningRestriction: seed.winningHistory ?? false,
+    householdNoWinningFiveYears: !(seed.winningHistory ?? false),
     monthlyIncome: seed.monthlyIncome,
     taxPaymentYears: 5,
     longOverseasStay: false,
@@ -58,14 +62,18 @@ function fromSeed(seed: Seed): KioskAnswers {
     householdIncome: seed.householdIncome ?? null,
     householdSize: seed.householdSize ?? (seed.householdType === 'single' ? null : 2 + childDates.length),
     childrenCount: childDates.length,
+    childExpectationStatus: 'NONE',
     childBirthDates: resizeChildDates([], childDates.length).map((_, index) => childDates[index] ?? ''),
     childBirthYears: resizeChildren([], childDates.length).map((_, index) => Number(childDates[index]?.slice(0, 4)) || null),
     totalAssets: seed.totalAssets,
     parentAssets: seed.parentAssets ?? 60_000_000,
+    parentInformationStatus: 'KNOWN',
   };
   answers.subscription = seed.account === false
     ? { accountKind: 'none', openedAt: '', paymentCount: null, depositAmount: null, firstRank: false }
     : { accountKind: 'housing', openedAt: '2018-01-01', paymentCount: 36, depositAmount: 6_000_000, firstRank: true };
+  // 차량가액은 Phase 5부터 공통 자산 질문으로 finance 단계에서 받는다.
+  answers.adaptive.vehicleValueKrw = seed.id === 'CLEARLY_INELIGIBLE' ? 90_000_000 : 15_000_000;
   return answers;
 }
 
@@ -76,7 +84,6 @@ const DEFAULT_ADAPTIVE: Partial<AdaptiveInfo> = {
   jobSeekerWithinTwoYears: false,
   youthStudyStatus: 'NEITHER',
   benefitCategory: 'NONE',
-  vehicleValueKrw: 15_000_000,
   applicantTotalAssetsKrw: 60_000_000,
   parentMonthlyIncomeKrw: 2_000_000,
   parentVehicleValueKrw: 8_000_000,
@@ -102,6 +109,35 @@ export const phase4Personas: Phase4Persona[] = seeds.map(seed => ({
     ? { eligibleResident: false, currentProgramTenant: true, vehicleValueKrw: 90_000_000 }
     : { ...DEFAULT_ADAPTIVE, applicantTotalAssetsKrw: seed.householdType === 'single' ? seed.totalAssets : 80_000_000 },
 }));
+
+/** 명시적 '모름'이 eligibility로 변환되거나 같은 세션에서 재질문되지 않는지 검증하는 persona. */
+export const doesNotKnowPersona: { id: 'DOES_NOT_KNOW'; label: string; answers: KioskAnswers; answerStates: AnswerStateMap } = (() => {
+  const answers = fromSeed(seeds[0]);
+  answers.applicant.longOverseasStay = null;
+  answers.applicant.neverOwnedHome = null;
+  answers.applicant.winningHistory = true; // 포괄 '이력 있음'은 세부 제한을 확정하지 않는다.
+  answers.applicant.specialSupplyHistory = null;
+  answers.applicant.reWinningRestriction = null;
+  answers.applicant.householdNoWinningFiveYears = null;
+  answers.applicant.monthlyIncome = null;
+  answers.household.childExpectationStatus = 'DOES_NOT_KNOW';
+  answers.household.totalAssets = null;
+  answers.household.parentAssets = null;
+  answers.household.parentInformationStatus = 'DOES_NOT_KNOW';
+  answers.adaptive.vehicleValueKrw = null;
+  const keys = [
+    'applicant.longOverseasStay', 'applicant.neverOwnedHome', 'applicant.specialSupplyHistory',
+    'applicant.reWinningRestriction', 'applicant.householdNoWinningFiveYears', 'applicant.monthlyIncome',
+    'household.childExpectationStatus', 'household.totalAssets', 'household.parentInformationStatus',
+    'adaptive.vehicleValueKrw',
+  ];
+  return {
+    id: 'DOES_NOT_KNOW',
+    label: '주요 소득·자산·이력을 모르는 미혼 청년',
+    answers,
+    answerStates: Object.fromEntries(keys.map(key => [key, 'DOES_NOT_KNOW'])) as AnswerStateMap,
+  };
+})();
 
 function distribution(outcomes: Array<{ status: KioskStatus }>): Record<KioskStatus, number> {
   const counts: Record<KioskStatus, number> = { COMPLETE: 0, NEEDS_USER_INPUT: 0, INELIGIBLE: 0, UNAVAILABLE: 0 };

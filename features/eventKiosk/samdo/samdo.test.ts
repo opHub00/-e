@@ -76,6 +76,24 @@ test('adaptive questions deduplicate shared facts and exclude already ineligible
   assert.equal(ids.filter(id => id === 'householdIncome').length, 1);
   assert.ok(plan.excludedIneligible.includes('NEWBORN'));
   assert.ok(plan.evidenceOnly.some(item => item.id === 'householdIncome'));
+
+  const addressed = {
+    'household.householdIncome': 'DOES_NOT_KNOW',
+    'household.totalAssets': 'DOES_NOT_KNOW',
+    'household.dualIncome': 'DOES_NOT_KNOW',
+    'household.householdSize': 'DOES_NOT_KNOW',
+  } as const;
+  const afterUnknown = buildSamdoQuestionPlan(buildSamdoRecommendation(rules, sparse), addressed);
+  const repeated = [...afterUnknown.questions, ...afterUnknown.evidenceOnly].map(item => item.id)
+    .filter(id => ['householdIncome', 'totalAssets', 'dualIncome', 'incomeHouseholdSize'].includes(id));
+  assert.deepEqual(repeated, [], 'explicit unknown facts are not re-asked with another Samdo label');
+
+  const parentUnknown = structuredClone(SAMDO_PERSONAS.find(item => item.id === 'young-single-20s')!.input);
+  parentUnknown.details.parentAssets = undefined;
+  const afterParentReason = buildSamdoQuestionPlan(buildSamdoRecommendation(rules, parentUnknown), {
+    'household.parentInformationStatus': 'DOES_NOT_KNOW',
+  });
+  assert.ok(!afterParentReason.evidenceOnly.some(item => item.id === 'parentAssets'), 'a completed parent-information reason is not asked again');
 });
 
 test('nine persona recommendation snapshots', () => {

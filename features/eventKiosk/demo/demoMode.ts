@@ -53,9 +53,8 @@ export function injectPersona(id: Phase4PersonaId, mode: InjectMode): KioskAnswe
     for (const key of Object.keys(persona.adaptiveAnswers)) answered.push(`adaptive.${key}`);
   }
   const store = useKioskStore.getState();
-  store.reset();
-  // 공개 setState 로 답만 넣는다. 결과(evaluation)는 비워 둔 채라 분석 화면이 실제로 계산한다.
-  useKioskStore.setState({ answers, answered });
+  // 답변 상태까지 한 번에 교체한다. 결과(evaluation)는 비워 둔 채라 분석 화면이 실제로 계산한다.
+  store.qaLoadAnswers(answers, answered);
   return answers;
 }
 

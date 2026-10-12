@@ -23,6 +23,9 @@ export const hasSpouse = (type: HouseholdType | null): boolean => type === 'coup
 
 /** 예 / 아니오 / 모름. 모름은 null 이다. */
 export type YesNo = boolean | null;
+export type AnswerState = 'ANSWERED' | 'DOES_NOT_KNOW';
+export type ParentInformationStatus = 'KNOWN' | 'NO_PARENTS' | 'CANNOT_CONTACT' | 'DOES_NOT_KNOW';
+export type ChildExpectationStatus = 'NONE' | 'UNBORN' | 'ADOPTION' | 'BOTH' | 'DOES_NOT_KNOW';
 
 export type ApplicantInfo = {
   /** 화면 인사에만 쓴다. 판정에 쓰지 않고, 비워 둬도 된다. */
@@ -43,6 +46,12 @@ export type ApplicantInfo = {
    * 한 질문으로 특별공급 당첨·재당첨 제한·5년 내 당첨을 함께 덮는다. '없어요'는 셋 다 없다는 뜻이다.
    */
   winningHistory: YesNo;
+  /** 특별공급 당첨 이력. 기존 포괄 질문과 분리해 제한을 과도하게 확정하지 않는다. */
+  specialSupplyHistory: YesNo;
+  /** 현재 재당첨·부적격 당첨 제한 여부. */
+  reWinningRestriction: YesNo;
+  /** 세대구성원 모두 최근 5년 내 다른 주택 당첨 이력이 없는가. */
+  householdNoWinningFiveYears: YesNo;
   /** 본인 월 소득(원). 모르면 null. */
   monthlyIncome: number | null;
   /** 일해서 소득세를 낸 기간(년). 모르면 null. */
@@ -69,6 +78,8 @@ export type HouseholdInfo = {
   /** 세대원 수(본인 포함). */
   householdSize: number | null;
   childrenCount: number | null;
+  /** 태아·입양 예정 자녀는 출생한 자녀 수와 별도로 받는다. */
+  childExpectationStatus: ChildExpectationStatus | null;
   /** 자녀별 출생 연도. 길이는 childrenCount 와 같다. 모르는 자녀는 null. */
   childBirthYears: (number | null)[];
   /** 자녀별 정확한 생년월일. 기존 연도 필드는 이전 저장 구조와의 호환을 위해 유지한다. */
@@ -77,6 +88,8 @@ export type HouseholdInfo = {
   totalAssets: number | null;
   /** 부모 총자산(원). 청년 공급에서만 쓴다. */
   parentAssets: number | null;
+  /** 부모 자산 금액을 왜 제공하지 못하는지 구분하되 금액을 추론하지 않는다. */
+  parentInformationStatus: ParentInformationStatus | null;
 };
 
 export type BenefitCategory =
@@ -151,6 +164,9 @@ export const emptyAnswers = (): KioskAnswers => ({
     householdNoHome: null,
     neverOwnedHome: null,
     winningHistory: null,
+    specialSupplyHistory: null,
+    reWinningRestriction: null,
+    householdNoWinningFiveYears: null,
     monthlyIncome: null,
     taxPaymentYears: null,
     longOverseasStay: null,
@@ -165,10 +181,12 @@ export const emptyAnswers = (): KioskAnswers => ({
     householdIncome: null,
     householdSize: null,
     childrenCount: null,
+    childExpectationStatus: null,
     childBirthYears: [],
     childBirthDates: [],
     totalAssets: null,
     parentAssets: null,
+    parentInformationStatus: null,
   },
   subscription: {
     accountKind: null,

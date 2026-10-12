@@ -1,4 +1,5 @@
 import type { SamdoQuestion, SamdoQuestionPlan, SamdoRecommendation, SamdoSupplyType } from './types.ts';
+import { samdoFactWasAddressed, type AnswerStateMap } from '../questionPolicy.ts';
 
 type Definition = Omit<SamdoQuestion, 'usedBy'>;
 
@@ -53,7 +54,7 @@ function definition(key: string): Definition | undefined {
 }
 
 /** Missing facts are deduplicated across only the still-viable supply types. */
-export function buildSamdoQuestionPlan(recommendation: SamdoRecommendation): SamdoQuestionPlan {
+export function buildSamdoQuestionPlan(recommendation: SamdoRecommendation, answerStates: AnswerStateMap = {}): SamdoQuestionPlan {
   const usage = new Map<string, { definition: Definition; usedBy: Set<SamdoSupplyType> }>();
   const excludedIneligible: SamdoSupplyType[] = [];
   for (const evaluation of recommendation.evaluations) {
@@ -63,6 +64,7 @@ export function buildSamdoQuestionPlan(recommendation: SamdoRecommendation): Sam
       continue;
     }
     for (const fact of evaluation.missingFacts) {
+      if (samdoFactWasAddressed(fact, answerStates)) continue;
       const item = definition(fact);
       if (!item) continue;
       const current = usage.get(item.id) ?? { definition: item, usedBy: new Set<SamdoSupplyType>() };

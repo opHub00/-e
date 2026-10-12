@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { hasSpouse } from '../../features/eventKiosk/model';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
-import { HouseholdYesNo, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
-import { ChoiceGroup, DateInput, Question, Section, Stepper } from '../../features/eventKiosk/ui/controls';
+import { HouseholdYesNo, TrackedDateInput, TrackedStepper, useChoiceValue } from '../../features/eventKiosk/ui/bindings';
+import { ChoiceGroup, Question, Section } from '../../features/eventKiosk/ui/controls';
 import { StepScreen } from '../../features/eventKiosk/ui/StepScreen';
 import { k } from '../../features/eventKiosk/ui/theme';
 
@@ -29,18 +29,20 @@ export default function FamilyStep() {
               choices={[
                 { value: true, label: '했어요' },
                 { value: false, label: '아직이에요', hint: '예비신혼부부' },
-                { value: null, label: '잘 모르겠어요' },
+                { value: null, label: '확인해 봐야 해요' },
               ]}
               value={registered}
               onChange={marriageRegistered => {
-                useKioskStore.getState().markAnswered('household.marriageRegistered');
+                const store = useKioskStore.getState();
+                if (marriageRegistered === null) store.markDoesNotKnow('household.marriageRegistered');
+                else store.markAnswered('household.marriageRegistered');
                 patch({ marriageRegistered, ...(marriageRegistered === false ? { marriageDate: '' } : { plannedMarriageWithinDeadline: null }) });
               }}
             />
           </Question>
           {household.marriageRegistered === true ? (
             <Question title="혼인신고일" hint="혼인 기간에 따라 신혼부부 공급 대상과 배점이 달라져요.">
-              <DateInput testID="input-marriageDate" accessibilityLabel="혼인신고일" value={household.marriageDate} onChange={marriageDate => patch({ marriageDate })} placeholder="예) 20250914" />
+              <TrackedDateInput questionKey="household.marriageDate" testID="input-marriageDate" accessibilityLabel="혼인신고일" value={household.marriageDate} onChange={marriageDate => patch({ marriageDate })} placeholder="예) 20250914" />
             </Question>
           ) : null}
           {household.marriageRegistered === false ? (
@@ -62,7 +64,7 @@ export default function FamilyStep() {
       {children ? (
         <Section title="자녀">
           <Question title="함께 사는 미성년 자녀는 몇 명인가요?" hint="태아는 빼고 세어 주세요.">
-            <Stepper testID="q-household-childrenCount" accessibilityLabel="자녀 수" value={household.childrenCount} onChange={childrenCount => patch({ childrenCount })} max={6} unit="명" />
+            <TrackedStepper questionKey="household.childrenCount" testID="q-household-childrenCount" accessibilityLabel="자녀 수" value={household.childrenCount} onChange={childrenCount => patch({ childrenCount })} max={6} unit="명" />
           </Question>
           {household.childBirthDates.length ? (
             <Question title="자녀 생년월일" hint="공고일 기준 자녀 나이와 출산일 경계를 정확히 확인해요.">
@@ -70,7 +72,8 @@ export default function FamilyStep() {
                 {household.childBirthDates.map((birthDate, index) => (
                   <View key={index} style={styles.child}>
                     <Text style={styles.childLabel}>{index + 1}번째 자녀</Text>
-                    <DateInput
+                    <TrackedDateInput
+                      questionKey={`household.childBirthDates.${index}`}
                       testID={`input-childBirthDate-${index}`}
                       accessibilityLabel={`${index + 1}번째 자녀 생년월일`}
                       value={birthDate}

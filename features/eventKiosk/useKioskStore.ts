@@ -9,12 +9,15 @@ import {
   resizeChildDates,
   resizeChildren,
   type AdaptiveInfo,
+  type AnswerState,
   type ApplicantInfo,
   type HouseholdInfo,
   type HouseholdType,
   type KioskAnswers,
   type SubscriptionInfo,
+  type InputStep,
 } from './model.ts';
+import { skippedQuestionKeys, type AnswerStateMap } from './questionPolicy.ts';
 
 /**
  * 행사 체험 한 번의 상태.
@@ -40,6 +43,8 @@ type KioskState = {
   chatBusy: boolean;
   /** 방문자가 손댄 질문. '잘 모르겠어요'(null)와 아직 답하지 않은 것을 화면에서 구별하는 데만 쓴다. */
   answered: string[];
+  /** 명시적으로 답한 값과 '잘 모르겠어요'를 분리한다. */
+  answerStates: AnswerStateMap;
 
   setHouseholdType: (type: HouseholdType) => void;
   patchApplicant: (patch: Partial<ApplicantInfo>) => void;
@@ -48,6 +53,9 @@ type KioskState = {
   patchAdaptive: (patch: Partial<AdaptiveInfo>) => void;
   runAnalysis: (event: LoadedEvent) => Promise<void>;
   markAnswered: (key: string) => void;
+  markDoesNotKnow: (key: string) => void;
+  clearAnswerState: (key: string) => void;
+  finalizeStep: (step: InputStep) => void;
   toggleFavorite: (outcomeId: string) => void;
   openChat: (event: LoadedEvent, outcomeId: string | null) => void;
   openSamdoChat: (event: LoadedEvent, recommendation: SamdoPresentationRecommendation) => void;
@@ -74,6 +82,7 @@ const initial = () => ({
   chat: null,
   chatBusy: false,
   answered: [] as string[],
+  answerStates: {} as AnswerStateMap,
 });
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -84,6 +93,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
 
   setHouseholdType: (type) => set(state => {
     const answers = structuredClone(state.answers);
+    const answerStates: AnswerStateMap = { ...state.answerStates, householdType: 'ANSWERED' as AnswerState };
     answers.householdType = type;
     // 배우자가 없는 가구로 바꾸면 배우자 관련 답을 지운다. 남겨 두면 보이지 않는 답이 판정에 섞인다.
     if (type !== 'couple' && type !== 'withChildren') {
@@ -91,15 +101,27 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
       answers.household.marriageDate = '';
       answers.household.plannedMarriageWithinDeadline = null;
       answers.household.dualIncome = null;
+      for (const key of ['household.marriageRegistered', 'household.marriageDate', 'household.plannedMarriageWithinDeadline', 'household.dualIncome']) delete answerStates[key];
     }
-    if (type !== 'singleParent') answers.household.singleParentQualified = null;
+    if (type !== 'singleParent') {
+      answers.household.singleParentQualified = null;
+      delete answerStates['household.singleParentQualified'];
+    }
     if (type === 'single' || type === 'couple' || type === 'other') {
       answers.household.childrenCount = null;
       answers.household.childBirthYears = [];
       answers.household.childBirthDates = [];
+      delete answerStates['household.childrenCount'];
+      for (const key of Object.keys(answerStates)) if (key.startsWith('household.childBirthDates.')) delete answerStates[key];
     }
-    if (type === 'single') answers.household.householdSize = null;
-    return { answers, stale: state.evaluation !== null };
+    if (type === 'single') {
+      answers.household.householdSize = null;
+      answers.household.householdIncome = null;
+      delete answerStates['household.householdSize'];
+      delete answerStates['household.householdIncome'];
+    }
+    const answered = [...new Set([...state.answered, 'householdType'])].filter(key => answerStates[key] !== undefined);
+    return { answers, answerStates, answered, stale: state.evaluation !== null };
   }),
   patchApplicant: (patch) => set(state => ({
     answers: { ...state.answers, applicant: { ...state.answers.applicant, ...patch } },
@@ -129,7 +151,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     try {
       const current = get();
       const evaluation = evaluateEvent(event, current.answers);
-      const adaptivePlan = createAdaptiveQuestionPlan(evaluation.assessment.results, current.answers, current.answered);
+      const adaptivePlan = createAdaptiveQuestionPlan(evaluation.assessment.results, current.answers, current.answered, current.answerStates);
       await wait(Math.max(0, MIN_ANALYSIS_MS - (Date.now() - started)));
       // 분석 중에 reset 됐다면 이전 방문자의 결과를 새 세션에 넣지 않는다.
       if (get().sessionKey !== sessionKey) return;
@@ -148,7 +170,33 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     }
   },
 
-  markAnswered: (key) => set(state => (state.answered.includes(key) ? state : { answered: [...state.answered, key] })),
+  markAnswered: (key) => set(state => ({
+    answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
+    answerStates: { ...state.answerStates, [key]: 'ANSWERED' },
+  })),
+
+  markDoesNotKnow: (key) => set(state => ({
+    answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
+    answerStates: { ...state.answerStates, [key]: 'DOES_NOT_KNOW' },
+  })),
+
+  clearAnswerState: (key) => set(state => {
+    const answerStates = { ...state.answerStates };
+    delete answerStates[key];
+    return { answerStates, answered: state.answered.filter(item => item !== key) };
+  }),
+
+  finalizeStep: (step) => set(state => {
+    const missing = skippedQuestionKeys(state.answers, step, state.answerStates);
+    if (!missing.length) return state;
+    const answerStates = { ...state.answerStates };
+    for (const key of missing) answerStates[key] = 'DOES_NOT_KNOW';
+    const answers = structuredClone(state.answers);
+    // These enums carry a meaningful reason beyond a nullable scalar, so persist the explicit state in the answer too.
+    if (missing.includes('household.childExpectationStatus')) answers.household.childExpectationStatus = 'DOES_NOT_KNOW';
+    if (missing.includes('household.parentInformationStatus')) answers.household.parentInformationStatus = 'DOES_NOT_KNOW';
+    return { answers, answerStates, answered: [...new Set([...state.answered, ...missing])] };
+  }),
 
   toggleFavorite: (outcomeId) => set(state => ({
     favorites: state.favorites.includes(outcomeId)
@@ -196,5 +244,6 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     ...initial(),
     answers: structuredClone(answers),
     answered: [...new Set(answeredKeys)],
+    answerStates: Object.fromEntries([...new Set(answeredKeys)].map(key => [key, 'ANSWERED'])) as AnswerStateMap,
   })),
 }));

@@ -39,11 +39,12 @@ test('persona injection replaces the session with answers only and leaves the re
   state.reset();
 });
 
-test('input-only injection leaves adaptive answers empty so the adaptive screen still appears', () => {
+test('input-only injection keeps conditional adaptive answers empty while retaining base vehicle input', () => {
   injectPersona('YOUNG_SINGLE', 'inputs');
   const state = useKioskStore.getState();
   assert.deepEqual(state.answered, []);
-  assert.ok(Object.values(state.answers.adaptive).every(value => value === null));
+  assert.equal(state.answers.adaptive.vehicleValueKrw, 15_000_000, 'vehicle is collected in the base finance step');
+  assert.ok(Object.entries(state.answers.adaptive).every(([key, value]) => key === 'vehicleValueKrw' || value === null));
   state.reset();
   assert.ok(DEMO_PERSONAS.length >= 8);
   assert.throws(() => injectPersona('NOPE' as never, 'inputs'), /DEMO_PERSONA_UNKNOWN/);

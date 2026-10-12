@@ -4,6 +4,7 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { Pop } from '../../../components/motion/Pop';
 import { tracking } from '../../../design/tokens';
+import { DOES_NOT_KNOW_ACKNOWLEDGEMENT } from '../questionPolicy';
 import { k } from './theme';
 import { useDensity } from '../layout/DensityContext';
 
@@ -90,33 +91,36 @@ export function ChoiceGroup<T extends string | number | boolean | null>({
   testID?: string;
 }) {
   return (
-    <View style={styles.choiceGrid} testID={testID} accessibilityRole="radiogroup">
-      {choices.map(choice => {
-        const selected = value === choice.value;
-        return (
-          <MotionPressable
-            key={String(choice.value)}
-            accessibilityRole="radio"
-            accessibilityState={{ selected, checked: selected }}
-            aria-checked={selected}
-            accessibilityLabel={choice.label}
-            onPress={() => onChange(choice.value)}
-            style={[styles.choice, { flexBasis: `${Math.floor(100 / columns) - 2}%` }, selected && styles.choiceSelected]}
-          >
-            <View style={styles.choiceRow}>
-              <Pop active={selected}>
-                <MaterialIcons
-                  name={selected ? 'radio-button-checked' : 'radio-button-unchecked'}
-                  size={24}
-                  color={selected ? k.colors.primary : k.colors.outline}
-                />
-              </Pop>
-              <Text style={[styles.choiceLabel, selected && styles.choiceLabelSelected]}>{choice.label}</Text>
-            </View>
-            {choice.hint ? <Text style={styles.choiceHint}>{choice.hint}</Text> : null}
-          </MotionPressable>
-        );
-      })}
+    <View style={styles.choiceBlock}>
+      <View style={styles.choiceGrid} testID={testID} accessibilityRole="radiogroup">
+        {choices.map(choice => {
+          const selected = value === choice.value;
+          return (
+            <MotionPressable
+              key={String(choice.value)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected, checked: selected }}
+              aria-checked={selected}
+              accessibilityLabel={choice.label}
+              onPress={() => onChange(choice.value)}
+              style={[styles.choice, { flexBasis: `${Math.floor(100 / columns) - 2}%` }, selected && styles.choiceSelected]}
+            >
+              <View style={styles.choiceRow}>
+                <Pop active={selected}>
+                  <MaterialIcons
+                    name={selected ? 'radio-button-checked' : 'radio-button-unchecked'}
+                    size={24}
+                    color={selected ? k.colors.primary : k.colors.outline}
+                  />
+                </Pop>
+                <Text style={[styles.choiceLabel, selected && styles.choiceLabelSelected]}>{choice.label}</Text>
+              </View>
+              {choice.hint ? <Text style={styles.choiceHint}>{choice.hint}</Text> : null}
+            </MotionPressable>
+          );
+        })}
+      </View>
+      <UnknownAcknowledgement visible={value === null} />
     </View>
   );
 }
@@ -126,19 +130,20 @@ export function ChoiceGroup<T extends string | number | boolean | null>({
  * 아직 고르지 않은 것과 '모름'을 구별하려고 answered 를 따로 받는다(저장소가 기억한다).
  */
 export function YesNoUnknown({
-  value, answered, onChange, yes = '예', no = '아니요', testID,
+  value, answered, onChange, yes = '예', no = '아니요', unknown = '확인해 봐야 해요', testID,
 }: {
   value: boolean | null;
   answered: boolean;
   onChange: (value: boolean | null) => void;
   yes?: string;
   no?: string;
+  unknown?: string;
   testID?: string;
 }) {
   return (
     <ChoiceGroup<boolean | null>
       testID={testID}
-      choices={[{ value: true, label: yes }, { value: false, label: no }, { value: null, label: '잘 모르겠어요' }]}
+      choices={[{ value: true, label: yes }, { value: false, label: no }, { value: null, label: unknown }]}
       value={answered || value !== null ? value : undefined}
       onChange={onChange}
     />
@@ -273,20 +278,33 @@ export function Stepper({
   );
 }
 
-/** '잘 모르겠어요' 하나짜리 버튼. 숫자 칸 옆에 붙여 값을 비운다. */
-export function UnknownToggle({ active, onPress }: { active: boolean; onPress: () => void }) {
+export function UnknownAcknowledgement({ visible, message = DOES_NOT_KNOW_ACKNOWLEDGEMENT }: { visible: boolean; message?: string }) {
+  return visible ? (
+    <View style={styles.unknownAcknowledgement} accessibilityLiveRegion="polite">
+      <MaterialIcons name="info-outline" size={18} color={k.colors.primary} />
+      <Text style={styles.unknownAcknowledgementText}>{message}</Text>
+    </View>
+  ) : null;
+}
+
+/** Explicit unknown is a normal, accessible alternative to entering a number or date. */
+export function UnknownToggle({ active, onPress, label = '정확히 몰라요', testID }: { active: boolean; onPress: () => void; label?: string; testID?: string }) {
   return (
-    <MotionPressable
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: active }}
-      aria-checked={active}
-      accessibilityLabel="잘 모르겠어요"
-      onPress={onPress}
-      style={[styles.unknown, active && styles.choiceSelected]}
-    >
-      <MaterialIcons name={active ? 'check-box' : 'check-box-outline-blank'} size={24} color={active ? k.colors.primary : k.colors.outline} />
-      <Text style={styles.choiceLabel}>잘 모르겠어요</Text>
-    </MotionPressable>
+    <View style={styles.unknownBlock}>
+      <MotionPressable
+        testID={testID}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: active }}
+        aria-checked={active}
+        accessibilityLabel={label}
+        onPress={onPress}
+        style={[styles.unknown, active && styles.choiceSelected]}
+      >
+        <MaterialIcons name={active ? 'check-box' : 'check-box-outline-blank'} size={24} color={active ? k.colors.primary : k.colors.outline} />
+        <Text style={[styles.choiceLabel, active && styles.choiceLabelSelected]}>{label}</Text>
+      </MotionPressable>
+      <UnknownAcknowledgement visible={active} />
+    </View>
   );
 }
 
@@ -330,6 +348,7 @@ const styles = StyleSheet.create({
   questionTitle: { ...k.type.question, color: k.colors.text },
   questionHint: { ...k.type.caption, color: k.colors.textMuted },
   questionBody: { marginTop: 6 },
+  choiceBlock: { gap: 10 },
   choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   choice: {
     flexGrow: 1,
@@ -384,5 +403,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  unknownBlock: { gap: 10, alignItems: 'flex-start' },
+  unknownAcknowledgement: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
+  unknownAcknowledgementText: { ...k.type.caption, color: k.colors.primary, flexShrink: 1 },
   notice: { flexDirection: 'row', gap: 12, padding: 20, borderRadius: 12, alignItems: 'flex-start' },
 });

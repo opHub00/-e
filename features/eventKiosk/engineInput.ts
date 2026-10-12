@@ -55,6 +55,8 @@ function adultBase(answers: KioskAnswers, role: 'APPLICANT' | 'SPOUSE', referenc
   const singleApplicant = role === 'APPLICANT' && answers.householdType === 'single';
   const allNoHome = answers.applicant.householdNoHome;
   const allNeverOwned = answers.applicant.neverOwnedHome;
+  const exactSpecialSupplyHistory = answers.applicant.specialSupplyHistory ?? (answers.applicant.winningHistory === false ? false : null);
+  const exactReWinningRestriction = answers.applicant.reWinningRestriction ?? (answers.applicant.winningHistory === false ? false : null);
   return {
     id: role === 'APPLICANT' ? 'applicant' : 'spouse',
     birthDate: role === 'APPLICANT' ? dateKnowledge(answers.applicant.birthDate) : unknown<string>(),
@@ -98,8 +100,8 @@ function adultBase(answers: KioskAnswers, role: 'APPLICANT' | 'SPOUSE', referenc
       monthlyIncomeKrw: unknown<number>(), earnedOrBusinessIncome: unknown<boolean>(),
       incomeTaxPaymentYears: unknown<number>(), totalAssetsKrw: unknown<number>(),
     },
-    specialSupplyHistory: unknown<boolean>(),
-    reWinningRestriction: unknown<boolean>(),
+    specialSupplyHistory: role === 'APPLICANT' ? boolKnowledge(exactSpecialSupplyHistory) : unknown<boolean>(),
+    reWinningRestriction: role === 'APPLICANT' ? boolKnowledge(exactReWinningRestriction) : unknown<boolean>(),
   };
 }
 
@@ -116,9 +118,20 @@ function memberProfiles(answers: KioskAnswers): HouseholdMemberProfile[] {
     monthlyIncomeKrw: unknown<number>(),
     totalAssetsKrw: unknown<number>(),
   }));
+  const expectation = answers.household.childExpectationStatus;
+  const expectedChildren: HouseholdMemberProfile[] = [];
+  if (expectation === 'UNBORN' || expectation === 'BOTH') expectedChildren.push({
+    id: 'child-unborn', relationship: 'CHILD', birthDate: unknown<string>(), unborn: true,
+    coResident: known(true), currentHomeCount: known(0), monthlyIncomeKrw: unknown<number>(), totalAssetsKrw: unknown<number>(),
+  });
+  if (expectation === 'ADOPTION' || expectation === 'BOTH') expectedChildren.push({
+    id: 'child-adoption-review', relationship: 'CHILD', birthDate: unknown<string>(), unborn: false,
+    coResident: unknown<boolean>(), currentHomeCount: unknown<number>(), monthlyIncomeKrw: unknown<number>(), totalAssetsKrw: unknown<number>(),
+  });
+  const allChildren = [...children, ...expectedChildren];
   const spouseCount = answers.householdType === 'couple' || answers.householdType === 'withChildren' ? 1 : 0;
   const declared = answers.household.householdSize;
-  const otherCount = declared === null ? 0 : Math.max(0, declared - 1 - spouseCount - children.length);
+  const otherCount = declared === null ? 0 : Math.max(0, declared - 1 - spouseCount - allChildren.length);
   const others = Array.from({ length: otherCount }, (_, index): HouseholdMemberProfile => ({
     id: `member-${index + 1}`,
     relationship: 'OTHER',
@@ -129,7 +142,7 @@ function memberProfiles(answers: KioskAnswers): HouseholdMemberProfile[] {
     monthlyIncomeKrw: unknown<number>(),
     totalAssetsKrw: unknown<number>(),
   }));
-  return [...children, ...others];
+  return [...allChildren, ...others];
 }
 
 /**
@@ -143,6 +156,8 @@ export function toUserProfile(answers: KioskAnswers, referenceDate = new Date())
   const spouse = hasSpouse ? ({ ...adultBase(answers, 'SPOUSE', referenceDate), role: 'SPOUSE' } satisfies SpouseProfile) : undefined;
   const declaredMemberCount = answers.household.householdSize ?? (answers.householdType === 'single' ? 1 : null);
   const declaredIncome = answers.household.householdIncome ?? (answers.householdType === 'single' ? answers.applicant.monthlyIncome : null);
+  const exactSpecialSupplyHistory = answers.applicant.specialSupplyHistory ?? (answers.applicant.winningHistory === false ? false : null);
+  const exactReWinningRestriction = answers.applicant.reWinningRestriction ?? (answers.applicant.winningHistory === false ? false : null);
   return {
     schemaVersion: 1,
     profileId: 'event-visitor',
@@ -157,8 +172,8 @@ export function toUserProfile(answers: KioskAnswers, referenceDate = new Date())
         totalAssetsKrw: numberKnowledge(answers.household.totalAssets),
         allNoHome: boolKnowledge(answers.applicant.householdNoHome),
         everOwnedHomeByAnyMember: answers.applicant.neverOwnedHome === null ? unknown<boolean>() : known(!answers.applicant.neverOwnedHome),
-        specialSupplyHistoryByAnyMember: boolKnowledge(answers.applicant.winningHistory),
-        reWinningRestrictionByAnyMember: boolKnowledge(answers.applicant.winningHistory),
+        specialSupplyHistoryByAnyMember: boolKnowledge(exactSpecialSupplyHistory),
+        reWinningRestrictionByAnyMember: boolKnowledge(exactReWinningRestriction),
         dualIncome: boolKnowledge(answers.household.dualIncome),
         maxVehicleValueKrw: numberKnowledge(answers.adaptive.vehicleValueKrw),
       },
@@ -170,7 +185,11 @@ export function toUserProfile(answers: KioskAnswers, referenceDate = new Date())
       supportedSingleParent: compositionOf(answers) === 'SINGLE_PARENT'
         ? boolKnowledge(answers.household.singleParentQualified)
         : known(false),
-      parentTotalAssetsKrw: numberKnowledge(answers.household.parentAssets),
+      parentTotalAssetsKrw: numberKnowledge(
+        answers.household.parentInformationStatus == null || answers.household.parentInformationStatus === 'KNOWN'
+          ? answers.household.parentAssets
+          : null,
+      ),
       eligibleResident: boolKnowledge(answers.adaptive.eligibleResident),
       currentProgramTenant: boolKnowledge(answers.adaptive.currentProgramTenant),
       collegeStudent: answers.adaptive.youthStudyStatus == null

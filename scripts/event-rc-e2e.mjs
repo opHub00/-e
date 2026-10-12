@@ -117,6 +117,7 @@ async function enterPersona(page, persona, verifyBack) {
   await choice(page, 'q-applicant-residenceMonths', '5년 이상');
   await choice(page, 'q-applicant-longOverseasStay', '없어요');
   await choice(page, 'q-applicant-specialException', '없어요');
+  await choice(page, 'q-household-childExpectationStatus', '없어요');
   if (verifyBack) {
     await page.getByRole('button', { name: '이전', exact: true }).click();
     await next(page);
@@ -145,12 +146,18 @@ async function enterPersona(page, persona, verifyBack) {
     await page.getByTestId('input-householdIncome').fill(persona.householdIncome);
   }
   await page.getByTestId('input-totalAssets').fill(persona.assets);
+  await page.getByTestId('input-vehicleValueKrw').fill(persona.id === 'CLEARLY_INELIGIBLE' ? '9000' : '1500');
+  if (await page.getByTestId('q-household-parentInformationStatus').count()) {
+    await choice(page, 'q-household-parentInformationStatus', '금액을 알고 있어요');
+  }
   if (await page.getByTestId('input-parentAssets').count()) await page.getByTestId('input-parentAssets').fill(persona.parentAssets ?? '6000');
   await next(page);
 
   await choice(page, 'q-applicant-householdNoHome', persona.ownsHome ? '있어요' : '모두 없어요');
   await choice(page, 'q-applicant-neverOwnedHome', persona.ownsHome ? '가진 적 있어요' : '가진 적 없어요');
-  await choice(page, 'q-applicant-winningHistory', persona.winning ? '있어요' : '없어요');
+  await choice(page, 'q-applicant-specialSupplyHistory', persona.winning ? '있어요' : '없어요');
+  await choice(page, 'q-applicant-reWinningRestriction', persona.winning ? '해당해요' : '아니에요');
+  await choice(page, 'q-applicant-householdNoWinningFiveYears', persona.winning ? '당첨 이력이 있어요' : '모두 없어요');
   await choice(page, 'q-subscription-accountKind', persona.noAccount ? '없어요' : '주택청약종합저축');
   if (!persona.noAccount) {
     await page.getByTestId('input-openedAt').fill('20180101');
@@ -300,6 +307,64 @@ async function edgeCases(browser) {
   return { invalidToken: 'PASS', emptyResults: 'PASS', refreshPrivacy: 'PASS', reducedViewportKeyboardCta: 'PASS', idleReset: 'PASS', adaptiveBackNavigation: 'PASS', resetVisitorIsolation: 'PASS' };
 }
 
+async function unknownUiCases(browser) {
+  const variants = [
+    { label: 'desktop', viewport: { width: 1440, height: 900 }, parent: '정확히 몰라요' },
+    { label: 'iPad portrait', viewport: { width: 768, height: 1024 }, parent: '부모님이 안 계세요' },
+    { label: 'iPad landscape', viewport: { width: 1024, height: 768 }, parent: '연락·확인이 어려워요' },
+  ];
+  const results = [];
+  for (const variant of variants) {
+    const context = await browser.newContext({ viewport: variant.viewport });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/event`);
+    await page.getByTestId('event-start').click();
+    await page.getByTestId('intro-next').click();
+    await page.getByTestId('household-single').click();
+    await next(page);
+
+    await page.getByTestId('input-birthDate').fill('20010410');
+    await choice(page, 'q-applicant-isHouseholdHead', '예');
+    await choice(page, 'q-applicant-livesInEventRegion', '예');
+    await choice(page, 'q-applicant-residenceMonths', '5년 이상');
+    await choice(page, 'q-applicant-longOverseasStay', '기억나지 않아요');
+    await choice(page, 'q-applicant-specialException', '없어요');
+    await choice(page, 'q-household-childExpectationStatus', '없어요');
+    if (!(await page.getByText('괜찮아요. 결과에서 확인이 필요한 항목으로 표시할게요.').count())) {
+      throw new Error(`${variant.label}: unknown acknowledgement missing`);
+    }
+    await noOverflow(page, `${variant.label}:unknown-applicant`);
+    await touchTargets(page, `${variant.label}:unknown-applicant`);
+    await next(page);
+
+    await page.getByTestId('unknown-applicant.monthlyIncome').click();
+    await choice(page, 'q-household-parentInformationStatus', variant.parent);
+    if (await page.getByTestId('unknown-applicant.monthlyIncome').getAttribute('aria-checked') !== 'true') {
+      throw new Error(`${variant.label}: amount unknown state was not selected`);
+    }
+    if (!(await page.getByText('괜찮아요. 부모 자산은 결과에서 확인이 필요한 항목으로 표시할게요.').count())) {
+      throw new Error(`${variant.label}: parent unknown acknowledgement missing`);
+    }
+    await noOverflow(page, `${variant.label}:unknown-finance`);
+    await touchTargets(page, `${variant.label}:unknown-finance`);
+
+    await page.getByRole('button', { name: '이전', exact: true }).click();
+    if (await page.getByTestId('q-applicant-longOverseasStay').getByRole('radio', { name: '기억나지 않아요', exact: true }).getAttribute('aria-checked') !== 'true') {
+      throw new Error(`${variant.label}: history unknown state was lost after back navigation`);
+    }
+    await next(page);
+    if (await page.getByTestId('unknown-applicant.monthlyIncome').getAttribute('aria-checked') !== 'true') {
+      throw new Error(`${variant.label}: amount unknown state was lost after back navigation`);
+    }
+    if (await page.getByTestId('q-household-parentInformationStatus').getByRole('radio', { name: variant.parent, exact: true }).getAttribute('aria-checked') !== 'true') {
+      throw new Error(`${variant.label}: parent reason was lost after back navigation`);
+    }
+    results.push({ viewport: variant.label, historyUnknown: 'PASS', amountUnknown: 'PASS', parentReason: variant.parent, backNavigation: 'PASS', touchTargets: 'PASS', overflow: 'PASS' });
+    await context.close();
+  }
+  return results;
+}
+
 const browser = await chromium.launch({ headless: true });
 const personaResults = [];
 try {
@@ -310,12 +375,14 @@ try {
     await context.close();
   }
   const edges = await edgeCases(browser);
+  const unknownUi = await unknownUiCases(browser);
   const report = {
     generatedAt: new Date().toISOString(),
     baseUrl,
     browsers: ['Chromium'],
     personas: personaResults,
     edges,
+    unknownUi,
     maxAnalysisMs: Math.max(...personaResults.map(item => item.analysisMs)),
     result: 'PASS',
   };

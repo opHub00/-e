@@ -28,6 +28,7 @@ export function KioskFrame({
   footer,
   children,
   scrollKey,
+  brandSlot,
 }: {
   brand: string;
   progress?: { steps: InputStep[]; current: InputStep } | { label: string };
@@ -39,6 +40,8 @@ export function KioskFrame({
   footer?: ReactNode;
   children: ReactNode;
   scrollKey?: string;
+  /** 브랜드 자리에 공식 로고 이미지를 넣을 때. 없으면 기존 글자 표시. */
+  brandSlot?: ReactNode;
 }) {
   const width = useKioskWidth();
   const compactTop = width < 600;
@@ -52,10 +55,12 @@ export function KioskFrame({
     <DensityProvider density={density}>
     <View style={styles.root}>
       <View style={[styles.top, density === 'compact' && styles.topCompact, { paddingHorizontal: gutter }]}>
-        <View style={styles.brandRow}>
-          <View style={styles.brandMark}><Text style={styles.brandMarkText}>e</Text></View>
-          <Text style={styles.brand}>{brand}</Text>
-        </View>
+        {brandSlot ?? (
+          <View style={styles.brandRow}>
+            <View style={styles.brandMark}><Text style={styles.brandMarkText}>e</Text></View>
+            <Text style={styles.brand}>{brand}</Text>
+          </View>
+        )}
         <View style={[styles.topActions, compactTop && styles.topActionsCompact]}>
           {hideChat ? null : (
             <MotionPressable

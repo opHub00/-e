@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { Animated, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { duration, easing, useNative } from '../../../design/motion';
@@ -24,6 +24,12 @@ const SCENE_VIEWS: Record<StorySceneId, ComponentType<{ p: Animated.Value; data:
 const MAX_STAGE_SCALE = 1.5;
 
 /**
+ * 첫 paint 전에 실행되는 effect. 서버(정적 HTML)에서는 layout effect 가 없으니 그때는 아무것도 하지 않는다
+ * (서버 HTML 은 아래 0% 초기값 그대로 그려진다).
+ */
+const useBeforePaint = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
  * Product Story. 서비스를 '이해시키는' 서사 계층이다(실제 사용 중 상태 피드백인 UI Motion 과 별개).
  *
  * - 장면은 자동으로 넘어가고 마지막 장면에서 멈춰 CTA 를 기다린다.
@@ -43,15 +49,21 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   const [round, setRound] = useState(0);
   const [stage, setStage] = useState({ width: 0, height: 0 });
   const scene = STORY_SCENES[index];
+  // 모든 값은 애니메이션 0% 로 만든다. 정적 HTML·hydration·첫 render 가 모두 이 값으로 그려진다.
   const progress = useRef(new Animated.Value(0)).current;
-  const fade = useRef(new Animated.Value(1)).current;
+  const fade = useRef(new Animated.Value(0)).current;
   const bar = useRef(new Animated.Value(0)).current;
+  const scale = stage.width && stage.height ? Math.min(stage.width / STAGE.width, stage.height / STAGE.height, MAX_STAGE_SCALE) : 0;
+  // 무대 크기를 재기 전에는 재생을 시작하지 않는다. 시작했다면 무대가 처음 보일 때 이미 중간 프레임이다.
+  const ready = scale > 0;
 
   // 장면 하나: 그림이 완성되는 동안 progress 0→1, 막대는 holdMs 동안 채워지고 다음 장면으로.
-  useEffect(() => {
+  // paint 전에 값을 되돌리고 시작한다. 그래서 장면이 바뀌거나 다시 볼 때도 이전 장면의 마지막 값(1)으로 한 번 그려지지 않는다.
+  useBeforePaint(() => {
     progress.setValue(reduced ? 1 : 0);
     fade.setValue(reduced ? 1 : 0);
     bar.setValue(0);
+    if (!ready) return undefined;
     const animations: Animated.CompositeAnimation[] = [];
     if (!reduced) {
       animations.push(Animated.timing(fade, { toValue: 1, duration: duration.screen, easing: easing.enter, useNativeDriver: useNative }));
@@ -69,11 +81,10 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
       animations.forEach(animation => animation.stop());
       if (timer) clearTimeout(timer);
     };
-  }, [bar, fade, index, progress, reduced, round, scene.buildMs, scene.holdMs]);
+  }, [bar, fade, index, progress, ready, reduced, round, scene.buildMs, scene.holdMs]);
 
   if (!data) return null;
   const SceneView = SCENE_VIEWS[scene.id];
-  const scale = stage.width && stage.height ? Math.min(stage.width / STAGE.width, stage.height / STAGE.height, MAX_STAGE_SCALE) : 0;
   const onStageLayout = (event: LayoutChangeEvent) => setStage({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
   const last = isLastScene(index);
   const replay = () => {

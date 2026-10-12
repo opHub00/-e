@@ -8,7 +8,7 @@ import type { Phase4PersonaId } from '../../features/eventKiosk/phase4Personas';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
 import { samdoRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
 import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samdoResultModel';
-import { SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
+import { SamdoBrandLogo, SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
 import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdoSummary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
@@ -90,7 +90,7 @@ export default function SamdoResultScreen() {
   return (
     <KioskFrame
       brand={brand}
-      progress={{ label: '공고별 분석' }}
+      brandSlot={<SamdoBrandLogo />}
       confirmHome={false}
       footer={
         <View style={styles.footer}>

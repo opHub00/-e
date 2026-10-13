@@ -40,11 +40,11 @@ export default function AnalysisScreen() {
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
 
-  if (!attached) return <KioskFrame brand={brand} hideChat confirmHome={false}><View /></KioskFrame>;
+  if (!attached) return <KioskFrame partner brand={brand} hideChat confirmHome={false}><View /></KioskFrame>;
 
   if (!householdType) {
     return (
-      <KioskFrame brand={brand} hideChat confirmHome={false}>
+      <KioskFrame partner brand={brand} hideChat confirmHome={false}>
         <EmptyState title="입력한 정보가 없어요" body="처음부터 정보를 입력하면 분석해 드려요." action={{ label: '처음부터 시작하기', onPress: resetToHome }} />
       </KioskFrame>
     );
@@ -52,7 +52,7 @@ export default function AnalysisScreen() {
 
   if (analysis === 'error') {
     return (
-      <KioskFrame brand={brand} hideChat>
+      <KioskFrame partner brand={brand} hideChat>
         <View style={styles.center} testID="analysis-error">
           {/* 내부 오류 코드는 보여 주지 않는다. 방문자가 할 수 있는 일만 안내한다. */}
           <Notice tone="error">분석하는 중에 문제가 생겼어요. 입력한 정보는 그대로 남아 있어요. 다시 분석하거나, 입력을 확인한 뒤 다시 시도해 주세요.</Notice>
@@ -66,7 +66,7 @@ export default function AnalysisScreen() {
   }
 
   return (
-    <KioskFrame brand={brand} hideChat confirmHome={false}>
+    <KioskFrame partner brand={brand} hideChat confirmHome={false}>
       <View style={styles.center} testID="analysis-running" accessibilityLiveRegion="polite">
         <View style={styles.spinner}><ActivityIndicator size="large" color={k.colors.primary} /></View>
         <Text style={styles.title}>분석하고 있어요</Text>

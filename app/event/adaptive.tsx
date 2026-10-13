@@ -88,7 +88,7 @@ export default function AdaptiveAssessmentScreen() {
   const evidenceOnlyFacts = plan?.evidenceOnlyFacts ?? [];
   if (!evaluation || !questions.length) {
     return (
-      <KioskFrame brand={load.event.config.copy.brand} progress={{ label: '추가 확인' }}>
+      <KioskFrame partner brand={load.event.config.copy.brand} progress={{ label: '추가 확인' }}>
         <Notice tone="warn">추가 확인할 질문이 없어요. 현재 결과를 확인해 주세요.</Notice>
         <View style={styles.inlineAction}><KioskButton label="결과 보기" onPress={() => router.replace('/event/results' as never)} /></View>
       </KioskFrame>
@@ -97,6 +97,7 @@ export default function AdaptiveAssessmentScreen() {
 
   return (
     <KioskFrame
+      partner
       brand={load.event.config.copy.brand}
       progress={{ label: `추가 확인 · ${questions.length}개` }}
       scrollKey="adaptive-assessment"

@@ -10,7 +10,7 @@ import { toSamdoPresentationRecommendation } from '../../features/eventKiosk/sam
 import { samdoRawRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
 import { SamdoRefinementPanel } from '../../features/eventKiosk/samdoResult/SamdoRefinementPanel';
 import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samdoResultModel';
-import { SamdoBrandLogo, SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
+import { SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
 import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdoSummary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
@@ -95,7 +95,7 @@ export default function SamdoResultScreen() {
   return (
     <KioskFrame
       brand={brand}
-      brandSlot={<SamdoBrandLogo />}
+      partner
       confirmHome={false}
       footer={
         <View style={styles.footer}>

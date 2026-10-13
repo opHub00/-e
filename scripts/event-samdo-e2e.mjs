@@ -45,7 +45,7 @@ for (const viewport of VIEWPORTS) {
   const ids = ['samdo-header', 'samdo-hero', 'samdo-why', 'samdo-refinement', 'samdo-alternatives', 'samdo-schedule', 'samdo-rejected', 'samdo-next'];
   const boxes = Object.fromEntries(await Promise.all(ids.map(async id => [id, await rect(page, id)])));
   check(`${viewport.name}: every section rendered`, ids.every(id => boxes[id]), ids.filter(id => !boxes[id]).join(','));
-  check(`${viewport.name}: character and partner logo are the real assets`, (await page.getByTestId('samdo-character').filter({ visible: true }).count()) === 1 && (await page.getByTestId('samdo-partner-logo').filter({ visible: true }).count()) === 1);
+  check(`${viewport.name}: character and partner logo are the real assets`, (await page.getByTestId('brand-character').filter({ visible: true }).count()) === 1 && (await page.getByTestId('partner-logo').filter({ visible: true }).count()) === 1);
   const heroTitle = await page.getByTestId('samdo-hero-title').filter({ visible: true }).innerText();
   check(`${viewport.name}: hero recommends newborn priority`, heroTitle.includes('신생아 특별공급'), heroTitle);
   const altCards = await page.evaluate(vh => [...document.querySelectorAll('[data-testid^="samdo-alt-"]')].map(el => el.getBoundingClientRect()).filter(r => r.width > 0 && r.top < vh).length, viewport.height);

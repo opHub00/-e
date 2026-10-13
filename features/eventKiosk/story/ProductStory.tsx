@@ -7,6 +7,7 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import { kioskEvent } from '../kioskEvent';
 import { useServiceListingPortfolio } from '../live/useServiceListingPortfolio';
 import { KioskButton } from '../ui/controls';
+import { BrandMark } from '../brand/BrandMark';
 import { k } from '../ui/theme';
 import { storyDataFrom, type StoryData } from './storyData';
 import { isLastScene, nextSceneIndex, STORY_SCENES, type StorySceneId } from './storyScript';
@@ -95,10 +96,7 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   return (
     <View style={styles.root} testID={testID} accessibilityViewIsModal>
       <View style={styles.top}>
-        <View style={styles.brandRow}>
-          <View style={styles.mark}><Text style={styles.markText}>e</Text></View>
-          <Text style={styles.brand}>{load.ok ? load.event.config.copy.brand : '완판e'}</Text>
-        </View>
+        <BrandMark size="hero" label={load.ok ? load.event.config.copy.brand : undefined} />
         <MotionPressable accessibilityRole="button" accessibilityLabel="소개 건너뛰기" onPress={onSkip} style={styles.skip} testID="story-skip">
           <Text style={styles.skipText}>건너뛰기</Text>
           <MaterialIcons name="close" size={22} color={k.colors.textMuted} />
@@ -167,10 +165,6 @@ const Easing_linear = (value: number) => value;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 14 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 52 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  mark: { width: 36, height: 36, borderRadius: 10, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  markText: { ...k.type.bodyLgStrong, color: k.colors.onPrimary },
-  brand: { ...k.type.section, color: k.colors.primary },
   skip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, minWidth: 48, paddingHorizontal: 14, borderRadius: 12 },
   skipText: { ...k.type.bodyStrong, color: k.colors.textMuted },
   progress: { flexDirection: 'row', gap: 6, width: '100%', maxWidth: 980, alignSelf: 'center' },

@@ -1,10 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useDensity } from '../layout/DensityContext';
 import { KioskButton } from '../ui/controls';
 import { k } from '../ui/theme';
-import { SAMDO_BRAND } from './brandAssets';
 import type { SamdoChip, SamdoResultView as Model, SamdoTone, SamdoTypeCard } from './samdoResultModel';
 
 type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
@@ -35,22 +34,6 @@ export type SamdoActions = {
   /** 판정 의미를 바꾸지 않는 확인·가정 패널. 추천 이유 뒤, 다른 유형 앞에 둔다. */
   refinementSlot?: ReactNode;
 };
-
-/** 화면 틀(KioskFrame) 맨 위 브랜드 자리에 넣는 공식 완판e 로고. 원본이 없으면 null → 틀의 기본 글자 표시. */
-export function SamdoBrandLogo() {
-  const { density } = useDensity();
-  if (!SAMDO_BRAND.logo) return null;
-  const height = density === 'compact' ? 44 : density === 'comfortable' ? 50 : 38;
-  return (
-    <Image
-      testID="samdo-wanpan-logo"
-      accessibilityLabel="완판e"
-      source={SAMDO_BRAND.logo.source}
-      style={{ height, width: height * SAMDO_BRAND.logo.ratio }}
-      resizeMode="contain"
-    />
-  );
-}
 
 function Chip({ chip }: { chip: SamdoChip }) {
   const { d } = useDensity();
@@ -84,41 +67,11 @@ function SectionTitle({ icon, title, hint }: { icon: IconName; title: string; hi
   );
 }
 
-/** 파트너 표시. 완판e 보다 작고 흐리게, 오른쪽 끝에. */
-function Partner() {
-  const { density, d } = useDensity();
-  const logoHeight = density === 'touch' ? 18 : 24;
-  return (
-    <View testID="samdo-partner" style={[styles.partner, density === 'touch' && styles.partnerTouch]}>
-      <Text style={[d.type.caption, styles.subtle]}>함께하는 곳</Text>
-      {SAMDO_BRAND.partnerLogo ? (
-        <Image
-          testID="samdo-partner-logo"
-          accessibilityLabel={SAMDO_BRAND.partnerName}
-          source={SAMDO_BRAND.partnerLogo.source}
-          style={[styles.partnerLogo, { height: logoHeight, width: logoHeight * SAMDO_BRAND.partnerLogo.ratio }]}
-          resizeMode="contain"
-        />
-      ) : <Text testID="samdo-partner-asset-needed" style={[d.type.caption, styles.muted]}>로고 원본 필요</Text>}
-    </View>
-  );
-}
-
 function Header({ model }: { model: Model }) {
-  const { density, d } = useDensity();
-  const character = density === 'compact' ? 52 : density === 'comfortable' ? 68 : 44;
+  const { d } = useDensity();
   return (
     <View testID="samdo-header" style={[styles.header, { paddingHorizontal: d.cardPadding, paddingVertical: d.cardPadding - 6, gap: 8 }]}>
       <View style={styles.headerMain}>
-        {SAMDO_BRAND.character ? (
-          <Image
-            testID="samdo-character"
-            accessibilityLabel="완판e 캐릭터 완판이"
-            source={SAMDO_BRAND.character.source}
-            style={{ width: character * SAMDO_BRAND.character.ratio, height: character }}
-            resizeMode="contain"
-          />
-        ) : <View testID="samdo-character-asset-needed" style={[styles.assetNeeded, { width: character, height: character }]}><Text style={[d.type.caption, styles.muted]}>캐릭터 원본 필요</Text></View>}
         <View style={styles.headerCopy}>
           <Text testID="samdo-title" accessibilityRole="header" style={[d.type.section, styles.text]}>{model.title}</Text>
           <View style={styles.headerMeta}>
@@ -126,9 +79,7 @@ function Header({ model }: { model: Model }) {
             <View style={styles.sourceTag}><Text testID="samdo-source" style={[d.type.caption, { color: k.colors.primary }]}>{model.sourceNote}</Text></View>
           </View>
         </View>
-        {density === 'touch' ? null : <Partner />}
       </View>
-      {density === 'touch' ? <Partner /> : null}
     </View>
   );
 }
@@ -447,10 +398,6 @@ const styles = StyleSheet.create({
   headerCopy: { flex: 1, minWidth: 0, gap: 2 },
   headerMeta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8, rowGap: 4 },
   sourceTag: { backgroundColor: k.colors.primaryFixed, borderRadius: k.radius.pill, paddingHorizontal: 8, paddingVertical: 1 },
-  partner: { alignItems: 'flex-end', gap: 2, paddingLeft: 14, borderLeftWidth: 1, borderLeftColor: k.colors.hairline },
-  partnerTouch: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingLeft: 0, borderLeftWidth: 0, paddingTop: 6, borderTopWidth: 1, borderTopColor: k.colors.hairline },
-  partnerLogo: { opacity: 0.85 },
-  assetNeeded: { borderRadius: k.radius.md, borderWidth: 1, borderStyle: 'dashed', borderColor: k.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', borderRadius: k.radius.pill, paddingHorizontal: 12, paddingVertical: 4 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

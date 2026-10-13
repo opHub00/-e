@@ -11,6 +11,8 @@ import { ProgressFill } from '../motion/ProgressFill';
 import { ScreenReveal } from '../motion/ScreenReveal';
 import { router } from 'expo-router';
 import { DensityProvider, useDensity } from '../layout/DensityContext';
+import { BrandMark } from '../brand/BrandMark';
+import { PartnerBadge } from '../brand/PartnerBadge';
 
 /**
  * 행사 화면 공통 틀.
@@ -28,7 +30,7 @@ export function KioskFrame({
   footer,
   children,
   scrollKey,
-  brandSlot,
+  partner = false,
 }: {
   brand: string;
   progress?: { steps: InputStep[]; current: InputStep } | { label: string };
@@ -40,8 +42,8 @@ export function KioskFrame({
   footer?: ReactNode;
   children: ReactNode;
   scrollKey?: string;
-  /** 브랜드 자리에 공식 로고 이미지를 넣을 때. 없으면 기존 글자 표시. */
-  brandSlot?: ReactNode;
+  /** 삼도이동 1지구 관련 화면: 우측 상단에 '함께하는 곳' 파트너 표시. */
+  partner?: boolean;
 }) {
   const width = useKioskWidth();
   const compactTop = width < 600;
@@ -55,12 +57,9 @@ export function KioskFrame({
     <DensityProvider density={density}>
     <View style={styles.root}>
       <View style={[styles.top, density === 'compact' && styles.topCompact, { paddingHorizontal: gutter }]}>
-        {brandSlot ?? (
-          <View style={styles.brandRow}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>e</Text></View>
-            <Text style={styles.brand}>{brand}</Text>
-          </View>
-        )}
+        <BrandMark size="header" label={brand} compact={compactTop} />
+        <View style={[styles.topRight, compactTop && styles.topActionsCompact]}>
+          {partner ? <View style={[styles.partnerSlot, compactTop && styles.partnerSlotCompact]}><PartnerBadge compact={compactTop} /></View> : null}
         <View style={[styles.topActions, compactTop && styles.topActionsCompact]}>
           {hideChat ? null : (
             <MotionPressable
@@ -84,6 +83,7 @@ export function KioskFrame({
             <MaterialIcons name="home" size={24} color={k.colors.primary} />
             {compactTop ? null : <Text style={styles.topButtonLabel}>처음으로</Text>}
           </MotionPressable>
+        </View>
         </View>
       </View>
       {progress ? <Progress progress={progress} gutter={gutter} /> : null}
@@ -168,10 +168,9 @@ const styles = StyleSheet.create({
     borderBottomColor: k.colors.surfaceHigh,
     backgroundColor: k.colors.surface,
   },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  brandMark: { width: 44, height: 44, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  brandMarkText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 30 },
-  brand: { ...k.type.section, color: k.colors.primary, fontSize: 25 },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 },
+  partnerSlot: { paddingRight: 12, borderRightWidth: 1, borderRightColor: k.colors.hairline },
+  partnerSlotCompact: { paddingRight: 6 },
   topActions: { flexDirection: 'row', gap: 12 },
   topActionsCompact: { gap: 8 },
   topButton: {

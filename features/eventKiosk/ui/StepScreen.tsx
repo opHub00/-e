@@ -37,6 +37,7 @@ export function StepScreen({ step, title, subtitle, children }: {
 
   return (
     <KioskFrame
+      partner
       brand={load.ok ? load.event.config.copy.brand : '완판e'}
       progress={{ steps, current: step }}
       scrollKey={`${sessionKey}-${step}`}

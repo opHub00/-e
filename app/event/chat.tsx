@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useAttached } from '../../features/adminPortal/useIsWide';
 import { BUCKET_LABELS } from '../../features/eventKiosk/evaluate';
@@ -16,6 +16,18 @@ import { k } from '../../features/eventKiosk/ui/theme';
 import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
+import { BRAND } from '../../features/eventKiosk/brand/brandAssets';
+
+/** 답하는 쪽 표시: 완판이 상담원 이모티콘(원본). 원본이 없으면 기존 아이콘. */
+function ConsultantAvatar() {
+  return (
+    <View style={styles.avatar} testID="chat-consultant-avatar">
+      {BRAND.consultant
+        ? <Image source={BRAND.consultant.source} style={{ height: 40, width: 40 * BRAND.consultant.ratio }} resizeMode="contain" accessibilityIgnoresInvertColors />
+        : <MaterialIcons name="auto-awesome" size={22} color={k.colors.primary} />}
+    </View>
+  );
+}
 
 /**
  * AI 상담. 일반 챗봇처럼 보이지만, 방문자가 입력한 정보·지금 공고·그 공고의 판정 결과를 이어받아
@@ -63,6 +75,7 @@ export default function ChatScreen() {
     <KioskFrame
       brand={brand}
       hideChat
+      partner={Boolean(chat.samdoRecommendation)}
       progress={{ label: 'AI 상담' }}
       footer={
         <View style={styles.composer}>
@@ -123,7 +136,7 @@ export default function ChatScreen() {
         {chat.messages.map((message, index) => (
           // 새 메시지만 짧게 떠오른다. 이미 있던 메시지는 다시 움직이지 않는다(key 가 그대로라서).
           <Appear key={index} distance={travel.sm} style={[styles.bubbleRow, message.role === 'user' && styles.bubbleRowUser]}>
-            {message.role === 'assistant' ? <View style={styles.avatar}><MaterialIcons name="auto-awesome" size={22} color={k.colors.onPrimary} /></View> : null}
+            {message.role === 'assistant' ? <ConsultantAvatar /> : null}
             <View style={[styles.bubble, message.role === 'user' ? styles.bubbleUser : styles.bubbleBot]} testID={`chat-message-${message.role}`}>
               <Text style={[styles.bubbleText, message.role === 'user' && { color: k.colors.onPrimary }]}>{message.text}</Text>
               {message.detail?.map(line => <Text key={line} style={styles.detail}>· {line}</Text>)}
@@ -132,7 +145,7 @@ export default function ChatScreen() {
         ))}
         {busy ? (
           <View style={styles.bubbleRow}>
-            <View style={styles.avatar}><MaterialIcons name="auto-awesome" size={22} color={k.colors.onPrimary} /></View>
+            <ConsultantAvatar />
             <View style={[styles.bubble, styles.bubbleBot]}><ActivityIndicator color={k.colors.primary} /></View>
           </View>
         ) : null}
@@ -168,7 +181,7 @@ const styles = StyleSheet.create({
   threadContent: { gap: 16, paddingBottom: 8 },
   bubbleRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   bubbleRowUser: { justifyContent: 'flex-end' },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.surfaceHigh, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   bubble: { maxWidth: '82%', borderRadius: 20, paddingVertical: 14, paddingHorizontal: 18, gap: 6 },
   bubbleBot: { backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.surfaceHigh, borderTopLeftRadius: 6 },
   bubbleUser: { backgroundColor: k.colors.primary, borderTopRightRadius: 6 },
@@ -178,6 +191,6 @@ const styles = StyleSheet.create({
   suggestion: { minHeight: 56, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 999, backgroundColor: k.colors.primaryFixed },
   suggestionText: { ...k.type.bodyStrong, color: k.colors.primary },
   disclaimer: { ...k.type.caption, color: k.colors.textSubtle, marginTop: 16 },
-  composer: { flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center' },
-  input: { flex: 1, minHeight: k.touch, borderRadius: 12, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, paddingHorizontal: 20, ...k.type.bodyLg, color: k.colors.text },
+  composer: { flex: 1, minWidth: 0, flexDirection: 'row', gap: 12, alignItems: 'center' },
+  input: { flex: 1, minWidth: 0, minHeight: k.touch, borderRadius: 12, borderWidth: 1, borderColor: k.colors.outline, backgroundColor: k.colors.surface, paddingHorizontal: 20, ...k.type.bodyLg, color: k.colors.text },
 });

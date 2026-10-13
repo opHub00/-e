@@ -8,6 +8,7 @@ import {
   E2E_FIXTURE_URL,
   assertWebBuildProfile,
   createE2EBuildEnvironment,
+  createEventQaBuildEnvironment,
   createProductionBuildEnvironment,
   createReleaseBuildEnvironment,
   createStagingBuildEnvironment,
@@ -32,6 +33,22 @@ test('E2E environment is explicit and does not mutate its parent environment', (
   assert.equal(env.EXPO_PUBLIC_SUPABASE_URL, E2E_FIXTURE_URL);
   assert.equal(env.EXPO_PUBLIC_SUPABASE_ANON_KEY, E2E_FIXTURE_KEY);
   assert.equal(env.WANPANE_METRO_CACHE_NAMESPACE, 'e2e');
+});
+
+test('Event Demo QA build always carries an exact commit and build time', () => {
+  const parent = { KEEP: 'yes' };
+  const env = createEventQaBuildEnvironment(parent, {
+    commit: 'a9a2e2bf450c48682aaa50fc751be37bdc63d867',
+    builtAt: '2026-10-13T00:00:00.000Z',
+  });
+  assert.deepEqual(parent, { KEEP: 'yes' });
+  assert.equal(env.KEEP, 'yes');
+  assert.equal(env.EXPO_PUBLIC_EVENT_DEMO_MODE, '1');
+  assert.equal(env.EXPO_PUBLIC_BUILD_COMMIT, 'a9a2e2bf450c48682aaa50fc751be37bdc63d867');
+  assert.equal(env.EXPO_PUBLIC_BUILD_TIME, '2026-10-13T00:00:00.000Z');
+  assert.throws(() => createEventQaBuildEnvironment({}, { builtAt: '2026-10-13T00:00:00.000Z' }), /EVENT_QA_BUILD_COMMIT_REQUIRED/);
+  assert.throws(() => createEventQaBuildEnvironment({}, { commit: 'not-a-commit', builtAt: '2026-10-13T00:00:00.000Z' }), /EVENT_QA_BUILD_COMMIT_REQUIRED/);
+  assert.throws(() => createEventQaBuildEnvironment({}, { commit: 'a9a2e2b' }), /EVENT_QA_BUILD_TIME_REQUIRED/);
 });
 
 test('production and staging builds use explicit isolated cache profiles', () => {

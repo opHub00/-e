@@ -75,7 +75,9 @@ async function enterNewlywedOneChild(page) {
   await next(page);
   await choice(page, 'q-applicant-householdNoHome', '모두 없어요');
   await choice(page, 'q-applicant-neverOwnedHome', '가진 적 없어요');
-  await choice(page, 'q-applicant-winningHistory', '없어요');
+  await choice(page, 'q-applicant-specialSupplyHistory', '없어요');
+  await choice(page, 'q-applicant-reWinningRestriction', '아니에요');
+  await choice(page, 'q-applicant-householdNoWinningFiveYears', '모두 없어요');
   await choice(page, 'q-subscription-accountKind', '주택청약종합저축');
   await tid(page, 'input-openedAt').fill('20180101');
   await tid(page, 'input-paymentCount').fill('36');

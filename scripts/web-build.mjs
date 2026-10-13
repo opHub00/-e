@@ -146,6 +146,24 @@ export function createE2EBuildEnvironment(source = process.env) {
   };
 }
 
+/**
+ * Browser QA for Demo Mode must identify the exact source it was built from.
+ * Keeping this explicit prevents an ad-hoc build from showing "기록 없음" and
+ * makes the motion E2E run under the same metadata contract every time.
+ */
+export function createEventQaBuildEnvironment(source = process.env, { commit, builtAt } = {}) {
+  const normalizedCommit = commit?.trim();
+  const normalizedBuiltAt = builtAt?.trim();
+  if (!normalizedCommit || !/^[0-9a-f]{7,40}$/i.test(normalizedCommit)) throw new Error('EVENT_QA_BUILD_COMMIT_REQUIRED');
+  if (!normalizedBuiltAt || Number.isNaN(Date.parse(normalizedBuiltAt))) throw new Error('EVENT_QA_BUILD_TIME_REQUIRED');
+  return {
+    ...source,
+    EXPO_PUBLIC_EVENT_DEMO_MODE: '1',
+    EXPO_PUBLIC_BUILD_COMMIT: normalizedCommit,
+    EXPO_PUBLIC_BUILD_TIME: normalizedBuiltAt,
+  };
+}
+
 export function createReleaseBuildEnvironment(target, source = process.env) {
   if (target !== 'production' && target !== 'staging') throw new Error('INVALID_WEB_BUILD_TARGET');
   if (

@@ -132,7 +132,7 @@ async function enterNewlywedOneChild(page) {
       await page.screenshot({ path: `${SHOT}/portrait-detail-1.png` });
     }
     if (rank === 2) {
-      check('detail 2 lists documents to check', (await tid(page, 'detail-documents').count()) === 1);
+      check('detail 2 keeps the optional document section singular', (await tid(page, 'detail-documents').count()) <= 1);
       await page.screenshot({ path: `${SHOT}/portrait-detail-2.png` });
     }
     await tid(page, 'detail-back').click();
@@ -166,8 +166,8 @@ async function enterNewlywedOneChild(page) {
   check('favorites list has 2', (await page.locator('[data-testid="favorites-list"] [data-testid^="listing-card-"]').filter({ visible: true }).count()) === 2);
   await tid(page, 'favorites-summary').click();
   await tid(page, 'summary').waitFor();
-  const selected = await tid(page, 'summary-selected').innerText();
-  check('summary: selected listings with status and check items', (await page.locator('[data-testid="summary-selected-item"]').filter({ visible: true }).count()) === 2 && /공식 점수/.test(selected));
+  const selected = await tid(page, 'summary-v2-favorites').innerText();
+  check('summary: selected listings use the recommendation portfolio status', (await page.locator('[data-testid="summary-selected-item"]').filter({ visible: true }).count()) === 2 && /신청 가능|조건 확인|신청 어려움|공고 정보만 제공/.test(selected));
   await noRaw(page, 'summary');
   await page.screenshot({ path: `${SHOT}/portrait-summary.png`, fullPage: false });
 

@@ -6,7 +6,9 @@ import { injectPersona, isDemoModeEnabled } from '../../features/eventKiosk/demo
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import type { Phase4PersonaId } from '../../features/eventKiosk/phase4Personas';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
-import { samdoRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
+import { toSamdoPresentationRecommendation } from '../../features/eventKiosk/samdo';
+import { samdoRawRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
+import { SamdoRefinementPanel } from '../../features/eventKiosk/samdoResult/SamdoRefinementPanel';
 import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samdoResultModel';
 import { SamdoBrandLogo, SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
 import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdoSummary';
@@ -30,6 +32,8 @@ export default function SamdoResultScreen() {
   const attached = useAttached();
   const { persona } = useLocalSearchParams<{ persona?: string }>();
   const answers = useKioskStore(state => state.answers);
+  const answerStates = useKioskStore(state => state.answerStates);
+  const applyRefinementAnswers = useKioskStore(state => state.applyRefinementAnswers);
   const openSamdoChat = useKioskStore(state => state.openSamdoChat);
   const [session, setSession] = useState<{ status: 'idle' | 'creating' | 'error' } | { status: 'ready'; link: string }>({ status: 'idle' });
 
@@ -41,8 +45,9 @@ export default function SamdoResultScreen() {
   const result = useMemo(() => {
     if (!answers.householdType) return null;
     try {
-      const recommendation = samdoRecommendationForAnswers(answers);
-      return { recommendation, view: buildSamdoResultView(recommendation) };
+      const rawRecommendation = samdoRawRecommendationForAnswers(answers);
+      const recommendation = toSamdoPresentationRecommendation(rawRecommendation);
+      return { rawRecommendation, recommendation, view: buildSamdoResultView(recommendation) };
     } catch {
       return 'error' as const;
     }
@@ -110,6 +115,14 @@ export default function SamdoResultScreen() {
           onSaveQr: () => { void saveQr(); },
           qrBusy: session.status === 'creating',
           qrSlot,
+          refinementSlot: (
+            <SamdoRefinementPanel
+              answers={answers}
+              answerStates={answerStates}
+              recommendation={result.rawRecommendation}
+              onResolve={resolved => applyRefinementAnswers(resolved.answers, resolved.answerKeys)}
+            />
+          ),
         }}
       />
     </KioskFrame>

@@ -42,7 +42,7 @@ for (const viewport of VIEWPORTS) {
   await page.screenshot({ path: `${SHOT}/${viewport.name}-newborn.png` });
   await page.screenshot({ path: `${SHOT}/${viewport.name}-newborn-full.png`, fullPage: true });
 
-  const ids = ['samdo-header', 'samdo-hero', 'samdo-why', 'samdo-alternatives', 'samdo-schedule', 'samdo-rejected', 'samdo-next'];
+  const ids = ['samdo-header', 'samdo-hero', 'samdo-why', 'samdo-refinement', 'samdo-alternatives', 'samdo-schedule', 'samdo-rejected', 'samdo-next'];
   const boxes = Object.fromEntries(await Promise.all(ids.map(async id => [id, await rect(page, id)])));
   check(`${viewport.name}: every section rendered`, ids.every(id => boxes[id]), ids.filter(id => !boxes[id]).join(','));
   check(`${viewport.name}: character and partner logo are the real assets`, (await page.getByTestId('samdo-character').filter({ visible: true }).count()) === 1 && (await page.getByTestId('samdo-partner-logo').filter({ visible: true }).count()) === 1);
@@ -68,8 +68,8 @@ for (const viewport of VIEWPORTS) {
     check(`${viewport.name}: alternatives sit beside the hero`, boxes['samdo-alternatives'].left > boxes['samdo-hero'].left + boxes['samdo-hero'].width - 1);
     check(`${viewport.name}: at least two alternative cards start in the first screen`, altCards >= 2, `${altCards}/${altTotal}`);
   } else {
-    const order = ['samdo-hero', 'samdo-why', 'samdo-alternatives'].map(id => boxes[id].top);
-    check(`${viewport.name}: hero → why → alternatives`, order[0] < order[1] && order[1] < order[2]);
+    const order = ['samdo-hero', 'samdo-why', 'samdo-refinement', 'samdo-alternatives'].map(id => boxes[id].top);
+    check(`${viewport.name}: hero → why → refinement → alternatives`, order[0] < order[1] && order[1] < order[2] && order[2] < order[3]);
     if (viewport.width < 744) check(`${viewport.name}: schedule comes right after the alternatives`, boxes['samdo-schedule'].top > boxes['samdo-alternatives'].top && boxes['samdo-schedule'].top < boxes['samdo-rejected'].top);
   }
 
@@ -89,6 +89,17 @@ for (const viewport of VIEWPORTS) {
   }
 
   if (viewport.name === 'desktop-1440') {
+    const baselineHero = await page.getByTestId('samdo-hero-title').filter({ visible: true }).innerText();
+    await page.getByTestId('samdo-simulation-open').filter({ visible: true }).click();
+    await page.getByTestId('samdo-simulation-fact-childBirthDate').filter({ visible: true }).click();
+    const simulationInput = page.getByTestId('samdo-refinement-input').filter({ visible: true });
+    await simulationInput.fill('2020-01-01');
+    await page.getByRole('button', { name: '적용', exact: true }).filter({ visible: true }).click();
+    const comparison = await page.getByTestId('samdo-simulation-comparison').filter({ visible: true }).innerText();
+    const unchangedHero = await page.getByTestId('samdo-hero-title').filter({ visible: true }).innerText();
+    check('simulation compares a child-DOB assumption without mutating the baseline', comparison.includes('신생아 특별공급') && comparison.includes('생애최초 특별공급') && unchangedHero === baselineHero, comparison.replace(/\s+/g, ' '));
+    await page.getByTestId('samdo-simulation-reset').filter({ visible: true }).click();
+    check('simulation reset restores the unchanged baseline', (await page.getByTestId('samdo-hero-title').filter({ visible: true }).innerText()) === baselineHero);
     await page.getByTestId('samdo-ask-ai').filter({ visible: true }).click();
     await page.getByTestId('chat-context').filter({ visible: true }).waitFor({ timeout: 15000 });
     const chatContext = await page.getByTestId('chat-context').filter({ visible: true }).innerText();

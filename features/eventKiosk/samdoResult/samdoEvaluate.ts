@@ -2,7 +2,12 @@ import rulePackage from '../../../data/assessment-rules/samdo-2026-v1.7.json' wi
 import { validateImportPackage } from '../../applicationAssessment/server/importPackage.ts';
 import type { AnnouncementRules } from '../../applicationAssessment/types.ts';
 import type { KioskAnswers } from '../model.ts';
-import { buildSamdoRecommendation, toSamdoPresentationRecommendation, type SamdoPresentationRecommendation } from '../samdo/index.ts';
+import {
+  buildSamdoRecommendation,
+  toSamdoPresentationRecommendation,
+  type SamdoPresentationRecommendation,
+  type SamdoRecommendation,
+} from '../samdo/index.ts';
 import { samdoInputFromAnswers } from './samdoInput.ts';
 
 /**
@@ -18,5 +23,10 @@ export function samdoRules(): AnnouncementRules {
 }
 
 export function samdoRecommendationForAnswers(answers: KioskAnswers): SamdoPresentationRecommendation {
-  return toSamdoPresentationRecommendation(buildSamdoRecommendation(samdoRules(), samdoInputFromAnswers(answers)));
+  return toSamdoPresentationRecommendation(samdoRawRecommendationForAnswers(answers));
+}
+
+/** Internal facts stay available to refinement services but never flow directly to presentation. */
+export function samdoRawRecommendationForAnswers(answers: KioskAnswers): SamdoRecommendation {
+  return buildSamdoRecommendation(samdoRules(), samdoInputFromAnswers(answers));
 }

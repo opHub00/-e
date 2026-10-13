@@ -51,6 +51,8 @@ type KioskState = {
   patchHousehold: (patch: Partial<HouseholdInfo>) => void;
   patchSubscription: (patch: Partial<SubscriptionInfo>) => void;
   patchAdaptive: (patch: Partial<AdaptiveInfo>) => void;
+  /** 해결 센터에서 사용자가 직접 확인한 값만 현재 세션의 원본 답변에 반영한다. */
+  applyRefinementAnswers: (answers: KioskAnswers, answeredKeys: string[]) => void;
   runAnalysis: (event: LoadedEvent) => Promise<void>;
   markAnswered: (key: string) => void;
   markDoesNotKnow: (key: string) => void;
@@ -143,6 +145,18 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     answers: { ...state.answers, adaptive: { ...state.answers.adaptive, ...patch } },
     stale: state.evaluation !== null,
   })),
+
+  applyRefinementAnswers: (answers, answeredKeys) => set(state => {
+    const answerStates = { ...state.answerStates };
+    for (const key of answeredKeys) answerStates[key] = 'ANSWERED';
+    return {
+      answers: structuredClone(answers),
+      answered: [...new Set([...state.answered, ...answeredKeys])],
+      answerStates,
+      stale: state.evaluation !== null,
+      chat: null,
+    };
+  }),
 
   runAnalysis: async (event) => {
     const sessionKey = get().sessionKey;

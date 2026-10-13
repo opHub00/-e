@@ -32,6 +32,8 @@ export type SamdoActions = {
   /** QR 이 준비되면 그 자리에 그린다. */
   qrSlot?: ReactNode;
   qrBusy?: boolean;
+  /** 판정 의미를 바꾸지 않는 확인·가정 패널. 추천 이유 뒤, 다른 유형 앞에 둔다. */
+  refinementSlot?: ReactNode;
 };
 
 /** 화면 틀(KioskFrame) 맨 위 브랜드 자리에 넣는 공식 완판e 로고. 원본이 없으면 null → 틀의 기본 글자 표시. */
@@ -393,9 +395,10 @@ export function SamdoResultView({ model, actions }: { model: Model; actions: Sam
         <Header model={model} />
         <View style={[styles.row, { gap }]}>
           <View style={[styles.col, { flex: 1.2, gap }]}>
-            <Hero model={model} />
-            <Why model={model} />
-            <Schedule model={model} />
+             <Hero model={model} />
+             <Why model={model} />
+             {actions.refinementSlot}
+             <Schedule model={model} />
           </View>
           <View style={[styles.col, { flex: 1, gap }]}>
             {hasOtherTypes
@@ -414,9 +417,10 @@ export function SamdoResultView({ model, actions }: { model: Model; actions: Sam
   return (
     <View testID="samdo-result" style={{ gap }}>
       <Header model={model} />
-      <Hero model={model} />
-      <Why model={model} />
-      <Alternatives model={model} columns={density === 'comfortable' ? 2 : 1} />
+       <Hero model={model} />
+       <Why model={model} />
+       {actions.refinementSlot}
+       <Alternatives model={model} columns={density === 'comfortable' ? 2 : 1} />
       <LowerPriority model={model} columns={density === 'comfortable' ? 2 : 1} />
       {density === 'touch' ? <Schedule model={model} /> : null}
       <Rejected model={model} />

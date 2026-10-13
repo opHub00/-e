@@ -25,6 +25,7 @@ export default function EventIntro() {
   if (!load.ok) return null;
   return (
     <KioskFrame
+      partner
       brand={load.event.config.copy.brand}
       hideChat
       confirmHome={false}

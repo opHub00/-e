@@ -5,7 +5,7 @@ import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { useDensity } from '../layout/DensityContext';
 import { SAMDO_DEEP_RULE_PACKAGE } from '../samdo/rulePackage';
 import { k } from '../ui/theme';
-import { SAMDO_BRAND } from './brandAssets';
+import { BRAND } from '../brand/brandAssets';
 
 /** 결과 목록에서 공고 전용 분석으로 가는 입구. 목록의 순서·판정에는 영향을 주지 않는다. */
 export function SamdoEntryBanner() {
@@ -18,7 +18,7 @@ export function SamdoEntryBanner() {
       onPress={() => router.push('/event/samdo' as never)}
       style={[styles.banner, { padding: d.cardPadding - 4, minHeight: d.control }]}
     >
-      {SAMDO_BRAND.character ? <Image source={SAMDO_BRAND.character.source} style={{ width: 44 * SAMDO_BRAND.character.ratio, height: 44 }} resizeMode="contain" /> : null}
+      {BRAND.character ? <Image source={BRAND.character.source} style={{ width: 44 * BRAND.character.ratio, height: 44 }} resizeMode="contain" /> : null}
       <View style={styles.copy}>
         <Text style={[d.type.bodyStrong, { color: k.colors.text }]}>{SAMDO_DEEP_RULE_PACKAGE.title}</Text>
         <Text style={[d.type.caption, { color: k.colors.textMuted }]}>이 공고에 어떤 유형으로 신청하는 게 가장 유리한지 따로 분석했어요.</Text>

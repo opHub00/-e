@@ -13,6 +13,7 @@ import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
 import { ProductStory } from '../../features/eventKiosk/story/ProductStory';
+import { BrandMark } from '../../features/eventKiosk/brand/BrandMark';
 import { hasSeenStory, markStorySeen } from '../../features/eventKiosk/story/storyPreference';
 import { STORY_AUTOPLAY_MS } from '../../features/eventKiosk/story/storyScript';
 
@@ -46,10 +47,7 @@ export default function EventLanding() {
   return (
     <View style={styles.root} testID="event-landing">
       <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <View style={styles.mark}><Text style={styles.markText}>e</Text></View>
-          <Text style={styles.brand}>{copy.brand}</Text>
-        </View>
+        <BrandMark size="hero" label={copy.brand} />
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.inner, wide && styles.innerWide]}>
@@ -131,10 +129,6 @@ const styles = StyleSheet.create({
   heroWide: { flex: 1.2 },
   heroCopy: { gap: 12 },
   heroRest: { gap: 28 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  mark: { width: 44, height: 44, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  markText: { ...k.type.section, color: k.colors.onPrimary, lineHeight: 30 },
-  brand: { ...k.type.section, fontSize: 25, color: k.colors.primary },
   eyebrow: { ...k.type.label, color: k.colors.primary },
   title: { ...k.type.display, color: k.colors.text },
   titleWide: { fontSize: 52, lineHeight: 68 },

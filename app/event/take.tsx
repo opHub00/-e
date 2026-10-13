@@ -8,6 +8,13 @@ import { isRenderableSummary } from '../../features/eventKiosk/experience/safeSu
 import { KIOSK_STATUS_LABELS, OFFICIAL_SCORE_STATUS_LABELS } from '../../features/eventKiosk/presentation';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
+import { BrandMark } from '../../features/eventKiosk/brand/BrandMark';
+import { PartnerBadge } from '../../features/eventKiosk/brand/PartnerBadge';
+import { SAMDO_DEEP_RULE_PACKAGE } from '../../features/eventKiosk/samdo/rulePackage';
+
+/** 삼도이동 1지구 전용 결과에서 만든 요약인지(제목이 그 공고). 그때만 파트너를 보여 준다. */
+const isSamdoSummary = (summary: ResultSummary) =>
+  [...summary.recommended, ...summary.favorites].some(item => item.title === SAMDO_DEEP_RULE_PACKAGE.title);
 
 /**
  * 방문자 휴대폰에서 열리는 요약. URL에는 opaque token만 있고, 개인정보를
@@ -32,7 +39,10 @@ export default function TakeAway() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <View style={styles.inner}>
-        <View style={styles.brandRow}><View style={styles.mark}><Text style={styles.markText}>e</Text></View><Text style={styles.brand}>완판e</Text></View>
+        <View style={styles.brandRow}>
+          <BrandMark size="mobile" />
+          {state.status === 'ok' && isSamdoSummary(state.summary) ? <PartnerBadge compact /> : null}
+        </View>
         {state.status === 'loading' ? <Text style={styles.muted}>요약을 여는 중이에요…</Text> : null}
         {state.status === 'invalid' ? (
           <View style={styles.card} testID="take-invalid">
@@ -166,10 +176,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 48, alignItems: 'center' },
   inner: { width: '100%', maxWidth: 560, gap: 16 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingBottom: 8 },
-  mark: { width: 40, height: 40, borderRadius: 12, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  markText: { ...k.type.bodyLgStrong, color: k.colors.onPrimary },
-  brand: { ...k.type.section, color: k.colors.primary },
+  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 8 },
   stack: { gap: 14 },
   title: { ...k.type.title, color: k.colors.text },
   section: { ...k.type.bodyLgStrong, color: k.colors.text },

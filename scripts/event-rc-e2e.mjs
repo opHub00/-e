@@ -200,7 +200,7 @@ async function verifyFullFlow(page, persona, browser) {
   if (persona.id === 'NEWLYWED_ONE_CHILD') {
     await page.getByTestId('open-samdo-result').click();
     await page.getByTestId('samdo-hero').waitFor();
-    if (!(await page.getByTestId('samdo-character').count()) || !(await page.getByTestId('samdo-partner-logo').count())) {
+    if (!(await page.getByTestId('brand-character').count()) || !(await page.getByTestId('partner-logo').count())) {
       throw new Error('Samdo visual polish assets are missing');
     }
     const samdoBody = await page.getByTestId('samdo-result').innerText();

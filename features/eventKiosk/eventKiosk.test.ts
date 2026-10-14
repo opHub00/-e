@@ -11,6 +11,7 @@ import { assessFrozenDataset } from './frozen/engine/batch.ts';
 import { emptyAnswers, inputSteps, resizeChildren, stepBlocker, type KioskAnswers } from './model.ts';
 import { assertOpaqueResultUrl, createResultSession, isOpaqueResultToken, readResultSession } from './resultSessionClient.ts';
 import { buildSummary } from './summary.ts';
+import { buildEventChatContext } from './chat/context.ts';
 
 const event = loadEvent(activeEventDataset);
 const REF = new Date('2026-10-29T09:00:00+09:00');
@@ -131,8 +132,32 @@ test('AI consultation carries the current profile, listing, result and privacy-r
   assert.equal(chat.assessmentContext?.dataset.fingerprint, event.dataset.fingerprint);
   assert.equal(chat.assessmentContext?.assessments.length, 9);
   assert.equal(chat.assessmentContext?.privacy.directIdentifiersIncluded, false);
+  const safeContext = buildEventChatContext(chat);
+  assert.ok(safeContext);
+  const serialized = JSON.stringify(safeContext);
+  for (const privateValue of ['테스트 방문자', '1995-04-10', '2500000', '120000000', 'profileId', 'birthDate', 'monthlyIncome', 'totalAssets']) assert.ok(!serialized.includes(privateValue), privateValue);
   chat = await sendChat(event, chat, '근거가 된 공고문 항목은 무엇인가요?');
   assert.match(chat.messages.at(-1)!.text, /근거/);
+  assert.equal(chat.messages.at(-1)!.response?.mode, 'deterministic');
+});
+
+test('AI consultation accepts a validated server response and keeps QA metadata', async () => {
+  const evaluation = evaluateEvent(event, answers('single'), REF);
+  const outcome = defaultChatOutcome(evaluation.outcomes)!;
+  const chat = startChat(event, evaluation, outcome);
+  const fetcher = async () => new Response(JSON.stringify({
+    text: '저장된 판정 결과와 공고 근거를 기준으로 설명한 답변이에요.',
+    detail: ['판정 자체는 변경하지 않았어요.'],
+    mode: 'llm',
+    provider: 'google-gemini',
+    model: 'gemini-2.5-flash',
+    requestId: 'qa-request',
+  }), { status: 200, headers: { 'content-type': 'application/json' } });
+  const answered = await sendChat(event, chat, '왜 이런 결과가 나왔나요?', { allowNetwork: true, fetcher: fetcher as typeof fetch, endpoint: 'https://example.test/event-api/chat' });
+  const reply = answered.messages.at(-1)!;
+  assert.equal(reply.response?.mode, 'llm');
+  assert.equal(reply.response?.provider, 'google-gemini');
+  assert.equal(reply.response?.requestId, 'qa-request');
 });
 
 test('QR session URL contains only an opaque token and the stored summary has no personal fields', async () => {

@@ -8,6 +8,10 @@ import { KIOSK_STATUS_LABELS, userFacingFactLabel, userFacingLabels } from './pr
 import { experienceAnswer, sanitizeReply } from './experience/chatAnswers.ts';
 import { evidenceOnlyFacts } from './experience/explain.ts';
 import type { SamdoPresentationItem, SamdoPresentationRecommendation } from './samdo/index.ts';
+import { buildEventChatContext } from './chat/context.ts';
+import { requestEventChat } from './chat/client.ts';
+import { boundedEventChatHistory, redactEventChatText } from './chat/privacy.ts';
+import type { EventChatMode, EventChatRequest } from './chat/contract.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -25,7 +29,13 @@ export type KioskChat = {
   result: EvaluationResult | null;
   /** 삼도 전용 화면에서 들어온 경우의 presentation-safe 판정 context. URL이나 서버에 저장하지 않는다. */
   samdoRecommendation: SamdoPresentationRecommendation | null;
-  messages: { role: 'user' | 'assistant'; text: string; detail?: string[] }[];
+  messages: Array<{
+    role: 'user' | 'assistant';
+    text: string;
+    detail?: string[];
+    /** QA/운영 확인용. 화면에는 provider 이름을 강제로 노출하지 않는다. */
+    response?: { mode: EventChatMode; provider?: string; model?: string; requestId?: string };
+  }>;
 };
 
 export function defaultChatOutcome(outcomes: KioskOutcome[]): KioskOutcome | null {
@@ -189,15 +199,42 @@ function answerSamdo(recommendation: SamdoPresentationRecommendation, message: s
   };
 }
 
-export async function sendChat(event: LoadedEvent, chat: KioskChat, message: string): Promise<KioskChat> {
+export type EventChatTransport = {
+  fetcher?: typeof fetch;
+  endpoint?: string;
+  /** Node 단위 테스트는 기본적으로 네트워크를 쓰지 않는다. 주입 테스트에서만 true로 켠다. */
+  allowNetwork?: boolean;
+};
+
+export async function sendChat(event: LoadedEvent, chat: KioskChat, message: string, transport: EventChatTransport = {}): Promise<KioskChat> {
   const text = message.trim();
   if (!text) return chat;
-  // 자주 묻는 질문은 방문자의 판정 결과로 먼저 답하고, 어떤 답이든 기계용 키를 지운 뒤 내보낸다.
-  const response = sanitizeReply(chat.samdoRecommendation
+  // 기존 deterministic 답은 항상 먼저 만든다. LLM은 이 답을 대체 계산하지 않고 설명만 풍부하게 한다.
+  const deterministic = sanitizeReply(chat.samdoRecommendation
     ? answerSamdo(chat.samdoRecommendation, text)
     : experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
+  const context = buildEventChatContext(chat);
+  const canUseEndpoint = Boolean(context) && (transport.allowNetwork === true || typeof window !== 'undefined');
+  let response = deterministic;
+  let metadata: NonNullable<KioskChat['messages'][number]['response']> = { mode: 'deterministic' };
+
+  if (context && canUseEndpoint) {
+    const request: EventChatRequest = {
+      question: redactEventChatText(text),
+      history: boundedEventChatHistory(chat.messages.map(item => ({ role: item.role, text: item.text }))),
+      context,
+      fallback: deterministic,
+    };
+    const remote = await requestEventChat(request, transport.fetcher ?? fetch, transport.endpoint ?? '/event-api/chat');
+    if (remote) {
+      response = sanitizeReply({ text: remote.text, ...(remote.detail ? { detail: remote.detail } : {}) });
+      metadata = { mode: remote.mode, ...(remote.provider ? { provider: remote.provider } : {}), ...(remote.model ? { model: remote.model } : {}), ...(remote.requestId ? { requestId: remote.requestId } : {}) };
+    } else {
+      metadata = { mode: 'fallback' };
+    }
+  }
   return {
     ...chat,
-    messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response }],
+    messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response, response: metadata }],
   };
 }

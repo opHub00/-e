@@ -10,6 +10,9 @@
     },
     "api/event-api/result-sessions/**/*.ts": {
       "includeFiles": "{features/eventKiosk/server/**,scripts/event-result-session-store.mjs}"
+    },
+    "api/event-api/chat.ts": {
+      "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/contract.ts,features/eventKiosk/chat/privacy.ts,features/eventKiosk/chat/package.json}"
     }
   },
   "headers": [
@@ -39,6 +42,10 @@
     {
       "source": "/event-api/result-sessions/:token",
       "destination": "/api/event-api/result-sessions/:token"
+    },
+    {
+      "source": "/event-api/chat",
+      "destination": "/api/event-api/chat"
     },
     {
       "source": "/discovery/:id",

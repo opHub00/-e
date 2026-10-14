@@ -30,8 +30,8 @@ function ConsultantAvatar() {
 }
 
 /**
- * AI 상담. 일반 챗봇처럼 보이지만, 방문자가 입력한 정보·지금 공고·그 공고의 판정 결과를 이어받아
- * 결정론 상담 엔진이 답한다. 외부 언어 모델을 부르지 않는다.
+ * AI 상담. 판정은 기존 deterministic engine 결과를 그대로 사용하고, 서버 LLM은 그 결과를 설명한다.
+ * 서버 호출이 불가능하거나 안전 검사를 통과하지 못하면 기존 규칙형 답변으로 즉시 돌아간다.
  */
 export default function ChatScreen() {
   const load = kioskEvent();

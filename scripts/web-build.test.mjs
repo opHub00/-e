@@ -25,6 +25,19 @@ test('listings function packages only its required event media modules', async (
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
 });
 
+test('event chat function packages only its server contract and privacy boundary', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const includeFiles = config.functions?.['api/event-api/chat.ts']?.includeFiles ?? '';
+  assert.match(includeFiles, /features\/eventKiosk\/server\/eventChat\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/chat\/contract\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/chat\/privacy\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/chat\/package\.json/);
+  assert.doesNotMatch(includeFiles, /features\/\*\*/);
+  assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
+  assert.ok(config.rewrites?.some(row => row.source === '/event-api/chat' && row.destination === '/api/event-api/chat'));
+  assert.deepEqual(JSON.parse(await readFile(new URL('../features/eventKiosk/chat/package.json', import.meta.url), 'utf8')), { type: 'module' });
+});
+
 test('E2E environment is explicit and does not mutate its parent environment', () => {
   const parent = { KEEP: 'yes' };
   const env = createE2EBuildEnvironment(parent);

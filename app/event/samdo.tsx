@@ -8,6 +8,7 @@ import type { Phase4PersonaId } from '../../features/eventKiosk/phase4Personas';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
 import { toSamdoPresentationRecommendation } from '../../features/eventKiosk/samdo';
 import { samdoRawRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
+import { samdoInputFromAnswers } from '../../features/eventKiosk/samdoResult/samdoInput';
 import { SamdoRefinementPanel } from '../../features/eventKiosk/samdoResult/SamdoRefinementPanel';
 import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samdoResultModel';
 import { SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
@@ -47,7 +48,11 @@ export default function SamdoResultScreen() {
     try {
       const rawRecommendation = samdoRawRecommendationForAnswers(answers);
       const recommendation = toSamdoPresentationRecommendation(rawRecommendation);
-      return { rawRecommendation, recommendation, view: buildSamdoResultView(recommendation) };
+      return {
+        rawRecommendation,
+        recommendation,
+        view: buildSamdoResultView(recommendation, { rawRecommendation, input: samdoInputFromAnswers(answers) }),
+      };
     } catch {
       return 'error' as const;
     }

@@ -13,6 +13,8 @@ import { isValidResultSummary } from '../../../scripts/event-result-session-stor
 import { sendChat, startSamdoChat } from '../consult.ts';
 import { isRenderableSummary } from '../experience/safeSummary.ts';
 import { buildEventChatContext } from '../chat/context.ts';
+import { SAMDO_PERSONAS } from '../samdo/personas.test-data.ts';
+import { buildOfficialCriteria } from './officialCriteria.ts';
 
 const load = kioskEvent();
 if (!load.ok) throw new Error(load.error);
@@ -81,6 +83,44 @@ test('unknown answers stay unknown in the assessment input', () => {
   const withWinning = samdoInputFromAnswers(answers);
   assert.equal(withWinning.details.specialSupplyHistory, undefined);
   assert.equal(withWinning.details.reWinningRestriction, undefined);
+});
+
+test('five representative supply types expose official eligibility, income, asset and subscription criteria', () => {
+  const cases = [
+    ['young-jeju-2y', 'YOUTH'],
+    ['newlywed-no-child', 'NEWLYWED'],
+    ['newborn-family', 'NEWBORN'],
+    ['first-home-couple', 'FIRST_HOME'],
+    ['general-no-home', 'GENERAL'],
+  ] as const;
+  for (const [personaId, expectedType] of cases) {
+    const persona = SAMDO_PERSONAS.find(item => item.id === personaId)!;
+    const rawRecommendation = buildSamdoRecommendation(samdoRules(), persona.input);
+    const recommendation = toSamdoPresentationRecommendation(rawRecommendation);
+    const view = buildSamdoResultView(recommendation, { rawRecommendation, input: persona.input });
+    assert.equal(view.hero.supplyType, expectedType, personaId);
+    assert.deepEqual(view.officialCriteria.map(item => item.id), ['eligibility', 'income', 'assets', 'subscription']);
+    const text = JSON.stringify(view.officialCriteria);
+    assert.match(text, /월평균소득/);
+    assert.match(text, /2023\.03\.28/);
+    assert.match(text, /가입 6개월/);
+    assert.match(text, /월 납입 6회 이상/);
+    if (expectedType === 'YOUTH') assert.match(text, /본인 276백만원 이하 \/ 부모 1,035백만원 이하/);
+    else assert.match(text, /세대 총자산 362백만원 이하/);
+  }
+});
+
+test('DOES_NOT_KNOW inputs stay reviewable and are never presented as PASS', () => {
+  const answers = structuredClone(answersOf('YOUNG_SINGLE'));
+  answers.household.parentInformationStatus = 'DOES_NOT_KNOW';
+  answers.household.parentAssets = null;
+  const input = samdoInputFromAnswers(answers);
+  const rawRecommendation = buildSamdoRecommendation(samdoRules(), input);
+  const youth = rawRecommendation.evaluations.find(item => item.supplyType === 'YOUTH')!;
+  const assets = buildOfficialCriteria(youth, input).find(item => item.id === 'assets')!;
+  assert.equal(assets.status, 'REVIEW');
+  assert.equal(assets.statusLabel, '확인 필요');
+  assert.ok(assets.current.every(line => line.includes('확인 필요')));
 });
 
 test('adapter keeps ambiguous history, scope, account and child facts separate', () => {

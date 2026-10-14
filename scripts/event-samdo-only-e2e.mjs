@@ -161,10 +161,13 @@ async function enterNewbornPersona(page) {
 async function verifyResult(page) {
   await page.getByTestId('samdo-result').waitFor();
   await samdoOnly(page, 'samdo-result');
-  for (const id of ['samdo-hero', 'samdo-why', 'samdo-schedule', 'samdo-refinement', 'samdo-simulator', 'samdo-information-only']) {
+  for (const id of ['samdo-hero', 'samdo-official-criteria', 'samdo-why', 'samdo-schedule', 'samdo-refinement', 'samdo-simulator', 'samdo-information-only']) {
     if (!(await page.getByTestId(id).count())) throw new Error(`${id} missing`);
   }
   const resultText = await page.getByTestId('samdo-result').innerText();
+  for (const term of ['입주자격', '소득기준', '자산기준', '청약통장', '가입 6개월', '월 납입 6회 이상']) {
+    if (!resultText.includes(term)) throw new Error(`official criterion missing: ${term}`);
+  }
   if (!resultText.includes('기관추천 특별공급') || !resultText.includes('정보 제공')) throw new Error('institutional recommendation is not information-only');
   if (/당첨\s*확률(?:이|은)?\s*(?:높|낮)|경쟁률\s*\d/.test(resultText)) throw new Error('winning probability or competition was invented');
 }

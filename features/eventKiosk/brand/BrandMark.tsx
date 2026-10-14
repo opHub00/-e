@@ -1,5 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { k } from '../ui/theme';
+import { Image, StyleSheet, View } from 'react-native';
 import { BRAND } from './brandAssets';
 
 /**
@@ -9,17 +8,17 @@ import { BRAND } from './brandAssets';
  */
 export type BrandMarkSize = 'header' | 'hero' | 'mobile';
 
-const SIZES: Record<BrandMarkSize, { character: number; text: object; gap: number }> = {
-  header: { character: 44, text: { ...k.type.section, fontSize: 24 }, gap: 8 },
-  hero: { character: 60, text: { ...k.type.title }, gap: 10 },
-  mobile: { character: 40, text: { ...k.type.section }, gap: 8 },
+const SIZES: Record<BrandMarkSize, { character: number }> = {
+  header: { character: 44 },
+  hero: { character: 60 },
+  mobile: { character: 40 },
 };
 
 export function BrandMark({ size = 'header', label = BRAND.name, compact = false }: { size?: BrandMarkSize; label?: string; compact?: boolean }) {
   const spec = SIZES[size];
   const character = compact ? Math.round(spec.character * 0.86) : spec.character;
   return (
-    <View testID="brand-mark" style={[styles.row, { gap: spec.gap }]}>
+    <View testID="brand-mark" style={styles.row} accessibilityLabel={label} accessibilityRole="image">
       {BRAND.character ? (
         <Image
           testID="brand-character"
@@ -29,13 +28,10 @@ export function BrandMark({ size = 'header', label = BRAND.name, compact = false
           accessibilityIgnoresInvertColors
         />
       ) : null}
-      <Text style={[spec.text, styles.text, compact && styles.textCompact]} numberOfLines={1}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, minWidth: 0 },
-  text: { color: k.colors.primary },
-  textCompact: { fontSize: 21, lineHeight: 28 },
 });

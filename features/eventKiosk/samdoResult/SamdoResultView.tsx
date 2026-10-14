@@ -139,6 +139,50 @@ function Why({ model }: { model: Model }) {
   );
 }
 
+function OfficialCriteria({ model }: { model: Model }) {
+  const { density, d } = useDensity();
+  if (!model.officialCriteria.length) return null;
+  return (
+    <Card testID="samdo-official-criteria">
+      <SectionTitle
+        icon="fact-check"
+        title="공고문 입주자격 기준"
+        hint="공고문 기준과 입력한 내용을 항목별로 비교한 결과입니다. 확인 필요는 충족으로 간주하지 않습니다."
+      />
+      <View style={[styles.criteriaGrid, { gap: d.gridGap - 4 }]}>
+        {model.officialCriteria.map(criterion => {
+          const tone = TONES[criterion.status === 'PASS' ? 'eligible' : criterion.status === 'FAIL' ? 'difficult' : 'review'];
+          return (
+            <View
+              key={criterion.id}
+              testID={`samdo-criterion-${criterion.id}`}
+              style={[styles.criterion, density === 'touch' ? styles.criterionTouch : null, { padding: d.cardGap }]}
+            >
+              <View style={styles.criterionHead}>
+                <Text style={[d.type.cardTitle, styles.text, styles.flex]}>{criterion.title}</Text>
+                <View style={[styles.chip, { backgroundColor: tone.bg }]}>
+                  <Text testID={`samdo-criterion-${criterion.id}-status`} style={[d.type.label, { color: tone.fg }]}>{criterion.statusLabel}</Text>
+                </View>
+              </View>
+              <View style={styles.criterionRequirements}>
+                {criterion.requirements.map(line => (
+                  <View key={line} style={styles.listLine}>
+                    <MaterialIcons name="description" size={15} color={k.colors.primary} style={styles.listIcon} />
+                    <Text style={[d.type.caption, styles.text, styles.flex]}>{line}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={styles.criterionCurrent}>
+                {criterion.current.map(line => <Text key={line} style={[d.type.caption, { color: tone.fg }]}>{line}</Text>)}
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    </Card>
+  );
+}
+
 function TypeCard({ card, testID }: { card: SamdoTypeCard; testID: string }) {
   const { density, d } = useDensity();
   const tone = TONES[card.status.tone];
@@ -347,6 +391,7 @@ export function SamdoResultView({ model, actions }: { model: Model; actions: Sam
         <View style={[styles.row, { gap }]}>
           <View style={[styles.col, { flex: 1.2, gap }]}>
              <Hero model={model} />
+             <OfficialCriteria model={model} />
              <Why model={model} />
              {actions.refinementSlot}
              <Schedule model={model} />
@@ -369,6 +414,7 @@ export function SamdoResultView({ model, actions }: { model: Model; actions: Sam
     <View testID="samdo-result" style={{ gap }}>
       <Header model={model} />
        <Hero model={model} />
+       <OfficialCriteria model={model} />
        <Why model={model} />
        {actions.refinementSlot}
        <Alternatives model={model} columns={density === 'comfortable' ? 2 : 1} />
@@ -409,6 +455,12 @@ const styles = StyleSheet.create({
   scoreLine: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
   scoreTrack: { height: 6, borderRadius: 3, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
   scoreFill: { height: 6, borderRadius: 3, backgroundColor: k.colors.primary },
+  criteriaGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+  criterion: { flexBasis: 245, flexGrow: 1, gap: 8, borderRadius: k.radius.md, borderWidth: 1, borderColor: k.colors.surfaceHigh, backgroundColor: k.colors.surfaceLow },
+  criterionTouch: { flexBasis: '100%' },
+  criterionHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  criterionRequirements: { gap: 4 },
+  criterionCurrent: { borderTopWidth: 1, borderTopColor: k.colors.hairline, paddingTop: 8 },
   whyList: { gap: 8 },
   whyGrid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 8 },
   whyItem: { flexBasis: 260, flexGrow: 1 },

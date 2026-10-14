@@ -5,10 +5,13 @@ import {
   type SamdoEligibility,
   type SamdoPresentationItem,
   type SamdoPresentationRecommendation,
+  type SamdoRecommendation,
   type SamdoSupplyType,
 } from '../samdo/index.ts';
+import type { AssessmentInput } from '../../applicationAssessment/types.ts';
 import { containsRawKey } from '../presentation.ts';
 import { SAMDO_EVENT } from '../samdoEventScope.ts';
+import { buildOfficialCriteria, type OfficialCriterion } from './officialCriteria.ts';
 
 /**
  * 삼도이동 1지구 전용 결과 화면 모델.
@@ -54,6 +57,7 @@ export type SamdoResultView = {
   subtitle: string;
   sourceNote: string;
   hero: SamdoHero;
+  officialCriteria: OfficialCriterion[];
   why: string[];
   alternatives: SamdoTypeCard[];
   lowerPriorityTypes: SamdoTypeCard[];
@@ -232,9 +236,15 @@ export function failedSentence(reason: string | undefined): string {
   return `'${text}' 조건을 충족하지 못했어요.`;
 }
 
-export function buildSamdoResultView(rec: SamdoPresentationRecommendation): SamdoResultView {
+export function buildSamdoResultView(
+  rec: SamdoPresentationRecommendation,
+  detail?: { rawRecommendation: SamdoRecommendation; input: AssessmentInput },
+): SamdoResultView {
   const hero = heroOf(rec);
   const focus = rec.recommendedType ?? rec.alternatives[0] ?? rec.lowerPriorityTypes[0] ?? null;
+  const rawFocus = focus && detail
+    ? detail.rawRecommendation.evaluations.find(item => item.supplyType === focus.supplyType) ?? null
+    : null;
   const why = focus ? pickStrengths(focus, 5) : [];
   if (rec.recommendedType && hero.score) why.splice(Math.min(why.length, 4), 0, `공식 가점 ${hero.score.total}/${hero.score.max}점이에요.`);
   const shown = new Set([hero.supplyType]);
@@ -250,6 +260,7 @@ export function buildSamdoResultView(rec: SamdoPresentationRecommendation): Samd
     subtitle: SAMDO_EVENT.title,
     sourceNote: rec.sourceStatus === 'OFFICIAL_VERIFIED' ? '공식 공고 기준' : '공고 검토본 기준 · 공식 게시 전',
     hero,
+    officialCriteria: rawFocus && detail ? buildOfficialCriteria(rawFocus, detail.input) : [],
     why: why.slice(0, 5),
     alternatives,
     lowerPriorityTypes,

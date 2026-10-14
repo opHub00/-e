@@ -42,7 +42,7 @@ export function KioskFrame({
   footer?: ReactNode;
   children: ReactNode;
   scrollKey?: string;
-  /** 삼도이동 1지구 관련 화면: 우측 상단에 '함께하는 곳' 파트너 표시. */
+  /** 삼도이동 1지구 관련 화면: 우측 상단 파트너 로고 표시. */
   partner?: boolean;
 }) {
   const width = useKioskWidth();

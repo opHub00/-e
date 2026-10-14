@@ -5,11 +5,12 @@ import { MotionPressable } from '../../../components/motion/MotionPressable';
 import { duration, easing, useNative } from '../../../design/motion';
 import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import { kioskEvent } from '../kioskEvent';
-import { useServiceListingPortfolio } from '../live/useServiceListingPortfolio';
 import { KioskButton } from '../ui/controls';
 import { BrandMark } from '../brand/BrandMark';
+import { PartnerBadge } from '../brand/PartnerBadge';
 import { k } from '../ui/theme';
 import { storyDataFrom, type StoryData } from './storyData';
+import { useKioskWidth } from '../ui/useKioskWidth';
 import { isLastScene, nextSceneIndex, STORY_SCENES, type StorySceneId } from './storyScript';
 import { SceneAction, SceneAnalysis, SceneComplexity, SceneProfile, SceneSorting, STAGE } from './StoryScenes';
 
@@ -43,8 +44,8 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   testID?: string;
 }) {
   const load = kioskEvent();
-  const { portfolio } = useServiceListingPortfolio(load.ok ? load.event.dataset : null);
-  const data = useMemo(() => (load.ok ? storyDataFrom(load.event, portfolio) : null), [load, portfolio]);
+  const data = useMemo(() => (load.ok ? storyDataFrom(load.event) : null), [load]);
+  const width = useKioskWidth();
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [round, setRound] = useState(0);
@@ -96,11 +97,14 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   return (
     <View style={styles.root} testID={testID} accessibilityViewIsModal>
       <View style={styles.top}>
-        <BrandMark size="hero" label={load.ok ? load.event.config.copy.brand : undefined} />
-        <MotionPressable accessibilityRole="button" accessibilityLabel="소개 건너뛰기" onPress={onSkip} style={styles.skip} testID="story-skip">
-          <Text style={styles.skipText}>건너뛰기</Text>
-          <MaterialIcons name="close" size={22} color={k.colors.textMuted} />
-        </MotionPressable>
+        <BrandMark size="hero" label={load.ok ? load.event.config.copy.brand : undefined} compact={width < 600} />
+        <View style={styles.topRight}>
+          <PartnerBadge compact />
+          <MotionPressable accessibilityRole="button" accessibilityLabel="소개 건너뛰기" onPress={onSkip} style={styles.skip} testID="story-skip">
+            <Text style={styles.skipText}>건너뛰기</Text>
+            <MaterialIcons name="close" size={22} color={k.colors.textMuted} />
+          </MotionPressable>
+        </View>
       </View>
 
       <View style={styles.progress} accessibilityRole="progressbar" accessibilityLabel={`${STORY_SCENES.length}장면 중 ${index + 1}번째`}>
@@ -145,7 +149,7 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
               <Text style={styles.replayText}>다시 보기</Text>
             </MotionPressable>
             <View style={styles.footerCta}>
-              <KioskButton testID="story-start" label="내 청약 분석 시작하기" icon="arrow-forward" onPress={onStart} large grow />
+              <KioskButton testID="story-start" label="내 신청유형 분석하기" icon="arrow-forward" onPress={onStart} large grow />
             </View>
           </>
         ) : (
@@ -165,6 +169,7 @@ const Easing_linear = (value: number) => value;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 14 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 52 },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   skip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, minWidth: 48, paddingHorizontal: 14, borderRadius: 12 },
   skipText: { ...k.type.bodyStrong, color: k.colors.textMuted },
   progress: { flexDirection: 'row', gap: 6, width: '100%', maxWidth: 980, alignSelf: 'center' },

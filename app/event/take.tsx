@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BUCKET_LABELS, type KioskBucket } from '../../features/eventKiosk/evaluate';
 import { isOpaqueResultToken, readResultSession } from '../../features/eventKiosk/resultSessionClient';
-import type { PortfolioSummaryItem, ResultSummary, ResultSummaryV2 } from '../../features/eventKiosk/summary';
+import type { PortfolioSummaryItem, ResultSummary, ResultSummaryV2, SamdoResultSummaryV3, SummaryItem } from '../../features/eventKiosk/summary';
 import { isRenderableSummary } from '../../features/eventKiosk/experience/safeSummary';
 import { KIOSK_STATUS_LABELS, OFFICIAL_SCORE_STATUS_LABELS } from '../../features/eventKiosk/presentation';
 import { MotionPressable } from '../../components/motion/MotionPressable';
@@ -11,10 +11,12 @@ import { bucketTone, k } from '../../features/eventKiosk/ui/theme';
 import { BrandMark } from '../../features/eventKiosk/brand/BrandMark';
 import { PartnerBadge } from '../../features/eventKiosk/brand/PartnerBadge';
 import { SAMDO_DEEP_RULE_PACKAGE } from '../../features/eventKiosk/samdo/rulePackage';
+import { SAMDO_ELIGIBILITY_LABELS } from '../../features/eventKiosk/samdo';
+import { formatSamdoDate } from '../../features/eventKiosk/samdoResult/samdoResultModel';
 
 /** 삼도이동 1지구 전용 결과에서 만든 요약인지(제목이 그 공고). 그때만 파트너를 보여 준다. */
 const isSamdoSummary = (summary: ResultSummary) =>
-  [...summary.recommended, ...summary.favorites].some(item => item.title === SAMDO_DEEP_RULE_PACKAGE.title);
+  summary.v === 3 || (summary.v === 1 && [...summary.recommended, ...summary.favorites].some(item => item.title === SAMDO_DEEP_RULE_PACKAGE.title));
 
 /**
  * 방문자 휴대폰에서 열리는 요약. URL에는 opaque token만 있고, 개인정보를
@@ -69,6 +71,7 @@ export default function TakeAway() {
 }
 
 function Summary({ summary }: { summary: ResultSummary }) {
+  if (summary.v === 3) return <SamdoSummary summary={summary} />;
   if (summary.v === 2) return <PortfolioSummary summary={summary} />;
   return (
     <View style={styles.stack} testID="take-summary">
@@ -89,6 +92,43 @@ function Summary({ summary }: { summary: ResultSummary }) {
         {summary.cautions.map(item => <Text key={item} style={styles.body}>· {item}</Text>)}
         <Text style={styles.muted}>· 입력한 정보로 계산한 예상 결과예요. 실제 자격은 모집공고와 증빙 서류로 확정돼요.</Text>
       </View>
+    </View>
+  );
+}
+
+function SamdoSummary({ summary }: { summary: SamdoResultSummaryV3 }) {
+  const focus = summary.focus;
+  return (
+    <View style={styles.stack} testID="take-samdo-summary">
+      <Text style={styles.title}>삼도이동 1지구 분석 결과</Text>
+      <Text style={styles.muted}>{summary.date.replace(/-/g, '.')} 분석 · {summary.title}</Text>
+      {focus ? (
+        <View style={[styles.card, styles.samdoHero]}>
+          <Text style={styles.contextTag}>{focus.kind === 'RECOMMENDED' ? '추천 공급유형' : '먼저 확인할 공급유형'}</Text>
+          <Text style={styles.samdoSupply}>{focus.supply}</Text>
+          <View style={styles.samdoChips}>
+            <Text style={styles.samdoChip}>{SAMDO_ELIGIBILITY_LABELS[focus.eligibility]}</Text>
+            <Text style={styles.samdoChip}>{focus.stage}</Text>
+            <Text style={styles.samdoChip}>{focus.officialScore.label}</Text>
+          </View>
+          <Text style={styles.body}>접수 일정 · {formatSamdoDate(focus.applicationDate)}</Text>
+        </View>
+      ) : (
+        <View style={styles.card}><Text style={styles.section}>현재 입력으로 추천할 신청유형이 없어요</Text><Text style={styles.muted}>유형별 신청이 어려운 이유는 행사 화면에서 확인해 주세요.</Text></View>
+      )}
+      {focus?.reasons.length ? <TextListCard title="추천 이유" items={focus.reasons} tone="positive" /> : null}
+      {focus?.checks.length ? <TextListCard title="확인 필요" items={focus.checks} tone="caution" /> : null}
+      <TextListCard title="신청 전 확인" items={summary.cautions} tone="caution" />
+      <Text style={styles.muted}>입력한 정보와 삼도이동 1지구 공고 기준으로 계산한 예상 결과예요. 경쟁률·당첨확률은 추정하지 않았으며 실제 자격은 모집공고와 증빙 서류로 확정돼요.</Text>
+    </View>
+  );
+}
+
+function TextListCard({ title, items, tone }: { title: string; items: string[]; tone: 'positive' | 'caution' }) {
+  return (
+    <View style={styles.card}>
+      <Text style={styles.section}>{title}</Text>
+      {items.length ? items.map(item => <Text key={item} style={tone === 'caution' ? styles.note : styles.body}>· {item}</Text>) : <Text style={styles.muted}>추가로 표시할 항목이 없어요.</Text>}
     </View>
   );
 }
@@ -147,7 +187,7 @@ function PortfolioCard({ item, emphasis }: { item: PortfolioSummaryItem; emphasi
   );
 }
 
-function Group({ title, items, empty }: { title: string; items: ResultSummary['recommended']; empty: string }) {
+function Group({ title, items, empty }: { title: string; items: SummaryItem[]; empty: string }) {
   return (
     <View style={styles.card}>
       <Text style={styles.section}>{title}</Text>
@@ -156,16 +196,6 @@ function Group({ title, items, empty }: { title: string; items: ResultSummary['r
           <Text style={styles.itemTitle}>{item.title}</Text>
           <Text style={styles.muted}>{item.supply} · {BUCKET_LABELS[item.bucket]}{item.stage ? ` · ${item.stage}` : ''}</Text>
           {item.note ? <Text style={styles.note}>{item.note}</Text> : null}
-          {'whyMatched' in item ? (
-            <View style={styles.portfolioDetails}>
-              {item.applicationStart || item.applicationEnd ? <Text style={styles.muted}>신청 일정 · {item.applicationStart ?? '확인 필요'} ~ {item.applicationEnd ?? '확인 필요'}</Text> : null}
-              <Text style={styles.muted}>완판e 추천 · {item.wanpanRecommendation} · {OFFICIAL_SCORE_STATUS_LABELS[item.officialScoreStatus]}</Text>
-              {item.whyMatched.map(line => <Text key={`why-${line}`} style={styles.body}>· {line}</Text>)}
-              {item.cautions.slice(1).map(line => <Text key={`caution-${line}`} style={styles.note}>확인 · {line}</Text>)}
-              {item.nearbyHighlights.map(line => <Text key={`near-${line}`} style={styles.muted}>주변 · {line}</Text>)}
-              <Text accessibilityRole="link" style={styles.source} onPress={() => void Linking.openURL(item.sourceUrl)}>공식 출처 · {item.sourceLabel}</Text>
-            </View>
-          ) : null}
         </View>
       )) : <Text style={styles.muted}>{empty}</Text>}
     </View>
@@ -208,4 +238,9 @@ const styles = StyleSheet.create({
   retry: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 52, borderRadius: 12, backgroundColor: k.colors.primary, marginTop: 4 },
   retryText: { ...k.type.bodyStrong, color: k.colors.onPrimary },
   invalidIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  samdoHero: { backgroundColor: k.colors.lavender, borderColor: k.colors.primary },
+  contextTag: { ...k.type.label, color: k.colors.primary },
+  samdoSupply: { ...k.type.title, color: k.colors.text },
+  samdoChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  samdoChip: { ...k.type.caption, color: k.colors.primary, backgroundColor: k.colors.surface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7, overflow: 'hidden' },
 });

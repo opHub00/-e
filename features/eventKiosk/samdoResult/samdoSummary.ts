@@ -1,45 +1,38 @@
-import type { KioskBucket } from '../evaluate.ts';
 import type { SamdoPresentationItem, SamdoPresentationRecommendation } from '../samdo/index.ts';
-import { SAMDO_DEEP_RULE_PACKAGE, SAMDO_ELIGIBILITY_LABELS } from '../samdo/index.ts';
-import type { ResultSummaryV1, SummaryItem } from '../summary.ts';
+import type { SamdoResultSummaryV3 } from '../summary.ts';
 import { shortStage, type SamdoResultView } from './samdoResultModel.ts';
+import { SAMDO_EVENT } from '../samdoEventScope.ts';
 
 /**
- * 휴대폰 QR 결과(기존 v1 결과 세션 계약 그대로). 개인정보 없이 공급유형·상태·단계·한 줄 메모만 담는다.
- * 결과 세션의 형식·보안 검사는 바꾸지 않는다.
+ * 휴대폰 QR 결과. 개인정보 없이 삼도 공급유형·상태·단계·공식 점수·확인사항만 담는다.
+ * 저장·token·TTL 보안 계약은 기존 결과 세션과 같다.
  */
-const BUCKET: Record<SamdoPresentationItem['eligibility'], KioskBucket> = {
-  ELIGIBLE: 'eligible', EVIDENCE_REQUIRED: 'review', CONDITIONAL: 'review', INELIGIBLE: 'difficult',
-};
-
-function item(source: SamdoPresentationItem, note: string | null): SummaryItem {
-  return {
-    title: SAMDO_DEEP_RULE_PACKAGE.title,
-    supply: source.supplyLabel,
-    bucket: BUCKET[source.eligibility],
-    stage: source.eligibility === 'INELIGIBLE' ? null : shortStage(source),
-    note: note ? note.slice(0, 500) : SAMDO_ELIGIBILITY_LABELS[source.eligibility],
-  };
+function scoreOf(source: SamdoPresentationItem): NonNullable<SamdoResultSummaryV3['focus']>['officialScore'] {
+  if (source.officialScore.status === 'AVAILABLE') {
+    return { status: 'AVAILABLE', label: `공식 가점 ${source.officialScore.total}/${source.officialScore.max}점` };
+  }
+  if (source.officialScore.status === 'PENDING') return { status: 'PENDING', label: '공식 가점 계산 전' };
+  return { status: 'NOT_APPLICABLE', label: '공식 점수 해당 없음' };
 }
 
-export function buildSamdoQrSummary(input: { eventId: string; date: string; recommendation: SamdoPresentationRecommendation; view: SamdoResultView }): ResultSummaryV1 {
+export function buildSamdoQrSummary(input: { eventId: string; date: string; recommendation: SamdoPresentationRecommendation; view: SamdoResultView }): SamdoResultSummaryV3 {
   const { recommendation: rec, view } = input;
-  const ranked = [rec.recommendedType, ...rec.alternatives, ...rec.lowerPriorityTypes].filter((entry): entry is SamdoPresentationItem => Boolean(entry));
-  const otherCards = [...view.alternatives, ...view.lowerPriorityTypes];
-  const recommended = ranked.slice(0, 5).map((entry, index) => item(entry, index === 0 && rec.recommendedType ? `가장 유리한 신청유형 · 접수 ${view.hero.chips.find(chip => chip.testID === 'samdo-hero-date')?.label.replace(/^접수 /, '') ?? entry.applicationDate}` : otherCards.find(card => card.supplyType === entry.supplyType)?.checks[0] ?? null));
+  const focus = rec.recommendedType ?? rec.alternatives[0] ?? rec.lowerPriorityTypes[0] ?? null;
   return {
-    v: 1,
+    v: 3,
     event: input.eventId,
     date: input.date,
-    household: null,
-    counts: {
-      eligible: ranked.filter(entry => entry.eligibility === 'ELIGIBLE').length,
-      review: ranked.filter(entry => entry.eligibility !== 'ELIGIBLE').length,
-      difficult: rec.rejectedTypes.length,
-    },
-    recommended,
-    // 휴대폰 화면의 '관심' 칸은 비워 둔다(이 화면에는 관심 담기가 없다).
-    favorites: [],
+    title: SAMDO_EVENT.title,
+    focus: focus ? {
+      kind: rec.recommendedType ? 'RECOMMENDED' : 'REVIEW',
+      supply: focus.supplyLabel,
+      eligibility: focus.eligibility,
+      stage: shortStage(focus),
+      officialScore: scoreOf(focus),
+      reasons: view.why.slice(0, 5),
+      checks: [...new Set([...focus.evidenceRequired, ...focus.cautions])].slice(0, 6),
+      applicationDate: focus.applicationDate,
+    } : null,
     cautions: [...view.documents.slice(0, 3).map(doc => `준비 서류: ${doc}`), ...view.notes].slice(0, 6),
   };
 }

@@ -43,5 +43,5 @@ export async function readResultSession(baseUrl: string, token: string, fetcher:
   if (response.status === 404 || response.status === 410) return null;
   if (!response.ok) throw new Error(`RESULT_SESSION_READ_FAILED:${response.status}`);
   const body = await response.json() as { summary?: ResultSummary };
-  return body.summary?.v === 1 || body.summary?.v === 2 ? body.summary : null;
+  return body.summary?.v === 1 || body.summary?.v === 2 || body.summary?.v === 3 ? body.summary : null;
 }

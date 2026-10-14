@@ -12,6 +12,7 @@ import { travel } from '../../design/motion';
 import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 import { doesNotKnowLabel } from '../../features/eventKiosk/questionPolicy';
+import { SAMDO_EVENT } from '../../features/eventKiosk/samdoEventScope';
 
 function AdaptiveControl({ question }: { question: AdaptiveQuestion }) {
   const value = useKioskStore(state => state.answers.adaptive[question.id]);
@@ -88,9 +89,9 @@ export default function AdaptiveAssessmentScreen() {
   const evidenceOnlyFacts = plan?.evidenceOnlyFacts ?? [];
   if (!evaluation || !questions.length) {
     return (
-      <KioskFrame partner brand={load.event.config.copy.brand} progress={{ label: '추가 확인' }}>
+      <KioskFrame partner hideChat brand={load.event.config.copy.brand} progress={{ label: '추가 확인' }}>
         <Notice tone="warn">추가 확인할 질문이 없어요. 현재 결과를 확인해 주세요.</Notice>
-        <View style={styles.inlineAction}><KioskButton label="결과 보기" onPress={() => router.replace('/event/results' as never)} /></View>
+        <View style={styles.inlineAction}><KioskButton label="결과 보기" onPress={() => router.replace(SAMDO_EVENT.resultPath as never)} /></View>
       </KioskFrame>
     );
   }
@@ -98,6 +99,7 @@ export default function AdaptiveAssessmentScreen() {
   return (
     <KioskFrame
       partner
+      hideChat
       brand={load.event.config.copy.brand}
       progress={{ label: `추가 확인 · ${questions.length}개` }}
       scrollKey="adaptive-assessment"
@@ -113,11 +115,12 @@ export default function AdaptiveAssessmentScreen() {
       {/* 일반 입력 단계와 다르게 들어온다: 안내 문구가 먼저, 몇 개 남았는지, 그다음 질문 카드가 차례로. */}
       <View style={styles.head} testID="adaptive-assessment">
         <Appear distance={travel.md}>
+          <Text style={styles.eyebrow}>{SAMDO_EVENT.contextLabel}</Text>
           <Text style={styles.title} accessibilityRole="header">정확한 판정을 위해 몇 가지만 더 확인할게요.</Text>
         </Appear>
         <Appear delay={eventMotion.sequence} distance={travel.sm}>
           <Text style={styles.count}>{questions.length}개만 더 확인하면 됩니다.</Text>
-          <Text style={styles.subtitle}>이미 신청이 어려운 공급은 제외했고, 여러 공고가 함께 쓰는 정보는 한 번만 물어요.</Text>
+          <Text style={styles.subtitle}>이미 신청이 어려운 유형은 제외했고, 여러 신청유형이 함께 쓰는 정보는 한 번만 물어요.</Text>
         </Appear>
       </View>
 
@@ -141,6 +144,7 @@ export default function AdaptiveAssessmentScreen() {
 const styles = StyleSheet.create({
   head: { gap: 8, marginBottom: 28 },
   title: { ...k.type.hero, color: k.colors.text },
+  eyebrow: { ...k.type.label, color: k.colors.primary, marginBottom: 4 },
   count: { ...k.type.title, color: k.colors.primary },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   numberControl: { gap: 8, alignItems: 'flex-start' },

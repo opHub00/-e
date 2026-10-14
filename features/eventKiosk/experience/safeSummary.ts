@@ -15,6 +15,14 @@ export function isRenderableSummary(value: unknown): value is ResultSummary {
   const portfolioItemsOk = (items: unknown) => itemsOk(items) && (items as Array<Record<string, unknown>>).every(item =>
     isText(item.status) && typeof item.rank === 'number' && Array.isArray(item.whyMatched) && item.whyMatched.every(isText)
     && Array.isArray(item.cautions) && item.cautions.every(isText) && isText(item.sourceUrl));
+  if (summary.v === 3) {
+    const samdo = summary as Extract<ResultSummary, { v: 3 }>;
+    const focus = samdo.focus;
+    return isText(samdo.date) && isText(samdo.title) && Array.isArray(samdo.cautions) && samdo.cautions.every(isText)
+      && (focus === null || (isText(focus.supply) && isText(focus.stage) && isText(focus.applicationDate)
+        && isText(focus.officialScore?.label) && Array.isArray(focus.reasons) && focus.reasons.every(isText)
+        && Array.isArray(focus.checks) && focus.checks.every(isText)));
+  }
   return (summary.v === 1 || summary.v === 2)
     && isText(summary.date)
     && !!summary.counts && typeof summary.counts === 'object'

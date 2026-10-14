@@ -34,7 +34,7 @@
     "test:e2e": "node e2e/runPlaywright.mjs",
     "test:e2e:mobile": "node e2e/runPlaywright.mjs --project=mobile-390x844",
     "test:e2e:desktop": "node e2e/runPlaywright.mjs --project=desktop-1440x900",
-    "test:event-rc:e2e": "node scripts/event-rc-e2e.mjs",
+    "test:event-rc:e2e": "node scripts/event-samdo-only-e2e.mjs",
     "report:event-phase4": "node --experimental-strip-types scripts/event-phase4-report.mjs",
     "test:build-config": "node --test scripts/web-build.test.mjs",
     "build:web": "node scripts/export-web.mjs production",

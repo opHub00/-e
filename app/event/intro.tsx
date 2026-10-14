@@ -7,6 +7,7 @@ import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { k } from '../../features/eventKiosk/ui/theme';
 import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
+import { SAMDO_EVENT, SAMDO_EVENT_COPY } from '../../features/eventKiosk/samdoEventScope';
 
 const STEP_MS = 700;
 
@@ -39,8 +40,8 @@ export default function EventIntro() {
       }
     >
       <View style={styles.head}>
-        <Text style={styles.eyebrow}>이렇게 진행해요</Text>
-        <Text style={styles.title} accessibilityRole="header">내 조건에 맞는 제주 청약을{`\n`}한 번에 비교해 보세요.</Text>
+        <Text style={styles.eyebrow}>{SAMDO_EVENT.contextLabel} · 이렇게 진행해요</Text>
+        <Text style={styles.title} accessibilityRole="header">{SAMDO_EVENT_COPY.introTitle}</Text>
       </View>
       <View style={styles.list} testID="event-intro">
         {steps.map((sentence, index) => {

@@ -6,6 +6,7 @@ import type {
   EventChatContext,
   EventChatOfficialScore,
 } from './contract.ts';
+import { SAMDO_EVENT } from '../samdoEventScope.ts';
 
 const text = (value: string): string => humanize(value).slice(0, 300);
 const list = (values: readonly string[], max = 8): string[] => humanizeAll(values).slice(0, max).map(value => value.slice(0, 300));
@@ -52,7 +53,7 @@ function samdoContext(chat: KioskChat): EventChatContext | null {
   return {
     schemaVersion: 1,
     scope: 'SAMDO',
-    listingTitle: text(chat.context.listingTitle ?? '삼도이동 1지구 토지임대부 분양주택'),
+    listingTitle: text(chat.context.listingTitle ?? SAMDO_EVENT.title),
     focus: {
       supplyType: text(focus.supplyLabel),
       eligibility: SAMDO_ELIGIBILITY_LABELS[focus.eligibility],
@@ -127,4 +128,3 @@ function portfolioContext(chat: KioskChat): EventChatContext | null {
 export function buildEventChatContext(chat: KioskChat): EventChatContext | null {
   return samdoContext(chat) ?? portfolioContext(chat);
 }
-

@@ -9,6 +9,7 @@ import { KioskFrame } from './KioskFrame';
 import { goBack, nextAfter, stepPath } from './navigation';
 import { k } from './theme';
 import { StepSlide } from '../motion/StepSlide';
+import { SAMDO_EVENT } from '../samdoEventScope';
 
 /** 입력 단계 화면 틀. 제목, 질문들, 아래 이전/다음. */
 export function StepScreen({ step, title, subtitle, children }: {
@@ -39,6 +40,7 @@ export function StepScreen({ step, title, subtitle, children }: {
     <KioskFrame
       partner
       brand={load.ok ? load.event.config.copy.brand : '완판e'}
+      hideChat
       progress={{ steps, current: step }}
       scrollKey={`${sessionKey}-${step}`}
       footer={
@@ -60,6 +62,7 @@ export function StepScreen({ step, title, subtitle, children }: {
     >
       <StepSlide index={index}>
       <View style={styles.head}>
+        <Text style={styles.eyebrow}>{SAMDO_EVENT.contextLabel}</Text>
         <Text style={styles.title} accessibilityRole="header">{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
@@ -77,6 +80,7 @@ export function StepScreen({ step, title, subtitle, children }: {
 
 const styles = StyleSheet.create({
   head: { gap: 8, marginBottom: 28 },
+  eyebrow: { ...k.type.label, color: k.colors.primary },
   title: { ...k.type.hero, color: k.colors.text },
   subtitle: { ...k.type.bodyLg, color: k.colors.textMuted },
   body: { gap: 24 },

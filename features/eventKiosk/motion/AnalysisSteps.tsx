@@ -10,8 +10,8 @@ import { k } from '../ui/theme';
  * 분석 중 화면의 네 단계. 실제 분석은 이 표시와 상관없이 진행되고, 끝나면 바로 결과로 넘어간다.
  * 단계 간격은 분석 화면의 최소 표시 시간을 네 칸으로 나눈 값이라 체험을 더 늦추지 않는다.
  */
-export function AnalysisSteps({ regionLabel, totalMs }: { regionLabel: string; totalMs: number }) {
-  const steps = [`${regionLabel} 공고 확인`, '공급유형 비교', '조건 분석', '결과 생성'];
+export function AnalysisSteps({ regionLabel: _regionLabel, totalMs }: { regionLabel: string; totalMs: number }) {
+  const steps = ['삼도이동 1지구 공고 확인', '5개 신청유형 비교', '자격·공급단계 분석', '추천 결과 생성'];
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
   const stepMs = Math.max(1, Math.floor(totalMs / steps.length));

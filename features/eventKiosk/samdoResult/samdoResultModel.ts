@@ -8,6 +8,7 @@ import {
   type SamdoSupplyType,
 } from '../samdo/index.ts';
 import { containsRawKey } from '../presentation.ts';
+import { SAMDO_EVENT } from '../samdoEventScope.ts';
 
 /**
  * 삼도이동 1지구 전용 결과 화면 모델.
@@ -245,8 +246,8 @@ export function buildSamdoResultView(rec: SamdoPresentationRecommendation): Samd
     focus?.officialScore.status === 'AVAILABLE' ? '가점이 같으면 추첨으로 정해요.' : null,
   ].filter((line): line is string => Boolean(line));
   return {
-    title: `완판e가 ${/^(.*?지구)/.exec(SAMDO_DEEP_RULE_PACKAGE.title)?.[1] ?? '이 공고'} 청약을 분석했어요`,
-    subtitle: SAMDO_DEEP_RULE_PACKAGE.title,
+    title: `완판e가 ${SAMDO_EVENT.shortTitle} 청약을 분석했어요`,
+    subtitle: SAMDO_EVENT.title,
     sourceNote: rec.sourceStatus === 'OFFICIAL_VERIFIED' ? '공식 공고 기준' : '공고 검토본 기준 · 공식 게시 전',
     hero,
     why: why.slice(0, 5),

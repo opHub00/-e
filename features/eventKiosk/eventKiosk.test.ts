@@ -12,6 +12,7 @@ import { emptyAnswers, inputSteps, resizeChildren, stepBlocker, type KioskAnswer
 import { assertOpaqueResultUrl, createResultSession, isOpaqueResultToken, readResultSession } from './resultSessionClient.ts';
 import { buildSummary } from './summary.ts';
 import { buildEventChatContext } from './chat/context.ts';
+import { SAMDO_EVENT, SAMDO_EVENT_COPY } from './samdoEventScope.ts';
 
 const event = loadEvent(activeEventDataset);
 const REF = new Date('2026-10-29T09:00:00+09:00');
@@ -139,6 +140,18 @@ test('AI consultation carries the current profile, listing, result and privacy-r
   chat = await sendChat(event, chat, '근거가 된 공고문 항목은 무엇인가요?');
   assert.match(chat.messages.at(-1)!.text, /근거/);
   assert.equal(chat.messages.at(-1)!.response?.mode, 'deterministic');
+});
+
+test('event presentation is scoped to the single Samdo announcement without changing the frozen regression dataset', () => {
+  assert.equal(event.config.copy.landingTitle, SAMDO_EVENT_COPY.landingTitle);
+  assert.equal(event.config.copy.landingCta, '내 신청유형 분석하기');
+  assert.equal(SAMDO_EVENT.resultPath, '/event/samdo');
+  assert.deepEqual(SAMDO_EVENT.inventory, { total: 32, units49: 8, units59: 24 });
+  assert.equal(SAMDO_EVENT.recommendationSupplies.length, 5);
+  assert.equal(SAMDO_EVENT.informationOnlySupplies.length, 1);
+  assert.equal([...SAMDO_EVENT.recommendationSupplies, ...SAMDO_EVENT.informationOnlySupplies].reduce((sum, supply) => sum + supply.count, 0), 32);
+  const copy = JSON.stringify(event.config.copy);
+  for (const forbidden of ['공식 제주 공고 5개', '제주 공고 9개', '나에게 맞는 여러 청약']) assert.equal(copy.includes(forbidden), false, forbidden);
 });
 
 test('AI consultation accepts a validated server response and keeps QA metadata', async () => {

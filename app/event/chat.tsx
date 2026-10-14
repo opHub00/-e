@@ -1,12 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { useAttached } from '../../features/adminPortal/useIsWide';
-import { BUCKET_LABELS } from '../../features/eventKiosk/evaluate';
-import { experienceSuggestedQuestions } from '../../features/eventKiosk/experience/chatAnswers';
-import { humanize } from '../../features/eventKiosk/presentation';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton } from '../../features/eventKiosk/ui/controls';
@@ -17,6 +13,8 @@ import { Appear } from '../../components/motion/Appear';
 import { travel } from '../../design/motion';
 import { StaggerList } from '../../features/eventKiosk/motion/StaggerList';
 import { BRAND } from '../../features/eventKiosk/brand/brandAssets';
+import { samdoRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
+import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 
 /** 답하는 쪽 표시: 완판이 상담원 이모티콘(원본). 원본이 없으면 기존 아이콘. */
 function ConsultantAvatar() {
@@ -36,19 +34,18 @@ function ConsultantAvatar() {
 export default function ChatScreen() {
   const load = kioskEvent();
   const attached = useAttached();
-  const { id } = useLocalSearchParams<{ id?: string }>();
   const chat = useKioskStore(state => state.chat);
   const busy = useKioskStore(state => state.chatBusy);
-  const evaluation = useKioskStore(state => state.evaluation);
-  const openChat = useKioskStore(state => state.openChat);
+  const householdType = useKioskStore(state => state.answers.householdType);
+  const openSamdoChat = useKioskStore(state => state.openSamdoChat);
   const ask = useKioskStore(state => state.ask);
   const [draft, setDraft] = useState('');
-  const [picking, setPicking] = useState(false);
   const scroll = useRef<ScrollView>(null);
 
   useEffect(() => {
-    if (attached && load.ok) openChat(load.event, id ?? null);
-  }, [attached, id, load, openChat]);
+    if (!attached || !load.ok || chat?.samdoRecommendation || !householdType) return;
+    openSamdoChat(load.event, samdoRecommendationForAnswers(useKioskStore.getState().answers));
+  }, [attached, chat?.samdoRecommendation, householdType, load, openSamdoChat]);
 
   useEffect(() => {
     const timer = setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 50);
@@ -57,15 +54,20 @@ export default function ChatScreen() {
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
-  if (!attached || !chat) return <KioskFrame brand={brand} hideChat><View /></KioskFrame>;
+  if (!attached) return <KioskFrame brand={brand} hideChat partner><View /></KioskFrame>;
+  if (!chat?.samdoRecommendation) {
+    return (
+      <KioskFrame brand={brand} hideChat partner confirmHome={false}>
+        <EmptyState title="먼저 삼도이동 1지구 분석을 완료해 주세요" body="내 조건을 입력하면 공급유형별 판정 결과를 기준으로 상담해 드려요." action={{ label: '분석 시작하기', onPress: () => goBack('/event') }} />
+      </KioskFrame>
+    );
+  }
 
-  const outcome = evaluation?.outcomes.find(item => item.id === chat.context.outcomeId) ?? null;
   const send = (text: string) => {
     if (!text.trim() || busy) return;
     setDraft('');
     void ask(load.event, text);
   };
-  const choices = (evaluation?.outcomes ?? []).filter(item => item.id !== chat.context.outcomeId);
   const samdoFocus = chat.samdoRecommendation?.recommendedType
     ?? chat.samdoRecommendation?.alternatives[0]
     ?? chat.samdoRecommendation?.lowerPriorityTypes[0]
@@ -75,7 +77,7 @@ export default function ChatScreen() {
     <KioskFrame
       brand={brand}
       hideChat
-      partner={Boolean(chat.samdoRecommendation)}
+      partner
       progress={{ label: 'AI 상담' }}
       footer={
         <View style={styles.composer}>
@@ -103,34 +105,14 @@ export default function ChatScreen() {
             {chat.context.listingTitle ? `${chat.context.listingTitle} · ${chat.context.supplyLabel}` : '아직 분석 결과가 없어요'}
           </Text>
           {/* 어떤 결과를 기준으로 답하는지 늘 보이게 한다. */}
-          {outcome ? (
-            <Text style={styles.contextMeta} testID="chat-context-verdict">
-              내 판정: {BUCKET_LABELS[outcome.bucket]}{outcome.stageLabel ? ` · ${humanize(outcome.stageLabel)}` : ''} · 입력하신 정보와 공고 근거 기준
-            </Text>
-          ) : samdoFocus ? (
+          {samdoFocus ? (
             <Text style={styles.contextMeta} testID="chat-context-verdict">
               삼도 전용 판정 · {samdoFocus.stageLabel} · 경쟁률·당첨확률 미추정
             </Text>
           ) : null}
         </View>
-        {choices.length ? <KioskButton label="공고 바꾸기" variant="soft" onPress={() => setPicking(value => !value)} testID="chat-switch" /> : null}
-        <KioskButton label="돌아가기" variant="ghost" icon="arrow-back" onPress={() => goBack(chat.samdoRecommendation ? '/event/samdo' : evaluation ? '/event/results' : '/event')} />
+        <KioskButton label="돌아가기" variant="ghost" icon="arrow-back" onPress={() => goBack('/event/samdo')} />
       </View>
-      {picking ? (
-        <View style={styles.picker}>
-          {choices.map(item => (
-            <MotionPressable
-              key={item.id}
-              accessibilityRole="button"
-              accessibilityLabel={`${item.listing.title} ${item.supplyLabel}로 상담하기`}
-              onPress={() => { setPicking(false); openChat(load.event, item.id); }}
-              style={styles.pick}
-            >
-              <Text style={styles.pickText}>{item.rank}. {item.listing.title} · {item.supplyLabel}</Text>
-            </MotionPressable>
-          ))}
-        </View>
-      ) : null}
 
       <ScrollView ref={scroll} style={styles.thread} contentContainerStyle={styles.threadContent} testID="chat-thread">
         {chat.messages.map((message, index) => (
@@ -152,13 +134,13 @@ export default function ChatScreen() {
       </ScrollView>
 
       <StaggerList key={chat.context.outcomeId ?? 'none'} style={styles.suggestions} testID="chat-suggestions">
-        {(chat.samdoRecommendation ? [
+        {[
           '왜 이 신청유형을 먼저 추천하나요?',
           '가장 중요한 조건은 무엇인가요?',
           '제가 확인해야 할 서류는 무엇인가요?',
           '다른 공급유형과 비교하면 어떤가요?',
           '근거가 된 공고문 항목은 무엇인가요?',
-        ] : experienceSuggestedQuestions(outcome)).map(question => (
+        ].map(question => (
           <MotionPressable key={question} accessibilityRole="button" accessibilityLabel={question} onPress={() => send(question)} style={styles.suggestion} disabled={busy}>
             <Text style={styles.suggestionText}>{question}</Text>
           </MotionPressable>
@@ -174,9 +156,6 @@ const styles = StyleSheet.create({
   contextLabel: { ...k.type.caption, color: k.colors.textMuted },
   contextValue: { ...k.type.bodyLgStrong, color: k.colors.primary },
   contextMeta: { ...k.type.caption, color: k.colors.textMuted, marginTop: 2 },
-  picker: { gap: 8, marginTop: 12 },
-  pick: { minHeight: k.touch, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 12, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
-  pickText: { ...k.type.bodyStrong, color: k.colors.text },
   thread: { marginTop: 20, maxHeight: 640 },
   threadContent: { gap: 16, paddingBottom: 8 },
   bubbleRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },

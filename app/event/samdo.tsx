@@ -15,7 +15,7 @@ import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdo
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
-import { goBack, resetToHome } from '../../features/eventKiosk/ui/navigation';
+import { resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { QrCode } from '../../features/eventKiosk/ui/QrCode';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { k } from '../../features/eventKiosk/ui/theme';
@@ -99,8 +99,8 @@ export default function SamdoResultScreen() {
       confirmHome={false}
       footer={
         <View style={styles.footer}>
-          <KioskButton testID="samdo-back" label="이전" icon="arrow-back" variant="ghost" onPress={() => goBack('/event/results')} />
-          <KioskButton testID="samdo-to-results" label="다른 공고 결과 보기" icon="arrow-forward" onPress={() => router.push('/event/results' as never)} />
+          <KioskButton testID="samdo-back" label="입력 확인" icon="arrow-back" variant="ghost" onPress={() => router.replace('/event/subscription' as never)} />
+          <KioskButton testID="samdo-restart" label="다시 분석하기" icon="refresh" onPress={resetToHome} />
         </View>
       }
     >

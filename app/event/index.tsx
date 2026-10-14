@@ -14,8 +14,10 @@ import { eventMotion } from '../../features/eventKiosk/motion/eventMotion';
 import { useFocusReplay } from '../../features/eventKiosk/motion/useFocusReplay';
 import { ProductStory } from '../../features/eventKiosk/story/ProductStory';
 import { BrandMark } from '../../features/eventKiosk/brand/BrandMark';
+import { PartnerBadge } from '../../features/eventKiosk/brand/PartnerBadge';
 import { hasSeenStory, markStorySeen } from '../../features/eventKiosk/story/storyPreference';
 import { STORY_AUTOPLAY_MS } from '../../features/eventKiosk/story/storyScript';
+import { SAMDO_EVENT, SAMDO_EVENT_COPY } from '../../features/eventKiosk/samdoEventScope';
 
 /**
  * 처음 온 브라우저에서만 Product Story 를 자동으로 연다. 자동화 브라우저(회귀 점검)는 기존 흐름을 그대로 검사하도록 자동 재생하지 않는다.
@@ -35,7 +37,7 @@ export default function EventLanding() {
   const [storyOpen, setStoryOpen] = useState(false);
   useEffect(() => { if (shouldAutoplayStory()) setStoryOpen(true); }, []);
   if (!load.ok) return null;
-  const { copy, listings } = load.event.config;
+  const { copy } = load.event.config;
   const wide = width >= 900;
 
   const start = () => {
@@ -47,23 +49,24 @@ export default function EventLanding() {
   return (
     <View style={styles.root} testID="event-landing">
       <View style={styles.header}>
-        <BrandMark size="hero" label={copy.brand} />
+        <BrandMark size="hero" label={copy.brand} compact={width < 600} />
+        <PartnerBadge compact={width < 600} />
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.inner, wide && styles.innerWide]}>
           <View style={[styles.hero, wide && styles.heroWide]}>
             <Appear replayKey={replay} distance={travel.md}>
             <View style={styles.heroCopy}>
-              <Text style={styles.eyebrow}>2026 제주 청약 체험</Text>
+              <Text style={styles.eyebrow}>{SAMDO_EVENT_COPY.eyebrow}</Text>
               <Text style={[styles.title, wide && styles.titleWide]} accessibilityRole="header">{copy.landingTitle}</Text>
               <Text style={styles.subtitle}>{copy.landingSubtitle}</Text>
             </View>
             </Appear>
             <Appear replayKey={replay} delay={eventMotion.sequence} style={styles.heroRest}>
             <View style={styles.facts}>
-              <Fact value={`${listings.length}개`} label="분석하는 공고" />
-              <Fact value="약 3분" label="입력 시간" />
-              <Fact value="저장 안 함" label="입력한 정보" />
+              <Fact value={`총 ${SAMDO_EVENT.inventory.total}세대`} label={SAMDO_EVENT.shortTitle} />
+              <Fact value={`${SAMDO_EVENT.inventory.units49}세대`} label="49㎡" />
+              <Fact value={`${SAMDO_EVENT.inventory.units59}세대`} label="59㎡" />
             </View>
             <View style={styles.cta}>
               <KioskButton testID="event-start" label={copy.landingCta} icon="arrow-forward" onPress={start} large grow />
@@ -78,16 +81,16 @@ export default function EventLanding() {
             </Appear>
           </View>
           <Appear replayKey={replay} delay={eventMotion.sequence * 2} style={[styles.preview, wide && styles.previewWide]}>
-            <Text style={styles.previewLabel}>한 번 입력하고 한눈에 비교해요</Text>
+            <Text style={styles.previewLabel}>신청유형을 한 번에 비교해요</Text>
             <View style={styles.previewRows}>
-              <PreviewRow icon="check-circle" title="신청 가능 여부" detail="자격·순위·추가 확인 사항" />
-              <PreviewRow icon="account-balance" title="공식 점수" detail="공식 배점이 있을 때만 표시" />
-              <PreviewRow icon="auto-awesome" title="완판e 추천" detail="적극 검토·검토 가능·조건 확인" />
+              <PreviewRow icon="check-circle" title="특별공급 / 일반공급" detail="5개 신청유형 자격과 공급단계" />
+              <PreviewRow icon="account-balance" title="공식 점수" detail="공식 배점이 있는 유형만 표시" />
+              <PreviewRow icon="auto-awesome" title="가장 유리한 신청유형" detail="근거·대안·확인 필요 항목 안내" />
             </View>
           </Appear>
         </View>
       </ScrollView>
-      <View style={styles.footer}><Text style={styles.footerText}>완판e 제주 청약 체험 · 행사 전용 데모</Text></View>
+      <View style={styles.footer}><Text style={styles.footerText}>{SAMDO_EVENT.title} · 행사 전용 분석</Text></View>
       {storyOpen ? (
         <View style={StyleSheet.absoluteFill}>
           <ProductStory
@@ -121,7 +124,7 @@ function Fact({ value, label }: { value: string; label: string }) {
 const styles = StyleSheet.create({
   storyLink: { flexDirection: 'row' },
   root: { flex: 1, backgroundColor: k.colors.surface, minHeight: '100%' as unknown as number },
-  header: { minHeight: 88, paddingHorizontal: 32, justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: k.colors.hairline },
+  header: { minHeight: 88, paddingHorizontal: 32, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, borderBottomWidth: 1, borderBottomColor: k.colors.hairline },
   scroll: { flexGrow: 1, paddingHorizontal: 48, paddingTop: 40, paddingBottom: 32, alignItems: 'center' },
   inner: { width: '100%', maxWidth: 1120, gap: 32 },
   innerWide: { flexDirection: 'row', alignItems: 'center', gap: 48 },

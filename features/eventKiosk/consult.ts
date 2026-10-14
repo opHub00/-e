@@ -12,6 +12,7 @@ import { buildEventChatContext } from './chat/context.ts';
 import { requestEventChat } from './chat/client.ts';
 import { boundedEventChatHistory, redactEventChatText } from './chat/privacy.ts';
 import type { EventChatMode, EventChatRequest } from './chat/contract.ts';
+import { SAMDO_EVENT } from './samdoEventScope.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -93,7 +94,7 @@ export function startSamdoChat(event: LoadedEvent, recommendation: SamdoPresenta
   return {
     context: {
       outcomeId: null,
-      listingTitle: '삼도이동 1지구 토지임대부 분양주택',
+      listingTitle: SAMDO_EVENT.title,
       supplyLabel: focus?.supplyLabel ?? '공급유형 분석',
       datasetVersion: event.dataset.datasetVersion,
       datasetFingerprint: event.dataset.fingerprint,

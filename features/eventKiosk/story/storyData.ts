@@ -1,6 +1,7 @@
 import type { LoadedEvent } from '../eventConfig.ts';
-import type { ServiceListingPortfolio } from '../live/types.ts';
 import type { ListingMedia } from '../media/listingMedia.ts';
+import { emptyListingMedia } from '../media/listingMedia.ts';
+import { SAMDO_EVENT } from '../samdoEventScope.ts';
 
 export type StoryListingCard = {
   id: string;
@@ -8,7 +9,7 @@ export type StoryListingCard = {
   meta: string;
   supplyCount: number;
   media: ListingMedia;
-  origin: 'LIVE' | 'FROZEN_REFERENCE';
+  origin: 'FROZEN_REFERENCE';
 };
 
 export type StoryData = {
@@ -24,16 +25,16 @@ export type StoryData = {
     housingType: string;
     district: string;
     media: ListingMedia;
-    origin: 'LIVE' | 'FROZEN_REFERENCE';
+    origin: 'FROZEN_REFERENCE';
   };
 };
 
 export const STORY_CONDITION_TAGS = [
   ['소득 기준', '무주택'],
   ['거주 기간', '자산 기준', '청약통장'],
-  ['혼인 기간', '자녀 수'],
-  ['소득 기준', '차량가액'],
-  ['무주택', '거주 기간', '자산 기준'],
+  ['혼인 기간', '자녀·출산'],
+  ['소득 기준', '공급단계'],
+  ['무주택', '거주 기간', '공식 가점'],
 ] as const;
 
 export const STORY_PROFILE_FIELDS = [
@@ -44,62 +45,31 @@ export const STORY_PROFILE_FIELDS = [
   { icon: 'savings', label: '청약통장' },
 ] as const;
 
-const dot = (date: string | null) => date ? date.slice(5).replace('-', '.') : '일정 확인';
-
-export function storyDataFrom(event: LoadedEvent, portfolio: ServiceListingPortfolio | null = null): StoryData {
-  const live = (portfolio?.listings ?? [])
-    .filter(listing => listing.origin === 'LIVE' && listing.lifecycle !== 'ARCHIVED')
-    .map(listing => ({
-      id: listing.canonicalKey,
-      title: listing.title,
-      meta: `실제 최신 공고 · ${listing.provider}`,
-      supplyCount: listing.supplyTypes.length,
-      media: listing.media,
-      origin: 'LIVE' as const,
-      schedule: `접수 ${dot(listing.applicationStart)} ~ ${dot(listing.applicationEnd)}`,
-      supplyLabel: listing.supplyTypes[0] ?? '공급유형 확인',
-      housingType: listing.housingName,
-      district: listing.region,
-    }));
-
-  const frozen = event.config.listings.map(listing => {
-    const rulePackage = event.dataset.rulePackages.find(item => item.listingId === listing.listingId);
-    return {
-      id: listing.listingId,
-      title: listing.title,
-      meta: `${listing.housingType} · ${listing.district}`,
-      supplyCount: rulePackage?.supplies.length ?? 0,
-      media: listing.media,
-      origin: 'FROZEN_REFERENCE' as const,
-      schedule: `접수 ${dot(listing.recruitment.startDate)} ~ ${dot(listing.recruitment.endDate)}`,
-      supplyLabel: rulePackage?.supplies[0]?.label ?? listing.housingType,
-      housingType: listing.housingType,
-      district: listing.district,
-    };
-  });
-
-  const combined = [...live, ...frozen];
-  const listings = combined.slice(0, 5).map(({ schedule: _schedule, supplyLabel: _supply, housingType: _housing, district: _district, ...listing }) => listing);
-  const supplies = [...new Set([
-    ...live.flatMap(item => (portfolio?.listings.find(listing => listing.canonicalKey === item.id)?.supplyTypes ?? [])),
-    ...event.dataset.rulePackages.flatMap(item => item.supplies.map(supply => supply.label)),
-  ])].slice(0, 6);
-
-  const featured = live[0] ?? [...frozen].sort((a, b) => b.supplyCount - a.supplyCount)[0];
+/** 행사 Product Story는 라이브 공고 목록이 아니라 삼도이동 1지구 공식 공급정보만 사용한다. */
+export function storyDataFrom(_event: LoadedEvent): StoryData {
+  const media = emptyListingMedia(`${SAMDO_EVENT.title} 대표 이미지`);
+  const supplies = [...SAMDO_EVENT.recommendationSupplies, ...SAMDO_EVENT.informationOnlySupplies];
   return {
-    region: event.config.regionLabel,
-    listings,
-    supplies,
+    region: SAMDO_EVENT.shortTitle,
+    listings: [{
+      id: SAMDO_EVENT.listingId,
+      title: SAMDO_EVENT.title,
+      meta: `토지임대부 공공분양 · 총 ${SAMDO_EVENT.inventory.total}세대`,
+      supplyCount: supplies.length,
+      media,
+      origin: 'FROZEN_REFERENCE',
+    }],
+    supplies: supplies.map(supply => supply.label),
     featured: {
-      listingId: featured.id,
-      title: featured.title,
-      meta: featured.meta,
-      schedule: featured.schedule,
-      supplyLabel: featured.supplyLabel,
-      housingType: featured.housingType,
-      district: featured.district,
-      media: featured.media,
-      origin: featured.origin,
+      listingId: SAMDO_EVENT.listingId,
+      title: SAMDO_EVENT.title,
+      meta: `49㎡ ${SAMDO_EVENT.inventory.units49}세대 · 59㎡ ${SAMDO_EVENT.inventory.units59}세대`,
+      schedule: '특별공급 10.12 · 일반공급 10.13~10.14',
+      supplyLabel: '5개 신청유형 비교',
+      housingType: '토지임대부 공공분양주택',
+      district: '제주시 삼도이동',
+      media,
+      origin: 'FROZEN_REFERENCE',
     },
   };
 }

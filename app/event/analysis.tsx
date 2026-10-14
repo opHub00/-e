@@ -10,6 +10,7 @@ import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { resetToHome, stepPath } from '../../features/eventKiosk/ui/navigation';
 import { k } from '../../features/eventKiosk/ui/theme';
 import { useAttached } from '../../features/adminPortal/useIsWide';
+import { SAMDO_EVENT } from '../../features/eventKiosk/samdoEventScope';
 
 
 /** 분석 중 화면. 계산은 금방 끝나지만, 무엇을 하는지 보여 줄 시간을 조금 둔다. */
@@ -33,7 +34,7 @@ export default function AnalysisScreen() {
   useEffect(() => {
     if (analysis === 'running') sawRunning.current = true;
     if (analysis === 'done' && sawRunning.current) {
-      router.replace((adaptivePlan?.questions.length ? '/event/adaptive' : '/event/results') as never);
+      router.replace((adaptivePlan?.questions.length ? '/event/adaptive' : SAMDO_EVENT.resultPath) as never);
     }
   }, [adaptivePlan, analysis]);
 
@@ -69,7 +70,8 @@ export default function AnalysisScreen() {
     <KioskFrame partner brand={brand} hideChat confirmHome={false}>
       <View style={styles.center} testID="analysis-running" accessibilityLiveRegion="polite">
         <View style={styles.spinner}><ActivityIndicator size="large" color={k.colors.primary} /></View>
-        <Text style={styles.title}>분석하고 있어요</Text>
+        <Text style={styles.eyebrow}>{SAMDO_EVENT.contextLabel}</Text>
+        <Text style={styles.title}>삼도이동 1지구의 신청유형을 비교하고 있어요</Text>
         <View style={styles.phases}>
           {/* 분석의 최소 표시 시간 안에서만 단계를 보여 준다. 분석이 끝나면 기다리지 않고 결과로 간다. */}
           <AnalysisSteps regionLabel={load.event.config.regionLabel} totalMs={MIN_ANALYSIS_MS} />
@@ -83,6 +85,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', gap: 24, paddingVertical: 64, paddingHorizontal: 24 },
   spinner: { width: 112, height: 112, borderRadius: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: k.colors.primaryFixed },
   title: { ...k.type.hero, color: k.colors.text },
+  eyebrow: { ...k.type.label, color: k.colors.primary },
   phases: { width: '100%', maxWidth: 520, gap: 12, padding: 24, borderRadius: 20, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline },
   actions: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', justifyContent: 'center' },
 });

@@ -97,7 +97,15 @@ export function KioskFrame({
       </ScrollView>
       {footer ? (
         <View testID="kiosk-footer" style={[styles.footer, { paddingHorizontal: gutter }]}>
-          <View style={[inner, styles.footerInner]}>{footer}</View>
+          <View
+            style={[
+              inner,
+              styles.footerInner,
+              { maxWidth: Math.min(d.contentMax, Math.max(0, width - gutter * 2)) },
+            ]}
+          >
+            {footer}
+          </View>
         </View>
       ) : null}
       <Modal visible={confirming} transparent animationType="fade" onRequestClose={() => setConfirming(false)}>
@@ -205,7 +213,7 @@ const styles = StyleSheet.create({
     backgroundColor: k.colors.surface,
     alignItems: 'center',
   },
-  footerInner: { flexDirection: 'row', gap: 12, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' },
+  footerInner: { width: 'auto', alignSelf: 'stretch', flexDirection: 'row', gap: 12, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' },
   scrim: { flex: 1, backgroundColor: 'rgba(28,27,34,0.45)', alignItems: 'center', justifyContent: 'center', padding: 24 },
   dialog: { width: '100%', maxWidth: 560, backgroundColor: k.colors.surface, borderRadius: 20, padding: 32, gap: 16 },
   dialogIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },

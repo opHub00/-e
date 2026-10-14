@@ -50,7 +50,28 @@ export type ResultSummaryV2 = {
   cautions: string[];
 };
 
-export type ResultSummary = ResultSummaryV1 | ResultSummaryV2;
+export type SamdoQrFocus = {
+  kind: 'RECOMMENDED' | 'REVIEW';
+  supply: string;
+  eligibility: 'ELIGIBLE' | 'CONDITIONAL' | 'INELIGIBLE' | 'EVIDENCE_REQUIRED';
+  stage: string;
+  officialScore: { status: 'AVAILABLE' | 'PENDING' | 'NOT_APPLICABLE'; label: string };
+  reasons: string[];
+  checks: string[];
+  applicationDate: string;
+};
+
+/** 삼도 행사 전용 모바일 결과. 프로필 원문·정확 소득/자산·다른 공고는 담지 않는다. */
+export type SamdoResultSummaryV3 = {
+  v: 3;
+  event: string;
+  date: string;
+  title: string;
+  focus: SamdoQrFocus | null;
+  cautions: string[];
+};
+
+export type ResultSummary = ResultSummaryV1 | ResultSummaryV2 | SamdoResultSummaryV3;
 
 /** 설명 계층과 같은 기준(부족 → 확인 필요 → 서류)으로 한 줄 메모를 고른다. 데이터셋이 없으면 기존 문구를 정리해 쓴다. */
 const noteOf = (outcome: KioskOutcome, evidenceOnly?: Set<string>): string | null => {

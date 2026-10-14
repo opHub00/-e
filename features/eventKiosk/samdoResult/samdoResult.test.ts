@@ -11,6 +11,8 @@ import { buildSamdoResultView, failedSentence, formatSamdoDate, pickStrengths } 
 import { buildSamdoQrSummary } from './samdoSummary.ts';
 import { isValidResultSummary } from '../../../scripts/event-result-session-store.mjs';
 import { sendChat, startSamdoChat } from '../consult.ts';
+import { isRenderableSummary } from '../experience/safeSummary.ts';
+import { buildEventChatContext } from '../chat/context.ts';
 
 const load = kioskEvent();
 if (!load.ok) throw new Error(load.error);
@@ -144,12 +146,18 @@ test('helpers: dates, strengths and failure sentences', () => {
   for (const line of pickStrengths(rec.recommendedType!, 5)) assert.ok(!/검토 메모|확인 필요/.test(line), line);
 });
 
-test('QR payload uses the existing v1 session contract and carries no personal data', () => {
+test('QR payload uses the Samdo-only v3 session contract and carries no personal data', () => {
   for (const persona of personas) {
     const recommendation = samdoRecommendationForAnswers(persona.finalAnswers);
     const summary = buildSamdoQrSummary({ eventId: load.event.config.id, date: '2026-10-11', recommendation, view: buildSamdoResultView(recommendation) });
     assert.ok(isValidResultSummary(summary), persona.personaId);
-    assert.equal(summary.recommended[0]?.supply ?? null, recommendation.recommendedType?.supplyLabel ?? recommendation.alternatives[0]?.supplyLabel ?? recommendation.lowerPriorityTypes[0]?.supplyLabel ?? null);
+    assert.ok(isRenderableSummary(summary), persona.personaId);
+    assert.equal(summary.v, 3);
+    assert.equal(summary.focus?.supply ?? null, recommendation.recommendedType?.supplyLabel ?? recommendation.alternatives[0]?.supplyLabel ?? recommendation.lowerPriorityTypes[0]?.supplyLabel ?? null);
+    assert.equal(summary.focus?.kind ?? null, recommendation.recommendedType ? 'RECOMMENDED' : summary.focus ? 'REVIEW' : null);
+    const serialized = JSON.stringify(summary);
+    assert.equal(serialized.includes('JPDC'), false);
+    for (const privateKey of ['displayName', 'birthDate', 'monthlyIncome', 'totalAssets', 'profileId', 'personId']) assert.equal(serialized.includes(privateKey), false, privateKey);
   }
 });
 
@@ -158,6 +166,10 @@ test('Samdo AI chat receives the recommendation contract without re-assessing or
   let chat = startSamdoChat(load.event, recommendation);
   assert.equal(chat.samdoRecommendation, recommendation);
   assert.equal(chat.context.supplyLabel, recommendation.recommendedType?.supplyLabel);
+  const context = buildEventChatContext(chat);
+  assert.equal(context?.scope, 'SAMDO');
+  const contextJson = JSON.stringify(context);
+  for (const listing of load.event.config.listings) assert.equal(contextJson.includes(listing.title), false, listing.title);
   chat = await sendChat(load.event, chat, '왜 이 신청유형을 먼저 추천하나요?');
   chat = await sendChat(load.event, chat, '제가 확인해야 할 서류는 무엇인가요?');
   chat = await sendChat(load.event, chat, '다른 공급유형과 비교하면 어떤가요?');

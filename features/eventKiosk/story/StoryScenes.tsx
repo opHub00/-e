@@ -52,20 +52,21 @@ function ListingMini({ title, meta, tags, tagOpacity }: { title: string; meta: s
 
 /** Scene 1 — 공고와 조건이 겹쳐 보이는 복잡함. */
 export function SceneComplexity({ p, data }: SceneProps) {
+  const listing = data.listings[0];
+  const appear = seg(p, 0, 0.35);
   return (
     <View style={styles.stage}>
-      {data.listings.map((listing, index) => {
-        const spot = SCATTER[index % SCATTER.length];
-        const appear = seg(p, index * 0.1, index * 0.1 + 0.35);
-        return (
-          <Animated.View
-            key={listing.id}
-            style={[styles.abs, { left: spot.x, top: spot.y, width: 212, opacity: appear, transform: [{ translateY: mix(appear, 0, 1, 14, 0) }, { rotate: spot.r }] }]}
-          >
-            <ListingMini title={listing.title} meta={listing.meta} tags={STORY_CONDITION_TAGS[index % STORY_CONDITION_TAGS.length]} tagOpacity={seg(p, 0.45 + index * 0.06, 0.75 + index * 0.05)} />
-          </Animated.View>
-        );
-      })}
+      {listing ? (
+        <Animated.View style={[styles.abs, { left: 40, top: 36, width: 400, opacity: appear, transform: [{ translateY: mix(appear, 0, 1, 14, 0) }] }]}>
+          <ListingMini title={listing.title} meta={listing.meta} tags={['공고문 1개', `신청유형 ${listing.supplyCount}개`]} tagOpacity={seg(p, 0.3, 0.55)} />
+        </Animated.View>
+      ) : null}
+      <View style={[styles.abs, styles.supplyCloud, { left: 40, top: 178, width: 400 }]}>
+        {data.supplies.map((supply, index) => {
+          const show = seg(p, 0.36 + index * 0.07, 0.56 + index * 0.07);
+          return <Animated.Text key={supply} style={[styles.supplyCloudChip, { opacity: show, transform: [{ translateY: mix(show, 0, 1, 8, 0) }] }]}>{supply}</Animated.Text>;
+        })}
+      </View>
     </View>
   );
 }
@@ -126,7 +127,7 @@ function connector(x1: number, y1: number, x2: number, y2: number) {
   return { midX: (x1 + x2) / 2, midY: (y1 + y2) / 2, length: Math.hypot(dx, dy), angle: Math.atan2(dy, dx) };
 }
 const COLUMN = { x: 296, width: 176, height: 58, gap: 14, top: 8 };
-const ANALYSIS_PHASES = (region: string) => [`${region} 공고 확인`, '공급유형 비교', '자격 조건 분석'];
+const ANALYSIS_PHASES = (_region: string) => ['삼도이동 1지구 공고 확인', '5개 신청유형 비교', '자격 조건 분석'];
 
 /** Scene 3 — 한 프로필에서 여러 공고로 동시에. 연결선이 펼쳐지고 세 단계가 차례로 켜진다. */
 export function SceneAnalysis({ p, data }: SceneProps) {
@@ -170,7 +171,7 @@ export function SceneAnalysis({ p, data }: SceneProps) {
             <Animated.View style={[styles.abs, styles.target, { left: COLUMN.x, top: y, width: COLUMN.width, height: COLUMN.height, opacity: mix(line, 0, 1, 0.35, 1) }]}>
               <Text style={styles.targetTitle} numberOfLines={1}>{listing.title}</Text>
               <View style={styles.targetRow}>
-                <Animated.Text style={[styles.targetMeta, { opacity: compared }]}>공급 {listing.supplyCount}개 비교</Animated.Text>
+                <Animated.Text style={[styles.targetMeta, { opacity: compared }]}>신청유형 {listing.supplyCount}개 확인</Animated.Text>
                 <Animated.View style={{ opacity: checked }}><MaterialIcons name="check-circle" size={18} color={k.colors.primary} /></Animated.View>
               </View>
             </Animated.View>
@@ -336,6 +337,8 @@ const styles = StyleSheet.create({
   miniMeta: { fontFamily: k.type.caption.fontFamily, fontSize: 11, lineHeight: 15, color: k.colors.textMuted },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   tag: { fontFamily: k.type.caption.fontFamily, fontSize: 11, lineHeight: 15, color: k.tint.amber.fg, backgroundColor: k.tint.amber.bg, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden' },
+  supplyCloud: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
+  supplyCloudChip: { fontFamily: k.type.label.fontFamily, fontSize: 13, lineHeight: 18, color: k.colors.primary, backgroundColor: k.colors.primaryFixed, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, overflow: 'hidden' },
   profile: { backgroundColor: k.colors.surface, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 14, gap: 6, boxShadow: '0 12px 28px rgba(59,48,158,0.16)' } as object,
   profileHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },

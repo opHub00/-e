@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { kioskEvent } from '../kioskEvent.ts';
 import { emptyListingMedia, listingMediaOf, normalizeListingMedia } from '../media/listingMedia.ts';
-import type { ServiceListing, ServiceListingPortfolio } from '../live/types.ts';
+import { SAMDO_EVENT } from '../samdoEventScope.ts';
 import { storyDataFrom, STORY_PROFILE_FIELDS } from './storyData.ts';
 import { forgetStorySeen, hasSeenStory, markStorySeen, STORY_SEEN_KEY } from './storyPreference.ts';
 import { isLastScene, nextSceneIndex, STORY_AUTOPLAY_MS, STORY_SCENES } from './storyScript.ts';
@@ -24,13 +24,14 @@ test('story is five scenes, 10–20 seconds to the final CTA, one message each',
   }
 });
 
-test('story data comes from the event dataset and carries no personal values', () => {
+test('story data is scoped to Samdo only and carries no personal values', () => {
   const data = storyDataFrom(load.event);
-  assert.equal(data.listings.length, 5);
-  assert.ok(data.listings.every(item => item.supplyCount >= 1));
-  assert.ok(data.supplies.length >= 3 && data.supplies.length <= 6);
-  assert.match(data.featured.schedule, /^접수 \d{2}\.\d{2} ~ \d{2}\.\d{2}$/);
-  assert.equal(data.region, load.event.config.regionLabel);
+  assert.equal(data.listings.length, 1);
+  assert.equal(data.listings[0]?.title, SAMDO_EVENT.title);
+  assert.equal(data.listings[0]?.supplyCount, 6);
+  assert.deepEqual(data.supplies, ['청년 특별공급', '신혼부부 특별공급', '생애최초 특별공급', '신생아 특별공급', '일반공급', '기관추천 특별공급']);
+  assert.equal(data.featured.schedule, '특별공급 10.12 · 일반공급 10.13~10.14');
+  assert.equal(data.region, SAMDO_EVENT.shortTitle);
   assert.deepEqual(STORY_PROFILE_FIELDS.map(field => field.label), ['나이', '혼인', '자녀', '무주택', '청약통장']);
   assert.ok(!/\d{4}-\d{2}-\d{2}|만원|원$/.test(JSON.stringify(STORY_PROFILE_FIELDS)), 'profile fields are labels only');
 });
@@ -78,19 +79,9 @@ test('listing media accepts only official safe images and otherwise keeps the ho
   assert.equal(listingMediaOf({ title: '테스트', media: [{ uri: 'https://example.com/x.jpg', sourceLabel: '공식', sourceUrl: 'https://example.com/project' }] }).primary?.alt, '테스트 대표 이미지');
 });
 
-test('live listing titles and schedules feed the story without creating a real eligibility result', () => {
-  const live: ServiceListing = {
-    canonicalKey: 'official:1', origin: 'LIVE', source: 'APPLYHOME', sourceUrl: 'https://official.example/notice', provider: '공식기관',
-    noticeId: '1', sourceId: 'official:1', title: '실제 제주 최신 공고', housingName: '실제 제주 주택', region: '제주특별자치도', address: '제주시',
-    location: { normalizedAddress: '제주특별자치도 제주시', latitude: null, longitude: null, status: 'MISSING', source: 'UNAVAILABLE' },
-    announcementDate: '2026-10-09', applicationStart: '2026-10-12', applicationEnd: '2026-10-13', resultDate: null, supplyTypes: ['일반공급'], units: [],
-    eligibilitySource: 'https://official.example/notice', originalDocuments: [], lifecycle: 'RULE_PENDING', applicationStatus: 'UPCOMING',
-    assessmentAvailability: 'INFORMATION_ONLY', assessmentListingId: null, rulePackageId: null, media: emptyListingMedia('실제 제주 주택'), nearbyPois: [], sellingPoints: [], locationCautions: [], fetchedAt: '2026-10-09T00:00:00.000Z',
-  };
-  const portfolio: ServiceListingPortfolio = { schemaVersion: 1, generatedAt: live.fetchedAt, listings: [live], coverage: { total: 1, active: 0, upcoming: 1, recent: 0, unknown: 0, assessable: 0, informationOnly: 1, byProvider: { APPLYHOME: 1 } }, sources: [], usedFrozenFallback: false };
-  const data = storyDataFrom(load.event, portfolio);
-  assert.equal(data.listings[0]?.title, live.title);
-  assert.equal(data.featured.title, live.title);
-  assert.equal(data.featured.schedule, '접수 10.12 ~ 10.13');
-  assert.equal(data.featured.origin, 'LIVE');
+test('live/frozen portfolio titles never enter the event story', () => {
+  const data = storyDataFrom(load.event);
+  const serialized = JSON.stringify(data);
+  for (const listing of load.event.config.listings) assert.equal(serialized.includes(listing.title), false, listing.title);
+  assert.equal(data.featured.title, SAMDO_EVENT.title);
 });

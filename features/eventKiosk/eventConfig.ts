@@ -2,6 +2,7 @@ import { assertDatasetBindings } from './frozen/engine/batch.ts';
 import type { FrozenListingDataset, Listing } from './frozen/domain/rules.ts';
 import type { ListingMedia } from './media/listingMedia.ts';
 import { officialListingMedia } from './media/officialListingMedia.ts';
+import { SAMDO_EVENT_COPY } from './samdoEventScope.ts';
 
 export type RecruitmentStatus = 'open' | 'upcoming' | 'closed' | 'unknown';
 
@@ -120,10 +121,10 @@ export function loadEvent(raw: unknown): LoadedEvent {
     residenceRegion: dataset.region,
     copy: {
       brand: '완판e',
-      landingTitle: '제주에서 나에게 맞는 청약을 찾아보세요.',
-      landingSubtitle: '한 번 입력하면 공식 제주 공고 5개와 공급유형 9개를 한눈에 비교해요.',
-      landingCta: '체험 시작하기',
-      introSteps: ['가구와 신청자 정보를 입력하고', '검수 완료된 제주 공고 9개 공급을 분석한 뒤', '자격·순위·공식 배점·완판e 추천을 나눠 비교합니다.'],
+      landingTitle: SAMDO_EVENT_COPY.landingTitle,
+      landingSubtitle: SAMDO_EVENT_COPY.landingSubtitle,
+      landingCta: SAMDO_EVENT_COPY.landingCta,
+      introSteps: [...SAMDO_EVENT_COPY.introSteps],
     },
     idleResetSeconds: 150,
     idleWarningSeconds: 20,

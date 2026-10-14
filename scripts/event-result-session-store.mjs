@@ -4,11 +4,15 @@ export const RESULT_SESSION_TTL_MS = 6 * 60 * 60 * 1000;
 export const RESULT_SESSION_TOKEN_PATTERN = /^[a-f0-9]{64}$/;
 
 const TOP_LEVEL_KEYS = ['cautions', 'counts', 'date', 'event', 'favorites', 'household', 'recommended', 'v'];
+const FOCUSED_TOP_LEVEL_KEYS = ['cautions', 'date', 'event', 'focus', 'title', 'v'];
+const FOCUSED_ITEM_KEYS = ['applicationDate', 'checks', 'eligibility', 'kind', 'officialScore', 'reasons', 'stage', 'supply'];
+const FOCUSED_SCORE_KEYS = ['label', 'status'];
 const ITEM_KEYS = ['bucket', 'note', 'stage', 'supply', 'title'];
 const PORTFOLIO_ITEM_KEYS = ['applicationEnd', 'applicationStart', 'bucket', 'cautions', 'location', 'nearbyHighlights', 'note', 'officialScoreStatus', 'rank', 'sourceLabel', 'sourceUrl', 'stage', 'status', 'supply', 'title', 'wanpanRecommendation', 'whyMatched'];
 const BUCKETS = new Set(['eligible', 'review', 'difficult']);
 const ASSESSMENT_STATUSES = new Set(['COMPLETE', 'NEEDS_USER_INPUT', 'INELIGIBLE', 'UNAVAILABLE', 'INFORMATION_ONLY']);
 const SCORE_STATUSES = new Set(['AVAILABLE', 'PENDING', 'NOT_APPLICABLE']);
+const FOCUSED_ELIGIBILITY = new Set(['ELIGIBLE', 'CONDITIONAL', 'INELIGIBLE', 'EVIDENCE_REQUIRED']);
 const PRIVATE_KEY = /(?:displayName|birthDate|monthlyIncome|totalAssets|profileId|personId|applicant|spouse)/i;
 
 export function isOpaqueResultToken(value) {
@@ -60,8 +64,32 @@ function validPortfolioItem(value) {
     && /^https:\/\//.test(value.sourceUrl);
 }
 
+function validFocusedItem(value) {
+  if (value === null) return true;
+  return value && typeof value === 'object' && !Array.isArray(value)
+    && hasExactKeys(value, FOCUSED_ITEM_KEYS)
+    && (value.kind === 'RECOMMENDED' || value.kind === 'REVIEW')
+    && validText(value.supply, 120)
+    && FOCUSED_ELIGIBILITY.has(value.eligibility)
+    && validText(value.stage, 160)
+    && value.officialScore && typeof value.officialScore === 'object' && !Array.isArray(value.officialScore)
+    && hasExactKeys(value.officialScore, FOCUSED_SCORE_KEYS)
+    && SCORE_STATUSES.has(value.officialScore.status)
+    && validText(value.officialScore.label, 160)
+    && validTextArray(value.reasons, 6)
+    && validTextArray(value.checks, 8)
+    && /^\d{4}-\d{2}-\d{2}$/.test(value.applicationDate);
+}
+
 export function isValidResultSummary(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || !hasExactKeys(value, TOP_LEVEL_KEYS)) return false;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (value.v === 3) {
+    if (!hasExactKeys(value, FOCUSED_TOP_LEVEL_KEYS) || !validText(value.event, 120) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date)) return false;
+    if (!validText(value.title, 300) || !validFocusedItem(value.focus) || !validTextArray(value.cautions, 20)) return false;
+    const raw = JSON.stringify(value);
+    return raw.length <= 48_000 && !PRIVATE_KEY.test(raw);
+  }
+  if (!hasExactKeys(value, TOP_LEVEL_KEYS)) return false;
   if ((value.v !== 1 && value.v !== 2) || !validText(value.event, 120) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date)) return false;
   if (!validText(value.household, 120, true)) return false;
   if (!value.counts || typeof value.counts !== 'object' || Array.isArray(value.counts)) return false;

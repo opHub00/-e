@@ -19,6 +19,8 @@ const choice = async (page, testId, label) => page.getByTestId(testId).getByRole
 const next = page => page.getByRole('button', { name: /^(다음|분석 시작하기)$/ }).click();
 
 async function noOverflow(page, step) {
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(350);
   const metrics = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
     clientWidth: document.documentElement.clientWidth,
@@ -30,9 +32,9 @@ async function noOverflow(page, step) {
   if (metrics.scrollWidth > metrics.clientWidth + 1) {
     const offenders = await page.evaluate(() => [...document.querySelectorAll('body *')].map(element => {
       const rect = element.getBoundingClientRect();
-      return { tag: element.tagName, testId: element.getAttribute('data-testid'), text: (element.textContent ?? '').trim().slice(0, 60), left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) };
-    }).filter(item => item.right > document.documentElement.clientWidth + 1 || item.left < -1).slice(0, 8));
-    throw new Error(`${step}: horizontal overflow ${metrics.scrollWidth}/${metrics.clientWidth} ${JSON.stringify(offenders)}`);
+      return { tag: element.tagName, testId: element.getAttribute('data-testid'), text: (element.textContent ?? '').trim().slice(0, 60), left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), scrollWidth: element.scrollWidth, clientWidth: element.clientWidth, overflowX: getComputedStyle(element).overflowX };
+    }).filter(item => item.right > document.documentElement.clientWidth + 1 || item.left < -1 || item.scrollWidth > item.clientWidth + 1).sort((a, b) => (b.scrollWidth - b.clientWidth) - (a.scrollWidth - a.clientWidth)).slice(0, 12));
+    throw new Error(`${step}: horizontal overflow ${metrics.scrollWidth}/${metrics.clientWidth} metrics=${JSON.stringify(metrics)} offenders=${JSON.stringify(offenders)}`);
   }
 }
 

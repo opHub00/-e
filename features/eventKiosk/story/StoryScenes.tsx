@@ -82,7 +82,24 @@ export function SceneSupplies({ p, data }: SceneProps) {
           </View>
         );
       })}
-      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 276, width: 400 }, rise(seg(p, 0.82, 1), 6)]}>
+      {/* 특별공급(앞 네 유형)·일반공급 합계. 공고 공급 내역(규칙 패키지 inventory) 그대로. */}
+      {(() => {
+        const groups = seg(p, 0.76, 0.92);
+        const specialLeft = centers[0] - cardW / 2;
+        const specialWidth = centers[3] + cardW / 2 - specialLeft;
+        const generalLeft = centers[4] - cardW / 2;
+        return (
+          <>
+            <Animated.View testID="story-total-special" style={[styles.abs, styles.group, { left: specialLeft, top: 262, width: specialWidth }, { opacity: groups }]}>
+              <Text style={styles.groupText}>특별공급 {data.totals.special}세대</Text>
+            </Animated.View>
+            <Animated.View testID="story-total-general" style={[styles.abs, styles.group, { left: generalLeft, top: 262, width: cardW }, { opacity: groups }]}>
+              <Text style={styles.groupText}>일반공급 {data.totals.general}세대</Text>
+            </Animated.View>
+          </>
+        );
+      })()}
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 312, width: 400 }, rise(seg(p, 0.86, 1), 6)]}>
         <MaterialIcons name="info-outline" size={18} color={k.colors.textMuted} />
         <Text style={styles.note}>유형마다 자격 기준과 선정 방식이 달라요</Text>
       </Animated.View>
@@ -268,8 +285,14 @@ export function SceneResult({ p, data }: SceneProps) {
           ))}
         </View>
         <Animated.View style={[styles.dateRow, { opacity: seg(p, 0.8, 1) }]}>
-          <MaterialIcons name="event" size={18} color={k.colors.primary} />
-          <Text style={styles.dateText}>특별공급 접수 {example.date}</Text>
+          <View style={styles.dateLine}>
+            <MaterialIcons name="event" size={18} color={k.colors.primary} />
+            <Text style={styles.dateText} testID="story-date-special">특별공급 접수 {example.date}</Text>
+          </View>
+          <View style={styles.dateLine}>
+            <MaterialIcons name="campaign" size={18} color={k.colors.textMuted} />
+            <Text style={styles.dateMuted} testID="story-date-winner">당첨자 발표 {example.winnerAnnouncement}</Text>
+          </View>
         </Animated.View>
       </Animated.View>
     </View>
@@ -323,7 +346,7 @@ const styles = StyleSheet.create({
   compareBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
   compareBadgeText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
   exampleNote: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted, textAlign: 'center' },
-  result: { ...card, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 16, gap: 10 },
+  result: { ...card, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 14, gap: 8 },
   resultTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: k.colors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   eyebrowText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.onPrimary },
@@ -343,6 +366,10 @@ const styles = StyleSheet.create({
   reason: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   checkDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: k.colors.success, alignItems: 'center', justifyContent: 'center' },
   reasonText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: k.colors.hairline },
+  dateRow: { gap: 4, paddingTop: 8, borderTopWidth: 1, borderTopColor: k.colors.hairline },
+  dateLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dateMuted: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.textMuted },
+  group: { borderTopWidth: 2, borderTopColor: k.colors.primary, paddingTop: 6, alignItems: 'center' },
+  groupText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.primary },
   dateText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.primary },
 });

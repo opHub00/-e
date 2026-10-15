@@ -19,6 +19,7 @@ export const EVENT_CHAT_SYSTEM_PROMPT = `당신은 완판e 제주 행사 상담 
 
 절대 규칙:
 - 자격, 공급단계, 공식 점수, 추천유형, 추천순위, 공급 세대수, 접수일은 이미 deterministic engine이 확정했습니다. 변경하거나 다시 계산하지 마세요.
+- 일정 질문은 snapshot의 schedule만 사용하세요. 날짜를 추측하거나 다른 공고 일정을 섞지 마세요.
 - 입력에 없는 조건·예외·점수·서류·사실을 만들지 마세요.
 - 당첨확률, 경쟁률, 당첨 가능성의 높고 낮음을 계산하거나 추정하지 마세요. 질문받으면 현재 공고 결과만으로는 추정할 수 없다고 답하세요.
 - '추가 확인 필요', '정보 추가 확인', '서류 확인 필요'를 '신청 가능'으로 바꾸지 마세요.
@@ -105,7 +106,12 @@ function isComparison(value: unknown): boolean {
 }
 
 export function isEventChatContext(value: unknown): value is EventChatContext {
-  if (!object(value) || !onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'focus', 'recommendation']) || value.schemaVersion !== 1 || (value.scope !== 'SAMDO' && value.scope !== 'PORTFOLIO') || typeof value.listingTitle !== 'string') return false;
+  if (!object(value) || !onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation']) || value.schemaVersion !== 1 || (value.scope !== 'SAMDO' && value.scope !== 'PORTFOLIO') || typeof value.listingTitle !== 'string') return false;
+  if (value.schedule !== null) {
+    if (!object(value.schedule) || !onlyKeys(value.schedule, ['special', 'generalFirst', 'generalSecond', 'winnerAnnouncement', 'documentSubmissionStart', 'documentSubmissionEnd', 'contractStart', 'contractEnd'])) return false;
+    if (!Object.values(value.schedule).every(item => typeof item === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item))) return false;
+  }
+  if (value.scope === 'SAMDO' && value.schedule === null) return false;
   const focus = value.focus;
   const recommendation = value.recommendation;
   if (!object(focus) || !onlyKeys(focus, ['supplyType', 'eligibility', 'priorityStage', 'officialScore', 'matchedAdvantages', 'missingInformation', 'cautions', 'evidence', 'applicationDate', 'supplyCount']) || typeof focus.supplyType !== 'string' || typeof focus.eligibility !== 'string' || (focus.priorityStage !== null && typeof focus.priorityStage !== 'string')) return false;
@@ -120,7 +126,18 @@ export function isEventChatContext(value: unknown): value is EventChatContext {
   return !containsForbiddenShape(value) && JSON.stringify(value).length <= 11_000;
 }
 
-function isFallback(value: unknown): value is EventChatFallback {
+function withoutAllowedScheduleDates(value: string, context: EventChatContext): string {
+  if (!context.schedule) return value;
+  return Object.values(context.schedule).reduce(
+    (text, date) => text.replaceAll(date, '').replaceAll(date.replaceAll('-', '.'), ''),
+    value,
+  );
+}
+
+function isFallback(value: unknown, context: EventChatContext): value is EventChatFallback {
+  const text = object(value) && typeof value.text === 'string'
+    ? [value.text, ...(Array.isArray(value.detail) ? value.detail : [])].join('\n')
+    : '';
   return object(value)
     && onlyKeys(value, ['text', 'detail'])
     && typeof value.text === 'string'
@@ -128,12 +145,15 @@ function isFallback(value: unknown): value is EventChatFallback {
     && value.text.length <= 2_000
     && (value.detail === undefined || strings(value.detail, 8))
     && !containsForbiddenShape(value)
-    && !containsDirectIdentifier([value.text, ...(Array.isArray(value.detail) ? value.detail : [])].join('\n'));
+    // A deterministic schedule answer may repeat only dates already fixed in the
+    // presentation-safe Samdo schedule. Any other exact date remains blocked as PII.
+    && !containsDirectIdentifier(withoutAllowedScheduleDates(text, context));
 }
 
 export function parseEventChatRequest(value: unknown): EventChatRequest | null {
   if (!object(value) || !onlyKeys(value, ['question', 'history', 'context', 'fallback']) || typeof value.question !== 'string' || value.question.length > EVENT_CHAT_MAX_QUESTION_CHARS) return null;
-  if (!isEventChatContext(value.context) || !isFallback(value.fallback) || !Array.isArray(value.history)) return null;
+  if (!isEventChatContext(value.context) || !Array.isArray(value.history)) return null;
+  if (!isFallback(value.fallback, value.context)) return null;
   if (!value.history.every(turn => object(turn) && onlyKeys(turn, ['role', 'text']) && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.text === 'string')) return null;
   const history = boundedEventChatHistory(value.history as EventChatRequest['history']);
   if (history.length > EVENT_CHAT_MAX_HISTORY_TURNS || history.reduce((sum, turn) => sum + turn.text.length, 0) > EVENT_CHAT_MAX_HISTORY_CHARS) return null;

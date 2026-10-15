@@ -64,8 +64,16 @@ export type SamdoDeepRulePackage = {
   sourceStatus: RuleSourceStatus;
   announcementDate: string;
   applicationDates: { special: string; generalFirst: string; generalSecond: string };
+  schedule: {
+    special: string;
+    generalFirst: string;
+    generalSecond: string;
+    winnerAnnouncement: string;
+    documentSubmission: { start: string; end: string };
+    contract: { start: string; end: string };
+  };
   document: { id: string; fileName: string; sha256: string; isOfficial: boolean };
-  inventory: { total: number; units49: number; units59: number };
+  inventory: { total: number; units49: number; units59: number; special: number; general: number };
   supplies: SamdoSupplyPackage[];
 };
 

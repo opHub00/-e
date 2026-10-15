@@ -37,6 +37,8 @@ export type ApplicantInfo = {
   /** 그 지역에 산 지 얼마나 됐는가(개월). 모르면 null. */
   residenceMonths: number | null;
   isHouseholdHead: YesNo;
+  /** 만 19세 미만 신청자의 자녀 양육·형제자매 부양 세대주 예외. */
+  minorHouseholdHeadException: YesNo;
   /** 본인과 세대원 모두 지금 집이 없는가. */
   householdNoHome: YesNo;
   /** 본인과 세대원 모두 지금까지 집을 가진 적이 없는가. 질문 문구가 세대까지 묻기 때문에 세대 사실로 쓴다. */
@@ -161,6 +163,7 @@ export const emptyAnswers = (): KioskAnswers => ({
     livesInEventRegion: null,
     residenceMonths: null,
     isHouseholdHead: null,
+    minorHouseholdHeadException: null,
     householdNoHome: null,
     neverOwnedHome: null,
     winningHistory: null,
@@ -240,8 +243,8 @@ export const hasFamilyStep = (type: HouseholdType | null): boolean =>
 
 export function inputSteps(type: HouseholdType | null): InputStep[] {
   return hasFamilyStep(type)
-    ? ['household', 'applicant', 'family', 'finance', 'subscription']
-    : ['household', 'applicant', 'finance', 'subscription'];
+    ? ['household', 'applicant', 'family', 'subscription', 'finance']
+    : ['household', 'applicant', 'subscription', 'finance'];
 }
 
 /** 단계별 진행률. 화면 위 진행 표시가 쓴다. */

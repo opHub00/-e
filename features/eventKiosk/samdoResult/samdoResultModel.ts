@@ -71,7 +71,7 @@ export type SamdoResultView = {
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-/** '2026-10-12' → '10월 12일(월)'. */
+/** '2026-11-16' → '11월 16일(월)'. */
 export function formatSamdoDate(iso: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!match) return iso;
@@ -251,14 +251,14 @@ export function buildSamdoResultView(
   const alternatives = rec.alternatives.filter(item => !shown.has(item.supplyType)).map(card);
   const lowerPriorityTypes = rec.lowerPriorityTypes.filter(item => !shown.has(item.supplyType)).map(card);
   const notes = [
-    rec.sourceStatus === 'OFFICIAL_VERIFIED' ? null : '모집공고 검토본을 기준으로 계산한 예상 결과예요. 최종 공고에서 기준이 달라질 수 있어요.',
+    rec.sourceStatus === 'OFFICIAL_VERIFIED' ? null : '사용자가 제공한 최종1.8 공고문을 기준으로 계산했어요. 접수 전 공급기관 공개 원문도 확인해 주세요.',
     '공급 세대수는 공고 정보일 뿐 당첨 가능성을 뜻하지 않아요.',
     focus?.officialScore.status === 'AVAILABLE' ? '가점이 같으면 추첨으로 정해요.' : null,
   ].filter((line): line is string => Boolean(line));
   return {
     title: `완판e가 ${SAMDO_EVENT.shortTitle} 청약을 분석했어요`,
     subtitle: SAMDO_EVENT.title,
-    sourceNote: rec.sourceStatus === 'OFFICIAL_VERIFIED' ? '공식 공고 기준' : '공고 검토본 기준 · 공식 게시 전',
+    sourceNote: rec.sourceStatus === 'OFFICIAL_VERIFIED' ? '공식 공고 기준' : '최종1.8 사용자 제공본 기준 · 공개 원문 별도 확인',
     hero,
     officialCriteria: rawFocus && detail ? buildOfficialCriteria(rawFocus, detail.input) : [],
     why: why.slice(0, 5),

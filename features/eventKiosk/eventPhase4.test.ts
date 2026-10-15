@@ -136,10 +136,7 @@ test('common required questions are in the base flow instead of appearing late',
     ...visibleQuestionKeysForStep(answers, 'subscription'),
   ]);
   for (const key of COMMON_REQUIRED_QUESTION_KEYS) assert.ok(base.has(key), `${key} must be asked before analysis`);
-  const plan = createAdaptiveQuestionPlan(evaluateEvent(event, answers, REF).assessment.results, answers, [], {
-    'adaptive.vehicleValueKrw': 'DOES_NOT_KNOW',
-  });
-  assert.ok(!plan.questions.some(question => question.id === 'vehicleValueKrw'), 'the common vehicle fact is collected in finance');
+  assert.ok(!base.has('adaptive.vehicleValueKrw'), 'Samdo final 1.8 uses total assets and does not ask a separate vehicle question');
 });
 
 test('explicit DOES_NOT_KNOW and skipped base questions are not asked again in one session', async () => {
@@ -161,7 +158,7 @@ test('explicit DOES_NOT_KNOW and skipped base questions are not asked again in o
   assert.equal(state.answers.household.childExpectationStatus, 'DOES_NOT_KNOW');
   assert.equal(state.answerStates['applicant.monthlyIncome'], 'DOES_NOT_KNOW');
   assert.equal(state.answerStates['household.totalAssets'], 'DOES_NOT_KNOW');
-  assert.equal(state.answerStates['adaptive.vehicleValueKrw'], 'DOES_NOT_KNOW');
+  assert.equal(state.answerStates['adaptive.vehicleValueKrw'], undefined);
 });
 
 test('parent information reasons stay distinct without inventing a parent asset amount', () => {

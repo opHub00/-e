@@ -28,9 +28,9 @@ test('story data is scoped to Samdo only and carries no personal values', () => 
   const data = storyDataFrom(load.event);
   assert.equal(data.listings.length, 1);
   assert.equal(data.listings[0]?.title, SAMDO_EVENT.title);
-  assert.equal(data.listings[0]?.supplyCount, 6);
-  assert.deepEqual(data.supplies, ['청년 특별공급', '신혼부부 특별공급', '생애최초 특별공급', '신생아 특별공급', '일반공급', '기관추천 특별공급']);
-  assert.equal(data.featured.schedule, '특별공급 10.12 · 일반공급 10.13~10.14');
+  assert.equal(data.listings[0]?.supplyCount, 5);
+  assert.deepEqual(data.supplies, ['청년 특별공급', '신혼부부 특별공급', '생애최초 특별공급', '신생아 특별공급', '일반공급']);
+  assert.equal(data.featured.schedule, '특별공급 11.16 · 일반공급 11.17~11.18');
   assert.equal(data.region, SAMDO_EVENT.shortTitle);
   assert.deepEqual(STORY_PROFILE_FIELDS.map(field => field.label), ['나이', '혼인', '자녀', '무주택', '청약통장']);
   assert.ok(!/\d{4}-\d{2}-\d{2}|만원|원$/.test(JSON.stringify(STORY_PROFILE_FIELDS)), 'profile fields are labels only');

@@ -1,4 +1,4 @@
-import rulePackage from '../../../data/assessment-rules/samdo-2026-v1.7.json' with { type: 'json' };
+import rulePackage from '../../../data/assessment-rules/samdo-2026-v1.8.json' with { type: 'json' };
 import { validateImportPackage } from '../../applicationAssessment/server/importPackage.ts';
 import type { AnnouncementRules } from '../../applicationAssessment/types.ts';
 import type { KioskAnswers } from '../model.ts';

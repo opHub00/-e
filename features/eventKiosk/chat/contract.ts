@@ -26,6 +26,17 @@ export type EventChatComparison = {
   officialScore: string;
 };
 
+export type EventChatSchedule = {
+  special: string;
+  generalFirst: string;
+  generalSecond: string;
+  winnerAnnouncement: string;
+  documentSubmissionStart: string;
+  documentSubmissionEnd: string;
+  contractStart: string;
+  contractEnd: string;
+};
+
 /**
  * Browser -> event chat function boundary.
  *
@@ -36,6 +47,7 @@ export type EventChatContext = {
   schemaVersion: 1;
   scope: 'SAMDO' | 'PORTFOLIO';
   listingTitle: string;
+  schedule: EventChatSchedule | null;
   focus: {
     supplyType: string;
     eligibility: string;
@@ -80,4 +92,3 @@ export const EVENT_CHAT_MAX_REQUEST_CHARS = 16_000;
 export const EVENT_CHAT_MAX_QUESTION_CHARS = 500;
 export const EVENT_CHAT_MAX_HISTORY_TURNS = 6;
 export const EVENT_CHAT_MAX_HISTORY_CHARS = 3_000;
-

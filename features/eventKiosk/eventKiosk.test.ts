@@ -55,7 +55,7 @@ test('loads only the frozen 2026-10 Jeju dataset with five listings and nine lis
 });
 
 test('input flow and date helpers remain stable', () => {
-  assert.deepEqual(inputSteps('single'), ['household', 'applicant', 'finance', 'subscription']);
+  assert.deepEqual(inputSteps('single'), ['household', 'applicant', 'subscription', 'finance']);
   assert.ok(inputSteps('couple').includes('family'));
   const value = emptyAnswers();
   assert.ok(stepBlocker(value, 'household'));
@@ -146,9 +146,9 @@ test('event presentation is scoped to the single Samdo announcement without chan
   assert.equal(event.config.copy.landingTitle, SAMDO_EVENT_COPY.landingTitle);
   assert.equal(event.config.copy.landingCta, '내 신청유형 분석하기');
   assert.equal(SAMDO_EVENT.resultPath, '/event/samdo');
-  assert.deepEqual(SAMDO_EVENT.inventory, { total: 32, units49: 8, units59: 24 });
+  assert.deepEqual(SAMDO_EVENT.inventory, { total: 32, units49: 8, units59: 24, special: 26, general: 6 });
   assert.equal(SAMDO_EVENT.recommendationSupplies.length, 5);
-  assert.equal(SAMDO_EVENT.informationOnlySupplies.length, 1);
+  assert.equal(SAMDO_EVENT.informationOnlySupplies.length, 0);
   assert.equal([...SAMDO_EVENT.recommendationSupplies, ...SAMDO_EVENT.informationOnlySupplies].reduce((sum, supply) => sum + supply.count, 0), 32);
   const copy = JSON.stringify(event.config.copy);
   for (const forbidden of ['공식 제주 공고 5개', '제주 공고 9개', '나에게 맞는 여러 청약']) assert.equal(copy.includes(forbidden), false, forbidden);

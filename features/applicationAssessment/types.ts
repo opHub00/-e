@@ -21,6 +21,8 @@ export type AssessmentInput = {
     accountKindEligible: boolean;
     firstRank: boolean;
     isHouseholdHead: boolean;
+    /** 만 19세 미만 신청자가 자녀를 양육하거나 형제·자매를 부양하는 세대주인지 여부. */
+    minorHouseholdHeadException: boolean;
     householdNoWinningFiveYears: boolean;
     incomeHouseholdSize: number;
     plannedMarriageWithinDeadline: boolean;

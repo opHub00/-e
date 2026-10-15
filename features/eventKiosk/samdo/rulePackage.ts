@@ -1,8 +1,9 @@
 import type { Evidence } from '../../applicationAssessment/types.ts';
 import type { SamdoDeepRulePackage, SamdoRuleCategory, SamdoRuleSummary, SamdoSupplyType } from './types.ts';
 
-const FILE = '(VER1.7_부동산원 제출용_공통) 삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp';
-const HASH = 'bd67d7ee6c9b9dbbe043f9c966679c791185ba0f21ae80050a33a489112e8763';
+const FILE = '(최종1.8)삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp';
+const HASH = '5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2';
+const DOCUMENT_ID = '18f88d9e-b4a4-4cf1-97e1-8b1838e81d01';
 
 function evidence(id: string, section: string, paragraphs: string, excerpt: string, tableLabel?: string): Evidence {
   return {
@@ -10,18 +11,27 @@ function evidence(id: string, section: string, paragraphs: string, excerpt: stri
     source: FILE,
     section,
     label: `${section} (${paragraphs})`,
-    documentId: 'bade0617-63c6-4f61-86bf-6cd5ae17d101',
+    documentId: DOCUMENT_ID,
     tableLabel,
     textExcerpt: excerpt,
     locator: { parser: 'HWP5_RECORDS', paragraphRange: paragraphs, sha256: HASH },
   };
 }
 
+const FINAL_PARAGRAPHS: Record<SamdoSupplyType, Partial<Record<SamdoRuleCategory, string>>> = {
+  YOUTH: { APPLICANT: '1568-1579', NO_HOME: '1568-1579', SUBSCRIPTION: '1570', INCOME: '1578-1579', ASSETS: '923-926,996-1009', RESTRICTION: '1702-1703', SPECIAL_SUPPLY_HISTORY: '1702-1703', STAGE: '1584-1692', SCORE: '1592-1692' },
+  NEWLYWED: { APPLICANT: '1713-1718', HOUSEHOLD: '1713-1718,1949', SUBSCRIPTION: '1716', ASSETS: '906-926,1000-1009', RESTRICTION: '1956-1963', SPECIAL_SUPPLY_HISTORY: '1956-1963', CHILD_BIRTH: '224-233,1495-1528', STAGE: '1827-1944', SCORE: '1830-1922' },
+  FIRST_HOME: { APPLICANT: '1974-1979', HOUSING_HISTORY: '151,1974', SUBSCRIPTION: '1975', INCOME: '1976-1979,2045-2051', ASSETS: '906-926,1000-1009', RESTRICTION: '2062-2063', SPECIAL_SUPPLY_HISTORY: '2062-2063', STAGE: '2045-2051' },
+  NEWBORN: { RESIDENCE: '308,783-788', CHILD_BIRTH: '2080-2084', NO_HOME: '2080-2084', SUBSCRIPTION: '2081', INCOME: '2149-2152', ASSETS: '906-926,1000-1009', RESTRICTION: '2254-2259', SPECIAL_SUPPLY_HISTORY: '2254-2259', STAGE: '2149-2244', SCORE: '2156-2239' },
+  GENERAL: { RESIDENCE: '308,783-788', NO_HOME: '2269-2272', SUBSCRIPTION: '2270,2343-2345', INCOME: '2337-2364', ASSETS: '906-926,1000-1009', RESTRICTION: '2376,2392-2401', STAGE: '2336-2365', SCORE: '2346-2359' },
+  INSTITUTIONAL_RECOMMENDATION: {},
+};
+
 const common = (type: SamdoSupplyType, category: SamdoRuleCategory, label: string, paragraphs: string, excerpt: string): SamdoRuleSummary => ({
   id: `samdo.deep.${type.toLowerCase()}.${category.toLowerCase()}`,
   category,
   label,
-  evidence: evidence(`samdo.deep.ev.${type.toLowerCase()}.${category.toLowerCase()}`, `${type} 신청자격`, paragraphs, excerpt),
+  evidence: evidence(`samdo.deep.ev.${type.toLowerCase()}.${category.toLowerCase()}`, `${type} 신청자격`, FINAL_PARAGRAPHS[type][category] ?? paragraphs, excerpt),
 });
 
 const restriction = (type: SamdoSupplyType) => common(type, 'RESTRICTION', '재당첨 제한 및 부적격 당첨 제한 기간이 아니어야 해요.', '2737-2743', '재당첨 제한기간 또는 부적격 당첨 제한기간 내인 신청자·세대는 신청할 수 없습니다.');
@@ -29,17 +39,22 @@ const residence = (type: SamdoSupplyType) => common(type, 'RESIDENCE', '공고�
 const assets = (type: SamdoSupplyType) => common(type, 'ASSETS', '세대 총자산이 공고 기준 이하여야 해요.', '1190-1219', '신혼부부·생애최초·신생아·일반공급은 무주택세대구성원 전원의 총자산을 검증하며 기본 기준은 362백만원 이하입니다.');
 
 export const SAMDO_DEEP_RULE_PACKAGE: SamdoDeepRulePackage = {
-  id: 'samdo-1-deep-analysis-v1.7',
-  baseRuleSetId: 'bade0617-63c6-4f61-86bf-6cd5ae17a101',
-  announcementId: 'bade0617-63c6-4f61-86bf-6cd5ae17b101',
-  version: 'VER1.7-hwp-deep-1',
-  listingId: 'samdo-1-2026-ver1.7',
+  id: 'samdo-1-deep-analysis-final-1.8',
+  baseRuleSetId: '18f88d9e-b4a4-4cf1-97e1-8b1838e81c01',
+  announcementId: '18f88d9e-b4a4-4cf1-97e1-8b1838e81a01',
+  version: 'FINAL-1.8-user-source-1',
+  listingId: 'samdo-1-2026-final-1.8',
   title: '삼도이동 1지구 토지임대부 분양주택',
   sourceStatus: 'DRAFT_SOURCE_VERIFIED',
-  announcementDate: '2026-09-14',
-  applicationDates: { special: '2026-10-12', generalFirst: '2026-10-13', generalSecond: '2026-10-14' },
-  document: { id: 'bade0617-63c6-4f61-86bf-6cd5ae17d101', fileName: FILE, sha256: HASH, isOfficial: false },
-  inventory: { total: 32, units49: 8, units59: 24 },
+  announcementDate: '2026-10-27',
+  applicationDates: { special: '2026-11-16', generalFirst: '2026-11-17', generalSecond: '2026-11-18' },
+  schedule: {
+    special: '2026-11-16', generalFirst: '2026-11-17', generalSecond: '2026-11-18', winnerAnnouncement: '2026-11-24',
+    documentSubmission: { start: '2026-11-30', end: '2026-12-04' },
+    contract: { start: '2027-01-25', end: '2027-01-29' },
+  },
+  document: { id: DOCUMENT_ID, fileName: FILE, sha256: HASH, isOfficial: false },
+  inventory: { total: 32, units49: 8, units59: 24, special: 26, general: 6 },
   supplies: [
     {
       supplyType: 'YOUTH', label: '청년 특별공급', supplyCount: 5, autoRecommend: true, assessmentMode: 'RULE_ENGINE',
@@ -48,7 +63,7 @@ export const SAMDO_DEEP_RULE_PACKAGE: SamdoDeepRulePackage = {
         common('YOUTH', 'NO_HOME', '신청자 본인이 현재와 과거 모두 무주택이어야 해요.', '1882-1898', '신청자 본인의 무주택 및 과거 소유 이력을 검증합니다.'),
         common('YOUTH', 'SUBSCRIPTION', '청약통장 6개월·6회 이상이 필요해요.', '1882-1898', '입주자저축 가입 6개월 및 6회 이상 납입'),
         common('YOUTH', 'INCOME', '신청자 월평균소득이 공고 기준 이하여야 해요.', '1325-1357', '청년 소득기준은 신청자 본인을 대상으로 합니다.'),
-        common('YOUTH', 'ASSETS', '본인 2억7,600만원, 부모 10억3,400만원 이하의 자산기준을 확인해요.', '1190-1219', '청년은 신청자 본인과 부모 자산을 각각 검증합니다.'),
+        common('YOUTH', 'ASSETS', '본인 2억7,600만원, 부모 10억3,500만원 이하의 자산기준을 확인해요.', '923-926,996-1009', '청년은 신청자 본인과 부모 자산을 각각 검증합니다.'),
         restriction('YOUTH'),
         common('YOUTH', 'SPECIAL_SUPPLY_HISTORY', '과거 특별공급 당첨 이력이 없어야 해요.', '289-292', '청년 특별공급은 신청자 본인의 특별공급 당첨 이력을 확인합니다.'),
         common('YOUTH', 'STAGE', '소득활동과 소득세 납부기간으로 우선공급 여부를 구분해요.', '1920-1969', '우선공급과 일반공급을 구분합니다.'),
@@ -95,7 +110,7 @@ export const SAMDO_DEEP_RULE_PACKAGE: SamdoDeepRulePackage = {
       ],
     },
     {
-      supplyType: 'GENERAL', label: '일반공급', supplyCount: 3, autoRecommend: true, assessmentMode: 'DEDICATED',
+      supplyType: 'GENERAL', label: '일반공급', supplyCount: 6, autoRecommend: true, assessmentMode: 'DEDICATED',
       rules: [
         residence('GENERAL'),
         common('GENERAL', 'NO_HOME', '세대구성원 전원이 무주택이어야 해요.', '2607-2611', '일반공급 무주택세대구성원 기준'),
@@ -105,10 +120,6 @@ export const SAMDO_DEEP_RULE_PACKAGE: SamdoDeepRulePackage = {
         common('GENERAL', 'STAGE', '신생아 우선 50%·1순위 우선 30%·잔여 추첨으로 구분해요.', '2674-2707', '일반공급 3단계 선정방법'),
         common('GENERAL', 'SCORE', '공식 점수는 없고, 1순위 경쟁 시 무주택 3년 이상과 저축총액 순차를 적용해요.', '2688-2704', '1순위 내 동일지역 경쟁 시 당첨자 선정순차'),
       ],
-    },
-    {
-      supplyType: 'INSTITUTIONAL_RECOMMENDATION', label: '기관추천 특별공급', supplyCount: 3, autoRecommend: false, assessmentMode: 'INFORMATION_ONLY',
-      rules: [common('INSTITUTIONAL_RECOMMENDATION', 'APPLICANT', '관계기관 추천 대상자만 신청할 수 있어요.', '2582-2600', '기관이 선정해 사업주체에 통보한 확정·예비대상자만 신청할 수 있습니다.')],
     },
   ],
 };

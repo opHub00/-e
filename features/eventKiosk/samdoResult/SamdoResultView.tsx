@@ -291,7 +291,7 @@ function InformationOnly({ model }: { model: Model }) {
   if (!model.informationOnly.length) return null;
   return (
     <Card testID="samdo-information-only">
-      <SectionTitle icon="info-outline" title="정보 제공만 하는 유형" hint="기관추천은 일반 사용자 자동 추천과 순위에서 제외해요." />
+      <SectionTitle icon="info-outline" title="정보 제공만 하는 유형" hint="자동 판정 대상이 아닌 유형은 추천과 순위에서 제외해요." />
       <View style={{ gap: d.cardGap - 6 }}>
         {model.informationOnly.map(item => (
           <View key={item.title} testID="samdo-info-only" style={styles.rejectRow}>

@@ -51,6 +51,7 @@ function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriod
     accountKindEligible: d.accountKindEligible,
     firstRank: d.firstRank,
     isHouseholdHead:d.isHouseholdHead,
+    minorHouseholdHeadException:d.minorHouseholdHeadException,
     householdNoWinningFiveYears:d.householdNoWinningFiveYears,
     incomeHouseholdSize: incomeSize,
     householdMemberCount: known(p.household.memberCount),

@@ -43,14 +43,14 @@ function childUnderTwo(input: AssessmentInput): boolean | undefined {
   const children = input.details.children;
   if (!children) return undefined;
   if (children.some(child => !child.unborn && !validDate(child.birthDate))) return undefined;
-  return children.some(child => child.unborn || child.birthDate! >= '2024-09-14');
+  return children.some(child => child.unborn || child.birthDate! >= '2024-10-27');
 }
 
 function minorChildren(input: AssessmentInput): number | undefined {
   const children = input.details.children;
   if (!children) return undefined;
   if (children.some(child => !child.unborn && !validDate(child.birthDate))) return undefined;
-  return children.filter(child => child.unborn || child.birthDate! > '2007-09-14').length;
+  return children.filter(child => child.unborn || child.birthDate! > '2007-10-27').length;
 }
 
 function householdNoHome(input: AssessmentInput): boolean | undefined {
@@ -131,7 +131,7 @@ function assetCheck(input: AssessmentInput): { check: Check; evidence: string[] 
   const recent = postBirthCount(input, '2023-03-28');
   if (amount === undefined) return { check: { value: null, fact: 'totalAssets', pass: '', fail: '세대 총자산을 확인해야 해요.' }, evidence: [] };
   if (amount <= 362_000_000) return { check: { value: true, fact: 'totalAssets', pass: '세대 총자산 기본기준 충족', fail: '' }, evidence: [] };
-  const relaxed = recent === undefined ? undefined : recent >= 2 ? 431_000_000 : recent === 1 ? 396_000_000 : 362_000_000;
+  const relaxed = recent === undefined ? undefined : recent >= 2 ? 431_000_000 : recent === 1 ? 397_000_000 : 362_000_000;
   if (relaxed === undefined) return { check: { value: null, fact: 'children', pass: '', fail: '출산가구 자산 완화 여부를 확인해야 해요.' }, evidence: [] };
   if (amount <= relaxed && recent! > 0) return {
     check: { value: false, fact: 'totalAssets', pass: '', fail: '기본 자산기준을 초과해요.', evidence: '출산가구 완화 자산기준 적용 증빙이 필요해요.' },
@@ -288,23 +288,11 @@ function mapGeneric(result: ApplicationAssessmentResult): SamdoSupplyEvaluation 
   };
 }
 
-function institutional(): SamdoSupplyEvaluation {
-  const supply = SAMDO_DEEP_RULE_PACKAGE.supplies.find(item => item.supplyType === 'INSTITUTIONAL_RECOMMENDATION')!;
-  return {
-    supplyType: supply.supplyType, supplyLabel: supply.label, eligibility: 'CONDITIONAL', stage: 'INFORMATION_ONLY',
-    stageLabel: '관계기관 추천 대상자 정보 제공', officialScore: { status: 'NOT_APPLICABLE' }, supplyCount: supply.supplyCount,
-    applicationDate: SAMDO_DEEP_RULE_PACKAGE.applicationDates.special,
-    matchedAdvantages: [], cautions: ['관계기관이 추천한 확정·예비대상자만 신청할 수 있어 자동 추천에서 제외해요.'],
-    evidenceRequired: ['추천기관의 대상자 선정·통보 여부를 확인해요.'], reasons: ['일반 사용자 자동 추천 제외'],
-    failedReasons: [], missingFacts: [], evidence: supply.rules.map(rule => rule.evidence), autoRecommend: false,
-  };
-}
-
 const STATUS_WEIGHT: Record<SamdoEligibility, number> = { ELIGIBLE: 4, EVIDENCE_REQUIRED: 3, CONDITIONAL: 2, INELIGIBLE: 0 };
 const STAGE_WEIGHT: Record<SamdoStage, number> = {
   PRIORITY: 6, NEWBORN_PRIORITY: 6, FIRST_RANK_PRIORITY: 5, GENERAL: 4, LOTTERY: 3, SECOND_RANK: 2, INFORMATION_ONLY: 0,
 };
-const ORDER: SamdoSupplyType[] = ['YOUTH', 'NEWLYWED', 'FIRST_HOME', 'NEWBORN', 'GENERAL', 'INSTITUTIONAL_RECOMMENDATION'];
+const ORDER: SamdoSupplyType[] = ['YOUTH', 'NEWLYWED', 'FIRST_HOME', 'NEWBORN', 'GENERAL'];
 
 function compare(a: SamdoSupplyEvaluation, b: SamdoSupplyEvaluation): number {
   const score = (item: SamdoSupplyEvaluation) => item.officialScore.status === 'AVAILABLE' ? item.officialScore.total : -1;
@@ -325,7 +313,7 @@ export function buildSamdoRecommendation(rules: AnnouncementRules, input: Assess
     throw new Error('Samdo rule package is not bound to this listing');
   }
   const generic = assessApplication(rules, input).map(mapGeneric);
-  const all = [...generic, evaluateNewborn(input, rules), evaluateGeneral(input, rules), institutional()];
+  const all = [...generic, evaluateNewborn(input, rules), evaluateGeneral(input, rules)];
   const ranked = [...all].sort(compare).map((item, index) => ({ ...item, rank: index + 1 }));
   const auto = ranked.filter(item => item.autoRecommend);
   const recommendedType = auto.find(item => item.eligibility === 'ELIGIBLE') ?? null;

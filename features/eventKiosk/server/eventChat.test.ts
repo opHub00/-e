@@ -8,6 +8,10 @@ const context: EventChatContext = {
   schemaVersion: 1,
   scope: 'SAMDO',
   listingTitle: '삼도이동 1지구 토지임대부 분양주택',
+  schedule: {
+    special: '2026-11-16', generalFirst: '2026-11-17', generalSecond: '2026-11-18', winnerAnnouncement: '2026-11-24',
+    documentSubmissionStart: '2026-11-30', documentSubmissionEnd: '2026-12-04', contractStart: '2027-01-25', contractEnd: '2027-01-29',
+  },
   focus: {
     supplyType: '신생아 특별공급',
     eligibility: '신청 가능',
@@ -23,7 +27,7 @@ const context: EventChatContext = {
     missingInformation: ['가족관계증명서 확인'],
     cautions: ['서류 제출 전 공고문을 다시 확인해요.'],
     evidence: [{ label: '신생아 특별공급 신청자격', section: '공고문 18쪽', page: 18 }],
-    applicationDate: '2026-10-12',
+    applicationDate: '2026-11-16',
     supplyCount: 11,
   },
   recommendation: {
@@ -71,6 +75,8 @@ test('event chat calls Gemini with only the bounded presentation-safe snapshot',
   assert.ok(!providerRequest.includes('010-1234-5678'));
   assert.ok(!providerRequest.includes('1990-01-02'));
   for (const forbidden of ['displayName', 'birthDate', 'monthlyIncome', 'totalAssets', 'factKey', 'rulePackage', 'qrToken']) assert.ok(!providerRequest.includes(forbidden), forbidden);
+  assert.ok(providerRequest.includes('2026-11-16'));
+  assert.ok(providerRequest.includes('2026-11-24'));
 });
 
 test('missing key, provider failure, unsafe probability, and grounding mismatch use deterministic fallback', async () => {
@@ -120,4 +126,17 @@ test('history and user-authored PII are bounded and redacted', () => {
   assert.ok(history.reduce((sum, item) => sum + item.text.length, 0) <= 3_000);
   const parsed = parseEventChatRequest(request('정상 질문'));
   assert.ok(parsed);
+});
+
+test('deterministic fallback may repeat only the public schedule dates', () => {
+  const scheduleFallback = request('신청은 언제부터 할 수 있어?');
+  scheduleFallback.fallback = {
+    text: '특별공급 2026.11.16, 일반공급 1순위 2026.11.17, 2순위 2026.11.18에 접수합니다.',
+    detail: ['당첨자 발표 2026.11.24', '서류접수 2026.11.30~2026.12.04', '계약체결 2027.01.25~2027.01.29'],
+  };
+  assert.ok(parseEventChatRequest(scheduleFallback));
+
+  const unrelatedDate = structuredClone(scheduleFallback);
+  unrelatedDate.fallback.text = '신청자의 날짜는 1990.01.02입니다.';
+  assert.equal(parseEventChatRequest(unrelatedDate), null);
 });

@@ -54,6 +54,16 @@ function samdoContext(chat: KioskChat): EventChatContext | null {
     schemaVersion: 1,
     scope: 'SAMDO',
     listingTitle: text(chat.context.listingTitle ?? SAMDO_EVENT.title),
+    schedule: {
+      special: SAMDO_EVENT.schedule.special,
+      generalFirst: SAMDO_EVENT.schedule.generalFirst,
+      generalSecond: SAMDO_EVENT.schedule.generalSecond,
+      winnerAnnouncement: SAMDO_EVENT.schedule.winnerAnnouncement,
+      documentSubmissionStart: SAMDO_EVENT.schedule.documentSubmission.start,
+      documentSubmissionEnd: SAMDO_EVENT.schedule.documentSubmission.end,
+      contractStart: SAMDO_EVENT.schedule.contract.start,
+      contractEnd: SAMDO_EVENT.schedule.contract.end,
+    },
     focus: {
       supplyType: text(focus.supplyLabel),
       eligibility: SAMDO_ELIGIBILITY_LABELS[focus.eligibility],
@@ -101,6 +111,7 @@ function portfolioContext(chat: KioskChat): EventChatContext | null {
     schemaVersion: 1,
     scope: 'PORTFOLIO',
     listingTitle: text(listing.title),
+    schedule: null,
     focus: {
       supplyType: text(result.supplyLabel),
       eligibility,

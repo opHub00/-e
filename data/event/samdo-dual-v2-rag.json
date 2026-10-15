@@ -1,0 +1,3237 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    {
+      "districtId": "samdo-1",
+      "title": "삼도이동 1지구 토지임대부 분양주택",
+      "managementNumber": "2026000434",
+      "fileName": "(최종1.8)삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
+      "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2"
+    },
+    {
+      "districtId": "samdo-2",
+      "title": "삼도이동 2지구 토지임대부 분양주택",
+      "managementNumber": "2026000435",
+      "fileName": "(최종1.8)삼도이동 2지구 토지임대부 분양주택 입주자모집공고문.hwp",
+      "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "samdo-1.overview",
+      "districtId": "samdo-1",
+      "section": "공급개요",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "1지구",
+        "위치",
+        "총 32세대",
+        "49㎡",
+        "59㎡"
+      ],
+      "textExcerpt": "▶ 공급위치 : (1지구) 제주특별자치도 제주시 삼도이동 1244-1 외 0필지\n▶ 공급대상 : (1지구) 토지임대부 분양주택 32호(전용면적 49㎡ 8세대, 59㎡ 24세대)",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 9,
+            "stream": "BodyText/Section0",
+            "offset": 5131
+          },
+          {
+            "index": 10,
+            "stream": "BodyText/Section0",
+            "offset": 5313
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.schedule",
+      "districtId": "samdo-1",
+      "section": "공급일정",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "신청일",
+        "특별공급",
+        "일반공급",
+        "당첨자발표",
+        "서류접수",
+        "계약"
+      ],
+      "textExcerpt": "■ 청약 및 계약 등 주요일정 안내\n2026.11.16.(월)\n2026.11.17.(화)\n2026.11.18.(수)\n2026.11.24.(화)\n2026.11.30.(월)~\n2026.12.04.(금)\n2027.01.25.(월)~\n2027.01.29.(금)",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 329,
+            "stream": "BodyText/Section0",
+            "offset": 87928
+          },
+          {
+            "index": 338,
+            "stream": "BodyText/Section0",
+            "offset": 89471
+          },
+          {
+            "index": 339,
+            "stream": "BodyText/Section0",
+            "offset": 89636
+          },
+          {
+            "index": 340,
+            "stream": "BodyText/Section0",
+            "offset": 89801
+          },
+          {
+            "index": 341,
+            "stream": "BodyText/Section0",
+            "offset": 89966
+          },
+          {
+            "index": 342,
+            "stream": "BodyText/Section0",
+            "offset": 90131
+          },
+          {
+            "index": 343,
+            "stream": "BodyText/Section0",
+            "offset": 90247
+          },
+          {
+            "index": 344,
+            "stream": "BodyText/Section0",
+            "offset": 90412
+          },
+          {
+            "index": 345,
+            "stream": "BodyText/Section0",
+            "offset": 90528
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.inventory",
+      "districtId": "samdo-1",
+      "section": "공급대상 및 공급세대수",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "공급세대",
+        "청년",
+        "신혼부부",
+        "신생아",
+        "생애최초",
+        "일반공급"
+      ],
+      "textExcerpt": "■ 공급규모 : 삼도이동 1지구 토지임대부 분양주택: 전용면적 49㎡ 8세대, 59㎡ 24세대\n• 특별공급 26세대, 일반공급 6세대\n■ 입주시기 : 2027년 11월~12월 예정(정확한 입주일자는 추후 통보함)\n■ 공급대상\n(단위: ㎡, 세대)\n주택\n관리번호\n모델\n주택형\n(전용면적기준)\n약식표기\n주택공급면적(㎡)\n기타\n공용면적\n(지하주차장등)\n계약\n면적\n세대별\n대지지분\n총공급\n세대수\n특별공급 세대수\n일반공급\n세대수\n최하층\n우선배정\n세대수\n주거\n전용면적\n주거\n공용면적\n소계\n청년\n신혼\n부부\n신생아\n생애\n최초\n계\n2026000434\n01\n049.5837A\n49A\n49.5837\n22.3674\n71.9511\n4.9980\n76.9491\n37.7248\n8\n1\n1\n3\n1\n6\n2\n1\n02\n059.9783B\n59A\n59.9783\n26.2244\n86.2027\n6.0458\n92.2485\n45.6334\n24\n4\n4\n8\n4\n20\n4\n3\n합 계\n32\n5\n5\n11\n5\n26\n6\n4\n■ 공급규모 : 아파트 지하 1층(기계실), 지상 9층 1개동 총 32세대\n[특별공급 26세대(청년 5세대, 신혼부부 5세대, 신생아 11세대, 생애최초 5세대) 포함] 및 부대복리시설\n구   분(약식표기)\n49A\n59A\n합  계\n청년 특별공급\n1\n4\n5\n신혼부부 특별공급\n1\n4\n5\n신생아 특별공급\n3\n8\n11\n생애최초 특별공급\n1\n4\n5\n합   계\n6\n20\n26\n※ 주택형별 특별공급대상 세대수는 공급세대수, 비율 등을 감안하여 배정하였으며 배정 호수가 없는 주택형에 대하여는 신청할 수 없음\n※ 주택관리번호: 2026000434",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 380,
+            "stream": "BodyText/Section0",
+            "offset": 100043
+          },
+          {
+            "index": 381,
+            "stream": "BodyText/Section0",
+            "offset": 100281
+          },
+          {
+            "index": 382,
+            "stream": "BodyText/Section0",
+            "offset": 100431
+          },
+          {
+            "index": 383,
+            "stream": "BodyText/Section0",
+            "offset": 100649
+          },
+          {
+            "index": 384,
+            "stream": "BodyText/Section0",
+            "offset": 100755
+          },
+          {
+            "index": 385,
+            "stream": "BodyText/Section0",
+            "offset": 101102
+          },
+          {
+            "index": 386,
+            "stream": "BodyText/Section0",
+            "offset": 101192
+          },
+          {
+            "index": 387,
+            "stream": "BodyText/Section0",
+            "offset": 101337
+          },
+          {
+            "index": 388,
+            "stream": "BodyText/Section0",
+            "offset": 101478
+          },
+          {
+            "index": 389,
+            "stream": "BodyText/Section0",
+            "offset": 101570
+          },
+          {
+            "index": 390,
+            "stream": "BodyText/Section0",
+            "offset": 101723
+          },
+          {
+            "index": 391,
+            "stream": "BodyText/Section0",
+            "offset": 101868
+          },
+          {
+            "index": 392,
+            "stream": "BodyText/Section0",
+            "offset": 102031
+          },
+          {
+            "index": 393,
+            "stream": "BodyText/Section0",
+            "offset": 102121
+          },
+          {
+            "index": 394,
+            "stream": "BodyText/Section0",
+            "offset": 102328
+          },
+          {
+            "index": 395,
+            "stream": "BodyText/Section0",
+            "offset": 102418
+          },
+          {
+            "index": 396,
+            "stream": "BodyText/Section0",
+            "offset": 102559
+          },
+          {
+            "index": 397,
+            "stream": "BodyText/Section0",
+            "offset": 102651
+          },
+          {
+            "index": 398,
+            "stream": "BodyText/Section0",
+            "offset": 102796
+          },
+          {
+            "index": 399,
+            "stream": "BodyText/Section0",
+            "offset": 102888
+          },
+          {
+            "index": 400,
+            "stream": "BodyText/Section0",
+            "offset": 103031
+          },
+          {
+            "index": 401,
+            "stream": "BodyText/Section0",
+            "offset": 103184
+          },
+          {
+            "index": 402,
+            "stream": "BodyText/Section0",
+            "offset": 103278
+          },
+          {
+            "index": 403,
+            "stream": "BodyText/Section0",
+            "offset": 103421
+          },
+          {
+            "index": 404,
+            "stream": "BodyText/Section0",
+            "offset": 103513
+          },
+          {
+            "index": 405,
+            "stream": "BodyText/Section0",
+            "offset": 103607
+          },
+          {
+            "index": 406,
+            "stream": "BodyText/Section0",
+            "offset": 103750
+          },
+          {
+            "index": 407,
+            "stream": "BodyText/Section0",
+            "offset": 103840
+          },
+          {
+            "index": 408,
+            "stream": "BodyText/Section0",
+            "offset": 103985
+          },
+          {
+            "index": 409,
+            "stream": "BodyText/Section0",
+            "offset": 104075
+          },
+          {
+            "index": 410,
+            "stream": "BodyText/Section0",
+            "offset": 104220
+          },
+          {
+            "index": 411,
+            "stream": "BodyText/Section0",
+            "offset": 104361
+          },
+          {
+            "index": 412,
+            "stream": "BodyText/Section0",
+            "offset": 104502
+          },
+          {
+            "index": 413,
+            "stream": "BodyText/Section0",
+            "offset": 104592
+          },
+          {
+            "index": 414,
+            "stream": "BodyText/Section0",
+            "offset": 104733
+          },
+          {
+            "index": 415,
+            "stream": "BodyText/Section0",
+            "offset": 104876
+          },
+          {
+            "index": 416,
+            "stream": "BodyText/Section0",
+            "offset": 104966
+          },
+          {
+            "index": 417,
+            "stream": "BodyText/Section0",
+            "offset": 105107
+          },
+          {
+            "index": 418,
+            "stream": "BodyText/Section0",
+            "offset": 105246
+          },
+          {
+            "index": 419,
+            "stream": "BodyText/Section0",
+            "offset": 105403
+          },
+          {
+            "index": 420,
+            "stream": "BodyText/Section0",
+            "offset": 105544
+          },
+          {
+            "index": 421,
+            "stream": "BodyText/Section0",
+            "offset": 105699
+          },
+          {
+            "index": 422,
+            "stream": "BodyText/Section0",
+            "offset": 105842
+          },
+          {
+            "index": 423,
+            "stream": "BodyText/Section0",
+            "offset": 105993
+          },
+          {
+            "index": 424,
+            "stream": "BodyText/Section0",
+            "offset": 106144
+          },
+          {
+            "index": 425,
+            "stream": "BodyText/Section0",
+            "offset": 106295
+          },
+          {
+            "index": 426,
+            "stream": "BodyText/Section0",
+            "offset": 106444
+          },
+          {
+            "index": 427,
+            "stream": "BodyText/Section0",
+            "offset": 106595
+          },
+          {
+            "index": 428,
+            "stream": "BodyText/Section0",
+            "offset": 106746
+          },
+          {
+            "index": 429,
+            "stream": "BodyText/Section0",
+            "offset": 106885
+          },
+          {
+            "index": 430,
+            "stream": "BodyText/Section0",
+            "offset": 107024
+          },
+          {
+            "index": 431,
+            "stream": "BodyText/Section0",
+            "offset": 107163
+          },
+          {
+            "index": 432,
+            "stream": "BodyText/Section0",
+            "offset": 107302
+          },
+          {
+            "index": 433,
+            "stream": "BodyText/Section0",
+            "offset": 107441
+          },
+          {
+            "index": 434,
+            "stream": "BodyText/Section0",
+            "offset": 107580
+          },
+          {
+            "index": 435,
+            "stream": "BodyText/Section0",
+            "offset": 107719
+          },
+          {
+            "index": 436,
+            "stream": "BodyText/Section0",
+            "offset": 107858
+          },
+          {
+            "index": 437,
+            "stream": "BodyText/Section0",
+            "offset": 107999
+          },
+          {
+            "index": 438,
+            "stream": "BodyText/Section0",
+            "offset": 108154
+          },
+          {
+            "index": 439,
+            "stream": "BodyText/Section0",
+            "offset": 108297
+          },
+          {
+            "index": 440,
+            "stream": "BodyText/Section0",
+            "offset": 108448
+          },
+          {
+            "index": 441,
+            "stream": "BodyText/Section0",
+            "offset": 108599
+          },
+          {
+            "index": 442,
+            "stream": "BodyText/Section0",
+            "offset": 108750
+          },
+          {
+            "index": 443,
+            "stream": "BodyText/Section0",
+            "offset": 108899
+          },
+          {
+            "index": 444,
+            "stream": "BodyText/Section0",
+            "offset": 109050
+          },
+          {
+            "index": 445,
+            "stream": "BodyText/Section0",
+            "offset": 109201
+          },
+          {
+            "index": 446,
+            "stream": "BodyText/Section0",
+            "offset": 109342
+          },
+          {
+            "index": 447,
+            "stream": "BodyText/Section0",
+            "offset": 109481
+          },
+          {
+            "index": 448,
+            "stream": "BodyText/Section0",
+            "offset": 109620
+          },
+          {
+            "index": 449,
+            "stream": "BodyText/Section0",
+            "offset": 109759
+          },
+          {
+            "index": 450,
+            "stream": "BodyText/Section0",
+            "offset": 109898
+          },
+          {
+            "index": 451,
+            "stream": "BodyText/Section0",
+            "offset": 110039
+          },
+          {
+            "index": 452,
+            "stream": "BodyText/Section0",
+            "offset": 110178
+          },
+          {
+            "index": 453,
+            "stream": "BodyText/Section0",
+            "offset": 110317
+          },
+          {
+            "index": 454,
+            "stream": "BodyText/Section0",
+            "offset": 110460
+          },
+          {
+            "index": 455,
+            "stream": "BodyText/Section0",
+            "offset": 110601
+          },
+          {
+            "index": 456,
+            "stream": "BodyText/Section0",
+            "offset": 110740
+          },
+          {
+            "index": 457,
+            "stream": "BodyText/Section0",
+            "offset": 110879
+          },
+          {
+            "index": 458,
+            "stream": "BodyText/Section0",
+            "offset": 111020
+          },
+          {
+            "index": 459,
+            "stream": "BodyText/Section0",
+            "offset": 111159
+          },
+          {
+            "index": 460,
+            "stream": "BodyText/Section0",
+            "offset": 111300
+          },
+          {
+            "index": 461,
+            "stream": "BodyText/Section0",
+            "offset": 111439
+          },
+          {
+            "index": 462,
+            "stream": "BodyText/Section0",
+            "offset": 111527
+          },
+          {
+            "index": 463,
+            "stream": "BodyText/Section0",
+            "offset": 111719
+          },
+          {
+            "index": 464,
+            "stream": "BodyText/Section0",
+            "offset": 112192
+          },
+          {
+            "index": 465,
+            "stream": "BodyText/Section0",
+            "offset": 112351
+          },
+          {
+            "index": 466,
+            "stream": "BodyText/Section0",
+            "offset": 112494
+          },
+          {
+            "index": 467,
+            "stream": "BodyText/Section0",
+            "offset": 112637
+          },
+          {
+            "index": 468,
+            "stream": "BodyText/Section0",
+            "offset": 112782
+          },
+          {
+            "index": 469,
+            "stream": "BodyText/Section0",
+            "offset": 112933
+          },
+          {
+            "index": 470,
+            "stream": "BodyText/Section0",
+            "offset": 113072
+          },
+          {
+            "index": 471,
+            "stream": "BodyText/Section0",
+            "offset": 113211
+          },
+          {
+            "index": 472,
+            "stream": "BodyText/Section0",
+            "offset": 113441
+          },
+          {
+            "index": 473,
+            "stream": "BodyText/Section0",
+            "offset": 113596
+          },
+          {
+            "index": 474,
+            "stream": "BodyText/Section0",
+            "offset": 113735
+          },
+          {
+            "index": 475,
+            "stream": "BodyText/Section0",
+            "offset": 113874
+          },
+          {
+            "index": 476,
+            "stream": "BodyText/Section0",
+            "offset": 114104
+          },
+          {
+            "index": 477,
+            "stream": "BodyText/Section0",
+            "offset": 114257
+          },
+          {
+            "index": 478,
+            "stream": "BodyText/Section0",
+            "offset": 114396
+          },
+          {
+            "index": 479,
+            "stream": "BodyText/Section0",
+            "offset": 114535
+          },
+          {
+            "index": 480,
+            "stream": "BodyText/Section0",
+            "offset": 114769
+          },
+          {
+            "index": 481,
+            "stream": "BodyText/Section0",
+            "offset": 114924
+          },
+          {
+            "index": 482,
+            "stream": "BodyText/Section0",
+            "offset": 115063
+          },
+          {
+            "index": 483,
+            "stream": "BodyText/Section0",
+            "offset": 115202
+          },
+          {
+            "index": 484,
+            "stream": "BodyText/Section0",
+            "offset": 115432
+          },
+          {
+            "index": 485,
+            "stream": "BodyText/Section0",
+            "offset": 115579
+          },
+          {
+            "index": 486,
+            "stream": "BodyText/Section0",
+            "offset": 115718
+          },
+          {
+            "index": 487,
+            "stream": "BodyText/Section0",
+            "offset": 115859
+          },
+          {
+            "index": 488,
+            "stream": "BodyText/Section0",
+            "offset": 115949
+          },
+          {
+            "index": 489,
+            "stream": "BodyText/Section0",
+            "offset": 116179
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.price-49",
+      "districtId": "samdo-1",
+      "section": "49㎡ 분양가격",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "49㎡",
+        "분양가격",
+        "공급금액"
+      ],
+      "textExcerpt": "공급가격ㆍ토지임대료 등\n■ 건물분양가\n※ 본 주택은 분양가상한제 적용주택으로 「주택법」 제57조에 따라 산정한 분양가상한금액 범위 내에서 층별 차등을 두어 책정한 금액입니다.\n※ 필로티 공간을 포함하여 층·호수를 산정하였으며, 이를 기준으로 실제 층고에 해당하는 층·호수를 고려하여 주택가격을 산정하였습니다.\n※ 하기 금액에는 취득세, 인지세 등의 제세공과금이 포함되어 있지 않습니다. (발코니 확장비용 제외)\n※ 호는 당첨자 선정 시 한국부동산원의 프로그램에 의해 무작위 추첨되며, 분양가는 주택형·층·향 등에 따라 차이가 있으므로 반드시 청약 전 사이버견본주택 및 팸플릿 등을 통해 동·호 배치도, 평면도 및 면적 등을 확인하신 후 신청하시기 바랍니다.\n※ 해당 주택은 공사가 정부로부터 주택도시기금을 지원받아 건설 공급하는 주택이나, 지원 받은 주택도시기금은 「주택도시기금 운용계획」에 따라 입주자 대환이 불가함을 알려드립니다.\n주택형\n약식\n표기\n층별\n구분\n주택가격(천원)\n발코니 확장비용\n(천원, 부가세 포함)\n계\n계약금\n(계약 시 10%)\n잔금\n(입주 시 90%)\n049.5837A\n49A\n2층\n기본형\n242,256\n24,225\n218,031\n4,371\n마이너스옵션\n215,274\n21,527\n193,747\n1,305\n3층\n기본형\n247,303\n24,730\n222,573\n4,371\n마이너스옵션\n220,321\n22,032\n198,289\n1,305\n4층~\n9층\n기본형\n252,350\n25,235\n227,115\n4,371\n마이너스옵션\n225,368\n22,536\n202,832\n1,305",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 499,
+            "stream": "BodyText/Section0",
+            "offset": 120134
+          },
+          {
+            "index": 500,
+            "stream": "BodyText/Section0",
+            "offset": 120690
+          },
+          {
+            "index": 501,
+            "stream": "BodyText/Section0",
+            "offset": 120790
+          },
+          {
+            "index": 502,
+            "stream": "BodyText/Section0",
+            "offset": 121028
+          },
+          {
+            "index": 503,
+            "stream": "BodyText/Section0",
+            "offset": 121262
+          },
+          {
+            "index": 504,
+            "stream": "BodyText/Section0",
+            "offset": 121460
+          },
+          {
+            "index": 505,
+            "stream": "BodyText/Section0",
+            "offset": 121872
+          },
+          {
+            "index": 506,
+            "stream": "BodyText/Section0",
+            "offset": 122449
+          },
+          {
+            "index": 507,
+            "stream": "BodyText/Section0",
+            "offset": 122592
+          },
+          {
+            "index": 508,
+            "stream": "BodyText/Section0",
+            "offset": 122682
+          },
+          {
+            "index": 509,
+            "stream": "BodyText/Section0",
+            "offset": 122823
+          },
+          {
+            "index": 510,
+            "stream": "BodyText/Section0",
+            "offset": 122964
+          },
+          {
+            "index": 511,
+            "stream": "BodyText/Section0",
+            "offset": 123105
+          },
+          {
+            "index": 512,
+            "stream": "BodyText/Section0",
+            "offset": 123258
+          },
+          {
+            "index": 513,
+            "stream": "BodyText/Section0",
+            "offset": 123360
+          },
+          {
+            "index": 514,
+            "stream": "BodyText/Section0",
+            "offset": 123521
+          },
+          {
+            "index": 515,
+            "stream": "BodyText/Section0",
+            "offset": 123660
+          },
+          {
+            "index": 516,
+            "stream": "BodyText/Section0",
+            "offset": 123752
+          },
+          {
+            "index": 517,
+            "stream": "BodyText/Section0",
+            "offset": 123909
+          },
+          {
+            "index": 518,
+            "stream": "BodyText/Section0",
+            "offset": 123999
+          },
+          {
+            "index": 519,
+            "stream": "BodyText/Section0",
+            "offset": 124156
+          },
+          {
+            "index": 520,
+            "stream": "BodyText/Section0",
+            "offset": 124311
+          },
+          {
+            "index": 521,
+            "stream": "BodyText/Section0",
+            "offset": 124454
+          },
+          {
+            "index": 522,
+            "stream": "BodyText/Section0",
+            "offset": 124595
+          },
+          {
+            "index": 523,
+            "stream": "BodyText/Section0",
+            "offset": 124738
+          },
+          {
+            "index": 524,
+            "stream": "BodyText/Section0",
+            "offset": 124889
+          },
+          {
+            "index": 525,
+            "stream": "BodyText/Section0",
+            "offset": 125038
+          },
+          {
+            "index": 526,
+            "stream": "BodyText/Section0",
+            "offset": 125189
+          },
+          {
+            "index": 527,
+            "stream": "BodyText/Section0",
+            "offset": 125336
+          },
+          {
+            "index": 528,
+            "stream": "BodyText/Section0",
+            "offset": 125485
+          },
+          {
+            "index": 529,
+            "stream": "BodyText/Section0",
+            "offset": 125636
+          },
+          {
+            "index": 530,
+            "stream": "BodyText/Section0",
+            "offset": 125785
+          },
+          {
+            "index": 531,
+            "stream": "BodyText/Section0",
+            "offset": 125936
+          },
+          {
+            "index": 532,
+            "stream": "BodyText/Section0",
+            "offset": 126083
+          },
+          {
+            "index": 533,
+            "stream": "BodyText/Section0",
+            "offset": 126224
+          },
+          {
+            "index": 534,
+            "stream": "BodyText/Section0",
+            "offset": 126367
+          },
+          {
+            "index": 535,
+            "stream": "BodyText/Section0",
+            "offset": 126518
+          },
+          {
+            "index": 536,
+            "stream": "BodyText/Section0",
+            "offset": 126667
+          },
+          {
+            "index": 537,
+            "stream": "BodyText/Section0",
+            "offset": 126818
+          },
+          {
+            "index": 538,
+            "stream": "BodyText/Section0",
+            "offset": 127001
+          },
+          {
+            "index": 539,
+            "stream": "BodyText/Section0",
+            "offset": 127150
+          },
+          {
+            "index": 540,
+            "stream": "BodyText/Section0",
+            "offset": 127301
+          },
+          {
+            "index": 541,
+            "stream": "BodyText/Section0",
+            "offset": 127450
+          },
+          {
+            "index": 542,
+            "stream": "BodyText/Section0",
+            "offset": 127601
+          },
+          {
+            "index": 543,
+            "stream": "BodyText/Section0",
+            "offset": 127784
+          },
+          {
+            "index": 544,
+            "stream": "BodyText/Section0",
+            "offset": 127876
+          },
+          {
+            "index": 545,
+            "stream": "BodyText/Section0",
+            "offset": 128017
+          },
+          {
+            "index": 546,
+            "stream": "BodyText/Section0",
+            "offset": 128160
+          },
+          {
+            "index": 547,
+            "stream": "BodyText/Section0",
+            "offset": 128311
+          },
+          {
+            "index": 548,
+            "stream": "BodyText/Section0",
+            "offset": 128460
+          },
+          {
+            "index": 549,
+            "stream": "BodyText/Section0",
+            "offset": 128611
+          },
+          {
+            "index": 550,
+            "stream": "BodyText/Section0",
+            "offset": 128794
+          },
+          {
+            "index": 551,
+            "stream": "BodyText/Section0",
+            "offset": 128943
+          },
+          {
+            "index": 552,
+            "stream": "BodyText/Section0",
+            "offset": 129094
+          },
+          {
+            "index": 553,
+            "stream": "BodyText/Section0",
+            "offset": 129243
+          },
+          {
+            "index": 554,
+            "stream": "BodyText/Section0",
+            "offset": 129394
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.price-59",
+      "districtId": "samdo-1",
+      "section": "59㎡ 분양가격",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "59㎡",
+        "분양가격",
+        "공급금액"
+      ],
+      "textExcerpt": "059.9783B\n59A\n2층\n기본형\n290,240\n29,024\n261,216\n4,836\n마이너스옵션\n255,974\n25,597\n230,377\n1,540\n3층\n기본형\n296,287\n29,628\n266,659\n4,836\n마이너스옵션\n262,021\n26,202\n235,819\n1,540\n4층~\n9층\n기본형\n302,334\n30,233\n272,101\n4,836\n마이너스옵션\n268,068\n26,806\n241,262\n1,540",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 555,
+            "stream": "BodyText/Section0",
+            "offset": 129577
+          },
+          {
+            "index": 556,
+            "stream": "BodyText/Section0",
+            "offset": 129732
+          },
+          {
+            "index": 557,
+            "stream": "BodyText/Section0",
+            "offset": 129875
+          },
+          {
+            "index": 558,
+            "stream": "BodyText/Section0",
+            "offset": 130016
+          },
+          {
+            "index": 559,
+            "stream": "BodyText/Section0",
+            "offset": 130159
+          },
+          {
+            "index": 560,
+            "stream": "BodyText/Section0",
+            "offset": 130310
+          },
+          {
+            "index": 561,
+            "stream": "BodyText/Section0",
+            "offset": 130459
+          },
+          {
+            "index": 562,
+            "stream": "BodyText/Section0",
+            "offset": 130610
+          },
+          {
+            "index": 563,
+            "stream": "BodyText/Section0",
+            "offset": 130757
+          },
+          {
+            "index": 564,
+            "stream": "BodyText/Section0",
+            "offset": 130906
+          },
+          {
+            "index": 565,
+            "stream": "BodyText/Section0",
+            "offset": 131057
+          },
+          {
+            "index": 566,
+            "stream": "BodyText/Section0",
+            "offset": 131206
+          },
+          {
+            "index": 567,
+            "stream": "BodyText/Section0",
+            "offset": 131357
+          },
+          {
+            "index": 568,
+            "stream": "BodyText/Section0",
+            "offset": 131504
+          },
+          {
+            "index": 569,
+            "stream": "BodyText/Section0",
+            "offset": 131645
+          },
+          {
+            "index": 570,
+            "stream": "BodyText/Section0",
+            "offset": 131788
+          },
+          {
+            "index": 571,
+            "stream": "BodyText/Section0",
+            "offset": 131939
+          },
+          {
+            "index": 572,
+            "stream": "BodyText/Section0",
+            "offset": 132088
+          },
+          {
+            "index": 573,
+            "stream": "BodyText/Section0",
+            "offset": 132239
+          },
+          {
+            "index": 574,
+            "stream": "BodyText/Section0",
+            "offset": 132422
+          },
+          {
+            "index": 575,
+            "stream": "BodyText/Section0",
+            "offset": 132571
+          },
+          {
+            "index": 576,
+            "stream": "BodyText/Section0",
+            "offset": 132722
+          },
+          {
+            "index": 577,
+            "stream": "BodyText/Section0",
+            "offset": 132871
+          },
+          {
+            "index": 578,
+            "stream": "BodyText/Section0",
+            "offset": 133022
+          },
+          {
+            "index": 579,
+            "stream": "BodyText/Section0",
+            "offset": 133205
+          },
+          {
+            "index": 580,
+            "stream": "BodyText/Section0",
+            "offset": 133297
+          },
+          {
+            "index": 581,
+            "stream": "BodyText/Section0",
+            "offset": 133438
+          },
+          {
+            "index": 582,
+            "stream": "BodyText/Section0",
+            "offset": 133581
+          },
+          {
+            "index": 583,
+            "stream": "BodyText/Section0",
+            "offset": 133732
+          },
+          {
+            "index": 584,
+            "stream": "BodyText/Section0",
+            "offset": 133881
+          },
+          {
+            "index": 585,
+            "stream": "BodyText/Section0",
+            "offset": 134032
+          },
+          {
+            "index": 586,
+            "stream": "BodyText/Section0",
+            "offset": 134215
+          },
+          {
+            "index": 587,
+            "stream": "BodyText/Section0",
+            "offset": 134364
+          },
+          {
+            "index": 588,
+            "stream": "BodyText/Section0",
+            "offset": 134515
+          },
+          {
+            "index": 589,
+            "stream": "BodyText/Section0",
+            "offset": 134664
+          },
+          {
+            "index": 590,
+            "stream": "BodyText/Section0",
+            "offset": 134815
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.rent",
+      "districtId": "samdo-1",
+      "section": "월 토지임대료",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "토지임대료",
+        "49㎡",
+        "59㎡",
+        "월 임대료"
+      ],
+      "textExcerpt": "■ 토지임대료\n약식표기\n주택형\n토지임대료(원/월)\n49A\n049.5837A\n247,050\n59A\n059.9783B\n298,840",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 734,
+            "stream": "BodyText/Section0",
+            "offset": 161872
+          },
+          {
+            "index": 735,
+            "stream": "BodyText/Section0",
+            "offset": 162209
+          },
+          {
+            "index": 736,
+            "stream": "BodyText/Section0",
+            "offset": 162354
+          },
+          {
+            "index": 737,
+            "stream": "BodyText/Section0",
+            "offset": 162497
+          },
+          {
+            "index": 738,
+            "stream": "BodyText/Section0",
+            "offset": 162654
+          },
+          {
+            "index": 739,
+            "stream": "BodyText/Section0",
+            "offset": 162797
+          },
+          {
+            "index": 740,
+            "stream": "BodyText/Section0",
+            "offset": 162952
+          },
+          {
+            "index": 741,
+            "stream": "BodyText/Section0",
+            "offset": 163103
+          },
+          {
+            "index": 742,
+            "stream": "BodyText/Section0",
+            "offset": 163246
+          },
+          {
+            "index": 743,
+            "stream": "BodyText/Section0",
+            "offset": 163401
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.land-lease",
+      "districtId": "samdo-1",
+      "section": "토지임대부 분양주택 안내",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "토지임대부",
+        "토지 소유권",
+        "건물 소유권",
+        "임대료"
+      ],
+      "textExcerpt": "■ 토지임대료 산정방법 및 유의사항\n• 본 입주자모집공고에서의 토지임대부 분양주택은 「공공주택특별법 시행규칙」 제23조의5제2항 및 「주택법」 제2조제9호에 의하여 공공주택사업자가 입주자를 선정하여 공급하는 주택으로서, 토지임대부 분양주택은 「주택법」 제2조제9호에 의하여 토지의 소유권은 사업계획의 승인을 받아 건설사업을 하는 JPDC가 가지고, 건축물 등에 대한 소유권(건축물의 전유부분에 대한 구분소유권은 이를 분양받은 자가 가지고, 건축물의 공용부분·부속건물은 분양받은 자들이 공유함)은 주택을 분양받은 자가 갖는 주택을 의미합니다.\n• 토지임대부 분양주택을 공급받은 자는 토지소유자(JPDC)와 「주택법」 제78조제3항 및 「주택법 시행규칙」 제31조에서 정하는 표준임대차계약서를 사용하여 토지에 대한 임대차계약을 체결하게 되며, 임대차계약을 체결한 경우 해당 주택의 구분소유권을 목적으로 그 토지 위에 40년 이내의 임대차기간(토지임대부 분양주택 소유자의 75퍼센트 이상이 계약갱신을 청구하는 경우 40년의 범위에서 갱신 가능) 동안 지상권이 설정된 것으로 봅니다. 토지임대부 분양주택을 양수한 자 또는 상속받은 자는 위 임대차계약을 승계합니다.",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 744,
+            "stream": "BodyText/Section0",
+            "offset": 163589
+          },
+          {
+            "index": 745,
+            "stream": "BodyText/Section0",
+            "offset": 163944
+          },
+          {
+            "index": 746,
+            "stream": "BodyText/Section0",
+            "offset": 164748
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.overseas",
+      "districtId": "samdo-1",
+      "section": "거주기간 및 해외체류",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "해외체류",
+        "출국",
+        "거주기간",
+        "우선공급"
+      ],
+      "textExcerpt": "• 2019.11.01. 시행된 「주택공급에 관한 규칙」 제4조제5항 및 제23조제2항제7호에 따라 우선공급 받으려는 경우에는 「출입국관리법」 제88조의 출입국사실증명서를 사업주체에 제출해야 합니다. 장기해외체류자는 해당 주택건설지역 우선공급 대상자로 신청이 불가하며, 이를 위반하여 해당 주택건설지역 거주자로 청약하여 당첨된 경우에는 부적격 당첨자로 처리됩니다.\n출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 196,
+            "stream": "BodyText/Section0",
+            "offset": 46232
+          },
+          {
+            "index": 197,
+            "stream": "BodyText/Section0",
+            "offset": 47005
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.youth-eligibility",
+      "districtId": "samdo-1",
+      "section": "청년 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "YOUTH"
+      ],
+      "keywords": [
+        "청년",
+        "미혼",
+        "무주택",
+        "청약통장",
+        "소득"
+      ],
+      "textExcerpt": "• 입주자모집공고일(2026.10.27.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자\n② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n도시근로자 가구원수별 가구당 월평균소득액의 140%\n5,338,708원",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 1568,
+            "stream": "BodyText/Section0",
+            "offset": 338308
+          },
+          {
+            "index": 1569,
+            "stream": "BodyText/Section0",
+            "offset": 338550
+          },
+          {
+            "index": 1570,
+            "stream": "BodyText/Section0",
+            "offset": 338780
+          },
+          {
+            "index": 1578,
+            "stream": "BodyText/Section0",
+            "offset": 340811
+          },
+          {
+            "index": 1579,
+            "stream": "BodyText/Section0",
+            "offset": 341012
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.newlywed-eligibility",
+      "districtId": "samdo-1",
+      "section": "신혼부부 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "NEWLYWED"
+      ],
+      "keywords": [
+        "신혼부부",
+        "예비신혼",
+        "한부모",
+        "혼인",
+        "청약통장"
+      ],
+      "textExcerpt": "① 입주자모집공고일 현재 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내이거나 6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분], 예비신혼부부[혼인을 계획 중이고 해당 주택의 입주자모집공고일로부터 1년 이내(1년이 되기 전에 입주하는 경우 입주 전까지)] 혼인 사실을 증명할 수 있으며, 혼인으로 구성할 세대 전원이 무주택인 분), 한부모가족[6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분] 중 하나에 해당하는 무주택세대구성원 (※ 2페이지 무주택세대구성원 설명 참고)\n※ (예비신혼부부) 청약 시 기입한 예비배우자와의 혼인관계증명서 및 혼인으로 구성될 세대가 포함된 신청자의 세대별 주민등록표등본을 입주 전까지 우리공사로 제출해야 하며, 서류 미제출 또는 전 배우자와 재혼한 사실이 확인되는 경우 계약이 해제되고 입주가 불가합니다.\n※ (한부모가족) 「한부모가족지원법」 제4조에 따른 한부모가족(한부모가족증명서를 통해 증명 가능한 「한부모가족지원법」 제4조제1호에 해당하는 분을 포함)을 말하며, 가족관계증명서와 주민등록표등본을 통해 공고일 현재 자녀 유무 등 해당 사실을 증명할 수 있어야 합니다. 만일 추후 사실혼 관계 등 한부모가족 자격 미달인 사실이 확인될 경우 계약취소 또는 해제될 수 있습니다.\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n※ 공고일 이후 한국부동산원 청약홈(www.applyhome.co.kr)에서 본인의 청약통장 순위확인서를 통해 확인하실 수 있습니다.\n③ 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 1713,
+            "stream": "BodyText/Section0",
+            "offset": 369825
+          },
+          {
+            "index": 1714,
+            "stream": "BodyText/Section0",
+            "offset": 370691
+          },
+          {
+            "index": 1715,
+            "stream": "BodyText/Section0",
+            "offset": 371133
+          },
+          {
+            "index": 1716,
+            "stream": "BodyText/Section0",
+            "offset": 371823
+          },
+          {
+            "index": 1717,
+            "stream": "BodyText/Section0",
+            "offset": 372119
+          },
+          {
+            "index": 1718,
+            "stream": "BodyText/Section0",
+            "offset": 372363
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.first-home-eligibility",
+      "districtId": "samdo-1",
+      "section": "생애최초 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "FIRST_HOME"
+      ],
+      "keywords": [
+        "생애최초",
+        "주택소유",
+        "600만원",
+        "소득세",
+        "세대주"
+      ],
+      "textExcerpt": "① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분\n※ 공고일 이후 한국부동산원 청약홈(www.applyhome.co.kr)에서 본인의 청약통장 순위확인서를 통해 확인하실 수 있습니다.\n③ 입주자모집공고일 현재 혼인(재혼 포함)중이거나 미혼인 자녀[입양을 포함하며, 신청자가 혼인 중이 아닌 경우에는 동일한 주민등록표등본상에 등재되어 있는 자녀(신청자의 태아 포함)를 말함]가 있는 분\n※ 1인 가구는 생애최초 특별공급 청약 신청이 불가합니다.\n④ 입주자모집공고일 현재 근로자 또는 자영업자(과거 1년 내에 소득세를 납부한 분을 포함)로서 신청자 본인이 5년 이상 소득세를 납부한 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 1974,
+            "stream": "BodyText/Section0",
+            "offset": 425467
+          },
+          {
+            "index": 1975,
+            "stream": "BodyText/Section0",
+            "offset": 425953
+          },
+          {
+            "index": 1976,
+            "stream": "BodyText/Section0",
+            "offset": 426385
+          },
+          {
+            "index": 1977,
+            "stream": "BodyText/Section0",
+            "offset": 426627
+          },
+          {
+            "index": 1978,
+            "stream": "BodyText/Section0",
+            "offset": 427043
+          },
+          {
+            "index": 1979,
+            "stream": "BodyText/Section0",
+            "offset": 427201
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.newborn-eligibility",
+      "districtId": "samdo-1",
+      "section": "신생아 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "NEWBORN"
+      ],
+      "keywords": [
+        "신생아",
+        "2세 미만",
+        "태아",
+        "입양",
+        "무주택"
+      ],
+      "textExcerpt": "※ 아동수당·부모급여 수령내역 등 자녀 양육사실 증빙서류는 공적 서류에 한하여 인정하며, 그 외 신청결과 문자 등은 인정하지 않습니다.\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n③ 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 자\n④ 무주택세대구성원 전원의 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득(4인 이상인 세대는 가구원수별 가구당 월평균소득을 말함)”의 140% (단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분\n구분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 2080,
+            "stream": "BodyText/Section0",
+            "offset": 452213
+          },
+          {
+            "index": 2081,
+            "stream": "BodyText/Section0",
+            "offset": 452459
+          },
+          {
+            "index": 2082,
+            "stream": "BodyText/Section0",
+            "offset": 452743
+          },
+          {
+            "index": 2083,
+            "stream": "BodyText/Section0",
+            "offset": 452959
+          },
+          {
+            "index": 2084,
+            "stream": "BodyText/Section0",
+            "offset": 453902
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.general-eligibility",
+      "districtId": "samdo-1",
+      "section": "일반공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "GENERAL"
+      ],
+      "keywords": [
+        "일반공급",
+        "무주택세대구성원",
+        "1순위",
+        "2순위"
+      ],
+      "textExcerpt": "• 입주자모집공고일(2026.10.27.) 현재 제주특별자치도에 거주하면서 아래 조건(①~③)을 모두 갖춘 분\n① 입주자모집공고일 현재 무주택세대구성원으로 입주자저축(주택청약종합저축 또는 청약저축)에 가입한 분  ※ 2페이지 무주택세대구성원 설명 참조\n② 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 분\n③ 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득 기준”의 100% 이하인 분(단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 2269,
+            "stream": "BodyText/Section0",
+            "offset": 492234
+          },
+          {
+            "index": 2270,
+            "stream": "BodyText/Section0",
+            "offset": 492470
+          },
+          {
+            "index": 2271,
+            "stream": "BodyText/Section0",
+            "offset": 492766
+          },
+          {
+            "index": 2272,
+            "stream": "BodyText/Section0",
+            "offset": 492988
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-1.documents",
+      "districtId": "samdo-1",
+      "section": "신청서류 및 당첨자 제출서류",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "준비서류",
+        "제출서류",
+        "등본",
+        "초본",
+        "청약통장",
+        "소득",
+        "자산"
+      ],
+      "textExcerpt": "■ 특별공급(청년·신혼부부·생애최초·신생아) 당첨자 제출서류\n* 입주자모집공고일(2026.10.27.) 이후 발급분에 한하며, 주민등록번호 별표(*) 처리 없이 전체 표기되도록 발급\n구 분\n서 류 유 형\n■ 일반공급 당첨자 제출서류\n* 입주자모집공고일(2026.10.27.) 이후 발급분에 한하며, 주민등록번호 별표(*) 처리 없이 전체 표기되도록 발급\n서 류 유 형",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+        "paragraphs": [
+          {
+            "index": 2693,
+            "stream": "BodyText/Section0",
+            "offset": 608104
+          },
+          {
+            "index": 2694,
+            "stream": "BodyText/Section0",
+            "offset": 608266
+          },
+          {
+            "index": 2695,
+            "stream": "BodyText/Section0",
+            "offset": 608787
+          },
+          {
+            "index": 2696,
+            "stream": "BodyText/Section0",
+            "offset": 608932
+          },
+          {
+            "index": 2929,
+            "stream": "BodyText/Section0",
+            "offset": 654771
+          },
+          {
+            "index": 2930,
+            "stream": "BodyText/Section0",
+            "offset": 654897
+          },
+          {
+            "index": 2931,
+            "stream": "BodyText/Section0",
+            "offset": 655394
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.overview",
+      "districtId": "samdo-2",
+      "section": "공급개요",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "2지구",
+        "위치",
+        "총 40세대",
+        "49㎡",
+        "59㎡"
+      ],
+      "textExcerpt": "▶ 공급위치 : (2지구) 제주특별자치도 제주시 삼도이동 1246-1 외 4필지\n▶ 공급대상 : (2지구) 토지임대부 분양주택 40호(전용면적 49㎡ 8세대, 59㎡ 32세대)",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 9,
+            "stream": "BodyText/Section0",
+            "offset": 5131
+          },
+          {
+            "index": 10,
+            "stream": "BodyText/Section0",
+            "offset": 5313
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.schedule",
+      "districtId": "samdo-2",
+      "section": "공급일정",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "신청일",
+        "특별공급",
+        "일반공급",
+        "당첨자발표",
+        "서류접수",
+        "계약"
+      ],
+      "textExcerpt": "■ 청약 및 계약 등 주요일정 안내\n2026.11.16.(월)\n2026.11.17.(화)\n2026.11.18.(수)\n2026.11.25.(수)\n2026.11.30.(월)~\n2026.12.04.(금)\n2027.01.25.(월)~\n2027.01.29.(금)",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 329,
+            "stream": "BodyText/Section0",
+            "offset": 87934
+          },
+          {
+            "index": 338,
+            "stream": "BodyText/Section0",
+            "offset": 89477
+          },
+          {
+            "index": 339,
+            "stream": "BodyText/Section0",
+            "offset": 89642
+          },
+          {
+            "index": 340,
+            "stream": "BodyText/Section0",
+            "offset": 89807
+          },
+          {
+            "index": 341,
+            "stream": "BodyText/Section0",
+            "offset": 89972
+          },
+          {
+            "index": 342,
+            "stream": "BodyText/Section0",
+            "offset": 90137
+          },
+          {
+            "index": 343,
+            "stream": "BodyText/Section0",
+            "offset": 90253
+          },
+          {
+            "index": 344,
+            "stream": "BodyText/Section0",
+            "offset": 90418
+          },
+          {
+            "index": 345,
+            "stream": "BodyText/Section0",
+            "offset": 90534
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.inventory",
+      "districtId": "samdo-2",
+      "section": "공급대상 및 공급세대수",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "공급세대",
+        "청년",
+        "신혼부부",
+        "신생아",
+        "생애최초",
+        "일반공급"
+      ],
+      "textExcerpt": "■ 공급규모 : 삼도이동 2지구 토지임대부 분양주택: 전용면적 49㎡ 8세대, 59㎡ 32세대\n• 특별공급 32세대, 일반공급 8세대\n■ 입주시기 : 2027년 11월~12월 예정(정확한 입주일자는 추후 통보함)\n■ 공급대상\n(단위: ㎡, 세대)\n주택\n관리번호\n모델\n주택형\n(전용면적기준)\n약식표기\n주택공급면적(㎡)\n기타\n공용면적\n(지하주차장등)\n계약\n면적\n세대별\n대지지분\n총공급\n세대수\n특별공급 세대수\n일반공급\n세대수\n최하층\n우선배정\n세대수\n주거\n전용면적\n주거\n공용면적\n소계\n청년\n신혼\n부부\n신생아\n생애\n최초\n계\n2026000435\n01\n049.5837A\n49A\n49.5837\n23.7228\n73.3065\n4.0138\n77.3203\n41.3073\n8\n1\n1\n3\n1\n6\n2\n1\n02\n059.9783B\n59A\n59.9783\n27.8639\n87.8422\n4.8553\n92.6975\n49.9669\n32\n5\n5\n11\n5\n26\n6\n4\n합 계\n40\n6\n6\n14\n6\n32\n8\n5\n■ 공급규모 : 아파트 지하 1층(기계실), 지상 9층 1개동 총 40세대\n[특별공급 32세대(청년 6세대, 신혼부부 6세대, 신생아 14세대, 생애최초 6세대) 포함] 및 부대복리시설\n구   분(약식표기)\n49A\n59A\n합  계\n청년 특별공급\n1\n5\n6\n신혼부부 특별공급\n1\n5\n6\n신생아 특별공급\n3\n11\n14\n생애최초 특별공급\n1\n5\n6\n합   계\n6\n26\n32\n※ 주택형별 특별공급대상 세대수는 공급세대수, 비율 등을 감안하여 배정하였으며 배정 호수가 없는 주택형에 대하여는 신청할 수 없음\n※ 주택관리번호: 2026000435",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 380,
+            "stream": "BodyText/Section0",
+            "offset": 100049
+          },
+          {
+            "index": 381,
+            "stream": "BodyText/Section0",
+            "offset": 100287
+          },
+          {
+            "index": 382,
+            "stream": "BodyText/Section0",
+            "offset": 100437
+          },
+          {
+            "index": 383,
+            "stream": "BodyText/Section0",
+            "offset": 100655
+          },
+          {
+            "index": 384,
+            "stream": "BodyText/Section0",
+            "offset": 100761
+          },
+          {
+            "index": 385,
+            "stream": "BodyText/Section0",
+            "offset": 101108
+          },
+          {
+            "index": 386,
+            "stream": "BodyText/Section0",
+            "offset": 101198
+          },
+          {
+            "index": 387,
+            "stream": "BodyText/Section0",
+            "offset": 101343
+          },
+          {
+            "index": 388,
+            "stream": "BodyText/Section0",
+            "offset": 101484
+          },
+          {
+            "index": 389,
+            "stream": "BodyText/Section0",
+            "offset": 101576
+          },
+          {
+            "index": 390,
+            "stream": "BodyText/Section0",
+            "offset": 101729
+          },
+          {
+            "index": 391,
+            "stream": "BodyText/Section0",
+            "offset": 101874
+          },
+          {
+            "index": 392,
+            "stream": "BodyText/Section0",
+            "offset": 102037
+          },
+          {
+            "index": 393,
+            "stream": "BodyText/Section0",
+            "offset": 102127
+          },
+          {
+            "index": 394,
+            "stream": "BodyText/Section0",
+            "offset": 102334
+          },
+          {
+            "index": 395,
+            "stream": "BodyText/Section0",
+            "offset": 102424
+          },
+          {
+            "index": 396,
+            "stream": "BodyText/Section0",
+            "offset": 102565
+          },
+          {
+            "index": 397,
+            "stream": "BodyText/Section0",
+            "offset": 102657
+          },
+          {
+            "index": 398,
+            "stream": "BodyText/Section0",
+            "offset": 102802
+          },
+          {
+            "index": 399,
+            "stream": "BodyText/Section0",
+            "offset": 102894
+          },
+          {
+            "index": 400,
+            "stream": "BodyText/Section0",
+            "offset": 103037
+          },
+          {
+            "index": 401,
+            "stream": "BodyText/Section0",
+            "offset": 103190
+          },
+          {
+            "index": 402,
+            "stream": "BodyText/Section0",
+            "offset": 103284
+          },
+          {
+            "index": 403,
+            "stream": "BodyText/Section0",
+            "offset": 103427
+          },
+          {
+            "index": 404,
+            "stream": "BodyText/Section0",
+            "offset": 103519
+          },
+          {
+            "index": 405,
+            "stream": "BodyText/Section0",
+            "offset": 103613
+          },
+          {
+            "index": 406,
+            "stream": "BodyText/Section0",
+            "offset": 103756
+          },
+          {
+            "index": 407,
+            "stream": "BodyText/Section0",
+            "offset": 103846
+          },
+          {
+            "index": 408,
+            "stream": "BodyText/Section0",
+            "offset": 103991
+          },
+          {
+            "index": 409,
+            "stream": "BodyText/Section0",
+            "offset": 104081
+          },
+          {
+            "index": 410,
+            "stream": "BodyText/Section0",
+            "offset": 104226
+          },
+          {
+            "index": 411,
+            "stream": "BodyText/Section0",
+            "offset": 104367
+          },
+          {
+            "index": 412,
+            "stream": "BodyText/Section0",
+            "offset": 104508
+          },
+          {
+            "index": 413,
+            "stream": "BodyText/Section0",
+            "offset": 104598
+          },
+          {
+            "index": 414,
+            "stream": "BodyText/Section0",
+            "offset": 104739
+          },
+          {
+            "index": 415,
+            "stream": "BodyText/Section0",
+            "offset": 104882
+          },
+          {
+            "index": 416,
+            "stream": "BodyText/Section0",
+            "offset": 104972
+          },
+          {
+            "index": 417,
+            "stream": "BodyText/Section0",
+            "offset": 105113
+          },
+          {
+            "index": 418,
+            "stream": "BodyText/Section0",
+            "offset": 105252
+          },
+          {
+            "index": 419,
+            "stream": "BodyText/Section0",
+            "offset": 105409
+          },
+          {
+            "index": 420,
+            "stream": "BodyText/Section0",
+            "offset": 105550
+          },
+          {
+            "index": 421,
+            "stream": "BodyText/Section0",
+            "offset": 105705
+          },
+          {
+            "index": 422,
+            "stream": "BodyText/Section0",
+            "offset": 105848
+          },
+          {
+            "index": 423,
+            "stream": "BodyText/Section0",
+            "offset": 105999
+          },
+          {
+            "index": 424,
+            "stream": "BodyText/Section0",
+            "offset": 106150
+          },
+          {
+            "index": 425,
+            "stream": "BodyText/Section0",
+            "offset": 106301
+          },
+          {
+            "index": 426,
+            "stream": "BodyText/Section0",
+            "offset": 106450
+          },
+          {
+            "index": 427,
+            "stream": "BodyText/Section0",
+            "offset": 106601
+          },
+          {
+            "index": 428,
+            "stream": "BodyText/Section0",
+            "offset": 106752
+          },
+          {
+            "index": 429,
+            "stream": "BodyText/Section0",
+            "offset": 106891
+          },
+          {
+            "index": 430,
+            "stream": "BodyText/Section0",
+            "offset": 107030
+          },
+          {
+            "index": 431,
+            "stream": "BodyText/Section0",
+            "offset": 107169
+          },
+          {
+            "index": 432,
+            "stream": "BodyText/Section0",
+            "offset": 107308
+          },
+          {
+            "index": 433,
+            "stream": "BodyText/Section0",
+            "offset": 107447
+          },
+          {
+            "index": 434,
+            "stream": "BodyText/Section0",
+            "offset": 107586
+          },
+          {
+            "index": 435,
+            "stream": "BodyText/Section0",
+            "offset": 107725
+          },
+          {
+            "index": 436,
+            "stream": "BodyText/Section0",
+            "offset": 107864
+          },
+          {
+            "index": 437,
+            "stream": "BodyText/Section0",
+            "offset": 108005
+          },
+          {
+            "index": 438,
+            "stream": "BodyText/Section0",
+            "offset": 108160
+          },
+          {
+            "index": 439,
+            "stream": "BodyText/Section0",
+            "offset": 108303
+          },
+          {
+            "index": 440,
+            "stream": "BodyText/Section0",
+            "offset": 108454
+          },
+          {
+            "index": 441,
+            "stream": "BodyText/Section0",
+            "offset": 108605
+          },
+          {
+            "index": 442,
+            "stream": "BodyText/Section0",
+            "offset": 108756
+          },
+          {
+            "index": 443,
+            "stream": "BodyText/Section0",
+            "offset": 108905
+          },
+          {
+            "index": 444,
+            "stream": "BodyText/Section0",
+            "offset": 109056
+          },
+          {
+            "index": 445,
+            "stream": "BodyText/Section0",
+            "offset": 109207
+          },
+          {
+            "index": 446,
+            "stream": "BodyText/Section0",
+            "offset": 109348
+          },
+          {
+            "index": 447,
+            "stream": "BodyText/Section0",
+            "offset": 109487
+          },
+          {
+            "index": 448,
+            "stream": "BodyText/Section0",
+            "offset": 109626
+          },
+          {
+            "index": 449,
+            "stream": "BodyText/Section0",
+            "offset": 109767
+          },
+          {
+            "index": 450,
+            "stream": "BodyText/Section0",
+            "offset": 109906
+          },
+          {
+            "index": 451,
+            "stream": "BodyText/Section0",
+            "offset": 110047
+          },
+          {
+            "index": 452,
+            "stream": "BodyText/Section0",
+            "offset": 110186
+          },
+          {
+            "index": 453,
+            "stream": "BodyText/Section0",
+            "offset": 110325
+          },
+          {
+            "index": 454,
+            "stream": "BodyText/Section0",
+            "offset": 110468
+          },
+          {
+            "index": 455,
+            "stream": "BodyText/Section0",
+            "offset": 110609
+          },
+          {
+            "index": 456,
+            "stream": "BodyText/Section0",
+            "offset": 110748
+          },
+          {
+            "index": 457,
+            "stream": "BodyText/Section0",
+            "offset": 110887
+          },
+          {
+            "index": 458,
+            "stream": "BodyText/Section0",
+            "offset": 111028
+          },
+          {
+            "index": 459,
+            "stream": "BodyText/Section0",
+            "offset": 111167
+          },
+          {
+            "index": 460,
+            "stream": "BodyText/Section0",
+            "offset": 111308
+          },
+          {
+            "index": 461,
+            "stream": "BodyText/Section0",
+            "offset": 111447
+          },
+          {
+            "index": 462,
+            "stream": "BodyText/Section0",
+            "offset": 111535
+          },
+          {
+            "index": 463,
+            "stream": "BodyText/Section0",
+            "offset": 111727
+          },
+          {
+            "index": 464,
+            "stream": "BodyText/Section0",
+            "offset": 112200
+          },
+          {
+            "index": 465,
+            "stream": "BodyText/Section0",
+            "offset": 112359
+          },
+          {
+            "index": 466,
+            "stream": "BodyText/Section0",
+            "offset": 112502
+          },
+          {
+            "index": 467,
+            "stream": "BodyText/Section0",
+            "offset": 112645
+          },
+          {
+            "index": 468,
+            "stream": "BodyText/Section0",
+            "offset": 112790
+          },
+          {
+            "index": 469,
+            "stream": "BodyText/Section0",
+            "offset": 112941
+          },
+          {
+            "index": 470,
+            "stream": "BodyText/Section0",
+            "offset": 113080
+          },
+          {
+            "index": 471,
+            "stream": "BodyText/Section0",
+            "offset": 113219
+          },
+          {
+            "index": 472,
+            "stream": "BodyText/Section0",
+            "offset": 113449
+          },
+          {
+            "index": 473,
+            "stream": "BodyText/Section0",
+            "offset": 113604
+          },
+          {
+            "index": 474,
+            "stream": "BodyText/Section0",
+            "offset": 113743
+          },
+          {
+            "index": 475,
+            "stream": "BodyText/Section0",
+            "offset": 113882
+          },
+          {
+            "index": 476,
+            "stream": "BodyText/Section0",
+            "offset": 114112
+          },
+          {
+            "index": 477,
+            "stream": "BodyText/Section0",
+            "offset": 114265
+          },
+          {
+            "index": 478,
+            "stream": "BodyText/Section0",
+            "offset": 114404
+          },
+          {
+            "index": 479,
+            "stream": "BodyText/Section0",
+            "offset": 114545
+          },
+          {
+            "index": 480,
+            "stream": "BodyText/Section0",
+            "offset": 114779
+          },
+          {
+            "index": 481,
+            "stream": "BodyText/Section0",
+            "offset": 114934
+          },
+          {
+            "index": 482,
+            "stream": "BodyText/Section0",
+            "offset": 115073
+          },
+          {
+            "index": 483,
+            "stream": "BodyText/Section0",
+            "offset": 115212
+          },
+          {
+            "index": 484,
+            "stream": "BodyText/Section0",
+            "offset": 115442
+          },
+          {
+            "index": 485,
+            "stream": "BodyText/Section0",
+            "offset": 115589
+          },
+          {
+            "index": 486,
+            "stream": "BodyText/Section0",
+            "offset": 115728
+          },
+          {
+            "index": 487,
+            "stream": "BodyText/Section0",
+            "offset": 115869
+          },
+          {
+            "index": 488,
+            "stream": "BodyText/Section0",
+            "offset": 115959
+          },
+          {
+            "index": 489,
+            "stream": "BodyText/Section0",
+            "offset": 116189
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.price-49",
+      "districtId": "samdo-2",
+      "section": "49㎡ 분양가격",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "49㎡",
+        "분양가격",
+        "공급금액"
+      ],
+      "textExcerpt": "공급가격ㆍ토지임대료 등\n■ 건물분양가\n※ 본 주택은 분양가상한제 적용주택으로 「주택법」 제57조에 따라 산정한 분양가상한금액 범위 내에서 층별 차등을 두어 책정한 금액입니다.\n※ 필로티 공간을 포함하여 층·호수를 산정하였으며, 이를 기준으로 실제 층고에 해당하는 층·호수를 고려하여 주택가격을 산정하였습니다.\n※ 하기 금액에는 취득세, 인지세 등의 제세공과금이 포함되어 있지 않습니다. (발코니 확장비용 제외)\n※ 호는 당첨자 선정 시 한국부동산원의 프로그램에 의해 무작위 추첨되며, 분양가는 주택형·층·향 등에 따라 차이가 있으므로 반드시 청약 전 사이버견본주택 및 팸플릿 등을 통해 동·호 배치도, 평면도 및 면적 등을 확인하신 후 신청하시기 바랍니다.\n※ 해당 주택은 공사가 정부로부터 주택도시기금을 지원받아 건설 공급하는 주택이나, 지원 받은 주택도시기금은 「주택도시기금 운용계획」에 따라 입주자 대환이 불가함을 알려드립니다.\n주택형\n(주택타입)\n세부\n평형\n층별\n구분\n주택가격(천원)\n발코니 확장비용\n(천원, 부가세 포함)\n계\n계약금\n(계약 시 10%)\n잔금\n(입주 시 90%)\n049.5837A\n49A\n2층\n기본형\n241,927\n24,192\n217,735\n4,371\n마이너스옵션\n214,437\n21,443\n192,994\n1,305\n3층\n기본형\n246,967\n24,696\n222,271\n4,371\n마이너스옵션\n219,477\n21,947\n197,530\n1,305\n4층~\n9층\n기본형\n252,007\n25,200\n226,807\n4,371\n마이너스옵션\n224,517\n22,451\n202,066\n1,305",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 499,
+            "stream": "BodyText/Section0",
+            "offset": 120144
+          },
+          {
+            "index": 500,
+            "stream": "BodyText/Section0",
+            "offset": 120700
+          },
+          {
+            "index": 501,
+            "stream": "BodyText/Section0",
+            "offset": 120800
+          },
+          {
+            "index": 502,
+            "stream": "BodyText/Section0",
+            "offset": 121038
+          },
+          {
+            "index": 503,
+            "stream": "BodyText/Section0",
+            "offset": 121272
+          },
+          {
+            "index": 504,
+            "stream": "BodyText/Section0",
+            "offset": 121470
+          },
+          {
+            "index": 505,
+            "stream": "BodyText/Section0",
+            "offset": 121882
+          },
+          {
+            "index": 506,
+            "stream": "BodyText/Section0",
+            "offset": 122459
+          },
+          {
+            "index": 507,
+            "stream": "BodyText/Section0",
+            "offset": 122551
+          },
+          {
+            "index": 508,
+            "stream": "BodyText/Section0",
+            "offset": 122700
+          },
+          {
+            "index": 509,
+            "stream": "BodyText/Section0",
+            "offset": 122790
+          },
+          {
+            "index": 510,
+            "stream": "BodyText/Section0",
+            "offset": 122931
+          },
+          {
+            "index": 511,
+            "stream": "BodyText/Section0",
+            "offset": 123072
+          },
+          {
+            "index": 512,
+            "stream": "BodyText/Section0",
+            "offset": 123213
+          },
+          {
+            "index": 513,
+            "stream": "BodyText/Section0",
+            "offset": 123366
+          },
+          {
+            "index": 514,
+            "stream": "BodyText/Section0",
+            "offset": 123468
+          },
+          {
+            "index": 515,
+            "stream": "BodyText/Section0",
+            "offset": 123629
+          },
+          {
+            "index": 516,
+            "stream": "BodyText/Section0",
+            "offset": 123768
+          },
+          {
+            "index": 517,
+            "stream": "BodyText/Section0",
+            "offset": 123860
+          },
+          {
+            "index": 518,
+            "stream": "BodyText/Section0",
+            "offset": 124017
+          },
+          {
+            "index": 519,
+            "stream": "BodyText/Section0",
+            "offset": 124107
+          },
+          {
+            "index": 520,
+            "stream": "BodyText/Section0",
+            "offset": 124264
+          },
+          {
+            "index": 521,
+            "stream": "BodyText/Section0",
+            "offset": 124419
+          },
+          {
+            "index": 522,
+            "stream": "BodyText/Section0",
+            "offset": 124562
+          },
+          {
+            "index": 523,
+            "stream": "BodyText/Section0",
+            "offset": 124703
+          },
+          {
+            "index": 524,
+            "stream": "BodyText/Section0",
+            "offset": 124846
+          },
+          {
+            "index": 525,
+            "stream": "BodyText/Section0",
+            "offset": 124997
+          },
+          {
+            "index": 526,
+            "stream": "BodyText/Section0",
+            "offset": 125146
+          },
+          {
+            "index": 527,
+            "stream": "BodyText/Section0",
+            "offset": 125297
+          },
+          {
+            "index": 528,
+            "stream": "BodyText/Section0",
+            "offset": 125444
+          },
+          {
+            "index": 529,
+            "stream": "BodyText/Section0",
+            "offset": 125593
+          },
+          {
+            "index": 530,
+            "stream": "BodyText/Section0",
+            "offset": 125744
+          },
+          {
+            "index": 531,
+            "stream": "BodyText/Section0",
+            "offset": 125893
+          },
+          {
+            "index": 532,
+            "stream": "BodyText/Section0",
+            "offset": 126044
+          },
+          {
+            "index": 533,
+            "stream": "BodyText/Section0",
+            "offset": 126191
+          },
+          {
+            "index": 534,
+            "stream": "BodyText/Section0",
+            "offset": 126332
+          },
+          {
+            "index": 535,
+            "stream": "BodyText/Section0",
+            "offset": 126475
+          },
+          {
+            "index": 536,
+            "stream": "BodyText/Section0",
+            "offset": 126626
+          },
+          {
+            "index": 537,
+            "stream": "BodyText/Section0",
+            "offset": 126775
+          },
+          {
+            "index": 538,
+            "stream": "BodyText/Section0",
+            "offset": 126926
+          },
+          {
+            "index": 539,
+            "stream": "BodyText/Section0",
+            "offset": 127109
+          },
+          {
+            "index": 540,
+            "stream": "BodyText/Section0",
+            "offset": 127258
+          },
+          {
+            "index": 541,
+            "stream": "BodyText/Section0",
+            "offset": 127409
+          },
+          {
+            "index": 542,
+            "stream": "BodyText/Section0",
+            "offset": 127558
+          },
+          {
+            "index": 543,
+            "stream": "BodyText/Section0",
+            "offset": 127709
+          },
+          {
+            "index": 544,
+            "stream": "BodyText/Section0",
+            "offset": 127892
+          },
+          {
+            "index": 545,
+            "stream": "BodyText/Section0",
+            "offset": 127984
+          },
+          {
+            "index": 546,
+            "stream": "BodyText/Section0",
+            "offset": 128125
+          },
+          {
+            "index": 547,
+            "stream": "BodyText/Section0",
+            "offset": 128268
+          },
+          {
+            "index": 548,
+            "stream": "BodyText/Section0",
+            "offset": 128419
+          },
+          {
+            "index": 549,
+            "stream": "BodyText/Section0",
+            "offset": 128568
+          },
+          {
+            "index": 550,
+            "stream": "BodyText/Section0",
+            "offset": 128719
+          },
+          {
+            "index": 551,
+            "stream": "BodyText/Section0",
+            "offset": 128902
+          },
+          {
+            "index": 552,
+            "stream": "BodyText/Section0",
+            "offset": 129051
+          },
+          {
+            "index": 553,
+            "stream": "BodyText/Section0",
+            "offset": 129202
+          },
+          {
+            "index": 554,
+            "stream": "BodyText/Section0",
+            "offset": 129351
+          },
+          {
+            "index": 555,
+            "stream": "BodyText/Section0",
+            "offset": 129502
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.price-59",
+      "districtId": "samdo-2",
+      "section": "59㎡ 분양가격",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "59㎡",
+        "분양가격",
+        "공급금액"
+      ],
+      "textExcerpt": "059.9783B\n59A\n2층\n기본형\n289,898\n28,989\n260,909\n4,836\n마이너스옵션\n254,980\n25,498\n229,482\n1,540\n3층\n기본형\n295,937\n29,593\n266,344\n4,836\n마이너스옵션\n261,019\n26,101\n234,918\n1,540\n4층~\n9층\n기본형\n301,977\n30,197\n271,780\n4,836\n마이너스옵션\n267,059\n26,705\n240,354\n1,540",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 556,
+            "stream": "BodyText/Section0",
+            "offset": 129685
+          },
+          {
+            "index": 557,
+            "stream": "BodyText/Section0",
+            "offset": 129840
+          },
+          {
+            "index": 558,
+            "stream": "BodyText/Section0",
+            "offset": 129983
+          },
+          {
+            "index": 559,
+            "stream": "BodyText/Section0",
+            "offset": 130124
+          },
+          {
+            "index": 560,
+            "stream": "BodyText/Section0",
+            "offset": 130267
+          },
+          {
+            "index": 561,
+            "stream": "BodyText/Section0",
+            "offset": 130418
+          },
+          {
+            "index": 562,
+            "stream": "BodyText/Section0",
+            "offset": 130567
+          },
+          {
+            "index": 563,
+            "stream": "BodyText/Section0",
+            "offset": 130718
+          },
+          {
+            "index": 564,
+            "stream": "BodyText/Section0",
+            "offset": 130865
+          },
+          {
+            "index": 565,
+            "stream": "BodyText/Section0",
+            "offset": 131014
+          },
+          {
+            "index": 566,
+            "stream": "BodyText/Section0",
+            "offset": 131165
+          },
+          {
+            "index": 567,
+            "stream": "BodyText/Section0",
+            "offset": 131314
+          },
+          {
+            "index": 568,
+            "stream": "BodyText/Section0",
+            "offset": 131465
+          },
+          {
+            "index": 569,
+            "stream": "BodyText/Section0",
+            "offset": 131612
+          },
+          {
+            "index": 570,
+            "stream": "BodyText/Section0",
+            "offset": 131753
+          },
+          {
+            "index": 571,
+            "stream": "BodyText/Section0",
+            "offset": 131896
+          },
+          {
+            "index": 572,
+            "stream": "BodyText/Section0",
+            "offset": 132047
+          },
+          {
+            "index": 573,
+            "stream": "BodyText/Section0",
+            "offset": 132196
+          },
+          {
+            "index": 574,
+            "stream": "BodyText/Section0",
+            "offset": 132347
+          },
+          {
+            "index": 575,
+            "stream": "BodyText/Section0",
+            "offset": 132530
+          },
+          {
+            "index": 576,
+            "stream": "BodyText/Section0",
+            "offset": 132679
+          },
+          {
+            "index": 577,
+            "stream": "BodyText/Section0",
+            "offset": 132830
+          },
+          {
+            "index": 578,
+            "stream": "BodyText/Section0",
+            "offset": 132979
+          },
+          {
+            "index": 579,
+            "stream": "BodyText/Section0",
+            "offset": 133130
+          },
+          {
+            "index": 580,
+            "stream": "BodyText/Section0",
+            "offset": 133313
+          },
+          {
+            "index": 581,
+            "stream": "BodyText/Section0",
+            "offset": 133405
+          },
+          {
+            "index": 582,
+            "stream": "BodyText/Section0",
+            "offset": 133546
+          },
+          {
+            "index": 583,
+            "stream": "BodyText/Section0",
+            "offset": 133689
+          },
+          {
+            "index": 584,
+            "stream": "BodyText/Section0",
+            "offset": 133840
+          },
+          {
+            "index": 585,
+            "stream": "BodyText/Section0",
+            "offset": 133989
+          },
+          {
+            "index": 586,
+            "stream": "BodyText/Section0",
+            "offset": 134140
+          },
+          {
+            "index": 587,
+            "stream": "BodyText/Section0",
+            "offset": 134323
+          },
+          {
+            "index": 588,
+            "stream": "BodyText/Section0",
+            "offset": 134472
+          },
+          {
+            "index": 589,
+            "stream": "BodyText/Section0",
+            "offset": 134623
+          },
+          {
+            "index": 590,
+            "stream": "BodyText/Section0",
+            "offset": 134772
+          },
+          {
+            "index": 591,
+            "stream": "BodyText/Section0",
+            "offset": 134923
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.rent",
+      "districtId": "samdo-2",
+      "section": "월 토지임대료",
+      "kind": "table",
+      "supplyTypes": [],
+      "keywords": [
+        "토지임대료",
+        "49㎡",
+        "59㎡",
+        "월 임대료"
+      ],
+      "textExcerpt": "■ 토지임대료\n약식표기\n주택형\n토지임대료(원/월)\n49A\n049.5837A\n283,920\n59A\n059.9783B\n343,440",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 735,
+            "stream": "BodyText/Section0",
+            "offset": 161980
+          },
+          {
+            "index": 736,
+            "stream": "BodyText/Section0",
+            "offset": 162317
+          },
+          {
+            "index": 737,
+            "stream": "BodyText/Section0",
+            "offset": 162462
+          },
+          {
+            "index": 738,
+            "stream": "BodyText/Section0",
+            "offset": 162605
+          },
+          {
+            "index": 739,
+            "stream": "BodyText/Section0",
+            "offset": 162762
+          },
+          {
+            "index": 740,
+            "stream": "BodyText/Section0",
+            "offset": 162905
+          },
+          {
+            "index": 741,
+            "stream": "BodyText/Section0",
+            "offset": 163060
+          },
+          {
+            "index": 742,
+            "stream": "BodyText/Section0",
+            "offset": 163211
+          },
+          {
+            "index": 743,
+            "stream": "BodyText/Section0",
+            "offset": 163354
+          },
+          {
+            "index": 744,
+            "stream": "BodyText/Section0",
+            "offset": 163509
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.land-lease",
+      "districtId": "samdo-2",
+      "section": "토지임대부 분양주택 안내",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "토지임대부",
+        "토지 소유권",
+        "건물 소유권",
+        "임대료"
+      ],
+      "textExcerpt": "■ 토지임대료 산정방법 및 유의사항\n• 본 입주자모집공고에서의 토지임대부 분양주택은 「공공주택특별법 시행규칙」 제23조의5제2항 및 「주택법」 제2조제9호에 의하여 공공주택사업자가 입주자를 선정하여 공급하는 주택으로서, 토지임대부 분양주택은 「주택법」 제2조제9호에 의하여 토지의 소유권은 사업계획의 승인을 받아 건설사업을 하는 JPDC가 가지고, 건축물 등에 대한 소유권(건축물의 전유부분에 대한 구분소유권은 이를 분양받은 자가 가지고, 건축물의 공용부분·부속건물은 분양받은 자들이 공유함)은 주택을 분양받은 자가 갖는 주택을 의미합니다.\n• 토지임대부 분양주택을 공급받은 자는 토지소유자(JPDC)와 「주택법」 제78조제3항 및 「주택법 시행규칙」 제31조에서 정하는 표준임대차계약서를 사용하여 토지에 대한 임대차계약을 체결하게 되며, 임대차계약을 체결한 경우 해당 주택의 구분소유권을 목적으로 그 토지 위에 40년 이내의 임대차기간(토지임대부 분양주택 소유자의 75퍼센트 이상이 계약갱신을 청구하는 경우 40년의 범위에서 갱신 가능) 동안 지상권이 설정된 것으로 봅니다. 토지임대부 분양주택을 양수한 자 또는 상속받은 자는 위 임대차계약을 승계합니다.",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 745,
+            "stream": "BodyText/Section0",
+            "offset": 163697
+          },
+          {
+            "index": 746,
+            "stream": "BodyText/Section0",
+            "offset": 164052
+          },
+          {
+            "index": 747,
+            "stream": "BodyText/Section0",
+            "offset": 164856
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.overseas",
+      "districtId": "samdo-2",
+      "section": "거주기간 및 해외체류",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "해외체류",
+        "출국",
+        "거주기간",
+        "우선공급"
+      ],
+      "textExcerpt": "• 2019.11.01. 시행된 「주택공급에 관한 규칙」 제4조제5항 및 제23조제2항제7호에 따라 우선공급 받으려는 경우에는 「출입국관리법」 제88조의 출입국사실증명서를 사업주체에 제출해야 합니다. 장기해외체류자는 해당 주택건설지역 우선공급 대상자로 신청이 불가하며, 이를 위반하여 해당 주택건설지역 거주자로 청약하여 당첨된 경우에는 부적격 당첨자로 처리됩니다.\n출입국사실증명서 해외체류기간이 계속하여 90일을 초과한 기간(입국 후 7일 내 동일국가 재출국 시 계속하여 해외에 체류한 것으로 봄) 또는 연간 183일을 초과하여 국외에 거주한 기간은 국내 거주로 인정되지 아니하므로 해당 주택건설지역으로 청약할 수 없습니다. 단, 90일 이내의 여행, 출장, 파견 등 단기 해외체류는 국내거주로 간주되어 해당 주택건설지역 우선공급 대상자로 청약 가능합니다.",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 196,
+            "stream": "BodyText/Section0",
+            "offset": 46230
+          },
+          {
+            "index": 197,
+            "stream": "BodyText/Section0",
+            "offset": 47003
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.youth-eligibility",
+      "districtId": "samdo-2",
+      "section": "청년 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "YOUTH"
+      ],
+      "keywords": [
+        "청년",
+        "미혼",
+        "무주택",
+        "청약통장",
+        "소득"
+      ],
+      "textExcerpt": "• 입주자모집공고일(2026.10.27.) 현재 제주특별자치도에 거주하면서 아래 조건(①~④)을 모두 갖춘 분\n① 19세 이상~39세 이하로 혼인 중이 아니며, 과거 주택을 소유한 사실이 없는 무주택자\n② 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n도시근로자 가구원수별 가구당 월평균소득액의 140%\n5,338,708원",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 1569,
+            "stream": "BodyText/Section0",
+            "offset": 338178
+          },
+          {
+            "index": 1570,
+            "stream": "BodyText/Section0",
+            "offset": 338420
+          },
+          {
+            "index": 1571,
+            "stream": "BodyText/Section0",
+            "offset": 338650
+          },
+          {
+            "index": 1579,
+            "stream": "BodyText/Section0",
+            "offset": 340681
+          },
+          {
+            "index": 1580,
+            "stream": "BodyText/Section0",
+            "offset": 340882
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.newlywed-eligibility",
+      "districtId": "samdo-2",
+      "section": "신혼부부 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "NEWLYWED"
+      ],
+      "keywords": [
+        "신혼부부",
+        "예비신혼",
+        "한부모",
+        "혼인",
+        "청약통장"
+      ],
+      "textExcerpt": "① 입주자모집공고일 현재 신혼부부[혼인 중인 사람으로서 혼인기간이 7년 이내이거나 6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분], 예비신혼부부[혼인을 계획 중이고 해당 주택의 입주자모집공고일로부터 1년 이내(1년이 되기 전에 입주하는 경우 입주 전까지)] 혼인 사실을 증명할 수 있으며, 혼인으로 구성할 세대 전원이 무주택인 분), 한부모가족[6세 이하의 자녀(만 7세 미만으로 태아 포함)가 있는 분] 중 하나에 해당하는 무주택세대구성원 (※ 2페이지 무주택세대구성원 설명 참고)\n※ (예비신혼부부) 청약 시 기입한 예비배우자와의 혼인관계증명서 및 혼인으로 구성될 세대가 포함된 신청자의 세대별 주민등록표등본을 입주 전까지 우리공사로 제출해야 하며, 서류 미제출 또는 전 배우자와 재혼한 사실이 확인되는 경우 계약이 해제되고 입주가 불가합니다.\n※ (한부모가족) 「한부모가족지원법」 제4조에 따른 한부모가족(한부모가족증명서를 통해 증명 가능한 「한부모가족지원법」 제4조제1호에 해당하는 분을 포함)을 말하며, 가족관계증명서와 주민등록표등본을 통해 공고일 현재 자녀 유무 등 해당 사실을 증명할 수 있어야 합니다. 만일 추후 사실혼 관계 등 한부모가족 자격 미달인 사실이 확인될 경우 계약취소 또는 해제될 수 있습니다.\n② 입주자저축(주택청약종합저축 또는 청약저축)에 가입하여 6개월이 경과되고, 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n※ 공고일 이후 한국부동산원 청약홈(www.applyhome.co.kr)에서 본인의 청약통장 순위확인서를 통해 확인하실 수 있습니다.\n③ 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 1714,
+            "stream": "BodyText/Section0",
+            "offset": 369695
+          },
+          {
+            "index": 1715,
+            "stream": "BodyText/Section0",
+            "offset": 370561
+          },
+          {
+            "index": 1716,
+            "stream": "BodyText/Section0",
+            "offset": 371003
+          },
+          {
+            "index": 1717,
+            "stream": "BodyText/Section0",
+            "offset": 371693
+          },
+          {
+            "index": 1718,
+            "stream": "BodyText/Section0",
+            "offset": 371989
+          },
+          {
+            "index": 1719,
+            "stream": "BodyText/Section0",
+            "offset": 372233
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.first-home-eligibility",
+      "districtId": "samdo-2",
+      "section": "생애최초 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "FIRST_HOME"
+      ],
+      "keywords": [
+        "생애최초",
+        "주택소유",
+        "600만원",
+        "소득세",
+        "세대주"
+      ],
+      "textExcerpt": "① 입주자모집공고일 현재 생애최초로 주택을 구입하는 무주택세대구성원(세대에 속한 모든 분이 과거 주택소유사실이 없는 경우로 한정하나, 공급 신청자의 배우자가 혼인신고일 전에 주택을 소유했다가 처분한 사실이 있는 경우는 신청 가능) ※ 2페이지 무주택세대구성원 설명 참조\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 「주택공급에 관한 규칙」 제27조제1항에 따른 1순위자*에 해당하는 무주택세대구성원으로서 저축액이 선납금을 포함하여 600만원 이상인 분\n※ 공고일 이후 한국부동산원 청약홈(www.applyhome.co.kr)에서 본인의 청약통장 순위확인서를 통해 확인하실 수 있습니다.\n③ 입주자모집공고일 현재 혼인(재혼 포함)중이거나 미혼인 자녀[입양을 포함하며, 신청자가 혼인 중이 아닌 경우에는 동일한 주민등록표등본상에 등재되어 있는 자녀(신청자의 태아 포함)를 말함]가 있는 분\n※ 1인 가구는 생애최초 특별공급 청약 신청이 불가합니다.\n④ 입주자모집공고일 현재 근로자 또는 자영업자(과거 1년 내에 소득세를 납부한 분을 포함)로서 신청자 본인이 5년 이상 소득세를 납부한 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 1975,
+            "stream": "BodyText/Section0",
+            "offset": 425337
+          },
+          {
+            "index": 1976,
+            "stream": "BodyText/Section0",
+            "offset": 425823
+          },
+          {
+            "index": 1977,
+            "stream": "BodyText/Section0",
+            "offset": 426255
+          },
+          {
+            "index": 1978,
+            "stream": "BodyText/Section0",
+            "offset": 426497
+          },
+          {
+            "index": 1979,
+            "stream": "BodyText/Section0",
+            "offset": 426913
+          },
+          {
+            "index": 1980,
+            "stream": "BodyText/Section0",
+            "offset": 427071
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.newborn-eligibility",
+      "districtId": "samdo-2",
+      "section": "신생아 특별공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "NEWBORN"
+      ],
+      "keywords": [
+        "신생아",
+        "2세 미만",
+        "태아",
+        "입양",
+        "무주택"
+      ],
+      "textExcerpt": "※ 아동수당·부모급여 수령내역 등 자녀 양육사실 증빙서류는 공적 서류에 한하여 인정하며, 그 외 신청결과 문자 등은 인정하지 않습니다.\n② 입주자모집공고일 현재 입주자저축(주택청약종합저축, 청약저축)에 가입하여 6개월이 경과되고 매월 약정납입일에 월납입금을 6회 이상 납입한 분\n③ 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 자\n④ 무주택세대구성원 전원의 월평균소득이 “<표5> 전년도 도시근로자 가구당 월평균소득(4인 이상인 세대는 가구원수별 가구당 월평균소득을 말함)”의 140% (단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분\n구분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 2081,
+            "stream": "BodyText/Section0",
+            "offset": 452083
+          },
+          {
+            "index": 2082,
+            "stream": "BodyText/Section0",
+            "offset": 452329
+          },
+          {
+            "index": 2083,
+            "stream": "BodyText/Section0",
+            "offset": 452613
+          },
+          {
+            "index": 2084,
+            "stream": "BodyText/Section0",
+            "offset": 452829
+          },
+          {
+            "index": 2085,
+            "stream": "BodyText/Section0",
+            "offset": 453772
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.general-eligibility",
+      "districtId": "samdo-2",
+      "section": "일반공급 신청자격",
+      "kind": "paragraph",
+      "supplyTypes": [
+        "GENERAL"
+      ],
+      "keywords": [
+        "일반공급",
+        "무주택세대구성원",
+        "1순위",
+        "2순위"
+      ],
+      "textExcerpt": "• 입주자모집공고일(2026.10.27.) 현재 제주특별자치도에 거주하면서 아래 조건(①~③)을 모두 갖춘 분\n① 입주자모집공고일 현재 무주택세대구성원으로 입주자저축(주택청약종합저축 또는 청약저축)에 가입한 분  ※ 2페이지 무주택세대구성원 설명 참조\n② 해당 세대의 총자산 합계액이 “<표3> 총자산보유기준“ 이하인 분\n③ 무주택세대구성원 전원의 월평균소득 합이 “<표5> 전년도 도시근로자 가구당 월평균소득 기준”의 100% 이하인 분(단, 본인 및 배우자가 모두 소득이 있는 경우에는 200%) 이하인 분",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 2270,
+            "stream": "BodyText/Section0",
+            "offset": 492104
+          },
+          {
+            "index": 2271,
+            "stream": "BodyText/Section0",
+            "offset": 492340
+          },
+          {
+            "index": 2272,
+            "stream": "BodyText/Section0",
+            "offset": 492636
+          },
+          {
+            "index": 2273,
+            "stream": "BodyText/Section0",
+            "offset": 492858
+          }
+        ]
+      }
+    },
+    {
+      "id": "samdo-2.documents",
+      "districtId": "samdo-2",
+      "section": "신청서류 및 당첨자 제출서류",
+      "kind": "paragraph",
+      "supplyTypes": [],
+      "keywords": [
+        "준비서류",
+        "제출서류",
+        "등본",
+        "초본",
+        "청약통장",
+        "소득",
+        "자산"
+      ],
+      "textExcerpt": "■ 특별공급(청년·신혼부부·생애최초·신생아) 당첨자 제출서류\n* 입주자모집공고일(2026.10.27.) 이후 발급분에 한하며, 주민등록번호 별표(*) 처리 없이 전체 표기되도록 발급\n구 분\n서 류 유 형\n■ 일반공급 당첨자 제출서류\n* 입주자모집공고일(2026.10.27.) 이후 발급분에 한하며, 주민등록번호 별표(*) 처리 없이 전체 표기되도록 발급\n서 류 유 형",
+      "locator": {
+        "parser": "HWP5_RECORDS",
+        "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+        "paragraphs": [
+          {
+            "index": 2694,
+            "stream": "BodyText/Section0",
+            "offset": 607974
+          },
+          {
+            "index": 2695,
+            "stream": "BodyText/Section0",
+            "offset": 608136
+          },
+          {
+            "index": 2696,
+            "stream": "BodyText/Section0",
+            "offset": 608657
+          },
+          {
+            "index": 2697,
+            "stream": "BodyText/Section0",
+            "offset": 608802
+          },
+          {
+            "index": 2930,
+            "stream": "BodyText/Section0",
+            "offset": 654641
+          },
+          {
+            "index": 2931,
+            "stream": "BodyText/Section0",
+            "offset": 654767
+          },
+          {
+            "index": 2932,
+            "stream": "BodyText/Section0",
+            "offset": 655264
+          }
+        ]
+      }
+    }
+  ],
+  "fingerprint": "5a372043de9f7fd186a893f398f0999e3a81041488c800d30cf37875a3cd4ff9"
+}

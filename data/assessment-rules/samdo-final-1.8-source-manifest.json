@@ -1,20 +1,26 @@
 {
-  "schemaVersion": 1,
-  "eventSourceOfTruth": {
-    "district": 1,
-    "fileName": "(최종1.8)삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
-    "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
-    "parser": "HWP5_RECORDS",
-    "paragraphCount": 3754,
-    "role": "EVENT_SOURCE_OF_TRUTH"
-  },
-  "crossCheckOnly": {
-    "district": 2,
-    "fileName": "(최종1.8)삼도이동 2지구 토지임대부 분양주택 입주자모집공고문.hwp",
-    "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
-    "parser": "HWP5_RECORDS",
-    "paragraphCount": 3757,
-    "role": "COMMON_RULE_CROSS_CHECK_ONLY",
-    "eventUiVisible": false
-  }
+  "schemaVersion": 2,
+  "eventSourceOfTruth": [
+    {
+      "districtId": "samdo-1",
+      "district": 1,
+      "fileName": "(최종1.8)삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
+      "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+      "parser": "HWP5_RECORDS",
+      "paragraphCount": 3754,
+      "role": "DISTRICT_RULE_SOURCE_OF_TRUTH",
+      "eventUiVisible": true
+    },
+    {
+      "districtId": "samdo-2",
+      "district": 2,
+      "fileName": "(최종1.8)삼도이동 2지구 토지임대부 분양주택 입주자모집공고문.hwp",
+      "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+      "parser": "HWP5_RECORDS",
+      "paragraphCount": 3757,
+      "role": "DISTRICT_RULE_SOURCE_OF_TRUTH",
+      "eventUiVisible": true
+    }
+  ],
+  "separationPolicy": "각 지구의 listing, Rule Package, 일정, 공급량, 분양가격, 월 토지임대료와 evidence locator를 독립 보존하며 다른 지구 값으로 보완하지 않는다."
 }

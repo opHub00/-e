@@ -2,9 +2,10 @@ import { assessApplication } from '../../applicationAssessment/engine.ts';
 import { completedMonths, validDate } from '../../applicationAssessment/facts.ts';
 import type { AnnouncementRules, ApplicationAssessmentResult, AssessmentInput, Evidence, Scalar, SupplyType } from '../../applicationAssessment/types.ts';
 import { humanizeAll } from '../presentation.ts';
-import { SAMDO_DEEP_RULE_PACKAGE, SAMDO_EVIDENCE } from './rulePackage.ts';
+import { SAMDO_DEEP_RULE_PACKAGE } from './rulePackage.ts';
 import type {
   SamdoEligibility,
+  SamdoDeepRulePackage,
   SamdoOfficialScore,
   SamdoRecommendation,
   SamdoRecommendationItem,
@@ -103,7 +104,7 @@ function classify(checks: Check[], extraMissing: string[], evidenceRequired: str
   return 'ELIGIBLE';
 }
 
-function newbornScore(input: AssessmentInput, rules: AnnouncementRules): SamdoOfficialScore {
+function newbornScore(input: AssessmentInput, rules: AnnouncementRules, deepPackage: SamdoDeepRulePackage): SamdoOfficialScore {
   const size = input.details.incomeHouseholdSize ?? known(input.profile.household.memberCount);
   const income = input.details.householdIncome;
   const dual = input.details.dualIncome;
@@ -112,16 +113,18 @@ function newbornScore(input: AssessmentInput, rules: AnnouncementRules): SamdoOf
   const incomePoints = income === undefined || low === undefined || middle === undefined ? undefined : income <= low ? 3 : income <= middle ? 2 : 1;
   const childCount = minorChildren(input);
   const childPoints = childCount === undefined ? undefined : Math.min(3, childCount);
-  const residenceMonths = completedMonths(input.details.residenceStartDate, SAMDO_DEEP_RULE_PACKAGE.announcementDate);
+  const residenceMonths = completedMonths(input.details.residenceStartDate, deepPackage.announcementDate);
   const residencePoints = residenceMonths === undefined ? undefined : residenceMonths >= 24 ? 3 : residenceMonths >= 12 ? 2 : residenceMonths >= 0 ? 1 : 0;
   const payment = input.details.recognizedPaymentCount;
   const paymentPoints = payment === undefined ? undefined : payment >= 24 ? 3 : payment >= 12 ? 2 : payment >= 6 ? 1 : 0;
   if ([incomePoints, childPoints, residencePoints, paymentPoints].some(value => value === undefined)) return { status: 'PENDING' };
+  const evidenceId = deepPackage.supplies.find(item => item.supplyType === 'NEWBORN')?.rules.find(rule => rule.category === 'SCORE')?.evidence.id;
+  if (!evidenceId) return { status: 'PENDING' };
   const breakdown = [
-    { label: '세대 월평균소득', points: incomePoints!, max: 3, evidenceId: SAMDO_EVIDENCE.newbornScore.id },
-    { label: '미성년 자녀 수', points: childPoints!, max: 3, evidenceId: SAMDO_EVIDENCE.newbornScore.id },
-    { label: '제주 연속 거주기간', points: residencePoints!, max: 3, evidenceId: SAMDO_EVIDENCE.newbornScore.id },
-    { label: '청약통장 인정 납입횟수', points: paymentPoints!, max: 3, evidenceId: SAMDO_EVIDENCE.newbornScore.id },
+    { label: '세대 월평균소득', points: incomePoints!, max: 3, evidenceId },
+    { label: '미성년 자녀 수', points: childPoints!, max: 3, evidenceId },
+    { label: '제주 연속 거주기간', points: residencePoints!, max: 3, evidenceId },
+    { label: '청약통장 인정 납입횟수', points: paymentPoints!, max: 3, evidenceId },
   ];
   return { status: 'AVAILABLE', total: breakdown.reduce((sum, item) => sum + item.points, 0), max: 12, breakdown };
 }
@@ -161,13 +164,13 @@ function incomeCheck(input: AssessmentInput, rules: AnnouncementRules, singlePer
   return { value: false, fact: 'householdIncome', pass: '', fail: '세대 월평균소득이 해당 단계 기준을 초과해요.' };
 }
 
-function evaluateNewborn(input: AssessmentInput, rules: AnnouncementRules): SamdoSupplyEvaluation {
-  const supply = SAMDO_DEEP_RULE_PACKAGE.supplies.find(item => item.supplyType === 'NEWBORN')!;
+function evaluateNewborn(input: AssessmentInput, rules: AnnouncementRules, deepPackage: SamdoDeepRulePackage): SamdoSupplyEvaluation {
+  const supply = deepPackage.supplies.find(item => item.supplyType === 'NEWBORN')!;
   const assets = assetCheck(input);
   const checks = [
     ...baseChecks(input, 'NEWBORN'),
     { value: childUnderTwo(input) ?? null, fact: 'childUnderTwo', pass: '2세 미만 자녀 또는 태아 있음', fail: '공고일 현재 2세 미만 자녀 또는 태아가 없어요.' },
-    { value: input.details.subscriptionAccountOpenedAt ? (completedMonths(input.details.subscriptionAccountOpenedAt, SAMDO_DEEP_RULE_PACKAGE.announcementDate) ?? -1) >= 6 : null, fact: 'accountMonths', pass: '청약통장 가입 6개월 이상', fail: '청약통장 가입기간이 6개월 미만이에요.' },
+    { value: input.details.subscriptionAccountOpenedAt ? (completedMonths(input.details.subscriptionAccountOpenedAt, deepPackage.announcementDate) ?? -1) >= 6 : null, fact: 'accountMonths', pass: '청약통장 가입 6개월 이상', fail: '청약통장 가입기간이 6개월 미만이에요.' },
     { value: input.details.recognizedPaymentCount === undefined ? null : input.details.recognizedPaymentCount >= 6, fact: 'recognizedPaymentCount', pass: '청약통장 6회 이상 납입', fail: '청약통장 인정 납입횟수가 6회 미만이에요.' },
     assets.check,
     incomeCheck(input, rules, 140, 200, true),
@@ -187,12 +190,12 @@ function evaluateNewborn(input: AssessmentInput, rules: AnnouncementRules): Samd
   const stageLabel = stage === 'PRIORITY' ? '1단계 우선공급(70%)' : stage === 'GENERAL' ? '2단계 일반공급(20%)' : stage === 'LOTTERY' ? '3단계 잔여 추첨공급' : '추가 정보 확인 후 단계 결정';
   return {
     supplyType: 'NEWBORN', supplyLabel: supply.label, eligibility, stage, stageLabel,
-    officialScore: stage === 'PRIORITY' || stage === 'GENERAL' ? newbornScore(input, rules) : stage === 'LOTTERY' ? { status: 'NOT_APPLICABLE' } : { status: 'PENDING' },
-    supplyCount: supply.supplyCount, applicationDate: SAMDO_DEEP_RULE_PACKAGE.applicationDates.special,
+    officialScore: stage === 'PRIORITY' || stage === 'GENERAL' ? newbornScore(input, rules, deepPackage) : stage === 'LOTTERY' ? { status: 'NOT_APPLICABLE' } : { status: 'PENDING' },
+    supplyCount: supply.supplyCount, applicationDate: deepPackage.applicationDates.special,
     matchedAdvantages: unique([
       ...checks.filter(check => check.value === true).map(check => check.pass),
       stage === 'PRIORITY' ? '공급물량 70% 우선공급 단계' : undefined,
-      supply.supplyCount === 11 ? '1지구 배정 11세대' : undefined,
+      `${deepPackage.title.includes('2지구') ? '2지구' : '1지구'} 배정 ${supply.supplyCount}세대`,
     ]),
     cautions: unique(['가점 동점자는 추첨으로 선정해요.', '공급량은 추천 근거 중 하나일 뿐 당첨확률을 뜻하지 않아요.']),
     evidenceRequired,
@@ -203,11 +206,11 @@ function evaluateNewborn(input: AssessmentInput, rules: AnnouncementRules): Samd
   };
 }
 
-function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules): SamdoSupplyEvaluation {
-  const supply = SAMDO_DEEP_RULE_PACKAGE.supplies.find(item => item.supplyType === 'GENERAL')!;
+function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules, deepPackage: SamdoDeepRulePackage): SamdoSupplyEvaluation {
+  const supply = deepPackage.supplies.find(item => item.supplyType === 'GENERAL')!;
   const assets = assetCheck(input);
   const checks = [...baseChecks(input, 'GENERAL'), assets.check, incomeCheck(input, rules, 100, 200, true)];
-  const accountMonths = input.details.subscriptionAccountOpenedAt ? completedMonths(input.details.subscriptionAccountOpenedAt, SAMDO_DEEP_RULE_PACKAGE.announcementDate) : undefined;
+  const accountMonths = input.details.subscriptionAccountOpenedAt ? completedMonths(input.details.subscriptionAccountOpenedAt, deepPackage.announcementDate) : undefined;
   const firstRankFacts = [
     accountMonths === undefined ? null : accountMonths >= 6,
     input.details.recognizedPaymentCount === undefined ? null : input.details.recognizedPaymentCount >= 6,
@@ -233,7 +236,7 @@ function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules): Samd
     : newborn && newbornIncome.value === true ? 'NEWBORN_PRIORITY'
       : firstRank && priorityIncome.value === true ? 'FIRST_RANK_PRIORITY'
         : firstRank ? 'GENERAL' : 'SECOND_RANK';
-  const noHomeMonths = input.details.noHomeSince ? completedMonths(input.details.noHomeSince, SAMDO_DEEP_RULE_PACKAGE.announcementDate) : undefined;
+  const noHomeMonths = input.details.noHomeSince ? completedMonths(input.details.noHomeSince, deepPackage.announcementDate) : undefined;
   const sequence = firstRank ? (noHomeMonths === undefined ? '1순위 내 무주택기간 확인 필요' : noHomeMonths >= 36 ? '1순위·무주택 3년 이상·저축총액 순차' : '1순위·저축총액 순차') : '2순위·동일지역 경쟁 시 추첨';
   const stageLabel = stage === 'NEWBORN_PRIORITY' ? '1단계 신생아 우선공급(50%)'
     : stage === 'FIRST_RANK_PRIORITY' ? '2단계 1순위 우선공급(30%)'
@@ -242,7 +245,7 @@ function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules): Samd
   return {
     supplyType: 'GENERAL', supplyLabel: supply.label, eligibility, stage, stageLabel,
     officialScore: { status: 'NOT_APPLICABLE' }, supplyCount: supply.supplyCount,
-    applicationDate: firstRank === false ? SAMDO_DEEP_RULE_PACKAGE.applicationDates.generalSecond : SAMDO_DEEP_RULE_PACKAGE.applicationDates.generalFirst,
+    applicationDate: firstRank === false ? deepPackage.applicationDates.generalSecond : deepPackage.applicationDates.generalFirst,
     matchedAdvantages: unique([
       ...checks.filter(check => check.value === true).map(check => check.pass),
       firstRank ? '일반공급 1순위' : undefined,
@@ -258,9 +261,9 @@ function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules): Samd
   };
 }
 
-function mapGeneric(result: ApplicationAssessmentResult): SamdoSupplyEvaluation {
+function mapGeneric(result: ApplicationAssessmentResult, deepPackage: SamdoDeepRulePackage): SamdoSupplyEvaluation {
   const type = TYPE_MAP[result.supplyType];
-  const supply = SAMDO_DEEP_RULE_PACKAGE.supplies.find(item => item.supplyType === type)!;
+  const supply = deepPackage.supplies.find(item => item.supplyType === type)!;
   const hasInputMissing = result.missingInformation.some(item => item.startsWith('input:'));
   // A separate review item must not hide an already-proven hard failure in the generic engine result.
   const eligibility: SamdoEligibility = result.failedConditions.length ? 'INELIGIBLE'
@@ -274,7 +277,7 @@ function mapGeneric(result: ApplicationAssessmentResult): SamdoSupplyEvaluation 
   return {
     supplyType: type, supplyLabel: supply.label, eligibility, stage,
     stageLabel: result.stageExplanation, officialScore: score, supplyCount: supply.supplyCount,
-    applicationDate: SAMDO_DEEP_RULE_PACKAGE.applicationDates.special,
+    applicationDate: deepPackage.applicationDates.special,
     matchedAdvantages: unique([
       ...result.satisfiedConditions.map(item => item.label),
       score.status === 'AVAILABLE' ? `공식 가점 ${score.total}/${score.max}점` : undefined,
@@ -306,20 +309,24 @@ function compare(a: SamdoSupplyEvaluation, b: SamdoSupplyEvaluation): number {
 }
 
 /** Existing assessment semantics are delegated unchanged for youth/newlywed/first-home. */
-export function buildSamdoRecommendation(rules: AnnouncementRules, input: AssessmentInput): SamdoRecommendation {
-  if (rules.id !== SAMDO_DEEP_RULE_PACKAGE.baseRuleSetId
-    || rules.provenance?.announcementId !== SAMDO_DEEP_RULE_PACKAGE.announcementId
-    || rules.provenance?.documentId !== SAMDO_DEEP_RULE_PACKAGE.document.id) {
+export function buildSamdoRecommendationForPackage(
+  rules: AnnouncementRules,
+  input: AssessmentInput,
+  deepPackage: SamdoDeepRulePackage,
+): SamdoRecommendation {
+  if (rules.id !== deepPackage.baseRuleSetId
+    || rules.provenance?.announcementId !== deepPackage.announcementId
+    || rules.provenance?.documentId !== deepPackage.document.id) {
     throw new Error('Samdo rule package is not bound to this listing');
   }
-  const generic = assessApplication(rules, input).map(mapGeneric);
-  const all = [...generic, evaluateNewborn(input, rules), evaluateGeneral(input, rules)];
+  const generic = assessApplication(rules, input).map(result => mapGeneric(result, deepPackage));
+  const all = [...generic, evaluateNewborn(input, rules, deepPackage), evaluateGeneral(input, rules, deepPackage)];
   const ranked = [...all].sort(compare).map((item, index) => ({ ...item, rank: index + 1 }));
   const auto = ranked.filter(item => item.autoRecommend);
   const recommendedType = auto.find(item => item.eligibility === 'ELIGIBLE') ?? null;
   return {
-    listingId: SAMDO_DEEP_RULE_PACKAGE.listingId,
-    sourceStatus: SAMDO_DEEP_RULE_PACKAGE.sourceStatus,
+    listingId: deepPackage.listingId,
+    sourceStatus: deepPackage.sourceStatus,
     recommendedType,
     alternatives: auto.filter(item => item !== recommendedType && ['ELIGIBLE', 'EVIDENCE_REQUIRED'].includes(item.eligibility)),
     lowerPriorityTypes: auto.filter(item => item.eligibility === 'CONDITIONAL'),
@@ -327,6 +334,11 @@ export function buildSamdoRecommendation(rules: AnnouncementRules, input: Assess
     informationOnlyTypes: ranked.filter(item => !item.autoRecommend),
     evaluations: ranked,
   };
+}
+
+/** Backwards-compatible 1지구 entry point. */
+export function buildSamdoRecommendation(rules: AnnouncementRules, input: AssessmentInput): SamdoRecommendation {
+  return buildSamdoRecommendationForPackage(rules, input, SAMDO_DEEP_RULE_PACKAGE);
 }
 
 export function samdoScalarFacts(input: AssessmentInput): Record<string, Scalar | null> {

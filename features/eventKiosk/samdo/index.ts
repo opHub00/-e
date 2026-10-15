@@ -1,4 +1,4 @@
-export { buildSamdoRecommendation, samdoScalarFacts } from './evaluate.ts';
+export { buildSamdoRecommendation, buildSamdoRecommendationForPackage, samdoScalarFacts } from './evaluate.ts';
 export { buildSamdoQuestionPlan, SAMDO_QUESTION_DEFINITIONS } from './questions.ts';
 export { SAMDO_DEEP_RULE_PACKAGE, SAMDO_EVIDENCE } from './rulePackage.ts';
 export {

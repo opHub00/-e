@@ -43,11 +43,8 @@ export type EventChatSchedule = {
  * This is deliberately presentation-safe. It contains no profile object, person id,
  * birth date, exact income/assets, raw fact key, QR token, or Rule Package.
  */
-export type EventChatContext = {
-  schemaVersion: 1;
-  scope: 'SAMDO' | 'PORTFOLIO';
+type EventChatContextBase = {
   listingTitle: string;
-  schedule: EventChatSchedule | null;
   focus: {
     supplyType: string;
     eligibility: string;
@@ -67,6 +64,39 @@ export type EventChatContext = {
     rejectedTypes: Array<{ supplyType: string; reason: string }>;
   };
 };
+
+export type EventChatSingleContext = EventChatContextBase & {
+  schemaVersion: 1;
+  scope: 'SAMDO' | 'PORTFOLIO';
+  schedule: EventChatSchedule | null;
+};
+
+export type EventChatDualContext = EventChatContextBase & {
+  schemaVersion: 2;
+  scope: 'SAMDO_DUAL';
+  schedule: null;
+  districts: Array<{
+    id: 'samdo-1' | 'samdo-2';
+    title: string;
+    managementNumber: string;
+    schedule: EventChatSchedule;
+    supplyCounts: Record<string, number>;
+    units: Array<{
+      unitType: string;
+      prices: Array<{ floor: string; priceKrw: number }>;
+      monthlyLandRentKrw: number;
+    }>;
+    recommendation: EventChatComparison | null;
+  }>;
+  retrievedEvidence: Array<{
+    districtId: 'samdo-1' | 'samdo-2';
+    section: string;
+    textExcerpt: string;
+    locator: string;
+  }>;
+};
+
+export type EventChatContext = EventChatSingleContext | EventChatDualContext;
 
 export type EventChatFallback = { text: string; detail?: string[] };
 

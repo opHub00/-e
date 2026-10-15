@@ -10,6 +10,7 @@ import {
   type EventChatResponse,
 } from '../chat/contract.ts';
 import { boundedEventChatHistory, containsDirectIdentifier, redactEventChatText, stripMarkup } from '../chat/privacy.ts';
+import { retrieveSamdoEvidence } from '../samdoDual/rag.ts';
 
 export const EVENT_CHAT_PROVIDER = 'google-gemini' as const;
 export const DEFAULT_EVENT_CHAT_MODEL = 'gemini-2.5-flash';
@@ -20,6 +21,7 @@ export const EVENT_CHAT_SYSTEM_PROMPT = `당신은 완판e 제주 행사 상담 
 절대 규칙:
 - 자격, 공급단계, 공식 점수, 추천유형, 추천순위, 공급 세대수, 접수일은 이미 deterministic engine이 확정했습니다. 변경하거나 다시 계산하지 마세요.
 - 일정 질문은 snapshot의 schedule만 사용하세요. 날짜를 추측하거나 다른 공고 일정을 섞지 마세요.
+- schemaVersion 2의 두 지구 상담은 districts의 구조화된 일정·가격·토지임대료·공급량을 우선하고, 설명성 답변은 retrievedEvidence 안의 근거만 사용하세요.
 - 입력에 없는 조건·예외·점수·서류·사실을 만들지 마세요.
 - 당첨확률, 경쟁률, 당첨 가능성의 높고 낮음을 계산하거나 추정하지 마세요. 질문받으면 현재 공고 결과만으로는 추정할 수 없다고 답하세요.
 - '추가 확인 필요', '정보 추가 확인', '서류 확인 필요'를 '신청 가능'으로 바꾸지 마세요.
@@ -105,33 +107,74 @@ function isComparison(value: unknown): boolean {
     && typeof value.officialScore === 'string';
 }
 
-export function isEventChatContext(value: unknown): value is EventChatContext {
-  if (!object(value) || !onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation']) || value.schemaVersion !== 1 || (value.scope !== 'SAMDO' && value.scope !== 'PORTFOLIO') || typeof value.listingTitle !== 'string') return false;
-  if (value.schedule !== null) {
-    if (!object(value.schedule) || !onlyKeys(value.schedule, ['special', 'generalFirst', 'generalSecond', 'winnerAnnouncement', 'documentSubmissionStart', 'documentSubmissionEnd', 'contractStart', 'contractEnd'])) return false;
-    if (!Object.values(value.schedule).every(item => typeof item === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item))) return false;
-  }
-  if (value.scope === 'SAMDO' && value.schedule === null) return false;
-  const focus = value.focus;
-  const recommendation = value.recommendation;
+function isSchedule(value: unknown): boolean {
+  return object(value)
+    && onlyKeys(value, ['special', 'generalFirst', 'generalSecond', 'winnerAnnouncement', 'documentSubmissionStart', 'documentSubmissionEnd', 'contractStart', 'contractEnd'])
+    && Object.values(value).every(item => typeof item === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item));
+}
+
+function isFocus(focus: unknown): boolean {
   if (!object(focus) || !onlyKeys(focus, ['supplyType', 'eligibility', 'priorityStage', 'officialScore', 'matchedAdvantages', 'missingInformation', 'cautions', 'evidence', 'applicationDate', 'supplyCount']) || typeof focus.supplyType !== 'string' || typeof focus.eligibility !== 'string' || (focus.priorityStage !== null && typeof focus.priorityStage !== 'string')) return false;
   if (!isOfficialScore(focus.officialScore) || !strings(focus.matchedAdvantages, 8) || !strings(focus.missingInformation, 8) || !strings(focus.cautions, 8)) return false;
   if (!Array.isArray(focus.evidence) || focus.evidence.length > 8 || !focus.evidence.every(item => object(item) && onlyKeys(item, ['label', 'section', 'page']) && typeof item.label === 'string' && typeof item.section === 'string' && (item.page === undefined || typeof item.page === 'number'))) return false;
   if (focus.applicationDate !== undefined && typeof focus.applicationDate !== 'string') return false;
-  if (focus.supplyCount !== undefined && (!Number.isSafeInteger(focus.supplyCount) || Number(focus.supplyCount) < 0)) return false;
+  return focus.supplyCount === undefined || (Number.isSafeInteger(focus.supplyCount) && Number(focus.supplyCount) >= 0);
+}
+
+function isRecommendation(recommendation: unknown): boolean {
   if (!object(recommendation) || !onlyKeys(recommendation, ['recommendedType', 'alternatives', 'lowerPriorityTypes', 'rejectedTypes']) || (recommendation.recommendedType !== null && typeof recommendation.recommendedType !== 'string')) return false;
   if (!Array.isArray(recommendation.alternatives) || recommendation.alternatives.length > 5 || !recommendation.alternatives.every(isComparison)) return false;
   if (!Array.isArray(recommendation.lowerPriorityTypes) || recommendation.lowerPriorityTypes.length > 5 || !recommendation.lowerPriorityTypes.every(isComparison)) return false;
-  if (!Array.isArray(recommendation.rejectedTypes) || recommendation.rejectedTypes.length > 6 || !recommendation.rejectedTypes.every(item => object(item) && onlyKeys(item, ['supplyType', 'reason']) && typeof item.supplyType === 'string' && typeof item.reason === 'string')) return false;
-  return !containsForbiddenShape(value) && JSON.stringify(value).length <= 11_000;
+  return Array.isArray(recommendation.rejectedTypes) && recommendation.rejectedTypes.length <= 6 && recommendation.rejectedTypes.every(item => object(item) && onlyKeys(item, ['supplyType', 'reason']) && typeof item.supplyType === 'string' && typeof item.reason === 'string');
+}
+
+function isDualDistrict(value: unknown): boolean {
+  if (!object(value) || !onlyKeys(value, ['id', 'title', 'managementNumber', 'schedule', 'supplyCounts', 'units', 'recommendation'])) return false;
+  if ((value.id !== 'samdo-1' && value.id !== 'samdo-2') || typeof value.title !== 'string' || typeof value.managementNumber !== 'string' || !isSchedule(value.schedule)) return false;
+  if (!object(value.supplyCounts) || !Object.values(value.supplyCounts).every(count => Number.isSafeInteger(count) && Number(count) >= 0)) return false;
+  if (!Array.isArray(value.units) || value.units.length > 4 || !value.units.every(unit => object(unit)
+    && onlyKeys(unit, ['unitType', 'prices', 'monthlyLandRentKrw'])
+    && typeof unit.unitType === 'string'
+    && Number.isSafeInteger(unit.monthlyLandRentKrw)
+    && Array.isArray(unit.prices)
+    && unit.prices.length <= 6
+    && unit.prices.every(price => object(price) && onlyKeys(price, ['floor', 'priceKrw']) && typeof price.floor === 'string' && Number.isSafeInteger(price.priceKrw)))) return false;
+  return value.recommendation === null || isComparison(value.recommendation);
+}
+
+export function isEventChatContext(value: unknown): value is EventChatContext {
+  if (!object(value) || typeof value.listingTitle !== 'string' || !isFocus(value.focus) || !isRecommendation(value.recommendation)) return false;
+  if (value.schemaVersion === 1) {
+    if (!onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation']) || (value.scope !== 'SAMDO' && value.scope !== 'PORTFOLIO')) return false;
+    if (value.schedule !== null && !isSchedule(value.schedule)) return false;
+    if (value.scope === 'SAMDO' && value.schedule === null) return false;
+  } else if (value.schemaVersion === 2) {
+    if (!onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation', 'districts', 'retrievedEvidence']) || value.scope !== 'SAMDO_DUAL' || value.schedule !== null) return false;
+    if (!Array.isArray(value.districts) || value.districts.length !== 2 || !value.districts.every(isDualDistrict)) return false;
+    // Evidence is server-owned. Any browser-authored evidence is rejected.
+    if (!Array.isArray(value.retrievedEvidence) || value.retrievedEvidence.length !== 0) return false;
+  } else return false;
+  return !containsForbiddenShape(value) && JSON.stringify(value).length <= 14_000;
 }
 
 function withoutAllowedScheduleDates(value: string, context: EventChatContext): string {
-  if (!context.schedule) return value;
-  return Object.values(context.schedule).reduce(
+  const dates = context.schemaVersion === 2
+    ? context.districts.flatMap(district => Object.values(district.schedule))
+    : context.schedule ? Object.values(context.schedule) : [];
+  let sanitized = dates.reduce(
     (text, date) => text.replaceAll(date, '').replaceAll(date.replaceAll('-', '.'), ''),
     value,
   );
+  if (context.schemaVersion === 2) {
+    const publicAmounts = context.districts.flatMap(district => district.units.flatMap(unit => [
+      unit.monthlyLandRentKrw,
+      ...unit.prices.map(price => price.priceKrw),
+    ]));
+    sanitized = publicAmounts.reduce((text, amount) => text
+      .replaceAll(`${amount.toLocaleString('ko-KR')}원`, '')
+      .replaceAll(`${amount}원`, ''), sanitized);
+  }
+  return sanitized;
 }
 
 function isFallback(value: unknown, context: EventChatContext): value is EventChatFallback {
@@ -160,6 +203,23 @@ export function parseEventChatRequest(value: unknown): EventChatRequest | null {
   const question = redactEventChatText(value.question);
   if (!question) return null;
   return { question, history, context: value.context, fallback: value.fallback };
+}
+
+function withTrustedEvidence(request: EventChatRequest): EventChatRequest {
+  if (request.context.schemaVersion !== 2) return request;
+  const retrieval = retrieveSamdoEvidence(request.question);
+  return {
+    ...request,
+    context: {
+      ...request.context,
+      retrievedEvidence: retrieval.chunks.map(chunk => ({
+        districtId: chunk.districtId,
+        section: chunk.section,
+        textExcerpt: chunk.textExcerpt.slice(0, 1_200),
+        locator: `${chunk.locator.parser}:${chunk.locator.paragraphs.map(item => item.index).join(',')}#${chunk.locator.sha256.slice(0, 12)}`,
+      })),
+    },
+  };
 }
 
 function fallback(request: EventChatRequest, requestId: string, model: string): EventChatResponse {
@@ -197,8 +257,9 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
   const contentLengthRaw = requestLike.headers?.['content-length'];
   const contentLength = Number(Array.isArray(contentLengthRaw) ? contentLengthRaw[0] : contentLengthRaw ?? serialized.length);
   if (serialized.length > EVENT_CHAT_MAX_REQUEST_CHARS || (Number.isFinite(contentLength) && contentLength > EVENT_CHAT_MAX_REQUEST_CHARS)) return { status: 413, body: { error: 'PAYLOAD_TOO_LARGE' } };
-  const request = parseEventChatRequest(requestLike.body);
-  if (!request) return { status: 400, body: { error: 'INVALID_CHAT_REQUEST' } };
+  const parsedRequest = parseEventChatRequest(requestLike.body);
+  if (!parsedRequest) return { status: 400, body: { error: 'INVALID_CHAT_REQUEST' } };
+  const request = withTrustedEvidence(parsedRequest);
 
   const env = dependencies.env ?? process.env;
   const model = env.EVENT_CHAT_GEMINI_MODEL?.trim() || DEFAULT_EVENT_CHAT_MODEL;

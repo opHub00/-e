@@ -13,6 +13,8 @@ import { requestEventChat } from './chat/client.ts';
 import { boundedEventChatHistory, redactEventChatText } from './chat/privacy.ts';
 import type { EventChatMode, EventChatRequest } from './chat/contract.ts';
 import { SAMDO_EVENT } from './samdoEventScope.ts';
+import { answerSamdoDualDeterministically, buildSamdoDualChatContext } from './samdoDual/chat.ts';
+import type { SamdoDualAssessment } from './samdoDual/types.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -30,6 +32,8 @@ export type KioskChat = {
   result: EvaluationResult | null;
   /** 삼도 전용 화면에서 들어온 경우의 presentation-safe 판정 context. URL이나 서버에 저장하지 않는다. */
   samdoRecommendation: SamdoPresentationRecommendation | null;
+  /** V2 1·2지구 판정 스냅샷. 원본 프로필은 포함하지 않는다. */
+  samdoDualAssessment: SamdoDualAssessment | null;
   messages: Array<{
     role: 'user' | 'assistant';
     text: string;
@@ -70,6 +74,7 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
       listing: null,
       result: null,
       samdoRecommendation: null,
+      samdoDualAssessment: null,
       messages: [{ role: 'assistant', text: '분석을 마치면 입력하신 정보와 검수된 공고 근거를 기준으로 답해 드려요.' }],
     };
   }
@@ -81,6 +86,7 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
     listing,
     result: outcome.result,
     samdoRecommendation: null,
+    samdoDualAssessment: null,
     messages: [{ role: 'assistant', text: `${outcome.listing.title} · ${outcome.supplyLabel} 결과와 공고 원문 근거를 기준으로 답해 드릴게요.` }],
   };
 }
@@ -104,12 +110,37 @@ export function startSamdoChat(event: LoadedEvent, recommendation: SamdoPresenta
     listing: null,
     result: null,
     samdoRecommendation: recommendation,
+    samdoDualAssessment: null,
     messages: [{
       role: 'assistant',
       text: focus
         ? `${focus.supplyLabel}을(를) 중심으로 삼도이동 1지구의 유형별 판정과 공고 근거를 설명해 드릴게요.`
         : '삼도이동 1지구의 유형별 판정과 신청이 어려운 이유를 설명해 드릴게요.',
     }],
+  };
+}
+
+/** 1회 입력으로 계산된 1·2지구 결과를 같은 상담 endpoint에 안전하게 연결한다. */
+export function startSamdoDualChat(event: LoadedEvent, assessment: SamdoDualAssessment): KioskChat {
+  const preferred = assessment.comparison.preferredDistrictId
+    ? assessment.districts.find(item => item.district.id === assessment.comparison.preferredDistrictId) ?? assessment.districts[0]
+    : assessment.districts[0];
+  const focus = preferred.recommendation.recommendedType ?? preferred.recommendation.evaluations[0] ?? null;
+  return {
+    context: {
+      outcomeId: null,
+      listingTitle: '삼도이동 1·2지구 토지임대부 분양주택',
+      supplyLabel: focus?.supplyLabel ?? '공급유형 분석',
+      datasetVersion: event.dataset.datasetVersion,
+      datasetFingerprint: event.dataset.fingerprint,
+    },
+    assessmentContext: null,
+    userProfile: null,
+    listing: null,
+    result: null,
+    samdoRecommendation: null,
+    samdoDualAssessment: assessment,
+    messages: [{ role: 'assistant', text: '동일한 입력으로 계산한 삼도이동 1·2지구 판정과 최종1.8 공고문 근거를 기준으로 답해 드릴게요.' }],
   };
 }
 
@@ -239,10 +270,14 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
   const text = message.trim();
   if (!text) return chat;
   // 기존 deterministic 답은 항상 먼저 만든다. LLM은 이 답을 대체 계산하지 않고 설명만 풍부하게 한다.
-  const deterministic = sanitizeReply(chat.samdoRecommendation
-    ? answerSamdo(chat.samdoRecommendation, text)
-    : experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
-  const context = buildEventChatContext(chat);
+  const deterministic = sanitizeReply(chat.samdoDualAssessment
+    ? answerSamdoDualDeterministically(chat.samdoDualAssessment, text)
+    : chat.samdoRecommendation
+      ? answerSamdo(chat.samdoRecommendation, text)
+      : experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
+  const context = chat.samdoDualAssessment
+    ? buildSamdoDualChatContext(chat.samdoDualAssessment, text)
+    : buildEventChatContext(chat);
   const canUseEndpoint = Boolean(context) && (transport.allowNetwork === true || typeof window !== 'undefined');
   let response = deterministic;
   let metadata: NonNullable<KioskChat['messages'][number]['response']> = { mode: 'deterministic' };

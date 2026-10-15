@@ -4,7 +4,7 @@ import { retrieveSamdoEvidence } from './rag.ts';
 import type { SamdoDistrictAssessment, SamdoDualAssessment, SamdoRagIntent, SamdoUnitType } from './types.ts';
 
 const won = (value: number) => `${value.toLocaleString('ko-KR')}원`;
-const shortDate = (value: string) => `${Number(value.slice(5, 7))}월 ${Number(value.slice(8, 10))}일`;
+const officialDate = (value: string) => value.replaceAll('-', '.');
 
 function schedule(district: SamdoDistrictAssessment): EventChatSchedule {
   const value = district.district.schedule;
@@ -88,17 +88,17 @@ function supplyCountAnswer(assessment: SamdoDualAssessment, question: string): E
 
 function scheduleAnswer(assessment: SamdoDualAssessment, question: string): EventChatFallback {
   const selected = /2지구/.test(question) ? [assessment.districts[1]] : /1지구/.test(question) ? [assessment.districts[0]] : [...assessment.districts];
-  if (/당첨.*발표/.test(question)) return { text: selected.map(item => `${item.district.id === 'samdo-1' ? '1지구' : '2지구'} 당첨자 발표는 ${shortDate(item.district.schedule.winnerAnnouncement)}예요.`).join(' ') };
-  if (/특별\s*공급/.test(question)) return { text: `두 지구 특별공급 접수일은 ${shortDate(selected[0].district.schedule.special)}예요.` };
-  if (/일반\s*공급.*1\s*순위|1\s*순위/.test(question)) return { text: `두 지구 일반공급 1순위 접수일은 ${shortDate(selected[0].district.schedule.generalFirst)}예요.` };
-  if (/일반\s*공급.*2\s*순위|2\s*순위/.test(question)) return { text: `두 지구 일반공급 2순위 접수일은 ${shortDate(selected[0].district.schedule.generalSecond)}예요.` };
+  if (/당첨.*발표/.test(question)) return { text: selected.map(item => `${item.district.id === 'samdo-1' ? '1지구' : '2지구'} 당첨자 발표는 ${officialDate(item.district.schedule.winnerAnnouncement)}예요.`).join(' ') };
+  if (/특별\s*공급/.test(question)) return { text: `두 지구 특별공급 접수일은 ${officialDate(selected[0].district.schedule.special)}예요.` };
+  if (/일반\s*공급.*1\s*순위|1\s*순위/.test(question)) return { text: `두 지구 일반공급 1순위 접수일은 ${officialDate(selected[0].district.schedule.generalFirst)}예요.` };
+  if (/일반\s*공급.*2\s*순위|2\s*순위/.test(question)) return { text: `두 지구 일반공급 2순위 접수일은 ${officialDate(selected[0].district.schedule.generalSecond)}예요.` };
   return {
     text: '두 지구의 청약 접수일은 같아요.',
     detail: [
-      `특별공급 ${shortDate(selected[0].district.schedule.special)}`,
-      `일반공급 1순위 ${shortDate(selected[0].district.schedule.generalFirst)}`,
-      `일반공급 2순위 ${shortDate(selected[0].district.schedule.generalSecond)}`,
-      ...selected.map(item => `${item.district.id === 'samdo-1' ? '1지구' : '2지구'} 당첨자 발표 ${shortDate(item.district.schedule.winnerAnnouncement)}`),
+      `특별공급 ${officialDate(selected[0].district.schedule.special)}`,
+      `일반공급 1순위 ${officialDate(selected[0].district.schedule.generalFirst)}`,
+      `일반공급 2순위 ${officialDate(selected[0].district.schedule.generalSecond)}`,
+      ...selected.map(item => `${item.district.id === 'samdo-1' ? '1지구' : '2지구'} 당첨자 발표 ${officialDate(item.district.schedule.winnerAnnouncement)}`),
     ],
   };
 }

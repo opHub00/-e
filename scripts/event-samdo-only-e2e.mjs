@@ -170,6 +170,17 @@ async function verifyResult(page) {
   }
   if (resultText.includes('기관추천 특별공급')) throw new Error('final 1.8 does not allocate institutional recommendation supply');
   if (/당첨\s*확률(?:이|은)?\s*(?:높|낮)|경쟁률\s*\d/.test(resultText)) throw new Error('winning probability or competition was invented');
+
+  if (await page.getByTestId('district-sample-banner').count()) throw new Error('layout sample entered the normal result flow');
+  const d1 = await page.getByTestId('district-card-D1').innerText();
+  const d2 = await page.getByTestId('district-card-D2').innerText();
+  for (const value of ['32세대', '8 / 24세대']) if (!d1.includes(value)) throw new Error(`D1 actual data missing: ${value}`);
+  for (const value of ['40세대', '8 / 32세대']) if (!d2.includes(value)) throw new Error(`D2 actual data missing: ${value}`);
+  const comparison = await page.getByTestId('district-comparison').innerText();
+  for (const value of ['298,840원', '343,440원', '11월 24일', '11월 25일']) {
+    if (!comparison.includes(value)) throw new Error(`dual comparison actual data missing: ${value}`);
+  }
+  if (comparison.includes('공고 데이터 연결 전') || comparison.includes('예시 데이터')) throw new Error('placeholder data is visible in the normal result flow');
 }
 
 async function verifySimulation(page) {
@@ -188,7 +199,7 @@ async function verifyChat(page) {
   await page.getByTestId('chat-context').waitFor();
   await samdoOnly(page, 'chat');
   const context = await page.getByTestId('chat-context').innerText();
-  if (!context.includes('삼도이동 1지구') || !context.includes('삼도 전용 판정')) throw new Error(`wrong chat context: ${context}`);
+  if (!context.includes('삼도이동 1·2지구') || !context.includes('삼도 1·2지구 판정')) throw new Error(`wrong chat context: ${context}`);
   await page.getByTestId('chat-input').fill('신청은 언제부터 할 수 있어?');
   await page.getByTestId('chat-send').click();
   await page.getByTestId('chat-message-assistant').nth(1).waitFor();
@@ -240,7 +251,10 @@ async function main() {
       ['laptop', 1280, 800],
       ['iPad landscape', 1024, 768],
       ['iPad portrait', 768, 1024],
-      ['mobile', 390, 844],
+      ['mobile 430', 430, 932],
+      ['mobile 390', 390, 844],
+      ['mobile 360', 360, 800],
+      ['mobile 320', 320, 720],
     ];
     for (const [label, width, height] of viewports) {
       await page.setViewportSize({ width, height });

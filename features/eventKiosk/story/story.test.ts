@@ -3,9 +3,7 @@ import { test } from 'node:test';
 import { kioskEvent } from '../kioskEvent.ts';
 import { emptyListingMedia, listingMediaOf, normalizeListingMedia } from '../media/listingMedia.ts';
 import { SAMDO_EVENT } from '../samdoEventScope.ts';
-import { STORY_CONDITIONS, STORY_CRITERIA, STORY_EXAMPLE_SCORE, storyDataFrom } from './storyData.ts';
-import { evaluatePhase4Personas } from '../phase4Personas.ts';
-import { samdoRecommendationForAnswers } from '../samdoResult/samdoEvaluate.ts';
+import { STORY_CONDITIONS, storyDataFrom, storyShortDate } from './storyData.ts';
 import { SAMDO_DEEP_RULE_PACKAGE } from '../samdo/rulePackage.ts';
 import { forgetStorySeen, hasSeenStory, markStorySeen, STORY_SEEN_KEY } from './storyPreference.ts';
 import { isLastScene, nextSceneIndex, STORY_AUTOPLAY_MS, STORY_SCENES } from './storyScript.ts';
@@ -13,14 +11,14 @@ import { isLastScene, nextSceneIndex, STORY_AUTOPLAY_MS, STORY_SCENES } from './
 const load = kioskEvent();
 if (!load.ok) throw new Error(load.error);
 
-test('story is five Samdo scenes, about 10–12 seconds to the final picture, one message each', () => {
-  assert.deepEqual(STORY_SCENES.map(scene => scene.id), ['supplies', 'conditions', 'check', 'compare', 'result']);
-  assert.deepEqual(STORY_SCENES.map(scene => scene.message('삼도이동 1지구').replace(/\n/g, ' ')), [
-    '같은 공고라도 신청할 수 있는 유형은 다릅니다',
-    '내 조건에 따라 자격과 순위가 달라집니다',
-    '완판e가 삼도이동 1지구 공고 기준으로 하나씩 확인합니다',
-    '신청 가능한 유형을 비교하고',
-    '가장 유리한 신청유형과 이유를 보여드립니다',
+test('story is five 1·2지구 scenes, about 10–12 seconds to the final picture, one message each', () => {
+  assert.deepEqual(STORY_SCENES.map(scene => scene.id), ['districts', 'profile', 'check', 'compare', 'result']);
+  assert.deepEqual(STORY_SCENES.map(scene => scene.message('삼도이동').replace(/\n/g, ' ')), [
+    '삼도이동에는 1지구와 2지구가 있습니다',
+    '내 조건은 한 번만 입력하면 됩니다',
+    '완판e가 두 지구의 신청유형을 각각 확인합니다',
+    '자격·순위·공급조건을 나란히 비교하고',
+    '나에게 맞는 선택지와 신청 일정을 보여드립니다',
   ]);
   const lastBuild = STORY_SCENES.at(-1)!.buildMs;
   assert.ok(STORY_AUTOPLAY_MS + lastBuild >= 10_000 && STORY_AUTOPLAY_MS + lastBuild <= 12_500, `${STORY_AUTOPLAY_MS + lastBuild}ms`);
@@ -29,45 +27,32 @@ test('story is five Samdo scenes, about 10–12 seconds to the final picture, on
   assert.equal(nextSceneIndex(STORY_SCENES.length - 1), null);
   assert.ok(isLastScene(STORY_SCENES.length - 1));
   for (const scene of STORY_SCENES) {
-    assert.ok(scene.message('지역').length <= 40, `${scene.id}: one short sentence`);
-    assert.ok(scene.description('지역').length > 10, `${scene.id}: has a screen-reader description`);
+    assert.ok(scene.message('삼도이동').length <= 40, `${scene.id}: one short sentence`);
+    assert.ok(scene.description('삼도이동').length > 10, `${scene.id}: has a screen-reader description`);
   }
 });
 
-test('story data is scoped to Samdo only and carries no personal values', () => {
+test('story numbers and schedules come from the final 1.8 dual-district config, never hard-coded', () => {
   const data = storyDataFrom(load.event);
-  assert.equal(data.title, SAMDO_EVENT.title);
-  assert.equal(data.region, SAMDO_EVENT.shortTitle);
+  assert.deepEqual(data.districts.map(item => item.id), ['D1', 'D2']);
+  const [d1, d2] = data.districts;
+  assert.deepEqual(d1.inventory, {
+    total: SAMDO_DEEP_RULE_PACKAGE.inventory.total,
+    special: SAMDO_DEEP_RULE_PACKAGE.inventory.special,
+    general: SAMDO_DEEP_RULE_PACKAGE.inventory.general,
+    units49: SAMDO_DEEP_RULE_PACKAGE.inventory.units49,
+    units59: SAMDO_DEEP_RULE_PACKAGE.inventory.units59,
+  });
+  assert.deepEqual(d1.inventory, { total: 32, special: 26, general: 6, units49: 8, units59: 24 });
+  assert.deepEqual(d2.inventory, { total: 40, special: 32, general: 8, units49: 8, units59: 32 });
+  assert.deepEqual(d1.schedule, { special: '2026-11-16', generalFirst: '2026-11-17', generalSecond: '2026-11-18', winnerAnnouncement: '2026-11-24' });
+  assert.deepEqual(d2.schedule, { special: '2026-11-16', generalFirst: '2026-11-17', generalSecond: '2026-11-18', winnerAnnouncement: '2026-11-25' });
+  assert.equal(storyShortDate(d1.schedule.special), '11.16');
   assert.deepEqual(data.supplies.map(item => item.short), ['청년', '신혼부부', '신생아', '생애최초', '일반공급']);
-  // 공급 세대수는 규칙 패키지 값 그대로.
-  for (const item of data.supplies) assert.equal(item.count, SAMDO_EVENT.recommendationSupplies.find(supply => supply.type === item.type)?.count);
-  assert.deepEqual(data.informationOnly, [], 'final 1.8 has no information-only supply in the event');
-  assert.deepEqual(data.schedule, { special: '2026년 11월 16일', generalFirst: '2026년 11월 17일', generalSecond: '2026년 11월 18일', winnerAnnouncement: '2026년 11월 24일' });
-  assert.equal(data.example.date, data.schedule.special);
-  assert.equal(data.example.winnerAnnouncement, data.schedule.winnerAnnouncement);
   assert.deepEqual(STORY_CONDITIONS.map(field => field.label), ['나이', '혼인', '자녀', '무주택', '소득', '자산', '청약통장']);
-  assert.equal(STORY_CRITERIA.length, 4);
   assert.ok(!/\d{4}-\d{2}-\d{2}|만원|원$/.test(JSON.stringify(STORY_CONDITIONS)), 'conditions are labels only');
-  assert.deepEqual(data.compare.map(row => row.short), data.supplies.map(item => item.short), 'every compared type is one of the five');
-});
-
-test('story numbers and dates match the final 1.8 notice package (no stale 1.7 values)', () => {
-  const data = storyDataFrom(load.event);
-  assert.match(SAMDO_DEEP_RULE_PACKAGE.document.fileName, /최종1\.8/);
-  assert.deepEqual(Object.fromEntries(data.supplies.map(item => [item.short, item.count])), { 청년: 5, 신혼부부: 5, 신생아: 11, 생애최초: 5, 일반공급: 6 });
-  assert.deepEqual(data.totals, { special: 26, general: 6 });
-  assert.equal(data.totals.special, data.supplies.filter(item => item.type !== 'GENERAL').reduce((sum, item) => sum + item.count, 0));
-  assert.match(data.meta, /총 32세대/);
-  const everything = JSON.stringify(data) + STORY_SCENES.map(scene => scene.message(data.region) + scene.description(data.region)).join('');
-  for (const stale of ['10월 12일', '10월 13일', '10월 14일', '10.12', '공공분양', 'VER1.7', '기관추천']) assert.ok(!everything.includes(stale), `stale value: ${stale}`);
-  // 예시 공식 가점의 만점은 실제 엔진(신생아 특별공급)과 같다.
-  const persona = evaluatePhase4Personas(load.event).find(item => item.personaId === 'NEWLYWED_ONE_CHILD')!;
-  const recommended = samdoRecommendationForAnswers(persona.finalAnswers).recommendedType!;
-  assert.equal(recommended.supplyType, 'NEWBORN');
-  assert.equal(recommended.officialScore.status, 'AVAILABLE');
-  if (recommended.officialScore.status === 'AVAILABLE') assert.equal(recommended.officialScore.max, STORY_EXAMPLE_SCORE.max);
-  assert.ok(STORY_EXAMPLE_SCORE.total <= STORY_EXAMPLE_SCORE.max);
-  assert.equal(STORY_CRITERIA.at(-1), '청약통장 6개월·6회 이상', 'subscription criterion comes from the package rule label');
+  const copy = STORY_SCENES.map(scene => scene.message(data.region) + scene.description(data.region)).join('');
+  for (const stale of ['10월 12일', 'VER1.7', '공공분양', '기관추천', '1지구 전용']) assert.ok(!copy.includes(stale), stale);
 });
 
 test('story plays once per browser and survives storage failures', () => {
@@ -117,5 +102,5 @@ test('live/frozen portfolio titles never enter the event story', () => {
   const data = storyDataFrom(load.event);
   const serialized = JSON.stringify(data);
   for (const listing of load.event.config.listings) assert.equal(serialized.includes(listing.title), false, listing.title);
-  assert.equal(data.title, SAMDO_EVENT.title);
+  assert.ok(data.program.includes('1·2지구'));
 });

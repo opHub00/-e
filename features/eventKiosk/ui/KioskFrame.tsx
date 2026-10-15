@@ -11,8 +11,9 @@ import { ProgressFill } from '../motion/ProgressFill';
 import { ScreenReveal } from '../motion/ScreenReveal';
 import { router } from 'expo-router';
 import { DensityProvider, useDensity } from '../layout/DensityContext';
+import { NARROW_PHONE_GUTTER, NARROW_PHONE_MAX_WIDTH } from '../layout/density';
 import { BrandMark } from '../brand/BrandMark';
-import { PartnerBadge } from '../brand/PartnerBadge';
+import { PartnerBadge, partnerSizeFor } from '../brand/PartnerBadge';
 
 /**
  * 행사 화면 공통 틀.
@@ -49,17 +50,17 @@ export function KioskFrame({
   const compactTop = width < 600;
   // 밀도(desktop=compact / iPad=comfortable / mobile=touch)가 여백과 본문 폭을 정한다. 안쪽 component 도 같은 값을 읽는다.
   const { density, d } = useDensity();
-  const gutter = d.gutter;
+  const gutter = width > 0 && width <= NARROW_PHONE_MAX_WIDTH ? NARROW_PHONE_GUTTER : d.gutter;
   const inner = [styles.inner, { maxWidth: d.contentMax }];
   const [confirming, setConfirming] = useState(false);
 
   return (
     <DensityProvider density={density}>
     <View style={styles.root}>
-      <View style={[styles.top, density === 'compact' && styles.topCompact, { paddingHorizontal: gutter }]}>
+      <View style={[styles.top, density === 'compact' && styles.topCompact, density === 'touch' && styles.topTouch, { paddingHorizontal: gutter }]}>
         <BrandMark size="header" label={brand} compact={compactTop} />
         <View style={[styles.topRight, compactTop && styles.topActionsCompact]}>
-          {partner ? <View style={[styles.partnerSlot, compactTop && styles.partnerSlotCompact]}><PartnerBadge compact={compactTop} /></View> : null}
+          {partner ? <View style={[styles.partnerSlot, compactTop && styles.partnerSlotCompact]}><PartnerBadge size={partnerSizeFor(width)} /></View> : null}
         <View style={[styles.topActions, compactTop && styles.topActionsCompact]}>
           {hideChat ? null : (
             <MotionPressable
@@ -86,17 +87,17 @@ export function KioskFrame({
         </View>
         </View>
       </View>
-      {progress ? <Progress progress={progress} gutter={gutter} /> : null}
+      {progress ? <Progress progress={progress} gutter={gutter} touch={density === 'touch'} /> : null}
       <ScrollView
         key={scrollKey}
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingHorizontal: gutter }]}
+        contentContainerStyle={[styles.content, density === 'touch' && styles.contentTouch, { paddingHorizontal: gutter }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={inner}><ScreenReveal>{children}</ScreenReveal></View>
       </ScrollView>
       {footer ? (
-        <View testID="kiosk-footer" style={[styles.footer, { paddingHorizontal: gutter }]}>
+        <View testID="kiosk-footer" style={[styles.footer, density === 'touch' && styles.footerTouch, { paddingHorizontal: gutter }]}>
           <View
             style={[
               inner,
@@ -131,10 +132,10 @@ export function KioskFrame({
   );
 }
 
-function Progress({ progress, gutter }: { progress: { steps: InputStep[]; current: InputStep } | { label: string }; gutter: number }) {
+function Progress({ progress, gutter, touch = false }: { progress: { steps: InputStep[]; current: InputStep } | { label: string }; gutter: number; touch?: boolean }) {
   if ('label' in progress) {
     return (
-      <View style={[styles.progress, { paddingHorizontal: gutter }]}>
+      <View style={[styles.progress, touch && styles.progressTouch, { paddingHorizontal: gutter }]}>
         <Text style={styles.progressLabel}>{progress.label}</Text>
       </View>
     );
@@ -142,7 +143,7 @@ function Progress({ progress, gutter }: { progress: { steps: InputStep[]; curren
   const index = progress.steps.indexOf(progress.current);
   return (
     <View
-      style={[styles.progress, { paddingHorizontal: gutter }]}
+      style={[styles.progress, touch && styles.progressTouch, { paddingHorizontal: gutter }]}
       accessibilityRole="progressbar"
       accessibilityLabel={`${progress.steps.length}단계 중 ${index + 1}단계, ${STEP_LABELS[progress.current]}`}
       testID="kiosk-progress"
@@ -166,6 +167,7 @@ function Progress({ progress, gutter }: { progress: { steps: InputStep[]; curren
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: k.colors.background, minHeight: '100%' as unknown as number },
   topCompact: { minHeight: 64 },
+  topTouch: { minHeight: 56, gap: 8 },
   top: {
     minHeight: 88,
     flexDirection: 'row',
@@ -178,9 +180,9 @@ const styles = StyleSheet.create({
   },
   topRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 },
   partnerSlot: { paddingRight: 12, borderRightWidth: 1, borderRightColor: k.colors.hairline },
-  partnerSlotCompact: { paddingRight: 6 },
+  partnerSlotCompact: { paddingRight: 6, borderRightWidth: 0 },
   topActions: { flexDirection: 'row', gap: 12 },
-  topActionsCompact: { gap: 8 },
+  topActionsCompact: { gap: 4 },
   topButton: {
     minHeight: 48,
     paddingHorizontal: 8,
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  topButtonCompact: { width: 48, paddingHorizontal: 0, justifyContent: 'center' },
+  topButtonCompact: { width: 44, minHeight: 44, paddingHorizontal: 0, justifyContent: 'center' },
   topButtonLabel: { ...k.type.bodyStrong, color: k.colors.primary },
   progress: { paddingVertical: 20, backgroundColor: k.colors.surface, borderBottomWidth: 1, borderBottomColor: k.colors.surfaceHigh },
   progressLabel: { ...k.type.bodyStrong, color: k.colors.textMuted },
@@ -204,6 +206,8 @@ const styles = StyleSheet.create({
   progressStepDone: { color: k.colors.textMuted },
   scroll: { flex: 1 },
   content: { paddingTop: 36, paddingBottom: 40, alignItems: 'center' },
+  contentTouch: { paddingTop: 16, paddingBottom: 24 },
+  progressTouch: { paddingVertical: 10 },
   inner: { width: '100%', maxWidth: k.contentMax },
   footer: {
     minHeight: 108,
@@ -213,6 +217,8 @@ const styles = StyleSheet.create({
     backgroundColor: k.colors.surface,
     alignItems: 'center',
   },
+  // 휴대폰 하단 CTA 영역: 높이를 줄이고(고정 영역이라 본문을 덜 가린다) 버튼은 48~52px.
+  footerTouch: { minHeight: 0, paddingVertical: 10 },
   footerInner: { width: 'auto', alignSelf: 'stretch', flexDirection: 'row', gap: 12, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' },
   scrim: { flex: 1, backgroundColor: 'rgba(28,27,34,0.45)', alignItems: 'center', justifyContent: 'center', padding: 24 },
   dialog: { width: '100%', maxWidth: 560, backgroundColor: k.colors.surface, borderRadius: 20, padding: 32, gap: 16 },

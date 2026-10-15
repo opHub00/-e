@@ -14,6 +14,10 @@ import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samd
 import { SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
 import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdoSummary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
+import { buildDistrictComparison } from '../../features/eventKiosk/districts/districtAdapter';
+import { DistrictComparison } from '../../features/eventKiosk/districts/DistrictComparison';
+import { DistrictDetailFold } from '../../features/eventKiosk/districts/DistrictDetailFold';
+import { buildSamdoDualAssessment } from '../../features/eventKiosk/samdoDual/evaluate';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { resetToHome } from '../../features/eventKiosk/ui/navigation';
@@ -31,11 +35,11 @@ const APPLY_HOME_URL = 'https://www.applyhome.co.kr';
 export default function SamdoResultScreen() {
   const load = kioskEvent();
   const attached = useAttached();
-  const { persona } = useLocalSearchParams<{ persona?: string }>();
+  const { persona, layout } = useLocalSearchParams<{ persona?: string; layout?: string }>();
   const answers = useKioskStore(state => state.answers);
   const answerStates = useKioskStore(state => state.answerStates);
   const applyRefinementAnswers = useKioskStore(state => state.applyRefinementAnswers);
-  const openSamdoChat = useKioskStore(state => state.openSamdoChat);
+  const openSamdoDualChat = useKioskStore(state => state.openSamdoDualChat);
   const [session, setSession] = useState<{ status: 'idle' | 'creating' | 'error' } | { status: 'ready'; link: string }>({ status: 'idle' });
 
   useEffect(() => {
@@ -46,17 +50,25 @@ export default function SamdoResultScreen() {
   const result = useMemo(() => {
     if (!answers.householdType) return null;
     try {
+      const input = samdoInputFromAnswers(answers);
       const rawRecommendation = samdoRawRecommendationForAnswers(answers);
       const recommendation = toSamdoPresentationRecommendation(rawRecommendation);
       return {
         rawRecommendation,
         recommendation,
-        view: buildSamdoResultView(recommendation, { rawRecommendation, input: samdoInputFromAnswers(answers) }),
+        dual: buildSamdoDualAssessment(input),
+        view: buildSamdoResultView(recommendation, { rawRecommendation, input }),
       };
     } catch {
       return 'error' as const;
     }
   }, [answers]);
+
+  // 정상 경로는 동일 입력으로 계산한 dual assessment만 사용한다. sample은 Demo Mode의 명시적 QA 경로다.
+  const districts = useMemo(() => buildDistrictComparison({
+    dual: result && result !== 'error' ? result.dual : null,
+    layoutSample: layout === 'sample' && isDemoModeEnabled(),
+  }), [layout, result]);
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
@@ -109,12 +121,14 @@ export default function SamdoResultScreen() {
         </View>
       }
     >
+      <DistrictComparison model={districts} />
+      <DistrictDetailFold title="1지구 상세 분석" hint="추천 이유·공식 기준·서류·QR·AI 상담">
       <SamdoResultView
         model={result.view}
         actions={{
           onApplyHome: () => { void Linking.openURL(APPLY_HOME_URL); },
           onAskAi: () => {
-            openSamdoChat(load.event, result.recommendation);
+            openSamdoDualChat(load.event, result.dual);
             router.push('/event/chat' as never);
           },
           onSaveQr: () => { void saveQr(); },
@@ -130,6 +144,7 @@ export default function SamdoResultScreen() {
           ),
         }}
       />
+      </DistrictDetailFold>
     </KioskFrame>
   );
 }

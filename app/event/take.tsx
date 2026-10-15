@@ -43,7 +43,7 @@ export default function TakeAway() {
       <View style={styles.inner}>
         <View style={styles.brandRow}>
           <BrandMark size="mobile" />
-          {state.status === 'ok' && isSamdoSummary(state.summary) ? <PartnerBadge compact /> : null}
+          {state.status === 'ok' && isSamdoSummary(state.summary) ? <PartnerBadge size="phone" /> : null}
         </View>
         {state.status === 'loading' ? <Text style={styles.muted}>요약을 여는 중이에요…</Text> : null}
         {state.status === 'invalid' ? (

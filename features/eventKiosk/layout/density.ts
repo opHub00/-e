@@ -68,24 +68,29 @@ export const DENSITY: Record<Density, DensityTokens> = {
     thumb: 72,
   },
   touch: {
-    control: 52,
-    controlLarge: 56,
-    controlPaddingX: 18,
-    controlLargePaddingX: 22,
-    sectionGap: 22,
-    cardPadding: 18,
-    cardGap: 12,
-    gridGap: 14,
-    headingGap: 6,
+    // 휴대폰 전용: PC 를 줄인 것이 아니라 손가락·좁은 폭 기준으로 따로 정한다. CTA 48~52px, 누르는 영역 44px 이상.
+    control: 48,
+    controlLarge: 52,
+    controlPaddingX: 16,
+    controlLargePaddingX: 18,
+    sectionGap: 16,
+    cardPadding: 14,
+    cardGap: 10,
+    gridGap: 10,
+    headingGap: 4,
     gutter: 16,
     contentMax: 640,
     cardBasis: 300,
-    thumb: 64,
+    thumb: 56,
   },
 };
 
 /** 노트북 화면부터 compact. iPad 가로(1024~1194)는 comfortable 로 남긴다. */
 export const COMPACT_MIN_WIDTH = 1200;
+/** 360px 이하 휴대폰은 좌우 여백을 더 줄인다(320·360 기기). */
+export const NARROW_PHONE_MAX_WIDTH = 360;
+export const NARROW_PHONE_GUTTER = 12;
+
 /** iPad mini 세로(744)부터 comfortable. */
 export const COMFORTABLE_MIN_WIDTH = 744;
 

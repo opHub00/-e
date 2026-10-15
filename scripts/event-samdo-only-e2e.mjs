@@ -112,7 +112,7 @@ async function enterNewbornPersona(page) {
     await page.getByTestId(`story-segment-${index}`).click();
     await samdoOnly(page, `story-${index}`);
   }
-  if (!(await page.getByTestId('story-message').innerText()).includes('가장 유리한 신청유형과')) throw new Error('Samdo story final message missing');
+  if (!(await page.getByTestId('story-message').innerText()).includes('나에게 맞는 선택지와')) throw new Error('Samdo story final message missing');
   await page.getByTestId('story-skip').click();
 
   await page.getByTestId('event-start').click();

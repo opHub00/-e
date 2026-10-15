@@ -1,11 +1,11 @@
 /**
- * Product Story — 삼도이동 1지구 행사용. 한 공고 안에서 '어떤 유형으로 신청하는 게 유리한가'를
- * 차분하게 보여 주는 짧은 서사(공공 청약 서비스 톤, 광고 영상처럼 만들지 않는다).
+ * Product Story — 삼도이동 토지임대부 분양주택 1·2지구 통합 행사용. 한 번 입력해 두 지구의 신청 선택지를
+ * 비교한다는 것을 차분하게 보여 주는 짧은 서사(공공 청약 서비스 톤, 광고 영상처럼 만들지 않는다).
  *
  * UI Motion(상태 변화 피드백, design/motion 토큰)과는 다른 계층이다. 여기 시간은 '한 장면을 읽고 이해하는 시간'이라
  * micro motion 토큰으로 표현하지 않고 장면 단위로 정한다. 장면마다 문장 하나, 그림 하나.
  */
-export type StorySceneId = 'supplies' | 'conditions' | 'check' | 'compare' | 'result';
+export type StorySceneId = 'districts' | 'profile' | 'check' | 'compare' | 'result';
 
 export type StoryScene = {
   id: StorySceneId;
@@ -21,37 +21,37 @@ export type StoryScene = {
 
 export const STORY_SCENES: readonly StoryScene[] = [
   {
-    id: 'supplies',
-    message: () => '같은 공고라도\n신청할 수 있는 유형은 다릅니다',
-    description: region => `${region} 공고문 아래로 청년·신혼부부·신생아·생애최초·일반공급 다섯 가지 신청유형과 유형별 공급 세대수가 나타나요.`,
+    id: 'districts',
+    message: () => '삼도이동에는\n1지구와 2지구가 있습니다',
+    description: () => '삼도이동 토지임대부 분양주택 아래로 1지구와 2지구 카드가 나타나고, 지구별 총 세대와 49㎡·59㎡ 세대수가 보여요.',
     holdMs: 2400,
     buildMs: 1700,
   },
   {
-    id: 'conditions',
-    message: () => '내 조건에 따라\n자격과 순위가 달라집니다',
-    description: () => '나이·혼인·자녀·무주택·소득·자산·청약통장 조건이 차례로 나타나고, 이 조건이 자격과 공급 단계·순위를 정한다는 표시로 이어져요.',
+    id: 'profile',
+    message: () => '내 조건은\n한 번만 입력하면 됩니다',
+    description: () => '나이·혼인·자녀·무주택·소득·자산·청약통장 조건이 한 장의 내 조건 카드로 모여요.',
     holdMs: 2400,
     buildMs: 1800,
   },
   {
     id: 'check',
-    message: region => `완판e가 ${region} 공고 기준으로\n하나씩 확인합니다`,
-    description: region => `${region} 공고문에서 거주·무주택·소득·자산·청약통장 조건을 뽑아내고, 입력한 정보와 하나씩 비교해 표시해요.`,
+    message: () => '완판e가 두 지구의 신청유형을\n각각 확인합니다',
+    description: () => '내 조건 카드에서 1지구와 2지구로 선이 이어지고, 지구마다 청년·신혼부부·신생아·생애최초·일반공급을 하나씩 확인해요.',
     holdMs: 2800,
     buildMs: 2200,
   },
   {
     id: 'compare',
-    message: () => '신청 가능한 유형을 비교하고',
-    description: () => '다섯 가지 신청유형 카드에 신청 가능·서류 확인 필요·신청 어려움 판정이 차례로 붙어요. 예시 화면이에요.',
+    message: () => '자격·순위·공급조건을\n나란히 비교하고',
+    description: () => '1지구와 2지구를 두 칸으로 놓고 자격, 우선단계, 공급세대, 분양가·토지임대료를 한 줄씩 비교해요. 예시 화면이에요.',
     holdMs: 2600,
     buildMs: 2000,
   },
   {
     id: 'result',
-    message: () => '가장 유리한 신청유형과\n이유를 보여드립니다',
-    description: () => '추천 신청유형, 공식 가점, 충족한 자격 기준, 접수일이 담긴 결과 카드가 나타나요. 예시 화면이에요.',
+    message: () => '나에게 맞는 선택지와\n신청 일정을 보여드립니다',
+    description: () => '지구별 추천 공급유형 카드와 특별공급·일반 1순위·일반 2순위·당첨자 발표 일정이 나타나요. 예시 화면이에요.',
     holdMs: 0,
     buildMs: 1600,
   },

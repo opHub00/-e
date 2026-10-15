@@ -10,7 +10,7 @@ await mkdir(SHOT, { recursive: true });
 const results = [];
 const check = (name, ok, detail = '') => results.push({ name, ok: Boolean(ok), detail });
 const browser = await chromium.launch();
-const SCENES = ['supplies', 'conditions', 'check', 'compare', 'result'];
+const SCENES = ['districts', 'profile', 'check', 'compare', 'result'];
 const VIEWPORTS = [
   { name: 'ipad-portrait', width: 768, height: 1024 },
   { name: 'ipad-landscape', width: 1024, height: 768 },
@@ -62,7 +62,7 @@ for (const viewport of VIEWPORTS) {
   check(`${viewport.name}: final scene shows CTA and replay`, (await tid(page, 'story-start').count()) === 1 && (await tid(page, 'story-replay').count()) === 1);
   // 다시 보기
   await tid(page, 'story-replay').click();
-  await tid(page, 'story-scene-supplies').waitFor();
+  await tid(page, 'story-scene-districts').waitFor();
   check(`${viewport.name}: replay returns to scene 1`, true);
   // 막대로 장면 이동
   await tid(page, 'story-segment-4').click();

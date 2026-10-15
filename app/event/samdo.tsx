@@ -14,6 +14,10 @@ import { buildSamdoResultView } from '../../features/eventKiosk/samdoResult/samd
 import { SamdoResultView } from '../../features/eventKiosk/samdoResult/SamdoResultView';
 import { buildSamdoQrSummary } from '../../features/eventKiosk/samdoResult/samdoSummary';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
+import { buildDistrictComparison } from '../../features/eventKiosk/districts/districtAdapter';
+import { DistrictComparison } from '../../features/eventKiosk/districts/DistrictComparison';
+import { DistrictDetailFold } from '../../features/eventKiosk/districts/DistrictDetailFold';
+import { codexDistrictPresentation, DISTRICT_LAYOUT_SAMPLE } from '../../features/eventKiosk/districts/districtSource';
 import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { resetToHome } from '../../features/eventKiosk/ui/navigation';
@@ -31,7 +35,7 @@ const APPLY_HOME_URL = 'https://www.applyhome.co.kr';
 export default function SamdoResultScreen() {
   const load = kioskEvent();
   const attached = useAttached();
-  const { persona } = useLocalSearchParams<{ persona?: string }>();
+  const { persona, layout } = useLocalSearchParams<{ persona?: string; layout?: string }>();
   const answers = useKioskStore(state => state.answers);
   const answerStates = useKioskStore(state => state.answerStates);
   const applyRefinementAnswers = useKioskStore(state => state.applyRefinementAnswers);
@@ -57,6 +61,12 @@ export default function SamdoResultScreen() {
       return 'error' as const;
     }
   }, [answers]);
+
+  // 1·2지구 비교: Codex presentation 값이 있으면 그것을, 레이아웃 점검(Demo Mode ?layout=sample)이면 예시를 쓴다.
+  const districts = useMemo(() => buildDistrictComparison({
+    district1: result && result !== 'error' ? result.recommendation : null,
+    codex: codexDistrictPresentation() ?? (layout === 'sample' && isDemoModeEnabled() ? DISTRICT_LAYOUT_SAMPLE : null),
+  }), [layout, result]);
 
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
@@ -109,6 +119,8 @@ export default function SamdoResultScreen() {
         </View>
       }
     >
+      <DistrictComparison model={districts} />
+      <DistrictDetailFold title="1지구 상세 분석" hint="추천 이유·공식 기준·서류·QR·AI 상담">
       <SamdoResultView
         model={result.view}
         actions={{
@@ -130,6 +142,7 @@ export default function SamdoResultScreen() {
           ),
         }}
       />
+      </DistrictDetailFold>
     </KioskFrame>
   );
 }

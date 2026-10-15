@@ -7,16 +7,16 @@ import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import { kioskEvent } from '../kioskEvent';
 import { KioskButton } from '../ui/controls';
 import { BrandMark } from '../brand/BrandMark';
-import { PartnerBadge } from '../brand/PartnerBadge';
+import { PartnerBadge, partnerSizeFor } from '../brand/PartnerBadge';
 import { k } from '../ui/theme';
 import { storyDataFrom, type StoryData } from './storyData';
 import { useKioskWidth } from '../ui/useKioskWidth';
 import { isLastScene, nextSceneIndex, STORY_SCENES, type StorySceneId } from './storyScript';
-import { SceneCheck, SceneCompare, SceneConditions, SceneResult, SceneSupplies, STAGE } from './StoryScenes';
+import { SceneCheck, SceneCompare, SceneDistricts, SceneProfile, SceneResult, STAGE } from './StoryScenes';
 
 const SCENE_VIEWS: Record<StorySceneId, ComponentType<{ p: Animated.Value; data: StoryData }>> = {
-  supplies: SceneSupplies,
-  conditions: SceneConditions,
+  districts: SceneDistricts,
+  profile: SceneProfile,
   check: SceneCheck,
   compare: SceneCompare,
   result: SceneResult,
@@ -97,11 +97,11 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
   return (
     <View style={styles.root} testID={testID} accessibilityViewIsModal>
       <View style={styles.top}>
-        <BrandMark size="hero" label={load.ok ? load.event.config.copy.brand : undefined} compact={width < 600} />
+        <BrandMark size={width > 0 && width < 600 ? 'header' : 'hero'} label={load.ok ? load.event.config.copy.brand : undefined} compact={width > 0 && width < 600} />
         <View style={styles.topRight}>
-          <PartnerBadge compact />
+          <PartnerBadge size={partnerSizeFor(width)} />
           <MotionPressable accessibilityRole="button" accessibilityLabel="소개 건너뛰기" onPress={onSkip} style={styles.skip} testID="story-skip">
-            <Text style={styles.skipText}>건너뛰기</Text>
+            {width > 0 && width <= 360 ? null : <Text style={styles.skipText}>건너뛰기</Text>}
             <MaterialIcons name="close" size={22} color={k.colors.textMuted} />
           </MotionPressable>
         </View>

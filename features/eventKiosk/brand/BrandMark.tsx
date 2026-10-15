@@ -15,7 +15,8 @@ const SIZES: Record<BrandMarkSize, { character: number; wordmark: number; gap: n
 
 export function BrandMark({ size = 'header', label = BRAND.name, compact = false }: { size?: BrandMarkSize; label?: string; compact?: boolean }) {
   const spec = SIZES[size];
-  const scale = compact ? 0.86 : 1;
+  // 휴대폰 헤더는 캐릭터·글자를 함께 줄여 헤더 높이를 낮춘다(글자 로고가 잘리지 않는 선).
+  const scale = compact ? 0.8 : 1;
   const character = Math.round(spec.character * scale);
   const wordmark = Math.round(spec.wordmark * scale);
   return (

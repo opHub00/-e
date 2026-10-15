@@ -1,14 +1,13 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { bucketTone, k } from '../ui/theme';
-import type { StoryData, StoryTone } from './storyData';
+import type { StoryData, StoryDistrict, StoryTone } from './storyData';
+import { storyShortDate } from './storyData';
 
 /**
  * 장면 그림. 모두 480×380 짜리 논리 무대 위에 절대 위치로 그리고, 바깥(ProductStory)이 화면 크기에 맞게 확대·축소한다.
- * 그래서 iPad·데스크톱·휴대폰에서 같은 구도가 유지된다.
- *
  * 각 장면은 0→1 로 가는 progress 하나만 받는다. reduced motion 이면 처음부터 1 이라 완성된 그림만 보인다.
- * 움직임은 opacity·짧은 이동·선이 자라는 것뿐이다. 회전·튀는 효과는 쓰지 않는다(공공 서비스 톤).
+ * 움직임은 opacity·짧은 이동·선이 자라는 것뿐이다(공공 서비스 톤). 1지구=보라, 2지구=초록으로 늘 같은 색을 쓴다.
  */
 export const STAGE = { width: 480, height: 380 } as const;
 
@@ -17,11 +16,9 @@ type SceneProps = { p: P; data: StoryData };
 type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
 type Src = Animated.Value | Animated.AnimatedInterpolation<string | number>;
 
-/** progress 의 [from, to] 구간에서 0→1. 구간 밖은 고정. */
 const seg = (p: Src, from: number, to: number) => p.interpolate({ inputRange: [from, to], outputRange: [0, 1], extrapolate: 'clamp' });
 const mix = (p: Src, from: number, to: number, a: number, b: number) =>
   p.interpolate({ inputRange: [from, to], outputRange: [a, b], extrapolate: 'clamp' });
-/** 나타나기: 투명 → 보임, 아래에서 살짝 올라온다. */
 const rise = (v: Src, distance = 10) => ({ opacity: v, transform: [{ translateY: mix(v, 0, 1, distance, 0) }] });
 
 const TONE: Record<StoryTone, { bg: string; fg: string; icon: IconName }> = {
@@ -29,271 +26,229 @@ const TONE: Record<StoryTone, { bg: string; fg: string; icon: IconName }> = {
   review: { bg: bucketTone.review.bg, fg: bucketTone.review.fg, icon: 'help' },
   difficult: { bg: bucketTone.difficult.bg, fg: bucketTone.difficult.fg, icon: 'remove-circle-outline' },
 };
+const DISTRICT_COLOR = { D1: k.colors.primary, D2: k.colors.success } as const;
 
-/** 선이 한쪽 끝에서부터 자란다(가로). */
 function HLine({ v, left, top, width }: { v: Src; left: number; top: number; width: number }) {
-  return (
-    <Animated.View
-      style={[styles.abs, styles.line, { left, top, width, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateX: mix(v, 0, 1, -width / 2, 0) }, { scaleX: v }] }]}
-    />
-  );
+  return <Animated.View style={[styles.abs, styles.line, { left, top, width, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateX: mix(v, 0, 1, -width / 2, 0) }, { scaleX: v }] }]} />;
 }
-
 function VLine({ v, left, top, height }: { v: Src; left: number; top: number; height: number }) {
-  return (
-    <Animated.View
-      style={[styles.abs, styles.vline, { left, top, height, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateY: mix(v, 0, 1, -height / 2, 0) }, { scaleY: v }] }]}
-    />
-  );
+  return <Animated.View style={[styles.abs, styles.vline, { left, top, height, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateY: mix(v, 0, 1, -height / 2, 0) }, { scaleY: v }] }]} />;
+}
+function Pill({ district }: { district: StoryDistrict }) {
+  return <View style={[styles.pill, { backgroundColor: DISTRICT_COLOR[district.id] }]}><Text style={styles.pillText}>{district.label}</Text></View>;
 }
 
-/** Scene 1 — 공고문 하나 아래로 다섯 신청유형이 펼쳐진다. */
-export function SceneSupplies({ p, data }: SceneProps) {
-  const doc = seg(p, 0, 0.25);
-  const stem = seg(p, 0.18, 0.32);
-  const bar = seg(p, 0.26, 0.45);
-  const cardW = 84;
-  const gap = 8;
-  const left0 = (STAGE.width - (cardW * 5 + gap * 4)) / 2;
-  const centers = data.supplies.map((_, index) => left0 + index * (cardW + gap) + cardW / 2);
+/** Scene 1 — 삼도이동 아래 1지구 · 2지구. */
+export function SceneDistricts({ p, data }: SceneProps) {
+  const head = seg(p, 0, 0.25);
+  const stem = seg(p, 0.2, 0.34);
+  const bar = seg(p, 0.3, 0.46);
+  const centers = [124, 356];
   return (
     <View style={styles.stage}>
-      <Animated.View style={[styles.abs, styles.doc, { left: 130, top: 6, width: 220 }, rise(doc)]}>
-        <View style={styles.docIcon}><MaterialIcons name="description" size={20} color={k.colors.primary} /></View>
+      <Animated.View style={[styles.abs, styles.headCard, { left: 110, top: 8, width: 260 }, rise(head)]}>
+        <View style={styles.headIcon}><MaterialIcons name="location-city" size={20} color={k.colors.primary} /></View>
         <View style={styles.flex}>
-          <Text style={styles.caption}>입주자모집공고</Text>
-          <Text style={styles.docTitle} numberOfLines={1}>{data.region}</Text>
-          <Text style={styles.caption} numberOfLines={1}>{data.meta}</Text>
+          <Text style={styles.caption}>제주시 삼도이동</Text>
+          <Text style={styles.headTitle} numberOfLines={2}>토지임대부 분양주택</Text>
         </View>
       </Animated.View>
-      <VLine v={stem} left={STAGE.width / 2 - 1} top={86} height={30} />
-      <HLine v={bar} left={centers[0]} top={116} width={centers[centers.length - 1] - centers[0]} />
-      {data.supplies.map((supply, index) => {
-        const drop = seg(p, 0.36 + index * 0.08, 0.56 + index * 0.08);
-        const appear = seg(p, 0.42 + index * 0.08, 0.66 + index * 0.08);
+      <VLine v={stem} left={STAGE.width / 2 - 1} top={84} height={30} />
+      <HLine v={bar} left={centers[0]} top={114} width={centers[1] - centers[0]} />
+      {data.districts.map((district, index) => {
+        const drop = seg(p, 0.42 + index * 0.12, 0.58 + index * 0.12);
+        const appear = seg(p, 0.48 + index * 0.12, 0.72 + index * 0.12);
+        const inv = district.inventory;
         return (
-          <View key={supply.type} style={StyleSheet.absoluteFill} pointerEvents="none">
-            <VLine v={drop} left={centers[index] - 1} top={116} height={22} />
-            <Animated.View style={[styles.abs, styles.supply, { left: centers[index] - cardW / 2, top: 140, width: cardW }, rise(appear, 12)]}>
-              <View style={styles.supplyIcon}><MaterialIcons name={supply.icon as IconName} size={22} color={k.colors.primary} /></View>
-              <Text style={styles.supplyName} numberOfLines={1}>{supply.short}</Text>
-              <Text style={styles.supplyCount}>{supply.count}세대</Text>
+          <View key={district.id} style={StyleSheet.absoluteFill} pointerEvents="none">
+            <VLine v={drop} left={centers[index] - 1} top={114} height={24} />
+            <Animated.View testID={`story-district-${district.id}`} style={[styles.abs, styles.district, { left: centers[index] - 100, top: 140, width: 200, borderTopColor: DISTRICT_COLOR[district.id] }, rise(appear, 12)]}>
+              <Pill district={district} />
+              <Text style={styles.districtTotal}>{inv ? `총 ${inv.total}세대` : '공고 확인 중'}</Text>
+              {inv ? (
+                <View style={styles.unitRow}>
+                  <View style={styles.unit}><Text style={styles.unitLabel}>49㎡</Text><Text style={styles.unitValue}>{inv.units49}세대</Text></View>
+                  <View style={styles.unit}><Text style={styles.unitLabel}>59㎡</Text><Text style={styles.unitValue}>{inv.units59}세대</Text></View>
+                </View>
+              ) : null}
             </Animated.View>
           </View>
         );
       })}
-      {/* 특별공급(앞 네 유형)·일반공급 합계. 공고 공급 내역(규칙 패키지 inventory) 그대로. */}
-      {(() => {
-        const groups = seg(p, 0.76, 0.92);
-        const specialLeft = centers[0] - cardW / 2;
-        const specialWidth = centers[3] + cardW / 2 - specialLeft;
-        const generalLeft = centers[4] - cardW / 2;
-        return (
-          <>
-            <Animated.View testID="story-total-special" style={[styles.abs, styles.group, { left: specialLeft, top: 262, width: specialWidth }, { opacity: groups }]}>
-              <Text style={styles.groupText}>특별공급 {data.totals.special}세대</Text>
-            </Animated.View>
-            <Animated.View testID="story-total-general" style={[styles.abs, styles.group, { left: generalLeft, top: 262, width: cardW }, { opacity: groups }]}>
-              <Text style={styles.groupText}>일반공급 {data.totals.general}세대</Text>
-            </Animated.View>
-          </>
-        );
-      })()}
-      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 312, width: 400 }, rise(seg(p, 0.86, 1), 6)]}>
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 318, width: 400 }, rise(seg(p, 0.84, 1), 6)]}>
         <MaterialIcons name="info-outline" size={18} color={k.colors.textMuted} />
-        <Text style={styles.note}>유형마다 자격 기준과 선정 방식이 달라요</Text>
+        <Text style={styles.note}>지구마다 공급 규모와 조건이 달라요</Text>
       </Animated.View>
     </View>
   );
 }
 
-/** Scene 2 — 내 조건 일곱 가지가 나타나고, 그것이 자격과 순위를 정한다. */
-export function SceneConditions({ p, data }: SceneProps) {
-  const chipW = 110;
-  const gap = 10;
-  const rowLeft = (count: number) => (STAGE.width - (chipW * count + gap * (count - 1))) / 2;
-  const outcome = seg(p, 0.72, 0.92);
-  const arrows = seg(p, 0.62, 0.78);
+/** Scene 2 — 조건 일곱 가지가 한 장의 '내 조건' 카드로. */
+export function SceneProfile({ p, data }: SceneProps) {
+  const card = seg(p, 0.62, 0.86);
   return (
     <View style={styles.stage}>
       {data.conditions.map((condition, index) => {
         const row = index < 4 ? 0 : 1;
         const col = row === 0 ? index : index - 4;
-        const left = rowLeft(row === 0 ? 4 : 3) + col * (chipW + gap);
-        const appear = seg(p, 0.04 + index * 0.075, 0.26 + index * 0.075);
+        const left = (row === 0 ? 15 : 74) + col * 118;
+        const appear = seg(p, 0.04 + index * 0.07, 0.24 + index * 0.07);
         return (
-          <Animated.View key={condition.label} style={[styles.abs, styles.condition, { left, top: 14 + row * 58, width: chipW }, rise(appear, 8)]}>
-            <View style={styles.conditionIcon}><MaterialIcons name={condition.icon as IconName} size={18} color={k.colors.primary} /></View>
+          <Animated.View key={condition.label} style={[styles.abs, styles.condition, { left, top: 10 + row * 56, width: 110 }, rise(appear, 8)]}>
+            <View style={styles.conditionIcon}><MaterialIcons name={condition.icon as IconName} size={17} color={k.colors.primary} /></View>
             <Text style={styles.conditionLabel}>{condition.label}</Text>
           </Animated.View>
         );
       })}
-      {[150, 330].map(x => (
-        <Animated.View key={x} style={[styles.abs, { left: x - 12, top: 132, opacity: arrows, transform: [{ translateY: mix(arrows, 0, 1, -6, 0) }] }]}>
-          <MaterialIcons name="south" size={24} color={k.colors.textSubtle} />
-        </Animated.View>
-      ))}
-      <Animated.View style={[styles.abs, styles.outcome, { left: 30, top: 170, width: 204 }, rise(outcome, 10)]}>
-        <View style={styles.outcomeHead}><MaterialIcons name="verified" size={20} color={k.colors.primary} /><Text style={styles.outcomeTitle}>자격</Text></View>
-        <Text style={styles.caption}>유형별 신청 가능 여부</Text>
-        <View style={styles.miniBadges}>
-          {(['eligible', 'review', 'difficult'] as const).map(tone => (
-            <View key={tone} style={[styles.miniBadge, { backgroundColor: TONE[tone].bg }]}>
-              <Text style={[styles.miniBadgeText, { color: TONE[tone].fg }]}>{tone === 'eligible' ? '가능' : tone === 'review' ? '확인' : '어려움'}</Text>
-            </View>
-          ))}
-        </View>
+      <Animated.View style={[styles.abs, { left: 228, top: 130, opacity: seg(p, 0.52, 0.66) }]}>
+        <MaterialIcons name="south" size={24} color={k.colors.textSubtle} />
       </Animated.View>
-      <Animated.View style={[styles.abs, styles.outcome, { left: 246, top: 170, width: 204 }, rise(seg(p, 0.78, 0.98), 10)]}>
-        <View style={styles.outcomeHead}><MaterialIcons name="format-list-numbered" size={20} color={k.colors.primary} /><Text style={styles.outcomeTitle}>순위</Text></View>
-        <Text style={styles.caption}>공급 단계 · 공식 가점</Text>
-        <View style={styles.stageBars}>
-          {['1단계', '2단계', '3단계'].map((label, index) => (
-            <View key={label} style={styles.stageBarRow}>
-              <Text style={styles.stageBarLabel}>{label}</Text>
-              <View style={styles.stageTrack}><View style={[styles.stageFill, { width: `${[70, 20, 10][index]}%` }]} /></View>
-            </View>
-          ))}
+      <Animated.View style={[styles.abs, styles.profile, { left: 110, top: 168, width: 260 }, rise(card, 12)]}>
+        <View style={styles.profileHead}>
+          <View style={styles.avatar}><MaterialIcons name="person" size={22} color={k.colors.onPrimary} /></View>
+          <View style={styles.flex}>
+            <Text style={styles.profileTitle}>내 조건</Text>
+            <Text style={styles.caption}>{data.conditions.length}가지 · 한 번 입력</Text>
+          </View>
+          <View style={styles.onceTag}><Text style={styles.onceText}>1회 입력</Text></View>
         </View>
+        <View style={styles.dots}>{data.conditions.map(condition => <View key={condition.label} style={styles.dot} />)}</View>
+      </Animated.View>
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 318, width: 400 }, rise(seg(p, 0.86, 1), 6)]}>
+        <MaterialIcons name="lock-outline" size={18} color={k.colors.textMuted} />
+        <Text style={styles.note}>입력한 정보는 이 기기에 저장하지 않아요</Text>
       </Animated.View>
     </View>
   );
 }
 
-/** Scene 3 — 공고문 → 조건 추출 → 내 정보와 비교. */
+/** Scene 3 — 내 조건 하나에서 1지구 · 2지구로 갈라져, 지구마다 신청유형을 하나씩 확인. */
 export function SceneCheck({ p, data }: SceneProps) {
-  const docV = seg(p, 0, 0.18);
-  const arrow1 = seg(p, 0.14, 0.28);
-  const arrow2 = seg(p, 0.56, 0.68);
-  const top = 24;
-  const rowY = (index: number) => top + 52 + index * 46;
+  const profile = seg(p, 0, 0.16);
+  const stem = seg(p, 0.12, 0.24);
+  const bar = seg(p, 0.2, 0.34);
+  const centers = [128, 352];
   return (
     <View style={styles.stage}>
-      <Animated.View style={[styles.abs, styles.column, { left: 4, top, width: 130, height: 262 }, rise(docV)]}>
-        <View style={styles.columnHead}><MaterialIcons name="description" size={18} color={k.colors.primary} /><Text style={styles.columnTitle}>공고문</Text></View>
-        <Text style={styles.caption} numberOfLines={1}>{data.region}</Text>
-        {[0.9, 0.7, 0.85, 0.6, 0.8, 0.5, 0.75].map((w, index) => (
-          <View key={index} style={[styles.textLine, { width: `${w * 100}%` }]} />
-        ))}
+      <Animated.View style={[styles.abs, styles.profileDock, styles.profileRow, { left: 150, top: 4, width: 180 }, rise(profile)]}>
+        <View style={styles.avatarSmall}><MaterialIcons name="person" size={18} color={k.colors.onPrimary} /></View>
+        <View style={styles.flex}>
+          <Text style={styles.profileTitle}>내 조건</Text>
+          <Text style={styles.caption}>한 번 입력</Text>
+        </View>
       </Animated.View>
-      <Animated.View style={[styles.abs, { left: 138, top: top + 118, opacity: arrow1, transform: [{ translateX: mix(arrow1, 0, 1, -8, 0) }] }]}>
-        <MaterialIcons name="east" size={26} color={k.colors.primary} />
-      </Animated.View>
-      <Animated.View style={[styles.abs, styles.column, { left: 168, top, width: 168, height: 262 }, { opacity: seg(p, 0.2, 0.32) }]}>
-        <View style={styles.columnHead}><MaterialIcons name="checklist" size={18} color={k.colors.primary} /><Text style={styles.columnTitle}>조건 추출</Text></View>
-      </Animated.View>
-      {data.criteria.map((criterion, index) => {
-        const pick = seg(p, 0.26 + index * 0.08, 0.42 + index * 0.08);
-        const verdict = seg(p, 0.66 + index * 0.07, 0.8 + index * 0.07);
-        const pending = index === data.criteria.length - 1;
+      <VLine v={stem} left={STAGE.width / 2 - 1} top={62} height={22} />
+      <HLine v={bar} left={centers[0]} top={84} width={centers[1] - centers[0]} />
+      {data.districts.map((district, ci) => {
+        const drop = seg(p, 0.3 + ci * 0.05, 0.4 + ci * 0.05);
+        const head = seg(p, 0.34 + ci * 0.05, 0.46 + ci * 0.05);
+        const left = centers[ci] - 100;
         return (
-          <View key={criterion} style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Animated.View style={[styles.abs, styles.criterion, { left: 176, top: rowY(index), width: 152 }, { opacity: pick, transform: [{ translateX: mix(pick, 0, 1, -10, 0) }] }]}>
-              <Text style={styles.criterionText} numberOfLines={1}>{criterion}</Text>
+          <View key={district.id} style={StyleSheet.absoluteFill} pointerEvents="none">
+            <VLine v={drop} left={centers[ci] - 1} top={84} height={18} />
+            <Animated.View style={[styles.abs, styles.checkColumn, { left, top: 102, width: 200, borderTopColor: DISTRICT_COLOR[district.id] }, { opacity: head }]}>
+              <Pill district={district} />
             </Animated.View>
-            <Animated.View style={[styles.abs, styles.verdict, { left: 384, top: rowY(index), backgroundColor: pending ? TONE.review.bg : TONE.eligible.bg }, { opacity: verdict }]}>
-              <MaterialIcons name={pending ? 'help' : 'check-circle'} size={16} color={pending ? TONE.review.fg : TONE.eligible.fg} />
-              <Text style={[styles.verdictText, { color: pending ? TONE.review.fg : TONE.eligible.fg }]}>{pending ? '확인' : '충족'}</Text>
-            </Animated.View>
+            {data.supplies.map((supply, si) => {
+              const tick = seg(p, 0.42 + ci * 0.05 + si * 0.08, 0.54 + ci * 0.05 + si * 0.08);
+              const col = si % 2;
+              const row = Math.floor(si / 2);
+              return (
+                <Animated.View key={supply.type} style={[styles.abs, styles.checkRow, { left: left + 10 + col * 92, top: 142 + row * 42, width: 88 }, { opacity: tick, transform: [{ translateY: mix(tick, 0, 1, 4, 0) }] }]}>
+                  <MaterialIcons name="check" size={15} color={DISTRICT_COLOR[district.id]} />
+                  <Text style={styles.checkText} numberOfLines={1}>{supply.short}</Text>
+                </Animated.View>
+              );
+            })}
           </View>
         );
       })}
-      <Animated.View style={[styles.abs, { left: 340, top: top + 118, opacity: arrow2, transform: [{ translateX: mix(arrow2, 0, 1, -8, 0) }] }]}>
-        <MaterialIcons name="east" size={26} color={k.colors.primary} />
-      </Animated.View>
-      <Animated.View style={[styles.abs, styles.columnHeadFloat, { left: 372, top: top + 10, opacity: seg(p, 0.6, 0.72) }]}>
-        <MaterialIcons name="person-outline" size={18} color={k.colors.primary} />
-        <Text style={styles.columnTitle}>내 정보</Text>
-      </Animated.View>
-      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 300, width: 400 }, rise(seg(p, 0.86, 1), 6)]}>
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 300, width: 400 }, rise(seg(p, 0.9, 1), 6)]}>
         <MaterialIcons name="fact-check" size={18} color={k.colors.textMuted} />
-        <Text style={styles.note}>공고문 원문 기준으로 조건마다 비교해요</Text>
+        <Text style={styles.note}>지구별 공고 기준으로 따로 확인해요</Text>
       </Animated.View>
     </View>
   );
 }
 
-/** Scene 4 — 다섯 유형 카드에 판정이 차례로 붙는다(예시). */
+/** Scene 4 — 두 칸 비교(자격 · 우선단계 · 공급세대 · 분양가·토지임대료), 예시. */
 export function SceneCompare({ p, data }: SceneProps) {
-  const settle = seg(p, 0.82, 1);
+  const rows: { label: string; render: (index: number) => React.ReactNode }[] = [
+    {
+      label: '자격',
+      render: index => {
+        const row = data.compare[index];
+        const tone = TONE[row.eligibility.tone];
+        return <View style={[styles.badge, { backgroundColor: tone.bg }]}><MaterialIcons name={tone.icon} size={14} color={tone.fg} /><Text style={[styles.badgeText, { color: tone.fg }]}>{row.eligibility.label}</Text></View>;
+      },
+    },
+    { label: '우선단계', render: index => <Text style={styles.cellText}>{data.compare[index].stage}</Text> },
+    { label: '공급세대', render: index => <Text style={styles.cellText}>{data.districts[index]?.inventory ? `총 ${data.districts[index].inventory!.total}세대` : '공고 확인'}</Text> },
+    { label: '분양가·임대료', render: () => <Text style={styles.cellMuted}>공고 금액 비교</Text> },
+  ];
   return (
     <View style={styles.stage}>
-      {data.compare.map((row, index) => {
-        const tone = TONE[row.status];
-        const card = seg(p, index * 0.05, 0.2 + index * 0.05);
-        const judged = seg(p, 0.22 + index * 0.12, 0.36 + index * 0.12);
-        const eligible = row.status === 'eligible';
+      <Animated.View style={[styles.abs, styles.tableHead, { left: 20, top: 8, width: 440 }, { opacity: seg(p, 0, 0.18) }]}>
+        <Text style={[styles.th, { width: 110 }]}>항목</Text>
+        {data.districts.map(district => <View key={district.id} style={styles.thCell}><Pill district={district} /></View>)}
+      </Animated.View>
+      {rows.map((row, ri) => {
+        const show = seg(p, 0.16 + ri * 0.15, 0.34 + ri * 0.15);
         return (
-          <Animated.View
-            key={row.short}
-            style={[
-              styles.abs,
-              styles.compareRow,
-              { left: 40, top: 8 + index * 58, width: 400 },
-              { opacity: card },
-            ]}
-          >
-            <Animated.View style={[StyleSheet.absoluteFill, styles.compareAccent, { borderColor: k.colors.primary, opacity: eligible ? settle : 0 }]} />
-            {/* 판정이 끝나면 신청 가능한 유형은 테두리로 강조하고, 어려운 유형은 조금 흐리게. */}
-            <Animated.Text style={[styles.compareName, { opacity: row.status === 'difficult' ? mix(settle, 0, 1, 1, 0.55) : 1 }]}>{row.short}</Animated.Text>
-            <Animated.View style={[styles.compareBadge, { backgroundColor: tone.bg, opacity: judged, transform: [{ translateX: mix(judged, 0, 1, 8, 0) }] }]}>
-              <MaterialIcons name={tone.icon} size={16} color={tone.fg} />
-              <Text style={[styles.compareBadgeText, { color: tone.fg }]}>{row.label}</Text>
-            </Animated.View>
+          <Animated.View key={row.label} style={[styles.abs, styles.tableRow, { left: 20, top: 58 + ri * 56, width: 440 }, rise(show, 6)]}>
+            <Text style={[styles.th, { width: 110 }]}>{row.label}</Text>
+            {data.districts.map((district, di) => <View key={district.id} style={styles.thCell}>{row.render(di)}</View>)}
           </Animated.View>
         );
       })}
-      <Animated.Text style={[styles.abs, styles.exampleNote, { left: 40, top: 304, width: 400, opacity: seg(p, 0.85, 1) }]}>
-        예시 화면 · 실제 판정은 입력한 조건으로 계산해요
+      <Animated.Text style={[styles.abs, styles.exampleNote, { left: 40, top: 300, width: 400, opacity: seg(p, 0.85, 1) }]}>
+        예시 화면 · 순위가 아니라 조건을 나란히 보여드려요
       </Animated.Text>
     </View>
   );
 }
 
-/** Scene 5 — 추천 유형 · 공식 가점 · 자격 기준 · 접수일(예시). */
+/** Scene 5 — 지구별 선택지 카드 + 신청 일정, 예시. */
 export function SceneResult({ p, data }: SceneProps) {
-  const card = seg(p, 0, 0.35);
-  const score = seg(p, 0.3, 0.7);
-  const { example } = data;
+  const scheduleRows: { label: string; key: keyof StoryDistrict['schedule'] }[] = [
+    { label: '특별공급', key: 'special' },
+    { label: '일반 1순위', key: 'generalFirst' },
+    { label: '일반 2순위', key: 'generalSecond' },
+    { label: '당첨자 발표', key: 'winnerAnnouncement' },
+  ];
   return (
     <View style={styles.stage}>
-      <Animated.View style={[styles.abs, styles.result, { left: 40, top: 4, width: 400 }, { opacity: card, transform: [{ translateY: mix(card, 0, 1, 12, 0) }] }]}>
-        <View style={styles.resultTop}>
-          <View style={styles.eyebrow}><MaterialIcons name="star" size={14} color={k.colors.onPrimary} /><Text style={styles.eyebrowText}>가장 유리한 신청유형</Text></View>
-          <Text style={styles.exampleTag}>예시</Text>
-        </View>
-        <Text style={styles.resultTitle}>{example.supplyLabel}</Text>
-        <View style={styles.resultChips}>
-          <View style={[styles.resultChip, { backgroundColor: TONE.eligible.bg }]}><Text style={[styles.resultChipText, { color: TONE.eligible.fg }]}>신청 가능</Text></View>
-          <View style={styles.resultChip}><Text style={styles.resultChipText}>{example.stage}</Text></View>
-        </View>
-        <Animated.View style={[styles.scoreBlock, { opacity: seg(p, 0.25, 0.45) }]}>
-          <View style={styles.scoreHead}>
-            <Text style={styles.scoreLabel}>공식 가점</Text>
-            <Text style={styles.scoreValue}>{example.score.total}<Text style={styles.scoreMax}> / {example.score.max}점</Text></Text>
-          </View>
-          <View style={styles.scoreTrack}>
-            <Animated.View style={[styles.scoreFill, { width: score.interpolate({ inputRange: [0, 1], outputRange: ['0%', `${Math.round((example.score.total / example.score.max) * 100)}%`] }) }]} />
-          </View>
-        </Animated.View>
-        <View style={styles.reasons}>
-          {example.reasons.map((reason, index) => (
-            <Animated.View key={reason} style={[styles.reason, rise(seg(p, 0.5 + index * 0.1, 0.68 + index * 0.1), 6)]}>
-              <View style={styles.checkDot}><MaterialIcons name="check" size={12} color={k.colors.onPrimary} /></View>
-              <Text style={styles.reasonText}>{reason}</Text>
+      <View style={[styles.abs, styles.choiceRow, { left: 20, top: 4, width: 440 }]}>
+        {data.choices.map((choice, index) => {
+          const district = data.districts.find(item => item.id === choice.district)!;
+          const tone = TONE[choice.status.tone];
+          return (
+            <Animated.View key={choice.district} style={[styles.choice, { borderTopColor: DISTRICT_COLOR[choice.district] }, rise(seg(p, index * 0.1, 0.3 + index * 0.1), 10)]}>
+              <View style={styles.choiceHead}><Pill district={district} /><Text style={styles.exampleTag}>예시</Text></View>
+              <Text style={styles.choiceTitle} numberOfLines={1}>{choice.supply}</Text>
+              <View style={[styles.badge, { backgroundColor: tone.bg }]}><MaterialIcons name={tone.icon} size={14} color={tone.fg} /><Text style={[styles.badgeText, { color: tone.fg }]}>{choice.status.label}</Text></View>
             </Animated.View>
-          ))}
+          );
+        })}
+      </View>
+      <Animated.View style={[styles.abs, styles.schedule, { left: 20, top: 150, width: 440 }, { opacity: seg(p, 0.35, 0.55) }]}>
+        <View style={styles.scheduleHead}>
+          <MaterialIcons name="event-available" size={18} color={k.colors.primary} />
+          <Text style={styles.scheduleTitle}>신청 일정</Text>
         </View>
-        <Animated.View style={[styles.dateRow, { opacity: seg(p, 0.8, 1) }]}>
-          <View style={styles.dateLine}>
-            <MaterialIcons name="event" size={18} color={k.colors.primary} />
-            <Text style={styles.dateText} testID="story-date-special">특별공급 접수 {example.date}</Text>
-          </View>
-          <View style={styles.dateLine}>
-            <MaterialIcons name="campaign" size={18} color={k.colors.textMuted} />
-            <Text style={styles.dateMuted} testID="story-date-winner">당첨자 발표 {example.winnerAnnouncement}</Text>
-          </View>
-        </Animated.View>
+        {scheduleRows.map((row, ri) => (
+          <Animated.View key={row.key} style={[styles.scheduleRow, { opacity: seg(p, 0.5 + ri * 0.1, 0.66 + ri * 0.1) }]}>
+            <Text style={[styles.th, { width: 96 }]}>{row.label}</Text>
+            {data.districts.map(district => (
+              <Text key={district.id} style={[styles.scheduleDate, { color: DISTRICT_COLOR[district.id] }]} testID={`story-date-${district.id}-${row.key}`}>
+                {district.label} {storyShortDate(district.schedule[row.key]) ?? '—'}
+              </Text>
+            ))}
+          </Animated.View>
+        ))}
+        {data.districts.some(district => Object.values(district.schedule).some(value => !value)) ? (
+          <Text style={styles.scheduleNote}>— 표시는 공고 데이터가 연결되면 채워져요</Text>
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -310,66 +265,52 @@ const styles = StyleSheet.create({
   caption: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted },
   note: { fontFamily: k.type.label.fontFamily, fontSize: 14, lineHeight: 20, color: k.colors.textMuted },
   noteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  doc: { ...card, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderColor: k.colors.primary, borderWidth: 2 },
-  docIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
-  docTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 23, color: k.colors.text },
-  supply: { ...card, alignItems: 'center', gap: 4, paddingVertical: 12, paddingHorizontal: 4 },
-  supplyIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
-  supplyName: { fontFamily: k.type.label.fontFamily, fontSize: 14, lineHeight: 19, color: k.colors.text },
-  supplyCount: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted },
-  condition: { ...card, flexDirection: 'row', alignItems: 'center', gap: 6, height: 46, paddingHorizontal: 8 },
-  conditionIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  pill: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  pillText: { fontFamily: k.type.label.fontFamily, fontSize: 13, lineHeight: 18, color: k.colors.onPrimary },
+  headCard: { ...card, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderColor: k.colors.primary, borderWidth: 2 },
+  headIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  headTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 23, color: k.colors.text },
+  district: { ...card, borderTopWidth: 4, padding: 14, gap: 6 },
+  districtTotal: { fontFamily: k.type.section.fontFamily, fontSize: 22, lineHeight: 30, color: k.colors.text },
+  unitRow: { flexDirection: 'row', gap: 8 },
+  unit: { flex: 1, borderRadius: 10, backgroundColor: k.colors.surfaceLow, paddingVertical: 6, alignItems: 'center' },
+  unitLabel: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
+  unitValue: { fontFamily: k.type.label.fontFamily, fontSize: 15, color: k.colors.text },
+  condition: { ...card, flexDirection: 'row', alignItems: 'center', gap: 6, height: 44, paddingHorizontal: 8 },
+  conditionIcon: { width: 26, height: 26, borderRadius: 13, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
   conditionLabel: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text, flexShrink: 0 },
-  outcome: { ...card, padding: 14, gap: 6, borderColor: k.colors.primary },
-  outcomeHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  outcomeTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 23, color: k.colors.text },
-  miniBadges: { flexDirection: 'row', gap: 6, marginTop: 4 },
-  miniBadge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  miniBadgeText: { fontFamily: k.type.label.fontFamily, fontSize: 12 },
-  stageBars: { gap: 5, marginTop: 4 },
-  stageBarRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  stageBarLabel: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted, width: 34 },
-  stageTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
-  stageFill: { height: 6, borderRadius: 3, backgroundColor: k.colors.primary },
-  column: { ...card, padding: 12, gap: 8 },
-  columnHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  columnHeadFloat: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  columnTitle: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
-  textLine: { height: 6, borderRadius: 3, backgroundColor: k.colors.surfaceHigh },
-  criterion: { height: 36, borderRadius: 10, backgroundColor: k.colors.primaryFixed, paddingHorizontal: 10, justifyContent: 'center' },
-  criterionText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.primary },
-  verdict: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 36, paddingHorizontal: 10, borderRadius: 10 },
-  verdictText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
-  compareRow: { ...card, height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
-  compareAccent: { borderRadius: 14, borderWidth: 2 },
-  compareName: { fontFamily: k.type.label.fontFamily, fontSize: 16, color: k.colors.text },
-  compareBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  compareBadgeText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
+  profile: { ...card, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 14, gap: 10 },
+  profileHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
+  profileTitle: { fontFamily: k.type.label.fontFamily, fontSize: 16, lineHeight: 22, color: k.colors.text },
+  onceTag: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, backgroundColor: k.colors.primaryFixed },
+  onceText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.primary },
+  dots: { flexDirection: 'row', gap: 6 },
+  dot: { flex: 1, height: 6, borderRadius: 3, backgroundColor: k.colors.primary, opacity: 0.85 },
+  profileDock: { ...card, borderWidth: 2, borderColor: k.colors.primary, padding: 12, gap: 4, alignItems: 'flex-start' },
+  checkColumn: { ...card, borderTopWidth: 4, height: 180, padding: 10 },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 34, paddingHorizontal: 6, borderRadius: 10, backgroundColor: k.colors.surfaceLow },
+  checkText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
+  tableHead: { flexDirection: 'row', alignItems: 'center', height: 40, paddingHorizontal: 12, borderRadius: 12, backgroundColor: k.colors.surfaceLow },
+  tableRow: { ...card, flexDirection: 'row', alignItems: 'center', height: 48, paddingHorizontal: 12 },
+  th: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.textMuted },
+  thCell: { flex: 1, minWidth: 0, alignItems: 'flex-start' },
+  cellText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
+  cellMuted: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
+  badgeText: { fontFamily: k.type.label.fontFamily, fontSize: 12 },
   exampleNote: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted, textAlign: 'center' },
-  result: { ...card, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 14, gap: 8 },
-  resultTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: k.colors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  eyebrowText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.onPrimary },
+  choiceRow: { flexDirection: 'row', gap: 12 },
+  choice: { ...card, flex: 1, borderTopWidth: 4, padding: 12, gap: 6 },
+  choiceHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  choiceTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 24, color: k.colors.text },
   exampleTag: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
-  resultTitle: { fontFamily: k.type.section.fontFamily, fontSize: 22, lineHeight: 30, color: k.colors.text },
-  resultChips: { flexDirection: 'row', gap: 6 },
-  resultChip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: k.colors.surfaceContainer },
-  resultChipText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.text },
-  scoreBlock: { gap: 6, padding: 10, borderRadius: 12, backgroundColor: k.colors.surfaceLow },
-  scoreHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  scoreLabel: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.textMuted },
-  scoreValue: { fontFamily: k.type.section.fontFamily, fontSize: 18, color: k.colors.text },
-  scoreMax: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
-  scoreTrack: { height: 8, borderRadius: 4, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
-  scoreFill: { height: 8, borderRadius: 4, backgroundColor: k.colors.primary },
-  reasons: { gap: 6 },
-  reason: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  checkDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: k.colors.success, alignItems: 'center', justifyContent: 'center' },
-  reasonText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
-  dateRow: { gap: 4, paddingTop: 8, borderTopWidth: 1, borderTopColor: k.colors.hairline },
-  dateLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dateMuted: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.textMuted },
-  group: { borderTopWidth: 2, borderTopColor: k.colors.primary, paddingTop: 6, alignItems: 'center' },
-  groupText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.primary },
-  dateText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.primary },
+  schedule: { ...card, padding: 12, gap: 6 },
+  scheduleHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
+  scheduleTitle: { fontFamily: k.type.label.fontFamily, fontSize: 15, color: k.colors.text },
+  scheduleRow: { flexDirection: 'row', alignItems: 'center', height: 30, borderTopWidth: 1, borderTopColor: k.colors.hairline },
+  scheduleDate: { flex: 1, minWidth: 0, fontFamily: k.type.label.fontFamily, fontSize: 14 },
+  scheduleNote: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted, paddingTop: 4 },
 });

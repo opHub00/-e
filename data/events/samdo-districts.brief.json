@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "note": "행사 V2 브리프(2026-10-15)로 받은 2지구 공급 규모. Codex 2지구 presentation data가 연결되면 그 값이 우선한다. 판정·분양가·토지임대료·일정은 여기 두지 않는다.",
+  "districts": [
+    {
+      "id": "D2",
+      "label": "2지구",
+      "inventory": { "total": 40, "units49": 8, "units59": 32 },
+      "source": { "status": "BRIEF", "label": "행사 브리프 공급 규모" }
+    }
+  ]
+}

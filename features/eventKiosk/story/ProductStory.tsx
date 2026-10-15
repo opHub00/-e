@@ -12,14 +12,14 @@ import { k } from '../ui/theme';
 import { storyDataFrom, type StoryData } from './storyData';
 import { useKioskWidth } from '../ui/useKioskWidth';
 import { isLastScene, nextSceneIndex, STORY_SCENES, type StorySceneId } from './storyScript';
-import { SceneAction, SceneAnalysis, SceneComplexity, SceneProfile, SceneSorting, STAGE } from './StoryScenes';
+import { SceneCheck, SceneCompare, SceneConditions, SceneResult, SceneSupplies, STAGE } from './StoryScenes';
 
 const SCENE_VIEWS: Record<StorySceneId, ComponentType<{ p: Animated.Value; data: StoryData }>> = {
-  complexity: SceneComplexity,
-  profile: SceneProfile,
-  analysis: SceneAnalysis,
-  sorting: SceneSorting,
-  action: SceneAction,
+  supplies: SceneSupplies,
+  conditions: SceneConditions,
+  check: SceneCheck,
+  compare: SceneCompare,
+  result: SceneResult,
 };
 
 /** 무대를 화면에 맞추는 최대 배율. 데스크톱에서 그림만 거대해지지 않게. */
@@ -128,7 +128,7 @@ export function ProductStory({ onStart, onSkip, testID = 'product-story' }: {
       </View>
 
       <Animated.View style={[styles.messageBox, { opacity: fade }]} accessibilityLiveRegion="polite">
-        <Text style={styles.message} accessibilityRole="header" testID="story-message">{scene.message(data.region)}</Text>
+        <Text style={[styles.message, width < 600 && styles.messageNarrow]} accessibilityRole="header" testID="story-message">{scene.message(data.region)}</Text>
       </Animated.View>
 
       <View style={styles.stageArea} onLayout={onStageLayout} accessibilityLabel={scene.description(data.region)} testID={`story-scene-${scene.id}`}>
@@ -177,7 +177,9 @@ const styles = StyleSheet.create({
   segment: { height: 4, borderRadius: 2, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
   segmentFill: { height: 4, borderRadius: 2, backgroundColor: k.colors.primary },
   messageBox: { width: '100%', maxWidth: 980, alignSelf: 'center', minHeight: 88, justifyContent: 'center' },
-  message: { ...k.type.hero, color: k.colors.text },
+  // 한국어 문장이 단어 중간에서 끊기지 않게(웹: word-break keep-all).
+  message: { ...k.type.hero, color: k.colors.text, wordBreak: 'keep-all' } as object,
+  messageNarrow: { fontSize: 28, lineHeight: 39 },
   stageArea: { flex: 1, minHeight: 200, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', maxWidth: 980, alignSelf: 'center', flexWrap: 'wrap' },
   footerHint: { ...k.type.bodyStrong, color: k.colors.textSubtle },

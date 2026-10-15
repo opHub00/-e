@@ -15,12 +15,15 @@ export type BrandImage = { source: ImageSourcePropType; ratio: number };
 export const BRAND: {
   name: string;
   character: BrandImage | null;
+  /** 원본 완판e 로고(`리본_완판이_브로슈어.ai` 표지)의 '완판e' 글자 부분만 잘라 배경만 투명하게 한 PNG(313×120). 폰트로 다시 만들지 않는다. */
+  wordmark: BrandImage | null;
   consultant: BrandImage | null;
   partnerLogo: BrandImage | null;
   partnerName: string;
 } = {
   name: '완판e',
   character: { source: require('../../../assets/images/brand/wanpan-character.png'), ratio: 427 / 480 },
+  wordmark: { source: require('../../../assets/images/brand/wanpan-wordmark.png'), ratio: 313 / 120 },
   consultant: { source: require('../../../assets/images/brand/wanpan-consultant.png'), ratio: 323 / 360 },
   partnerLogo: { source: require('../../../assets/images/brand/heungin-logo.png'), ratio: 751 / 200 },
   partnerName: '㈜흥인코퍼레이션',

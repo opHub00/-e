@@ -10,7 +10,7 @@ await mkdir(SHOT, { recursive: true });
 const results = [];
 const check = (name, ok, detail = '') => results.push({ name, ok: Boolean(ok), detail });
 const browser = await chromium.launch();
-const SCENES = ['complexity', 'profile', 'analysis', 'sorting', 'action'];
+const SCENES = ['supplies', 'conditions', 'check', 'compare', 'result'];
 const VIEWPORTS = [
   { name: 'ipad-portrait', width: 768, height: 1024 },
   { name: 'ipad-landscape', width: 1024, height: 768 },
@@ -62,11 +62,11 @@ for (const viewport of VIEWPORTS) {
   check(`${viewport.name}: final scene shows CTA and replay`, (await tid(page, 'story-start').count()) === 1 && (await tid(page, 'story-replay').count()) === 1);
   // 다시 보기
   await tid(page, 'story-replay').click();
-  await tid(page, 'story-scene-complexity').waitFor();
+  await tid(page, 'story-scene-supplies').waitFor();
   check(`${viewport.name}: replay returns to scene 1`, true);
   // 막대로 장면 이동
   await tid(page, 'story-segment-4').click();
-  await tid(page, 'story-scene-action').waitFor();
+  await tid(page, 'story-scene-result').waitFor();
   // CTA → 실제 Intro
   await tid(page, 'story-start').click();
   await tid(page, 'event-intro').waitFor({ timeout: 8000 });
@@ -110,7 +110,7 @@ for (const viewport of VIEWPORTS) {
     await page.waitForTimeout(150);
     await page.screenshot({ path: `${SHOT}/reduced-${index + 1}-${scene}.png` });
   }
-  const transforms = await page.evaluate(() => [...document.querySelectorAll('[data-testid="story-scene-action"] div')].some(el => /matrix\(0\.8/.test(getComputedStyle(el).transform)));
+  const transforms = await page.evaluate(() => [...document.querySelectorAll('[data-testid="story-scene-result"] div')].some(el => /matrix\(0\.8/.test(getComputedStyle(el).transform)));
   check('reduced motion: final scene is shown complete without mid-animation state', !transforms);
   check('reduced motion: no runtime errors', errors.length === 0, errors[0] ?? '');
   await context.close();

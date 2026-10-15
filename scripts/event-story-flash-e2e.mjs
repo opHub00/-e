@@ -147,8 +147,8 @@ for (const scenario of SCENARIOS) {
   const scenes = [...new Set(frames.map(frame => frame.scene).filter(Boolean))];
   const problems = analyse(frames);
   check('auto advance, segment jump and replay start every scene at 0%', problems.length === 0, problems.slice(0, 3).join(' | '));
-  check('transitions visited the expected scenes', ['story-scene-complexity', 'story-scene-profile', 'story-scene-sorting', 'story-scene-action'].every(id => scenes.includes(id)), scenes.join(','));
-  check('replay goes back to scene 1', (await page.getByTestId('story-scene-complexity').count()) === 1);
+  check('transitions visited the expected scenes', ['story-scene-supplies', 'story-scene-conditions', 'story-scene-compare', 'story-scene-result'].every(id => scenes.includes(id)), scenes.join(','));
+  check('replay goes back to scene 1', (await page.getByTestId('story-scene-supplies').count()) === 1);
   await page.getByTestId('story-start-now').filter({ visible: true }).click();
   await page.waitForURL(/\/event\/intro/, { timeout: 8000 });
   check('start leaves the story to the intro', /\/event\/intro/.test(page.url()));

@@ -1,392 +1,348 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
-import { MediaPlaceholder } from '../media/ListingMediaView';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { bucketTone, k } from '../ui/theme';
-import { STORY_CONDITION_TAGS, STORY_PROFILE_FIELDS, type StoryData } from './storyData';
+import type { StoryData, StoryTone } from './storyData';
 
 /**
- * 장면 그림. 모두 480×380 짜리 논리 무대 위에 절대 위치로 그리고, 바깥(StoryStage)이 화면 크기에 맞게 확대·축소한다.
+ * 장면 그림. 모두 480×380 짜리 논리 무대 위에 절대 위치로 그리고, 바깥(ProductStory)이 화면 크기에 맞게 확대·축소한다.
  * 그래서 iPad·데스크톱·휴대폰에서 같은 구도가 유지된다.
  *
  * 각 장면은 0→1 로 가는 progress 하나만 받는다. reduced motion 이면 처음부터 1 이라 완성된 그림만 보인다.
- * 움직임은 opacity·이동·작은 크기 변화뿐이다. 튀거나 흔들리지 않는다.
+ * 움직임은 opacity·짧은 이동·선이 자라는 것뿐이다. 회전·튀는 효과는 쓰지 않는다(공공 서비스 톤).
  */
 export const STAGE = { width: 480, height: 380 } as const;
 
 type P = Animated.Value;
 type SceneProps = { p: P; data: StoryData };
-/** 진행값 또는 그 구간값. 둘 다 다시 구간을 나눌 수 있다. */
+type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
 type Src = Animated.Value | Animated.AnimatedInterpolation<string | number>;
 
 /** progress 의 [from, to] 구간에서 0→1. 구간 밖은 고정. */
 const seg = (p: Src, from: number, to: number) => p.interpolate({ inputRange: [from, to], outputRange: [0, 1], extrapolate: 'clamp' });
 const mix = (p: Src, from: number, to: number, a: number, b: number) =>
   p.interpolate({ inputRange: [from, to], outputRange: [a, b], extrapolate: 'clamp' });
+/** 나타나기: 투명 → 보임, 아래에서 살짝 올라온다. */
+const rise = (v: Src, distance = 10) => ({ opacity: v, transform: [{ translateY: mix(v, 0, 1, distance, 0) }] });
 
-/** 장면 1·2 에서 흩어져 있는 공고 카드 자리. 살짝 기울어 겹친다(정신없지 않게 각도는 작게). */
-const SCATTER = [
-  { x: 14, y: 24, r: '-3deg' },
-  { x: 250, y: 6, r: '2.5deg' },
-  { x: 132, y: 118, r: '-1.5deg' },
-  { x: 6, y: 228, r: '2deg' },
-  { x: 262, y: 206, r: '-2.5deg' },
-];
+const TONE: Record<StoryTone, { bg: string; fg: string; icon: IconName }> = {
+  eligible: { bg: bucketTone.eligible.bg, fg: bucketTone.eligible.fg, icon: 'check-circle' },
+  review: { bg: bucketTone.review.bg, fg: bucketTone.review.fg, icon: 'help' },
+  difficult: { bg: bucketTone.difficult.bg, fg: bucketTone.difficult.fg, icon: 'remove-circle-outline' },
+};
 
-function ListingMini({ title, meta, tags, tagOpacity }: { title: string; meta: string; tags: readonly string[]; tagOpacity?: Animated.AnimatedInterpolation<string | number> }) {
+/** 선이 한쪽 끝에서부터 자란다(가로). */
+function HLine({ v, left, top, width }: { v: Src; left: number; top: number; width: number }) {
   return (
-    <View style={styles.mini}>
-      <View style={styles.miniHead}>
-        <View style={styles.miniIcon}><MaterialIcons name="apartment" size={18} color={k.colors.primary} /></View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.miniTitle} numberOfLines={1}>{title}</Text>
-          <Text style={styles.miniMeta} numberOfLines={1}>{meta}</Text>
+    <Animated.View
+      style={[styles.abs, styles.line, { left, top, width, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateX: mix(v, 0, 1, -width / 2, 0) }, { scaleX: v }] }]}
+    />
+  );
+}
+
+function VLine({ v, left, top, height }: { v: Src; left: number; top: number; height: number }) {
+  return (
+    <Animated.View
+      style={[styles.abs, styles.vline, { left, top, height, opacity: mix(v, 0, 0.2, 0, 1), transform: [{ translateY: mix(v, 0, 1, -height / 2, 0) }, { scaleY: v }] }]}
+    />
+  );
+}
+
+/** Scene 1 — 공고문 하나 아래로 다섯 신청유형이 펼쳐진다. */
+export function SceneSupplies({ p, data }: SceneProps) {
+  const doc = seg(p, 0, 0.25);
+  const stem = seg(p, 0.18, 0.32);
+  const bar = seg(p, 0.26, 0.45);
+  const cardW = 84;
+  const gap = 8;
+  const left0 = (STAGE.width - (cardW * 5 + gap * 4)) / 2;
+  const centers = data.supplies.map((_, index) => left0 + index * (cardW + gap) + cardW / 2);
+  return (
+    <View style={styles.stage}>
+      <Animated.View style={[styles.abs, styles.doc, { left: 130, top: 6, width: 220 }, rise(doc)]}>
+        <View style={styles.docIcon}><MaterialIcons name="description" size={20} color={k.colors.primary} /></View>
+        <View style={styles.flex}>
+          <Text style={styles.caption}>입주자모집공고</Text>
+          <Text style={styles.docTitle} numberOfLines={1}>{data.region}</Text>
+          <Text style={styles.caption} numberOfLines={1}>{data.meta}</Text>
         </View>
-      </View>
-      <Animated.View style={[styles.tags, tagOpacity ? { opacity: tagOpacity } : null]}>
-        {tags.map(tag => <Text key={tag} style={styles.tag}>{tag}</Text>)}
+      </Animated.View>
+      <VLine v={stem} left={STAGE.width / 2 - 1} top={86} height={30} />
+      <HLine v={bar} left={centers[0]} top={116} width={centers[centers.length - 1] - centers[0]} />
+      {data.supplies.map((supply, index) => {
+        const drop = seg(p, 0.36 + index * 0.08, 0.56 + index * 0.08);
+        const appear = seg(p, 0.42 + index * 0.08, 0.66 + index * 0.08);
+        return (
+          <View key={supply.type} style={StyleSheet.absoluteFill} pointerEvents="none">
+            <VLine v={drop} left={centers[index] - 1} top={116} height={22} />
+            <Animated.View style={[styles.abs, styles.supply, { left: centers[index] - cardW / 2, top: 140, width: cardW }, rise(appear, 12)]}>
+              <View style={styles.supplyIcon}><MaterialIcons name={supply.icon as IconName} size={22} color={k.colors.primary} /></View>
+              <Text style={styles.supplyName} numberOfLines={1}>{supply.short}</Text>
+              <Text style={styles.supplyCount}>{supply.count}세대</Text>
+            </Animated.View>
+          </View>
+        );
+      })}
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 276, width: 400 }, rise(seg(p, 0.82, 1), 6)]}>
+        <MaterialIcons name="info-outline" size={18} color={k.colors.textMuted} />
+        <Text style={styles.note}>유형마다 자격 기준과 선정 방식이 달라요</Text>
       </Animated.View>
     </View>
   );
 }
 
-/** Scene 1 — 공고와 조건이 겹쳐 보이는 복잡함. */
-export function SceneComplexity({ p, data }: SceneProps) {
-  const listing = data.listings[0];
-  const appear = seg(p, 0, 0.35);
+/** Scene 2 — 내 조건 일곱 가지가 나타나고, 그것이 자격과 순위를 정한다. */
+export function SceneConditions({ p, data }: SceneProps) {
+  const chipW = 110;
+  const gap = 10;
+  const rowLeft = (count: number) => (STAGE.width - (chipW * count + gap * (count - 1))) / 2;
+  const outcome = seg(p, 0.72, 0.92);
+  const arrows = seg(p, 0.62, 0.78);
   return (
     <View style={styles.stage}>
-      {listing ? (
-        <Animated.View style={[styles.abs, { left: 40, top: 36, width: 400, opacity: appear, transform: [{ translateY: mix(appear, 0, 1, 14, 0) }] }]}>
-          <ListingMini title={listing.title} meta={listing.meta} tags={['공고문 1개', `신청유형 ${listing.supplyCount}개`]} tagOpacity={seg(p, 0.3, 0.55)} />
-        </Animated.View>
-      ) : null}
-      <View style={[styles.abs, styles.supplyCloud, { left: 40, top: 178, width: 400 }]}>
-        {data.supplies.map((supply, index) => {
-          const show = seg(p, 0.36 + index * 0.07, 0.56 + index * 0.07);
-          return <Animated.Text key={supply} style={[styles.supplyCloudChip, { opacity: show, transform: [{ translateY: mix(show, 0, 1, 8, 0) }] }]}>{supply}</Animated.Text>;
-        })}
-      </View>
-    </View>
-  );
-}
-
-/** Scene 2 — 공고는 뒤로, 내 조건은 한 장의 프로필로. */
-export function SceneProfile({ p, data }: SceneProps) {
-  const recede = seg(p, 0, 0.35);
-  const card = seg(p, 0.2, 0.45);
-  return (
-    <View style={styles.stage}>
-      {data.listings.map((listing, index) => {
-        const spot = SCATTER[index % SCATTER.length];
+      {data.conditions.map((condition, index) => {
+        const row = index < 4 ? 0 : 1;
+        const col = row === 0 ? index : index - 4;
+        const left = rowLeft(row === 0 ? 4 : 3) + col * (chipW + gap);
+        const appear = seg(p, 0.04 + index * 0.075, 0.26 + index * 0.075);
         return (
-          <Animated.View
-            key={listing.id}
-            style={[styles.abs, { left: spot.x, top: spot.y, width: 212, opacity: mix(recede, 0, 1, 1, 0.18), transform: [{ scale: mix(recede, 0, 1, 1, 0.9) }, { rotate: spot.r }] }]}
-          >
-            <ListingMini title={listing.title} meta={listing.meta} tags={STORY_CONDITION_TAGS[index % STORY_CONDITION_TAGS.length]} />
+          <Animated.View key={condition.label} style={[styles.abs, styles.condition, { left, top: 14 + row * 58, width: chipW }, rise(appear, 8)]}>
+            <View style={styles.conditionIcon}><MaterialIcons name={condition.icon as IconName} size={18} color={k.colors.primary} /></View>
+            <Text style={styles.conditionLabel}>{condition.label}</Text>
           </Animated.View>
         );
       })}
-      <Animated.View style={[styles.abs, styles.profile, { left: 130, top: 56, width: 220, opacity: card, transform: [{ scale: mix(card, 0, 1, 0.96, 1) }] }]}>
-        <View style={styles.profileHead}>
-          <View style={styles.avatar}><MaterialIcons name="person" size={26} color={k.colors.onPrimary} /></View>
-          <View>
-            <Text style={styles.profileTitle}>내 청약 프로필</Text>
-            <Text style={styles.profileMeta}>한 번 입력</Text>
-          </View>
-        </View>
-        {STORY_PROFILE_FIELDS.map((field, index) => {
-          const arrive = seg(p, 0.42 + index * 0.08, 0.62 + index * 0.08);
-          const from = SCATTER[index % SCATTER.length];
-          // 칩이 흩어진 공고 쪽에서 프로필 안 자기 자리로 모인다.
-          const dx = from.x - 130;
-          const dy = from.y - 56 - 64 - index * 34;
-          return (
-            <Animated.View
-              key={field.label}
-              style={[styles.field, { opacity: arrive, transform: [{ translateX: mix(arrive, 0, 1, dx * 0.35, 0) }, { translateY: mix(arrive, 0, 1, dy * 0.35, 0) }] }]}
-            >
-              <MaterialIcons name={field.icon} size={18} color={k.colors.primary} />
-              <Text style={styles.fieldLabel}>{field.label}</Text>
-              <MaterialIcons name="check" size={18} color={k.tint.green.fg} />
-            </Animated.View>
-          );
-        })}
-      </Animated.View>
-    </View>
-  );
-}
-
-const PROFILE_DOCK = { x: 10, y: 128, width: 150, height: 112 };
-
-/** 두 점을 잇는 선의 가운데·길이·각도. */
-function connector(x1: number, y1: number, x2: number, y2: number) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  return { midX: (x1 + x2) / 2, midY: (y1 + y2) / 2, length: Math.hypot(dx, dy), angle: Math.atan2(dy, dx) };
-}
-const COLUMN = { x: 296, width: 176, height: 58, gap: 14, top: 8 };
-const ANALYSIS_PHASES = (_region: string) => ['삼도이동 1지구 공고 확인', '5개 신청유형 비교', '자격 조건 분석'];
-
-/** Scene 3 — 한 프로필에서 여러 공고로 동시에. 연결선이 펼쳐지고 세 단계가 차례로 켜진다. */
-export function SceneAnalysis({ p, data }: SceneProps) {
-  const dock = seg(p, 0, 0.18);
-  const startX = PROFILE_DOCK.x + PROFILE_DOCK.width;
-  const startY = PROFILE_DOCK.y + PROFILE_DOCK.height / 2;
-  const phases = ANALYSIS_PHASES(data.region);
-  return (
-    <View style={styles.stage}>
-      <Animated.View style={[styles.abs, styles.profileDock, { left: PROFILE_DOCK.x, top: PROFILE_DOCK.y, width: PROFILE_DOCK.width, height: PROFILE_DOCK.height, opacity: dock }]}>
-        <View style={styles.avatarSmall}><MaterialIcons name="person" size={20} color={k.colors.onPrimary} /></View>
-        <Text style={styles.profileTitle}>내 프로필</Text>
-        <Text style={styles.profileMeta}>조건 5가지</Text>
-      </Animated.View>
-      {data.listings.map((listing, index) => {
-        const y = COLUMN.top + index * (COLUMN.height + COLUMN.gap);
-        const line = seg(p, 0.12 + index * 0.06, 0.32 + index * 0.06);
-        const compared = seg(p, 0.45 + index * 0.03, 0.55 + index * 0.03);
-        const checked = seg(p, 0.75 + index * 0.03, 0.85 + index * 0.03);
-        const link = connector(startX, startY, COLUMN.x, y + COLUMN.height / 2);
-        return (
-          <View key={listing.id} style={StyleSheet.absoluteFill} pointerEvents="none">
-            {/* 프로필에서 공고로 이어지는 선. 선의 가운데를 기준으로 회전하고, 프로필 쪽에서부터 길어진다. */}
-            <Animated.View
-              style={[
-                styles.abs,
-                styles.link,
-                {
-                  left: link.midX - link.length / 2,
-                  top: link.midY - 1,
-                  width: link.length,
-                  opacity: mix(line, 0, 1, 0, 0.7),
-                  transform: [
-                    { rotate: `${link.angle}rad` },
-                    { translateX: mix(line, 0, 1, -link.length / 2, 0) },
-                    { scaleX: line },
-                  ],
-                },
-              ]}
-            />
-            <Animated.View style={[styles.abs, styles.target, { left: COLUMN.x, top: y, width: COLUMN.width, height: COLUMN.height, opacity: mix(line, 0, 1, 0.35, 1) }]}>
-              <Text style={styles.targetTitle} numberOfLines={1}>{listing.title}</Text>
-              <View style={styles.targetRow}>
-                <Animated.Text style={[styles.targetMeta, { opacity: compared }]}>신청유형 {listing.supplyCount}개 확인</Animated.Text>
-                <Animated.View style={{ opacity: checked }}><MaterialIcons name="check-circle" size={18} color={k.colors.primary} /></Animated.View>
-              </View>
-            </Animated.View>
-          </View>
-        );
-      })}
-      <View style={[styles.abs, styles.phases, { left: 0, top: 300, width: 286 }]}>
-        {phases.map((label, index) => {
-          const on = seg(p, 0.2 + index * 0.27, 0.3 + index * 0.27);
-          return (
-            <Animated.View key={label} style={[styles.phase, { opacity: mix(on, 0, 1, 0.35, 1) }]}>
-              <Animated.View style={[styles.phaseDot, { opacity: on }]} />
-              <Text style={styles.phaseText}>{label}</Text>
-            </Animated.View>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
-const BUCKETS = [
-  { key: 'eligible', label: '신청 가능', x: 6 },
-  { key: 'review', label: '조건 확인', x: 166 },
-  { key: 'difficult', label: '신청 어려움', x: 326 },
-] as const;
-/** 분류 장면의 예시 배치(열, 열 안 순서). 실제 판정이 아니라 '나뉜다'를 보여 주는 예시다. 첫 칩이 강조되는 공급. */
-const SORTED: readonly [number, number][] = [[0, 0], [0, 1], [1, 0], [2, 0], [2, 1], [1, 1]];
-const FEATURED = 0;
-
-/** Scene 4 — 공급유형이 세 묶음으로 나뉘고, 신청 가능한 하나가 이유와 함께 강조된다. */
-export function SceneSorting({ p, data }: SceneProps) {
-  const highlight = seg(p, 0.55, 0.7);
-  const callouts = ['어디에 · 신청 가능한 공급', '왜 · 충족한 조건', '무엇을 · 더 확인할 서류'];
-  return (
-    <View style={styles.stage}>
-      {BUCKETS.map((bucket, index) => (
-        <Animated.View key={bucket.key} style={[styles.abs, styles.bucket, { left: bucket.x, top: 0, opacity: seg(p, 0, 0.15 + index * 0.05) }]}>
-          <View style={[styles.bucketHead, { backgroundColor: bucketTone[bucket.key].bg }]}>
-            <MaterialIcons name={bucketTone[bucket.key].icon} size={16} color={bucketTone[bucket.key].fg} />
-            <Text style={[styles.bucketLabel, { color: bucketTone[bucket.key].fg }]}>{bucket.label}</Text>
-          </View>
+      {[150, 330].map(x => (
+        <Animated.View key={x} style={[styles.abs, { left: x - 12, top: 132, opacity: arrows, transform: [{ translateY: mix(arrows, 0, 1, -6, 0) }] }]}>
+          <MaterialIcons name="south" size={24} color={k.colors.textSubtle} />
         </Animated.View>
       ))}
-      {data.supplies.slice(0, SORTED.length).map((label, index) => {
-        const [column, slot] = SORTED[index];
-        const move = seg(p, 0.12 + index * 0.05, 0.42 + index * 0.05);
-        const targetX = BUCKETS[column].x + 4;
-        const targetY = 46 + slot * 50;
-        const startX = 170;
-        const startY = 120 + (index % 3) * 18;
-        const isFeatured = index === FEATURED;
+      <Animated.View style={[styles.abs, styles.outcome, { left: 30, top: 170, width: 204 }, rise(outcome, 10)]}>
+        <View style={styles.outcomeHead}><MaterialIcons name="verified" size={20} color={k.colors.primary} /><Text style={styles.outcomeTitle}>자격</Text></View>
+        <Text style={styles.caption}>유형별 신청 가능 여부</Text>
+        <View style={styles.miniBadges}>
+          {(['eligible', 'review', 'difficult'] as const).map(tone => (
+            <View key={tone} style={[styles.miniBadge, { backgroundColor: TONE[tone].bg }]}>
+              <Text style={[styles.miniBadgeText, { color: TONE[tone].fg }]}>{tone === 'eligible' ? '가능' : tone === 'review' ? '확인' : '어려움'}</Text>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
+      <Animated.View style={[styles.abs, styles.outcome, { left: 246, top: 170, width: 204 }, rise(seg(p, 0.78, 0.98), 10)]}>
+        <View style={styles.outcomeHead}><MaterialIcons name="format-list-numbered" size={20} color={k.colors.primary} /><Text style={styles.outcomeTitle}>순위</Text></View>
+        <Text style={styles.caption}>공급 단계 · 공식 가점</Text>
+        <View style={styles.stageBars}>
+          {['1단계', '2단계', '3단계'].map((label, index) => (
+            <View key={label} style={styles.stageBarRow}>
+              <Text style={styles.stageBarLabel}>{label}</Text>
+              <View style={styles.stageTrack}><View style={[styles.stageFill, { width: `${[70, 20, 10][index]}%` }]} /></View>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Scene 3 — 공고문 → 조건 추출 → 내 정보와 비교. */
+export function SceneCheck({ p, data }: SceneProps) {
+  const docV = seg(p, 0, 0.18);
+  const arrow1 = seg(p, 0.14, 0.28);
+  const arrow2 = seg(p, 0.56, 0.68);
+  const top = 24;
+  const rowY = (index: number) => top + 52 + index * 46;
+  return (
+    <View style={styles.stage}>
+      <Animated.View style={[styles.abs, styles.column, { left: 4, top, width: 130, height: 262 }, rise(docV)]}>
+        <View style={styles.columnHead}><MaterialIcons name="description" size={18} color={k.colors.primary} /><Text style={styles.columnTitle}>공고문</Text></View>
+        <Text style={styles.caption} numberOfLines={1}>{data.region}</Text>
+        {[0.9, 0.7, 0.85, 0.6, 0.8, 0.5, 0.75].map((w, index) => (
+          <View key={index} style={[styles.textLine, { width: `${w * 100}%` }]} />
+        ))}
+      </Animated.View>
+      <Animated.View style={[styles.abs, { left: 138, top: top + 118, opacity: arrow1, transform: [{ translateX: mix(arrow1, 0, 1, -8, 0) }] }]}>
+        <MaterialIcons name="east" size={26} color={k.colors.primary} />
+      </Animated.View>
+      <Animated.View style={[styles.abs, styles.column, { left: 168, top, width: 168, height: 262 }, { opacity: seg(p, 0.2, 0.32) }]}>
+        <View style={styles.columnHead}><MaterialIcons name="checklist" size={18} color={k.colors.primary} /><Text style={styles.columnTitle}>조건 추출</Text></View>
+      </Animated.View>
+      {data.criteria.map((criterion, index) => {
+        const pick = seg(p, 0.26 + index * 0.08, 0.42 + index * 0.08);
+        const verdict = seg(p, 0.66 + index * 0.07, 0.8 + index * 0.07);
+        const pending = index === data.criteria.length - 1;
+        return (
+          <View key={criterion} style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Animated.View style={[styles.abs, styles.criterion, { left: 176, top: rowY(index), width: 152 }, { opacity: pick, transform: [{ translateX: mix(pick, 0, 1, -10, 0) }] }]}>
+              <Text style={styles.criterionText} numberOfLines={1}>{criterion}</Text>
+            </Animated.View>
+            <Animated.View style={[styles.abs, styles.verdict, { left: 384, top: rowY(index), backgroundColor: pending ? TONE.review.bg : TONE.eligible.bg }, { opacity: verdict }]}>
+              <MaterialIcons name={pending ? 'help' : 'check-circle'} size={16} color={pending ? TONE.review.fg : TONE.eligible.fg} />
+              <Text style={[styles.verdictText, { color: pending ? TONE.review.fg : TONE.eligible.fg }]}>{pending ? '확인' : '충족'}</Text>
+            </Animated.View>
+          </View>
+        );
+      })}
+      <Animated.View style={[styles.abs, { left: 340, top: top + 118, opacity: arrow2, transform: [{ translateX: mix(arrow2, 0, 1, -8, 0) }] }]}>
+        <MaterialIcons name="east" size={26} color={k.colors.primary} />
+      </Animated.View>
+      <Animated.View style={[styles.abs, styles.columnHeadFloat, { left: 372, top: top + 10, opacity: seg(p, 0.6, 0.72) }]}>
+        <MaterialIcons name="person-outline" size={18} color={k.colors.primary} />
+        <Text style={styles.columnTitle}>내 정보</Text>
+      </Animated.View>
+      <Animated.View style={[styles.abs, styles.noteRow, { left: 40, top: 300, width: 400 }, rise(seg(p, 0.86, 1), 6)]}>
+        <MaterialIcons name="fact-check" size={18} color={k.colors.textMuted} />
+        <Text style={styles.note}>공고문 원문 기준으로 조건마다 비교해요</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Scene 4 — 다섯 유형 카드에 판정이 차례로 붙는다(예시). */
+export function SceneCompare({ p, data }: SceneProps) {
+  const settle = seg(p, 0.82, 1);
+  return (
+    <View style={styles.stage}>
+      {data.compare.map((row, index) => {
+        const tone = TONE[row.status];
+        const card = seg(p, index * 0.05, 0.2 + index * 0.05);
+        const judged = seg(p, 0.22 + index * 0.12, 0.36 + index * 0.12);
+        const eligible = row.status === 'eligible';
         return (
           <Animated.View
-            key={label}
+            key={row.short}
             style={[
               styles.abs,
-              styles.chip,
-              isFeatured && styles.chipFeatured,
-              {
-                left: 0,
-                top: 0,
-                opacity: mix(move, 0, 1, 0.6, column === 2 ? 0.6 : 1),
-                transform: [
-                  { translateX: mix(move, 0, 1, startX, targetX) },
-                  { translateY: mix(move, 0, 1, startY, targetY) },
-                  { scale: isFeatured ? mix(highlight, 0, 1, 1, 1.05) : 1 },
-                ],
-              },
+              styles.compareRow,
+              { left: 40, top: 8 + index * 58, width: 400 },
+              { opacity: card },
             ]}
           >
-            <View style={styles.chipRow}>
-              <Text style={[styles.chipText, isFeatured && styles.chipTextFeatured]} numberOfLines={1}>{label}</Text>
-              {isFeatured ? <Animated.View style={{ opacity: highlight }}><MaterialIcons name="check-circle" size={16} color={k.colors.primary} /></Animated.View> : null}
-            </View>
+            <Animated.View style={[StyleSheet.absoluteFill, styles.compareAccent, { borderColor: k.colors.primary, opacity: eligible ? settle : 0 }]} />
+            {/* 판정이 끝나면 신청 가능한 유형은 테두리로 강조하고, 어려운 유형은 조금 흐리게. */}
+            <Animated.Text style={[styles.compareName, { opacity: row.status === 'difficult' ? mix(settle, 0, 1, 1, 0.55) : 1 }]}>{row.short}</Animated.Text>
+            <Animated.View style={[styles.compareBadge, { backgroundColor: tone.bg, opacity: judged, transform: [{ translateX: mix(judged, 0, 1, 8, 0) }] }]}>
+              <MaterialIcons name={tone.icon} size={16} color={tone.fg} />
+              <Text style={[styles.compareBadgeText, { color: tone.fg }]}>{row.label}</Text>
+            </Animated.View>
           </Animated.View>
         );
       })}
-      <Animated.View style={[styles.abs, styles.callouts, { left: 6, top: 196, width: 468, opacity: highlight }]}>
-        {callouts.map((text, index) => {
-          const show = seg(p, 0.62 + index * 0.1, 0.75 + index * 0.1);
-          return (
-            <Animated.View key={text} style={[styles.callout, { opacity: show, transform: [{ translateY: mix(show, 0, 1, 8, 0) }] }]}>
-              <MaterialIcons name={index === 0 ? 'place' : index === 1 ? 'fact-check' : 'description'} size={20} color={k.colors.primary} />
-              <Text style={styles.calloutText}>{text}</Text>
-            </Animated.View>
-          );
-        })}
-        <Text style={styles.example}>예시 화면 · 실제 결과는 입력한 조건으로 계산해요</Text>
-      </Animated.View>
+      <Animated.Text style={[styles.abs, styles.exampleNote, { left: 40, top: 304, width: 400, opacity: seg(p, 0.85, 1) }]}>
+        예시 화면 · 실제 판정은 입력한 조건으로 계산해요
+      </Animated.Text>
     </View>
   );
 }
 
-/** Scene 5 — 선택한 주택 카드가 커지며 실제 상세 화면의 요소로 이어진다. */
-function FeaturedHousingMedia({ featured }: { featured: StoryData['featured'] }) {
-  const [failed, setFailed] = useState(false);
-  const image = failed ? null : featured.media.primary;
-  useEffect(() => setFailed(false), [featured.media.primary?.uri]);
-  if (!image) return <MediaPlaceholder housingType={featured.housingType} district={featured.district} />;
-  return <Image source={{ uri: image.uri }} style={styles.storyImage} resizeMode="cover" accessibilityLabel={image.alt} onError={() => setFailed(true)} />;
-}
-
-export function SceneAction({ p, data }: SceneProps) {
-  const grow = seg(p, 0, 0.5);
-  const details = seg(p, 0.45, 0.9);
+/** Scene 5 — 추천 유형 · 공식 가점 · 자격 기준 · 접수일(예시). */
+export function SceneResult({ p, data }: SceneProps) {
+  const card = seg(p, 0, 0.35);
+  const score = seg(p, 0.3, 0.7);
+  const { example } = data;
   return (
     <View style={styles.stage}>
-      <Animated.View
-        style={[
-          styles.abs,
-          styles.detail,
-          {
-            left: 40,
-            top: 0,
-            width: 400,
-            opacity: mix(grow, 0, 0.4, 0, 1),
-            transform: [{ translateY: mix(grow, 0, 1, 24, 0) }, { scale: mix(grow, 0, 1, 0.82, 1) }],
-          },
-        ]}
-      >
-        <View style={styles.detailMedia}>
-          <FeaturedHousingMedia featured={data.featured} />
+      <Animated.View style={[styles.abs, styles.result, { left: 40, top: 4, width: 400 }, { opacity: card, transform: [{ translateY: mix(card, 0, 1, 12, 0) }] }]}>
+        <View style={styles.resultTop}>
+          <View style={styles.eyebrow}><MaterialIcons name="star" size={14} color={k.colors.onPrimary} /><Text style={styles.eyebrowText}>가장 유리한 신청유형</Text></View>
+          <Text style={styles.exampleTag}>예시</Text>
         </View>
-        <View style={styles.detailBody}>
-          <View style={styles.detailBadges}>
-            <View style={[styles.statusBadge, { backgroundColor: bucketTone.eligible.bg }]}>
-              <MaterialIcons name="check-circle" size={16} color={bucketTone.eligible.fg} />
-              <Text style={[styles.statusText, { color: bucketTone.eligible.fg }]}>신청 가능</Text>
-            </View>
-            <Text style={styles.exampleTag}>예시</Text>
+        <Text style={styles.resultTitle}>{example.supplyLabel}</Text>
+        <View style={styles.resultChips}>
+          <View style={[styles.resultChip, { backgroundColor: TONE.eligible.bg }]}><Text style={[styles.resultChipText, { color: TONE.eligible.fg }]}>신청 가능</Text></View>
+          <View style={styles.resultChip}><Text style={styles.resultChipText}>{example.stage}</Text></View>
+        </View>
+        <Animated.View style={[styles.scoreBlock, { opacity: seg(p, 0.25, 0.45) }]}>
+          <View style={styles.scoreHead}>
+            <Text style={styles.scoreLabel}>공식 가점</Text>
+            <Text style={styles.scoreValue}>{example.score.total}<Text style={styles.scoreMax}> / {example.score.max}점</Text></Text>
           </View>
-          <Text style={styles.detailTitle} numberOfLines={1}>{data.featured.title}</Text>
-          <Text style={styles.detailMeta} numberOfLines={1}>{data.featured.supplyLabel} · {data.featured.meta}</Text>
-          <Animated.View style={[styles.detailRows, { opacity: details }]}>
-            <View style={styles.detailRow}>
-              <MaterialIcons name="event" size={18} color={k.colors.textMuted} />
-              <Text style={styles.detailRowText}>{data.featured.schedule}</Text>
-            </View>
-            <View style={styles.scoreRow}>
-              {/* 공식 배점과 완판e 추천은 다른 상자. 같은 숫자처럼 보이지 않게 이름을 붙여 나눈다. */}
-              <View style={styles.scoreBox}><Text style={styles.scoreLabel}>공식 배점</Text><Text style={styles.scoreValue}>공고 기준</Text></View>
-              <View style={[styles.scoreBox, styles.scoreBoxWanpan]}><Text style={[styles.scoreLabel, { color: k.colors.primary }]}>완판e 추천</Text><Text style={[styles.scoreValue, { color: k.colors.primary }]}>비교 참고</Text></View>
-            </View>
-            <View style={styles.askChip}>
-              <MaterialIcons name="forum" size={18} color={k.colors.primary} />
-              <Text style={styles.askText}>AI에게 물어보기</Text>
-            </View>
-          </Animated.View>
+          <View style={styles.scoreTrack}>
+            <Animated.View style={[styles.scoreFill, { width: score.interpolate({ inputRange: [0, 1], outputRange: ['0%', `${Math.round((example.score.total / example.score.max) * 100)}%`] }) }]} />
+          </View>
+        </Animated.View>
+        <View style={styles.reasons}>
+          {example.reasons.map((reason, index) => (
+            <Animated.View key={reason} style={[styles.reason, rise(seg(p, 0.5 + index * 0.1, 0.68 + index * 0.1), 6)]}>
+              <View style={styles.checkDot}><MaterialIcons name="check" size={12} color={k.colors.onPrimary} /></View>
+              <Text style={styles.reasonText}>{reason}</Text>
+            </Animated.View>
+          ))}
         </View>
+        <Animated.View style={[styles.dateRow, { opacity: seg(p, 0.8, 1) }]}>
+          <MaterialIcons name="event" size={18} color={k.colors.primary} />
+          <Text style={styles.dateText}>특별공급 접수 {example.date}</Text>
+        </Animated.View>
       </Animated.View>
     </View>
   );
 }
+
+const card = { backgroundColor: k.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: k.colors.surfaceHigh } as const;
 
 const styles = StyleSheet.create({
   stage: { width: STAGE.width, height: STAGE.height },
   abs: { position: 'absolute' },
-  mini: { backgroundColor: k.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: k.colors.outline, padding: 12, gap: 8, boxShadow: '0 6px 16px rgba(59,48,158,0.08)' } as object,
-  miniHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  miniIcon: { width: 30, height: 30, borderRadius: 9, backgroundColor: k.colors.lavender, alignItems: 'center', justifyContent: 'center' },
-  miniTitle: { fontFamily: k.type.label.fontFamily, fontSize: 14, lineHeight: 19, color: k.colors.text },
-  miniMeta: { fontFamily: k.type.caption.fontFamily, fontSize: 11, lineHeight: 15, color: k.colors.textMuted },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  tag: { fontFamily: k.type.caption.fontFamily, fontSize: 11, lineHeight: 15, color: k.tint.amber.fg, backgroundColor: k.tint.amber.bg, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden' },
-  supplyCloud: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
-  supplyCloudChip: { fontFamily: k.type.label.fontFamily, fontSize: 13, lineHeight: 18, color: k.colors.primary, backgroundColor: k.colors.primaryFixed, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, overflow: 'hidden' },
-  profile: { backgroundColor: k.colors.surface, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 14, gap: 6, boxShadow: '0 12px 28px rgba(59,48,158,0.16)' } as object,
-  profileHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  avatarSmall: { width: 34, height: 34, borderRadius: 17, backgroundColor: k.colors.primary, alignItems: 'center', justifyContent: 'center' },
-  profileTitle: { fontFamily: k.type.label.fontFamily, fontSize: 15, lineHeight: 20, color: k.colors.text },
-  profileMeta: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted },
-  field: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 28, paddingHorizontal: 10, borderRadius: 10, backgroundColor: k.colors.surfaceLow },
-  fieldLabel: { flex: 1, fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.text },
-  profileDock: { backgroundColor: k.colors.surface, borderRadius: 16, borderWidth: 2, borderColor: k.colors.primary, padding: 12, gap: 4, alignItems: 'flex-start', justifyContent: 'center' },
-  target: { backgroundColor: k.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: k.colors.outline, paddingHorizontal: 12, justifyContent: 'center', gap: 4 },
-  targetTitle: { fontFamily: k.type.label.fontFamily, fontSize: 13, lineHeight: 18, color: k.colors.text },
-  targetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  targetMeta: { fontFamily: k.type.caption.fontFamily, fontSize: 11, color: k.colors.textMuted },
-  phases: { gap: 8 },
-  phase: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  phaseDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: k.colors.primary },
-  phaseText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
-  bucket: { width: 148 },
-  bucketHead: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, height: 32, borderRadius: 10 },
-  bucketLabel: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
-  chip: { width: 140, height: 40, borderRadius: 10, backgroundColor: k.colors.surface, borderWidth: 1, borderColor: k.colors.outline, paddingHorizontal: 10, justifyContent: 'center' },
-  chipFeatured: { borderColor: k.colors.primary, borderWidth: 2, backgroundColor: k.colors.lavender },
-  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  chipTextFeatured: { color: k.colors.primary, flex: 1 },
-  link: { height: 2, borderRadius: 1, backgroundColor: k.colors.primary },
-  chipText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.text },
-  callouts: { gap: 8, padding: 14, borderRadius: 16, backgroundColor: k.colors.lavender },
-  callout: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  calloutText: { fontFamily: k.type.label.fontFamily, fontSize: 15, lineHeight: 21, color: k.colors.text },
-  example: { fontFamily: k.type.caption.fontFamily, fontSize: 11, color: k.colors.textMuted, marginTop: 2 },
-  detail: { backgroundColor: k.colors.surface, borderRadius: 20, borderWidth: 1, borderColor: k.colors.outline, overflow: 'hidden', boxShadow: '0 16px 36px rgba(59,48,158,0.14)' } as object,
-  detailMedia: { height: 132 },
-  storyImage: { width: '100%', height: '100%' },
-  detailBody: { padding: 16, gap: 6 },
-  detailBadges: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 999 },
-  statusText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
-  exampleTag: { fontFamily: k.type.caption.fontFamily, fontSize: 11, color: k.colors.textMuted },
-  detailTitle: { fontFamily: k.type.section.fontFamily, fontSize: 18, lineHeight: 24, color: k.colors.text },
-  detailMeta: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
-  detailRows: { gap: 8, marginTop: 6 },
-  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  detailRowText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.text },
-  scoreRow: { flexDirection: 'row', gap: 8 },
-  scoreBox: { flex: 1, borderRadius: 10, borderWidth: 1, borderColor: k.colors.outline, paddingHorizontal: 10, paddingVertical: 6 },
-  scoreBoxWanpan: { borderColor: k.colors.lavender, backgroundColor: k.colors.lavender },
-  scoreLabel: { fontFamily: k.type.caption.fontFamily, fontSize: 11, color: k.colors.textMuted },
-  scoreValue: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.text },
-  askChip: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: k.colors.primaryFixed },
-  askText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.primary },
+  flex: { flex: 1, minWidth: 0 },
+  line: { height: 2, borderRadius: 1, backgroundColor: k.colors.primary },
+  vline: { width: 2, borderRadius: 1, backgroundColor: k.colors.primary },
+  caption: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted },
+  note: { fontFamily: k.type.label.fontFamily, fontSize: 14, lineHeight: 20, color: k.colors.textMuted },
+  noteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  doc: { ...card, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderColor: k.colors.primary, borderWidth: 2 },
+  docIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  docTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 23, color: k.colors.text },
+  supply: { ...card, alignItems: 'center', gap: 4, paddingVertical: 12, paddingHorizontal: 4 },
+  supplyIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  supplyName: { fontFamily: k.type.label.fontFamily, fontSize: 14, lineHeight: 19, color: k.colors.text },
+  supplyCount: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted },
+  condition: { ...card, flexDirection: 'row', alignItems: 'center', gap: 6, height: 46, paddingHorizontal: 8 },
+  conditionIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: k.colors.primaryFixed, alignItems: 'center', justifyContent: 'center' },
+  conditionLabel: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text, flexShrink: 0 },
+  outcome: { ...card, padding: 14, gap: 6, borderColor: k.colors.primary },
+  outcomeHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  outcomeTitle: { fontFamily: k.type.section.fontFamily, fontSize: 17, lineHeight: 23, color: k.colors.text },
+  miniBadges: { flexDirection: 'row', gap: 6, marginTop: 4 },
+  miniBadge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  miniBadgeText: { fontFamily: k.type.label.fontFamily, fontSize: 12 },
+  stageBars: { gap: 5, marginTop: 4 },
+  stageBarRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  stageBarLabel: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted, width: 34 },
+  stageTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
+  stageFill: { height: 6, borderRadius: 3, backgroundColor: k.colors.primary },
+  column: { ...card, padding: 12, gap: 8 },
+  columnHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  columnHeadFloat: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  columnTitle: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
+  textLine: { height: 6, borderRadius: 3, backgroundColor: k.colors.surfaceHigh },
+  criterion: { height: 36, borderRadius: 10, backgroundColor: k.colors.primaryFixed, paddingHorizontal: 10, justifyContent: 'center' },
+  criterionText: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.primary },
+  verdict: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 36, paddingHorizontal: 10, borderRadius: 10 },
+  verdictText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
+  compareRow: { ...card, height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
+  compareAccent: { borderRadius: 14, borderWidth: 2 },
+  compareName: { fontFamily: k.type.label.fontFamily, fontSize: 16, color: k.colors.text },
+  compareBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+  compareBadgeText: { fontFamily: k.type.label.fontFamily, fontSize: 13 },
+  exampleNote: { fontFamily: k.type.caption.fontFamily, fontSize: 12, lineHeight: 16, color: k.colors.textMuted, textAlign: 'center' },
+  result: { ...card, borderRadius: 18, borderWidth: 2, borderColor: k.colors.primary, padding: 16, gap: 10 },
+  resultTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: k.colors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  eyebrowText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.onPrimary },
+  exampleTag: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
+  resultTitle: { fontFamily: k.type.section.fontFamily, fontSize: 22, lineHeight: 30, color: k.colors.text },
+  resultChips: { flexDirection: 'row', gap: 6 },
+  resultChip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: k.colors.surfaceContainer },
+  resultChipText: { fontFamily: k.type.label.fontFamily, fontSize: 12, color: k.colors.text },
+  scoreBlock: { gap: 6, padding: 10, borderRadius: 12, backgroundColor: k.colors.surfaceLow },
+  scoreHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  scoreLabel: { fontFamily: k.type.label.fontFamily, fontSize: 13, color: k.colors.textMuted },
+  scoreValue: { fontFamily: k.type.section.fontFamily, fontSize: 18, color: k.colors.text },
+  scoreMax: { fontFamily: k.type.caption.fontFamily, fontSize: 12, color: k.colors.textMuted },
+  scoreTrack: { height: 8, borderRadius: 4, backgroundColor: k.colors.surfaceHighest, overflow: 'hidden' },
+  scoreFill: { height: 8, borderRadius: 4, backgroundColor: k.colors.primary },
+  reasons: { gap: 6 },
+  reason: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  checkDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: k.colors.success, alignItems: 'center', justifyContent: 'center' },
+  reasonText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.text },
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: k.colors.hairline },
+  dateText: { fontFamily: k.type.label.fontFamily, fontSize: 14, color: k.colors.primary },
 });

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "eventSourceOfTruth": {
+    "district": 1,
+    "fileName": "(최종1.8)삼도이동 1지구 토지임대부 분양주택 입주자모집공고문.hwp",
+    "sha256": "5834b996f9d49ea7dc6e45fc36312b2fba1b4d5fa3b5d1bcd3a7d8e9189b90d2",
+    "parser": "HWP5_RECORDS",
+    "paragraphCount": 3754,
+    "role": "EVENT_SOURCE_OF_TRUTH"
+  },
+  "crossCheckOnly": {
+    "district": 2,
+    "fileName": "(최종1.8)삼도이동 2지구 토지임대부 분양주택 입주자모집공고문.hwp",
+    "sha256": "336c345354c6ab9085683ede9e8fde52f4be73969c5058c0a62602257289ab71",
+    "parser": "HWP5_RECORDS",
+    "paragraphCount": 3757,
+    "role": "COMMON_RULE_CROSS_CHECK_ONLY",
+    "eventUiVisible": false
+  }
+}

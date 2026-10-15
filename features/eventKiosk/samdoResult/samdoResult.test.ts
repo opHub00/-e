@@ -41,7 +41,7 @@ test('newborn family: hero recommends newborn priority with official score, 3–
   assert.equal(view.hero.kind, 'recommended');
   assert.equal(view.hero.supplyType, 'NEWBORN');
   assert.match(view.hero.headline, /^신생아 특별공급 우선공급을 먼저 검토하세요$/);
-  assert.deepEqual(view.hero.chips.map(chip => chip.label), ['신청 가능', '1단계 우선공급(70%)', '공식 가점 10/12점', '접수 10월 12일(월)']);
+  assert.deepEqual(view.hero.chips.map(chip => chip.label), ['신청 가능', '1단계 우선공급(70%)', '공식 가점 10/12점', '접수 11월 16일(월)']);
   assert.ok(view.why.length >= 3 && view.why.length <= 5, view.why.join('|'));
   assert.ok(view.why.some(line => /자녀/.test(line)) && view.why.some(line => /소득/.test(line)) && view.why.some(line => /거주/.test(line)));
   assert.ok(view.schedule.find(row => row.id === 'special')!.highlight);
@@ -154,7 +154,7 @@ test('adapter keeps ambiguous history, scope, account and child facts separate',
   assert.equal(input.details.recognizedPaymentCount, 12);
   assert.equal(input.details.recognizedDepositAmount, 6_000_000);
   assert.equal(input.details.firstRank, false);
-  assert.equal(input.details.residenceStartDate, '2024-09-14', 'duration is mapped as a conservative lower bound at announcement date');
+  assert.equal(input.details.residenceStartDate, '2024-10-27', 'duration is mapped as a conservative lower bound at announcement date');
 });
 
 test('household scopes stay household-scoped and single-parent is mapped without inventing marriage history', () => {
@@ -178,8 +178,8 @@ test('household scopes stay household-scoped and single-parent is mapped without
 });
 
 test('helpers: dates, strengths and failure sentences', () => {
-  assert.equal(formatSamdoDate('2026-10-12'), '10월 12일(월)');
-  assert.equal(formatSamdoDate('2026-10-14'), '10월 14일(수)');
+  assert.equal(formatSamdoDate('2026-11-16'), '11월 16일(월)');
+  assert.equal(formatSamdoDate('2026-11-18'), '11월 18일(수)');
   assert.equal(failedSentence('만 19~39세'), "'만 19~39세' 조건을 충족하지 못했어요.");
   assert.equal(failedSentence('공고일 현재 제주 거주자가 아니에요.'), '공고일 현재 제주 거주자가 아니에요.');
   const rec = samdoRecommendationForAnswers(answersOf('NEWLYWED_COUPLE'));
@@ -214,9 +214,21 @@ test('Samdo AI chat receives the recommendation contract without re-assessing or
   chat = await sendChat(load.event, chat, '제가 확인해야 할 서류는 무엇인가요?');
   chat = await sendChat(load.event, chat, '다른 공급유형과 비교하면 어떤가요?');
   chat = await sendChat(load.event, chat, '근거가 된 공고문 항목은 무엇인가요?');
+  const scheduleQuestions = [
+    ['신청은 언제부터 할 수 있어?', '2026.11.16'],
+    ['해당 공고 신청은 언제부터할 수있어?', '2026.11.16'],
+    ['일반공급 1순위는 언제야?', '2026.11.17'],
+    ['특별공급 접수일 알려줘', '2026.11.16'],
+    ['당첨자 발표 언제야?', '2026.11.24'],
+  ] as const;
+  for (const [question, expected] of scheduleQuestions) {
+    chat = await sendChat(load.event, chat, question);
+    assert.match(chat.messages.at(-1)?.text ?? '', new RegExp(expected.replaceAll('.', '\\.')));
+    assert.doesNotMatch(chat.messages.at(-1)?.text ?? '', /가장 앞선 신청유형/);
+  }
   for (const message of chat.messages) {
     assert.ok(!containsRawKey(message.text), message.text);
     for (const detail of message.detail ?? []) assert.ok(!containsRawKey(detail), detail);
   }
-  assert.ok(chat.messages.some(message => /당첨확률은 추정하지 않았/.test(message.text)));
+  assert.equal(context?.schedule?.winnerAnnouncement, '2026-11-24');
 });

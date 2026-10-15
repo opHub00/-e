@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { defaultChatOutcome, sendChat, startChat, startSamdoChat, type KioskChat } from './consult.ts';
 import type { SamdoPresentationRecommendation } from './samdo/index.ts';
 import { evaluateEvent, type KioskEvaluation } from './evaluate.ts';
-import { createAdaptiveQuestionPlan, type AdaptiveQuestionPlan } from './adaptiveAssessment.ts';
+import type { AdaptiveQuestionPlan } from './adaptiveAssessment.ts';
 import type { LoadedEvent } from './eventConfig.ts';
 import {
   emptyAnswers,
@@ -165,7 +165,10 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     try {
       const current = get();
       const evaluation = evaluateEvent(event, current.answers);
-      const adaptivePlan = createAdaptiveQuestionPlan(evaluation.assessment.results, current.answers, current.answered, current.answerStates);
+      // /event is scoped to Samdo final 1.8. The base questionnaire already asks every user-answerable
+      // Samdo fact; unresolved evidence stays in the result refinement center. Never surface frozen
+      // multi-listing questions (for example event.eligibleResident) in this route.
+      const adaptivePlan: AdaptiveQuestionPlan = { questions: [], evidenceOnlyFacts: [], excludedIneligible: [] };
       await wait(Math.max(0, MIN_ANALYSIS_MS - (Date.now() - started)));
       // 분석 중에 reset 됐다면 이전 방문자의 결과를 새 세션에 넣지 않는다.
       if (get().sessionKey !== sessionKey) return;

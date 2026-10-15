@@ -125,8 +125,6 @@ async function enterNewbornPersona(page) {
   await choice(page, 'q-applicant-isHouseholdHead', '예');
   await choice(page, 'q-applicant-livesInEventRegion', '예');
   await choice(page, 'q-applicant-residenceMonths', '5년 이상');
-  await choice(page, 'q-applicant-longOverseasStay', '없어요');
-  await choice(page, 'q-applicant-specialException', '없어요');
   await choice(page, 'q-household-childExpectationStatus', '없어요');
   await next(page);
 
@@ -136,25 +134,25 @@ async function enterNewbornPersona(page) {
   await page.getByTestId('input-childBirthDate-0').fill('20250115');
   await next(page);
 
+  await choice(page, 'q-applicant-householdNoHome', '모두 없어요');
+  await choice(page, 'q-applicant-neverOwnedHome', '가진 적 없어요');
+  await choice(page, 'q-subscription-accountKind', '주택청약종합저축');
+  await page.getByTestId('input-openedAt').fill('20180101');
+  await page.getByTestId('input-paymentCount').fill('36');
+  await page.getByTestId('input-depositAmount').fill('600');
+  await next(page);
+
   await page.getByTestId('input-monthlyIncome').fill('260');
   await choice(page, 'q-applicant-taxPaymentYears', '5년 이상');
   await choice(page, 'q-household-dualIncome', '맞벌이예요');
   await setStepper(page, 'q-household-householdSize', '세대원 수', 3);
   await page.getByTestId('input-householdIncome').fill('470');
   await page.getByTestId('input-totalAssets').fill('13000');
-  await page.getByTestId('input-vehicleValueKrw').fill('1500');
-  await next(page);
-
-  await choice(page, 'q-applicant-householdNoHome', '모두 없어요');
-  await choice(page, 'q-applicant-neverOwnedHome', '가진 적 없어요');
   await choice(page, 'q-applicant-specialSupplyHistory', '없어요');
-  await choice(page, 'q-applicant-reWinningRestriction', '아니에요');
+  await choice(page, 'q-applicant-reWinningRestriction', '표시되지 않아요');
   await choice(page, 'q-applicant-householdNoWinningFiveYears', '모두 없어요');
-  await choice(page, 'q-subscription-accountKind', '주택청약종합저축');
-  await page.getByTestId('input-openedAt').fill('20180101');
-  await page.getByTestId('input-paymentCount').fill('36');
-  await page.getByTestId('input-depositAmount').fill('600');
-  await choice(page, 'q-subscription-firstRank', '채웠어요');
+  await choice(page, 'q-applicant-longOverseasStay', '없어요');
+  await choice(page, 'q-applicant-specialException', '해당 없어요');
   await next(page);
   const adaptive = await completeAdaptive(page);
   return adaptive;
@@ -163,14 +161,14 @@ async function enterNewbornPersona(page) {
 async function verifyResult(page) {
   await page.getByTestId('samdo-result').waitFor();
   await samdoOnly(page, 'samdo-result');
-  for (const id of ['samdo-hero', 'samdo-official-criteria', 'samdo-why', 'samdo-schedule', 'samdo-refinement', 'samdo-simulator', 'samdo-information-only']) {
+  for (const id of ['samdo-hero', 'samdo-official-criteria', 'samdo-why', 'samdo-schedule', 'samdo-refinement', 'samdo-simulator']) {
     if (!(await page.getByTestId(id).count())) throw new Error(`${id} missing`);
   }
   const resultText = await page.getByTestId('samdo-result').innerText();
   for (const term of ['입주자격', '소득기준', '자산기준', '청약통장', '가입 6개월', '월 납입 6회 이상']) {
     if (!resultText.includes(term)) throw new Error(`official criterion missing: ${term}`);
   }
-  if (!resultText.includes('기관추천 특별공급') || !resultText.includes('정보 제공')) throw new Error('institutional recommendation is not information-only');
+  if (resultText.includes('기관추천 특별공급')) throw new Error('final 1.8 does not allocate institutional recommendation supply');
   if (/당첨\s*확률(?:이|은)?\s*(?:높|낮)|경쟁률\s*\d/.test(resultText)) throw new Error('winning probability or competition was invented');
 }
 
@@ -191,10 +189,17 @@ async function verifyChat(page) {
   await samdoOnly(page, 'chat');
   const context = await page.getByTestId('chat-context').innerText();
   if (!context.includes('삼도이동 1지구') || !context.includes('삼도 전용 판정')) throw new Error(`wrong chat context: ${context}`);
-  await page.getByTestId('chat-input').fill('당첨 확률 몇 퍼센트야?');
+  await page.getByTestId('chat-input').fill('신청은 언제부터 할 수 있어?');
   await page.getByTestId('chat-send').click();
   await page.getByTestId('chat-message-assistant').nth(1).waitFor();
-  const answer = await page.getByTestId('chat-message-assistant').nth(1).innerText();
+  const scheduleAnswer = await page.getByTestId('chat-message-assistant').nth(1).innerText();
+  for (const date of ['2026.11.16', '2026.11.17', '2026.11.18']) {
+    if (!scheduleAnswer.includes(date)) throw new Error(`chat schedule answer missing ${date}: ${scheduleAnswer}`);
+  }
+  await page.getByTestId('chat-input').fill('당첨 확률 몇 퍼센트야?');
+  await page.getByTestId('chat-send').click();
+  await page.getByTestId('chat-message-assistant').nth(2).waitFor();
+  const answer = await page.getByTestId('chat-message-assistant').nth(2).innerText();
   if (/(?:당첨\s*확률|경쟁률)[^\n]{0,20}\d+\s*%/.test(answer)) throw new Error(`chat invented probability: ${answer}`);
   await page.getByRole('button', { name: '돌아가기', exact: true }).click();
   await page.getByTestId('samdo-result').waitFor();

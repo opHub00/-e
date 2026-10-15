@@ -1,6 +1,7 @@
 import type { AssessmentInput, Child } from '../../applicationAssessment/types.ts';
 import { createMinimalApplicantProfile, knownField } from '../../profile/domain.ts';
 import { monthsBefore } from '../engineInput.ts';
+import { completedMonths } from '../../applicationAssessment/facts.ts';
 import { isIsoDate, type KioskAnswers } from '../model.ts';
 import { SAMDO_DEEP_RULE_PACKAGE } from '../samdo/rulePackage.ts';
 
@@ -52,6 +53,12 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
   const familyCategory = familyCategoryOf(answers);
   const married = familyCategory === 'married';
   const residence = applicant.livesInEventRegion === null ? undefined : applicant.livesInEventRegion ? JEJU : `${JEJU} 외`;
+  const accountMonths = isIsoDate(subscription.openedAt)
+    ? completedMonths(subscription.openedAt, SAMDO_DEEP_RULE_PACKAGE.announcementDate)
+    : undefined;
+  const derivedFirstRank = accountMonths === undefined || subscription.paymentCount === null
+    ? undefined
+    : accountMonths >= 6 && subscription.paymentCount >= 6;
 
   const profile = createMinimalApplicantProfile({ name: '', age: 30, currentRegion: residence ?? '', preferredRegions: [] });
   if (single || familyCategory === 'singleParent') profile.family.marriageStatus = knownField('single');
@@ -101,6 +108,7 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
       : monthsBefore(applicant.residenceMonths, new Date(`${SAMDO_DEEP_RULE_PACKAGE.announcementDate}T00:00:00`)),
     overseasStayHistory: applicant.longOverseasStay === false ? [] : undefined,
     isHouseholdHead: yes(applicant.isHouseholdHead),
+    minorHouseholdHeadException: yes(applicant.minorHouseholdHeadException),
     familyCategory,
     everMarried: single ? false : married ? true : undefined,
     marriageDate,
@@ -118,7 +126,7 @@ export function samdoInputFromAnswers(answers: KioskAnswers): AssessmentInput {
     subscriptionAccountOpenedAt: isIsoDate(subscription.openedAt) ? subscription.openedAt : undefined,
     recognizedPaymentCount: subscription.paymentCount ?? undefined,
     recognizedDepositAmount: subscription.depositAmount ?? undefined,
-    firstRank: yes(subscription.firstRank),
+    firstRank: subscription.firstRank === null ? derivedFirstRank : subscription.firstRank,
     monthlyIncome: applicant.monthlyIncome ?? undefined,
     householdIncome: household.householdIncome ?? (single ? applicant.monthlyIncome ?? undefined : undefined),
     incomeHouseholdSize: memberCount ?? undefined,

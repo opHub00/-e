@@ -34,6 +34,14 @@ export default function ApplicantStep() {
         <Question title="세대주인가요?" hint="주민등록등본에 세대주로 올라 있는지예요.">
           <ApplicantYesNo field="isHouseholdHead" />
         </Question>
+        {applicant.birthDate && applicant.birthDate > '2007-10-27' ? (
+          <Question
+            title="자녀를 키우거나 형제·자매를 부양하는 세대주인가요?"
+            hint="만 19세 미만 신청자에게만 묻습니다. 본인과 자녀 또는 형제·자매가 같은 주민등록표에 올라 있어야 해요."
+          >
+            <ApplicantYesNo field="minorHouseholdHeadException" yes="해당해요" no="아니에요" />
+          </Question>
+        ) : null}
       </Section>
       <Section title="거주">
         <Question title={`지금 ${region}에 살고 계세요?`} hint="주민등록상 주소 기준이에요.">
@@ -54,12 +62,6 @@ export default function ApplicantStep() {
             />
           </Question>
         ) : null}
-        <Question title="최근 해외에 계속 90일 넘게 나가 있었던 적이 있나요?" hint="유학·근무·장기 여행 등. 거주기간 계산에 영향을 줘요.">
-          <ApplicantYesNo field="longOverseasStay" yes="있어요" no="없어요" />
-        </Question>
-        <Question title="공고의 특례에 해당할 수 있는 사정이 있나요?" hint="예) 해외 근무 발령, 군 복무, 최근 출산 등. 없으면 ‘없어요’를 골라 주세요.">
-          <ApplicantYesNo field="specialException" yes="있어요" no="없어요" />
-        </Question>
       </Section>
       <Section title="자녀·출산 확인">
         <Question title="현재 태아 또는 입양 절차 중인 자녀가 있나요?" hint="출생한 자녀의 생년월일은 다음 단계에서 별도로 받아요. 태아·입양 여부를 모르면 그대로 확인 필요로 남깁니다.">

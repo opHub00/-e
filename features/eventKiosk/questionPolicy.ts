@@ -19,7 +19,6 @@ export const COMMON_REQUIRED_QUESTION_KEYS = [
   'applicant.reWinningRestriction',
   'applicant.householdNoWinningFiveYears',
   'household.totalAssets',
-  'adaptive.vehicleValueKrw',
   'subscription.accountKind',
 ] as const;
 
@@ -28,6 +27,7 @@ export const DOES_NOT_KNOW_ACKNOWLEDGEMENT = '괜찮아요. 결과에서 확인�
 const DOES_NOT_KNOW_LABELS: Record<string, string> = {
   'applicant.residenceMonths': '정확한 기간을 몰라요',
   'applicant.longOverseasStay': '기억나지 않아요',
+  'applicant.minorHouseholdHeadException': '확인해 봐야 해요',
   'applicant.specialException': '확인해 봐야 해요',
   'applicant.monthlyIncome': '정확히 몰라요',
   'applicant.taxPaymentYears': '정확한 기간을 몰라요',
@@ -71,12 +71,15 @@ export function visibleQuestionKeysForStep(answers: KioskAnswers, step: InputSte
   const spouse = answers.householdType === 'couple' || answers.householdType === 'withChildren';
   const children = answers.householdType === 'withChildren' || answers.householdType === 'singleParent';
   const single = answers.householdType === 'single';
-  const unmarried = !spouse || answers.household.marriageRegistered === false;
+  const youthAge = answers.applicant.birthDate >= '1986-10-28' && answers.applicant.birthDate <= '2007-10-27';
+  const unmarriedYouth = youthAge && (!spouse || answers.household.marriageRegistered === false);
   if (step === 'household') return ['householdType'];
   if (step === 'applicant') return [
-    'applicant.birthDate', 'applicant.isHouseholdHead', 'applicant.livesInEventRegion',
+    'applicant.birthDate', 'applicant.isHouseholdHead',
+    ...(answers.applicant.birthDate && answers.applicant.birthDate > '2007-10-27' ? ['applicant.minorHouseholdHeadException'] : []),
+    'applicant.livesInEventRegion',
     ...(answers.applicant.livesInEventRegion ? ['applicant.residenceMonths'] : []),
-    'applicant.longOverseasStay', 'applicant.specialException', 'household.childExpectationStatus',
+    'household.childExpectationStatus',
   ];
   if (step === 'family') return [
     ...(spouse ? ['household.marriageRegistered'] : []),
@@ -86,19 +89,21 @@ export function visibleQuestionKeysForStep(answers: KioskAnswers, step: InputSte
     ...(children ? ['household.childrenCount', ...answers.household.childBirthDates.map((_, index) => `household.childBirthDates.${index}`)] : []),
   ];
   if (step === 'finance') return [
-    'applicant.monthlyIncome', 'applicant.taxPaymentYears',
+    'applicant.monthlyIncome',
+    ...((answers.applicant.birthDate >= '1986-10-28' && answers.applicant.birthDate <= '2007-10-27') || spouse || children ? ['applicant.taxPaymentYears'] : []),
     ...(spouse ? ['household.dualIncome'] : []),
     ...(!single ? ['household.householdSize', 'household.householdIncome'] : []),
-    'household.totalAssets', 'adaptive.vehicleValueKrw',
-    ...(unmarried ? ['household.parentInformationStatus'] : []),
-    ...(unmarried && answers.household.parentInformationStatus === 'KNOWN' ? ['household.parentAssets'] : []),
+    'household.totalAssets',
+    ...(unmarriedYouth ? ['household.parentInformationStatus'] : []),
+    ...(unmarriedYouth && answers.household.parentInformationStatus === 'KNOWN' ? ['household.parentAssets'] : []),
+    'applicant.specialSupplyHistory', 'applicant.reWinningRestriction', 'applicant.householdNoWinningFiveYears',
+    'applicant.longOverseasStay', 'applicant.specialException',
   ];
   const hasAccount = answers.subscription.accountKind === 'housing' || answers.subscription.accountKind === 'other';
   return [
     'applicant.householdNoHome', 'applicant.neverOwnedHome',
-    'applicant.specialSupplyHistory', 'applicant.reWinningRestriction', 'applicant.householdNoWinningFiveYears',
     'subscription.accountKind',
-    ...(hasAccount ? ['subscription.openedAt', 'subscription.paymentCount', 'subscription.depositAmount', 'subscription.firstRank'] : []),
+    ...(hasAccount ? ['subscription.openedAt', 'subscription.paymentCount', 'subscription.depositAmount'] : []),
   ];
 }
 
@@ -167,6 +172,7 @@ const SAMDO_FACT_RESPONSE_KEYS: Record<string, readonly string[]> = {
   specialSupplyHistory: ['applicant.specialSupplyHistory'], noSpecialSupplyHistory: ['applicant.specialSupplyHistory'],
   reWinningRestriction: ['applicant.reWinningRestriction'], noReWinningRestriction: ['applicant.reWinningRestriction'],
   specialExceptions: ['applicant.specialException'], exceptionsClear: ['applicant.specialException'],
+  minorHouseholdHeadException: ['applicant.minorHouseholdHeadException'],
 };
 
 export function samdoFactWasAddressed(fact: string, states: AnswerStateMap): boolean {

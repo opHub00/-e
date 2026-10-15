@@ -169,6 +169,31 @@ function answerSamdo(recommendation: SamdoPresentationRecommendation, message: s
     const rejected = recommendation.rejectedTypes.slice(0, 5).map(item => `${item.supplyLabel}: ${item.failedReasons[0] ?? '신청 조건을 충족하지 못했어요.'}`);
     return { text: '현재 입력으로 자동 추천할 수 있는 공급유형이 없어요.', detail: rejected };
   }
+  const schedule = SAMDO_EVENT.schedule;
+  if (/당첨자?\s*발표|발표\s*(?:일|날짜|언제)/.test(message)) {
+    return { text: `당첨자 발표일은 ${schedule.winnerAnnouncement.replaceAll('-', '.')}입니다.` };
+  }
+  if (/서류\s*(?:접수|제출).*(?:언제|일|날짜)|(?:언제|일|날짜).*서류\s*(?:접수|제출)/.test(message)) {
+    return { text: `당첨자 서류접수는 ${schedule.documentSubmission.start.replaceAll('-', '.')}~${schedule.documentSubmission.end.replaceAll('-', '.')}입니다.` };
+  }
+  if (/계약\s*(?:체결)?.*(?:언제|일|날짜)|(?:언제|일|날짜).*계약/.test(message)) {
+    return { text: `계약체결 기간은 ${schedule.contract.start.replaceAll('-', '.')}~${schedule.contract.end.replaceAll('-', '.')}입니다.` };
+  }
+  if (/특별\s*공급.*(?:접수|신청|언제|날짜)|(?:접수|신청|언제|날짜).*특별\s*공급/.test(message)) {
+    return { text: `특별공급 접수일은 ${schedule.special.replaceAll('-', '.')}입니다.` };
+  }
+  if (/일반\s*공급.*1\s*순위|1\s*순위.*(?:접수|신청|언제|날짜)/.test(message)) {
+    return { text: `일반공급 1순위 접수일은 ${schedule.generalFirst.replaceAll('-', '.')}입니다.` };
+  }
+  if (/일반\s*공급.*2\s*순위|2\s*순위.*(?:접수|신청|언제|날짜)/.test(message)) {
+    return { text: `일반공급 2순위 접수일은 ${schedule.generalSecond.replaceAll('-', '.')}입니다.` };
+  }
+  if (/(?:신청|청약|접수).*(?:언제|언제부터|날짜|일정)|(?:언제|언제부터).*(?:신청|청약|접수)/.test(message)) {
+    return {
+      text: `삼도이동 1지구 청약은 특별공급 ${schedule.special.replaceAll('-', '.')}, 일반공급 1순위 ${schedule.generalFirst.replaceAll('-', '.')}, 2순위 ${schedule.generalSecond.replaceAll('-', '.')}에 접수합니다.`,
+      detail: [`당첨자 발표 ${schedule.winnerAnnouncement.replaceAll('-', '.')}`, `서류접수 ${schedule.documentSubmission.start.replaceAll('-', '.')}~${schedule.documentSubmission.end.replaceAll('-', '.')}`, `계약체결 ${schedule.contract.start.replaceAll('-', '.')}~${schedule.contract.end.replaceAll('-', '.')}`],
+    };
+  }
   if (/서류|증빙|준비물|제출/.test(message)) {
     return focus.evidenceRequired.length
       ? { text: `${focus.supplyLabel}에서 서류로 확인해야 할 항목이에요.`, detail: focus.evidenceRequired.slice(0, 6) }
@@ -186,18 +211,21 @@ function answerSamdo(recommendation: SamdoPresentationRecommendation, message: s
       detail: focus.evidence.slice(0, 5).map(item => `${item.section}${item.page ? ` · ${item.page}쪽` : ''} · ${item.label}`),
     };
   }
+  if (/공식\s*(?:점수|가점)|점수|가점/.test(message)) {
+    if (focus.officialScore.status === 'AVAILABLE') return { text: `${focus.supplyLabel}의 공식 가점은 ${focus.officialScore.total}/${focus.officialScore.max}점입니다. 완판e 추천순위와는 별도입니다.`, detail: focus.officialScore.breakdown.map(item => `${item.label}: ${item.points}/${item.max}점`).slice(0, 5) };
+    if (focus.officialScore.status === 'PENDING') return { text: `${focus.supplyLabel}의 공식 가점은 필요한 정보를 확인한 뒤 계산할 수 있습니다.` };
+    return { text: `${focus.supplyLabel}에는 공식 가점제가 적용되지 않습니다. 완판e 추천순위와는 별도입니다.` };
+  }
+  if (/소득/.test(message)) return { text: `${focus.supplyLabel}의 소득 판정은 입력 금액을 전송하지 않고 확정된 판정 결과만 설명합니다.`, detail: [...focus.matchedAdvantages, ...focus.cautions].filter(item => item.includes('소득')).slice(0, 5) };
+  if (/자산/.test(message)) return { text: `${focus.supplyLabel}의 자산 판정은 공고 기준과 확인된 판정 상태를 따릅니다. 모르는 값은 충족으로 추정하지 않습니다.`, detail: [...focus.matchedAdvantages, ...focus.cautions, ...focus.evidenceRequired].filter(item => item.includes('자산')).slice(0, 5) };
+  if (/청약\s*통장|입주자저축|납입|저축액/.test(message)) return { text: `${focus.supplyLabel}의 입주자저축 기준은 저장된 판정 결과를 따릅니다.`, detail: [...focus.matchedAdvantages, ...focus.cautions, ...focus.evidenceRequired].filter(item => /통장|납입|저축/.test(item)).slice(0, 5) };
   if (/확인|조건|중요|핵심/.test(message)) {
     const checks = [...focus.cautions, ...focus.evidenceRequired];
     return checks.length
       ? { text: `${focus.supplyLabel}에서 먼저 확인할 조건이에요.`, detail: checks.slice(0, 6) }
       : { text: `${focus.supplyLabel}의 입력 조건은 모두 확인됐어요.`, detail: focus.matchedAdvantages.slice(0, 5) };
   }
-  return {
-    text: recommendation.recommendedType
-      ? `${focus.supplyLabel}이 현재 입력에서 가장 앞선 신청유형이에요. 경쟁률이나 당첨확률은 추정하지 않았어요.`
-      : `${focus.supplyLabel}은 추가 확인이 필요한 유형이에요. 아직 가장 유리한 신청유형으로 확정하지 않았어요.`,
-    detail: focus.reasons.slice(0, 5),
-  };
+  return { text: '질문을 정확히 이해하지 못했어요. 신청 일정, 자격조건, 소득·자산 기준, 청약통장, 공식 점수, 준비서류 중 무엇이 궁금하신가요?' };
 }
 
 export type EventChatTransport = {

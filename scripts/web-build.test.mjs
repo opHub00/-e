@@ -29,15 +29,14 @@ test('event chat function packages its server contract, privacy boundary and tru
   const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
   const includeFiles = config.functions?.['api/event-api/chat.ts']?.includeFiles ?? '';
   assert.match(includeFiles, /features\/eventKiosk\/server\/eventChat\.ts/);
-  assert.match(includeFiles, /features\/eventKiosk\/chat\/contract\.ts/);
-  assert.match(includeFiles, /features\/eventKiosk\/chat\/privacy\.ts/);
-  assert.match(includeFiles, /features\/eventKiosk\/chat\/package\.json/);
-  assert.match(includeFiles, /features\/eventKiosk\/samdoDual\/\{rag,types\}\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/chat\/\{contract\.ts,privacy\.ts,package\.json\}/);
+  assert.match(includeFiles, /features\/eventKiosk\/samdoDual\/\{rag\.ts,types\.ts,package\.json\}/);
   assert.match(includeFiles, /data\/event\/samdo-dual-v2-rag\.json/);
   assert.doesNotMatch(includeFiles, /features\/\*\*/);
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
   assert.ok(config.rewrites?.some(row => row.source === '/event-api/chat' && row.destination === '/api/event-api/chat'));
   assert.deepEqual(JSON.parse(await readFile(new URL('../features/eventKiosk/chat/package.json', import.meta.url), 'utf8')), { type: 'module' });
+  assert.deepEqual(JSON.parse(await readFile(new URL('../features/eventKiosk/samdoDual/package.json', import.meta.url), 'utf8')), { type: 'module' });
 });
 
 test('E2E environment is explicit and does not mutate its parent environment', () => {

@@ -12,7 +12,7 @@
       "includeFiles": "{features/eventKiosk/server/**,scripts/event-result-session-store.mjs}"
     },
     "api/event-api/chat.ts": {
-      "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/contract.ts,features/eventKiosk/chat/privacy.ts,features/eventKiosk/chat/package.json,features/eventKiosk/samdoDual/{rag,types}.ts,data/event/samdo-dual-v2-rag.json}"
+      "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/{contract.ts,privacy.ts,package.json},features/eventKiosk/samdoDual/{rag.ts,types.ts,package.json},data/event/samdo-dual-v2-rag.json}"
     }
   },
   "headers": [

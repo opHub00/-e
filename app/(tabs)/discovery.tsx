@@ -14,7 +14,7 @@ import {
 import { WanpanCard } from '../../components/WanpanCard';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, shadow, spacing, tint, tracking, type } from '../../design/tokens';
+import { colors, radius, shadow, size, spacing, tint, tracking, type } from '../../design/tokens';
 import { DiscoveryMap } from '../../features/discovery/components/DiscoveryMap';
 import { ListingCard } from '../../features/discovery/components/ListingCard';
 import { InsightListingCard, type ListViewport } from '../../features/listingInsight/InsightListingCard';
@@ -635,9 +635,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainer,
     paddingHorizontal: 16,
   },
-  searchCopy: { flex: 1, gap: 1 },
-  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal, padding: 0 },
-  searchSub: { ...type.micro, color: colors.textSubtle },
+  searchCopy: { flex: 1 },
+  /* 입력 터치 영역은 44px, 보조 문구는 입력 아래 여백에 겹쳐 시각 높이는 그대로 둔다. */
+  searchInput: { ...type.bodySmStrong, color: colors.text, letterSpacing: tracking.normal, padding: 0, height: size.touch },
+  searchSub: { ...type.micro, color: colors.textSubtle, marginTop: -12 },
   headerIconButton: {
     width: 44,
     height: 44,
@@ -655,10 +656,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    height: 30,
+    height: size.touch,
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceContainer,
-    paddingHorizontal: 11,
+    paddingHorizontal: 13,
   },
   chipQuietActive: { backgroundColor: colors.surfaceHighest },
   chipPrimary: { backgroundColor: colors.lavender },
@@ -730,7 +731,8 @@ const styles = StyleSheet.create({
   sheetStatusText: { ...type.micro, color: colors.textSubtle },
   sheetStatusTextOpen: { color: tint.green.fg },
   sheetStatusTextSoon: { color: tint.amber.fg },
-  saveButton: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
+  /* 터치 영역 44px, 바깥 여백을 음수로 돌려 시트 배치는 30px 아이콘 그대로 둔다. */
+  saveButton: { width: size.touch, height: size.touch, margin: -7, alignItems: 'center', justifyContent: 'center' },
 
   sheetName: {
     ...type.section,
@@ -761,7 +763,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    height: 42,
+    height: size.touch,
     borderRadius: radius.button,
     backgroundColor: colors.primary,
     paddingHorizontal: 18,

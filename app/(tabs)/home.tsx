@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   stageText: { ...type.bodySmStrong, color: colors.onPrimary, letterSpacing: tracking.normal },
-  profileEntry: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
+  profileEntry: { flexDirection: 'row', alignItems: 'center', minHeight: size.touch },
   profileText: { ...type.micro, color: 'rgba(255,255,255,0.72)' },
 
   sheet: {
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   },
   groupTitle: { ...type.bodyLgStrong, color: colors.text, letterSpacing: tracking.snug },
   groupTitleSub: { ...type.label, color: colors.textMuted },
-  moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, paddingVertical: 4 },
+  moreLink: { flexDirection: 'row', alignItems: 'center', gap: 1, minHeight: size.touch, paddingLeft: spacing.sm },
   moreLinkText: { ...type.label, color: colors.primary, letterSpacing: tracking.normal },
   listingContext: { ...type.micro, color: colors.textSubtle, paddingTop: 3, paddingBottom: 4 },
   listingState: { minHeight: 74, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

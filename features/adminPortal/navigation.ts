@@ -31,6 +31,7 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
     title: '운영 현황',
     items: [
       { label: '대시보드', hint: '오늘 무엇을 해야 하는지', href: '/admin', icon: 'dashboard' },
+      { label: '통합 운영 콘솔', hint: '공고·규칙·AI·판정 한눈에(V3)', href: '/admin/console', icon: 'space-dashboard' },
     ],
   },
   {

@@ -33,6 +33,7 @@ export const ALLOWLIST = [
   { pattern: /^scripts\/audit-extraction-samples\.mjs$/, reason: 'archived extraction audit', file: true },
   { pattern: /^scripts\/event-phase4-report\.mjs$/, reason: 'frozen Jeju event QA report generator', file: true },
   { pattern: /^scripts\/event-rc-e2e\.mjs$/, reason: 'frozen Jeju event release-candidate browser QA', file: true },
+  { pattern: /^scripts\/ui-quality-qa\.mjs$/, reason: 'responsive UI QA harness that opens the frozen Jeju event screens', file: true },
   { pattern: /^scripts\/announcement-hardcode-guard\.mjs$/, reason: 'this guard', file: true },
 ];
 

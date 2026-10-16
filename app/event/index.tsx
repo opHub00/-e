@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { useKioskWidth } from '../../features/eventKiosk/ui/useKioskWidth';
+import { useViewportHeight } from '../../features/eventKiosk/layout/DensityContext';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
 import { KioskButton } from '../../features/eventKiosk/ui/controls';
@@ -34,6 +35,7 @@ function shouldAutoplayStory(): boolean {
 export default function EventLanding() {
   const load = kioskEvent();
   const width = useKioskWidth();
+  const height = useViewportHeight();
   const replay = useFocusReplay();
   // 정적으로 그린 화면과 첫 화면이 같도록, 저장된 '봤음' 표시는 붙은 뒤에 읽는다.
   const [storyOpen, setStoryOpen] = useState(false);
@@ -43,6 +45,8 @@ export default function EventLanding() {
   const { copy } = load.event.config;
   const wide = width >= 900;
   const phone = width > 0 && width < 600;
+  // 낮은 화면(노트북 720px, 휴대폰 844px 이하)에서는 여백만 줄여 내용이 한 화면에 들어오게 한다.
+  const short = height > 0 && (phone ? height < 900 : height <= 800);
 
   const start = () => {
     // 시작할 때 한 번 더 비운다. 이전 방문자가 '처음으로'를 누르지 않고 떠났어도 남는 것이 없다.
@@ -56,9 +60,9 @@ export default function EventLanding() {
         <BrandMark size="hero" label={copy.brand} compact={phone} />
         <PartnerBadge size={partnerSizeFor(width)} />
       </View>
-      <ScrollView contentContainerStyle={[styles.scroll, phone && styles.scrollPhone]}>
-        <View style={[styles.inner, wide && styles.innerWide]}>
-          <View style={[styles.hero, wide && styles.heroWide, phone && styles.heroPhone]}>
+      <ScrollView contentContainerStyle={[styles.scroll, phone && styles.scrollPhone, short && (phone ? styles.scrollPhoneShort : styles.scrollShort)]}>
+        <View style={[styles.inner, wide && styles.innerWide, short && phone && styles.innerPhoneShort]}>
+          <View style={[styles.hero, wide && styles.heroWide, phone && styles.heroPhone, short && styles.heroShort]}>
             <Appear replayKey={replay} distance={travel.md}>
               <View style={styles.heroCopy}>
                 <Text style={[styles.eyebrow, phone && styles.eyebrowPhone]}>{DISTRICT_COPY.eyebrow}</Text>
@@ -66,7 +70,7 @@ export default function EventLanding() {
                 <Text style={[styles.subtitle, phone && styles.subtitlePhone]}>{DISTRICT_COPY.landingSubtitle}</Text>
               </View>
             </Appear>
-            <Appear replayKey={replay} delay={eventMotion.sequence} style={[styles.heroRest, phone && styles.heroRestPhone]}>
+            <Appear replayKey={replay} delay={eventMotion.sequence} style={[styles.heroRest, phone && styles.heroRestPhone, short && styles.heroRestShort]}>
               <View testID="landing-districts" style={[styles.districts, phone && styles.districtsPhone]}>
                 {districts.cards.map(card => <DistrictIntro key={card.id} card={card} phone={phone} />)}
               </View>
@@ -142,14 +146,19 @@ const styles = StyleSheet.create({
   headerPhone: { minHeight: 56, paddingHorizontal: 16, gap: 8 },
   scroll: { flexGrow: 1, paddingHorizontal: 48, paddingTop: 40, paddingBottom: 32, alignItems: 'center' },
   scrollPhone: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 20 },
+  scrollShort: { paddingTop: 24, paddingBottom: 20 },
+  scrollPhoneShort: { paddingTop: 16, paddingBottom: 12 },
+  innerPhoneShort: { gap: 16 },
   inner: { width: '100%', maxWidth: 1120, gap: 32 },
   innerWide: { flexDirection: 'row', alignItems: 'center', gap: 48 },
   hero: { gap: 28 },
   heroWide: { flex: 1.2 },
   heroPhone: { gap: 16 },
+  heroShort: { gap: 12 },
   heroCopy: { gap: 10 },
   heroRest: { gap: 22 },
   heroRestPhone: { gap: 14 },
+  heroRestShort: { gap: 12 },
   eyebrow: { ...k.type.label, color: k.colors.primary },
   eyebrowPhone: { fontSize: 13, lineHeight: 18 },
   title: { ...k.type.display, color: k.colors.text, wordBreak: 'keep-all' } as object,

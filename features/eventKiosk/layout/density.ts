@@ -104,3 +104,66 @@ export function densityFor(width: number, input: { coarsePointer?: boolean } = {
   if (width >= COMPACT_MIN_WIDTH && !input.coarsePointer) return 'compact';
   return 'comfortable';
 }
+
+/* ── 반응형 품질 시스템: 폭 + 높이 + 입력 방식 + 화면 성격 ───────────────────────── */
+
+/** 세로 여유에 따른 간격 단계. 토큰 등급(Density)과 별개로 간격·머리 높이만 조절한다. */
+export type Spacing = 'compact' | 'comfortable' | 'spacious';
+export type LayoutClass = 'phone' | 'tablet' | 'desktop';
+export type ContentType = 'content' | 'form' | 'dashboard' | 'chat';
+
+export type ViewportProfile = {
+  /** 크기·글자 토큰 등급(기존 DENSITY 키). */
+  density: Density;
+  /** 세로 여유를 반영한 간격 단계. */
+  spacing: Spacing;
+  layout: LayoutClass;
+  /** 높이가 짧아(노트북 720~768, 가로 태블릿) 머리·간격을 줄여야 하는 화면. */
+  shortHeight: boolean;
+};
+
+/** 이 높이 이하이면 '낮은 화면'(1280×720, 1366×768, 1024×768 가로 태블릿, 320×568 휴대폰). */
+export const SHORT_HEIGHT_MAX = 800;
+/** 이 높이 이상 + 넓은 데스크톱이면 넉넉한 간격(1920×1080). */
+export const SPACIOUS_MIN_HEIGHT = 1000;
+export const SPACIOUS_MIN_WIDTH = 1600;
+
+/**
+ * 접속 환경에서 화면 밀도를 정한다. PC 화면을 줄이는 게 아니라 기기 성격마다 정보량을 다르게 둔다.
+ *  - 폭: phone(<744) / tablet / desktop(≥1200, 마우스)
+ *  - 높이: 낮으면(≤800) 간격 compact, 아주 넓고 높으면(≥1600×1000) spacious
+ *  - 손가락 입력: 넓어도 tablet(큰 터치 UI 를 줄이지 않는다)
+ *  - 화면 성격: dashboard 는 spacious 대신 comfortable(정보량 우선), chat 은 낮은 화면에서 compact
+ * 붙기 전(폭 0)에는 정적 화면과 같도록 comfortable·tablet.
+ */
+export function deriveDensity(input: { width: number; height: number; pointerType?: 'fine' | 'coarse'; contentType?: ContentType }): ViewportProfile {
+  const { width, height } = input;
+  if (width <= 0) return { density: 'comfortable', spacing: 'comfortable', layout: 'tablet', shortHeight: false };
+  const coarse = input.pointerType === 'coarse';
+  const density = densityFor(width, { coarsePointer: coarse });
+  const layout: LayoutClass = density === 'touch' ? 'phone' : density === 'compact' ? 'desktop' : 'tablet';
+  const shortHeight = height > 0 && height <= SHORT_HEIGHT_MAX;
+  let spacing: Spacing = 'comfortable';
+  if (shortHeight || (layout === 'phone' && width <= NARROW_PHONE_MAX_WIDTH)) spacing = 'compact';
+  else if (layout === 'desktop' && width >= SPACIOUS_MIN_WIDTH && height >= SPACIOUS_MIN_HEIGHT) spacing = 'spacious';
+  if (input.contentType === 'dashboard' && spacing === 'spacious') spacing = 'comfortable';
+  if (input.contentType === 'chat' && shortHeight) spacing = 'compact';
+  return { density, spacing, layout, shortHeight };
+}
+
+const SPACING_SCALE: Record<Spacing, number> = { compact: 0.7, comfortable: 1, spacious: 1.2 };
+
+/** 간격 단계를 토큰에 적용한다. 누르는 영역(control)과 글자 크기는 바꾸지 않는다. */
+export function applySpacing(tokens: DensityTokens, spacing: Spacing): DensityTokens {
+  if (spacing === 'comfortable') return tokens;
+  const scale = SPACING_SCALE[spacing];
+  const s = (value: number, min: number) => Math.max(min, Math.round(value * scale));
+  return {
+    ...tokens,
+    sectionGap: s(tokens.sectionGap, 12),
+    cardGap: s(tokens.cardGap, 8),
+    gridGap: s(tokens.gridGap, 8),
+    headingGap: s(tokens.headingGap, 2),
+    cardPadding: s(tokens.cardPadding, 12),
+  };
+}

@@ -64,6 +64,10 @@ type KioskState = {
   openSamdoChat: (event: LoadedEvent, recommendation: SamdoPresentationRecommendation) => void;
   openSamdoDualChat: (event: LoadedEvent, assessment: SamdoDualAssessment) => void;
   ask: (event: LoadedEvent, message: string) => Promise<void>;
+  /** Copilot 화면이 직접 답한 대화(모름·나중에·왜·가정 열기)를 기록한다. 서버를 부르지 않는다. */
+  appendLocalExchange: (userText: string, reply: { text: string; detail?: string[] }) => void;
+  /** 답이 바뀐 뒤 상담 맥락의 두 지구 판정만 최신으로 바꾼다(대화 기록 유지). */
+  refreshSamdoDualAssessment: (assessment: SamdoDualAssessment) => void;
   reset: () => void;
   /**
    * 개발·QA 전용. 시연 persona 의 답을 한 번에 넣는다. 화면 흐름(분석 → 질문 → 결과)은 그대로 거친다.
@@ -256,6 +260,14 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
       if (get().sessionKey === sessionKey) set({ chatBusy: false });
     }
   },
+
+  appendLocalExchange: (userText, reply) => set(state => (state.chat ? {
+    chat: { ...state.chat, messages: [...state.chat.messages, { role: 'user', text: userText }, { role: 'assistant', text: reply.text, detail: reply.detail }] },
+  } : {})),
+
+  refreshSamdoDualAssessment: (assessment) => set(state => (state.chat?.samdoDualAssessment ? {
+    chat: { ...state.chat, samdoDualAssessment: assessment },
+  } : {})),
 
   reset: () => set(state => ({ sessionKey: state.sessionKey + 1, ...initial() })),
 

@@ -49,7 +49,9 @@ export function KioskFrame({
   const width = useKioskWidth();
   const compactTop = width < 600;
   // 밀도(desktop=compact / iPad=comfortable / mobile=touch)가 여백과 본문 폭을 정한다. 안쪽 component 도 같은 값을 읽는다.
-  const { density, d } = useDensity();
+  // 폭·높이를 함께 본 밀도: 낮은 화면(≤800px)은 머리·여백을 줄여 내용이 한 화면에 들어오게 한다.
+  const { density, d, shortHeight } = useDensity();
+  const short = shortHeight && density !== 'touch';
   const gutter = width > 0 && width <= NARROW_PHONE_MAX_WIDTH ? NARROW_PHONE_GUTTER : d.gutter;
   const inner = [styles.inner, { maxWidth: d.contentMax }];
   const [confirming, setConfirming] = useState(false);
@@ -57,7 +59,7 @@ export function KioskFrame({
   return (
     <DensityProvider density={density}>
     <View style={styles.root}>
-      <View style={[styles.top, density === 'compact' && styles.topCompact, density === 'touch' && styles.topTouch, { paddingHorizontal: gutter }]}>
+      <View style={[styles.top, (density === 'compact' || short) && styles.topCompact, density === 'touch' && styles.topTouch, { paddingHorizontal: gutter }]}>
         <BrandMark size="header" label={brand} compact={compactTop} />
         <View style={[styles.topRight, compactTop && styles.topActionsCompact]}>
           {partner ? <View style={[styles.partnerSlot, compactTop && styles.partnerSlotCompact]}><PartnerBadge size={partnerSizeFor(width)} /></View> : null}
@@ -87,17 +89,17 @@ export function KioskFrame({
         </View>
         </View>
       </View>
-      {progress ? <Progress progress={progress} gutter={gutter} touch={density === 'touch'} /> : null}
+      {progress ? <Progress progress={progress} gutter={gutter} touch={density === 'touch' || short} /> : null}
       <ScrollView
         key={scrollKey}
         style={styles.scroll}
-        contentContainerStyle={[styles.content, density === 'touch' && styles.contentTouch, { paddingHorizontal: gutter }]}
+        contentContainerStyle={[styles.content, short && styles.contentShort, density === 'touch' && styles.contentTouch, { paddingHorizontal: gutter }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={inner}><ScreenReveal>{children}</ScreenReveal></View>
       </ScrollView>
       {footer ? (
-        <View testID="kiosk-footer" style={[styles.footer, density === 'touch' && styles.footerTouch, { paddingHorizontal: gutter }]}>
+        <View testID="kiosk-footer" style={[styles.footer, short && styles.footerShort, density === 'touch' && styles.footerTouch, { paddingHorizontal: gutter }]}>
           <View
             style={[
               inner,
@@ -207,6 +209,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { paddingTop: 36, paddingBottom: 40, alignItems: 'center' },
   contentTouch: { paddingTop: 16, paddingBottom: 24 },
+  contentShort: { paddingTop: 20, paddingBottom: 24 },
+  footerShort: { minHeight: 0, paddingVertical: 12 },
   progressTouch: { paddingVertical: 10 },
   inner: { width: '100%', maxWidth: k.contentMax },
   footer: {

@@ -5,7 +5,7 @@ import type { SamdoEligibility, SamdoRecommendationItem, SamdoStage, SamdoSupply
 import { samdoRules } from '../samdoResult/samdoEvaluate.ts';
 import { SAMDO_DISTRICTS } from './config.ts';
 import { SAMDO_DISTRICT2_DEEP_RULE_PACKAGE, samdoDistrict2Rules } from './rulePackages.ts';
-import type { SamdoChecklistItem, SamdoDistrictAssessment, SamdoDistrictComparison, SamdoDualAssessment, SamdoUnitEconomics } from './types.ts';
+import type { SamdoChecklistItem, SamdoDistrictAssessment, SamdoDistrictComparison, SamdoDistrictId, SamdoDualAssessment, SamdoUnitEconomics } from './types.ts';
 
 const statusWeight: Record<SamdoEligibility, number> = { ELIGIBLE: 4, EVIDENCE_REQUIRED: 3, CONDITIONAL: 2, INELIGIBLE: 0 };
 const stageWeight: Record<SamdoStage, number> = {
@@ -74,27 +74,32 @@ function checklist(district: SamdoDistrictAssessment): SamdoChecklistItem[] {
   });
 }
 
-export function buildSamdoDualAssessment(input: AssessmentInput): SamdoDualAssessment {
-  const district1: SamdoDistrictAssessment = {
-    district: SAMDO_DISTRICTS['samdo-1'],
-    recommendation: buildSamdoRecommendationForPackage(samdoRules(), input, SAMDO_DEEP_RULE_PACKAGE),
-    checklist: [], specialProvisions: [],
-  };
-  const district2: SamdoDistrictAssessment = {
-    district: SAMDO_DISTRICTS['samdo-2'],
-    recommendation: buildSamdoRecommendationForPackage(samdoDistrict2Rules(), input, SAMDO_DISTRICT2_DEEP_RULE_PACKAGE),
-    checklist: [], specialProvisions: [],
-  };
-  district1.checklist = checklist(district1);
-  district2.checklist = checklist(district2);
-  for (const district of [district1, district2]) {
-    const grouped = new Map<string, Set<SamdoSupplyType>>();
-    for (const evaluation of district.recommendation.evaluations) for (const label of evaluation.evidenceRequired.filter(item => item.startsWith('특례:'))) {
-      const types = grouped.get(label) ?? new Set<SamdoSupplyType>();
-      types.add(evaluation.supplyType);
-      grouped.set(label, types);
+/** Evaluate exactly one district. Generic notice adapters use this compatibility boundary. */
+export function buildSamdoDistrictAssessment(input: AssessmentInput, districtId: SamdoDistrictId): SamdoDistrictAssessment {
+  const district: SamdoDistrictAssessment = districtId === 'samdo-1'
+    ? {
+      district: SAMDO_DISTRICTS['samdo-1'],
+      recommendation: buildSamdoRecommendationForPackage(samdoRules(), input, SAMDO_DEEP_RULE_PACKAGE),
+      checklist: [], specialProvisions: [],
     }
-    district.specialProvisions = [...grouped].map(([label, types]) => ({ label: label.replace(/^특례:\s*/, ''), supplyTypes: [...types], status: 'EVIDENCE_REQUIRED' as const }));
+    : {
+      district: SAMDO_DISTRICTS['samdo-2'],
+      recommendation: buildSamdoRecommendationForPackage(samdoDistrict2Rules(), input, SAMDO_DISTRICT2_DEEP_RULE_PACKAGE),
+      checklist: [], specialProvisions: [],
+    };
+  district.checklist = checklist(district);
+  const grouped = new Map<string, Set<SamdoSupplyType>>();
+  for (const evaluation of district.recommendation.evaluations) for (const label of evaluation.evidenceRequired.filter(item => item.startsWith('특례:'))) {
+    const types = grouped.get(label) ?? new Set<SamdoSupplyType>();
+    types.add(evaluation.supplyType);
+    grouped.set(label, types);
   }
+  district.specialProvisions = [...grouped].map(([label, types]) => ({ label: label.replace(/^특례:\s*/, ''), supplyTypes: [...types], status: 'EVIDENCE_REQUIRED' as const }));
+  return district;
+}
+
+export function buildSamdoDualAssessment(input: AssessmentInput): SamdoDualAssessment {
+  const district1 = buildSamdoDistrictAssessment(input, 'samdo-1');
+  const district2 = buildSamdoDistrictAssessment(input, 'samdo-2');
   return { schemaVersion: 1, districts: [district1, district2], comparison: compareDistricts(district1, district2) };
 }

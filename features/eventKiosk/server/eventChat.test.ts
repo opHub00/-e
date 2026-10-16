@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import type { EventChatContext, EventChatRequest } from '../chat/contract.ts';
 import { boundedEventChatHistory, redactEventChatText } from '../chat/privacy.ts';
-import { handleEventChat, parseEventChatRequest, resetEventChatRateLimitForTests, type EventChatEnvironment } from './eventChat.ts';
+import { handleEventChat, parseEventChatRequest, resetEventChatRateLimitForTests, type EventChatEnvironment, type EventChatTelemetry } from './eventChat.ts';
 
 const context: EventChatContext = {
   schemaVersion: 1,
@@ -78,6 +78,21 @@ test('event chat calls Gemini with only the bounded presentation-safe snapshot',
   for (const forbidden of ['displayName', 'birthDate', 'monthlyIncome', 'totalAssets', 'factKey', 'rulePackage', 'qrToken']) assert.ok(!providerRequest.includes(forbidden), forbidden);
   assert.ok(providerRequest.includes('2026-11-16'));
   assert.ok(providerRequest.includes('2026-11-24'));
+});
+
+test('event chat emits sanitized operational telemetry without affecting the answer', async () => {
+  const records: EventChatTelemetry[] = [];
+  const deterministic = request('내 번호는 010-1234-5678이고 신청 일정이 궁금해');
+  deterministic.resolution = 'EXACT_STRUCTURED';
+  const result = await handleEventChat({ method: 'POST', body: deterministic, headers: {}, ip: 'monitor' }, {
+    env: {}, requestId: () => 'monitor-request', now: () => Date.parse('2026-10-16T00:00:00Z'), monitor: record => { records.push(record); },
+  });
+  assert.equal('mode' in result.body && result.body.mode, 'deterministic');
+  assert.equal(records.length, 1);
+  assert.equal(records[0].requestId, 'monitor-request');
+  assert.equal(records[0].mode, 'deterministic');
+  assert.equal(records[0].fallbackReason, null);
+  assert.doesNotMatch(records[0].sanitizedQuestion, /010-1234-5678/);
 });
 
 test('missing key, provider failure, unsafe probability, and grounding mismatch use deterministic fallback', async () => {

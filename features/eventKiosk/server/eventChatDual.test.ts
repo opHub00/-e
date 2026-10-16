@@ -1,14 +1,14 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { SAMDO_PERSONAS } from '../samdo/personas.test-data.ts';
-import { answerSamdoDualDeterministically, buildSamdoDualAssessment, buildSamdoDualChatContext } from '../samdoDual/index.ts';
+import { answerSamdoDualDeterministically, buildSamdoDualAssessment, buildSamdoDualChatContext, retrieveSamdoEvidence } from '../samdoDual/index.ts';
 import type { EventChatRequest } from '../chat/contract.ts';
 import { handleEventChat, resetEventChatRateLimitForTests } from './eventChat.ts';
 
 const assessment = buildSamdoDualAssessment(SAMDO_PERSONAS.find(item => item.id === 'newborn-family')!.input);
 
 function request(question: string): EventChatRequest {
-  return { question, history: [], context: buildSamdoDualChatContext(assessment, question), fallback: answerSamdoDualDeterministically(assessment, question) };
+  return { question, history: [], context: buildSamdoDualChatContext(assessment, question), fallback: answerSamdoDualDeterministically(assessment, question), resolution: 'FREEFORM_RAG' };
 }
 
 function gemini(answer: unknown): Response {
@@ -18,7 +18,8 @@ function gemini(answer: unknown): Response {
 test('dual chat sends structured districts and retrieved evidence to Gemini without profile facts', async () => {
   resetEventChatRateLimitForTests();
   let providerBody = '';
-  const chatRequest = request('1지구랑 2지구 차이가 뭐야?');
+  const chatRequest = request('토지임대부 분양주택에서 토지와 건물의 소유 관계를 공고문 근거로 설명해줘');
+  const evidence = retrieveSamdoEvidence(chatRequest.question).chunks[0];
   const result = await handleEventChat({ method: 'POST', body: chatRequest, headers: {}, ip: 'dual-success' }, {
     env: { GEMINI_API_KEY: 'server-secret' },
     requestId: () => 'dual-request',
@@ -29,6 +30,7 @@ test('dual chat sends structured districts and retrieved evidence to Gemini with
         anchorSupplyType: chatRequest.context.focus.supplyType,
         anchorEligibility: chatRequest.context.focus.eligibility,
         anchorRecommendedType: chatRequest.context.recommendation.recommendedType ?? '없음',
+        evidenceAnchors: [`${evidence.districtId}|${evidence.section}`],
       });
     },
   });
@@ -38,6 +40,22 @@ test('dual chat sends structured districts and retrieved evidence to Gemini with
   assert.ok(providerBody.includes('2026000435'));
   assert.ok(providerBody.includes('retrievedEvidence'));
   for (const forbidden of ['birthDate', 'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'qrToken']) assert.ok(!providerBody.includes(forbidden), forbidden);
+});
+
+test('exact and assessment-aware routes do not ask Gemini to recalculate a deterministic answer', async () => {
+  for (const [question, resolution] of [['2지구 신생아 특별공급 몇 세대야?', 'EXACT_STRUCTURED'], ['내가 둘 다 신청 가능한지', 'ASSESSMENT_AWARE']] as const) {
+    resetEventChatRateLimitForTests();
+    const chatRequest = request(question);
+    chatRequest.resolution = resolution;
+    let providerCalls = 0;
+    const result = await handleEventChat({ method: 'POST', body: chatRequest, headers: {}, ip: question }, {
+      env: { GEMINI_API_KEY: 'server-secret' },
+      fetcher: async () => { providerCalls += 1; throw new Error('must not call provider'); },
+    });
+    assert.equal(result.status, 200);
+    assert.equal('mode' in result.body && result.body.mode, 'deterministic');
+    assert.equal(providerCalls, 0);
+  }
 });
 
 test('dual chat provider unavailable uses exact structured fallback', async () => {

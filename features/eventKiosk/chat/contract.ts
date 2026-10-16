@@ -88,6 +88,15 @@ export type EventChatDualContext = EventChatContextBase & {
     }>;
     recommendation: EventChatComparison | null;
   }>;
+  unresolvedFacts: Array<{
+    label: string;
+    state: 'DOES_NOT_KNOW' | 'UNKNOWN' | 'EVIDENCE_REQUIRED' | 'CONDITIONAL';
+    districts: Array<'samdo-1' | 'samdo-2'>;
+    affectedSupplyTypes: string[];
+    userFacingQuestion: string;
+    reason: string;
+    evidenceNeeded: string;
+  }>;
   retrievedEvidence: Array<{
     districtId: 'samdo-1' | 'samdo-2';
     section: string;
@@ -100,11 +109,14 @@ export type EventChatContext = EventChatSingleContext | EventChatDualContext;
 
 export type EventChatFallback = { text: string; detail?: string[] };
 
+export type EventChatResolution = 'EXACT_STRUCTURED' | 'ASSESSMENT_AWARE' | 'FREEFORM_RAG' | 'CLARIFICATION';
+
 export type EventChatRequest = {
   question: string;
   history: EventChatHistoryTurn[];
   context: EventChatContext;
   fallback: EventChatFallback;
+  resolution: EventChatResolution;
 };
 
 export type EventChatMode = 'llm' | 'deterministic' | 'fallback';

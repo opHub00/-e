@@ -43,6 +43,7 @@ const request = (question = '왜 신생아 특별공급이 제일 유리해?'): 
   history: [{ role: 'user', text: '중요한 조건이 뭐야?' }, { role: 'assistant', text: '출생 자녀 조건이 중요해요.' }],
   context,
   fallback: { text: '신생아 특별공급이 현재 입력에서 가장 앞선 신청유형이에요.', detail: ['기존 판정 결과를 기준으로 설명했어요.'] },
+  resolution: 'FREEFORM_RAG',
 });
 
 function gemini(answer: unknown, status = 200): Response {

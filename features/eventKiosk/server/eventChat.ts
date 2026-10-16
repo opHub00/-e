@@ -34,6 +34,7 @@ export const EVENT_CHAT_SYSTEM_PROMPT = `당신은 완판e 제주 행사 상담 
 답변 형식:
 - 한국어 해요체, 간결하고 친절하게 답하세요.
 - text는 핵심 답변, detail은 필요할 때만 최대 5개 짧은 확인 항목입니다.
+- schemaVersion 2에서는 사용한 retrievedEvidence를 evidenceAnchors에 "districtId|section" 형식으로 1개 이상 적으세요.
 - JSON 스키마 이외의 텍스트를 출력하지 마세요.`;
 
 type RequestLike = {
@@ -142,6 +143,18 @@ function isDualDistrict(value: unknown): boolean {
   return value.recommendation === null || isComparison(value.recommendation);
 }
 
+function isUnresolvedFact(value: unknown): boolean {
+  return object(value)
+    && onlyKeys(value, ['label', 'state', 'districts', 'affectedSupplyTypes', 'userFacingQuestion', 'reason', 'evidenceNeeded'])
+    && typeof value.label === 'string'
+    && ['DOES_NOT_KNOW', 'UNKNOWN', 'EVIDENCE_REQUIRED', 'CONDITIONAL'].includes(String(value.state))
+    && Array.isArray(value.districts) && value.districts.length <= 2 && value.districts.every(id => id === 'samdo-1' || id === 'samdo-2')
+    && strings(value.affectedSupplyTypes, 6)
+    && typeof value.userFacingQuestion === 'string'
+    && typeof value.reason === 'string'
+    && typeof value.evidenceNeeded === 'string';
+}
+
 export function isEventChatContext(value: unknown): value is EventChatContext {
   if (!object(value) || typeof value.listingTitle !== 'string' || !isFocus(value.focus) || !isRecommendation(value.recommendation)) return false;
   if (value.schemaVersion === 1) {
@@ -149,8 +162,9 @@ export function isEventChatContext(value: unknown): value is EventChatContext {
     if (value.schedule !== null && !isSchedule(value.schedule)) return false;
     if (value.scope === 'SAMDO' && value.schedule === null) return false;
   } else if (value.schemaVersion === 2) {
-    if (!onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation', 'districts', 'retrievedEvidence']) || value.scope !== 'SAMDO_DUAL' || value.schedule !== null) return false;
+    if (!onlyKeys(value, ['schemaVersion', 'scope', 'listingTitle', 'schedule', 'focus', 'recommendation', 'districts', 'unresolvedFacts', 'retrievedEvidence']) || value.scope !== 'SAMDO_DUAL' || value.schedule !== null) return false;
     if (!Array.isArray(value.districts) || value.districts.length !== 2 || !value.districts.every(isDualDistrict)) return false;
+    if (!Array.isArray(value.unresolvedFacts) || value.unresolvedFacts.length > 16 || !value.unresolvedFacts.every(isUnresolvedFact)) return false;
     // Evidence is server-owned. Any browser-authored evidence is rejected.
     if (!Array.isArray(value.retrievedEvidence) || value.retrievedEvidence.length !== 0) return false;
   } else return false;
@@ -194,7 +208,8 @@ function isFallback(value: unknown, context: EventChatContext): value is EventCh
 }
 
 export function parseEventChatRequest(value: unknown): EventChatRequest | null {
-  if (!object(value) || !onlyKeys(value, ['question', 'history', 'context', 'fallback']) || typeof value.question !== 'string' || value.question.length > EVENT_CHAT_MAX_QUESTION_CHARS) return null;
+  if (!object(value) || !onlyKeys(value, ['question', 'history', 'context', 'fallback', 'resolution']) || typeof value.question !== 'string' || value.question.length > EVENT_CHAT_MAX_QUESTION_CHARS) return null;
+  if (!['EXACT_STRUCTURED', 'ASSESSMENT_AWARE', 'FREEFORM_RAG', 'CLARIFICATION'].includes(String(value.resolution))) return null;
   if (!isEventChatContext(value.context) || !Array.isArray(value.history)) return null;
   if (!isFallback(value.fallback, value.context)) return null;
   if (!value.history.every(turn => object(turn) && onlyKeys(turn, ['role', 'text']) && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.text === 'string')) return null;
@@ -202,12 +217,13 @@ export function parseEventChatRequest(value: unknown): EventChatRequest | null {
   if (history.length > EVENT_CHAT_MAX_HISTORY_TURNS || history.reduce((sum, turn) => sum + turn.text.length, 0) > EVENT_CHAT_MAX_HISTORY_CHARS) return null;
   const question = redactEventChatText(value.question);
   if (!question) return null;
-  return { question, history, context: value.context, fallback: value.fallback };
+  return { question, history, context: value.context, fallback: value.fallback, resolution: value.resolution as EventChatRequest['resolution'] };
 }
 
 function withTrustedEvidence(request: EventChatRequest): EventChatRequest {
   if (request.context.schemaVersion !== 2) return request;
-  const retrieval = retrieveSamdoEvidence(request.question);
+  const recentUserContext = request.history.filter(turn => turn.role === 'user').slice(-2).map(turn => turn.text).join(' ');
+  const retrieval = retrieveSamdoEvidence(`${recentUserContext} ${request.question}`.trim());
   return {
     ...request,
     context: {
@@ -222,14 +238,17 @@ function withTrustedEvidence(request: EventChatRequest): EventChatRequest {
   };
 }
 
-function fallback(request: EventChatRequest, requestId: string, model: string): EventChatResponse {
+type FallbackReason = 'rate_limit' | 'prompt_injection' | 'missing_key' | 'provider_error' | 'timeout' | 'grounding_rejected' | 'parser_failure' | 'empty_evidence';
+
+function fallback(request: EventChatRequest, requestId: string, model: string, reason: FallbackReason): EventChatResponse {
+  console.warn('[event-chat]', JSON.stringify({ requestId, mode: 'fallback', reason, model }));
   return { ...request.fallback, mode: 'fallback', provider: EVENT_CHAT_PROVIDER, model, requestId };
 }
 
 const injection = /(?:system\s*prompt|시스템\s*프롬프트|이전\s*(?:지시|명령).{0,12}무시|지시문.{0,12}(?:공개|출력)|ignore\s+(?:all|previous)\s+instructions)/i;
 const unsafeOutput = /(?:<script|javascript\s*:|systemInstruction|SYSTEM_PROMPT|API[_ ]?KEY|\b(?:EVIDENCE_REQUIRED|CONDITIONAL|INELIGIBLE|ELIGIBLE)\b|\b\d+(?:\.\d+)?\s*%|당첨\s*가능성(?:이|은|가)?\s*(?:높|낮)|경쟁률\s*(?:은|이|가)?\s*\d)/i;
 
-type GeminiAnswer = { text: string; detail?: string[]; anchorSupplyType: string; anchorEligibility: string; anchorRecommendedType: string };
+type GeminiAnswer = { text: string; detail?: string[]; anchorSupplyType: string; anchorEligibility: string; anchorRecommendedType: string; evidenceAnchors?: string[] };
 
 function parseGeminiAnswer(value: unknown, context: EventChatContext): { text: string; detail?: string[] } | null {
   if (!object(value) || typeof value.text !== 'string' || value.text.length < 2 || value.text.length > 2_000) return null;
@@ -238,7 +257,14 @@ function parseGeminiAnswer(value: unknown, context: EventChatContext): { text: s
   const all = [value.text, ...(Array.isArray(value.detail) ? value.detail : [])].join('\n');
   if (unsafeOutput.test(all) || containsForbiddenShape(all)) return null;
   const text = stripMarkup(value.text);
-  const detail = Array.isArray(value.detail) ? value.detail.map(item => stripMarkup(String(item))).filter(Boolean) : undefined;
+  let detail = Array.isArray(value.detail) ? value.detail.map(item => stripMarkup(String(item))).filter(Boolean) : undefined;
+  if (context.schemaVersion === 2) {
+    const allowed = new Set(context.retrievedEvidence.map(item => `${item.districtId}|${item.section}`));
+    if (!Array.isArray(value.evidenceAnchors) || !value.evidenceAnchors.length || value.evidenceAnchors.some(anchor => typeof anchor !== 'string' || !allowed.has(anchor))) return null;
+    const anchor = value.evidenceAnchors[0];
+    const [districtId, section] = anchor.split('|');
+    detail = [...(detail ?? []).slice(0, 4), `공고문 근거 · ${districtId === 'samdo-1' ? '1지구' : '2지구'} · ${section}`];
+  }
   if (!text) return null;
   return { text, ...(detail?.length ? { detail } : {}) };
 }
@@ -265,11 +291,15 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
   const model = env.EVENT_CHAT_GEMINI_MODEL?.trim() || DEFAULT_EVENT_CHAT_MODEL;
   const requestId = (dependencies.requestId ?? randomUUID)();
   const now = (dependencies.now ?? Date.now)();
-  if (!rateAllowed(requestLike.ip ?? 'unknown', now)) return { status: 200, body: fallback(request, requestId, model) };
-  if (injection.test(request.question)) return { status: 200, body: fallback(request, requestId, model) };
+  if (request.resolution === 'EXACT_STRUCTURED' || request.resolution === 'ASSESSMENT_AWARE' || request.resolution === 'CLARIFICATION') {
+    return { status: 200, body: { ...request.fallback, mode: 'deterministic', requestId } };
+  }
+  if (!rateAllowed(requestLike.ip ?? 'unknown', now)) return { status: 200, body: fallback(request, requestId, model, 'rate_limit') };
+  if (injection.test(request.question)) return { status: 200, body: fallback(request, requestId, model, 'prompt_injection') };
+  if (request.context.schemaVersion === 2 && !request.context.retrievedEvidence.length) return { status: 200, body: fallback(request, requestId, model, 'empty_evidence') };
 
   const apiKey = env.EVENT_CHAT_GEMINI_API_KEY?.trim() || env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return { status: 200, body: fallback(request, requestId, model) };
+  if (!apiKey) return { status: 200, body: fallback(request, requestId, model, 'missing_key') };
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EVENT_CHAT_TIMEOUT_MS);
@@ -288,31 +318,34 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
           thinkingConfig: { thinkingBudget: 0 },
           responseSchema: {
             type: 'OBJECT',
-            required: ['text', 'anchorSupplyType', 'anchorEligibility', 'anchorRecommendedType'],
+            required: ['text', 'anchorSupplyType', 'anchorEligibility', 'anchorRecommendedType', ...(request.context.schemaVersion === 2 ? ['evidenceAnchors'] : [])],
             properties: {
               text: { type: 'STRING' },
               detail: { type: 'ARRAY', maxItems: 5, items: { type: 'STRING' } },
               anchorSupplyType: { type: 'STRING', enum: [request.context.focus.supplyType] },
               anchorEligibility: { type: 'STRING', enum: [request.context.focus.eligibility] },
               anchorRecommendedType: { type: 'STRING', enum: [request.context.recommendation.recommendedType ?? '없음'] },
+              ...(request.context.schemaVersion === 2 ? {
+                evidenceAnchors: { type: 'ARRAY', minItems: 1, maxItems: 3, items: { type: 'STRING', enum: request.context.retrievedEvidence.map(item => `${item.districtId}|${item.section}`) } },
+              } : {}),
             },
           },
         },
       }),
     });
-    if (!response.ok) return { status: 200, body: fallback(request, requestId, model) };
+    if (!response.ok) return { status: 200, body: fallback(request, requestId, model, 'provider_error') };
     const providerBody: any = await response.json();
     const candidate = providerBody?.candidates?.[0];
-    if (!candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) return { status: 200, body: fallback(request, requestId, model) };
+    if (!candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) return { status: 200, body: fallback(request, requestId, model, 'provider_error') };
     const raw = candidate.content?.parts?.filter((part: { thought?: boolean }) => !part.thought).map((part: { text?: string }) => part.text ?? '').join('').trim();
-    if (!raw) return { status: 200, body: fallback(request, requestId, model) };
+    if (!raw) return { status: 200, body: fallback(request, requestId, model, 'parser_failure') };
     let parsed: GeminiAnswer;
-    try { parsed = JSON.parse(raw) as GeminiAnswer; } catch { return { status: 200, body: fallback(request, requestId, model) }; }
+    try { parsed = JSON.parse(raw) as GeminiAnswer; } catch { return { status: 200, body: fallback(request, requestId, model, 'parser_failure') }; }
     const answer = parseGeminiAnswer(parsed, request.context);
-    if (!answer) return { status: 200, body: fallback(request, requestId, model) };
+    if (!answer) return { status: 200, body: fallback(request, requestId, model, 'grounding_rejected') };
     return { status: 200, body: { ...answer, mode: 'llm', provider: EVENT_CHAT_PROVIDER, model, requestId } };
-  } catch {
-    return { status: 200, body: fallback(request, requestId, model) };
+  } catch (error) {
+    return { status: 200, body: fallback(request, requestId, model, error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'provider_error') };
   } finally {
     clearTimeout(timeout);
   }

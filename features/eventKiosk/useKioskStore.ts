@@ -234,7 +234,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
   },
 
   openSamdoChat: (event, recommendation) => set({ chat: startSamdoChat(event, recommendation) }),
-  openSamdoDualChat: (event, assessment) => set({ chat: startSamdoDualChat(event, assessment) }),
+  openSamdoDualChat: (event, assessment) => set(state => ({ chat: startSamdoDualChat(event, assessment, state.answerStates) })),
 
   ask: async (event, message) => {
     const { chat, sessionKey } = get();

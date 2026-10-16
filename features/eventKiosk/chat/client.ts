@@ -5,7 +5,7 @@ function isResponse(value: unknown): value is EventChatResponse {
   const row = value as Record<string, unknown>;
   return typeof row.text === 'string'
     && row.text.length > 0
-    && (row.mode === 'llm' || row.mode === 'fallback')
+    && (row.mode === 'llm' || row.mode === 'deterministic' || row.mode === 'fallback')
     && (row.detail === undefined || (Array.isArray(row.detail) && row.detail.every(item => typeof item === 'string')));
 }
 

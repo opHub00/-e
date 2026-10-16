@@ -5,12 +5,15 @@ import ragData from '../../../data/event/samdo-dual-v2-rag.json' with { type: 'j
 import { validateImportPackage } from '../../applicationAssessment/server/importPackage.ts';
 import { buildSamdoRecommendation } from '../samdo/evaluate.ts';
 import { SAMDO_PERSONAS } from '../samdo/personas.test-data.ts';
+import { doesNotKnowPersona } from '../phase4Personas.ts';
+import { samdoInputFromAnswers } from '../samdoResult/samdoInput.ts';
 import { samdoRules } from '../samdoResult/samdoEvaluate.ts';
-import { answerSamdoDualDeterministically, buildSamdoDualChatContext } from './chat.ts';
+import { answerSamdoDualDeterministically, buildSamdoDualChatContext, resolveSamdoDualConversation } from './chat.ts';
 import { SAMDO_DISTRICTS } from './config.ts';
 import { buildSamdoDualAssessment } from './evaluate.ts';
 import { retrieveSamdoEvidence } from './rag.ts';
 import { SAMDO_DISTRICT2_DEEP_RULE_PACKAGE } from './rulePackages.ts';
+import { getUnresolvedAssessmentFacts } from './unresolved.ts';
 
 test('district 1 and district 2 final 1.8 configs stay independently bound', () => {
   const d1 = SAMDO_DISTRICTS['samdo-1'];
@@ -147,4 +150,47 @@ test('dual browser LLM context is presentation-safe and cannot author RAG eviden
   for (const forbidden of ['birthDate', 'monthlyIncome', 'householdIncome', 'totalAssets', 'parentAssets', 'factKey', 'rulePackage', 'qrToken', 'personId']) {
     assert.ok(!serialized.includes(forbidden), forbidden);
   }
+});
+
+test('assessment-aware chat resolves continuous follow-ups from only real unresolved facts', () => {
+  const assessment = buildSamdoDualAssessment(samdoInputFromAnswers(doesNotKnowPersona.answers));
+  const facts = getUnresolvedAssessmentFacts(assessment, doesNotKnowPersona.answerStates);
+  assert.ok(facts.length > 0);
+  assert.ok(facts.some(item => item.state === 'DOES_NOT_KNOW'));
+
+  const first = resolveSamdoDualConversation(assessment, '내가 둘 다 신청 가능한지', [], facts);
+  const history1 = [{ role: 'user' as const, text: '내가 둘 다 신청 가능한지' }, { role: 'assistant' as const, text: first.answer.text }];
+  const second = resolveSamdoDualConversation(assessment, '그럼 어떤 정보를 입력해야 확정적으로 추천해줄 수 있어?', history1, facts);
+  const history2 = [...history1, { role: 'user' as const, text: '그럼 어떤 정보를 입력해야 확정적으로 추천해줄 수 있어?' }, { role: 'assistant' as const, text: second.answer.text }];
+  const third = resolveSamdoDualConversation(assessment, '그중 제일 먼저 확인할 건?', history2, facts);
+
+  assert.equal(first.resolution, 'ASSESSMENT_AWARE');
+  assert.match(second.answer.text, new RegExp(`${facts.length}가지`));
+  assert.ok((second.answer.detail ?? []).every(line => !/(?:applicant|household|fact|input)\./.test(line)));
+  assert.match(third.answer.text, new RegExp(facts[0].label));
+
+  const unknown = resolveSamdoDualConversation(assessment, '내가 모르는 것만 알려줘', [], facts);
+  const unknownLabels = facts.filter(item => item.state === 'DOES_NOT_KNOW' || item.state === 'UNKNOWN').map(item => item.label);
+  assert.ok((unknown.answer.detail ?? []).every(line => unknownLabels.some(label => line.includes(label))));
+
+  const context = buildSamdoDualChatContext(assessment, '뭘 더 입력해야 해?', facts);
+  const serialized = JSON.stringify(context);
+  assert.ok(context.unresolvedFacts.length > 0);
+  assert.ok(!serialized.includes('factKey'));
+  assert.ok(!serialized.includes('parentAssets'));
+});
+
+test('comparison conversations answer objective differences before personal assessment', () => {
+  const assessment = buildSamdoDualAssessment(SAMDO_PERSONAS.find(item => item.id === 'newborn-family')!.input);
+  const objective = resolveSamdoDualConversation(assessment, '1지구와 2지구의 차이점은 뭐야?');
+  assert.match(objective.answer.text, /공급 규모, 분양가격·월 토지임대료, 당첨자 발표일/);
+  assert.doesNotMatch(objective.answer.text, /먼저 정렬|더 유리/);
+  assert.ok((objective.answer.detail ?? []).some(line => /1지구 32세대.*2지구 40세대/.test(line)));
+
+  const history = [{ role: 'user' as const, text: '1지구와 2지구의 차이점은 뭐야?' }, { role: 'assistant' as const, text: objective.answer.text }];
+  const personal = resolveSamdoDualConversation(assessment, '그러면 나한테는 어디가 더 맞아?', history);
+  const why = resolveSamdoDualConversation(assessment, '왜?', [...history, { role: 'user' as const, text: '그러면 나한테는 어디가 더 맞아?' }, { role: 'assistant' as const, text: personal.answer.text }]);
+  assert.equal(personal.resolution, 'ASSESSMENT_AWARE');
+  assert.doesNotMatch(personal.answer.text, /당첨확률.*높/);
+  assert.ok(why.answer.detail?.length);
 });

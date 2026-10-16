@@ -13,8 +13,10 @@ import { requestEventChat } from './chat/client.ts';
 import { boundedEventChatHistory, redactEventChatText } from './chat/privacy.ts';
 import type { EventChatMode, EventChatRequest } from './chat/contract.ts';
 import { SAMDO_EVENT } from './samdoEventScope.ts';
-import { answerSamdoDualDeterministically, buildSamdoDualChatContext } from './samdoDual/chat.ts';
+import { buildSamdoDualChatContext, resolveSamdoDualConversation } from './samdoDual/chat.ts';
 import type { SamdoDualAssessment } from './samdoDual/types.ts';
+import { getUnresolvedAssessmentFacts, type SamdoUnresolvedAssessmentFact } from './samdoDual/unresolved.ts';
+import type { AnswerStateMap } from './questionPolicy.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -34,6 +36,8 @@ export type KioskChat = {
   samdoRecommendation: SamdoPresentationRecommendation | null;
   /** V2 1·2지구 판정 스냅샷. 원본 프로필은 포함하지 않는다. */
   samdoDualAssessment: SamdoDualAssessment | null;
+  /** Internal keys stay in memory only; the server context receives label-only copies. */
+  samdoUnresolvedFacts: SamdoUnresolvedAssessmentFact[] | null;
   messages: Array<{
     role: 'user' | 'assistant';
     text: string;
@@ -75,6 +79,7 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
       result: null,
       samdoRecommendation: null,
       samdoDualAssessment: null,
+      samdoUnresolvedFacts: null,
       messages: [{ role: 'assistant', text: '분석을 마치면 입력하신 정보와 검수된 공고 근거를 기준으로 답해 드려요.' }],
     };
   }
@@ -87,6 +92,7 @@ export function startChat(event: LoadedEvent, evaluation: KioskEvaluation | null
     result: outcome.result,
     samdoRecommendation: null,
     samdoDualAssessment: null,
+    samdoUnresolvedFacts: null,
     messages: [{ role: 'assistant', text: `${outcome.listing.title} · ${outcome.supplyLabel} 결과와 공고 원문 근거를 기준으로 답해 드릴게요.` }],
   };
 }
@@ -111,6 +117,7 @@ export function startSamdoChat(event: LoadedEvent, recommendation: SamdoPresenta
     result: null,
     samdoRecommendation: recommendation,
     samdoDualAssessment: null,
+    samdoUnresolvedFacts: null,
     messages: [{
       role: 'assistant',
       text: focus
@@ -121,7 +128,7 @@ export function startSamdoChat(event: LoadedEvent, recommendation: SamdoPresenta
 }
 
 /** 1회 입력으로 계산된 1·2지구 결과를 같은 상담 endpoint에 안전하게 연결한다. */
-export function startSamdoDualChat(event: LoadedEvent, assessment: SamdoDualAssessment): KioskChat {
+export function startSamdoDualChat(event: LoadedEvent, assessment: SamdoDualAssessment, answerStates: AnswerStateMap = {}): KioskChat {
   const preferred = assessment.comparison.preferredDistrictId
     ? assessment.districts.find(item => item.district.id === assessment.comparison.preferredDistrictId) ?? assessment.districts[0]
     : assessment.districts[0];
@@ -140,6 +147,7 @@ export function startSamdoDualChat(event: LoadedEvent, assessment: SamdoDualAsse
     result: null,
     samdoRecommendation: null,
     samdoDualAssessment: assessment,
+    samdoUnresolvedFacts: getUnresolvedAssessmentFacts(assessment, answerStates),
     messages: [{ role: 'assistant', text: '동일한 입력으로 계산한 삼도이동 1·2지구 판정과 최종1.8 공고문 근거를 기준으로 답해 드릴게요.' }],
   };
 }
@@ -269,14 +277,18 @@ export type EventChatTransport = {
 export async function sendChat(event: LoadedEvent, chat: KioskChat, message: string, transport: EventChatTransport = {}): Promise<KioskChat> {
   const text = message.trim();
   if (!text) return chat;
+  const history = boundedEventChatHistory(chat.messages.map(item => ({ role: item.role, text: item.text })));
+  const dualResolution = chat.samdoDualAssessment
+    ? resolveSamdoDualConversation(chat.samdoDualAssessment, text, history, chat.samdoUnresolvedFacts ?? [])
+    : null;
   // 기존 deterministic 답은 항상 먼저 만든다. LLM은 이 답을 대체 계산하지 않고 설명만 풍부하게 한다.
   const deterministic = sanitizeReply(chat.samdoDualAssessment
-    ? answerSamdoDualDeterministically(chat.samdoDualAssessment, text)
+    ? dualResolution!.answer
     : chat.samdoRecommendation
       ? answerSamdo(chat.samdoRecommendation, text)
       : experienceAnswer(chat, text, evidenceOnlyFacts(event.dataset)) ?? answer(chat, text));
   const context = chat.samdoDualAssessment
-    ? buildSamdoDualChatContext(chat.samdoDualAssessment, text)
+    ? buildSamdoDualChatContext(chat.samdoDualAssessment, text, chat.samdoUnresolvedFacts ?? [])
     : buildEventChatContext(chat);
   const canUseEndpoint = Boolean(context) && (transport.allowNetwork === true || typeof window !== 'undefined');
   let response = deterministic;
@@ -285,9 +297,10 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
   if (context && canUseEndpoint) {
     const request: EventChatRequest = {
       question: redactEventChatText(text),
-      history: boundedEventChatHistory(chat.messages.map(item => ({ role: item.role, text: item.text }))),
+      history,
       context,
       fallback: deterministic,
+      resolution: dualResolution?.resolution ?? 'FREEFORM_RAG',
     };
     const remote = await requestEventChat(request, transport.fetcher ?? fetch, transport.endpoint ?? '/event-api/chat');
     if (remote) {

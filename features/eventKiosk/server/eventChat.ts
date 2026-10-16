@@ -46,11 +46,26 @@ type RequestLike = {
 
 export type EventChatHandlerResult = { status: number; body: EventChatResponse | { error: string } };
 export type EventChatEnvironment = Record<string, string | undefined>;
+export type EventChatTelemetry = {
+  requestId: string;
+  createdAt: string;
+  sanitizedQuestion: string;
+  resolver: EventChatRequest['resolution'];
+  mode: EventChatResponse['mode'];
+  provider: string | null;
+  model: string | null;
+  ragEvidenceCount: number;
+  groundingResult: 'PASSED' | 'REJECTED' | 'NOT_RUN';
+  fallbackReason: 'missing_key' | 'provider_error' | 'timeout' | 'grounding_rejected' | 'parser_failure' | 'unknown' | null;
+  latencyMs: number;
+  noticeIds: string[];
+};
 export type EventChatDependencies = {
   env?: EventChatEnvironment;
   fetcher?: typeof fetch;
   now?: () => number;
   requestId?: () => string;
+  monitor?: (record: EventChatTelemetry) => void | Promise<void>;
 };
 
 const windows = new Map<string, { startedAt: number; count: number }>();
@@ -298,15 +313,32 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
   const model = env.EVENT_CHAT_GEMINI_MODEL?.trim() || DEFAULT_EVENT_CHAT_MODEL;
   const requestId = (dependencies.requestId ?? randomUUID)();
   const now = (dependencies.now ?? Date.now)();
+  const startedAt = Date.now();
+  const complete = async (body: EventChatResponse, reason: FallbackReason | null = null, groundingResult: EventChatTelemetry['groundingResult'] = 'NOT_RUN'): Promise<EventChatHandlerResult> => {
+    const allowedReason: EventChatTelemetry['fallbackReason'] = reason === null ? null
+      : ['missing_key', 'provider_error', 'timeout', 'grounding_rejected', 'parser_failure'].includes(reason) ? reason as EventChatTelemetry['fallbackReason'] : 'unknown';
+    const noticeIds = request.context.schemaVersion === 2 ? request.context.districts.map(item => item.id) : request.context.scope === 'SAMDO' ? ['samdo-1'] : [];
+    if (dependencies.monitor) {
+      try {
+        await dependencies.monitor({ requestId, createdAt: new Date(now).toISOString(), sanitizedQuestion: request.question,
+          resolver: request.resolution, mode: body.mode, provider: body.provider ?? null, model: body.model ?? null,
+          ragEvidenceCount: request.context.schemaVersion === 2 ? request.context.retrievedEvidence.length : request.context.focus.evidence.length,
+          groundingResult, fallbackReason: allowedReason, latencyMs: Math.max(0, Date.now() - startedAt), noticeIds });
+      } catch (error) {
+        console.warn('[event-chat-monitor]', error instanceof Error ? error.message : 'MONITORING_FAILED');
+      }
+    }
+    return { status: 200, body };
+  };
   if (request.resolution === 'EXACT_STRUCTURED' || request.resolution === 'ASSESSMENT_AWARE' || request.resolution === 'CLARIFICATION') {
-    return { status: 200, body: { ...request.fallback, mode: 'deterministic', requestId } };
+    return complete({ ...request.fallback, mode: 'deterministic', requestId });
   }
-  if (!rateAllowed(requestLike.ip ?? 'unknown', now)) return { status: 200, body: fallback(request, requestId, model, 'rate_limit') };
-  if (injection.test(request.question)) return { status: 200, body: fallback(request, requestId, model, 'prompt_injection') };
-  if (request.context.schemaVersion === 2 && !request.context.retrievedEvidence.length) return { status: 200, body: fallback(request, requestId, model, 'empty_evidence') };
+  if (!rateAllowed(requestLike.ip ?? 'unknown', now)) return complete(fallback(request, requestId, model, 'rate_limit'), 'rate_limit');
+  if (injection.test(request.question)) return complete(fallback(request, requestId, model, 'prompt_injection'), 'prompt_injection');
+  if (request.context.schemaVersion === 2 && !request.context.retrievedEvidence.length) return complete(fallback(request, requestId, model, 'empty_evidence'), 'empty_evidence');
 
   const apiKey = env.EVENT_CHAT_GEMINI_API_KEY?.trim() || env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return { status: 200, body: fallback(request, requestId, model, 'missing_key') };
+  if (!apiKey) return complete(fallback(request, requestId, model, 'missing_key'), 'missing_key');
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EVENT_CHAT_TIMEOUT_MS);
@@ -340,19 +372,20 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
         },
       }),
     });
-    if (!response.ok) return { status: 200, body: fallback(request, requestId, model, 'provider_error') };
+    if (!response.ok) return complete(fallback(request, requestId, model, 'provider_error'), 'provider_error');
     const providerBody: any = await response.json();
     const candidate = providerBody?.candidates?.[0];
-    if (!candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) return { status: 200, body: fallback(request, requestId, model, 'provider_error') };
+    if (!candidate || (candidate.finishReason && candidate.finishReason !== 'STOP')) return complete(fallback(request, requestId, model, 'provider_error'), 'provider_error');
     const raw = candidate.content?.parts?.filter((part: { thought?: boolean }) => !part.thought).map((part: { text?: string }) => part.text ?? '').join('').trim();
-    if (!raw) return { status: 200, body: fallback(request, requestId, model, 'parser_failure') };
+    if (!raw) return complete(fallback(request, requestId, model, 'parser_failure'), 'parser_failure');
     let parsed: GeminiAnswer;
-    try { parsed = JSON.parse(raw) as GeminiAnswer; } catch { return { status: 200, body: fallback(request, requestId, model, 'parser_failure') }; }
+    try { parsed = JSON.parse(raw) as GeminiAnswer; } catch { return complete(fallback(request, requestId, model, 'parser_failure'), 'parser_failure'); }
     const answer = parseGeminiAnswer(parsed, request.context);
-    if (!answer) return { status: 200, body: fallback(request, requestId, model, 'grounding_rejected') };
-    return { status: 200, body: { ...answer, mode: 'llm', provider: EVENT_CHAT_PROVIDER, model, requestId } };
+    if (!answer) return complete(fallback(request, requestId, model, 'grounding_rejected'), 'grounding_rejected', 'REJECTED');
+    return complete({ ...answer, mode: 'llm', provider: EVENT_CHAT_PROVIDER, model, requestId }, null, 'PASSED');
   } catch (error) {
-    return { status: 200, body: fallback(request, requestId, model, error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'provider_error') };
+    const reason = error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'provider_error';
+    return complete(fallback(request, requestId, model, reason), reason);
   } finally {
     clearTimeout(timeout);
   }

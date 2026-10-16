@@ -26,7 +26,7 @@ test('dual chat sends structured districts and retrieved evidence to Gemini with
     fetcher: async (_url, init) => {
       providerBody = String(init?.body ?? '');
       return gemini({
-        text: '현재 판정 우선순위는 같고, 2지구의 해당 공급유형 배정 세대수가 더 많아요. 공급량은 당첨확률을 뜻하지 않아요.',
+        text: '토지는 공공이 소유하고 건물은 수분양자가 소유하며, 월 토지임대료를 납부하는 방식이에요.',
         anchorSupplyType: chatRequest.context.focus.supplyType,
         anchorEligibility: chatRequest.context.focus.eligibility,
         anchorRecommendedType: chatRequest.context.recommendation.recommendedType ?? '없음',

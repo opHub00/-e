@@ -34,7 +34,7 @@ export const EVENT_CHAT_SYSTEM_PROMPT = `당신은 완판e 제주 행사 상담 
 답변 형식:
 - 한국어 해요체, 간결하고 친절하게 답하세요.
 - text는 핵심 답변, detail은 필요할 때만 최대 5개 짧은 확인 항목입니다.
-- schemaVersion 2에서는 사용한 retrievedEvidence를 evidenceAnchors에 "districtId|section" 형식으로 1개 이상 적으세요.
+- schemaVersion 2에서는 가능하면 사용한 retrievedEvidence를 evidenceAnchors에 "districtId|section" 형식으로 적으세요. 서버가 최종 근거 일치 여부를 별도로 검증합니다.
 - JSON 스키마 이외의 텍스트를 출력하지 마세요.`;
 
 type RequestLike = {
@@ -260,8 +260,15 @@ function parseGeminiAnswer(value: unknown, context: EventChatContext): { text: s
   let detail = Array.isArray(value.detail) ? value.detail.map(item => stripMarkup(String(item))).filter(Boolean) : undefined;
   if (context.schemaVersion === 2) {
     const allowed = new Set(context.retrievedEvidence.map(item => `${item.districtId}|${item.section}`));
-    if (!Array.isArray(value.evidenceAnchors) || !value.evidenceAnchors.length || value.evidenceAnchors.some(anchor => typeof anchor !== 'string' || !allowed.has(anchor))) return null;
-    const anchor = value.evidenceAnchors[0];
+    if (!context.retrievedEvidence.length) return null;
+    if (value.evidenceAnchors !== undefined && (!Array.isArray(value.evidenceAnchors) || value.evidenceAnchors.some(anchor => typeof anchor !== 'string' || !allowed.has(anchor)))) return null;
+    const evidenceText = context.retrievedEvidence.map(item => `${item.section} ${item.textExcerpt}`).join(' ').replace(/\s+/g, '');
+    const groundedTerms = [...new Set(text.match(/[가-힣A-Za-z]{2,}/g) ?? [])]
+      .filter(term => !/^(?:그리고|하지만|따라서|있어요|입니다|해요|대한|관련|공고문)$/.test(term));
+    if (!groundedTerms.some(term => evidenceText.includes(term))) return null;
+    const anchor = Array.isArray(value.evidenceAnchors) && value.evidenceAnchors.length
+      ? value.evidenceAnchors[0]
+      : `${context.retrievedEvidence[0].districtId}|${context.retrievedEvidence[0].section}`;
     const [districtId, section] = anchor.split('|');
     detail = [...(detail ?? []).slice(0, 4), `공고문 근거 · ${districtId === 'samdo-1' ? '1지구' : '2지구'} · ${section}`];
   }
@@ -318,7 +325,7 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
           thinkingConfig: { thinkingBudget: 0 },
           responseSchema: {
             type: 'OBJECT',
-            required: ['text', 'anchorSupplyType', 'anchorEligibility', 'anchorRecommendedType', ...(request.context.schemaVersion === 2 ? ['evidenceAnchors'] : [])],
+            required: ['text', 'anchorSupplyType', 'anchorEligibility', 'anchorRecommendedType'],
             properties: {
               text: { type: 'STRING' },
               detail: { type: 'ARRAY', maxItems: 5, items: { type: 'STRING' } },

@@ -1,18 +1,20 @@
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { colors, spacing, type } from '../../../design/tokens';
-import { KpiGrid, SectionCard } from '../../../features/adminPortal/ui/AdminKit';
-import { ConsoleShell } from '../../../features/adminConsole/ConsoleShell';
-import { ShareBars } from '../../../features/adminConsole/ConsoleKit';
-import { ASSESSMENT_LABEL } from '../../../features/adminConsole/consoleModel';
-import type { AssessmentStatus, ConsoleSnapshot } from '../../../features/adminConsole/contract';
+import { colors, radius, spacing, type } from '../../../design/tokens';
+import { AdminButton, EmptyState, SectionCard } from '../../../features/adminPortal/ui/AdminKit';
+import { ConsoleShell, useConsole } from '../../../features/adminConsole/ConsoleShell';
+import { LevelBadge, ShareBars } from '../../../features/adminConsole/ConsoleKit';
+import { ASSESSMENT_LABEL, assessmentInsights, percent } from '../../../features/adminConsole/consoleModel';
+import { collected, emptyCopy } from '../../../features/adminConsole/consoleState';
+import type { ConsoleSnapshot } from '../../../features/adminConsole/contract';
 
-/** 판정 현황: 상태 분포와 사용자가 가장 많이 막히는 항목. */
+/** 판정 현황: 숫자만이 아니라 '그래서 무엇을 할지'. 급한 상태가 위로 온다. */
 export default function ConsoleAssessments() {
   return (
     <ConsoleShell
       menuKey="assessments"
       title="판정 현황"
-      subtitle="판정이 어디서 멈추는지, 어떤 항목에서 사용자가 답하지 못하는지 봐요."
+      subtitle="판정이 어디서 멈추는지, 어떤 항목에서 사용자가 답하지 못하는지, 무엇부터 손볼지 봐요."
       testID="console-assessments"
       needs={['일자별 판정 상태 집계(COMPLETE·NEEDS_USER_INPUT·INELIGIBLE·UNAVAILABLE)', '미해결 fact 집계(라벨·건수)']}
     >
@@ -22,30 +24,52 @@ export default function ConsoleAssessments() {
 }
 
 function Assessments({ snapshot }: { snapshot: ConsoleSnapshot }) {
+  const router = useRouter();
+  const { link } = useConsole();
   const { width } = useWindowDimensions();
   const two = width >= 1100;
-  const entries = Object.entries(snapshot.assessments.byStatus) as Array<[AssessmentStatus, number]>;
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-  const blockers = [...snapshot.assessments.blockers].sort((a, b) => b.count - a.count);
+  const isCollected = collected(snapshot.coverage, 'assessments');
+  const stats = snapshot.assessments;
+  const total = Object.values(stats.byStatus).reduce((sum, count) => sum + count, 0);
+  if (!isCollected || !total) return <EmptyState {...emptyCopy('assessments', isCollected)} />;
+  const insights = assessmentInsights(stats);
+  const blockers = [...stats.blockers].sort((a, b) => b.count - a.count);
   const top = blockers[0]?.count ?? 0;
+  const needs = stats.byStatus.NEEDS_USER_INPUT;
   return (
     <View style={styles.stack}>
-      <KpiGrid items={entries.map(([status, count]) => ({
-        label: ASSESSMENT_LABEL[status].label,
-        value: `${count.toLocaleString('ko-KR')}건`,
-        hint: total ? `전체의 ${Math.round((count / total) * 100)}%` : undefined,
-        tone: ASSESSMENT_LABEL[status].tone,
-      }))} />
+      <SectionCard title="상태별 다음 행동" description={`${stats.date} · 전체 ${total.toLocaleString('ko-KR')}건 · 급한 상태부터`}>
+        <View testID="console-assessment-insights" style={styles.insights}>
+          {insights.map(item => (
+            <View key={item.status} testID={`console-insight-${item.status}`} style={[styles.insight, two && styles.insightWide]}>
+              <View style={styles.insightHead}>
+                <Text style={styles.insightLabel}>{ASSESSMENT_LABEL[item.status].label}</Text>
+                <Text style={styles.code}>{item.status}</Text>
+                {item.level ? <LevelBadge level={item.level} /> : null}
+              </View>
+              <Text style={styles.insightValue}>{item.count.toLocaleString('ko-KR')}건 <Text style={styles.share}>· {percent(item.share)}</Text></Text>
+              <Text style={styles.action}>{item.action}</Text>
+              {item.level && item.target && item.target !== 'assessments' ? (
+                <AdminButton label="규칙 상태 확인" tone="quiet" icon="chevron-right" onPress={() => router.push(link(`/admin/console/${item.target}`))} />
+              ) : null}
+            </View>
+          ))}
+        </View>
+      </SectionCard>
       <View style={[styles.grid, two && styles.gridTwo]}>
         <View style={two ? styles.col : null}>
-          <SectionCard title="상태 분포" description={`${snapshot.assessments.date} · 전체 ${total.toLocaleString('ko-KR')}건`}>
-            <ShareBars testID="console-status-bars" rows={entries.map(([status, count]) => ({ key: status, label: ASSESSMENT_LABEL[status].label, count, share: total ? count / total : 0, tone: ASSESSMENT_LABEL[status].tone }))} />
+          <SectionCard title="가장 많이 막히는 항목" description={`추가 입력 필요 ${needs.toLocaleString('ko-KR')}건이 어떤 항목에서 멈췄는지`}>
+            {blockers.length ? (
+              <>
+                <ShareBars testID="console-blocker-bars" hideShare rows={blockers.map((row, index) => ({ key: row.label, label: `${index + 1}. ${row.label}`, count: row.count, share: top ? row.count / top : 0, tone: 'amber' }))} />
+                <Text style={styles.note}>1위 항목의 질문 문구·'확인 방법' 안내를 먼저 보강해요. 같은 판정에서 여러 항목이 막힐 수 있어 합이 전체보다 클 수 있어요.</Text>
+              </>
+            ) : <Text style={styles.note}>막힌 항목 집계가 아직 없어요.</Text>}
           </SectionCard>
         </View>
         <View style={two ? styles.col : null}>
-          <SectionCard title="가장 많이 막히는 항목" description="이 항목에 답하지 못해 '추가 입력 필요'로 끝난 판정 수예요.">
-            <ShareBars testID="console-blocker-bars" hideShare rows={blockers.map((row, index) => ({ key: row.label, label: `${index + 1}. ${row.label}`, count: row.count, share: top ? row.count / top : 0, tone: 'amber' }))} />
-            <Text style={styles.note}>질문 문구·안내를 바꾸거나 '확인 방법'을 보강할 우선순위로 써요.</Text>
+          <SectionCard title="상태 분포" description="막대 길이는 전체 대비 비율">
+            <ShareBars testID="console-status-bars" rows={insights.map(item => ({ key: item.status, label: ASSESSMENT_LABEL[item.status].label, count: item.count, share: item.share, tone: ASSESSMENT_LABEL[item.status].tone }))} />
           </SectionCard>
         </View>
       </View>
@@ -58,5 +82,14 @@ const styles = StyleSheet.create({
   grid: { gap: spacing.md },
   gridTwo: { flexDirection: 'row', alignItems: 'flex-start' },
   col: { flex: 1, minWidth: 0 },
+  insights: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  insight: { flexGrow: 1, flexBasis: '100%', minWidth: 0, gap: 4, padding: spacing.sm, borderRadius: radius.cardSm, borderWidth: 1, borderColor: colors.surfaceContainer },
+  insightWide: { flexBasis: '45%' },
+  insightHead: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  insightLabel: { ...type.bodyStrong, color: colors.text },
+  code: { ...type.caption, color: colors.textSubtle },
+  insightValue: { ...type.section, color: colors.text },
+  share: { ...type.bodySm, color: colors.textMuted },
+  action: { ...type.bodySm, color: colors.textMuted },
   note: { ...type.caption, color: colors.textMuted, marginTop: 8 },
 });

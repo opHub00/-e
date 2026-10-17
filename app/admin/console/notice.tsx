@@ -1,9 +1,9 @@
-import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, type } from '../../../design/tokens';
 import { AdminButton, EmptyState, SectionCard } from '../../../features/adminPortal/ui/AdminKit';
-import { ConsoleShell } from '../../../features/adminConsole/ConsoleShell';
+import { ConsoleShell, useConsole } from '../../../features/adminConsole/ConsoleShell';
 import { Field, FieldGrid, LifecycleBadge, ValidationBadge, WrapTabs } from '../../../features/adminConsole/ConsoleKit';
 import { noticeById, shortTime } from '../../../features/adminConsole/consoleModel';
 import type { ConsoleNotice, ConsoleSnapshot } from '../../../features/adminConsole/contract';
@@ -26,11 +26,12 @@ export default function ConsoleNoticeDetail() {
 }
 
 function Detail({ snapshot }: { snapshot: ConsoleSnapshot }) {
-  const { id, demo } = useLocalSearchParams<{ id?: string; demo?: string }>();
+  const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
+  const { link } = useConsole();
   const [tab, setTab] = useState<Tab>('overview');
   const notice = noticeById(snapshot, id);
-  const back = () => router.push(`/admin/console/notices${demo === '1' ? '?demo=1' : ''}` as Href);
+  const back = () => router.push(link('/admin/console/notices'));
   if (!notice) return <EmptyState title="공고를 찾을 수 없어요" body="목록에서 다시 골라 주세요." action={<AdminButton label="공고 목록" icon="arrow-back" onPress={back} />} />;
   const rules = snapshot.rules.filter(rule => rule.noticeId === notice.id);
   return (
@@ -62,7 +63,7 @@ function Detail({ snapshot }: { snapshot: ConsoleSnapshot }) {
         </SectionCard>
       ) : null}
       {tab === 'rules' ? (
-        <SectionCard title="규칙 패키지" description={`${notice.ruleVersion ?? '버전 없음'} · 규칙 ${notice.ruleCount}건 · 검토 대기 ${rules.filter(rule => rule.status === 'PENDING').length}건`} action={<AdminButton label="규칙 검토로" icon="fact-check" onPress={() => router.push(`/admin/console/rules?notice=${encodeURIComponent(notice.id)}${demo === '1' ? '&demo=1' : ''}` as Href)} />}>
+        <SectionCard title="규칙 패키지" description={`${notice.ruleVersion ?? '버전 없음'} · 규칙 ${notice.ruleCount}건 · 검토 대기 ${rules.filter(rule => rule.status === 'PENDING').length}건`} action={<AdminButton label="규칙 검토로" icon="fact-check" onPress={() => router.push(link('/admin/console/rules', { notice: notice.id }))} />}>
           <Text style={styles.body}>규칙 하나씩 근거 문장과 함께 확인하고 승인해요.</Text>
         </SectionCard>
       ) : null}
@@ -71,13 +72,13 @@ function Detail({ snapshot }: { snapshot: ConsoleSnapshot }) {
           <FieldGrid>
             <Field label="RAG 버전" value={notice.ragVersion ?? '색인 없음'} />
             <Field label="chunk 수" value={`${notice.ragChunkCount}개`} />
-            <Field label="원문 해시와 일치" value={notice.ragVersion ? '예(같은 원문에서 색인)' : '—'} />
           </FieldGrid>
         </SectionCard>
       ) : null}
       {tab === 'history' ? (
         <SectionCard title="변경 이력" description="최신 순">
           <View style={styles.list}>
+            {!notice.history.length ? <Text style={styles.body}>기록된 변경이 없어요.</Text> : null}
             {[...notice.history].sort((a, b) => b.at.localeCompare(a.at)).map(item => (
               <View key={`${item.at}-${item.summary}`} style={styles.line}>
                 <Text style={styles.time}>{shortTime(item.at)}</Text>

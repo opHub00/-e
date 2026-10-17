@@ -1,17 +1,19 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, usePathname, useRouter, type Href } from 'expo-router';
-import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { MotionPressable } from '../../components/motion/MotionPressable';
 import { colors, radius, spacing, tint, type } from '../../design/tokens';
 import { useAdminAccess } from '../adminPortal/useAdminAccess';
-import { adminAccessMessage } from '../adminPortal/access';
 import { useAttached, useIsWide } from '../adminPortal/useIsWide';
 import { ADMIN_LOGIN_ROUTE } from '../adminPortal/navigation';
-import { AdminButton, NotConnected, SectionCard } from '../adminPortal/ui/AdminKit';
+import { Notice } from '../adminPortal/ui/AdminKit';
 import { BrandMark } from '../eventKiosk/brand/BrandMark';
 import { useAuthStore } from '../auth/useAuthStore';
+import { DataStamp, LoadingView, StateView } from './ConsoleKit';
+import { ConsoleLoadError, LOAD_ERROR_COPY, missingSections, SECTION_LABEL, type ConsoleLoadErrorKind } from './consoleState';
 import type { ConsoleSnapshot } from './contract';
+import { demoClock, demoScenario, parseDemoState, type DemoState } from './demoScenarios';
 import { connectedSnapshot, consoleSource } from './source';
 
 type IconName = ComponentProps<typeof MaterialIcons>['name'];
@@ -28,90 +30,171 @@ export const CONSOLE_MENU: Array<{ key: string; label: string; hint: string; hre
 
 const WIDE = 1024;
 
+export type ConsoleMode = 'CONNECTED' | 'DEMO';
+
+/** 화면이 쓰는 공통 값: 기준 '지금'(예시 모드는 예시 기준 시각), 새로고침, 콘솔 안 링크. */
+export type ConsoleContextValue = { now: Date; refresh: () => void; link: (path: string, query?: Record<string, string>) => Href; mode: ConsoleMode };
+const ConsoleContext = createContext<ConsoleContextValue | null>(null);
+export function useConsole(): ConsoleContextValue {
+  const value = useContext(ConsoleContext);
+  if (!value) throw new Error('useConsole must be used inside ConsoleShell');
+  return value;
+}
+
 type Props = {
   menuKey: string;
   title: string;
   subtitle: string;
   testID: string;
-  children: (snapshot: ConsoleSnapshot, mode: 'CONNECTED' | 'DEMO') => ReactNode;
-  /** 연결 전 화면에 적을 '필요한 것' */
+  children: (snapshot: ConsoleSnapshot, mode: ConsoleMode) => ReactNode;
+  /** 오류 화면에 적는 '이 화면이 기다리는 데이터' */
   needs: string[];
 };
+
+type View_ =
+  | { kind: 'LOADING' }
+  | { kind: 'ERROR'; error: ConsoleLoadErrorKind; status: number | null }
+  | { kind: 'READY'; snapshot: ConsoleSnapshot; mode: ConsoleMode; refreshError: ConsoleLoadErrorKind | null };
+
+const DEMO_STATE_LABEL: Record<DemoState, string> = {
+  populated: '기본', loading: '불러오는 중', empty: '빈 데이터', partial: '부분 데이터', stale: '오래된 데이터', large: '많은 데이터(100건)',
+  error: '서버 오류', timeout: '연결 지연', network: '네트워크 끊김', auth: '권한 확인 불가', unauthorized: '로그인 필요', forbidden: '권한 없음',
+};
+
+/** 실제 운영 데이터: 권한 확인 → 불러오기. 새로고침이 실패하면 마지막 데이터는 남기고 실패를 알린다. */
+function useConnectedView(enabled: boolean, nonce: number): View_ {
+  const access = useAdminAccess();
+  const token = useAuthStore(state => state.session?.access_token ?? null);
+  const [state, setState] = useState<{ snapshot: ConsoleSnapshot | null; error: { kind: ConsoleLoadErrorKind; status: number | null } | null; loading: boolean }>({ snapshot: null, error: null, loading: true });
+  useEffect(() => {
+    if (!enabled || access.status !== 'ALLOWED') return;
+    if (!token) { setState(current => ({ ...current, loading: false, error: { kind: 'UNAUTHORIZED', status: null } })); return; }
+    let active = true;
+    setState(current => ({ ...current, loading: true }));
+    connectedSnapshot(token).then(snapshot => {
+      if (active) setState({ snapshot, error: null, loading: false });
+    }).catch((error: unknown) => {
+      const kind = error instanceof ConsoleLoadError ? error.kind : 'SERVER';
+      const status = error instanceof ConsoleLoadError ? error.status : null;
+      if (active) setState(current => ({ ...current, loading: false, error: { kind, status } }));
+    });
+    return () => { active = false; };
+  }, [access.status, enabled, nonce, token]);
+  if (access.status === 'LOADING') return { kind: 'LOADING' };
+  if (access.status === 'SIGNED_OUT') return { kind: 'ERROR', error: 'UNAUTHORIZED', status: null };
+  if (access.status === 'FORBIDDEN') return { kind: 'ERROR', error: 'FORBIDDEN', status: null };
+  if (access.status === 'ERROR') return { kind: 'ERROR', error: access.code === 'NETWORK' ? 'NETWORK' : 'AUTH_UNAVAILABLE', status: null };
+  if (state.snapshot) return { kind: 'READY', snapshot: state.snapshot, mode: 'CONNECTED', refreshError: state.error?.kind ?? null };
+  if (state.error) return { kind: 'ERROR', error: state.error.kind, status: state.error.status };
+  return { kind: 'LOADING' };
+}
 
 /**
  * 콘솔 껍데기. 일반 사용자 화면과 구분되는 운영 도구 모양(어두운 사이드바)이지만 완판e 토큰을 쓴다.
  * 넓은 화면: 왼쪽 사이드바. 좁은 화면: 위쪽 메뉴 격자(줄바꿈, 가로 스크롤 없음).
- * 실제 데이터 모드는 관리자 권한을 확인한다. 예시 데이터(?demo=1, Demo 빌드)만 로그인 없이 열린다.
+ *
+ * 상태: 불러오는 중 · 로그인 필요 · 권한 없음 · 권한 확인 불가 · 서버 오류 · 네트워크 · 지연 · 준비됨(부분·오래된 데이터 포함).
+ * 예시 데이터(?demo=1, Demo 빌드)만 로그인 없이 열리고, ?state= 로 각 상태를 그려 볼 수 있다.
  */
 export function ConsoleShell({ menuKey, title, subtitle, testID, children, needs }: Props) {
-  const params = useLocalSearchParams<{ demo?: string }>();
+  const params = useLocalSearchParams<{ demo?: string; state?: string }>();
   const attached = useAttached();
-  const access = useAdminAccess();
-  const token = useAuthStore(state => state.session?.access_token ?? null);
-  const [connected, setConnected] = useState<ConsoleSnapshot | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  useEffect(() => {
-    setConnected(null);
-    setLoadError(null);
-    if (!attached || access.status !== 'ALLOWED' || !token || consoleSource(params.demo).status === 'DEMO') return;
-    let active = true;
-    void connectedSnapshot(token).then(snapshot => {
-      if (active) { setConnected(snapshot); setLoadError(null); }
-    }).catch(() => {
-      if (active) { setConnected(null); setLoadError('운영 데이터 서버에 연결하지 못했어요.'); }
-    });
-    return () => { active = false; };
-  }, [access.status, attached, params.demo, token]);
-  const source = consoleSource(attached ? params.demo : undefined, access.status === 'ALLOWED' ? connected : null);
-  const demo = source.status === 'DEMO';
-  return (
-    <ConsoleChrome menuKey={menuKey} demo={demo}>
-      {/* 라우터 기본 머리(경로 이름)를 숨긴다. 콘솔은 자체 사이드바·제목을 쓴다. */}
-      <Stack.Screen options={{ headerShown: false, title: `${title} · 운영 콘솔` }} />
-      <View testID={testID} style={styles.page}>
-        <View style={styles.pageHead}>
-          <Text accessibilityRole="header" style={styles.pageTitle}>{title}</Text>
-          <Text style={styles.pageSubtitle}>{subtitle}</Text>
-        </View>
-        {demo ? (
-          <View testID="console-demo-banner" style={styles.demoBanner}>
-            <MaterialIcons name="science" size={18} color={tint.amber.fg} />
-            <Text style={styles.demoText}>예시 데이터로 보는 화면이에요 · 실제 운영 값이 아니고 저장되지 않아요</Text>
-          </View>
-        ) : null}
-        {!attached ? <View style={styles.center}><ActivityIndicator color={colors.primary} /></View>
-          : source.status === 'NOT_CONNECTED' ? <Gated><NotConnected title={loadError ?? `${title} 데이터 연결 중`} purpose={subtitle} needs={needs} /></Gated>
-            : source.status === 'DEMO' ? children(source.snapshot, 'DEMO')
-              : <Gated>{children(source.snapshot, 'CONNECTED')}</Gated>}
-      </View>
-    </ConsoleChrome>
-  );
-}
-
-/** 실제 데이터 모드의 관리자 권한 확인. */
-function Gated({ children }: { children: ReactNode }) {
-  const access = useAdminAccess();
   const router = useRouter();
-  if (access.status === 'LOADING') return <View style={styles.center}><ActivityIndicator color={colors.primary} /><Text style={styles.muted}>권한을 확인하는 중이에요</Text></View>;
-  if (access.status === 'ALLOWED') return <>{children}</>;
-  const body = access.status === 'SIGNED_OUT' ? '운영 콘솔은 관리자 계정으로만 열 수 있어요.'
-    : access.status === 'FORBIDDEN' ? '이 계정은 운영 권한이 없어요.'
-      : adminAccessMessage(access.code);
+  const [nonce, setNonce] = useState(0);
+  const [clock, setClock] = useState(() => new Date());
+  const demo = attached && consoleSource(params.demo).status === 'DEMO';
+  const demoState = parseDemoState(params.state);
+  const connected = useConnectedView(attached && !demo, nonce);
+  const scenario = demo ? demoScenario(demoState) : null;
+  const view: View_ = !attached ? { kind: 'LOADING' }
+    : scenario ? (scenario.kind === 'READY' ? { kind: 'READY', snapshot: scenario.snapshot, mode: 'DEMO', refreshError: null } : scenario)
+      : connected;
+  // 실제 모드의 '지금'은 1분마다 갱신해 '몇 분 전' 표시가 흐르게 한다.
+  useEffect(() => {
+    if (demo) return;
+    const timer = setInterval(() => setClock(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, [demo]);
+  const now = demo ? demoClock() : clock;
+  const refresh = useCallback(() => { setClock(new Date()); setNonce(value => value + 1); }, []);
+  const link = useCallback((path: string, query: Record<string, string> = {}) => {
+    const all = { ...query, ...(demo ? { demo: '1', ...(demoState !== 'populated' ? { state: demoState } : {}) } : {}) };
+    const search = Object.entries(all).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+    return `${path}${search ? `?${search}` : ''}` as Href;
+  }, [demo, demoState]);
+  const login = () => router.replace(ADMIN_LOGIN_ROUTE as Href);
   return (
-    <SectionCard title="관리자 권한이 필요해요" description={body}>
-      <AdminButton label="관리자 로그인" icon="login" onPress={() => router.replace(ADMIN_LOGIN_ROUTE as Href)} />
-    </SectionCard>
+    <ConsoleContext.Provider value={{ now, refresh, link, mode: demo ? 'DEMO' : 'CONNECTED' }}>
+      <ConsoleChrome menuKey={menuKey} demo={demo} link={link}>
+        {/* 라우터 기본 머리(경로 이름)를 숨긴다. 콘솔은 자체 사이드바·제목을 쓴다. */}
+        <Stack.Screen options={{ headerShown: false, title: `${title} · 운영 콘솔` }} />
+        <View testID={testID} style={styles.page}>
+          <View style={styles.pageHead}>
+            <Text accessibilityRole="header" style={styles.pageTitle}>{title}</Text>
+            <Text style={styles.pageSubtitle}>{subtitle}</Text>
+          </View>
+          {demo ? (
+            <View testID="console-demo-banner" style={styles.demoBanner}>
+              <MaterialIcons name="science" size={18} color={tint.amber.fg} />
+              <Text style={styles.demoText}>예시 데이터로 보는 화면이에요 · 실제 운영 값이 아니고 저장되지 않아요{demoState !== 'populated' ? ` · 상태: ${DEMO_STATE_LABEL[demoState]}` : ''}</Text>
+            </View>
+          ) : null}
+          {view.kind === 'LOADING' ? <LoadingView /> : null}
+          {view.kind === 'ERROR' ? (
+            <View style={styles.page}>
+              <StateView kind={view.error} status={view.status} onRetry={refresh} onLogin={login} />
+              {view.error === 'SERVER' || view.error === 'TIMEOUT' ? <Text style={styles.needs}>이 화면이 기다리는 데이터: {needs.join(' · ')}</Text> : null}
+            </View>
+          ) : null}
+          {view.kind === 'READY' ? (
+            <>
+              <DataStamp generatedAt={view.snapshot.generatedAt} now={now} onRefresh={refresh} missing={missingSections(view.snapshot).map(section => SECTION_LABEL[section])} />
+              {view.refreshError ? (
+                <Notice tone="amber" icon="sync-problem">새로고침 실패 · {LOAD_ERROR_COPY[view.refreshError].title}. 아래는 마지막으로 받은 데이터예요.</Notice>
+              ) : null}
+              {children(view.snapshot, view.mode)}
+            </>
+          ) : null}
+        </View>
+      </ConsoleChrome>
+    </ConsoleContext.Provider>
   );
 }
 
-function ConsoleChrome({ menuKey, demo, children }: { menuKey: string; demo: boolean; children: ReactNode }) {
+/**
+ * 아래 여백 맞추기: 내용이 화면에 들어맞는데 아래 여백 때문에만 생기는 스크롤을 없앤다.
+ * 내용(여백 제외)이 들어맞으면 여백을 남는 만큼으로 줄이고, 넘치면 원래 여백을 쓴다.
+ * 여백을 바꿔도 '여백 제외 내용 높이'는 그대로라 값이 흔들리지 않는다.
+ */
+function useFittedBottom(base: number) {
+  const [viewport, setViewport] = useState(0);
+  // 내용 높이는 잴 때 쓰인 여백과 함께 저장한다(여백을 뺀 순수 내용 높이를 정확히 구하려고).
+  const [content, setContent] = useState<{ height: number; padding: number } | null>(null);
+  const [padding, setPadding] = useState(base);
+  const paddingRef = useRef(base);
+  paddingRef.current = padding;
+  useEffect(() => {
+    if (!viewport || !content) return;
+    const inner = content.height - content.padding;
+    const next = inner <= viewport ? Math.max(0, Math.min(base, viewport - inner)) : base;
+    if (next !== paddingRef.current) setPadding(next);
+  }, [base, content, viewport]);
+  return {
+    padding,
+    onLayout: (event: { nativeEvent: { layout: { height: number } } }) => setViewport(Math.round(event.nativeEvent.layout.height)),
+    onContentSizeChange: (_width: number, height: number) => setContent({ height: Math.round(height), padding: paddingRef.current }),
+  };
+}
+
+function ConsoleChrome({ menuKey, demo, link, children }: { menuKey: string; demo: boolean; link: ConsoleContextValue['link']; children: ReactNode }) {
   const wide = useIsWide(WIDE);
   const { width, height } = useWindowDimensions();
   // 노트북 높이(≤800)에서는 위아래 여백만 줄여 내용이 들어맞는데도 생기는 스크롤을 없앤다.
   const short = height > 0 && height <= 800;
   const router = useRouter();
   const pathname = usePathname();
-  const go = (href: string) => router.push(`${href}${demo ? '?demo=1' : ''}` as Href);
+  const go = (href: string) => router.push(link(href));
+  const fit = useFittedBottom(wide ? (short ? spacing.sm : spacing.xl) : spacing.md);
   const columns = width >= 700 ? 3 : 2;
   const brand = (
     <View style={styles.brandRow}>
@@ -150,12 +233,12 @@ function ConsoleChrome({ menuKey, demo, children }: { menuKey: string; demo: boo
             <Text style={styles.navHint}>기존 운영 화면</Text>
           </MotionPressable>
         </View>
-        <ScrollView style={styles.main} contentContainerStyle={[styles.mainContent, short && styles.mainContentShort]}>{children}</ScrollView>
+        <ScrollView style={styles.main} onLayout={fit.onLayout} onContentSizeChange={fit.onContentSizeChange} contentContainerStyle={[styles.mainContent, short && styles.mainContentShort, { paddingBottom: fit.padding }]}>{children}</ScrollView>
       </View>
     );
   }
   return (
-    <ScrollView style={styles.narrowRoot} contentContainerStyle={styles.narrowContent}>
+    <ScrollView style={styles.narrowRoot} onLayout={fit.onLayout} onContentSizeChange={fit.onContentSizeChange} contentContainerStyle={[styles.narrowContent, { paddingBottom: fit.padding }]}>
       <View style={styles.narrowHead}>{brand}</View>
       <View testID="console-nav-grid" style={styles.navGrid}>{items}</View>
       {children}
@@ -198,5 +281,6 @@ const styles = StyleSheet.create({
   demoBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: spacing.sm, borderRadius: radius.button, backgroundColor: tint.amber.bg },
   demoText: { ...type.label, color: tint.amber.fg, flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: spacing.xl },
+  needs: { ...type.caption, color: colors.textMuted },
   muted: { ...type.body, color: colors.textMuted },
 });

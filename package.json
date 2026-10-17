@@ -91,7 +91,8 @@
     "qa:ui-quality": "node scripts/ui-quality-qa.mjs",
     "test:admin-console:e2e": "node scripts/admin-console-e2e.mjs",
     "qa:copilot": "node scripts/event-samdo-copilot-qa.mjs",
-    "qa:ui-compare": "node scripts/ui-quality-compare.mjs"
+    "qa:ui-compare": "node scripts/ui-quality-compare.mjs",
+    "qa:admin-ops": "node scripts/admin-ops-qa.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

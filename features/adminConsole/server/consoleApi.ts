@@ -1,6 +1,17 @@
-import { noticePlatform } from '../../eventKiosk/noticePlatform/index.ts';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { buildProductV3AdminSeed } from '../../productV3/admin/seed.ts';
 import { buildConnectedConsoleSnapshot } from '../connectedAdapter.ts';
+
+type NoticePlatformModule = typeof import('../../eventKiosk/noticePlatform/index.ts');
+// Keep Node's native ESM loader for the approved rule packages' JSON import attributes.
+// Vercel's function bundler otherwise compiles that transitive graph as CommonJS.
+const nativeImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<unknown>;
+
+async function loadNoticePlatform(): Promise<NoticePlatformModule['noticePlatform']> {
+  const module = await nativeImport(pathToFileURL(join(process.cwd(), 'features/eventKiosk/noticePlatform/index.ts')).href) as NoticePlatformModule;
+  return module.noticePlatform;
+}
 
 type Request = { method?: string; headers?: Record<string, string | string[] | undefined> };
 type Reply = { status: number; body: unknown };
@@ -21,6 +32,7 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   try { role = await dependencies.authorize(token); }
   catch { return { status: 503, body: { error: 'ADMIN_AUTH_UNAVAILABLE' } }; }
   if (!role) return { status: 403, body: { error: 'FORBIDDEN' } };
+  const noticePlatform = await loadNoticePlatform();
   const seed = buildProductV3AdminSeed(noticePlatform);
   const ragChunkCounts = Object.fromEntries(seed.notices.map(notice => [notice.id, noticePlatform.ragSource(notice.id).chunks.length]));
   return {

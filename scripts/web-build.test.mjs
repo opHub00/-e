@@ -43,7 +43,7 @@ test('Product V3 admin function packages its authenticated server and notice dep
   const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
   const includeFiles = config.functions?.['api/admin-api/product-v3.ts']?.includeFiles ?? '';
   assert.match(includeFiles, /adminConsole\/\*\*/);
-  assert.match(includeFiles, /productV3\/admin\/\*\*/);
+  assert.match(includeFiles, /productV3\/\*\*/);
   assert.match(includeFiles, /noticePlatform\/\*\*/);
   assert.match(includeFiles, /applicationAssessment\/\*\*/);
   assert.match(includeFiles, /eventKiosk\/\*\*/);
@@ -54,6 +54,10 @@ test('Product V3 admin function packages its authenticated server and notice dep
   const endpoint = await readFile(new URL('../api/admin-api/product-v3.ts', import.meta.url), 'utf8');
   assert.match(endpoint, /loadConsoleModule\(\)/);
   assert.doesNotMatch(endpoint, /^import .*consoleApi\.ts/m, 'server module must use native ESM, not a CJS bundle import');
+  for (const scope of ['adminConsole', 'productV3', 'noticePlatform', 'profile', 'applicationAssessment', 'eventKiosk']) {
+    const marker = JSON.parse(await readFile(new URL(`../features/${scope}/package.json`, import.meta.url), 'utf8'));
+    assert.equal(marker.type, 'module', `${scope} must load with Node native ESM in the Preview function`);
+  }
 });
 
 test('E2E environment is explicit and does not mutate its parent environment', () => {

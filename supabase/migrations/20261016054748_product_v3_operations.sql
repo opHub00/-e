@@ -54,7 +54,7 @@ alter table public.product_v3_ai_monitoring enable row level security;
 alter table public.product_v3_assessment_monitoring enable row level security;
 alter table public.product_v3_admin_audit_log enable row level security;
 
-revoke all on public.product_v3_ai_monitoring, public.product_v3_assessment_monitoring, public.product_v3_admin_audit_log from public, anon, authenticated;
+revoke all on public.product_v3_ai_monitoring, public.product_v3_assessment_monitoring, public.product_v3_admin_audit_log from public, anon, authenticated, service_role;
 grant select, insert on public.product_v3_ai_monitoring, public.product_v3_assessment_monitoring, public.product_v3_admin_audit_log to service_role;
 
 commit;

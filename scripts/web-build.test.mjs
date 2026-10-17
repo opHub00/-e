@@ -31,6 +31,7 @@ test('event chat function packages its server contract, privacy boundary and tru
   assert.match(includeFiles, /features\/eventKiosk\/server\/eventChat\.ts/);
   assert.match(includeFiles, /features\/eventKiosk\/chat\/\{contract\.ts,privacy\.ts,package\.json\}/);
   assert.match(includeFiles, /features\/eventKiosk\/samdoDual\/\{rag\.ts,types\.ts,package\.json\}/);
+  assert.match(includeFiles, /features\/productV3\/admin\/staging\*\.ts/);
   assert.match(includeFiles, /data\/event\/samdo-dual-v2-rag\.json/);
   assert.doesNotMatch(includeFiles, /features\/\*\*/);
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');

@@ -12,10 +12,10 @@ type ApiRequest = { method?: string; headers: Record<string, string | string[] |
 type ApiResponse = { setHeader(name: string, value: string): void; status(code: number): ApiResponse; json(body: unknown): void };
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
-  const { authorizeProductV3Admin, handleProductV3ConsoleRequest } = await loadConsoleModule();
+  const { authorizeProductV3Admin, handleProductV3ConsoleRequest, loadProductV3StagingSnapshot } = await loadConsoleModule();
   const result = await handleProductV3ConsoleRequest(
     { method: request.method, headers: request.headers },
-    { authorize: token => authorizeProductV3Admin(token, process.env) },
+    { authorize: token => authorizeProductV3Admin(token, process.env), loadSnapshot: () => loadProductV3StagingSnapshot(process.env) },
   );
   response.setHeader('Cache-Control', 'no-store');
   response.status(result.status).json(result.body);

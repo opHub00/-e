@@ -52,16 +52,19 @@ test('demo data is labelled and isolated; console source gates demo behind ?demo
   assert.ok(!/\d{6}-\d{7}|010-\d{4}|@[a-z]+\./.test(JSON.stringify(CONSOLE_DEMO_SNAPSHOT)));
 });
 
-test('connected console is server-authorized, read-only and uses real notice contracts', async () => {
+test('connected console is server-authorized, read-only and returns only its injected snapshot', async () => {
   const authorized = { authorize: async (token: string) => token === 'test-token' ? 'reviewer' as const : null,
-    now: () => '2026-10-17T00:00:00.000Z' };
+    loadSnapshot: async () => ({ ...CONSOLE_DEMO_SNAPSHOT, notices: CONSOLE_DEMO_SNAPSHOT.notices.map(notice => ({ ...notice, title: notice.title.replace('[예시]', '') })), errors: [] }) };
   assert.equal((await handleProductV3ConsoleRequest({ method: 'GET' }, authorized)).status, 401);
   assert.equal((await handleProductV3ConsoleRequest({ method: 'GET', headers: { authorization: 'Bearer invalid' } }, authorized)).status, 403);
   assert.equal((await handleProductV3ConsoleRequest({ method: 'POST', headers: { authorization: 'Bearer test-token' } }, authorized)).status, 405);
   const result = await handleProductV3ConsoleRequest({ method: 'GET', headers: { authorization: 'Bearer test-token' } }, authorized);
   assert.equal(result.status, 200);
   const snapshot = result.body as typeof CONSOLE_DEMO_SNAPSHOT;
-  assert.deepEqual(snapshot.notices.map(notice => notice.id).sort(), ['samdo-1', 'samdo-2']);
   assert.ok(snapshot.notices.every(notice => !notice.title.startsWith('[예시]')));
-  assert.ok(snapshot.errors.some(error => error.message.includes('운영 DB 연결 대기')));
+  assert.deepEqual(snapshot.errors, []);
+  const unavailable = await handleProductV3ConsoleRequest({ method: 'GET', headers: { authorization: 'Bearer test-token' } }, {
+    authorize: authorized.authorize, loadSnapshot: async () => { throw new Error('service-key-or-db-detail'); },
+  });
+  assert.deepEqual(unavailable, { status: 503, body: { error: 'ADMIN_STAGING_DATA_UNAVAILABLE' } });
 });

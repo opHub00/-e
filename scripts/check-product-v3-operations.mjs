@@ -19,6 +19,7 @@ try {
     values('audit-1','admin-1','admin','APPROVE_RULE_PACKAGE','RULE_PACKAGE','pkg-1','isolated verification')`);
   ok((await db.query('select count(*)::int count from public.product_v3_ai_monitoring')).rows[0].count === 1, 'AI row stored');
   await rejects(() => db.query("update public.product_v3_admin_audit_log set reason='changed' where id='audit-1'"), 'audit is append-only');
+  await rejects(() => db.query("delete from public.product_v3_admin_audit_log where id='audit-1'"), 'audit cannot be deleted');
   await rejects(() => db.query(`insert into public.product_v3_ai_monitoring(request_id,sanitized_question,resolver,mode,rag_evidence_count,grounding_result,latency_ms,notice_ids)
     values('bad','x','EXACT','fallback',0,'NOT_RUN',1,'[]')`), 'fallback requires reason');
   for (const role of ['anon', 'authenticated']) {
@@ -29,8 +30,17 @@ try {
     }
     await db.exec('reset role');
   }
+  const tables = ['product_v3_ai_monitoring','product_v3_assessment_monitoring','product_v3_admin_audit_log'];
+  const rls = await db.query("select relname, relrowsecurity from pg_class where relnamespace = 'public'::regnamespace and relname = any($1::text[])", [tables]);
+  ok(rls.rows.length === 3 && rls.rows.every(row => row.relrowsecurity), 'all exposed telemetry tables enable RLS');
+  const indexes = await db.query("select indexname from pg_indexes where schemaname='public' and indexname like 'product_v3_%_idx'");
+  ok(indexes.rows.length === 4, 'all four monitoring/audit indexes exist');
   await db.exec('set role service_role');
   ok((await db.query('select count(*)::int count from public.product_v3_assessment_monitoring')).rows[0].count === 1, 'service role reads telemetry');
+  for (const table of tables) {
+    for (const privilege of ['SELECT', 'INSERT']) ok((await db.query('select has_table_privilege(current_user,$1,$2) allowed', [`public.${table}`, privilege])).rows[0].allowed, `service role ${privilege} ${table}`);
+    for (const privilege of ['UPDATE', 'DELETE']) ok(!(await db.query('select has_table_privilege(current_user,$1,$2) allowed', [`public.${table}`, privilege])).rows[0].allowed, `service role cannot ${privilege} ${table}`);
+  }
   await db.exec('reset role');
   console.log(`Product V3 operations SQL/RLS: ${checks} checks passed (isolated PGlite; no remote connection)`);
 } finally { await db.close(); }

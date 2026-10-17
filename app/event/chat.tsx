@@ -154,7 +154,7 @@ export default function ChatScreen() {
     if (!text.trim() || busy) return;
     setDraft('');
     const intent = copilotIntent(text);
-    const turn = dual ? runCopilotTurn(noticePlatform, {
+    const turn = dual && (intent.kind === 'RECOMMEND' || intent.kind === 'COMPARE') ? runCopilotTurn(noticePlatform, {
       profile: { ...samdoInputFromAnswers(answers), answerStates },
       noticeIds: noticePlatform.getActiveNotices().map(notice => notice.id),
       conversation: chat.messages.map(message => ({ role: message.role, text: message.text })),

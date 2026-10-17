@@ -304,7 +304,7 @@ export function CopilotWhatIfCard({
               </View>
               <Text style={[d.type.caption, styles.muted]}>
                 {row.changed || row.newlyEligible.length || row.noLongerEligible.length
-                  ? [row.newlyEligible.length ? `새로 신청 가능: ${row.newlyEligible.join(', ')}` : '', row.noLongerEligible.length ? `신청 어려워짐: ${row.noLongerEligible.join(', ')}` : ''].filter(Boolean).join(' · ') || '추천 유형이 바뀌어요'
+                  ? [row.newlyEligible.length ? `새로 신청 가능: ${row.newlyEligible.join(', ')}` : '', row.noLongerEligible.length ? `신청 어려워짐: ${row.noLongerEligible.join(', ')}` : ''].filter(Boolean).join(' · ') || '판정 결과가 달라져요'
                   : '이 가정으로는 결과가 달라지지 않아요'}
               </Text>
             </View>

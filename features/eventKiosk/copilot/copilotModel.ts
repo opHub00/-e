@@ -270,7 +270,7 @@ export function copilotWhatIf(answers: KioskAnswers, fact: CopilotWhatIfFact, va
         label: DISTRICT_LABEL[district.district.id],
         before,
         after,
-        changed: genericDiff ? genericDiff.recommendedTypeBefore !== genericDiff.recommendedTypeAfter || genericDiff.officialScoreChanged || genericDiff.newlyEligibleTypes.length > 0 || genericDiff.noLongerEligibleTypes.length > 0 : false,
+        changed: genericDiff ? genericDiff.recommendedTypeBefore !== genericDiff.recommendedTypeAfter || before.headline !== after.headline || before.tone !== after.tone : false,
         newlyEligible: genericDiff?.newlyEligibleTypes.map(labelOf) ?? [],
         noLongerEligible: genericDiff?.noLongerEligibleTypes.map(labelOf) ?? [],
       };

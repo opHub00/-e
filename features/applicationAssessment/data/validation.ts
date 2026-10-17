@@ -88,7 +88,7 @@ export function score(key: string, config: unknown, ev: Evidence): ScoreRule {
     const max = b.max === undefined ? undefined : scalar(b.max);
     if ((min !== undefined && typeof min !== 'number') || (max !== undefined && typeof max !== 'number')) throw new Error('band bounds');
     if (min !== undefined && max !== undefined && min > max) throw new Error('band order');
-    return { ...(min === undefined ? {} : { min }), ...(max === undefined ? {} : { max }), points: integer(b.points), ...(b.notApplicable === true ? { notApplicable: true as const } : {}) };
+    return { ...(min === undefined ? {} : { min: min as number }), ...(max === undefined ? {} : { max: max as number }), points: integer(b.points), ...(b.notApplicable === true ? { notApplicable: true as const } : {}) };
   });
   if (bands && (!bands.length || bands.some((b, i) => bands.some((other, j) => i < j && (b.min ?? -Infinity) <= (other.max ?? Infinity) && (other.min ?? -Infinity) <= (b.max ?? Infinity))))) throw new Error('empty or overlapping bands');
   return { id: key, label: string(c.label), fact: fact(c.fact), bands, evidence: ev };

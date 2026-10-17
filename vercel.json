@@ -15,7 +15,7 @@
       "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/{contract.ts,privacy.ts,package.json},features/eventKiosk/samdoDual/{rag.ts,types.ts,package.json},data/event/samdo-dual-v2-rag.json}"
     },
     "api/admin-api/product-v3.ts": {
-      "includeFiles": "{features/{noticePlatform/**,profile/domain.ts,applicationAssessment/**,eventKiosk/{samdo/**,samdoDual/**,samdoResult/**,noticePlatform/**,*.ts,frozen/domain/profile.ts}},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+      "includeFiles": "{features/{adminConsole/**,productV3/admin/**,noticePlatform/**,profile/domain.ts,applicationAssessment/**,eventKiosk/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
     }
   },
   "headers": [

@@ -39,6 +39,23 @@ test('event chat function packages its server contract, privacy boundary and tru
   assert.deepEqual(JSON.parse(await readFile(new URL('../features/eventKiosk/samdoDual/package.json', import.meta.url), 'utf8')), { type: 'module' });
 });
 
+test('Product V3 admin function packages its authenticated server and notice dependencies', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const includeFiles = config.functions?.['api/admin-api/product-v3.ts']?.includeFiles ?? '';
+  assert.match(includeFiles, /adminConsole\/\*\*/);
+  assert.match(includeFiles, /productV3\/admin\/\*\*/);
+  assert.match(includeFiles, /noticePlatform\/\*\*/);
+  assert.match(includeFiles, /applicationAssessment\/\*\*/);
+  assert.match(includeFiles, /eventKiosk\/\*\*/);
+  assert.match(includeFiles, /assessment-rules\/\*v1\.8\.json/);
+  assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
+  assert.doesNotMatch(includeFiles, /features\/\*\*/);
+  assert.ok(config.rewrites?.some(row => row.source === '/admin-api/product-v3' && row.destination === '/api/admin-api/product-v3'));
+  const endpoint = await readFile(new URL('../api/admin-api/product-v3.ts', import.meta.url), 'utf8');
+  assert.match(endpoint, /loadConsoleModule\(\)/);
+  assert.doesNotMatch(endpoint, /^import .*consoleApi\.ts/m, 'server module must use native ESM, not a CJS bundle import');
+});
+
 test('E2E environment is explicit and does not mutate its parent environment', () => {
   const parent = { KEEP: 'yes' };
   const env = createE2EBuildEnvironment(parent);

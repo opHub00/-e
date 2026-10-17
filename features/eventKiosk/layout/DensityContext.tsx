@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { useKioskWidth } from '../ui/useKioskWidth';
-import { DENSITY, densityFor, type Density, type DensityTokens } from './density';
+import { applySpacing, DENSITY, deriveDensity, densityFor, type Density, type DensityTokens, type Spacing, type ViewportProfile } from './density';
 import { DENSITY_TYPE, type DensityType } from './densityType';
 
 /**
@@ -39,8 +39,32 @@ export function DensityProvider({ children, density }: { children: ReactNode; de
   return <DensityContext.Provider value={density ?? resolved}>{children}</DensityContext.Provider>;
 }
 
-/** 지금 화면의 밀도와 그 token. 공급자 밖에서는 폭으로 직접 계산한다. */
-export function useDensity(): { density: Density; d: DensityTokens & { type: DensityType } } {
+/** 창 높이. 붙기 전에는 0(정적 화면과 같게 comfortable 간격). */
+export function useViewportHeight(): number {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const read = () => setHeight(window.innerHeight);
+    read();
+    window.addEventListener('resize', read);
+    return () => window.removeEventListener('resize', read);
+  }, []);
+  return height;
+}
+
+/** 폭·높이·입력 방식을 함께 본 화면 성격(deriveDensity). */
+export function useViewportProfile(contentType?: Parameters<typeof deriveDensity>[0]['contentType']): ViewportProfile {
+  const width = useKioskWidth();
+  const height = useViewportHeight();
+  const coarse = useCoarsePointer();
+  const parent = useContext(DensityContext);
+  const profile = deriveDensity({ width, height, pointerType: coarse ? 'coarse' : 'fine', contentType });
+  return parent ? { ...profile, density: parent } : profile;
+}
+
+/** 지금 화면의 밀도와 그 token(높이에 따른 간격 단계까지 반영). 공급자 밖에서는 폭으로 직접 계산한다. */
+export function useDensity(): { density: Density; spacing: Spacing; shortHeight: boolean; d: DensityTokens & { type: DensityType } } {
   const density = useResolvedDensity();
-  return { density, d: { ...DENSITY[density], type: DENSITY_TYPE[density] } };
+  const { spacing, shortHeight } = useViewportProfile();
+  return { density, spacing, shortHeight, d: { ...applySpacing(DENSITY[density], spacing), type: DENSITY_TYPE[density] } };
 }

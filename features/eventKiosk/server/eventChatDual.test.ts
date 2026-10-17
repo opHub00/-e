@@ -36,6 +36,12 @@ test('dual chat sends structured districts and retrieved evidence to Gemini with
   });
   assert.equal(result.status, 200);
   assert.equal('mode' in result.body && result.body.mode, 'llm');
+  if ('evidence' in result.body) {
+    assert.equal(result.body.evidence?.[0]?.noticeId, evidence.districtId);
+    assert.equal(result.body.evidence?.[0]?.section, evidence.section);
+    assert.ok(result.body.evidence?.[0]?.locator, 'admin locator remains available');
+    assert.ok(!result.body.detail?.some(line => line.includes('공고문 근거 ·')), 'answer details and evidence are separate');
+  } else assert.fail('grounded response must have evidence');
   assert.ok(providerBody.includes('2026000434'));
   assert.ok(providerBody.includes('2026000435'));
   assert.ok(providerBody.includes('retrievedEvidence'));

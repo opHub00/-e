@@ -281,11 +281,7 @@ function parseGeminiAnswer(value: unknown, context: EventChatContext): { text: s
     const groundedTerms = [...new Set(text.match(/[가-힣A-Za-z]{2,}/g) ?? [])]
       .filter(term => !/^(?:그리고|하지만|따라서|있어요|입니다|해요|대한|관련|공고문)$/.test(term));
     if (!groundedTerms.some(term => evidenceText.includes(term))) return null;
-    const anchor = Array.isArray(value.evidenceAnchors) && value.evidenceAnchors.length
-      ? value.evidenceAnchors[0]
-      : `${context.retrievedEvidence[0].districtId}|${context.retrievedEvidence[0].section}`;
-    const [districtId, section] = anchor.split('|');
-    detail = [...(detail ?? []).slice(0, 4), `공고문 근거 · ${districtId === 'samdo-1' ? '1지구' : '2지구'} · ${section}`];
+    detail = detail?.slice(0, 4);
   }
   if (!text) return null;
   return { text, ...(detail?.length ? { detail } : {}) };
@@ -382,7 +378,18 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
     try { parsed = JSON.parse(raw) as GeminiAnswer; } catch { return complete(fallback(request, requestId, model, 'parser_failure'), 'parser_failure'); }
     const answer = parseGeminiAnswer(parsed, request.context);
     if (!answer) return complete(fallback(request, requestId, model, 'grounding_rejected'), 'grounding_rejected', 'REJECTED');
-    return complete({ ...answer, mode: 'llm', provider: EVENT_CHAT_PROVIDER, model, requestId }, null, 'PASSED');
+    const dualContext = request.context.schemaVersion === 2 ? request.context : null;
+    const anchors = dualContext && Array.isArray(parsed.evidenceAnchors) && parsed.evidenceAnchors.length
+      ? new Set(parsed.evidenceAnchors) : null;
+    const evidence = dualContext
+      ? dualContext.retrievedEvidence
+        .filter(item => !anchors || anchors.has(`${item.districtId}|${item.section}`))
+        .slice(0, 3)
+        .map(item => ({ noticeId: item.districtId,
+          noticeTitle: dualContext.districts.find(district => district.id === item.districtId)?.title ?? item.districtId,
+          section: item.section, summary: item.textExcerpt.slice(0, 240), locator: item.locator }))
+      : [];
+    return complete({ ...answer, ...(evidence.length ? { evidence } : {}), mode: 'llm', provider: EVENT_CHAT_PROVIDER, model, requestId }, null, 'PASSED');
   } catch (error) {
     const reason = error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'provider_error';
     return complete(fallback(request, requestId, model, reason), reason);

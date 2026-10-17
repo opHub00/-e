@@ -6,7 +6,11 @@ function isResponse(value: unknown): value is EventChatResponse {
   return typeof row.text === 'string'
     && row.text.length > 0
     && (row.mode === 'llm' || row.mode === 'deterministic' || row.mode === 'fallback')
-    && (row.detail === undefined || (Array.isArray(row.detail) && row.detail.every(item => typeof item === 'string')));
+    && (row.detail === undefined || (Array.isArray(row.detail) && row.detail.every(item => typeof item === 'string')))
+    && (row.evidence === undefined || (Array.isArray(row.evidence) && row.evidence.every(item => item && typeof item === 'object'
+      && typeof item.noticeId === 'string' && typeof item.noticeTitle === 'string'
+      && typeof item.section === 'string' && typeof item.summary === 'string'
+      && (item.locator === undefined || typeof item.locator === 'string'))));
 }
 
 export async function requestEventChat(

@@ -11,7 +11,7 @@ import type { SamdoPresentationItem, SamdoPresentationRecommendation } from './s
 import { buildEventChatContext } from './chat/context.ts';
 import { requestEventChat } from './chat/client.ts';
 import { boundedEventChatHistory, redactEventChatText } from './chat/privacy.ts';
-import type { EventChatMode, EventChatRequest } from './chat/contract.ts';
+import type { EventChatSourceEvidence, EventChatMode, EventChatRequest } from './chat/contract.ts';
 import { SAMDO_EVENT } from './samdoEventScope.ts';
 import { buildSamdoDualChatContext, resolveSamdoDualConversation } from './samdoDual/chat.ts';
 import type { SamdoDualAssessment } from './samdoDual/types.ts';
@@ -42,6 +42,7 @@ export type KioskChat = {
     role: 'user' | 'assistant';
     text: string;
     detail?: string[];
+    evidence?: EventChatSourceEvidence[];
     /** QA/운영 확인용. 화면에는 provider 이름을 강제로 노출하지 않는다. */
     response?: { mode: EventChatMode; provider?: string; model?: string; requestId?: string };
   }>;
@@ -292,6 +293,7 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
     : buildEventChatContext(chat);
   const canUseEndpoint = Boolean(context) && (transport.allowNetwork === true || typeof window !== 'undefined');
   let response = deterministic;
+  let responseEvidence: EventChatSourceEvidence[] | undefined;
   let metadata: NonNullable<KioskChat['messages'][number]['response']> = { mode: 'deterministic' };
 
   if (context && canUseEndpoint) {
@@ -305,6 +307,7 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
     const remote = await requestEventChat(request, transport.fetcher ?? fetch, transport.endpoint ?? '/event-api/chat');
     if (remote) {
       response = sanitizeReply({ text: remote.text, ...(remote.detail ? { detail: remote.detail } : {}) });
+      responseEvidence = remote.evidence;
       metadata = { mode: remote.mode, ...(remote.provider ? { provider: remote.provider } : {}), ...(remote.model ? { model: remote.model } : {}), ...(remote.requestId ? { requestId: remote.requestId } : {}) };
     } else {
       metadata = { mode: 'fallback' };
@@ -312,6 +315,6 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
   }
   return {
     ...chat,
-    messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response, response: metadata }],
+    messages: [...chat.messages, { role: 'user', text }, { role: 'assistant', ...response, ...(responseEvidence ? { evidence: responseEvidence } : {}), response: metadata }],
   };
 }

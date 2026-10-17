@@ -81,13 +81,15 @@ export function DiscoveryMapFallback({
             accessibilityLabel={`${listing.complexName} 지도 핀`}
             accessibilityState={{ selected: active }}
             onPress={() => onSelect(listing.id)}
+            // 누르는 영역은 44×44(접근성). 보이는 핀은 안쪽에 그대로 두고, 위치는 예전 핀과 같게 보정한다.
             style={[
-              styles.pin,
-              collapsed && styles.pinCollapsed,
+              styles.pinHit,
+              collapsed && styles.pinHitCollapsed,
               { left: `${position.x}%`, top: `${top}%` },
-              active && styles.pinActive,
+              active && styles.pinHitActive,
             ]}
           >
+            <View style={[styles.pin, collapsed && styles.pinCollapsed, active && styles.pinActive]}>
             {collapsed ? null : (
               <MaterialIcons
                 name="location-on"
@@ -102,6 +104,7 @@ export function DiscoveryMapFallback({
                 </Text>
               ) : null
             )}
+            </View>
           </Pressable>
         );
       })}
@@ -228,8 +231,19 @@ const styles = StyleSheet.create({
   },
   demoBadgeText: { ...type.caption, color: colors.primary },
   /* 미선택 마커: 겹칠 때 덜 혼잡하도록 무게를 낮춘다. */
-  pin: {
+  /* 핀의 누르는 영역(투명). 보이는 핀 크기와 별개로 44×44. */
+  pinHit: {
     position: 'absolute',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -22,
+    marginTop: -8,
+  },
+  pinHitCollapsed: { marginLeft: -22, marginTop: -15 },
+  pinHitActive: { zIndex: 10, marginTop: -5 },
+  pin: {
     minHeight: 28,
     flexDirection: 'row',
     alignItems: 'center',
@@ -239,7 +253,6 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceHigh,
     backgroundColor: 'rgba(255,255,255,0.94)',
     paddingHorizontal: 7,
-    marginLeft: -22,
     ...shadow.card,
   },
   /* 선택 마커: 흰 링 + 진한 그림자로 한 단계 위에 띄운다. */
@@ -249,7 +262,6 @@ const styles = StyleSheet.create({
     width: 14,
     paddingHorizontal: 0,
     borderRadius: 7,
-    marginLeft: -7,
     borderColor: colors.outline,
   },
   pinActive: {

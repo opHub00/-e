@@ -984,7 +984,7 @@ const styles = StyleSheet.create({
   demoNotice: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.cardSm, backgroundColor: colors.surfaceLow, padding: 12 },
   demoNoticeText: { ...type.caption, color: colors.textMuted, flex: 1 },
   footer: { gap: spacing.xs, paddingHorizontal: spacing.screen, paddingTop: spacing.sm, paddingBottom: spacing.sm, borderTopWidth: 1, borderTopColor: colors.surfaceHigh, backgroundColor: colors.surface, ...shadow.floating },
-  aiLink: { minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  aiLink: { minHeight: size.touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
   aiLinkText: { ...type.label, color: colors.primary },
   notFound: { flex: 1, justifyContent: 'center', gap: spacing.md, padding: spacing.screen },
   notFoundTitle: { ...type.title, color: colors.text },

@@ -186,12 +186,13 @@ const styles = StyleSheet.create({
   },
   statusText: { ...type.micro },
   place: { ...type.micro, color: colors.textSubtle, flexShrink: 1 },
+  /* 아이콘은 그대로, 누르는 영역만 44×44 */
   saveButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 28,
-    height: 28,
+    top: 2,
+    right: 2,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: -4,

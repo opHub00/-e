@@ -121,9 +121,18 @@ export type EventChatRequest = {
 
 export type EventChatMode = 'llm' | 'deterministic' | 'fallback';
 
+export type EventChatSourceEvidence = {
+  noticeId: string;
+  noticeTitle: string;
+  section: string;
+  summary: string;
+  locator?: string;
+};
+
 export type EventChatResponse = {
   text: string;
   detail?: string[];
+  evidence?: EventChatSourceEvidence[];
   mode: EventChatMode;
   provider?: 'google-gemini';
   model?: string;

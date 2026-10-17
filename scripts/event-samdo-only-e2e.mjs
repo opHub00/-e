@@ -222,7 +222,9 @@ async function verifyQr(page, browser) {
   const link = await page.getByTestId('samdo-qr-code').locator('..').getAttribute('data-link');
   const url = link ? new URL(link) : null;
   if (!url || url.pathname !== '/event/take' || url.searchParams.size !== 1 || !/^[a-f0-9]{64}$/.test(url.searchParams.get('token') ?? '')) throw new Error(`QR URL is not opaque: ${link}`);
-  for (const pii of ['1991', '2025', '260', '470', '13000']) if (link.includes(pii)) throw new Error(`QR URL contains personal value: ${pii}`);
+  // A random opaque token can coincidentally contain a profile number. Validate URL structure
+  // and the separately tested session payload instead of searching token substrings.
+  if ([...url.searchParams.keys()].some(key => key !== 'token') || url.hash) throw new Error('QR URL contains an unexpected field');
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobile = await mobileContext.newPage();

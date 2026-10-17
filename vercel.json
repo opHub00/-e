@@ -13,6 +13,9 @@
     },
     "api/event-api/chat.ts": {
       "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/{contract.ts,privacy.ts,package.json},features/eventKiosk/samdoDual/{rag.ts,types.ts,package.json},data/event/samdo-dual-v2-rag.json}"
+    },
+    "api/admin-api/product-v3.ts": {
+      "includeFiles": "{data/event/samdo-dual-v2-rag.json}"
     }
   },
   "headers": [
@@ -31,6 +34,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/admin-api/product-v3",
+      "destination": "/api/admin-api/product-v3"
+    },
     {
       "source": "/event-api/listings",
       "destination": "/api/event-api/listings"

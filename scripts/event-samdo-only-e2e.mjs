@@ -1,6 +1,8 @@
 import { chromium } from '@playwright/test';
 
 const baseUrl = process.env.EVENT_RC_BASE_URL ?? 'http://127.0.0.1:4173';
+const protectedPreviewHeaders = process.env.VERCEL_OIDC_TOKEN
+  ? { 'x-vercel-trusted-oidc-idp-token': process.env.VERCEL_OIDC_TOKEN } : {};
 const OTHER_LISTINGS = [
   '제주 일도·삼도 행복주택',
   'JPDC 청년 매입임대',
@@ -226,7 +228,7 @@ async function verifyQr(page, browser) {
   // and the separately tested session payload instead of searching token substrings.
   if ([...url.searchParams.keys()].some(key => key !== 'token') || url.hash) throw new Error('QR URL contains an unexpected field');
 
-  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, extraHTTPHeaders: protectedPreviewHeaders });
   const mobile = await mobileContext.newPage();
   await mobile.goto(link);
   await mobile.getByTestId('take-samdo-summary').waitFor();
@@ -242,7 +244,7 @@ async function verifyQr(page, browser) {
 async function main() {
   const browser = await chromium.launch({ headless: true });
   try {
-    const context = await browser.newContext({ viewport: { width: 768, height: 1024 } });
+    const context = await browser.newContext({ viewport: { width: 768, height: 1024 }, extraHTTPHeaders: protectedPreviewHeaders });
     const page = await context.newPage();
     const adaptive = await enterNewbornPersona(page);
     await verifyResult(page);
@@ -269,7 +271,7 @@ async function main() {
     const token = await verifyQr(page, browser);
     await context.close();
 
-    const invalidContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const invalidContext = await browser.newContext({ viewport: { width: 390, height: 844 }, extraHTTPHeaders: protectedPreviewHeaders });
     const invalid = await invalidContext.newPage();
     await invalid.goto(`${baseUrl}/event/take?token=${'f'.repeat(64)}`);
     await invalid.getByTestId('take-invalid').waitFor();

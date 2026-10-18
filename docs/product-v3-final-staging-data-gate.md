@@ -46,6 +46,10 @@ Staging uses Supabase Storage because it meets the QR security contract without 
 
 ## Remaining gates
 
+### External protected Preview verification
+
+Preview `https://staging-supabase-rule-review-e2e-kcfmrh4hm-ophub00s-projects.vercel.app` is a Staging-only deployment of commit `5058166` with Vercel Authentication retained. Using the linked project's short-lived development OIDC token (never logged), `/`, `/event`, `/event/chat` and `/admin/console` returned 200; the Admin API returned 401 without an application Admin session. QR POST → GET → DELETE → GET returned 201 → 200 → 204 → 404. The mobile result page returned 200; invalid token and private payload returned 400. A protected external Chromium run completed the newborn persona from landing/story/questionnaire through dual result, simulation, chat, QR and mobile result across desktop, laptop, both iPad orientations and 430/390/360/320 mobile widths; horizontal overflow, other-listing exposure and small touch targets were zero in that run. This verifies the **user path**, not the missing permanent Admin-authenticated path or the unpublished 1.8 Staging promotion.
+
 - Public final 1.8 official source, reviewer approval, 1.8 activation, Samdo 2 Staging source, and index registration are pending.
 - Existing approved permanent Admin account session is not available to this automation. Do not create a QA admin or bypass RLS to declare the seven-screen auth test passed.
 - External protected Preview must verify real user QR creation/redemption and Admin screens. Vercel Authentication stays enabled.

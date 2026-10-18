@@ -1,13 +1,15 @@
 import type { ConsoleSnapshot } from '../contract.ts';
 import { resolveProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
+import { pageConsoleSnapshot, parseConsolePageQuery } from './pagination.ts';
+import { parseMetricWindowQuery, type MetricWindowQuery } from './metrics.ts';
 export { loadProductV3StagingSnapshot } from './stagingSnapshot.ts';
 
-type Request = { method?: string; headers?: Record<string, string | string[] | undefined> };
+type Request = { method?: string; headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown> };
 type Reply = { status: number; body: unknown };
 type AuthResult = 'admin' | 'reviewer' | null;
 export type ConsoleApiDependencies = {
   authorize: (token: string) => Promise<AuthResult>;
-  loadSnapshot: () => Promise<ConsoleSnapshot>;
+  loadSnapshot: (window?: MetricWindowQuery) => Promise<ConsoleSnapshot>;
 };
 
 /** Only read operations are exposed. Authorization is checked again on the server. */
@@ -21,7 +23,17 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   try { role = await dependencies.authorize(token); }
   catch { return { status: 503, body: { error: 'ADMIN_AUTH_UNAVAILABLE' } }; }
   if (!role) return { status: 403, body: { error: 'FORBIDDEN' } };
-  try { return { status: 200, body: await dependencies.loadSnapshot() }; }
+  try {
+    const metricRequested = request.query && ['from', 'to', 'bucket', 'previousPeriod'].some(key => key in request.query!);
+    const metricWindow = metricRequested ? parseMetricWindowQuery(request.query!) : undefined;
+    if (metricRequested && !metricWindow) return { status: 400, body: { error: 'INVALID_METRIC_WINDOW' } };
+    const snapshot = await dependencies.loadSnapshot(metricWindow ?? undefined);
+    if (request.query?.collection !== undefined) {
+      const query = parseConsolePageQuery(request.query);
+      return query ? { status: 200, body: pageConsoleSnapshot(snapshot, query) } : { status: 400, body: { error: 'INVALID_PAGE_QUERY' } };
+    }
+    return { status: 200, body: snapshot };
+  }
   catch { return { status: 503, body: { error: 'ADMIN_STAGING_DATA_UNAVAILABLE' } }; }
 }
 

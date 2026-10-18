@@ -46,11 +46,11 @@ export const CONSOLE_DEMO_SNAPSHOT: ConsoleSnapshot = {
     },
   ],
   rules: [
-    { id: 'r1', noticeId: 'demo-notice-c', ruleType: '소득', supplyType: '일반', condition: '세대 월평균소득 ≤', value: '도시근로자 70%', evidence: { section: '3. 신청자격', excerpt: '(예시) 해당 세대의 월평균소득이 전년도 도시근로자 가구당 월평균소득의 70% 이하인 자', locator: 'p.4 · 표3 · row 2' }, validation: { status: 'PASS', messages: [] }, status: 'PENDING' },
-    { id: 'r2', noticeId: 'demo-notice-c', ruleType: '자산', supplyType: '일반', condition: '세대 총자산 ≤', value: '3억 4,500만원', evidence: { section: '3. 신청자격', excerpt: '(예시) 총자산가액 합계금액 3억4천5백만원 이하', locator: 'p.4 · 문단 18' }, validation: { status: 'PASS', messages: [] }, status: 'PENDING' },
-    { id: 'r3', noticeId: 'demo-notice-c', ruleType: '자동차', supplyType: '일반', condition: '자동차 가액 ≤', value: '3,708만원', evidence: { section: '3. 신청자격', excerpt: '(예시) 자동차가액 3,708만원 이하', locator: 'p.5 · 문단 2' }, validation: { status: 'WARN', messages: ['연도 기준 표기 확인 필요'] }, status: 'PENDING' },
-    { id: 'r4', noticeId: 'demo-notice-c', ruleType: '거주', supplyType: '우선', condition: '해당 지역 거주기간 ≥', value: '1년', evidence: { section: '4. 우선공급', excerpt: '(예시) 공고일 현재 서귀포시에 1년 이상 거주한 자', locator: 'p.6 · 문단 7' }, validation: { status: 'PASS', messages: [] }, status: 'APPROVED' },
-    { id: 'r5', noticeId: 'demo-notice-c', ruleType: '무주택', supplyType: '일반', condition: '세대 구성원 전원 무주택', value: '예', evidence: { section: '3. 신청자격', excerpt: '(예시) 무주택세대구성원으로서', locator: 'p.4 · 문단 15' }, validation: { status: 'FAIL', messages: ['우선공급 조건과 중복 추출 의심'] }, status: 'PENDING' },
+    { id: 'r1', noticeId: 'demo-notice-c', ruleType: '소득', supplyType: '일반', condition: '세대 월평균소득 ≤', value: '도시근로자 70%', evidence: { section: '3. 신청자격', excerpt: '(예시) 해당 세대의 월평균소득이 전년도 도시근로자 가구당 월평균소득의 70% 이하인 자', locator: 'p.4 · 표3 · row 2' }, validation: { status: 'PASS', messages: [] }, status: 'PENDING', changed: true },
+    { id: 'r2', noticeId: 'demo-notice-c', ruleType: '자산', supplyType: '일반', condition: '세대 총자산 ≤', value: '3억 4,500만원', evidence: { section: '3. 신청자격', excerpt: '(예시) 총자산가액 합계금액 3억4천5백만원 이하', locator: 'p.4 · 문단 18' }, validation: { status: 'PASS', messages: [] }, status: 'PENDING', changed: false },
+    { id: 'r3', noticeId: 'demo-notice-c', ruleType: '자동차', supplyType: '일반', condition: '자동차 가액 ≤', value: '3,708만원', evidence: { section: '3. 신청자격', excerpt: '(예시) 자동차가액 3,708만원 이하', locator: 'p.5 · 문단 2' }, validation: { status: 'WARN', messages: ['연도 기준 표기 확인 필요'] }, status: 'PENDING', changed: true },
+    { id: 'r4', noticeId: 'demo-notice-c', ruleType: '거주', supplyType: '우선', condition: '해당 지역 거주기간 ≥', value: '1년', evidence: { section: '4. 우선공급', excerpt: '(예시) 공고일 현재 서귀포시에 1년 이상 거주한 자', locator: 'p.6 · 문단 7' }, validation: { status: 'PASS', messages: [] }, status: 'APPROVED', changed: false },
+    { id: 'r5', noticeId: 'demo-notice-c', ruleType: '무주택', supplyType: '일반', condition: '세대 구성원 전원 무주택', value: '예', evidence: { section: '3. 신청자격', excerpt: '(예시) 무주택세대구성원으로서', locator: 'p.4 · 문단 15' }, validation: { status: 'FAIL', messages: ['우선공급 조건과 중복 추출 의심'] }, status: 'PENDING', changed: false },
   ],
   assessments: {
     date: DAY,
@@ -63,9 +63,9 @@ export const CONSOLE_DEMO_SNAPSHOT: ConsoleSnapshot = {
   ai: [
     { id: 'a1', at: at('10:21'), question: '[예시] A단지와 B단지 중 어디가 신청하기 좋아요?', mode: 'llm', provider: 'google-gemini', fallbackReason: null, groundingRejected: false, providerError: false, evidenceCount: 3, latencyMs: 2140, evidence: [{ section: '공급 내역', excerpt: '(예시) A단지 32세대 · 2지구 40세대', locator: 'D1 p.2 / D2 p.2' }] },
     { id: 'a2', at: at('10:18'), question: '[예시] 신청은 언제부터 할 수 있어?', mode: 'deterministic', provider: null, fallbackReason: null, groundingRejected: false, providerError: false, evidenceCount: 1, latencyMs: 35, evidence: [{ section: '일정', excerpt: '(예시) 특별공급 11.16', locator: 'D1 p.3 · 표 일정' }] },
-    { id: 'a3', at: at('10:11'), question: '[예시] 59㎡ 토지임대료 비교해 줘', mode: 'fallback', provider: 'google-gemini', fallbackReason: '근거 문장과 답변 숫자 불일치', groundingRejected: true, providerError: false, evidenceCount: 2, latencyMs: 2870, evidence: [{ section: '토지임대료', excerpt: '(예시) 월 임대료 표', locator: 'D2 p.5 · 표 7' }] },
+    { id: 'a3', at: at('10:11'), question: '[예시] 59㎡ 토지임대료 비교해 줘', mode: 'fallback', provider: 'google-gemini', fallbackReason: 'grounding_rejected', groundingRejected: true, providerError: false, evidenceCount: 2, latencyMs: 2870, evidence: [{ section: '토지임대료', excerpt: '(예시) 월 임대료 표', locator: 'D2 p.5 · 표 7' }] },
     { id: 'a4', at: at('10:02'), question: '[예시] 재당첨 제한이 뭐예요?', mode: 'llm', provider: 'google-gemini', fallbackReason: null, groundingRejected: false, providerError: false, evidenceCount: 2, latencyMs: 1930, evidence: [{ section: '재당첨 제한', excerpt: '(예시) 재당첨 제한 기간 내 신청 불가', locator: 'D1 p.9 · 문단 40' }] },
-    { id: 'a5', at: at('09:55'), question: '[예시] 둘 다 신청 가능한가요?', mode: 'fallback', provider: 'google-gemini', fallbackReason: '제공자 응답 시간 초과', groundingRejected: false, providerError: true, evidenceCount: 0, latencyMs: 8000, evidence: [] },
+    { id: 'a5', at: at('09:55'), question: '[예시] 둘 다 신청 가능한가요?', mode: 'fallback', provider: 'google-gemini', fallbackReason: 'timeout', groundingRejected: false, providerError: true, evidenceCount: 0, latencyMs: 8000, evidence: [] },
     { id: 'a6', at: at('09:41'), question: '[예시] 당첨자 발표 언제야?', mode: 'deterministic', provider: null, fallbackReason: null, groundingRejected: false, providerError: false, evidenceCount: 1, latencyMs: 28, evidence: [{ section: '일정', excerpt: '(예시) 당첨자 발표 11.24', locator: 'D1 p.3 · 표 일정' }] },
   ],
   audit: [
@@ -75,7 +75,7 @@ export const CONSOLE_DEMO_SNAPSHOT: ConsoleSnapshot = {
     { id: 'u4', at: '2026-10-15T16:02:00+09:00', actor: '운영자 B', action: '공고 원문 등록', entity: { type: 'NOTICE', id: 'demo-notice-d', label: '[예시] 다솜동 행복주택' }, before: null, after: { status: 'SOURCE_VERIFIED', sha256: 'demo0004…0004' } },
   ],
   errors: [
-    { at: at('09:55'), source: 'AI 상담', message: '[예시] 제공자 응답 시간 초과(8초) — 대체 답변으로 전환' },
-    { at: at('08:15'), source: '규칙 추출', message: '[예시] 나래지구 소득 기준 표 1개 미추출' },
+    { at: at('09:55'), source: 'AI 상담', message: '[예시] 제공자 응답 시간 초과(8초) — 대체 답변으로 전환', level: 'WARNING' },
+    { at: at('08:15'), source: '규칙 추출', message: '[예시] 나래지구 소득 기준 표 1개 미추출', level: 'WARNING' },
   ],
 };

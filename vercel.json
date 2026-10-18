@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build:web:release",
+  "buildCommand": "node scripts/vercel-web-build.mjs",
   "outputDirectory": "dist",
   "framework": null,
   "cleanUrls": true,
@@ -16,6 +16,9 @@
     },
     "api/admin-api/product-v3.ts": {
       "includeFiles": "{features/{adminConsole/**,productV3/**,noticePlatform/**,profile/**,applicationAssessment/**,eventKiosk/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+    },
+    "api/event-api/assessments.ts": {
+      "includeFiles": "{features/{productV3/admin/{assessmentEvents.ts,stagingTarget.ts},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
     }
   },
   "headers": [
@@ -53,6 +56,10 @@
     {
       "source": "/event-api/chat",
       "destination": "/api/event-api/chat"
+    },
+    {
+      "source": "/event-api/assessments",
+      "destination": "/api/event-api/assessments"
     },
     {
       "source": "/discovery/:id",

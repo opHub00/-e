@@ -22,6 +22,7 @@ export const ALLOWLIST = [
   { pattern: /^features\/discovery\/regions\.ts$/, reason: 'region registry: the single source of truth for every region', file: true },
   { pattern: /^app\/event\//, reason: 'standalone frozen Jeju event demo UI' },
   { pattern: /^features\/eventKiosk\//, reason: 'standalone frozen Jeju event demo domain and presentation' },
+  { pattern: /^features\/productV3\/admin\/assessmentEvents\.ts$/, reason: 'staging event telemetry adapter is scoped to the two active event notices', file: true },
   { pattern: /^features\/applicationAssessment\/reference\//, reason: 'LEGACY/REFERENCE_ONLY sample, explicitly selected and labelled', dir: 'features/applicationAssessment/reference' },
   { pattern: /^features\/ruleExtraction\/server\/v4\/scorecard\.ts$/, reason: 'Samdo retrieval benchmark oracle; not on the import path', file: true },
   { pattern: /^features\/ruleExtraction\/server\/v4_1\/benchmarkPack\.ts$/, reason: 'frozen Samdo benchmark pack identity', file: true },
@@ -33,6 +34,7 @@ export const ALLOWLIST = [
   { pattern: /^scripts\/audit-extraction-samples\.mjs$/, reason: 'archived extraction audit', file: true },
   { pattern: /^scripts\/event-phase4-report\.mjs$/, reason: 'frozen Jeju event QA report generator', file: true },
   { pattern: /^scripts\/event-rc-e2e\.mjs$/, reason: 'frozen Jeju event release-candidate browser QA', file: true },
+  { pattern: /^scripts\/product-v3-staging-assessment-e2e\.mjs$/, reason: 'staging-only event persona telemetry QA', file: true },
   { pattern: /^scripts\/ui-quality-qa\.mjs$/, reason: 'responsive UI QA harness that opens the frozen Jeju event screens', file: true },
   { pattern: /^scripts\/announcement-hardcode-guard\.mjs$/, reason: 'this guard', file: true },
 ];

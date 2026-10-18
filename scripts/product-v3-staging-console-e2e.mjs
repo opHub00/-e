@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream, existsSync, mkdirSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, resolve, sep } from 'node:path';
@@ -20,9 +20,10 @@ const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
   '.png': 'image/png', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
 const server = createServer(async (request, response) => {
   try {
-    const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://127.0.0.1').pathname);
+    const parsed = new URL(request.url ?? '/', 'http://127.0.0.1');
+    const pathname = decodeURIComponent(parsed.pathname);
     if (pathname === '/admin-api/product-v3') {
-      return adminApi({ method: request.method, headers: request.headers }, {
+      return adminApi({ method: request.method, headers: request.headers, query: Object.fromEntries(parsed.searchParams) }, {
         setHeader: (name, value) => response.setHeader(name, value),
         status: status => ({ json: body => { response.statusCode = status; response.setHeader('content-type', 'application/json'); response.end(JSON.stringify(body)); } }),
       });
@@ -52,7 +53,7 @@ const apiStatuses = [];
 page.on('response', response => {
   if (response.url().includes('/admin-api/product-v3')) apiStatuses.push(response.status());
 });
-const report = { login: false, connected: false, routes: {}, apiStatuses, firstRouteState: null };
+const report = { login: false, connected: false, routes: {}, apiStatuses, firstRouteState: null, viewports: [] };
 try {
   await page.goto(base + '/admin/login', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('관리자 이메일').fill(process.env.STAGING_QA_EMAIL);
@@ -77,8 +78,31 @@ try {
     if (!apiResponse) break;
   }
   report.connected = apiStatuses.includes(200) && Object.values(report.routes).every(Boolean);
+  const shotDir = resolve('.cache/staging-admin-qa');
+  mkdirSync(shotDir, { recursive: true });
+  for (const viewport of [{ name: 'desktop', width: 1440, height: 900 }, { name: 'tablet', width: 820, height: 1180 }, { name: 'mobile', width: 390, height: 844 }]) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto(base + '/admin/console', { waitUntil: 'networkidle' });
+    await page.getByTestId('console-dashboard').waitFor({ timeout: 15000 });
+    const check = await page.evaluate(() => {
+      const visible = element => {
+        const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return box.width > 0 && box.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+      };
+      const small = [...document.querySelectorAll('button,a[href],[role="button"],[role="link"],input')]
+        .filter(visible).filter(element => {
+          const box = element.getBoundingClientRect();
+          return box.width < 43.5 || box.height < 43.5;
+        });
+      return { overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth), smallTouchTargets: small.length,
+        dashboardText: document.body.innerText.includes('판정') };
+    });
+    await page.screenshot({ path: join(shotDir, `${viewport.name}-dashboard.png`), fullPage: true });
+    report.viewports.push({ name: viewport.name, ...check });
+  }
   console.log(JSON.stringify(report));
-  if (!report.connected) process.exitCode = 1;
+  if (!report.connected || report.viewports.some(item => item.overflow > 0 || item.smallTouchTargets > 0 || !item.dashboardText)) process.exitCode = 1;
 } finally {
   await browser.close();
   await new Promise(resolveServer => server.close(resolveServer));

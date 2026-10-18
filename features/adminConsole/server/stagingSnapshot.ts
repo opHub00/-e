@@ -1,10 +1,11 @@
 import type { ConsoleAssessmentStats, ConsoleAuditEntry, ConsoleNotice, ConsoleRule, ConsoleSnapshot } from '../contract.ts';
 import { resolveProductV3StagingTarget, sanitizeUnresolvedCategory, type ProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
+import { buildMetricTrend, type MetricWindowQuery } from './metrics.ts';
 
 type Row = Record<string, unknown>;
 type Table = 'announcements' | 'announcement_documents' | 'assessment_rule_sets' | 'assessment_rules' |
   'rule_evidence' | 'assessment_rule_review_versions' | 'assessment_rule_reviews' |
-  'product_v3_ai_monitoring' | 'product_v3_assessment_monitoring' | 'product_v3_admin_audit_log';
+  'product_v3_ai_monitoring' | 'product_v3_assessment_monitoring' | 'product_v3_assessment_events' | 'product_v3_admin_audit_log';
 
 const selections: Record<Table, string> = {
   announcements: 'id,title,region_name,announcement_date,status,updated_at,source_url',
@@ -16,6 +17,7 @@ const selections: Record<Table, string> = {
   assessment_rule_reviews: 'rule_set_id,materialized_rule_id,review_status',
   product_v3_ai_monitoring: 'request_id,created_at,resolver,mode,provider,rag_evidence_count,grounding_result,fallback_reason,latency_ms',
   product_v3_assessment_monitoring: 'created_at,complete_count,needs_user_input_count,ineligible_count,unavailable_count,unresolved_labels',
+  product_v3_assessment_events: 'request_id,created_at,notice_id,supply_type,status,unresolved_categories,evidence_complete,rule_package_version,source_status',
   product_v3_admin_audit_log: 'id,actor_id,action,entity,entity_id,before_snapshot,after_snapshot,created_at',
 };
 
@@ -59,6 +61,7 @@ export async function loadProductV3StagingSnapshot(
   env: Record<string, string | undefined>,
   fetcher: typeof fetch = fetch,
   now: () => string = () => new Date().toISOString(),
+  metricWindow?: MetricWindowQuery,
 ): Promise<ConsoleSnapshot> {
   const target = resolveProductV3StagingTarget(env);
   const tables = Object.keys(selections) as Table[];
@@ -120,19 +123,20 @@ export async function loadProductV3StagingSnapshot(
   const generatedAt = now();
   const assessments = emptyStats(generatedAt.slice(0, 10));
   const frequency = new Map<string, number>();
-  for (const item of data.product_v3_assessment_monitoring) {
+  for (const item of data.product_v3_assessment_events) {
     if (!string(item.created_at).startsWith(assessments.date)) continue;
-    assessments.byStatus.COMPLETE += number(item.complete_count);
-    assessments.byStatus.NEEDS_USER_INPUT += number(item.needs_user_input_count);
-    assessments.byStatus.INELIGIBLE += number(item.ineligible_count);
-    assessments.byStatus.UNAVAILABLE += number(item.unavailable_count);
-    for (const label of new Set(Array.isArray(item.unresolved_labels) ? item.unresolved_labels : [])) {
+    const status = string(item.status) as keyof typeof assessments.byStatus;
+    if (status in assessments.byStatus) assessments.byStatus[status] += 1;
+    for (const label of new Set(Array.isArray(item.unresolved_categories) ? item.unresolved_categories : [])) {
       const safe = sanitizeUnresolvedCategory(label);
       frequency.set(safe, (frequency.get(safe) ?? 0) + 1);
     }
   }
   assessments.blockers = [...frequency].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'ko'));
   return { generatedAt, notices, rules, assessments,
+    ...(metricWindow ? { trend: buildMetricTrend(
+      data.product_v3_assessment_events.map(row => ({ created_at: row.created_at, status: row.status })),
+      data.product_v3_ai_monitoring.map(row => ({ created_at: row.created_at, mode: row.mode })), metricWindow) } : {}),
     ai: data.product_v3_ai_monitoring.map(item => ({ id: string(item.request_id), at: string(item.created_at), question: `질문 분류: ${/^[A-Z_]{2,40}$/.test(string(item.resolver)) ? string(item.resolver) : 'OTHER'}`,
       mode: item.mode === 'llm' ? 'llm' : item.mode === 'fallback' ? 'fallback' : 'deterministic', provider: string(item.provider) || null,
       fallbackReason: string(item.fallback_reason) || null, groundingRejected: item.grounding_result === 'REJECTED',

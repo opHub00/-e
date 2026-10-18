@@ -1,15 +1,60 @@
-import { isDemoModeEnabled } from '../eventKiosk/demo/demoMode';
+import { isDemoModeEnabled } from '../eventKiosk/demo/demoMode.ts';
 import type { ConsoleSnapshot, ConsoleSource } from './contract.ts';
+import { classifyResponse, ConsoleLoadError } from './consoleState.ts';
 import { CONSOLE_DEMO_SNAPSHOT } from './demoData.ts';
+import type { ConsoleAiEvent, ConsoleAuditEntry, ConsoleNotice } from './contract.ts';
+import type { ConsolePage, ConsolePageQuery } from './server/pagination.ts';
 
-/** Transport port: the browser receives only a presentation snapshot after server authorization. */
-export async function connectedSnapshot(accessToken: string, fetcher: typeof fetch = fetch): Promise<ConsoleSnapshot> {
-  const response = await fetcher('/admin-api/product-v3', {
-    headers: { authorization: `Bearer ${accessToken}` },
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error(response.status === 403 ? 'FORBIDDEN' : 'ADMIN_CONSOLE_UNAVAILABLE');
+/** 응답이 이보다 늦으면 '연결 지연'으로 알린다. */
+export const CONSOLE_REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * Transport port: the browser receives only a presentation snapshot after server authorization.
+ * 실패는 ConsoleLoadError(kind)로 던진다. 화면은 kind 로 로그인 필요·권한 없음·지연·서버 오류를 나눠 보여 준다.
+ */
+export async function connectedSnapshot(accessToken: string, fetcher: typeof fetch = fetch, timeoutMs = CONSOLE_REQUEST_TIMEOUT_MS): Promise<ConsoleSnapshot> {
+  const controller = typeof AbortController === 'undefined' ? null : new AbortController();
+  let timedOut = false;
+  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs) : null;
+  let response: Response;
+  try {
+    response = await fetcher('/admin-api/product-v3', {
+      headers: { authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+      signal: controller?.signal,
+    });
+  } catch {
+    throw new ConsoleLoadError(timedOut ? 'TIMEOUT' : 'NETWORK');
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string } | null;
+    throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
+  }
   return response.json() as Promise<ConsoleSnapshot>;
+}
+
+/** Connected-only list transport. The server applies filters and returns at most 100 sanitized rows. */
+export async function connectedPage(
+  accessToken: string, query: ConsolePageQuery, fetcher: typeof fetch = fetch,
+): Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>> {
+  const params = new URLSearchParams({ collection: query.collection, cursor: query.cursor ?? '0', limit: String(query.limit ?? 25) });
+  if (query.filter) params.set('filter', query.filter);
+  if (query.search) params.set('search', query.search);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONSOLE_REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetcher(`/admin-api/product-v3?${params}`, { headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store', signal: controller.signal });
+  } catch {
+    throw new ConsoleLoadError(controller.signal.aborted ? 'TIMEOUT' : 'NETWORK');
+  } finally { clearTimeout(timer); }
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string } | null;
+    throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
+  }
+  return response.json() as Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>>;
 }
 
 /** 예시 데이터는 Demo 빌드(또는 개발 서버) + ?demo=1 에서만. 운영 빌드에서는 열리지 않는다. */

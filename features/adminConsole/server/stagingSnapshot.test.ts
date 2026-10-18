@@ -36,6 +36,12 @@ test('operational snapshot is built exclusively from staging rows, including emp
     assessment_rule_review_versions: [], assessment_rule_reviews: [],
     product_v3_ai_monitoring: [{ request_id: 'r1', created_at: '2026-10-17T00:01:00Z', sanitized_question: '010-1234-5678', resolver: 'EXACT_STRUCTURED', mode: 'fallback', provider: null, rag_evidence_count: 1, grounding_result: 'REJECTED', fallback_reason: 'grounding_rejected', latency_ms: 25 }],
     product_v3_assessment_monitoring: [{ created_at: '2026-10-17T00:02:00Z', complete_count: 1, needs_user_input_count: 2, ineligible_count: 1, unavailable_count: 0, unresolved_labels: ['소득', 'score.key'] }],
+    product_v3_assessment_events: [
+      { request_id: 'r1', created_at: '2026-10-17T00:02:00Z', notice_id: 'samdo-1', supply_type: 'YOUTH', status: 'COMPLETE', unresolved_categories: [] },
+      { request_id: 'r1', created_at: '2026-10-17T00:02:00Z', notice_id: 'samdo-2', supply_type: 'YOUTH', status: 'NEEDS_USER_INPUT', unresolved_categories: ['소득', 'score.key'] },
+      { request_id: 'r1', created_at: '2026-10-17T00:02:00Z', notice_id: 'samdo-1', supply_type: 'GENERAL', status: 'NEEDS_USER_INPUT', unresolved_categories: [] },
+      { request_id: 'r1', created_at: '2026-10-17T00:02:00Z', notice_id: 'samdo-2', supply_type: 'GENERAL', status: 'INELIGIBLE', unresolved_categories: [] },
+    ],
     product_v3_admin_audit_log: [{ id: 'audit-1', actor_id: 'admin-1', action: 'APPROVE_RULE_PACKAGE', entity: 'RULE_PACKAGE', entity_id: 'pkg-1', created_at: '2026-10-17T00:03:00Z', before_snapshot: { status: 'IN_REVIEW' }, after_snapshot: { status: 'APPROVED' } }],
   };
   const seen: string[] = [];
@@ -57,7 +63,7 @@ test('operational snapshot is built exclusively from staging rows, including emp
   assert.equal(snapshot.ai[0].mode, 'fallback');
   assert.equal(snapshot.audit[0].action, 'APPROVE_RULE_PACKAGE');
   assert.ok(snapshot.errors.some(error => error.source === 'RAG 메타데이터'));
-  assert.equal(seen.length, 10);
+  assert.equal(seen.length, 11);
   assert.ok(!JSON.stringify(snapshot).includes('test-service-secret'));
   assert.ok(!JSON.stringify(snapshot).includes('score.key'));
   assert.ok(!JSON.stringify(snapshot).includes('010-1234-5678'));

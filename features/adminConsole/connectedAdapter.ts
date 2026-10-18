@@ -56,6 +56,7 @@ export function buildConnectedConsoleSnapshot(
       },
       validation: validationOf(view.validationErrors, rule.missingEvidence),
       status: view.status === 'ACTIVE' || view.status === 'APPROVED' ? 'APPROVED' as const : 'PENDING' as const,
+      evidenceMissing: rule.missingEvidence,
     }));
   });
   const audit: ConsoleAuditEntry[] = state.audits.map(item => ({
@@ -77,6 +78,8 @@ export function buildConnectedConsoleSnapshot(
       evidenceCount: item.ragEvidenceCount, latencyMs: item.latencyMs, evidence: [],
     })),
     audit,
-    errors: monitoringConnected ? [] : [{ at: generatedAt, source: '운영 모니터링', message: 'Preview 운영 DB 연결 대기 · 집계 수치는 아직 수집되지 않았어요.' }],
+    errors: monitoringConnected ? [] : [{ at: generatedAt, source: '운영 모니터링', message: 'Preview 운영 DB 연결 대기 · 집계 수치는 아직 수집되지 않았어요.', level: 'INFO' }],
+    // 모니터링 미연결이면 AI 로그·판정 집계는 0건이 아니라 '수집 전'이다.
+    coverage: { notices: 'CONNECTED', rules: 'CONNECTED', audit: 'CONNECTED', ai: monitoringConnected ? 'CONNECTED' : 'NOT_COLLECTED', assessments: monitoringConnected ? 'CONNECTED' : 'NOT_COLLECTED' },
   };
 }

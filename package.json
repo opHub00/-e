@@ -23,7 +23,7 @@
     "test:assessment": "node --experimental-strip-types features/applicationAssessment/assessment.test.ts && node --experimental-strip-types features/applicationAssessment/ruleRegion.test.ts && node --experimental-strip-types features/applicationAssessment/secondAnnouncement.test.ts && node --experimental-strip-types features/applicationAssessment/genericFacts.test.ts && node --experimental-strip-types features/applicationAssessment/data/ruleRepository.test.ts && node --experimental-strip-types features/applicationAssessment/server/importPackage.test.ts && node --experimental-strip-types features/applicationAssessment/server/samdoDraft.test.ts && node --experimental-strip-types --test features/applicationAssessment/server/demoAnnouncements.test.ts features/applicationAssessment/server/demoActivationGate.test.ts features/applicationAssessment/server/geomamAssessment.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/consultation.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/interpreter.regression.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/newlywedUtterances.test.ts && node --experimental-strip-types features/applicationAssessment/consultation/newlywedChat.test.ts && node --experimental-strip-types features/assessmentConsultation/engineAdapter.test.ts && node --experimental-strip-types --test features/applicationAssessment/questionnaire/dateInput.test.ts features/applicationAssessment/questionnaire/questionnaire.test.ts features/applicationAssessment/questionnaire/categories.test.ts features/applicationAssessment/questionnaire/draft.test.ts",
     "test:event-kiosk": "node --experimental-strip-types --test features/eventKiosk/eventKiosk.test.ts features/eventKiosk/eventPhase4.test.ts features/eventKiosk/presentation.test.ts features/eventKiosk/samdo/samdo.test.ts features/eventKiosk/samdoDual/samdoDual.test.ts features/eventKiosk/copilot/copilot.test.ts features/eventKiosk/samdoResult/samdoResult.test.ts features/eventKiosk/districts/districts.test.ts features/eventKiosk/samdoResult/samdoRefinement.test.ts scripts/event-result-session-store.test.mjs",
     "test:event-chat": "node --experimental-strip-types --test features/eventKiosk/server/eventChat.test.ts features/eventKiosk/server/eventChatDual.test.ts",
-    "test:product-v3": "node --experimental-strip-types --test features/noticePlatform/noticePlatform.test.ts features/productV3/admin/admin.test.ts features/productV3/copilot/copilot.test.ts && npm run test:product-v3-db",
+    "test:product-v3": "node --experimental-strip-types --test features/noticePlatform/noticePlatform.test.ts features/noticePlatform/importedPackageAdapter.test.ts features/productV3/admin/admin.test.ts features/productV3/copilot/copilot.test.ts && npm run test:product-v3-db",
     "test:product-v3-db": "node scripts/check-product-v3-operations.mjs",
     "test:samdo-deep": "node --experimental-strip-types --test features/eventKiosk/samdo/samdo.test.ts",
     "test:event-v2": "node --experimental-strip-types --test features/eventKiosk/v2/v2.test.ts",
@@ -87,11 +87,12 @@
     "benchmark:samdo:evaluate-v4": "node --experimental-strip-types scripts/evaluate-samdo-v4.mjs",
     "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs",
     "test:hardcode-guard": "node --test scripts/announcement-hardcode-guard.test.mjs",
-    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/server/stagingSnapshot.test.ts",
+    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/server/stagingSnapshot.test.ts features/adminConsole/server/metrics.test.ts features/productV3/admin/assessmentEvents.test.ts",
     "qa:ui-quality": "node scripts/ui-quality-qa.mjs",
     "test:admin-console:e2e": "node scripts/admin-console-e2e.mjs",
     "qa:copilot": "node scripts/event-samdo-copilot-qa.mjs",
-    "qa:ui-compare": "node scripts/ui-quality-compare.mjs"
+    "qa:ui-compare": "node scripts/ui-quality-compare.mjs",
+    "qa:admin-ops": "node scripts/admin-ops-qa.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

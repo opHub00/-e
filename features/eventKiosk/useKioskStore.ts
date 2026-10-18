@@ -19,6 +19,7 @@ import {
   type InputStep,
 } from './model.ts';
 import { skippedQuestionKeys, type AnswerStateMap } from './questionPolicy.ts';
+import { samdoInputFromAnswers } from './samdoResult/samdoInput.ts';
 
 /**
  * 행사 체험 한 번의 상태.
@@ -187,6 +188,16 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
         favorites: state.favorites.filter(id => known.has(id)),
         chat: null,
       }));
+      // Staging-only server independently re-evaluates this input. The browser never writes telemetry
+      // or supplies status counts; monitoring failure cannot affect the on-device result.
+      if (typeof window !== 'undefined' && globalThis.crypto?.randomUUID) {
+        const source = samdoInputFromAnswers(current.answers);
+        const input = { ...source, profile: { ...source.profile, basic: { ...source.profile.basic, name: '' } }, answerStates: current.answerStates };
+        void fetch('/event-api/assessments', {
+          method: 'POST', headers: { 'content-type': 'application/json' }, cache: 'no-store',
+          body: JSON.stringify({ requestId: globalThis.crypto.randomUUID(), input }),
+        }).catch(() => undefined);
+      }
     } catch (error) {
       if (get().sessionKey !== sessionKey) return;
       set({ analysis: 'error', analysisError: error instanceof Error ? error.message : 'ANALYSIS_FAILED' });

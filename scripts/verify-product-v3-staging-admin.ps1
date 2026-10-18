@@ -64,6 +64,7 @@ try {
   if ($LASTEXITCODE -ne 0) { $report.browserProbe = $browserReport; throw 'ADMIN_BROWSER_E2E_FAILED' }
   $report.browserConnected = $browserReport.connected
   $report.browserRoutes = $browserReport.routes
+  $report.browserViewports = $browserReport.viewports
 } finally {
   if ($membershipGranted) {
     $revokeSql = "begin; update public.assessment_review_members set enabled=false,updated_at=now() where user_id='$userId'::uuid; insert into public.assessment_review_membership_audit_log(action,actor_role,target_user_id,previous_role,reason) values ('REVOKE','migration','$userId'::uuid,'admin','Temporary Product V3 staging admin E2E complete'); commit;"

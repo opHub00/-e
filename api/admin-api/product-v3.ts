@@ -8,14 +8,14 @@ async function loadConsoleModule(): Promise<ConsoleModule> {
   return nativeImport(pathToFileURL(join(process.cwd(), 'features/adminConsole/server/consoleApi.ts')).href) as Promise<ConsoleModule>;
 }
 
-type ApiRequest = { method?: string; headers: Record<string, string | string[] | undefined> };
+type ApiRequest = { method?: string; headers: Record<string, string | string[] | undefined>; query?: Record<string, unknown> };
 type ApiResponse = { setHeader(name: string, value: string): void; status(code: number): ApiResponse; json(body: unknown): void };
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   const { authorizeProductV3Admin, handleProductV3ConsoleRequest, loadProductV3StagingSnapshot } = await loadConsoleModule();
   const result = await handleProductV3ConsoleRequest(
-    { method: request.method, headers: request.headers },
-    { authorize: token => authorizeProductV3Admin(token, process.env), loadSnapshot: () => loadProductV3StagingSnapshot(process.env) },
+    { method: request.method, headers: request.headers, query: request.query },
+    { authorize: token => authorizeProductV3Admin(token, process.env), loadSnapshot: window => loadProductV3StagingSnapshot(process.env, fetch, () => new Date().toISOString(), window) },
   );
   response.setHeader('Cache-Control', 'no-store');
   response.status(result.status).json(result.body);

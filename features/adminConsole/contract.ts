@@ -40,6 +40,10 @@ export type ConsoleRule = {
   evidence: { section: string; excerpt: string; locator: string };
   validation: ConsoleValidation;
   status: RuleReviewStatus;
+  /** 원문 근거(locator·문장)가 없으면 true. 없으면(undefined) 화면이 문장/locator 로 추정한다. */
+  evidenceMissing?: boolean;
+  /** 직전 규칙 패키지 버전 대비 바뀐 규칙이면 true. 비교 데이터가 없으면 undefined(‘바뀐 것만’ 필터 비활성). */
+  changed?: boolean;
 };
 
 export type AssessmentStatus = 'COMPLETE' | 'NEEDS_USER_INPUT' | 'INELIGIBLE' | 'UNAVAILABLE';
@@ -79,7 +83,13 @@ export type ConsoleAuditEntry = {
   after: Record<string, string | number | boolean | null> | null;
 };
 
-export type ConsoleError = { at: string; source: string; message: string };
+/** 오류 수준. 없으면 ERROR 로 본다. 연결 대기 같은 안내는 INFO. */
+export type ConsoleErrorLevel = 'ERROR' | 'WARNING' | 'INFO';
+export type ConsoleError = { at: string; source: string; message: string; level?: ConsoleErrorLevel };
+
+/** 영역별 수집 상태. NOT_COLLECTED 면 '0건'이 아니라 '아직 수집 전'으로 보여 준다(부분 데이터). */
+export type ConsoleSection = 'notices' | 'rules' | 'assessments' | 'ai' | 'audit';
+export type ConsoleCoverage = Partial<Record<ConsoleSection, 'CONNECTED' | 'NOT_COLLECTED'>>;
 
 export type ConsoleSnapshot = {
   generatedAt: string;
@@ -89,6 +99,10 @@ export type ConsoleSnapshot = {
   ai: ConsoleAiEvent[];
   audit: ConsoleAuditEntry[];
   errors: ConsoleError[];
+  /** 없으면 모든 영역이 연결된 것으로 본다. */
+  coverage?: ConsoleCoverage;
+  /** Optional server-computed time window; dashboard charts can consume this without deriving rates. */
+  trend?: import('./server/metrics.ts').MetricTrend;
 };
 
 export type ConsoleSource =

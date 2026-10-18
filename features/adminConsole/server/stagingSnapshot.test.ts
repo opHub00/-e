@@ -63,10 +63,24 @@ test('operational snapshot is built exclusively from staging rows, including emp
   assert.equal(snapshot.ai[0].mode, 'fallback');
   assert.equal(snapshot.audit[0].action, 'APPROVE_RULE_PACKAGE');
   assert.ok(snapshot.errors.some(error => error.source === 'RAG 메타데이터'));
+  assert.equal(snapshot.errors.find(error => error.source === 'RAG 메타데이터')?.level, 'WARNING');
   assert.equal(seen.length, 11);
   assert.ok(!JSON.stringify(snapshot).includes('test-service-secret'));
   assert.ok(!JSON.stringify(snapshot).includes('score.key'));
   assert.ok(!JSON.stringify(snapshot).includes('010-1234-5678'));
+});
+
+test('stale Samdo staging source is a blocking operational error, not a RAG-only warning', async () => {
+  const rows: Record<string, unknown[]> = {
+    announcements: [{ id: 'samdo-db-1', title: '삼도이동 1지구 토지임대부 공공분양주택', status: 'PUBLISHED' }],
+    announcement_documents: [{ id: 'old-doc', announcement_id: 'samdo-db-1', file_name: 'VER1.7.hwp', sha256: 'b'.repeat(64), is_official: false }],
+    assessment_rule_sets: [{ id: 'old-rules', announcement_id: 'samdo-db-1', version: 'VER1.7', is_active: true }],
+  };
+  const fetcher = (async (url: URL) => Response.json(rows[url.pathname.split('/').at(-1)!] ?? [])) as typeof fetch;
+  const snapshot = await loadProductV3StagingSnapshot(staging, fetcher);
+  assert.equal(snapshot.errors.find(error => error.source === '공고 원문 버전 불일치')?.level, 'ERROR');
+  assert.equal(snapshot.notices[0].ragVersion, null);
+  assert.equal(snapshot.notices[0].ragChunkCount, 0);
 });
 
 test('one unavailable staging table fails closed; static seed is never substituted', async () => {

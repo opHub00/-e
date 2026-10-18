@@ -1,6 +1,7 @@
 import type { ConsoleAssessmentStats, ConsoleAuditEntry, ConsoleNotice, ConsoleRule, ConsoleSnapshot } from '../contract.ts';
 import { resolveProductV3StagingTarget, sanitizeUnresolvedCategory, type ProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
 import { buildMetricTrend, type MetricWindowQuery } from './metrics.ts';
+import { getActiveNotices } from '../../eventKiosk/noticePlatform/index.ts';
 
 type Row = Record<string, unknown>;
 type Table = 'announcements' | 'announcement_documents' | 'assessment_rule_sets' | 'assessment_rules' |
@@ -121,6 +122,15 @@ export async function loadProductV3StagingSnapshot(
     };
   });
   const generatedAt = now();
+  const registeredNotices = getActiveNotices();
+  const sourceErrors = notices.flatMap(notice => {
+    if (notice.status !== 'ACTIVE') return [];
+    const matching = registeredNotices.filter(value => notice.title.startsWith(value.title.split(' ').slice(0, 2).join(' ')));
+    if (matching.length !== 1 || notice.provenance.sha256 === matching[0].sourceDocument.sha256) return [];
+    return [{ at: generatedAt, source: '공고 원문 버전 불일치',
+      message: `${notice.title}: Staging의 활성 공고문/규칙이 현재 등록된 원문과 일치하지 않습니다. 새 원문과 Rule Package의 검수·승인 전에는 활성화하지 마세요.`,
+      level: 'ERROR' as const }];
+  });
   const assessments = emptyStats(generatedAt.slice(0, 10));
   const frequency = new Map<string, number>();
   for (const item of data.product_v3_assessment_events) {
@@ -142,5 +152,10 @@ export async function loadProductV3StagingSnapshot(
       fallbackReason: string(item.fallback_reason) || null, groundingRejected: item.grounding_result === 'REJECTED',
       providerError: item.fallback_reason === 'provider_error' || item.fallback_reason === 'timeout', evidenceCount: number(item.rag_evidence_count),
       latencyMs: number(item.latency_ms), evidence: [] })), audit,
-    errors: notices.length ? [{ at: generatedAt, source: 'RAG 메타데이터', message: '이 Staging schema에는 RAG 버전과 청크 수가 저장되지 않아 표시할 수 없어요.' }] : [] };
+    errors: [
+      ...sourceErrors,
+      ...(notices.length ? [{ at: generatedAt, source: 'RAG 메타데이터',
+        message: 'Staging에는 RAG 버전·청크 수가 저장되지 않았습니다. 근거 locator와 원문 해시가 있어도 RAG 색인 버전은 검증할 수 없어요.',
+        level: 'WARNING' as const }] : []),
+    ] };
 }

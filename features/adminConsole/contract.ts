@@ -18,6 +18,8 @@ export type ConsoleNotice = {
   status: NoticeLifecycle;
   ruleVersion: string | null;
   ragVersion: string | null;
+  /** Persisted index state; absent on older staging schemas. */
+  ragIndexStatus?: 'ACTIVE' | 'STALE' | 'FAILED' | 'REINDEX_REQUIRED' | null;
   provenance: { fileName: string; sha256: string; official: boolean; sourceUrl?: string | null };
   /** ISO 시각 */
   updatedAt: string;

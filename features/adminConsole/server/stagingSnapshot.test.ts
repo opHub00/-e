@@ -64,7 +64,7 @@ test('operational snapshot is built exclusively from staging rows, including emp
   assert.equal(snapshot.audit[0].action, 'APPROVE_RULE_PACKAGE');
   assert.ok(snapshot.errors.some(error => error.source === 'RAG 메타데이터'));
   assert.equal(snapshot.errors.find(error => error.source === 'RAG 메타데이터')?.level, 'WARNING');
-  assert.equal(seen.length, 11);
+  assert.equal(seen.length, 12);
   assert.ok(!JSON.stringify(snapshot).includes('test-service-secret'));
   assert.ok(!JSON.stringify(snapshot).includes('score.key'));
   assert.ok(!JSON.stringify(snapshot).includes('010-1234-5678'));
@@ -81,6 +81,31 @@ test('stale Samdo staging source is a blocking operational error, not a RAG-only
   assert.equal(snapshot.errors.find(error => error.source === '공고 원문 버전 불일치')?.level, 'ERROR');
   assert.equal(snapshot.notices[0].ragVersion, null);
   assert.equal(snapshot.notices[0].ragChunkCount, 0);
+});
+
+test('Admin exposes only persisted RAG index metadata matching the active source', async () => {
+  const rows: Record<string, unknown[]> = {
+    announcements: [{ id: 'notice-rag', title: '별도 공고', status: 'PUBLISHED' }],
+    announcement_documents: [{ id: 'doc-rag', announcement_id: 'notice-rag', file_name: 'official.pdf', sha256: 'a'.repeat(64), is_official: true }],
+    assessment_rule_sets: [{ id: 'pkg-rag', announcement_id: 'notice-rag', document_id: 'doc-rag', version: '1.0', is_active: true, approved_at: '2026-10-18T00:00:00Z' }],
+    product_v3_rag_index_metadata: [{ notice_id: 'external-rag', announcement_id: 'notice-rag', source_version: '1.0',
+      source_hash: 'a'.repeat(64), index_version: 'index-sha-1', chunk_count: 8, indexed_at: '2026-10-18T00:00:00Z', index_status: 'ACTIVE' }],
+  };
+  const fetcher = (async (url: URL) => Response.json(rows[url.pathname.split('/').at(-1)!] ?? [])) as typeof fetch;
+  const snapshot = await loadProductV3StagingSnapshot(staging, fetcher);
+  assert.equal(snapshot.notices[0].ragVersion, 'index-sha-1');
+  assert.equal(snapshot.notices[0].ragChunkCount, 8);
+  assert.equal(snapshot.notices[0].ragIndexStatus, 'ACTIVE');
+  assert.equal(snapshot.errors.some(error => error.source.startsWith('RAG')), false);
+  rows.announcement_documents!.push({ id: 'newer-official-doc', announcement_id: 'notice-rag', file_name: 'replacement.pdf',
+    sha256: 'c'.repeat(64), is_official: true });
+  const stillActive = await loadProductV3StagingSnapshot(staging, fetcher);
+  assert.equal(stillActive.notices[0].provenance.sha256, 'a'.repeat(64), 'active RuleSet controls displayed source');
+  assert.equal(stillActive.notices[0].ragVersion, 'index-sha-1');
+  rows.product_v3_rag_index_metadata![0] = { ...(rows.product_v3_rag_index_metadata![0] as object), source_hash: 'b'.repeat(64) };
+  const stale = await loadProductV3StagingSnapshot(staging, fetcher);
+  assert.equal(stale.notices[0].ragVersion, null);
+  assert.equal(stale.errors.find(error => error.source === 'RAG 색인 상태')?.level, 'WARNING');
 });
 
 test('one unavailable staging table fails closed; static seed is never substituted', async () => {

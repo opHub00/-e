@@ -6,7 +6,8 @@ import { getActiveNotices } from '../../eventKiosk/noticePlatform/index.ts';
 type Row = Record<string, unknown>;
 type Table = 'announcements' | 'announcement_documents' | 'assessment_rule_sets' | 'assessment_rules' |
   'rule_evidence' | 'assessment_rule_review_versions' | 'assessment_rule_reviews' |
-  'product_v3_ai_monitoring' | 'product_v3_assessment_monitoring' | 'product_v3_assessment_events' | 'product_v3_admin_audit_log';
+  'product_v3_ai_monitoring' | 'product_v3_assessment_monitoring' | 'product_v3_assessment_events' | 'product_v3_admin_audit_log' |
+  'product_v3_rag_index_metadata';
 
 const selections: Record<Table, string> = {
   announcements: 'id,title,region_name,announcement_date,status,updated_at,source_url',
@@ -20,6 +21,7 @@ const selections: Record<Table, string> = {
   product_v3_assessment_monitoring: 'created_at,complete_count,needs_user_input_count,ineligible_count,unavailable_count,unresolved_labels',
   product_v3_assessment_events: 'request_id,created_at,notice_id,supply_type,status,unresolved_categories,evidence_complete,rule_package_version,source_status',
   product_v3_admin_audit_log: 'id,actor_id,action,entity,entity_id,before_snapshot,after_snapshot,created_at',
+  product_v3_rag_index_metadata: 'notice_id,announcement_id,source_version,source_hash,index_version,chunk_count,indexed_at,index_status',
 };
 
 const string = (value: unknown): string => typeof value === 'string' ? value : '';
@@ -42,6 +44,8 @@ async function readTable(target: ProductV3StagingTarget, table: Table, fetcher: 
       headers: { apikey: target.serviceRoleKey, authorization: `Bearer ${target.serviceRoleKey}` },
       cache: 'no-store', signal: AbortSignal.timeout(6000),
     });
+    // The new metadata migration may not yet be applied to an older Staging project.
+    if (response.status === 404 && table === 'product_v3_rag_index_metadata') return [];
     if (!response.ok) throw new Error(`PRODUCT_V3_STAGING_READ_FAILED:${table}:${response.status}`);
     const page = rowsOf(await response.json());
     all.push(...page);
@@ -69,8 +73,10 @@ export async function loadProductV3StagingSnapshot(
   const values = await Promise.all(tables.map(table => readTable(target, table, fetcher)));
   const data = Object.fromEntries(tables.map((table, index) => [table, values[index]])) as Record<Table, Row[]>;
   const documents = new Map<string, Row>();
+  const documentsById = new Map<string, Row>();
   for (const document of data.announcement_documents) {
     const id = string(document.announcement_id);
+    documentsById.set(string(document.id), document);
     if (document.is_official === true || !documents.has(id)) documents.set(id, document);
   }
   const packages = new Map<string, Row[]>();
@@ -83,6 +89,7 @@ export async function loadProductV3StagingSnapshot(
   const reviews = new Map<string, Row>();
   for (const item of data.assessment_rule_reviews) if (item.materialized_rule_id) reviews.set(string(item.materialized_rule_id), item);
   const reviewVersions = new Map(data.assessment_rule_review_versions.map(item => [string(item.rule_set_id), item]));
+  const ragIndexes = new Map(data.product_v3_rag_index_metadata.map(item => [string(item.announcement_id), item]));
   const rules: ConsoleRule[] = data.assessment_rules.flatMap(rule => {
     const pkg = data.assessment_rule_sets.find(item => item.id === rule.rule_set_id);
     if (!pkg) return [];
@@ -102,9 +109,13 @@ export async function loadProductV3StagingSnapshot(
     before: auditFields(item.before_snapshot), after: auditFields(item.after_snapshot),
   }));
   const notices: ConsoleNotice[] = data.announcements.map(item => {
-    const id = string(item.id), document = documents.get(id), allPackages = packages.get(id) ?? [];
+    const id = string(item.id), allPackages = packages.get(id) ?? [];
     const active = allPackages.find(pkg => pkg.is_active === true);
     const current = active ?? allPackages.find(pkg => !!pkg.approved_at) ?? allPackages[0];
+    const document = documentsById.get(string(current?.document_id)) ?? documents.get(id);
+    const ragIndex = ragIndexes.get(id);
+    const ragMatchesActiveSource = ragIndex?.index_status === 'ACTIVE' && ragIndex.source_hash === document?.sha256
+      && current?.is_active === true && current.document_id === document?.id;
     const state = string(item.status);
     const status: ConsoleNotice['status'] = state === 'ARCHIVED' ? 'ARCHIVED' : state === 'DRAFT' ? 'DRAFT'
       : active ? 'ACTIVE' : current && reviewVersions.get(string(current.id))?.lifecycle_status === 'REVALIDATION_REQUIRED' ? 'REVIEW_REQUIRED'
@@ -112,10 +123,12 @@ export async function loadProductV3StagingSnapshot(
     const currentRuleIds = new Set(data.assessment_rules.filter(rule => rule.rule_set_id === current?.id).map(rule => string(rule.id)));
     const relatedRules = rules.filter(rule => currentRuleIds.has(rule.id));
     return { id, title: string(item.title), region: string(item.region_name), announcementDate: string(item.announcement_date), status,
-      ruleVersion: current ? string(current.version) : null, ragVersion: null,
+      ruleVersion: current ? string(current.version) : null,
+      ragVersion: ragMatchesActiveSource ? string(ragIndex?.index_version) : null,
+      ragIndexStatus: ragIndex ? string(ragIndex.index_status) as ConsoleNotice['ragIndexStatus'] : null,
       provenance: { fileName: string(document?.file_name), sha256: string(document?.sha256), official: document?.is_official === true, sourceUrl: string(document?.source_url) || string(item.source_url) || null },
       updatedAt: string(item.updated_at), supplyTypes: [...new Set(relatedRules.map(rule => rule.supplyType))], ruleCount: relatedRules.length,
-      ragChunkCount: 0,
+      ragChunkCount: ragMatchesActiveSource ? number(ragIndex?.chunk_count) : 0,
       validation: document?.is_official === true && !!current && relatedRules.length > 0 && relatedRules.every(rule => rule.validation.status === 'PASS')
         ? { status: 'PASS', messages: [] } : { status: 'WARN', messages: ['공고문 또는 규칙 근거 확인 필요'] },
       history: audit.filter(entry => entry.entity.id === id).map(entry => ({ at: entry.at, actor: entry.actor, summary: entry.action })),
@@ -130,6 +143,16 @@ export async function loadProductV3StagingSnapshot(
     return [{ at: generatedAt, source: '공고 원문 버전 불일치',
       message: `${notice.title}: Staging의 활성 공고문/규칙이 현재 등록된 원문과 일치하지 않습니다. 새 원문과 Rule Package의 검수·승인 전에는 활성화하지 마세요.`,
       level: 'ERROR' as const }];
+  });
+  const ragErrors = notices.flatMap(notice => {
+    const index = ragIndexes.get(notice.id);
+    if (!index) return [{ at: generatedAt, source: 'RAG 메타데이터',
+      message: `${notice.title}: 저장된 RAG 색인 버전·원문 해시·청크 수가 없습니다. 색인 여부를 추정하지 않습니다.`,
+      level: 'WARNING' as const }];
+    if (index.index_status !== 'ACTIVE' || notice.ragVersion === null) return [{ at: generatedAt, source: 'RAG 색인 상태',
+      message: `${notice.title}: 색인이 활성 원문·Rule Package와 일치하지 않거나 재색인이 필요합니다.`,
+      level: 'WARNING' as const }];
+    return [];
   });
   const assessments = emptyStats(generatedAt.slice(0, 10));
   const frequency = new Map<string, number>();
@@ -154,8 +177,6 @@ export async function loadProductV3StagingSnapshot(
       latencyMs: number(item.latency_ms), evidence: [] })), audit,
     errors: [
       ...sourceErrors,
-      ...(notices.length ? [{ at: generatedAt, source: 'RAG 메타데이터',
-        message: 'Staging에는 RAG 버전·청크 수가 저장되지 않았습니다. 근거 locator와 원문 해시가 있어도 RAG 색인 버전은 검증할 수 없어요.',
-        level: 'WARNING' as const }] : []),
+      ...ragErrors,
     ] };
 }

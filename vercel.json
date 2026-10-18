@@ -9,7 +9,7 @@
       "includeFiles": "{data/events/*.json,features/discovery/server/ApplyHomeApi.ts,features/discovery/server/package.json,features/eventKiosk/frozen/domain/rules.ts,features/eventKiosk/live/**,features/eventKiosk/media/*.ts,features/eventKiosk/media/package.json}"
     },
     "api/event-api/result-sessions/**/*.ts": {
-      "includeFiles": "{features/eventKiosk/server/**,scripts/event-result-session-store.mjs}"
+      "includeFiles": "{features/eventKiosk/server/**,features/productV3/admin/stagingTarget.ts,scripts/event-result-session-store.mjs}"
     },
     "api/event-api/chat.ts": {
       "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/{contract.ts,privacy.ts,package.json},features/eventKiosk/samdoDual/{rag.ts,types.ts,package.json},features/productV3/admin/staging*.ts,data/event/samdo-dual-v2-rag.json}"

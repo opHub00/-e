@@ -2,14 +2,14 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 type SessionModule = typeof import('../../../features/eventKiosk/server/persistentResultSession.ts');
-type RepositoryModule = typeof import('../../../features/eventKiosk/server/upstashResultSession.ts');
+type RepositoryModule = typeof import('../../../features/eventKiosk/server/resultSessionRepository.ts');
 const nativeImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<unknown>;
 
 async function loadSessionModules(): Promise<[SessionModule, RepositoryModule]> {
   const root = process.cwd();
   return Promise.all([
     nativeImport(pathToFileURL(join(root, 'features/eventKiosk/server/persistentResultSession.ts')).href) as Promise<SessionModule>,
-    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/server/upstashResultSession.ts')).href) as Promise<RepositoryModule>,
+    nativeImport(pathToFileURL(join(root, 'features/eventKiosk/server/resultSessionRepository.ts')).href) as Promise<RepositoryModule>,
   ]);
 }
 
@@ -39,8 +39,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     return;
   }
   try {
-    const [{ PersistentResultSessionService, resultSessionPublicBaseUrl }, { UpstashResultSessionRepository }] = await loadSessionModules();
-    const service = new PersistentResultSessionService(new UpstashResultSessionRepository());
+    const [{ PersistentResultSessionService, resultSessionPublicBaseUrl }, { createResultSessionRepository }] = await loadSessionModules();
+    const service = new PersistentResultSessionService(createResultSessionRepository());
     const created = await service.create((request.body as { summary?: unknown } | null)?.summary);
     const baseUrl = resultSessionPublicBaseUrl(process.env, host(request.headers));
     response.status(201).json({ ...created, url: `${baseUrl}/event/take?token=${created.token}` });

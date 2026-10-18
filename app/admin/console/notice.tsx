@@ -70,8 +70,11 @@ function Detail({ snapshot }: { snapshot: ConsoleSnapshot }) {
       {tab === 'rag' ? (
         <SectionCard title="RAG 색인" description="AI 상담이 근거로 찾는 공고 조각이에요.">
           <FieldGrid>
+            <Field label="색인 상태" value={notice.ragIndexStatus === 'REINDEX_REQUIRED' ? '재색인 필요' : notice.ragIndexStatus === 'ACTIVE' ? '사용 가능' : notice.ragIndexStatus === 'STALE' ? '원문 불일치' : notice.ragIndexStatus === 'FAILED' ? '색인 실패' : '등록 정보 없음'} />
+            <Field label="원문 버전" value={notice.ragSourceVersion ?? '등록 정보 없음'} />
             <Field label="RAG 버전" value={notice.ragVersion ?? '색인 없음'} />
-            <Field label="chunk 수" value={`${notice.ragChunkCount}개`} />
+            <Field label="기록된 chunk 수" value={notice.ragRecordedChunkCount === null || notice.ragRecordedChunkCount === undefined ? '등록 정보 없음' : `${notice.ragRecordedChunkCount}개`} />
+            <Field label="색인 시각" value={notice.ragIndexedAt ?? '색인되지 않음'} />
           </FieldGrid>
         </SectionCard>
       ) : null}

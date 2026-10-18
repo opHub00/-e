@@ -96,6 +96,9 @@ test('Admin exposes only persisted RAG index metadata matching the active source
   assert.equal(snapshot.notices[0].ragVersion, 'index-sha-1');
   assert.equal(snapshot.notices[0].ragChunkCount, 8);
   assert.equal(snapshot.notices[0].ragIndexStatus, 'ACTIVE');
+  assert.equal(snapshot.notices[0].ragSourceVersion, '1.0');
+  assert.equal(snapshot.notices[0].ragRecordedChunkCount, 8);
+  assert.equal(snapshot.notices[0].ragIndexedAt, '2026-10-18T00:00:00Z');
   assert.equal(snapshot.errors.some(error => error.source.startsWith('RAG')), false);
   rows.announcement_documents!.push({ id: 'newer-official-doc', announcement_id: 'notice-rag', file_name: 'replacement.pdf',
     sha256: 'c'.repeat(64), is_official: true });
@@ -106,6 +109,14 @@ test('Admin exposes only persisted RAG index metadata matching the active source
   const stale = await loadProductV3StagingSnapshot(staging, fetcher);
   assert.equal(stale.notices[0].ragVersion, null);
   assert.equal(stale.errors.find(error => error.source === 'RAG 색인 상태')?.level, 'WARNING');
+  rows.product_v3_rag_index_metadata![0] = { ...(rows.product_v3_rag_index_metadata![0] as object), source_hash: 'a'.repeat(64),
+    index_status: 'REINDEX_REQUIRED', index_version: 'NOT_BUILT', chunk_count: 0, indexed_at: null };
+  const notIndexed = await loadProductV3StagingSnapshot(staging, fetcher);
+  assert.equal(notIndexed.notices[0].ragVersion, null);
+  assert.equal(notIndexed.notices[0].ragChunkCount, 0);
+  assert.equal(notIndexed.notices[0].ragRecordedChunkCount, 0);
+  assert.equal(notIndexed.notices[0].ragIndexedAt, null);
+  assert.equal(notIndexed.notices[0].ragIndexStatus, 'REINDEX_REQUIRED');
 });
 
 test('one unavailable staging table fails closed; static seed is never substituted', async () => {

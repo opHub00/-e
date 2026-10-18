@@ -20,6 +20,10 @@ export type ConsoleNotice = {
   ragVersion: string | null;
   /** Persisted index state; absent on older staging schemas. */
   ragIndexStatus?: 'ACTIVE' | 'STALE' | 'FAILED' | 'REINDEX_REQUIRED' | null;
+  /** Recorded source lineage, independent of whether the index is usable. */
+  ragSourceVersion?: string | null;
+  ragIndexedAt?: string | null;
+  ragRecordedChunkCount?: number | null;
   provenance: { fileName: string; sha256: string; official: boolean; sourceUrl?: string | null };
   /** ISO 시각 */
   updatedAt: string;

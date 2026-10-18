@@ -22,6 +22,7 @@ try {
     grant all on storage.objects to anon, authenticated, service_role;`);
   await db.exec(await readFile(new URL('../supabase/migrations/20260915105910_assessment_rule_registry.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/20261018134607_product_v3_rag_index_metadata.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20261018181550_product_v3_rag_index_grants_hardening.sql', import.meta.url), 'utf8'));
   await db.query('insert into public.announcements(id,source,title,status) values($1,$2,$3,$4)',
     [announcementId, 'LOCAL_TEST', 'RAG isolated test', 'PUBLISHED']);
   await db.query(`insert into public.announcement_documents(id,announcement_id,document_type,storage_path,file_name,mime_type,version_label,sha256,is_official)
@@ -55,5 +56,13 @@ try {
   const rls = await db.query("select relrowsecurity from pg_class where relnamespace='public'::regnamespace and relname = any($1::text[])",
     [['product_v3_rag_index_metadata', 'product_v3_rag_index_audit_log']]);
   ok(rls.rows.length === 2 && rls.rows.every(row => row.relrowsecurity), 'both RAG tables enable RLS');
+  for (const [table, allowed] of [['product_v3_rag_index_metadata', ['SELECT', 'INSERT', 'UPDATE']],
+    ['product_v3_rag_index_audit_log', ['SELECT', 'INSERT']]]) {
+    for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) {
+      const actual = (await db.query('select has_table_privilege($1,$2,$3) allowed',
+        ['service_role', `public.${table}`, privilege])).rows[0].allowed;
+      ok(actual === allowed.includes(privilege), `service_role ${privilege} on ${table} is least-privilege`);
+    }
+  }
   console.log(`Product V3 RAG metadata SQL/RLS: ${checks} checks passed (isolated PGlite)`);
 } finally { await db.close(); }

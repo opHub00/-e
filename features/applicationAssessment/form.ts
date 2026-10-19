@@ -15,7 +15,7 @@ export const FORM_GROUP_LABELS: Record<FormGroup, string> = {
 export const FORM_GROUP_HINTS: Partial<Record<FormGroup, string>> = {
   announcement: '공고 원문에서 직접 확인한 경우에만 답해 주세요. 모르면 비워 두는 편이 정확해요.',
 };
-export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children' | 'dates'; group: FormGroup; money?: true; supplies?: SupplyType[];
+export type FormField = { key: keyof Details; label: string; kind: 'date' | 'number' | 'boolean' | 'children' | 'dates' | 'choice'; group: FormGroup; money?: true; supplies?: SupplyType[];
   /** Ask only when the loaded rules actually read this fact (a standard that only some announcements use). */
   onlyWhenRulesUse?: true };
 export const FORM_FIELDS: FormField[] = [
@@ -44,6 +44,19 @@ export const FORM_FIELDS: FormField[] = [
   { key: 'householdIncome', label: '세대 월평균소득(원)', kind: 'number', group: 'income', money: true, supplies: ['newlywed', 'firstHome'] },
   { key: 'dualIncome', label: '맞벌이인가요?', kind: 'boolean', group: 'income', supplies: ['newlywed', 'firstHome'] },
   { key: 'workStartedAt', label: '근로 시작일', kind: 'date', group: 'income', supplies: ['youth'] },
+  { key: 'educationStatus', label: '대학 재학·입학·복학/졸업 상태', kind: 'choice', group: 'basic', supplies: ['student'] },
+  { key: 'graduationDate', label: '졸업·중퇴일', kind: 'date', group: 'basic', supplies: ['student'] },
+  { key: 'schoolRegion', label: '현재 학교 소재지', kind: 'choice', group: 'residence', supplies: ['student'] },
+  { key: 'incomeSourceRegion', label: '소득 근거지', kind: 'choice', group: 'residence', supplies: ['youth', 'newlywed'] },
+  { key: 'youthActivityCategory', label: '청년 소득활동 유형', kind: 'choice', group: 'income', supplies: ['youth'] },
+  { key: 'totalIncomeWorkMonths', label: '소득이 있는 업무 총 기간(개월)', kind: 'number', group: 'income', supplies: ['youth'] },
+  { key: 'parentApplicantMonthlyIncome', label: '본인·부모 월평균소득 합계(원)', kind: 'number', group: 'income', money: true, supplies: ['student'] },
+  { key: 'housingBenefitRecipient', label: '주거급여 수급자인가요?', kind: 'boolean', group: 'basic', supplies: ['housingBenefit'] },
+  { key: 'canProveSubscriptionByMoveIn', label: '입주 전까지 청약통장 가입을 증명할 수 있나요?', kind: 'boolean', group: 'account', supplies: ['youth','newlywed'] },
+  { key: 'adultOrMinorHouseholdHeadException', label: '성년 신청자이거나 미성년 세대주 예외에 해당하나요?', kind: 'boolean', group: 'announcement' },
+  { key: 'applicationResidencyEligible', label: '공고의 신청 가능 지역 조건을 충족하나요?', kind: 'boolean', group: 'announcement' },
+  { key: 'noPublicRentalSubletRestriction', label: '공공임대 불법전대 신청 제한이 없나요?', kind: 'boolean', group: 'announcement' },
+  { key: 'singleHouseholdApplicationClear', label: '이 공고에 한 세대 1건만 신청하나요?', kind: 'boolean', group: 'announcement' },
   { key: 'totalAssets', label: '자산 총액(원, 청년은 본인 / 그 외 세대)', kind: 'number', group: 'assets', money: true, onlyWhenRulesUse: true },
   { key: 'parentAssets', label: '부모 자산 총액(원)', kind: 'number', group: 'assets', money: true, supplies: ['youth'], onlyWhenRulesUse: true },
   { key: 'realEstateAssets', label: '세대 부동산(건물+토지) 가액 합계(원, 없으면 0)', kind: 'number', group: 'assets', money: true, supplies: ['newlywed', 'firstHome'], onlyWhenRulesUse: true },
@@ -90,6 +103,8 @@ export function parseForm(raw: Record<string, string>, supply: SupplyType): { de
       const dates = value === '없음' ? [] : value.split(',').map(s => s.trim());
       if (dates.some(date => !validDate(date))) { errors.push(`${field.label}: 날짜를 확인해 주세요.`); continue; }
       parsed = field.kind === 'dates' ? dates : dates.map(birthDate => ({ birthDate, unborn: false }));
+    } else if (field.kind === 'choice') {
+      parsed = value;
     } else {
       if (!['yes', 'no'].includes(value)) { errors.push(`${field.label}: 응답을 다시 확인해 주세요.`); continue; }
       parsed = value === 'yes';

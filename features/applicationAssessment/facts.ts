@@ -1,5 +1,5 @@
 import type { ProfileFieldState } from '../profile/domain.ts';
-import type { AssessmentInput, Scalar } from './types.ts';
+import type { AssessmentInput, Scalar, SupplyType } from './types.ts';
 import { noHomeDuration, withinYears } from './dateFacts.ts';
 
 export function validDate(value: string | undefined): value is string {
@@ -21,7 +21,7 @@ const inverse = (value: boolean | undefined) => value === undefined ? undefined 
 /** Facts where -1 means "not applicable to this applicant" (0 points), distinct from unknown. */
 const NOT_APPLICABLE_SENTINEL_FACTS = new Set(['calculatedNoHomeMonths', 'newlywedMarriageScoreMonths', 'singleParentChildScoreMonths']);
 
-function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
+function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}, supplyType?: SupplyType): Record<string, Scalar | undefined> {
   const p = input.profile;
   const d = input.details;
   const months = (date: string | undefined) => completedMonths(date, asOf);
@@ -40,6 +40,34 @@ function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriod
   const low = incomeThreshold(d.dualIncome ? '80' : '70'), mid = incomeThreshold(d.dualIncome ? '110' : '100');
   const cutoff = parameters['exceptions.childbirthAfter'];
   const childbirthClear = typeof cutoff === 'string' && children && validChildren ? !children.some(c => c.unborn || c.birthDate! >= cutoff) : undefined;
+  const recentChildCount = typeof cutoff === 'string' && children && validChildren
+    ? children.filter(c => c.unborn || c.adopted || c.birthDate! >= cutoff).length
+    : undefined;
+  const childBand = recentChildCount === undefined ? undefined : Math.min(2, recentChildCount);
+  const rawHouseholdSize = d.incomeHouseholdSize;
+  const incomeSourceFact = supplyType && typeof parameters[`threshold.${supplyType}.incomeFact`] === 'string'
+    ? parameters[`threshold.${supplyType}.incomeFact`] as string
+    : undefined;
+  const incomeAmount = incomeSourceFact === 'parentApplicantMonthlyIncome' ? d.parentApplicantMonthlyIncome
+    : incomeSourceFact === 'monthlyIncome' ? d.monthlyIncome
+    : incomeSourceFact === 'householdIncome' ? d.householdIncome : undefined;
+  const incomeMode = d.dualIncome ? 'dual' : 'single';
+  const percentKey = supplyType && Number.isSafeInteger(rawHouseholdSize)
+    ? `threshold.${supplyType}.incomePercent.${incomeMode}.${rawHouseholdSize}` : undefined;
+  const defaultPercentKey = supplyType ? `threshold.${supplyType}.incomePercent.${incomeMode}.default` : undefined;
+  const basePercent = percentKey && typeof parameters[percentKey] === 'number' ? parameters[percentKey] as number
+    : defaultPercentKey && typeof parameters[defaultPercentKey] === 'number' ? parameters[defaultPercentKey] as number : undefined;
+  const maxPercentKey = supplyType ? `threshold.${supplyType}.incomeMaxPercent` : undefined;
+  const maxPercent = maxPercentKey && typeof parameters[maxPercentKey] === 'number' ? parameters[maxPercentKey] as number : undefined;
+  const adjustedPercent = basePercent === undefined || childBand === undefined ? undefined
+    : Math.min(basePercent + childBand * 10, maxPercent ?? Number.POSITIVE_INFINITY);
+  const incomeLimitKey = supplyType && rawHouseholdSize && adjustedPercent !== undefined
+    ? `threshold.${supplyType}.income.${rawHouseholdSize}.${adjustedPercent}` : undefined;
+  const announcementIncomeLimit = incomeLimitKey && typeof parameters[incomeLimitKey] === 'number' ? parameters[incomeLimitKey] as number : undefined;
+  const assetLimitKey = supplyType && childBand !== undefined ? `threshold.${supplyType}.assets.${childBand}` : undefined;
+  const vehicleLimitKey = supplyType && childBand !== undefined ? `threshold.${supplyType}.vehicle.${childBand}` : undefined;
+  const announcementAssetLimit = assetLimitKey && typeof parameters[assetLimitKey] === 'number' ? parameters[assetLimitKey] as number : undefined;
+  const announcementVehicleLimit = vehicleLimitKey && typeof parameters[vehicleLimitKey] === 'number' ? parameters[vehicleLimitKey] as number : undefined;
   const minorAgeYears = typeof parameters['children.minorAgeYears'] === 'number' ? parameters['children.minorAgeYears'] : 18;
   // 가구소득 배점: 공고가 정한 비율(외벌이/맞벌이) 이하이면 1, 초과면 0. 비율이 없으면 계산하지 않는다.
   const scorePercent = d.dualIncome === undefined ? undefined : parameters[d.dualIncome ? 'incomeScore.dualPercent' : 'incomeScore.singlePercent'];
@@ -62,6 +90,7 @@ function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriod
     hasChildUnder7: validChildren ? children!.some(c => c.unborn) || childAges!.some(a => a! < 84) : undefined,
     hasChildUnder3: validChildren ? children!.some(c => c.unborn) || childAges!.some(a => a! < 36) : undefined,
     childbirthClear,
+    recentChildCount,
     householdIncomeScoreTier: d.dualIncome !== undefined && typeof d.householdIncome === 'number' && d.householdIncome >= 0 && typeof low === 'number' && typeof mid === 'number' ? (d.householdIncome <= low ? 0 : d.householdIncome <= mid ? 1 : 2) : undefined,
     // -1 is an explicit not-applicable sentinel, distinct from a valid period under one month.
     calculatedNoHomeMonths: duration && !(known(p.housing.householdDisqualifyingPreviousOwnership) === true && !d.housingDisposalDates?.length) ? (duration.applicable ? duration.months : -1) : undefined,
@@ -105,12 +134,28 @@ function buildExactFacts(input: AssessmentInput, asOf: string | null, workPeriod
     workOrTaxMonths: workPeriodBasis === 'work' ? months(d.workStartedAt)
       : workPeriodBasis === 'tax' && known(p.income.incomeTaxPaymentYears) !== undefined ? known(p.income.incomeTaxPaymentYears)! * 12 : undefined,
     exceptionsClear: d.specialExceptions ? d.specialExceptions.length === 0 : undefined,
+    educationStatus: d.educationStatus,
+    graduationMonths: months(d.graduationDate),
+    schoolRegion: d.schoolRegion,
+    incomeSourceRegion: d.incomeSourceRegion,
+    youthActivityCategory: d.youthActivityCategory,
+    totalIncomeWorkMonths: d.totalIncomeWorkMonths,
+    parentApplicantMonthlyIncome: d.parentApplicantMonthlyIncome,
+    housingBenefitRecipient: d.housingBenefitRecipient,
+    canProveSubscriptionByMoveIn: d.canProveSubscriptionByMoveIn,
+    adultOrMinorHouseholdHeadException: d.adultOrMinorHouseholdHeadException,
+    applicationResidencyEligible: d.applicationResidencyEligible,
+    noPublicRentalSubletRestriction: d.noPublicRentalSubletRestriction,
+    singleHouseholdApplicationClear: d.singleHouseholdApplicationClear,
+    incomeWithinAnnouncementLimit: typeof incomeAmount === 'number' && typeof announcementIncomeLimit === 'number' ? incomeAmount <= announcementIncomeLimit : undefined,
+    assetsWithinAnnouncementLimit: typeof d.totalAssets === 'number' && typeof announcementAssetLimit === 'number' ? d.totalAssets <= announcementAssetLimit : undefined,
+    vehicleWithinAnnouncementLimit: typeof d.vehicleValue === 'number' && typeof announcementVehicleLimit === 'number' ? d.vehicleValue <= announcementVehicleLimit : undefined,
   };
   // Never coerce negative values, fractions in counts, NaN, or infinity into eligibility.
   for (const [key, value] of Object.entries(facts)) {
     if (typeof value === 'number' && (!Number.isFinite(value) || (value < 0 && !(NOT_APPLICABLE_SENTINEL_FACTS.has(key) && value === -1)) ||
-      (['recognizedPaymentCount', 'incomeTaxPaymentYears','householdMemberCount','incomeHouseholdSize'].includes(key) && !Number.isSafeInteger(value)) ||
-      (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','totalAssets','parentAssets','recognizedDepositAmount','realEstateAssets','vehicleValue'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
+      (['recognizedPaymentCount', 'incomeTaxPaymentYears','householdMemberCount','incomeHouseholdSize','recentChildCount','totalIncomeWorkMonths'].includes(key) && !Number.isSafeInteger(value)) ||
+      (parameters['amounts.integerWon'] === true && ['monthlyIncome','householdIncome','parentApplicantMonthlyIncome','totalAssets','parentAssets','recognizedDepositAmount','realEstateAssets','vehicleValue'].includes(key) && !Number.isSafeInteger(value)))) facts[key] = undefined;
   }
   return facts;
 }
@@ -134,16 +179,16 @@ const hasRange = (d: Details) => !!d.marriageDateLatest || !!d.children?.some(ch
  * latest possible dates and kept only where both agree — the facts are monotone in these dates, so
  * the two ends decide every case in between. A disagreement leaves the fact unknown (fail closed).
  */
-export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): Record<string, Scalar | undefined> {
-  return buildFactsWithRanges(input, asOf, workPeriodBasis, parameters).facts;
+export function buildFacts(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}, supplyType?: SupplyType): Record<string, Scalar | undefined> {
+  return buildFactsWithRanges(input, asOf, workPeriodBasis, parameters, supplyType).facts;
 }
 
 /** Facts, plus [low, high] for numeric facts whose two ends disagree (e.g. a child born "2022년 5월" is 51–52 months old). */
-export function buildFactsWithRanges(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}): { facts: Record<string, Scalar | undefined>; ranges: Record<string, [number, number]> } {
+export function buildFactsWithRanges(input: AssessmentInput, asOf: string | null, workPeriodBasis?: Scalar | null, parameters: Record<string, Scalar | null> = {}, supplyType?: SupplyType): { facts: Record<string, Scalar | undefined>; ranges: Record<string, [number, number]> } {
   const details: Details = input.details.children === undefined ? { ...input.details, children: profileChildren(input.profile) } : input.details;
-  if (!hasRange(details)) return { facts: buildExactFacts({ ...input, details }, asOf, workPeriodBasis, parameters), ranges: {} };
+  if (!hasRange(details)) return { facts: buildExactFacts({ ...input, details }, asOf, workPeriodBasis, parameters, supplyType), ranges: {} };
   if (details.marriageDateLatest && (!validDate(details.marriageDate) || !validDate(details.marriageDateLatest) || details.marriageDateLatest < details.marriageDate!)) {
-    return { facts: buildExactFacts({ ...input, details: { ...details, marriageDate: undefined, marriageDateLatest: undefined } }, asOf, workPeriodBasis, parameters), ranges: {} };
+    return { facts: buildExactFacts({ ...input, details: { ...details, marriageDate: undefined, marriageDateLatest: undefined } }, asOf, workPeriodBasis, parameters, supplyType), ranges: {} };
   }
   const at = (end: 'early' | 'late'): Details => ({
     ...details,
@@ -153,8 +198,8 @@ export function buildFactsWithRanges(input: AssessmentInput, asOf: string | null
       birthDate: end === 'late' && child.birthDateLatest ? child.birthDateLatest : child.birthDate,
     })),
   });
-  const early = buildExactFacts({ ...input, details: at('early') }, asOf, workPeriodBasis, parameters);
-  const late = buildExactFacts({ ...input, details: at('late') }, asOf, workPeriodBasis, parameters);
+  const early = buildExactFacts({ ...input, details: at('early') }, asOf, workPeriodBasis, parameters, supplyType);
+  const late = buildExactFacts({ ...input, details: at('late') }, asOf, workPeriodBasis, parameters, supplyType);
   const ranges: Record<string, [number, number]> = {};
   for (const key of Object.keys(early)) {
     const a = early[key], b = late[key];

@@ -23,7 +23,7 @@ export const SCORING_STATUS_LABEL: Record<ScoringStatus, string> = {
 };
 
 /** 어떤 공급에 쓰는 산식인가. 엔진의 공급 유형과 "민영 일반공급"을 함께 담는다. */
-export type ScoringTarget = SupplyType | 'generalPrivate' | 'generalPublic';
+export type ScoringTarget = Extract<SupplyType, 'youth' | 'newlywed' | 'firstHome'> | 'generalPrivate' | 'generalPublic';
 
 export const SCORING_TARGET_LABEL: Record<ScoringTarget, string> = {
   generalPrivate: '민영주택 일반공급',

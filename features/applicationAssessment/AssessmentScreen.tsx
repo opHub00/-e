@@ -14,6 +14,7 @@ import type { ProfileFieldState } from '../profile/domain';
 import { assessApplication } from './engine';
 import { QuestionnaireFlow } from './QuestionnaireFlow';
 import { SUPPLY_LABELS } from './labels';
+import { supplyLabelFor } from './supplyTypes';
 import { REFERENCE_LISTING_ID, REFERENCE_RULE_SET } from './reference';
 import { announcementResidenceRegion } from './ruleRegion';
 import { SOURCE_LABELS, useAssessmentCatalog, useAssessmentRules } from './data/useAssessmentRules';
@@ -189,7 +190,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
       {step === 1 ? <>
         <Text style={styles.strong}>{title}</Text>
         <Text style={styles.title}>확인할 공급유형</Text>
-        {(rules?.supplies.map(s => s.type) ?? []).map(key => <Choice key={key} label={SUPPLY_LABELS[key]} selected={key === supply} onPress={() => { setSupply(key); resetAnswers(); }} />)}
+        {(rules?.supplies.map(s => s.type) ?? []).map(key => <Choice key={key} label={supplyLabelFor(rules, key)} selected={key === supply} onPress={() => { setSupply(key); resetAnswers(); }} />)}
         <WanpanCard style={styles.stack}>
           <Text style={styles.title}>{profile.basic.name}님의 저장된 정보</Text>
           {[
@@ -207,7 +208,7 @@ function AssessmentFlow({ listingId, onBack }: { listingId?: string; onBack: () 
         <PrimaryButton label="공고 다시 선택" variant="soft" onPress={() => move(0)} />
       </> : null}
       {step === 2 ? <>
-        <Text style={styles.strong}>{SUPPLY_LABELS[supply]}</Text>
+        <Text style={styles.strong}>{supplyLabelFor(rules, supply)}</Text>
         {useListingInputs && listingInputStatus === 'loading'
           ? <Text style={styles.body}>이 공고에서 저장한 답변을 불러오고 있어요.</Text>
           : <QuestionnaireFlow

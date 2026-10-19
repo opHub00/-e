@@ -89,10 +89,12 @@ try {
   await db.exec(concurrencyLock);
   const listingInputs = await readFile(new URL('../supabase/migrations/20261005090000_user_listing_assessment_inputs.sql', import.meta.url), 'utf8');
   await db.exec(listingInputs);
+  const rentalSupplyExpansion = await readFile(new URL('../supabase/migrations/20261019083000_expand_listing_input_supply_types.sql', import.meta.url), 'utf8');
+  await db.exec(rentalSupplyExpansion);
   await db.query('insert into auth.users(id) values($1),($2)', [ids.a, ids.b]);
   await db.query('insert into public.announcements(id,title) values($1,$2)', [ids.announcement, '검증 공고']);
   await db.query('insert into public.announcement_documents(id,announcement_id,sha256) values($1,$2,$3)', [ids.document, ids.announcement, sourceHash]);
-  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,is_active,is_public,approved_at,config) values($1,$2,$3,$4,'DRAFT_SOURCE_VERIFIED',true,true,now(),$5)", [ids.ruleSet, ids.announcement, ids.document, '1.0.0', { supplies: [{ type: 'youth' }] }]);
+  await db.query("insert into public.assessment_rule_sets(id,announcement_id,document_id,version,source_status,is_active,is_public,approved_at,config) values($1,$2,$3,$4,'DRAFT_SOURCE_VERIFIED',true,true,now(),$5)", [ids.ruleSet, ids.announcement, ids.document, '1.0.0', { supplies: [{ type: 'youth' }, { type:'student' }] }]);
   await db.query('insert into public.announcement_listing_bindings(listing_id,announcement_id,bound_rule_set_id) values($1,$2,$3)', ['listing-1', ids.announcement, ids.ruleSet]);
   await db.query('insert into public.user_profiles(user_id,profile_json,updated_at) values($1,$2,$3)', [ids.b, v2, '2026-10-01T00:00:00Z']);
 
@@ -178,6 +180,12 @@ try {
     "select public.read_user_listing_assessment_input('listing-1','youth',$1) result", [ids.ruleSet],
   )).rows[0].result;
   ok(response.userId === ids.a && response.compatibility === 'CURRENT', 'owner reads a compatible listing-scoped snapshot');
+  response = (await db.query(
+    "select public.save_user_listing_assessment_input('listing-1','student',$1,0,1,$2) result",
+    [ids.ruleSet, { canProveSubscriptionByMoveIn:'yes', applicationResidencyEligible:'yes', noPublicRentalSubletRestriction:'yes', singleHouseholdApplicationClear:'yes' }],
+  )).rows[0].result;
+  ok(response.supplyType === 'student' && response.answers.canProveSubscriptionByMoveIn === 'yes'
+    && response.answers.applicationResidencyEligible === 'yes', 'rental supply answers use the same owner/revision RPC');
   await rejects(
     () => db.query("select public.save_user_listing_assessment_input('listing-1','youth',$1,0,1,$2)", [ids.ruleSet, { exceptions: 'yes' }]),
     'listing-scoped answer revision conflicts are rejected',

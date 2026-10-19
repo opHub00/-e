@@ -20,6 +20,7 @@ import type { SupplyType } from '../../../features/applicationAssessment/types.t
 import { normalizePortfolioFailure, type PortfolioItemFailureCode } from '../../../features/applicationAssessment/portfolioFailure.ts';
 import type { ApplicantProfileV3 } from '../../../features/profile/v3.ts';
 import { assessmentDetailsFromListingAnswers } from '../../../features/applicationAssessment/listingInputs.ts';
+import { SUPPLY_TYPE_SET } from '../../../features/applicationAssessment/supplyTypes.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -135,7 +136,7 @@ async function candidateSources(env: Environment, userId: string, profile: Appli
       && (!binding.bound_rule_set_id || binding.bound_rule_set_id === set.id));
     const listingIds = setBindings.length ? setBindings.map(binding => binding.listing_id) : [`announcement:${set.announcement_id}`];
     for (const listingId of listingIds) for (const supply of set.config.supplies ?? []) {
-      if (!['youth', 'newlywed', 'firstHome'].includes(supply.type ?? '')) continue;
+      if (!SUPPLY_TYPE_SET.has(supply.type ?? '')) continue;
       candidates.push({
         listing: {
           listingId, announcementId: announcement.id, title: announcement.title,

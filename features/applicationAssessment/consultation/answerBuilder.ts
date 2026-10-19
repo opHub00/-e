@@ -9,12 +9,11 @@ import type {
   ConsultationResolution,
   ConsultationResponse,
 } from './types.ts';
+import { SUPPLY_LABELS } from '../supplyTypes.ts';
 
 const REGION_OR_RESIDENCE = new RegExp(`(거주|${REGION_DEFINITIONS.flatMap(region => region.aliases).join('|')})`);
 
-const SUPPLY_LABEL: Record<SupplyType, string> = {
-  youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급',
-};
+const SUPPLY_LABEL: Record<SupplyType, string> = SUPPLY_LABELS;
 const STAGE_LABEL = { PRIORITY: '우선공급', GENERAL: '일반공급', LOTTERY: '추첨공급' } as const;
 const PROFILE_FACTS = new Set([
   'householdMemberCount', 'maritalStatus', 'noHome', 'neverOwned', 'householdNoHome',

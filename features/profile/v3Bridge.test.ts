@@ -33,3 +33,17 @@ test('questionnaire persists reusable facts and excludes announcement-only quali
   assert.equal('specialExceptions' in next, false);
   assert.equal('incomeHouseholdSize' in next.household, false);
 });
+
+test('rental qualification raw facts persist while announcement confirmations do not', () => {
+  const next = mergeReusableAssessmentDetailsIntoV3(createEmptyApplicantProfileV3(), {
+    educationStatus:'GRADUATED_OR_WITHDRAWN', graduationDate:'2026-02-10', schoolRegion:'제주특별자치도',
+    incomeSourceRegion:'제주특별자치도', youthActivityCategory:'WORKER', totalIncomeWorkMonths:24,
+    parentApplicantMonthlyIncome:4_000_000, housingBenefitRecipient:false,
+    canProveSubscriptionByMoveIn:true, noPublicRentalSubletRestriction:true,
+  }, '2026-10-19T00:00:00.000Z');
+  assert.equal(next.education?.status.state, 'KNOWN');
+  assert.equal(next.income.youthActivityCategory?.state, 'KNOWN');
+  assert.equal(next.benefits?.housingBenefitRecipient.state, 'KNOWN');
+  assert.equal('canProveSubscriptionByMoveIn' in next, false);
+  assert.equal('noPublicRentalSubletRestriction' in next, false);
+});

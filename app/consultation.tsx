@@ -11,6 +11,7 @@ import { createAssessmentConsultationUiEngine } from '../features/assessmentCons
 import { readAssessmentConsultationSeed } from '../features/assessmentConsultation/seedStore';
 import { useAssessmentRules } from '../features/applicationAssessment/data/useAssessmentRules';
 import { useUserStore } from '../store/useUserStore';
+import type { SupplyType } from '../features/applicationAssessment/types';
 
 export default function ConsultationRoute() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function ConsultationRoute() {
   const engine = useMemo(() => {
     if (!listingId || !ruleLoad.rules || !hydrated) return null;
     const preferred = supplyType && ruleLoad.rules.supplies.some(item => item.type === supplyType)
-      ? supplyType as 'youth' | 'newlywed' | 'firstHome'
+      ? supplyType as SupplyType
       : undefined;
     const rules = preferred
       ? { ...ruleLoad.rules, supplies: [

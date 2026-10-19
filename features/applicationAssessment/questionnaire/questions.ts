@@ -67,6 +67,19 @@ const QUESTION_FACTS: Record<string, string[]> = {
   householdIncome: ['householdIncome', 'householdIncomeScoreTier', 'householdIncomeScoreEligible'],
   dualIncome: ['dualIncome', 'householdIncomeScoreTier', 'householdIncomeScoreEligible'],
   workStartedAt: ['workMonths', 'workOrTaxMonths'],
+  educationStatus: ['educationStatus'],
+  graduationDate: ['graduationMonths'],
+  schoolRegion: ['schoolRegion'],
+  incomeSourceRegion: ['incomeSourceRegion'],
+  youthActivityCategory: ['youthActivityCategory'],
+  totalIncomeWorkMonths: ['totalIncomeWorkMonths'],
+  parentApplicantMonthlyIncome: ['parentApplicantMonthlyIncome'],
+  housingBenefitRecipient: ['housingBenefitRecipient'],
+  canProveSubscriptionByMoveIn: ['canProveSubscriptionByMoveIn'],
+  adultOrMinorHouseholdHeadException: ['adultOrMinorHouseholdHeadException'],
+  applicationResidencyEligible: ['applicationResidencyEligible'],
+  noPublicRentalSubletRestriction: ['noPublicRentalSubletRestriction'],
+  singleHouseholdApplicationClear: ['singleHouseholdApplicationClear'],
   totalAssets: ['totalAssets'],
   parentAssets: ['parentAssets'],
   realEstateAssets: ['realEstateAssets'],
@@ -135,6 +148,13 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
   const questions: Question[] = [];
   const add = (question: Question | null) => { if (question) questions.push(question); };
 
+  if (uses('educationStatus')) add({ id:'educationStatus', kind:'choice', section:'기본', title:'학적 상태를 알려주세요.', options:[
+    {value:'ENROLLED_OR_INCOMING',label:'대학 재학·입학·복학 예정'},
+    {value:'GRADUATED_OR_WITHDRAWN',label:'대학·고등학교 졸업 또는 중퇴'},
+    {value:'OTHER',label:'기타'}, {value:'',label:'잘 모르겠어요'}], why:'대학생 계층 자격을 확인해요.' });
+  if (uses('graduationDate') && answers.educationStatus === 'GRADUATED_OR_WITHDRAWN') add({ id:'graduationDate', kind:'date', section:'기본', title:'가장 최근 졸업·중퇴일은 언제인가요?', why:'공고일 기준 2년 이내인지 확인해요.' });
+  if (uses('housingBenefitRecipient')) add({ id:'housingBenefitRecipient', kind:'boolean', section:'기본', title:'현재 주거급여 수급자인가요?', options:YES_NO, why:'주거급여수급자 계층 자격을 확인해요.' });
+
   // ── 기본
   const savedBirthDate = known(profile.basic.birthDate);
   if (uses('birthDate')) add({
@@ -155,6 +175,18 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
       : [{ value: profile.residence.currentRegion, label: profile.residence.currentRegion }, { value: '기타', label: '다른 지역' }, { value: '', label: '잘 모르겠어요' }],
     why: '공고의 지역 요건과 지역우선 공급을 확인해요.',
     prefill: profile.residence.currentRegion ? { value: profile.residence.currentRegion, source: '프로필에 저장된 거주지역' } : undefined,
+  });
+  if (uses('schoolRegion')) add({
+    id:'schoolRegion', kind:'choice', section:'거주', title:'현재 학교가 있는 지역은 어디인가요?',
+    options: region
+      ? [{value:region.profile,label:region.profile},{value:'기타',label:`${region.short} 외 지역`},{value:'',label:'잘 모르겠어요'}]
+      : [{value:profile.residence.currentRegion,label:profile.residence.currentRegion},{value:'기타',label:'다른 지역'},{value:'',label:'잘 모르겠어요'}],
+  });
+  if (uses('incomeSourceRegion')) add({
+    id:'incomeSourceRegion', kind:'choice', section:'거주', title:'현재 소득이 발생하는 근무지·사업장 지역은 어디인가요?',
+    options: region
+      ? [{value:region.profile,label:region.profile},{value:'기타',label:`${region.short} 외 지역`},{value:'',label:'해당 없음/잘 모름'}]
+      : [{value:profile.residence.currentRegion,label:profile.residence.currentRegion},{value:'기타',label:'다른 지역'},{value:'',label:'해당 없음/잘 모름'}],
   });
   if (uses('overseas')) add({
     id: 'overseas', kind: 'boolean', section: '거주', options: YES_NO,
@@ -350,6 +382,9 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
     id: 'workStartedAt', kind: 'date', section: '소득', title: '언제부터 일을 시작하셨나요?',
     why: '근로기간이 청년 특별공급 요건에 쓰여요.',
   });
+  if (uses('youthActivityCategory')) add({ id:'youthActivityCategory', kind:'choice', section:'소득', title:'청년 소득활동 유형은 어떤 것인가요?', options:[{value:'WORKER',label:'현재 소득이 있는 업무 중'},{value:'RECENTLY_UNEMPLOYED',label:'퇴직 1년 이내·구직급여 자격'},{value:'ARTIST',label:'예술인'},{value:'OTHER',label:'기타'},{value:'',label:'잘 모르겠어요'}] });
+  if (uses('totalIncomeWorkMonths')) add({ id:'totalIncomeWorkMonths', kind:'number', section:'소득', title:'소득이 있는 업무에 종사한 총 기간은 몇 개월인가요?', why:'중단된 기간을 합산해 5년 이내인지 확인해요.' });
+  if (uses('parentApplicantMonthlyIncome')) add({ id:'parentApplicantMonthlyIncome', kind:'money', section:'소득', title:'본인과 부모님의 월평균소득 합계는 얼마인가요?', help:'세전 원 단위로 입력해 주세요.' });
   for (const [id, title] of [['totalAssets', '본인(또는 세대) 자산 총액은 얼마인가요?'], ['parentAssets', '부모님 자산 총액은 얼마인가요?'],
     ['realEstateAssets', '세대가 가진 부동산(건물+토지) 가액은 얼마인가요?'], ['vehicleValue', '세대 자동차 중 가장 비싼 차량가액은 얼마인가요?']] as const) {
     if (uses(id)) add({ id, kind: 'money', section: '자산', title, help: '원 단위로 입력해 주세요. 없으면 0.', why: '공고의 자산 기준과 비교해요.' });
@@ -364,6 +399,13 @@ export function buildQuestionnaire(input: QuestionnaireInput): Question[] {
     title: '출산·혼인 특례처럼 따로 확인할 사정이 있나요?',
     why: '특례가 있으면 결과에 추가 확인이 필요하다고 표시해요.',
   });
+  for (const [id,title] of [
+    ['canProveSubscriptionByMoveIn','입주 전까지 청약통장 가입을 증명할 수 있나요?'],
+    ['adultOrMinorHouseholdHeadException','성년자이거나 공고의 미성년 세대주 예외에 해당하나요?'],
+    ['applicationResidencyEligible','공고의 신청 가능 지역 조건을 충족하나요?'],
+    ['noPublicRentalSubletRestriction','공공임대주택 불법전대로 인한 신청 제한이 없나요?'],
+    ['singleHouseholdApplicationClear','이 공고에 세대당 한 건만 신청하나요?'],
+  ] as const) if (uses(id)) add({id,kind:'boolean',section:'공고 확인',options:YES_NO,title,why:'이 답은 현재 공고에만 저장되고 다른 공고에 재사용하지 않아요.'});
   return questions;
 }
 

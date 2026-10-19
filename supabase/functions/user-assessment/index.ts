@@ -7,6 +7,7 @@ import {
 import type { AssessmentInput, SupplyType } from '../../../features/applicationAssessment/types.ts';
 import { assessmentDetailsFromListingAnswers } from '../../../features/applicationAssessment/listingInputs.ts';
 import type { ApplicantProfileV3 } from '../../../features/profile/v3.ts';
+import { SUPPLY_TYPE_SET } from '../../../features/applicationAssessment/supplyTypes.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +20,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 });
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-const SUPPLIES = new Set<SupplyType>(['youth', 'newlywed', 'firstHome']);
+const SUPPLIES = SUPPLY_TYPE_SET as ReadonlySet<SupplyType>;
 const DETAIL_KEYS = new Set([
   'birthDate', 'firstMarriageDate', 'everMarried', 'accountKindEligible', 'firstRank',
   'isHouseholdHead', 'householdNoWinningFiveYears', 'incomeHouseholdSize',
@@ -32,6 +33,11 @@ const DETAIL_KEYS = new Set([
   'businessIncome', 'totalAssets', 'parentAssets', 'realEstateAssets', 'vehicleValue',
   'workStartedAt', 'youthPriorityTarget', 'newlywedPriorityTarget', 'specialSupplyHistory',
   'reWinningRestriction', 'specialExceptions',
+  'educationStatus', 'graduationDate', 'schoolRegion', 'incomeSourceRegion',
+  'youthActivityCategory', 'totalIncomeWorkMonths', 'parentApplicantMonthlyIncome',
+  'housingBenefitRecipient', 'canProveSubscriptionByMoveIn',
+  'adultOrMinorHouseholdHeadException', 'applicationResidencyEligible',
+  'noPublicRentalSubletRestriction', 'singleHouseholdApplicationClear',
 ]);
 
 type Environment = {

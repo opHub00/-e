@@ -1,0 +1,1596 @@
+{
+  "evidencePrefix": "lh.jeju.happy.20260918",
+  "evidenceSource": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+  "announcement": {
+    "id": "902916ae-bb9a-4ddf-a3cc-505d18a20e25",
+    "source": "LH",
+    "externalId": "lh-jeju-ildo-samdo-happy-20260918",
+    "housingManagementNumber": null,
+    "title": "제주일도·삼도 행복주택 예비입주자 모집",
+    "publisher": "한국토지주택공사",
+    "announcementDate": "2026-09-18",
+    "regionCode": "500",
+    "regionName": "제주특별자치도",
+    "sourceUrl": null
+  },
+  "document": {
+    "id": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+    "documentType": "DRAFT",
+    "storagePath": "2026/902916ae-bb9a-4ddf-a3cc-505d18a20e25/620be476-2073-4bf4-8db9-0bacb6ae1b29/original.pdf",
+    "fileName": "lh-2026-09-18-jeju-ildo-samdo-happy-housing.pdf",
+    "mimeType": "application/pdf",
+    "versionLabel": "2026.09.18. 모집공고 검토본",
+    "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+    "isOfficial": false,
+    "sourceUrl": null,
+    "publishedAt": null
+  },
+  "ruleSet": {
+    "id": "20b37b91-9edf-479a-a56a-ac9d3b70c424",
+    "version": "DRAFT-2026-09-18-transcription-1",
+    "sourceStatus": "DRAFT_SOURCE_VERIFIED",
+    "effectiveDate": "2026-09-18",
+    "config": {
+      "parameters": {
+        "supplyLabel.student": "대학생 계층",
+        "supplyLabel.youth": "청년 계층",
+        "supplyLabel.newlywed": "신혼부부·예비신혼부부 계층",
+        "supplyLabel.senior": "고령자 계층",
+        "supplyLabel.housingBenefit": "주거급여수급자 계층",
+        "amounts.integerWon": true,
+        "children.includeUnborn": true,
+        "children.minorAgeYears": 19,
+        "exceptions.childbirthAfter": "2023-03-28",
+        "announcement.applicationStartsAt": "2026-10-01T10:00:00+09:00",
+        "announcement.applicationEndsAt": "2026-10-02T17:00:00+09:00",
+        "announcement.documentTargetAt": "2026-10-08T16:00:00+09:00",
+        "announcement.documentsEndDate": "2026-10-14",
+        "announcement.winnerAt": "2026-12-28T16:00:00+09:00",
+        "announcement.applicationResidency": "NATIONWIDE",
+        "stage.student.PRIORITY.label": "1순위",
+        "stage.student.GENERAL.label": "2순위",
+        "stage.youth.PRIORITY.label": "1순위",
+        "stage.youth.GENERAL.label": "2순위",
+        "stage.newlywed.PRIORITY.label": "1순위",
+        "stage.newlywed.GENERAL.label": "2순위",
+        "stage.senior.LOTTERY.label": "추첨",
+        "stage.housingBenefit.LOTTERY.label": "추첨",
+        "warning.selection": "대학생·청년·신혼부부·한부모가족은 순위 후 추첨, 고령자·주거급여수급자는 추첨으로 선정합니다.",
+        "warning.childbirth": "2023-03-28 이후 출산·입양·태아에 따른 소득·자산 가산을 최대 2명까지 반영합니다.",
+        "threshold.student.incomeFact": "parentApplicantMonthlyIncome",
+        "threshold.student.incomeMaxPercent": 120,
+        "threshold.student.incomePercent.single.1": 120,
+        "threshold.student.incomePercent.single.2": 110,
+        "threshold.student.incomePercent.single.default": 100,
+        "threshold.student.income.1.120": 4576036,
+        "threshold.student.income.2.110": 6452897,
+        "threshold.student.income.2.120": 7039524,
+        "threshold.student.income.2.130": 7626151,
+        "threshold.student.income.2.140": 8212778,
+        "threshold.student.income.3.100": 8168429,
+        "threshold.student.income.3.110": 8985272,
+        "threshold.student.income.3.120": 9802115,
+        "threshold.student.income.3.130": 10618958,
+        "threshold.student.income.3.140": 11435801,
+        "threshold.student.income.4.100": 8802202,
+        "threshold.student.income.4.110": 9682422,
+        "threshold.student.income.4.120": 10562642,
+        "threshold.student.income.4.130": 11442863,
+        "threshold.student.income.4.140": 12323083,
+        "threshold.student.income.5.100": 9326985,
+        "threshold.student.income.5.110": 10259684,
+        "threshold.student.income.5.120": 11192382,
+        "threshold.student.income.5.130": 12125081,
+        "threshold.student.income.5.140": 13057779,
+        "threshold.student.income.6.100": 9906263,
+        "threshold.student.income.6.110": 10896889,
+        "threshold.student.income.6.120": 11887516,
+        "threshold.student.income.6.130": 12878142,
+        "threshold.student.income.6.140": 13868768,
+        "threshold.youth.incomeFact": "householdIncome",
+        "threshold.youth.incomeMaxPercent": 120,
+        "threshold.youth.incomePercent.single.1": 120,
+        "threshold.youth.incomePercent.single.2": 110,
+        "threshold.youth.incomePercent.single.default": 100,
+        "threshold.youth.income.1.120": 4576036,
+        "threshold.youth.income.2.110": 6452897,
+        "threshold.youth.income.2.120": 7039524,
+        "threshold.youth.income.2.130": 7626151,
+        "threshold.youth.income.2.140": 8212778,
+        "threshold.youth.income.3.100": 8168429,
+        "threshold.youth.income.3.110": 8985272,
+        "threshold.youth.income.3.120": 9802115,
+        "threshold.youth.income.3.130": 10618958,
+        "threshold.youth.income.3.140": 11435801,
+        "threshold.youth.income.4.100": 8802202,
+        "threshold.youth.income.4.110": 9682422,
+        "threshold.youth.income.4.120": 10562642,
+        "threshold.youth.income.4.130": 11442863,
+        "threshold.youth.income.4.140": 12323083,
+        "threshold.youth.income.5.100": 9326985,
+        "threshold.youth.income.5.110": 10259684,
+        "threshold.youth.income.5.120": 11192382,
+        "threshold.youth.income.5.130": 12125081,
+        "threshold.youth.income.5.140": 13057779,
+        "threshold.youth.income.6.100": 9906263,
+        "threshold.youth.income.6.110": 10896889,
+        "threshold.youth.income.6.120": 11887516,
+        "threshold.youth.income.6.130": 12878142,
+        "threshold.youth.income.6.140": 13868768,
+        "threshold.newlywed.incomeFact": "householdIncome",
+        "threshold.newlywed.incomeMaxPercent": 140,
+        "threshold.newlywed.incomePercent.single.1": 120,
+        "threshold.newlywed.incomePercent.single.2": 110,
+        "threshold.newlywed.incomePercent.single.default": 100,
+        "threshold.newlywed.incomePercent.dual.1": 120,
+        "threshold.newlywed.incomePercent.dual.2": 130,
+        "threshold.newlywed.incomePercent.dual.default": 120,
+        "threshold.newlywed.income.1.120": 4576036,
+        "threshold.newlywed.income.2.110": 6452897,
+        "threshold.newlywed.income.2.120": 7039524,
+        "threshold.newlywed.income.2.130": 7626151,
+        "threshold.newlywed.income.2.140": 8212778,
+        "threshold.newlywed.income.3.100": 8168429,
+        "threshold.newlywed.income.3.110": 8985272,
+        "threshold.newlywed.income.3.120": 9802115,
+        "threshold.newlywed.income.3.130": 10618958,
+        "threshold.newlywed.income.3.140": 11435801,
+        "threshold.newlywed.income.4.100": 8802202,
+        "threshold.newlywed.income.4.110": 9682422,
+        "threshold.newlywed.income.4.120": 10562642,
+        "threshold.newlywed.income.4.130": 11442863,
+        "threshold.newlywed.income.4.140": 12323083,
+        "threshold.newlywed.income.5.100": 9326985,
+        "threshold.newlywed.income.5.110": 10259684,
+        "threshold.newlywed.income.5.120": 11192382,
+        "threshold.newlywed.income.5.130": 12125081,
+        "threshold.newlywed.income.5.140": 13057779,
+        "threshold.newlywed.income.6.100": 9906263,
+        "threshold.newlywed.income.6.110": 10896889,
+        "threshold.newlywed.income.6.120": 11887516,
+        "threshold.newlywed.income.6.130": 12878142,
+        "threshold.newlywed.income.6.140": 13868768,
+        "threshold.senior.incomeFact": "householdIncome",
+        "threshold.senior.incomeMaxPercent": 120,
+        "threshold.senior.incomePercent.single.1": 120,
+        "threshold.senior.incomePercent.single.2": 110,
+        "threshold.senior.incomePercent.single.default": 100,
+        "threshold.senior.income.1.120": 4576036,
+        "threshold.senior.income.2.110": 6452897,
+        "threshold.senior.income.2.120": 7039524,
+        "threshold.senior.income.2.130": 7626151,
+        "threshold.senior.income.2.140": 8212778,
+        "threshold.senior.income.3.100": 8168429,
+        "threshold.senior.income.3.110": 8985272,
+        "threshold.senior.income.3.120": 9802115,
+        "threshold.senior.income.3.130": 10618958,
+        "threshold.senior.income.3.140": 11435801,
+        "threshold.senior.income.4.100": 8802202,
+        "threshold.senior.income.4.110": 9682422,
+        "threshold.senior.income.4.120": 10562642,
+        "threshold.senior.income.4.130": 11442863,
+        "threshold.senior.income.4.140": 12323083,
+        "threshold.senior.income.5.100": 9326985,
+        "threshold.senior.income.5.110": 10259684,
+        "threshold.senior.income.5.120": 11192382,
+        "threshold.senior.income.5.130": 12125081,
+        "threshold.senior.income.5.140": 13057779,
+        "threshold.senior.income.6.100": 9906263,
+        "threshold.senior.income.6.110": 10896889,
+        "threshold.senior.income.6.120": 11887516,
+        "threshold.senior.income.6.130": 12878142,
+        "threshold.senior.income.6.140": 13868768,
+        "threshold.student.assets.0": 108000000,
+        "threshold.student.vehicle.0": 0,
+        "threshold.student.assets.1": 119000000,
+        "threshold.student.vehicle.1": 0,
+        "threshold.student.assets.2": 130000000,
+        "threshold.student.vehicle.2": 0,
+        "threshold.youth.assets.0": 251000000,
+        "threshold.youth.vehicle.0": 45420000,
+        "threshold.youth.assets.1": 276000000,
+        "threshold.youth.vehicle.1": 49960000,
+        "threshold.youth.assets.2": 301000000,
+        "threshold.youth.vehicle.2": 54510000,
+        "threshold.newlywed.assets.0": 345000000,
+        "threshold.newlywed.vehicle.0": 45420000,
+        "threshold.newlywed.assets.1": 379000000,
+        "threshold.newlywed.vehicle.1": 49960000,
+        "threshold.newlywed.assets.2": 413000000,
+        "threshold.newlywed.vehicle.2": 54510000,
+        "threshold.senior.assets.0": 345000000,
+        "threshold.senior.vehicle.0": 45420000,
+        "threshold.senior.assets.1": 379000000,
+        "threshold.senior.vehicle.1": 49960000,
+        "threshold.senior.assets.2": 413000000,
+        "threshold.senior.vehicle.2": 54510000
+      },
+      "supplies": [
+        {
+          "type": "student",
+          "eligibility": [
+            "student.applicantAgeOrException",
+            "student.subletRestriction",
+            "student.singleApplication",
+            "student.education",
+            "student.unmarried",
+            "student.noHome",
+            "student.income",
+            "student.assets",
+            "student.vehicle"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "student.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "youth",
+          "eligibility": [
+            "youth.applicantAgeOrException",
+            "youth.subletRestriction",
+            "youth.singleApplication",
+            "youth.category",
+            "youth.unmarried",
+            "youth.noHome",
+            "youth.income",
+            "youth.assets",
+            "youth.vehicle",
+            "youth.account"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "youth.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "newlywed",
+          "eligibility": [
+            "newlywed.applicantAgeOrException",
+            "newlywed.subletRestriction",
+            "newlywed.singleApplication",
+            "newlywed.category",
+            "newlywed.householdNoHome",
+            "newlywed.income",
+            "newlywed.assets",
+            "newlywed.vehicle",
+            "newlywed.account"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "newlywed.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "senior",
+          "eligibility": [
+            "senior.applicantAgeOrException",
+            "senior.subletRestriction",
+            "senior.singleApplication",
+            "senior.age",
+            "senior.householdNoHome",
+            "senior.income",
+            "senior.assets",
+            "senior.vehicle"
+          ],
+          "stages": [
+            {
+              "stage": "LOTTERY",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "housingBenefit",
+          "eligibility": [
+            "housingBenefit.applicantAgeOrException",
+            "housingBenefit.subletRestriction",
+            "housingBenefit.singleApplication",
+            "housingBenefit.recipient",
+            "housingBenefit.householdNoHome"
+          ],
+          "stages": [
+            {
+              "stage": "LOTTERY",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "ruleKey": "student.applicantAgeOrException",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000097",
+          "b000099",
+          "b000100",
+          "b000104",
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "성년 신청자 또는 미성년 세대주 예외"
+      }
+    },
+    {
+      "ruleKey": "student.subletRestriction",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음"
+      }
+    },
+    {
+      "ruleKey": "student.singleApplication",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000157",
+          "b000985"
+        ],
+        "section": "세대당 1건 신청"
+      }
+    },
+    {
+      "ruleKey": "student.education",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "대학생 또는 졸업·중퇴 2년 이내 취업준비생",
+        "expression": {
+          "any": [
+            {
+              "fact": "educationStatus",
+              "op": "eq",
+              "value": "ENROLLED_OR_INCOMING"
+            },
+            {
+              "all": [
+                {
+                  "fact": "educationStatus",
+                  "op": "eq",
+                  "value": "GRADUATED_OR_WITHDRAWN"
+                },
+                {
+                  "fact": "graduationMonths",
+                  "op": "lte",
+                  "value": 24
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000148",
+          "b000151",
+          "b000152",
+          "b000153"
+        ],
+        "section": "대학생 또는 졸업·중퇴 2년 이내 취업준비생"
+      }
+    },
+    {
+      "ruleKey": "student.unmarried",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "미혼",
+        "expression": {
+          "fact": "maritalStatus",
+          "op": "eq",
+          "value": "single"
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000154"
+        ],
+        "section": "미혼"
+      }
+    },
+    {
+      "ruleKey": "student.noHome",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신청자 본인 무주택",
+        "expression": {
+          "fact": "noHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000148",
+          "b000128"
+        ],
+        "section": "신청자 본인 무주택"
+      }
+    },
+    {
+      "ruleKey": "student.income",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "본인·부모 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000155",
+          "b000156",
+          "b000158",
+          "b000160",
+          "b000161",
+          "b000162",
+          "b000163",
+          "b000164",
+          "b000165"
+        ],
+        "section": "본인·부모 소득 기준"
+      }
+    },
+    {
+      "ruleKey": "student.assets",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "본인 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000167",
+          "b000168",
+          "b000170",
+          "b000173",
+          "b000177",
+          "b000178",
+          "b000179",
+          "b000181"
+        ],
+        "section": "본인 총자산 기준"
+      }
+    },
+    {
+      "ruleKey": "student.vehicle",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "자동차를 소유하지 않음",
+        "expression": {
+          "fact": "vehicleValue",
+          "op": "eq",
+          "value": 0
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000167",
+          "b000173"
+        ],
+        "section": "자동차를 소유하지 않음"
+      }
+    },
+    {
+      "ruleKey": "student.rank1",
+      "supplyType": "student",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "제주 거주 또는 제주 대학 재학",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "schoolRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000236",
+          "b000239",
+          "b000242",
+          "b000244"
+        ],
+        "section": "제주 거주 또는 제주 대학 재학"
+      }
+    },
+    {
+      "ruleKey": "youth.applicantAgeOrException",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000097",
+          "b000099",
+          "b000100",
+          "b000104",
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "성년 신청자 또는 미성년 세대주 예외"
+      }
+    },
+    {
+      "ruleKey": "youth.subletRestriction",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음"
+      }
+    },
+    {
+      "ruleKey": "youth.singleApplication",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000157",
+          "b000985"
+        ],
+        "section": "세대당 1건 신청"
+      }
+    },
+    {
+      "ruleKey": "youth.category",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "청년 또는 소득활동 5년 이내 사회초년생",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "age",
+                  "op": "gte",
+                  "value": 19
+                },
+                {
+                  "fact": "age",
+                  "op": "lte",
+                  "value": 39
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "WORKER"
+                    },
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "RECENTLY_UNEMPLOYED"
+                    },
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "ARTIST"
+                    }
+                  ]
+                },
+                {
+                  "fact": "totalIncomeWorkMonths",
+                  "op": "lte",
+                  "value": 60
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "주민등록표등본",
+          "국민연금 가입증명서",
+          "건강보험자격득실확인서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000190",
+          "b000191",
+          "b000193",
+          "b000194",
+          "b000195",
+          "b000196",
+          "b000197"
+        ],
+        "section": "청년 또는 소득활동 5년 이내 사회초년생"
+      }
+    },
+    {
+      "ruleKey": "youth.unmarried",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "미혼",
+        "expression": {
+          "fact": "maritalStatus",
+          "op": "eq",
+          "value": "single"
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000199"
+        ],
+        "section": "미혼"
+      }
+    },
+    {
+      "ruleKey": "youth.noHome",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신청자 본인 무주택",
+        "expression": {
+          "fact": "noHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000190",
+          "b000201"
+        ],
+        "section": "신청자 본인 무주택"
+      }
+    },
+    {
+      "ruleKey": "youth.income",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000200",
+          "b000202",
+          "b000204",
+          "b000208",
+          "b000210",
+          "b000211",
+          "b000212",
+          "b000213",
+          "b000214"
+        ],
+        "section": "해당 세대 소득 기준"
+      }
+    },
+    {
+      "ruleKey": "youth.assets",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000217",
+          "b000221",
+          "b000228",
+          "b000231",
+          "b000232",
+          "b000234"
+        ],
+        "section": "해당 세대 총자산 기준"
+      }
+    },
+    {
+      "ruleKey": "youth.vehicle",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000217",
+          "b000228",
+          "b000231",
+          "b000232",
+          "b000234"
+        ],
+        "section": "해당 세대 자동차 기준"
+      }
+    },
+    {
+      "ruleKey": "youth.account",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주 전까지 청약통장 가입사실 증명",
+        "expression": {
+          "fact": "canProveSubscriptionByMoveIn",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000219"
+        ],
+        "section": "입주 전까지 청약통장 가입사실 증명"
+      }
+    },
+    {
+      "ruleKey": "youth.rank1",
+      "supplyType": "youth",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "제주 거주 또는 제주 소득 근거지",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "incomeSourceRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000236",
+          "b000239",
+          "b000242"
+        ],
+        "section": "제주 거주 또는 제주 소득 근거지"
+      }
+    },
+    {
+      "ruleKey": "newlywed.applicantAgeOrException",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000097",
+          "b000099",
+          "b000100",
+          "b000104",
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "성년 신청자 또는 미성년 세대주 예외"
+      }
+    },
+    {
+      "ruleKey": "newlywed.subletRestriction",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음"
+      }
+    },
+    {
+      "ruleKey": "newlywed.singleApplication",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000157",
+          "b000985"
+        ],
+        "section": "세대당 1건 신청"
+      }
+    },
+    {
+      "ruleKey": "newlywed.category",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신혼부부·예비신혼부부·한부모가족",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "married"
+                },
+                {
+                  "any": [
+                    {
+                      "fact": "marriageWithin7Years",
+                      "op": "eq",
+                      "value": true
+                    },
+                    {
+                      "fact": "hasChildUnder7",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "engaged"
+                },
+                {
+                  "fact": "plannedMarriageWithinDeadline",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "singleParent"
+                },
+                {
+                  "fact": "singleParentQualified",
+                  "op": "eq",
+                  "value": true
+                },
+                {
+                  "fact": "hasChildUnder7",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000252",
+          "b000253",
+          "b000254",
+          "b000257",
+          "b000258",
+          "b000259",
+          "b000260"
+        ],
+        "section": "신혼부부·예비신혼부부·한부모가족"
+      }
+    },
+    {
+      "ruleKey": "newlywed.householdNoHome",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "현재 또는 미래 세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000252",
+          "b000253",
+          "b000288",
+          "b000354",
+          "b000355"
+        ],
+        "section": "현재 또는 미래 세대 전원 무주택"
+      }
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000262",
+          "b000263",
+          "b000264",
+          "b000269",
+          "b000271",
+          "b000273",
+          "b000275",
+          "b000276",
+          "b000312",
+          "b000313",
+          "b000314",
+          "b000315",
+          "b000316"
+        ],
+        "section": "해당 세대 소득 기준"
+      }
+    },
+    {
+      "ruleKey": "newlywed.assets",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000280",
+          "b000282",
+          "b000289",
+          "b000295",
+          "b000297",
+          "b000298",
+          "b000299",
+          "b000300"
+        ],
+        "section": "해당 세대 총자산 기준"
+      }
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000280",
+          "b000282",
+          "b000294",
+          "b000295",
+          "b000297",
+          "b000298",
+          "b000299",
+          "b000300"
+        ],
+        "section": "해당 세대 자동차 기준"
+      }
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주 전까지 본인 또는 배우자 청약통장 가입사실 증명",
+        "expression": {
+          "fact": "canProveSubscriptionByMoveIn",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000284",
+          "b000285",
+          "b000289"
+        ],
+        "section": "입주 전까지 본인 또는 배우자 청약통장 가입사실 증명"
+      }
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "본인·배우자의 제주 거주 또는 소득 근거지",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "incomeSourceRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000291",
+          "b000295",
+          "b000299",
+          "b000302",
+          "b000308"
+        ],
+        "section": "본인·배우자의 제주 거주 또는 소득 근거지"
+      }
+    },
+    {
+      "ruleKey": "senior.applicantAgeOrException",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000097",
+          "b000099",
+          "b000100",
+          "b000104",
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "성년 신청자 또는 미성년 세대주 예외"
+      }
+    },
+    {
+      "ruleKey": "senior.subletRestriction",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음"
+      }
+    },
+    {
+      "ruleKey": "senior.singleApplication",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000157",
+          "b000985"
+        ],
+        "section": "세대당 1건 신청"
+      }
+    },
+    {
+      "ruleKey": "senior.age",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "만 65세 이상",
+        "expression": {
+          "fact": "age",
+          "op": "gte",
+          "value": 65
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000327",
+          "b000329",
+          "b000331"
+        ],
+        "section": "만 65세 이상"
+      }
+    },
+    {
+      "ruleKey": "senior.householdNoHome",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000331",
+          "b000354",
+          "b000355"
+        ],
+        "section": "세대 전원 무주택"
+      }
+    },
+    {
+      "ruleKey": "senior.income",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000333",
+          "b000335",
+          "b000337",
+          "b000338",
+          "b000339",
+          "b000340",
+          "b000343",
+          "b000345",
+          "b000347"
+        ],
+        "section": "해당 세대 소득 기준"
+      }
+    },
+    {
+      "ruleKey": "senior.assets",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000351",
+          "b000353",
+          "b000360",
+          "b000363",
+          "b000365",
+          "b000367"
+        ],
+        "section": "해당 세대 총자산 기준"
+      }
+    },
+    {
+      "ruleKey": "senior.vehicle",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000351",
+          "b000353",
+          "b000360",
+          "b000363",
+          "b000365",
+          "b000367"
+        ],
+        "section": "해당 세대 자동차 기준"
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.applicantAgeOrException",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "blockIds": [
+          "b000097",
+          "b000099",
+          "b000100",
+          "b000104",
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "성년 신청자 또는 미성년 세대주 예외"
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.subletRestriction",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000137",
+          "b000139",
+          "b000140",
+          "b000141"
+        ],
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음"
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.singleApplication",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000157",
+          "b000985"
+        ],
+        "section": "세대당 1건 신청"
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.recipient",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "주거급여 수급자",
+        "expression": {
+          "fact": "housingBenefitRecipient",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000376",
+          "b000379",
+          "b000381",
+          "b000393"
+        ],
+        "section": "주거급여 수급자"
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.householdNoHome",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "blockIds": [
+          "b000381",
+          "b000383",
+          "b000385",
+          "b000387",
+          "b000389",
+          "b000391"
+        ],
+        "section": "세대 전원 무주택"
+      }
+    }
+  ]
+}

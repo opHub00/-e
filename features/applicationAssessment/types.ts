@@ -1,6 +1,6 @@
 import type { ApplicantProfileV2 } from '../profile/domain.ts';
 
-export type SupplyType = 'youth' | 'newlywed' | 'firstHome';
+export type SupplyType = 'youth' | 'newlywed' | 'firstHome' | 'student' | 'senior' | 'housingBenefit';
 export type Stage = 'PRIORITY' | 'GENERAL' | 'LOTTERY';
 export type Status = 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_MORE_INFORMATION';
 export type RuleSourceStatus = 'REFERENCE' | 'DRAFT_SOURCE_VERIFIED' | 'OFFICIAL_VERIFIED';
@@ -9,7 +9,7 @@ export type Scalar = string | number | boolean;
  * birthDate is the earliest possible birth date. birthDateLatest is set only when the date is
  * known to month or year precision; facts are then kept only if both ends agree.
  */
-export type Child = { birthDate?: string; birthDateLatest?: string; unborn: boolean };
+export type Child = { birthDate?: string; birthDateLatest?: string; unborn: boolean; adopted?: boolean };
 
 /** Additional exact, announcement-date inputs. Existing profile stays the source of truth. */
 export type AssessmentInput = {
@@ -60,6 +60,21 @@ export type AssessmentInput = {
     specialSupplyHistory: boolean;
     reWinningRestriction: boolean;
     specialExceptions: string[];
+    /** Reusable raw facts used by rental announcements. */
+    educationStatus: 'ENROLLED_OR_INCOMING' | 'GRADUATED_OR_WITHDRAWN' | 'OTHER';
+    graduationDate: string;
+    schoolRegion: string;
+    incomeSourceRegion: string;
+    youthActivityCategory: 'WORKER' | 'RECENTLY_UNEMPLOYED' | 'ARTIST' | 'OTHER';
+    totalIncomeWorkMonths: number;
+    parentApplicantMonthlyIncome: number;
+    housingBenefitRecipient: boolean;
+    /** Announcement-scoped confirmations. These must not be inferred from a result. */
+    canProveSubscriptionByMoveIn: boolean;
+    adultOrMinorHouseholdHeadException: boolean;
+    applicationResidencyEligible: boolean;
+    noPublicRentalSubletRestriction: boolean;
+    singleHouseholdApplicationClear: boolean;
   }>;
 };
 
@@ -133,6 +148,8 @@ export type ApplicationAssessmentResult = {
   status: Status;
   eligible: boolean | null;
   stage: Stage | null;
+  /** Announcement-defined wording such as `1순위`; stage remains the stable engine enum. */
+  stageLabel?: string;
   stageExplanation: string;
   regionalPriority?: { status: 'LOCAL' | 'REMAINDER_ONLY' | 'NEEDS_REVIEW'; label: string };
   inputDates: Record<string, string>;

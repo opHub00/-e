@@ -68,7 +68,7 @@ export function mergeExplicitV2ProfileEditIntoV3(
 const childrenFact = (children: Child[], observedAt: string): ProfileFact<ApplicantProfileV3['family']['children'] extends ProfileFact<infer T> ? T : never> =>
   knownProfileFact(children.map((child, index) => ({
     id: `user-child-${index + 1}`,
-    status: child.unborn ? 'UNBORN' as const : 'BORN' as const,
+    status: child.unborn ? 'UNBORN' as const : child.adopted ? 'ADOPTED' as const : 'BORN' as const,
     birthDate: child.birthDate
       ? knownProfileFact(day(child.birthDate), userMetadata(observedAt))
       : ({ state: 'UNKNOWN', ...userMetadata(observedAt) } as const),
@@ -117,6 +117,22 @@ export function mergeReusableAssessmentDetailsIntoV3(
   if (details.householdIncome !== undefined) out.income.monthlyHouseholdIncome = knownProfileFact(details.householdIncome, meta);
   if (details.dualIncome !== undefined) out.income.dualIncome = knownProfileFact(details.dualIncome, meta);
   if (details.workStartedAt) out.income.workStartedAt = knownProfileFact(day(details.workStartedAt), meta);
+  if (details.incomeSourceRegion) out.income.incomeSourceRegion = knownProfileFact(details.incomeSourceRegion, meta);
+  if (details.youthActivityCategory) out.income.youthActivityCategory = knownProfileFact(details.youthActivityCategory, meta);
+  if (details.totalIncomeWorkMonths !== undefined) out.income.totalIncomeWorkMonths = knownProfileFact(details.totalIncomeWorkMonths, meta);
+  if (details.parentApplicantMonthlyIncome !== undefined) out.income.parentApplicantMonthlyIncome = knownProfileFact(details.parentApplicantMonthlyIncome, meta);
+  if (details.educationStatus || details.graduationDate || details.schoolRegion) {
+    out.education ??= {
+      status: { state:'UNKNOWN' }, graduationDate:{ state:'UNKNOWN' }, schoolRegion:{ state:'UNKNOWN' },
+    };
+    if (details.educationStatus) out.education.status = knownProfileFact(details.educationStatus, meta);
+    if (details.graduationDate) out.education.graduationDate = knownProfileFact(day(details.graduationDate), meta);
+    if (details.schoolRegion) out.education.schoolRegion = knownProfileFact(details.schoolRegion, meta);
+  }
+  if (details.housingBenefitRecipient !== undefined) {
+    out.benefits ??= { housingBenefitRecipient:{ state:'UNKNOWN' } };
+    out.benefits.housingBenefitRecipient = knownProfileFact(details.housingBenefitRecipient, meta);
+  }
   if (details.monthlyIncome !== undefined || details.householdIncome !== undefined || details.spouseIncome !== undefined) {
     out.income.amountAsOf = knownProfileFact(day(observedAt.slice(0, 10)), meta);
   }

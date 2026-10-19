@@ -116,6 +116,7 @@ const childDetails = (profile: ApplicantProfileV3): Child[] | undefined => {
     return {
       ...(bounds ? { birthDate: bounds.earliest, ...(bounds.latest !== bounds.earliest ? { birthDateLatest: bounds.latest } : {}) } : {}),
       unborn: child.status === 'UNBORN',
+      adopted: child.status === 'ADOPTED',
     };
   });
 };
@@ -193,6 +194,15 @@ export function assessmentInputFromApplicantProfileV3(
   assign('householdIncome', profileFactValue(profile.income.monthlyHouseholdIncome));
   assign('dualIncome', profileFactValue(profile.income.dualIncome));
   assign('workStartedAt', exactDate(profileFactValue(profile.income.workStartedAt)));
+  assign('incomeSourceRegion', profile.income.incomeSourceRegion ? profileFactValue(profile.income.incomeSourceRegion) : undefined);
+  assign('youthActivityCategory', profile.income.youthActivityCategory ? profileFactValue(profile.income.youthActivityCategory) : undefined);
+  assign('totalIncomeWorkMonths', profile.income.totalIncomeWorkMonths ? profileFactValue(profile.income.totalIncomeWorkMonths) : undefined);
+  assign('parentApplicantMonthlyIncome', profile.income.parentApplicantMonthlyIncome ? profileFactValue(profile.income.parentApplicantMonthlyIncome) : undefined);
+
+  assign('educationStatus', profile.education ? profileFactValue(profile.education.status) : undefined);
+  assign('graduationDate', profile.education ? exactDate(profileFactValue(profile.education.graduationDate)) : undefined);
+  assign('schoolRegion', profile.education ? profileFactValue(profile.education.schoolRegion) : undefined);
+  assign('housingBenefitRecipient', profile.benefits ? profileFactValue(profile.benefits.housingBenefitRecipient) : undefined);
 
   assign('totalAssets', profileFactValue(profile.assets.totalApplicantAssets));
   assign('parentAssets', profileFactValue(profile.assets.parentAssets));

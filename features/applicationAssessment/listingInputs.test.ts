@@ -31,6 +31,9 @@ test('long-term, listing-scoped and derived facts stay in separate stores', () =
   assert.equal(classifyQuestionnaireAnswer('exceptions'), 'LISTING_SCOPED');
   assert.equal(classifyQuestionnaireAnswer('exceptionsClear'), 'DERIVED_OR_UNKNOWN');
   assert.equal(classifyQuestionnaireAnswer('childbirthClear'), 'DERIVED_OR_UNKNOWN');
+  assert.equal(classifyQuestionnaireAnswer('educationStatus'), 'LONG_TERM_PROFILE');
+  assert.equal(classifyQuestionnaireAnswer('canProveSubscriptionByMoveIn'), 'LISTING_SCOPED');
+  assert.equal(classifyQuestionnaireAnswer('applicationResidencyEligible'), 'LISTING_SCOPED');
   assert.deepEqual(selectListingScopedAnswers({
     birthDate: '1990-01-01', exceptions: 'no', exceptionsClear: 'true',
     youthPriorityTarget: 'yes', score: '9',
@@ -38,6 +41,15 @@ test('long-term, listing-scoped and derived facts stay in separate stores', () =
   assert.deepEqual(assessmentDetailsFromListingAnswers({
     exceptions: 'no', incomeHouseholdSize: '3', birthDate: '1990-01-01',
   }, 'newlywed'), { incomeHouseholdSize: 3, specialExceptions: [] });
+  assert.deepEqual(assessmentDetailsFromListingAnswers({
+    canProveSubscriptionByMoveIn:'yes', applicationResidencyEligible:'yes', noPublicRentalSubletRestriction:'yes',
+    singleHouseholdApplicationClear:'yes', educationStatus:'ENROLLED_OR_INCOMING',
+  }, 'youth'), {
+    canProveSubscriptionByMoveIn:true,
+    applicationResidencyEligible:true,
+    noPublicRentalSubletRestriction:true,
+    singleHouseholdApplicationClear:true,
+  });
 });
 
 test('a valid answer is reused only for the same exact rule and document reference', () => {

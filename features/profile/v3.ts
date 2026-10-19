@@ -75,6 +75,12 @@ export type ApplicantProfileV3 = {
     birthDate: ProfileFact<PartialDate>;
     occupation: ProfileFact<Occupation>;
   };
+  /** Optional for backward-compatible reads of profiles written before rental eligibility facts existed. */
+  education?: {
+    status: ProfileFact<'ENROLLED_OR_INCOMING' | 'GRADUATED_OR_WITHDRAWN' | 'OTHER'>;
+    graduationDate: ProfileFact<PartialDate>;
+    schoolRegion: ProfileFact<string>;
+  };
   residence: {
     currentRegion: ProfileFact<string>;
     startedAt: ProfileFact<PartialDate>;
@@ -128,6 +134,10 @@ export type ApplicantProfileV3 = {
     workStartedAt: ProfileFact<PartialDate>;
     workOrBusinessIncomeEligible: ProfileFact<boolean>;
     incomeTaxPaymentYears: ProfileFact<number>;
+    incomeSourceRegion?: ProfileFact<string>;
+    youthActivityCategory?: ProfileFact<'WORKER' | 'RECENTLY_UNEMPLOYED' | 'ARTIST' | 'OTHER'>;
+    totalIncomeWorkMonths?: ProfileFact<number>;
+    parentApplicantMonthlyIncome?: ProfileFact<number>;
   };
   assets: {
     financialRange: ProfileFact<AmountRange>;
@@ -141,6 +151,9 @@ export type ApplicantProfileV3 = {
     financialAssets: ProfileFact<number>;
     debtAmount: ProfileFact<number>;
     amountAsOf: ProfileFact<PartialDate>;
+  };
+  benefits?: {
+    housingBenefitRecipient: ProfileFact<boolean>;
   };
 };
 
@@ -179,6 +192,11 @@ export function createEmptyApplicantProfileV3(): ApplicantProfileV3 {
       displayName: unknowns(metadata),
       birthDate: unknowns(metadata),
       occupation: unknowns(metadata),
+    },
+    education: {
+      status: unknowns(metadata),
+      graduationDate: unknowns(metadata),
+      schoolRegion: unknowns(metadata),
     },
     residence: {
       currentRegion: unknowns(metadata),
@@ -231,6 +249,10 @@ export function createEmptyApplicantProfileV3(): ApplicantProfileV3 {
       workStartedAt: unknowns(metadata),
       workOrBusinessIncomeEligible: unknowns(metadata),
       incomeTaxPaymentYears: unknowns(metadata),
+      incomeSourceRegion: unknowns(metadata),
+      youthActivityCategory: unknowns(metadata),
+      totalIncomeWorkMonths: unknowns(metadata),
+      parentApplicantMonthlyIncome: unknowns(metadata),
     },
     assets: {
       financialRange: unknowns(metadata),
@@ -245,6 +267,7 @@ export function createEmptyApplicantProfileV3(): ApplicantProfileV3 {
       debtAmount: unknowns(metadata),
       amountAsOf: unknowns(metadata),
     },
+    benefits: { housingBenefitRecipient: unknowns(metadata) },
   };
 }
 

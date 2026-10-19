@@ -13,6 +13,9 @@ export const LONG_TERM_QUESTION_IDS = [
   'recognizedDepositAmount', 'firstRank', 'monthlyIncome', 'householdIncome',
   'dualIncome', 'workStartedAt', 'totalAssets', 'parentAssets',
   'realEstateAssets', 'vehicleValue',
+  'educationStatus', 'graduationDate', 'schoolRegion', 'incomeSourceRegion',
+  'youthActivityCategory', 'totalIncomeWorkMonths', 'parentApplicantMonthlyIncome',
+  'housingBenefitRecipient',
 ] as const;
 
 /**
@@ -31,6 +34,11 @@ export const LISTING_SCOPED_QUESTION_IDS = [
   'youthPriorityTarget',
   'newlywedPriorityTarget',
   'exceptions',
+  'canProveSubscriptionByMoveIn',
+  'adultOrMinorHouseholdHeadException',
+  'applicationResidencyEligible',
+  'noPublicRentalSubletRestriction',
+  'singleHouseholdApplicationClear',
 ] as const;
 
 export const LISTING_SCOPED_ANSWER_FACTS: Record<ListingScopedQuestionId, readonly string[]> = {
@@ -45,6 +53,11 @@ export const LISTING_SCOPED_ANSWER_FACTS: Record<ListingScopedQuestionId, readon
   youthPriorityTarget: ['youthPriorityTarget'],
   newlywedPriorityTarget: ['newlywedPriorityTarget'],
   exceptions: ['exceptionsClear'],
+  canProveSubscriptionByMoveIn: ['canProveSubscriptionByMoveIn'],
+  adultOrMinorHouseholdHeadException: ['adultOrMinorHouseholdHeadException'],
+  applicationResidencyEligible: ['applicationResidencyEligible'],
+  noPublicRentalSubletRestriction: ['noPublicRentalSubletRestriction'],
+  singleHouseholdApplicationClear: ['singleHouseholdApplicationClear'],
 };
 
 /** Engine facts and outputs. None may be accepted as a persisted user answer. */

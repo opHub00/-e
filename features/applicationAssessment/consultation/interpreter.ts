@@ -7,13 +7,14 @@ import type {
 import type { SupplyType } from '../types.ts';
 import { REGION_DEFINITIONS } from '../../discovery/regions.ts';
 import { childBirthLists, mentionsChild, rangeText, saidDates } from './familyFacts.ts';
+import { SUPPLY_TYPE_SET } from '../supplyTypes.ts';
 
 const INTENTS = new Set<ConsultationIntent>([
   'CHECK_ELIGIBILITY', 'CHECK_SCORE', 'CHECK_STAGE', 'WHY_RESULT',
   'CHECK_REQUIREMENT', 'CHECK_EXCEPTION', 'CHECK_DOCUMENTS',
   'UPDATE_USER_INFO', 'SHOW_PROFILE', 'UNKNOWN',
 ]);
-const SUPPLIES = new Set<SupplyType>(['youth', 'newlywed', 'firstHome']);
+const SUPPLIES = SUPPLY_TYPE_SET as ReadonlySet<SupplyType>;
 const UPDATE_FIELDS = new Set<ConsultationFieldUpdate['field']>([
   'declaredAgeYears', 'birthDate', 'currentResidence', 'residenceDurationMonths',
   'subscriptionDurationMonths', 'recognizedPaymentCount', 'recognizedDepositAmount',

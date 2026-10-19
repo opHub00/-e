@@ -46,7 +46,7 @@ export function AssessmentResult({ result, onEditProfile, onEditAnswers, onAskAb
         ? '탈락이나 오류가 아니에요. 공고 기준을 확인하는 중이라 결과를 아직 확정하지 않았어요.'
         : '탈락이나 오류가 아니에요. 아래 정보를 채우면 다시 판정할 수 있어요.'}</Text> : null}
       <Text style={styles.title}>{SUPPLY_LABELS[result.supplyType]}</Text>
-      <Text style={styles.body}>{result.stage ? STAGE_LABELS[result.stage] : '공급단계 확인 전'}</Text>
+      <Text style={styles.body}>{result.stage ? result.stageLabel ?? STAGE_LABELS[result.stage] : '공급단계 확인 전'}</Text>
       <Text style={styles.body}>{result.stageExplanation}</Text>
       {result.score ? <Text style={styles.heading}>예상 {result.score.total} / {result.score.max}점</Text> : <Text style={styles.body}>{result.scoring === 'NOT_APPLICABLE' ? result.supplyType === 'firstHome' ? '이 유형은 가점 대신 공급단계와 추첨으로 선정돼요. 점수가 없는 것이 정상이에요.' : '이 공급단계는 가점 없이 추첨으로 선정돼요.' : '필요한 정보와 배점표가 확인되면 점수를 보여드려요.'}</Text>}
       {/* 신뢰도를 %로 말하지 않는다. 어떤 문서를 근거로 계산했는지만 밝힌다. */}

@@ -1,0 +1,32 @@
+/** Admin-only transport contract. No raw profile or public assessment state. */
+export type JejuV2CandidateView = {
+  status: 'REVIEW_CANDIDATE'; publicationStatus: 'INACTIVE'; registrationStatus: 'NOT_REGISTERED';
+  title: string; noticeFamily: string; version: string; previousVersion: string; ruleSetId: string;
+  source: { url: string; pdfUrl: string; sha256: string }; sourceVerification: string;
+  approved: false; active: false; ruleCount: number; changedRuleCount: number; warningCount: number;
+  warningCounts: Record<string, number>; blockerCount: number; supplyTypes: string[];
+  rules: Array<{ id: string; label: string; supplyType: string; category: string; scope: string | null; scopeLabel: string;
+    evidence: Array<{ section: string; excerpt: string | null; locator: Record<string, unknown> }>;
+    changed: boolean; status: string }>;
+  changes: Array<{ ruleId: string; supplyType: string; v1Condition: unknown; v2Condition: unknown;
+    v1Scope: string; v2Scope: string; v1Locator: Record<string, unknown>; v2Locator: Record<string, unknown>;
+    changeReason: string; userImpact: string; adminReviewPoint: string }>;
+  parameterChanges: Array<{ key: string; oldValue: unknown; newValue: unknown }>;
+  notInSource: Array<{ parameterId: string; supplyType: string; v1Value: unknown; v2CandidateValue: null;
+    displayValue: '원문에 수치 없음 · NOT_IN_SOURCE · 관리자 결정 필요';
+    source: { page: number; section: string; locator: string; sourceWording: string } }>;
+  warnings: Array<{ id: string; ruleId: string; supplyType: string; message: string; classification: string;
+    severity: 'BLOCKER' | 'REVIEW_REQUIRED' | 'INFO'; assessmentImpactPossible: boolean;
+    evidenceImpactPossible: boolean; adminDecisionRequired: boolean; recommendedAction: string;
+    reviewStatus: 'PENDING_REVIEW'; reviewerNote: null;
+    evidence: Array<{ section: string; excerpt: string | null; locator: Record<string, unknown> }> }>;
+  blocker: { unresolvedId: string; type: string; description: string; ruleKeys: string[];
+    decision: 'UNRESOLVED_BLOCKER'; causes: string[]; nextAction: string; affectedSupplyTypes: string[];
+    locators: Array<{ ruleId: string; section: string; locator: Record<string, unknown> }>;
+    assessmentImpact: string;
+    resolutionOptions: readonly ['RESOLVED_WITH_SOURCE', 'RESOLVED_WITH_SCOPE_DECISION', 'REJECT_RULE', 'KEEP_BLOCKED'] };
+  boundaryComparisons: Array<{ id: string; persona: string; v1Result: string; v2Result: string; sourceLocator: string; reason: string }>;
+  reviewActions: { available: false; reason: string;
+    options: readonly ['ADD_NOTE', 'MARK_REVIEWED', 'RESOLVE_WARNING', 'RESOLVE_BLOCKER', 'REJECT_CANDIDATE', 'START_REVIEW'] };
+  activation: { allowed: false; reason: string };
+};

@@ -48,7 +48,7 @@ test('Product V3 admin function packages its authenticated server and notice dep
   assert.match(includeFiles, /noticePlatform\/\*\*/);
   assert.match(includeFiles, /applicationAssessment\/\*\*/);
   assert.match(includeFiles, /eventKiosk\/\*\*/);
-  assert.match(includeFiles, /assessment-rules\/\*v1\.8\.json/);
+  assert.match(includeFiles, /assessment-rules\/\{\*v1\.8,lh-jeju-ildo-samdo-happy-20260918\*\}\.json/);
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
   assert.doesNotMatch(includeFiles, /features\/\*\*/);
   assert.ok(config.rewrites?.some(row => row.source === '/admin-api/product-v3' && row.destination === '/api/admin-api/product-v3'));

@@ -4,6 +4,7 @@ import { classifyResponse, ConsoleLoadError } from './consoleState.ts';
 import { CONSOLE_DEMO_SNAPSHOT } from './demoData.ts';
 import type { ConsoleAiEvent, ConsoleAuditEntry, ConsoleNotice } from './contract.ts';
 import type { ConsolePage, ConsolePageQuery } from './server/pagination.ts';
+import type { JejuV2CandidateView } from './reviewCandidateContract.ts';
 
 /** 응답이 이보다 늦으면 '연결 지연'으로 알린다. */
 export const CONSOLE_REQUEST_TIMEOUT_MS = 15_000;
@@ -33,6 +34,25 @@ export async function connectedSnapshot(accessToken: string, fetcher: typeof fet
     throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
   }
   return response.json() as Promise<ConsoleSnapshot>;
+}
+
+/** Reviewer-only candidate data; the server verifies the caller before reading repository artifacts. */
+export async function connectedJejuV2Candidate(accessToken: string, fetcher: typeof fetch = fetch): Promise<JejuV2CandidateView> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONSOLE_REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetcher('/admin-api/product-v3?reviewCandidate=jeju-v2', {
+      headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store', signal: controller.signal,
+    });
+  } catch {
+    throw new ConsoleLoadError(controller.signal.aborted ? 'TIMEOUT' : 'NETWORK');
+  } finally { clearTimeout(timer); }
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string } | null;
+    throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
+  }
+  return response.json() as Promise<JejuV2CandidateView>;
 }
 
 /** Connected-only list transport. The server applies filters and returns at most 100 sanitized rows. */

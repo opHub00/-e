@@ -26,6 +26,13 @@ test('admin authorization sends the caller JWT only to the explicit staging proj
   assert.equal(host, 'aaaaaaaaaaaaaaaaaaaa.supabase.co');
 });
 
+test('server distinguishes an expired token from an authenticated non-reviewer', async () => {
+  const expired = (async () => new Response(null, { status: 401 })) as typeof fetch;
+  const ordinary = (async () => Response.json({ role: null })) as typeof fetch;
+  assert.equal(await authorizeProductV3Admin('expired-jwt', staging, expired), 'UNAUTHENTICATED');
+  assert.equal(await authorizeProductV3Admin('ordinary-jwt', staging, ordinary), null);
+});
+
 test('operational snapshot is built exclusively from staging rows, including empty states and telemetry', async () => {
   const rows: Record<string, unknown[]> = {
     announcements: [{ id: 'notice-1', title: '실제 DB 공고', region_name: '제주', announcement_date: '2026-10-16', status: 'PUBLISHED', updated_at: '2026-10-16T00:00:00Z' }],

@@ -87,7 +87,7 @@
     "benchmark:samdo:evaluate-v4": "node --experimental-strip-types scripts/evaluate-samdo-v4.mjs",
     "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs",
     "test:hardcode-guard": "node --test scripts/announcement-hardcode-guard.test.mjs",
-    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/server/stagingSnapshot.test.ts features/adminConsole/server/metrics.test.ts features/productV3/admin/assessmentEvents.test.ts",
+    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/server/stagingSnapshot.test.ts features/adminConsole/server/metrics.test.ts features/adminConsole/server/jejuV2Candidate.test.ts features/productV3/admin/assessmentEvents.test.ts",
     "qa:ui-quality": "node scripts/ui-quality-qa.mjs",
     "test:admin-console:e2e": "node scripts/admin-console-e2e.mjs",
     "qa:copilot": "node scripts/event-samdo-copilot-qa.mjs",

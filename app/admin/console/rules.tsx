@@ -12,6 +12,7 @@ import {
 } from '../../../features/adminConsole/consoleModel';
 import { emptyCopy } from '../../../features/adminConsole/consoleState';
 import type { ConsoleRule, ConsoleSnapshot, RuleReviewStatus } from '../../../features/adminConsole/contract';
+import { JejuV2ReviewPanel } from '../../../features/adminConsole/JejuV2ReviewPanel';
 
 const REVIEW_LABEL: Record<RuleReviewStatus, { label: string; tone: 'amber' | 'green' | 'neutral'; icon: 'pending' | 'check-circle' | 'block' }> = {
   PENDING: { label: '검토 대기', tone: 'amber', icon: 'pending' },
@@ -60,7 +61,7 @@ function Rules({ snapshot, demoMode }: { snapshot: ConsoleSnapshot; demoMode: bo
   const wideFilters = width >= 900;
   const activeFilters = (['validation', 'evidence', 'supply', 'status'] as const).filter(key => filters[key] !== 'ALL').length + (filters.changedOnly ? 1 : 0);
 
-  if (!noticeIds.length) return <EmptyState {...emptyCopy('rules', true)} />;
+  if (!noticeIds.length) return <View style={styles.stack}><JejuV2ReviewPanel enabled={!demoMode} /><EmptyState {...emptyCopy('rules', true)} /></View>;
   const stat = (predicate: (rule: ConsoleRule) => boolean) => all.filter(predicate).length;
 
   const controls = (
@@ -151,6 +152,7 @@ function Rules({ snapshot, demoMode }: { snapshot: ConsoleSnapshot; demoMode: bo
 
   return (
     <View style={styles.stack}>
+      <JejuV2ReviewPanel enabled={!demoMode} />
       <NoticePicker
         testID="console-rule-notice"
         value={noticeId}

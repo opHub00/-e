@@ -6,10 +6,11 @@ export { loadProductV3StagingSnapshot } from './stagingSnapshot.ts';
 
 type Request = { method?: string; headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown> };
 type Reply = { status: number; body: unknown };
-type AuthResult = 'admin' | 'reviewer' | null;
+type AuthResult = 'admin' | 'reviewer' | 'UNAUTHENTICATED' | null;
 export type ConsoleApiDependencies = {
   authorize: (token: string) => Promise<AuthResult>;
   loadSnapshot: (window?: MetricWindowQuery) => Promise<ConsoleSnapshot>;
+  loadJejuCandidate?: () => Promise<unknown>;
 };
 
 /** Only read operations are exposed. Authorization is checked again on the server. */
@@ -22,8 +23,14 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   let role: AuthResult;
   try { role = await dependencies.authorize(token); }
   catch { return { status: 503, body: { error: 'ADMIN_AUTH_UNAVAILABLE' } }; }
+  if (role === 'UNAUTHENTICATED') return { status: 401, body: { error: 'AUTH_REQUIRED' } };
   if (!role) return { status: 403, body: { error: 'FORBIDDEN' } };
   try {
+    if (request.query?.reviewCandidate !== undefined) {
+      if (request.query.reviewCandidate !== 'jeju-v2' || !dependencies.loadJejuCandidate)
+        return { status: 400, body: { error: 'INVALID_REVIEW_CANDIDATE' } };
+      return { status: 200, body: await dependencies.loadJejuCandidate() };
+    }
     const metricRequested = request.query && ['from', 'to', 'bucket', 'previousPeriod'].some(key => key in request.query!);
     const metricWindow = metricRequested ? parseMetricWindowQuery(request.query!) : undefined;
     if (metricRequested && !metricWindow) return { status: 400, body: { error: 'INVALID_METRIC_WINDOW' } };
@@ -44,7 +51,8 @@ export async function authorizeProductV3Admin(token: string, env: Record<string,
     method: 'POST', headers: { apikey: target.anonKey, authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: '{}',
     signal: AbortSignal.timeout(6000),
   });
-  if (response.status === 401 || response.status === 403) return null;
+  if (response.status === 401) return 'UNAUTHENTICATED';
+  if (response.status === 403) return null;
   if (!response.ok) throw new Error('ADMIN_AUTH_UNAVAILABLE');
   const data: unknown = await response.json();
   const role = data && typeof data === 'object' ? (data as { role?: unknown }).role : null;

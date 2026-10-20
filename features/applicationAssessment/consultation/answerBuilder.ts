@@ -14,6 +14,7 @@ const REGION_OR_RESIDENCE = new RegExp(`(거주|${REGION_DEFINITIONS.flatMap(reg
 
 const SUPPLY_LABEL: Record<SupplyType, string> = {
   youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급',
+  student: '대학생 계층', senior: '고령자 계층', housingBenefit: '주거급여수급자 계층',
 };
 const STAGE_LABEL = { PRIORITY: '우선공급', GENERAL: '일반공급', LOTTERY: '추첨공급' } as const;
 const PROFILE_FACTS = new Set([

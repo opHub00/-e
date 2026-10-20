@@ -1,5 +1,6 @@
-import { buildFactsWithRanges, validDate } from './facts.ts';
+import { buildFactsWithRanges, resolveScopedThresholdInputs, validDate } from './facts.ts';
 import type { AnnouncementRules, ApplicationAssessmentResult, AssessmentInput, ConditionResult, ConditionRule, Expression, Scalar, SupplyRule } from './types.ts';
+import { SUPPLY_TYPE_SET } from './supplyTypes.ts';
 
 type Evaluation = { value: boolean | null; inputs: Record<string, Scalar | null>; missing: string[] };
 function evaluateExpression(expression: Expression, facts: Record<string, Scalar | undefined>, rules: AnnouncementRules): Evaluation {
@@ -35,11 +36,51 @@ function condition(rule: ConditionRule, facts: Record<string, Scalar | undefined
   return { ruleId: rule.id, evidenceId: rule.evidence.id, label: rule.label, outcome: result.value === null ? 'UNKNOWN' : result.value ? 'PASS' : 'FAIL', inputs: result.inputs, missing: result.missing };
 }
 
+/** Convert a missing derived threshold into the raw user facts or the exact missing rule table cell. */
+function expandThresholdMissing(key: string, supply: SupplyRule, input: AssessmentInput, facts: Record<string, Scalar | undefined>, rules: AnnouncementRules): string[] {
+  const scoped = resolveScopedThresholdInputs(input, rules.parameters, supply.type);
+  if (key === 'input:incomeWithinAnnouncementLimit') {
+    const missing: string[] = [];
+    if (scoped.selectorMissing) missing.push(`input:${scoped.selectorMissing}`);
+    const incomeFact = scoped.incomeFact;
+    if (typeof incomeFact !== 'string') return [`rule:threshold.${supply.type}.incomeFact`];
+    if (scoped.incomeAmount === undefined && !scoped.selectorMissing) missing.push(`input:${incomeFact}`);
+    const size = scoped.size;
+    if (size === undefined && scoped.sizeFact && !scoped.selectorMissing) missing.push(`input:${scoped.sizeFact}`);
+    if (facts.recentChildCount === undefined) missing.push('input:children');
+    if (supply.type === 'newlywed' && scoped.dualIncome === undefined && !scoped.selectorMissing) missing.push(`input:${input.details.familyCategory === 'engaged' ? 'futureHouseholdDualIncome' : 'dualIncome'}`);
+    if (missing.length) return missing;
+    const mode = scoped.dualIncome ? 'dual' : 'single';
+    const specificKey = `threshold.${supply.type}.incomePercent.${mode}.${size}`;
+    const specific = rules.parameters[specificKey];
+    const fallback = rules.parameters[`threshold.${supply.type}.incomePercent.${mode}.default`];
+    const base = Object.prototype.hasOwnProperty.call(rules.parameters, specificKey) ? specific : fallback;
+    const cap = rules.parameters[`threshold.${supply.type}.incomeMaxPercent`];
+    if (typeof base !== 'number') return [`rule:threshold.${supply.type}.incomePercent.${mode}.${size}`];
+    const percent = Math.min(base + Math.min(2, facts.recentChildCount as number) * 10, typeof cap === 'number' ? cap : Number.POSITIVE_INFINITY);
+    const cell = `threshold.${supply.type}.income.${size}.${percent}`;
+    return typeof rules.parameters[cell] === 'number' ? [key] : [`rule:${cell}`];
+  }
+  if (key === 'input:assetsWithinAnnouncementLimit' || key === 'input:vehicleWithinAnnouncementLimit') {
+    const asset = key.startsWith('input:assets');
+    const source = asset ? scoped.assetsFact : scoped.vehicleFact;
+    const value = asset ? scoped.assetsAmount : scoped.vehicleAmount;
+    const missing = [scoped.selectorMissing ? `input:${scoped.selectorMissing}` : null,
+      value === undefined && !scoped.selectorMissing ? `input:${source}` : null,
+      facts.recentChildCount === undefined ? 'input:children' : null].filter((item): item is string => item !== null);
+    if (missing.length) return missing;
+    const kind = asset ? 'assets' : 'vehicle';
+    const cell = `threshold.${supply.type}.${kind}.${Math.min(2, facts.recentChildCount as number)}`;
+    return typeof rules.parameters[cell] === 'number' ? [key] : [`rule:${cell}`];
+  }
+  return [key];
+}
+
 function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply: SupplyRule, listingId: string): ApplicationAssessmentResult {
-  const { facts, ranges } = buildFactsWithRanges(input, rules.announcementDate, rules.parameters['youth.workPeriodBasis'], rules.parameters);
+  const { facts, ranges } = buildFactsWithRanges(input, rules.announcementDate, rules.parameters['youth.workPeriodBasis'], rules.parameters, supply.type);
   const base = supply.eligibility.map(r => condition(r, facts, rules));
   const allRules = [...supply.eligibility, ...supply.stages.flatMap(s => s.conditions)];
-  const missing = base.flatMap(c => c.missing);
+  const missing = base.flatMap(c => c.missing.flatMap(key => expandThresholdMissing(key, supply, input, facts, rules)));
   if (!base.length) missing.push('rule:eligibility');
   const warnings: string[] = [];
   const bound = rules.listingId === listingId;
@@ -62,7 +103,7 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
         : { status:'REMAINDER_ONLY', label:'기타지역: 해당지역 미달 물량이 있을 때 공급 대상' };
   if (regionalPriority) warnings.push(regionalPriority.label);
   // warning.<supplyType>.* is shown only for that supply; other warning.* keys apply to every supply.
-  for (const key of Object.keys(rules.parameters).filter(k => k.startsWith('warning.') && !(SUPPLY_TYPES.has(k.split('.')[1]) && k.split('.')[1] !== supply.type))) {
+  for (const key of Object.keys(rules.parameters).filter(k => k.startsWith('warning.') && !(SUPPLY_TYPE_SET.has(k.split('.')[1]) && k.split('.')[1] !== supply.type))) {
     if (typeof rules.parameters[key] === 'string') warnings.push(rules.parameters[key] as string);
   }
   if (!rules.parameters['dates.calculatedNoHome'] && input.details.housingDisposalDates?.some(date => !validDate(date) || (input.details.noHomeSince && date > input.details.noHomeSince))) {
@@ -112,9 +153,17 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
   return {
     rulesId: rules.id, rulesVersion: rules.version, sourceStatus, provenance: rules.provenance, listingId, supplyType: supply.type, status,
     eligible: status === 'NEEDS_MORE_INFORMATION' ? null : status === 'ELIGIBLE',
-    stage: verified ? selected?.stage ?? null : null, score, scoring, regionalPriority,
+    stage: verified ? selected?.stage ?? null : null,
+    stageLabel: verified && selected
+      ? (typeof rules.parameters[`stage.${supply.type}.${selected.stage}.label`] === 'string'
+        ? rules.parameters[`stage.${supply.type}.${selected.stage}.label`] as string
+        : undefined)
+      : undefined,
+    score, scoring, regionalPriority,
     stageExplanation: !verified ? '공고 기준이 확인되면 신청 가능한 공급단계를 구분할 수 있어요.'
       : !selected ? '기본 자격 또는 앞선 공급단계의 조건을 더 확인해야 해요.'
+      : typeof rules.parameters[`stage.${supply.type}.${selected.stage}.label`] === 'string'
+        ? `${rules.parameters[`stage.${supply.type}.${selected.stage}.label`]} 기준을 충족했어요. 이후 선정은 공고의 추첨·순위 기준을 따라요.`
       : selected.stage === 'PRIORITY' ? '기본 자격과 우선공급 대상 조건을 충족했어요.'
       : selected.stage === 'GENERAL' ? '기본 자격은 충족하지만 우선공급 대상 조건에 해당하지 않아 일반공급 단계로 분류했어요.'
       : '기본 자격은 충족하지만 앞선 두 단계의 기준에 해당하지 않아 추첨공급 단계로 분류했어요.',
@@ -128,7 +177,6 @@ function evaluateSupply(rules: AnnouncementRules, input: AssessmentInput, supply
 }
 
 /** Rules are trusted reviewed application data, never unvalidated AI output. */
-const SUPPLY_TYPES = new Set(['youth', 'newlywed', 'firstHome']);
 export function assessApplication(rules: AnnouncementRules, input: AssessmentInput, listingId = rules.listingId): ApplicationAssessmentResult[] {
   return rules.supplies.map(supply => evaluateSupply(rules, input, supply, listingId));
 }

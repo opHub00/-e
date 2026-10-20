@@ -37,9 +37,16 @@ export const UNIT_SUFFIX: Record<ValueKind, string> = {
 
 export const OPERATOR_TEXT: Record<string, string> = { gte: '이상', lte: '이하', gt: '초과', lt: '미만', eq: '=' };
 export const OPERATOR_CHOICES = ['gte', 'lte', 'gt', 'lt', 'eq'] as const;
-export const SCOPE_CHOICES = ['APPLICANT', 'HOUSEHOLD', 'SPOUSE', 'PARENT'] as const;
+export const SCOPE_CHOICES = [
+  'APPLICANT', 'HOUSEHOLD', 'SPOUSE', 'PARENT',
+  'APPLICANT_AND_PARENTS', 'HEAD_HOUSEHOLD_OR_MEMBER_APPLICANT',
+  'CURRENT_OR_FUTURE_HOUSEHOLD', 'APPLICANT_OR_SPOUSE',
+] as const;
 export const STAGE_CHOICES = [null, 'PRIORITY', 'GENERAL', 'LOTTERY'] as const;
-export const SCOPE_TEXT: Record<string, string> = { APPLICANT: '본인', HOUSEHOLD: '세대', SPOUSE: '배우자', PARENT: '부모' };
+export const SCOPE_TEXT: Record<string, string> = { APPLICANT: '신청자 본인', HOUSEHOLD: '현재 세대', SPOUSE: '배우자', PARENT: '부모',
+  APPLICANT_AND_PARENTS: '신청자 본인 + 부모 소득', HEAD_HOUSEHOLD_OR_MEMBER_APPLICANT: '세대주: 현재 세대 / 세대원: 신청자 본인',
+  CURRENT_OR_FUTURE_HOUSEHOLD: '기혼·한부모: 현재 세대 / 예비신혼: 혼인 예정 세대',
+  APPLICANT_OR_SPOUSE: '신청자 또는 배우자·예비배우자 (한부모는 신청자)' };
 export const STAGE_TEXT: Record<string, string> = { PRIORITY: '우선공급', GENERAL: '일반공급', LOTTERY: '추첨공급' };
 
 /** A number the reviewer typed, plus the human-readable echo shown under the field. */

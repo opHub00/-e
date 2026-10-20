@@ -3,6 +3,11 @@ import type { AssessmentInput, Evidence, RuleSourceStatus } from '../application
 export type NoticeId = string;
 export type NoticeLifecycleStatus = 'DRAFT' | 'SOURCE_VERIFIED' | 'REVIEW_REQUIRED' | 'APPROVED' | 'ACTIVE' | 'ARCHIVED';
 export type RulePackageLifecycleStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'ACTIVE' | 'ARCHIVED';
+export type NoticeLifecycle = {
+  sourceVerificationState: 'UNVERIFIED' | 'SOURCE_VERIFIED';
+  reviewStatus: 'DRAFT' | 'IN_REVIEW' | 'REVIEW_REQUIRED' | 'APPROVED';
+  publicationStatus: 'INACTIVE' | 'ACTIVE' | 'ARCHIVED';
+};
 export type NoticeEligibility = 'ELIGIBLE' | 'CONDITIONAL' | 'INELIGIBLE' | 'EVIDENCE_REQUIRED' | 'UNAVAILABLE';
 
 export type Listing = {
@@ -158,5 +163,9 @@ export type NoticeAdapter = {
   notice: Notice;
   rulePackage: RulePackage;
   ragSource: RAGSource;
+  lifecycle: NoticeLifecycle;
+  binding: { noticeId: NoticeId; rulePackageId: string; sourceHash: string; status: 'INACTIVE' | 'ACTIVE' };
+  /** Unresolved source/scope findings prohibit public activation. */
+  reviewBlockers: readonly string[];
   assess: (profile: NoticeAssessmentInput) => Assessment;
 };

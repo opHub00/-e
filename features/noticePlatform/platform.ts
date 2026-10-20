@@ -17,20 +17,29 @@ export class NoticePlatform {
     for (const adapter of adapters) {
       if (this.#registry.has(adapter.notice.id)) throw new Error(`DUPLICATE_NOTICE_ID:${adapter.notice.id}`);
       if (adapter.rulePackage.noticeId !== adapter.notice.id || adapter.ragSource.noticeId !== adapter.notice.id) throw new Error(`NOTICE_ADAPTER_CROSS_CONTAMINATION:${adapter.notice.id}`);
+      if (adapter.binding.noticeId !== adapter.notice.id || adapter.binding.rulePackageId !== adapter.rulePackage.id ||
+        adapter.binding.sourceHash !== adapter.rulePackage.sourceHash) throw new Error(`NOTICE_BINDING_MISMATCH:${adapter.notice.id}`);
       this.#registry.set(adapter.notice.id, adapter);
+    }
+    const activeFamilies = new Set<string>();
+    for (const adapter of this.#registry.values()) {
+      if (this.#publicBlockReason(adapter) !== null) continue;
+      const family = adapter.notice.managementNumber || adapter.notice.listing.id;
+      if (activeFamilies.has(family)) throw new Error(`ACTIVE_VERSION_COLLISION:${family}`);
+      activeFamilies.add(family);
     }
   }
 
-  getActiveNotices() { return [...this.#registry.values()].map(value => value.notice).filter(notice => notice.status === 'ACTIVE').map(notice => structuredClone(notice)); }
+  getActiveNotices() { return [...this.#registry.values()].filter(value => this.#publicBlockReason(value) === null).map(value => structuredClone(value.notice)); }
 
   getNoticePresentation(noticeId: NoticeId): NoticePresentation {
-    const adapter = this.#adapter(noticeId), notice = adapter.notice;
+    const adapter = this.#publicAdapter(noticeId), notice = adapter.notice;
     return { id: notice.id, title: notice.title, managementNumber: notice.managementNumber, region: notice.listing.region, address: notice.listing.address,
       noticeDate: notice.noticeDate, status: notice.status, supplyTypes: structuredClone(notice.supplyTypes), source: structuredClone(notice.sourceDocument) };
   }
 
   assessNotice(profile: NoticeAssessmentInput, noticeId: NoticeId): Assessment {
-    const assessment = this.#adapter(noticeId).assess(profile);
+    const assessment = this.#publicAdapter(noticeId).assess(profile);
     if (assessment.noticeId !== noticeId) throw new Error(`ASSESSMENT_NOTICE_MISMATCH:${noticeId}`);
     return structuredClone(assessment);
   }
@@ -40,6 +49,11 @@ export class NoticePlatform {
   }
 
   compareAssessmentResults(results: readonly Assessment[]): ComparisonResult {
+    for (const result of results) {
+      const adapter = this.#publicAdapter(result.noticeId);
+      if (result.rulePackageId !== adapter.rulePackage.id || result.rulePackageVersion !== adapter.rulePackage.version)
+        throw new Error(`ASSESSMENT_PACKAGE_MISMATCH:${result.noticeId}`);
+    }
     const ranked = [...results].sort((a, b) => this.#compare(a, b) || a.noticeId.localeCompare(b.noticeId));
     if (!ranked.length || ranked.every(result => !focus(result))) return { orderedNoticeIds: ranked.map(item => item.noticeId), preferredNoticeId: null, basis: 'NO_RECOMMENDATION', reasons: ['비교할 추천 결과가 없어요.'], disclaimer: this.#disclaimer() };
     const first = ranked[0], second = ranked[1];
@@ -50,7 +64,7 @@ export class NoticePlatform {
   }
 
   retrieveNoticeEvidence(noticeId: NoticeId, query: string, maxChunks = 6): RAGSource['chunks'] {
-    const source = this.#adapter(noticeId).ragSource;
+    const source = this.#publicAdapter(noticeId).ragSource;
     const normalized = query.toLowerCase();
     const expanded = [
       ...(/서류|증빙|준비/.test(normalized) ? ['서류', '제출', '등본', '초본', '증빙'] : []),
@@ -64,9 +78,24 @@ export class NoticePlatform {
       .filter(value => value.score > 0).sort((a, b) => b.score - a.score || a.chunk.id.localeCompare(b.chunk.id)).slice(0, maxChunks).map(value => structuredClone(value.chunk));
   }
 
-  rulePackage(noticeId: NoticeId) { return structuredClone(this.#adapter(noticeId).rulePackage); }
-  ragSource(noticeId: NoticeId) { return structuredClone(this.#adapter(noticeId).ragSource); }
+  rulePackage(noticeId: NoticeId) { return structuredClone(this.#publicAdapter(noticeId).rulePackage); }
+  ragSource(noticeId: NoticeId) { return structuredClone(this.#publicAdapter(noticeId).ragSource); }
   #adapter(id: NoticeId) { const value = this.#registry.get(id); if (!value) throw new Error(`NOTICE_NOT_FOUND:${id}`); return value; }
+  #publicAdapter(id: NoticeId) {
+    const adapter = this.#adapter(id), reason = this.#publicBlockReason(adapter);
+    if (reason) throw new Error(`${reason}:${id}`);
+    return adapter;
+  }
+  #publicBlockReason(adapter: NoticeAdapter): string | null {
+    if (adapter.lifecycle.sourceVerificationState !== 'SOURCE_VERIFIED' || adapter.rulePackage.sourceStatus === 'REFERENCE' ||
+      adapter.rulePackage.sourceHash !== adapter.notice.sourceDocument.sha256 ||
+      adapter.rulePackage.rules.some(rule => !rule.evidence.id || !rule.evidence.locator)) return 'SOURCE_NOT_VERIFIED';
+    if (adapter.reviewBlockers.length || adapter.rulePackage.validationErrors.length || adapter.lifecycle.reviewStatus === 'REVIEW_REQUIRED') return 'REVIEW_REQUIRED';
+    if (adapter.lifecycle.reviewStatus !== 'APPROVED' || !['APPROVED', 'ACTIVE'].includes(adapter.rulePackage.status)) return 'RULE_PACKAGE_NOT_APPROVED';
+    if (adapter.notice.status !== 'ACTIVE' || adapter.lifecycle.publicationStatus !== 'ACTIVE' ||
+      adapter.binding.status !== 'ACTIVE' || !adapter.notice.activatedAt) return 'NOT_ACTIVE';
+    return null;
+  }
   #disclaimer() { return '이 비교는 자격·공급단계·공식 점수·확인 필요 항목·공급 세대수만 정렬하며, 경쟁률이나 당첨확률을 추정하지 않아요.'; }
   #compare(a: Assessment, b: Assessment) {
     const x = focus(a), y = focus(b);

@@ -92,6 +92,11 @@ export function createSamdoNoticeAdapter(id: SamdoDistrictId): NoticeAdapter {
   };
   return {
     notice, rulePackage, ragSource: ragSource(id),
+    // Preserve the pre-existing active event adapter; this declaration is not a new approval.
+    // Source verification is distinct from whether the underlying HWP is officially published.
+    lifecycle: { sourceVerificationState: 'SOURCE_VERIFIED', reviewStatus: 'APPROVED', publicationStatus: 'ACTIVE' },
+    binding: { noticeId: id, rulePackageId: rulePackage.id, sourceHash: rulePackage.sourceHash, status: 'ACTIVE' },
+    reviewBlockers: [],
     assess: profile => {
       const district = buildSamdoDistrictAssessment(profile, id);
       const recommendation = mapRecommendation(district.recommendation);

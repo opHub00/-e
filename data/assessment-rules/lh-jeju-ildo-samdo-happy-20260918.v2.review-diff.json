@@ -1,0 +1,2936 @@
+{
+  "schemaVersion": 1,
+  "previousRuleSetId": "20b37b91-9edf-479a-a56a-ac9d3b70c424",
+  "previousRuleSetVersion": "DRAFT-2026-09-18-transcription-1",
+  "ruleSetId": "bd20aacc-a52b-4fc9-92fe-a70cdb0a170f",
+  "ruleSetVersion": "OFFICIAL-2026-09-18-review-v2",
+  "documentSha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+  "officialAnnouncementUrl": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+  "officialPdfUrl": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68665434",
+  "changedRuleIds": [
+    "student.applicantAgeOrException",
+    "student.income",
+    "student.assets",
+    "student.vehicle",
+    "youth.applicantAgeOrException",
+    "youth.income",
+    "youth.assets",
+    "youth.vehicle",
+    "youth.rank1",
+    "newlywed.applicantAgeOrException",
+    "newlywed.householdNoHome",
+    "newlywed.income",
+    "newlywed.assets",
+    "newlywed.vehicle",
+    "newlywed.account",
+    "newlywed.rank1",
+    "senior.applicantAgeOrException",
+    "housingBenefit.applicantAgeOrException"
+  ],
+  "changes": [
+    {
+      "ruleKey": "student.applicantAgeOrException",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "student.income",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000155",
+            "page": 3,
+            "bbox": [
+              59.335155,
+              291.178193,
+              786.9402966735446,
+              299.213838
+            ]
+          },
+          {
+            "id": "b000156",
+            "page": 3,
+            "bbox": [
+              48.786683000000004,
+              302.572018,
+              710.703301,
+              310.487728
+            ]
+          },
+          {
+            "id": "b000158",
+            "page": 3,
+            "bbox": [
+              501.531896,
+              324.759993,
+              784.063129,
+              331.836158
+            ]
+          },
+          {
+            "id": "b000160",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              333.875053,
+              785.7800126870001,
+              340.951218
+            ]
+          },
+          {
+            "id": "b000161",
+            "page": 3,
+            "bbox": [
+              43.272709,
+              342.53436,
+              785.7800126870001,
+              350.33013500000004
+            ]
+          },
+          {
+            "id": "b000162",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              352.105173,
+              785.7800126870001,
+              359.181338
+            ]
+          },
+          {
+            "id": "b000163",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              361.220233,
+              785.7800126870001,
+              369.039995
+            ]
+          },
+          {
+            "id": "b000164",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              370.215358,
+              785.7800126870001,
+              377.291523
+            ]
+          },
+          {
+            "id": "b000165",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              378.27499,
+              785.7800126870001,
+              386.406583
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000155",
+            "page": 3,
+            "bbox": [
+              59.335155,
+              291.178193,
+              786.9402966735446,
+              299.213838
+            ]
+          },
+          {
+            "id": "b000156",
+            "page": 3,
+            "bbox": [
+              48.786683000000004,
+              302.572018,
+              710.703301,
+              310.487728
+            ]
+          },
+          {
+            "id": "b000158",
+            "page": 3,
+            "bbox": [
+              501.531896,
+              324.759993,
+              784.063129,
+              331.836158
+            ]
+          },
+          {
+            "id": "b000160",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              333.875053,
+              785.7800126870001,
+              340.951218
+            ]
+          },
+          {
+            "id": "b000161",
+            "page": 3,
+            "bbox": [
+              43.272709,
+              342.53436,
+              785.7800126870001,
+              350.33013500000004
+            ]
+          },
+          {
+            "id": "b000162",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              352.105173,
+              785.7800126870001,
+              359.181338
+            ]
+          },
+          {
+            "id": "b000163",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              361.220233,
+              785.7800126870001,
+              369.039995
+            ]
+          },
+          {
+            "id": "b000164",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              370.215358,
+              785.7800126870001,
+              377.291523
+            ]
+          },
+          {
+            "id": "b000165",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              378.27499,
+              785.7800126870001,
+              386.406583
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "student.assets",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000168",
+            "page": 3,
+            "bbox": [
+              48.187338000000004,
+              414.111568,
+              729.662261516,
+              421.667473
+            ]
+          },
+          {
+            "id": "b000170",
+            "page": 3,
+            "bbox": [
+              55.259609000000005,
+              435.340063,
+              766.449937747,
+              443.495643
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          },
+          {
+            "id": "b000177",
+            "page": 3,
+            "bbox": [
+              604.259629,
+              486.432373,
+              777.49310911,
+              493.508538
+            ]
+          },
+          {
+            "id": "b000178",
+            "page": 3,
+            "bbox": [
+              64.010046,
+              490.98990299999997,
+              777.49310911,
+              502.623598
+            ]
+          },
+          {
+            "id": "b000179",
+            "page": 3,
+            "bbox": [
+              541.208535,
+              504.662493,
+              777.49310911,
+              511.738658
+            ]
+          },
+          {
+            "id": "b000181",
+            "page": 3,
+            "bbox": [
+              595.389323,
+              513.777553,
+              777.49310911,
+              520.8537180000001
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000168",
+            "page": 3,
+            "bbox": [
+              48.187338000000004,
+              414.111568,
+              729.662261516,
+              421.667473
+            ]
+          },
+          {
+            "id": "b000170",
+            "page": 3,
+            "bbox": [
+              55.259609000000005,
+              435.340063,
+              766.449937747,
+              443.495643
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          },
+          {
+            "id": "b000177",
+            "page": 3,
+            "bbox": [
+              604.259629,
+              486.432373,
+              777.49310911,
+              493.508538
+            ]
+          },
+          {
+            "id": "b000178",
+            "page": 3,
+            "bbox": [
+              64.010046,
+              490.98990299999997,
+              777.49310911,
+              502.623598
+            ]
+          },
+          {
+            "id": "b000179",
+            "page": 3,
+            "bbox": [
+              541.208535,
+              504.662493,
+              777.49310911,
+              511.738658
+            ]
+          },
+          {
+            "id": "b000181",
+            "page": 3,
+            "bbox": [
+              595.389323,
+              513.777553,
+              777.49310911,
+              520.8537180000001
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "student.vehicle",
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "oldExpression": {
+        "fact": "vehicleValue",
+        "op": "eq",
+        "value": 0
+      },
+      "newExpression": {
+        "fact": "applicantOwnsVehicle",
+        "op": "eq",
+        "value": false
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.applicantAgeOrException",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.income",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000200",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              170.16377799999998,
+              810.5538303799,
+              177.23994299999998
+            ]
+          },
+          {
+            "id": "b000202",
+            "page": 4,
+            "bbox": [
+              467.369231,
+              181.19779800000003,
+              627.6344196402723,
+              188.27396300000004
+            ]
+          },
+          {
+            "id": "b000204",
+            "page": 4,
+            "bbox": [
+              466.170541,
+              192.23181799999998,
+              711.062908,
+              199.30798299999998
+            ]
+          },
+          {
+            "id": "b000208",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              225.33387800000003,
+              775.4716263071,
+              232.41004300000003
+            ]
+          },
+          {
+            "id": "b000210",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              234.568873,
+              775.4716263071,
+              241.645038
+            ]
+          },
+          {
+            "id": "b000211",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              241.43275304999997,
+              775.4716263071,
+              250.88003299999997
+            ]
+          },
+          {
+            "id": "b000212",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              252.918928,
+              775.4716263071,
+              261.194443
+            ]
+          },
+          {
+            "id": "b000213",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              262.393793,
+              775.4716263071,
+              269.469958
+            ]
+          },
+          {
+            "id": "b000214",
+            "page": 4,
+            "bbox": [
+              77.91485,
+              269.350023,
+              775.4716263071,
+              278.704953
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000200",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              170.16377799999998,
+              810.5538303799,
+              177.23994299999998
+            ]
+          },
+          {
+            "id": "b000202",
+            "page": 4,
+            "bbox": [
+              467.369231,
+              181.19779800000003,
+              627.6344196402723,
+              188.27396300000004
+            ]
+          },
+          {
+            "id": "b000204",
+            "page": 4,
+            "bbox": [
+              466.170541,
+              192.23181799999998,
+              711.062908,
+              199.30798299999998
+            ]
+          },
+          {
+            "id": "b000208",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              225.33387800000003,
+              775.4716263071,
+              232.41004300000003
+            ]
+          },
+          {
+            "id": "b000210",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              234.568873,
+              775.4716263071,
+              241.645038
+            ]
+          },
+          {
+            "id": "b000211",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              241.43275304999997,
+              775.4716263071,
+              250.88003299999997
+            ]
+          },
+          {
+            "id": "b000212",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              252.918928,
+              775.4716263071,
+              261.194443
+            ]
+          },
+          {
+            "id": "b000213",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              262.393793,
+              775.4716263071,
+              269.469958
+            ]
+          },
+          {
+            "id": "b000214",
+            "page": 4,
+            "bbox": [
+              77.91485,
+              269.350023,
+              775.4716263071,
+              278.704953
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.assets",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000221",
+            "page": 4,
+            "bbox": [
+              544.2052600000001,
+              330.996613,
+              726.186060516,
+              338.072778
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000221",
+            "page": 4,
+            "bbox": [
+              544.2052600000001,
+              330.996613,
+              726.186060516,
+              338.072778
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.vehicle",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.rank1",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "newExpression": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000236",
+            "page": 4,
+            "bbox": [
+              33.803058,
+              450.59579500000007,
+              783.224046,
+              461.246023
+            ]
+          },
+          {
+            "id": "b000239",
+            "page": 4,
+            "bbox": [
+              50.34498,
+              468.921863,
+              783.224046,
+              480.795428
+            ]
+          },
+          {
+            "id": "b000242",
+            "page": 4,
+            "bbox": [
+              50.34498,
+              496.626848,
+              180.163107,
+              503.703013
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "tables": [
+          {
+            "id": "t00019",
+            "page": 5,
+            "row": 0,
+            "columns": [
+              0,
+              1
+            ],
+            "bbox": [
+              34.762,
+              433.507,
+              384.659,
+              491.20799999999997
+            ]
+          }
+        ],
+        "normalization": "PDF_TABLE_CELL_READING_ORDER_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.applicantAgeOrException",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.householdNoHome",
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "oldExpression": {
+        "fact": "householdNoHome",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "engaged"
+              },
+              {
+                "fact": "futureHouseholdNoHome",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "singleParent"
+                  }
+                ]
+              },
+              {
+                "fact": "householdNoHome",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000252",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              82.61122799999998,
+              812.4731128592555,
+              91.72628800000001
+            ]
+          },
+          {
+            "id": "b000253",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              93.79276804999995,
+              812.4723696360942,
+              102.76030800000001
+            ]
+          },
+          {
+            "id": "b000288",
+            "page": 5,
+            "bbox": [
+              463.29368500000004,
+              376.332043,
+              658.320548,
+              383.408208
+            ]
+          },
+          {
+            "id": "b000354",
+            "page": 6,
+            "bbox": [
+              30.206988000000003,
+              392.76313799999997,
+              746.304394,
+              401.638328
+            ]
+          },
+          {
+            "id": "b000355",
+            "page": 6,
+            "bbox": [
+              39.796508,
+              404.756638,
+              747.9822123799,
+              413.991633
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000252",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              82.61122799999998,
+              812.4731128592555,
+              91.72628800000001
+            ]
+          },
+          {
+            "id": "b000253",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              93.79276804999995,
+              812.4723696360942,
+              102.76030800000001
+            ]
+          },
+          {
+            "id": "b000288",
+            "page": 5,
+            "bbox": [
+              463.29368500000004,
+              376.332043,
+              658.320548,
+              383.408208
+            ]
+          },
+          {
+            "id": "b000354",
+            "page": 6,
+            "bbox": [
+              30.206988000000003,
+              392.76313799999997,
+              746.304394,
+              401.638328
+            ]
+          },
+          {
+            "id": "b000355",
+            "page": 6,
+            "bbox": [
+              39.796508,
+              404.756638,
+              747.9822123799,
+              413.991633
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000262",
+            "page": 5,
+            "bbox": [
+              39.55677,
+              198.228568,
+              810.434309,
+              205.784473
+            ]
+          },
+          {
+            "id": "b000263",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              209.502458,
+              683.852645,
+              217.05836300000004
+            ]
+          },
+          {
+            "id": "b000264",
+            "page": 5,
+            "bbox": [
+              39.676639,
+              220.89628300000004,
+              746.064656,
+              228.45218800000004
+            ]
+          },
+          {
+            "id": "b000269",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              260.714703,
+              791.533724687,
+              267.790868
+            ]
+          },
+          {
+            "id": "b000271",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              271.868658,
+              791.533724687,
+              278.944823
+            ]
+          },
+          {
+            "id": "b000273",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              282.902678,
+              791.533724687,
+              289.978843
+            ]
+          },
+          {
+            "id": "b000275",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              294.056633,
+              791.533724687,
+              301.132798
+            ]
+          },
+          {
+            "id": "b000276",
+            "page": 5,
+            "bbox": [
+              80.791706,
+              302.811888,
+              791.533724687,
+              312.286753
+            ]
+          },
+          {
+            "id": "b000312",
+            "page": 6,
+            "bbox": [
+              155.470093,
+              44.711768000000006,
+              377.10787400000004,
+              51.78793299999995
+            ]
+          },
+          {
+            "id": "b000313",
+            "page": 6,
+            "bbox": [
+              202.57861,
+              53.82682799999998,
+              377.10787400000004,
+              60.902992999999924
+            ]
+          },
+          {
+            "id": "b000314",
+            "page": 6,
+            "bbox": [
+              116.27293,
+              58.264422999999965,
+              807.5583760125168,
+              79.01317799999993
+            ]
+          },
+          {
+            "id": "b000315",
+            "page": 6,
+            "bbox": [
+              146.599787,
+              81.05207300000006,
+              377.10787400000004,
+              88.12823800000001
+            ]
+          },
+          {
+            "id": "b000316",
+            "page": 6,
+            "bbox": [
+              193.708304,
+              90.16713299999998,
+              377.10787400000004,
+              97.24329799999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000262",
+            "page": 5,
+            "bbox": [
+              39.55677,
+              198.228568,
+              810.434309,
+              205.784473
+            ]
+          },
+          {
+            "id": "b000263",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              209.502458,
+              683.852645,
+              217.05836300000004
+            ]
+          },
+          {
+            "id": "b000264",
+            "page": 5,
+            "bbox": [
+              39.676639,
+              220.89628300000004,
+              746.064656,
+              228.45218800000004
+            ]
+          },
+          {
+            "id": "b000269",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              260.714703,
+              791.533724687,
+              267.790868
+            ]
+          },
+          {
+            "id": "b000271",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              271.868658,
+              791.533724687,
+              278.944823
+            ]
+          },
+          {
+            "id": "b000273",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              282.902678,
+              791.533724687,
+              289.978843
+            ]
+          },
+          {
+            "id": "b000275",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              294.056633,
+              791.533724687,
+              301.132798
+            ]
+          },
+          {
+            "id": "b000276",
+            "page": 5,
+            "bbox": [
+              80.791706,
+              302.811888,
+              791.533724687,
+              312.286753
+            ]
+          },
+          {
+            "id": "b000312",
+            "page": 6,
+            "bbox": [
+              155.470093,
+              44.711768000000006,
+              377.10787400000004,
+              51.78793299999995
+            ]
+          },
+          {
+            "id": "b000313",
+            "page": 6,
+            "bbox": [
+              202.57861,
+              53.82682799999998,
+              377.10787400000004,
+              60.902992999999924
+            ]
+          },
+          {
+            "id": "b000314",
+            "page": 6,
+            "bbox": [
+              116.27293,
+              58.264422999999965,
+              807.5583760125168,
+              79.01317799999993
+            ]
+          },
+          {
+            "id": "b000315",
+            "page": 6,
+            "bbox": [
+              146.599787,
+              81.05207300000006,
+              377.10787400000004,
+              88.12823800000001
+            ]
+          },
+          {
+            "id": "b000316",
+            "page": 6,
+            "bbox": [
+              193.708304,
+              90.16713299999998,
+              377.10787400000004,
+              97.24329799999998
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.assets",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "oldExpression": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000294",
+            "page": 5,
+            "bbox": [
+              612.290852,
+              436.659348,
+              797.3682403799,
+              444.814928
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000294",
+            "page": 5,
+            "bbox": [
+              612.290852,
+              436.659348,
+              797.3682403799,
+              444.814928
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "oldExpression": {
+        "fact": "canProveSubscriptionByMoveIn",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "singleParent"
+              },
+              {
+                "fact": "applicantCanProveSubscriptionByMoveIn",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "engaged"
+                  }
+                ]
+              },
+              {
+                "any": [
+                  {
+                    "fact": "applicantCanProveSubscriptionByMoveIn",
+                    "op": "eq",
+                    "value": true
+                  },
+                  {
+                    "fact": "spouseCanProveSubscriptionByMoveIn",
+                    "op": "eq",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000284",
+            "page": 5,
+            "bbox": [
+              463.053947,
+              353.544393,
+              810.4339613799,
+              360.620558
+            ]
+          },
+          {
+            "id": "b000285",
+            "page": 5,
+            "bbox": [
+              36.200438,
+              363.738868,
+              736.587333384,
+              372.014383
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000284",
+            "page": 5,
+            "bbox": [
+              463.053947,
+              353.544393,
+              810.4339613799,
+              360.620558
+            ]
+          },
+          {
+            "id": "b000285",
+            "page": 5,
+            "bbox": [
+              36.200438,
+              363.738868,
+              736.587333384,
+              372.014383
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          }
+        ]
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "oldExpression": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "newExpression": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "singleParent"
+              },
+              {
+                "any": [
+                  {
+                    "fact": "residence",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  },
+                  {
+                    "fact": "incomeSourceRegion",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "engaged"
+                  }
+                ]
+              },
+              {
+                "any": [
+                  {
+                    "any": [
+                      {
+                        "fact": "residence",
+                        "op": "eq",
+                        "value": "제주특별자치도"
+                      },
+                      {
+                        "fact": "incomeSourceRegion",
+                        "op": "eq",
+                        "value": "제주특별자치도"
+                      }
+                    ]
+                  },
+                  {
+                    "fact": "spouseResidence",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  },
+                  {
+                    "fact": "spouseIncomeSourceRegion",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000291",
+            "page": 5,
+            "bbox": [
+              33.803058,
+              417.349813,
+              775.919588747,
+              427.56827499999997
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000302",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              497.346458,
+              392.09254186030006,
+              504.422623
+            ]
+          },
+          {
+            "id": "b000308",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              532.7272829999999,
+              595.868799,
+              541.8663300000001
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          6
+        ],
+        "tables": [
+          {
+            "id": "t00021",
+            "page": 6,
+            "row": 0,
+            "columns": [
+              0,
+              1
+            ],
+            "bbox": [
+              455.262,
+              52.891199999999984,
+              811.3582857142857,
+              115.618
+            ]
+          }
+        ],
+        "normalization": "PDF_TABLE_CELL_READING_ORDER_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "senior.applicantAgeOrException",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    },
+    {
+      "ruleKey": "housingBenefit.applicantAgeOrException",
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "oldExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "newExpression": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "oldLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "newLocator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "reviewerNoteSeed": "공식 LH PDF 해시 동일성, 페이지·표 셀·적용 범위를 독립적으로 확인해 주세요."
+    }
+  ],
+  "parameterChanges": [
+    {
+      "key": "threshold.newlywed.incomePercent.single.1",
+      "oldValue": 120,
+      "newValue": null
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.dual.1",
+      "oldValue": 120,
+      "newValue": null
+    },
+    {
+      "key": "threshold.student.vehicle.0",
+      "oldValue": 0,
+      "newValue": null
+    },
+    {
+      "key": "threshold.student.vehicle.1",
+      "oldValue": 0,
+      "newValue": null
+    },
+    {
+      "key": "threshold.student.vehicle.2",
+      "oldValue": 0,
+      "newValue": null
+    },
+    {
+      "key": "threshold.student.scopeMode",
+      "oldValue": null,
+      "newValue": "APPLICANT_AND_PARENTS"
+    },
+    {
+      "key": "threshold.youth.scopeMode",
+      "oldValue": null,
+      "newValue": "HOUSEHOLD_HEAD_OR_SELF"
+    },
+    {
+      "key": "threshold.newlywed.scopeMode",
+      "oldValue": null,
+      "newValue": "CURRENT_OR_FUTURE_HOUSEHOLD"
+    }
+  ],
+  "activation": "PROHIBITED_UNTIL_AUTHENTICATED_REVIEW_APPROVAL"
+}

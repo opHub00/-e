@@ -23,9 +23,10 @@ test('generic platform preserves all nine Samdo persona semantics', () => {
 test('notice registry supports N notices without cross-notice contamination', () => {
   const base = createSamdoNoticeAdapter('samdo-1');
   const synthetic: NoticeAdapter = structuredClone({ ...base, assess: undefined }) as unknown as NoticeAdapter;
-  synthetic.notice.id = 'synthetic-3'; synthetic.notice.title = '합성 검증 공고'; synthetic.notice.listing.id = 'synthetic-listing-3';
+  synthetic.notice.id = 'synthetic-3'; synthetic.notice.title = '합성 검증 공고'; synthetic.notice.managementNumber = 'synthetic-management-3'; synthetic.notice.listing.id = 'synthetic-listing-3';
   synthetic.rulePackage.noticeId = 'synthetic-3'; synthetic.rulePackage.id = 'synthetic-rule-3';
   synthetic.ragSource.noticeId = 'synthetic-3'; synthetic.ragSource.id = 'synthetic-rag-3';
+  synthetic.binding.noticeId = 'synthetic-3'; synthetic.binding.rulePackageId = 'synthetic-rule-3';
   synthetic.assess = input => {
     const result = base.assess(input);
     return { ...result, noticeId: 'synthetic-3', listingId: 'synthetic-listing-3', rulePackageId: 'synthetic-rule-3' };

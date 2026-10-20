@@ -1,0 +1,4247 @@
+{
+  "schemaVersion": 1,
+  "announcement": {
+    "id": "902916ae-bb9a-4ddf-a3cc-505d18a20e25",
+    "source": "LH",
+    "externalId": "lh-jeju-ildo-samdo-happy-20260918",
+    "housingManagementNumber": null,
+    "title": "제주일도·삼도 행복주택 예비입주자 모집",
+    "publisher": "한국토지주택공사",
+    "announcementDate": "2026-09-18",
+    "regionCode": "500",
+    "regionName": "제주특별자치도",
+    "sourceUrl": null
+  },
+  "document": {
+    "id": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+    "documentType": "DRAFT",
+    "storagePath": "2026/902916ae-bb9a-4ddf-a3cc-505d18a20e25/620be476-2073-4bf4-8db9-0bacb6ae1b29/original.pdf",
+    "fileName": "lh-2026-09-18-jeju-ildo-samdo-happy-housing.pdf",
+    "mimeType": "application/pdf",
+    "versionLabel": "2026.09.18. 모집공고 검토본",
+    "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+    "isOfficial": false,
+    "sourceUrl": null,
+    "publishedAt": null
+  },
+  "ruleSet": {
+    "id": "20b37b91-9edf-479a-a56a-ac9d3b70c424",
+    "version": "DRAFT-2026-09-18-transcription-1",
+    "sourceStatus": "DRAFT_SOURCE_VERIFIED",
+    "effectiveDate": "2026-09-18",
+    "config": {
+      "parameters": {
+        "supplyLabel.student": "대학생 계층",
+        "supplyLabel.youth": "청년 계층",
+        "supplyLabel.newlywed": "신혼부부·예비신혼부부 계층",
+        "supplyLabel.senior": "고령자 계층",
+        "supplyLabel.housingBenefit": "주거급여수급자 계층",
+        "amounts.integerWon": true,
+        "children.includeUnborn": true,
+        "children.minorAgeYears": 19,
+        "exceptions.childbirthAfter": "2023-03-28",
+        "announcement.applicationStartsAt": "2026-10-01T10:00:00+09:00",
+        "announcement.applicationEndsAt": "2026-10-02T17:00:00+09:00",
+        "announcement.documentTargetAt": "2026-10-08T16:00:00+09:00",
+        "announcement.documentsEndDate": "2026-10-14",
+        "announcement.winnerAt": "2026-12-28T16:00:00+09:00",
+        "announcement.applicationResidency": "NATIONWIDE",
+        "stage.student.PRIORITY.label": "1순위",
+        "stage.student.GENERAL.label": "2순위",
+        "stage.youth.PRIORITY.label": "1순위",
+        "stage.youth.GENERAL.label": "2순위",
+        "stage.newlywed.PRIORITY.label": "1순위",
+        "stage.newlywed.GENERAL.label": "2순위",
+        "stage.senior.LOTTERY.label": "추첨",
+        "stage.housingBenefit.LOTTERY.label": "추첨",
+        "warning.selection": "대학생·청년·신혼부부·한부모가족은 순위 후 추첨, 고령자·주거급여수급자는 추첨으로 선정합니다.",
+        "warning.childbirth": "2023-03-28 이후 출산·입양·태아에 따른 소득·자산 가산을 최대 2명까지 반영합니다.",
+        "threshold.student.incomeFact": "parentApplicantMonthlyIncome",
+        "threshold.student.incomeMaxPercent": 120,
+        "threshold.student.incomePercent.single.1": 120,
+        "threshold.student.incomePercent.single.2": 110,
+        "threshold.student.incomePercent.single.default": 100,
+        "threshold.student.income.1.120": 4576036,
+        "threshold.student.income.2.110": 6452897,
+        "threshold.student.income.2.120": 7039524,
+        "threshold.student.income.2.130": 7626151,
+        "threshold.student.income.2.140": 8212778,
+        "threshold.student.income.3.100": 8168429,
+        "threshold.student.income.3.110": 8985272,
+        "threshold.student.income.3.120": 9802115,
+        "threshold.student.income.3.130": 10618958,
+        "threshold.student.income.3.140": 11435801,
+        "threshold.student.income.4.100": 8802202,
+        "threshold.student.income.4.110": 9682422,
+        "threshold.student.income.4.120": 10562642,
+        "threshold.student.income.4.130": 11442863,
+        "threshold.student.income.4.140": 12323083,
+        "threshold.student.income.5.100": 9326985,
+        "threshold.student.income.5.110": 10259684,
+        "threshold.student.income.5.120": 11192382,
+        "threshold.student.income.5.130": 12125081,
+        "threshold.student.income.5.140": 13057779,
+        "threshold.student.income.6.100": 9906263,
+        "threshold.student.income.6.110": 10896889,
+        "threshold.student.income.6.120": 11887516,
+        "threshold.student.income.6.130": 12878142,
+        "threshold.student.income.6.140": 13868768,
+        "threshold.youth.incomeFact": "householdIncome",
+        "threshold.youth.incomeMaxPercent": 120,
+        "threshold.youth.incomePercent.single.1": 120,
+        "threshold.youth.incomePercent.single.2": 110,
+        "threshold.youth.incomePercent.single.default": 100,
+        "threshold.youth.income.1.120": 4576036,
+        "threshold.youth.income.2.110": 6452897,
+        "threshold.youth.income.2.120": 7039524,
+        "threshold.youth.income.2.130": 7626151,
+        "threshold.youth.income.2.140": 8212778,
+        "threshold.youth.income.3.100": 8168429,
+        "threshold.youth.income.3.110": 8985272,
+        "threshold.youth.income.3.120": 9802115,
+        "threshold.youth.income.3.130": 10618958,
+        "threshold.youth.income.3.140": 11435801,
+        "threshold.youth.income.4.100": 8802202,
+        "threshold.youth.income.4.110": 9682422,
+        "threshold.youth.income.4.120": 10562642,
+        "threshold.youth.income.4.130": 11442863,
+        "threshold.youth.income.4.140": 12323083,
+        "threshold.youth.income.5.100": 9326985,
+        "threshold.youth.income.5.110": 10259684,
+        "threshold.youth.income.5.120": 11192382,
+        "threshold.youth.income.5.130": 12125081,
+        "threshold.youth.income.5.140": 13057779,
+        "threshold.youth.income.6.100": 9906263,
+        "threshold.youth.income.6.110": 10896889,
+        "threshold.youth.income.6.120": 11887516,
+        "threshold.youth.income.6.130": 12878142,
+        "threshold.youth.income.6.140": 13868768,
+        "threshold.newlywed.incomeFact": "householdIncome",
+        "threshold.newlywed.incomeMaxPercent": 140,
+        "threshold.newlywed.incomePercent.single.1": 120,
+        "threshold.newlywed.incomePercent.single.2": 110,
+        "threshold.newlywed.incomePercent.single.default": 100,
+        "threshold.newlywed.incomePercent.dual.1": 120,
+        "threshold.newlywed.incomePercent.dual.2": 130,
+        "threshold.newlywed.incomePercent.dual.default": 120,
+        "threshold.newlywed.income.1.120": 4576036,
+        "threshold.newlywed.income.2.110": 6452897,
+        "threshold.newlywed.income.2.120": 7039524,
+        "threshold.newlywed.income.2.130": 7626151,
+        "threshold.newlywed.income.2.140": 8212778,
+        "threshold.newlywed.income.3.100": 8168429,
+        "threshold.newlywed.income.3.110": 8985272,
+        "threshold.newlywed.income.3.120": 9802115,
+        "threshold.newlywed.income.3.130": 10618958,
+        "threshold.newlywed.income.3.140": 11435801,
+        "threshold.newlywed.income.4.100": 8802202,
+        "threshold.newlywed.income.4.110": 9682422,
+        "threshold.newlywed.income.4.120": 10562642,
+        "threshold.newlywed.income.4.130": 11442863,
+        "threshold.newlywed.income.4.140": 12323083,
+        "threshold.newlywed.income.5.100": 9326985,
+        "threshold.newlywed.income.5.110": 10259684,
+        "threshold.newlywed.income.5.120": 11192382,
+        "threshold.newlywed.income.5.130": 12125081,
+        "threshold.newlywed.income.5.140": 13057779,
+        "threshold.newlywed.income.6.100": 9906263,
+        "threshold.newlywed.income.6.110": 10896889,
+        "threshold.newlywed.income.6.120": 11887516,
+        "threshold.newlywed.income.6.130": 12878142,
+        "threshold.newlywed.income.6.140": 13868768,
+        "threshold.senior.incomeFact": "householdIncome",
+        "threshold.senior.incomeMaxPercent": 120,
+        "threshold.senior.incomePercent.single.1": 120,
+        "threshold.senior.incomePercent.single.2": 110,
+        "threshold.senior.incomePercent.single.default": 100,
+        "threshold.senior.income.1.120": 4576036,
+        "threshold.senior.income.2.110": 6452897,
+        "threshold.senior.income.2.120": 7039524,
+        "threshold.senior.income.2.130": 7626151,
+        "threshold.senior.income.2.140": 8212778,
+        "threshold.senior.income.3.100": 8168429,
+        "threshold.senior.income.3.110": 8985272,
+        "threshold.senior.income.3.120": 9802115,
+        "threshold.senior.income.3.130": 10618958,
+        "threshold.senior.income.3.140": 11435801,
+        "threshold.senior.income.4.100": 8802202,
+        "threshold.senior.income.4.110": 9682422,
+        "threshold.senior.income.4.120": 10562642,
+        "threshold.senior.income.4.130": 11442863,
+        "threshold.senior.income.4.140": 12323083,
+        "threshold.senior.income.5.100": 9326985,
+        "threshold.senior.income.5.110": 10259684,
+        "threshold.senior.income.5.120": 11192382,
+        "threshold.senior.income.5.130": 12125081,
+        "threshold.senior.income.5.140": 13057779,
+        "threshold.senior.income.6.100": 9906263,
+        "threshold.senior.income.6.110": 10896889,
+        "threshold.senior.income.6.120": 11887516,
+        "threshold.senior.income.6.130": 12878142,
+        "threshold.senior.income.6.140": 13868768,
+        "threshold.student.assets.0": 108000000,
+        "threshold.student.vehicle.0": 0,
+        "threshold.student.assets.1": 119000000,
+        "threshold.student.vehicle.1": 0,
+        "threshold.student.assets.2": 130000000,
+        "threshold.student.vehicle.2": 0,
+        "threshold.youth.assets.0": 251000000,
+        "threshold.youth.vehicle.0": 45420000,
+        "threshold.youth.assets.1": 276000000,
+        "threshold.youth.vehicle.1": 49960000,
+        "threshold.youth.assets.2": 301000000,
+        "threshold.youth.vehicle.2": 54510000,
+        "threshold.newlywed.assets.0": 345000000,
+        "threshold.newlywed.vehicle.0": 45420000,
+        "threshold.newlywed.assets.1": 379000000,
+        "threshold.newlywed.vehicle.1": 49960000,
+        "threshold.newlywed.assets.2": 413000000,
+        "threshold.newlywed.vehicle.2": 54510000,
+        "threshold.senior.assets.0": 345000000,
+        "threshold.senior.vehicle.0": 45420000,
+        "threshold.senior.assets.1": 379000000,
+        "threshold.senior.vehicle.1": 49960000,
+        "threshold.senior.assets.2": 413000000,
+        "threshold.senior.vehicle.2": 54510000
+      },
+      "supplies": [
+        {
+          "type": "student",
+          "eligibility": [
+            "student.applicantAgeOrException",
+            "student.subletRestriction",
+            "student.singleApplication",
+            "student.education",
+            "student.unmarried",
+            "student.noHome",
+            "student.income",
+            "student.assets",
+            "student.vehicle"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "student.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "youth",
+          "eligibility": [
+            "youth.applicantAgeOrException",
+            "youth.subletRestriction",
+            "youth.singleApplication",
+            "youth.category",
+            "youth.unmarried",
+            "youth.noHome",
+            "youth.income",
+            "youth.assets",
+            "youth.vehicle",
+            "youth.account"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "youth.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "newlywed",
+          "eligibility": [
+            "newlywed.applicantAgeOrException",
+            "newlywed.subletRestriction",
+            "newlywed.singleApplication",
+            "newlywed.category",
+            "newlywed.householdNoHome",
+            "newlywed.income",
+            "newlywed.assets",
+            "newlywed.vehicle",
+            "newlywed.account"
+          ],
+          "stages": [
+            {
+              "stage": "PRIORITY",
+              "conditions": [
+                "newlywed.rank1"
+              ],
+              "scores": null
+            },
+            {
+              "stage": "GENERAL",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "senior",
+          "eligibility": [
+            "senior.applicantAgeOrException",
+            "senior.subletRestriction",
+            "senior.singleApplication",
+            "senior.age",
+            "senior.householdNoHome",
+            "senior.income",
+            "senior.assets",
+            "senior.vehicle"
+          ],
+          "stages": [
+            {
+              "stage": "LOTTERY",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        },
+        {
+          "type": "housingBenefit",
+          "eligibility": [
+            "housingBenefit.applicantAgeOrException",
+            "housingBenefit.subletRestriction",
+            "housingBenefit.singleApplication",
+            "housingBenefit.recipient",
+            "housingBenefit.householdNoHome"
+          ],
+          "stages": [
+            {
+              "stage": "LOTTERY",
+              "conditions": [],
+              "scores": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "ruleKey": "student.applicantAgeOrException",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.applicantAgeOrException",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "성년 신청자 또는 미성년 세대주 예외",
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "tableLabel": null,
+        "pageNumber": 2,
+        "textExcerpt": "공 형 급 별 공 대 급 상 건 호 설 수 공 호 가 수 중 예 자 인 비 우선일반 주 전 거 용 주 공 거 용기 공 타 용면 주 적 차 합계 계 계약 잔금 임 (천 대 월 원 료 ) 보 한 (천 증 도 원 금 액 ) 보 임 증 대 금 임대 월 료 거 기 (년 주 간 ) 난 및 방 ■ • 입 입 주 주 자 자 선 신 정 청 에 자 격 필요한 자격 해당여부는 공급신청자를 기준으로 합니다.\n(천원) (원) • 주택공급신청자는 성년자(자녀를 부양하거나 직계존속의 사망, 실종신고 및 행방불명 등으로\n형제자매를 부양하여야 하는 세대주인 미성년자, 부 또는 모가 외국인인 한부모가족으로서 미성년\n(-)27,000 5,606228,190 리트 단, 대학생, 청년, 예비신혼부부, 한부모가족은 성년자가 아닌 경우에도 신청가능합니다.\n대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            2,
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000097",
+              "page": 2,
+              "bbox": [
+                32.36463,
+                302.524044,
+                718.850197585,
+                328.262095
+              ]
+            },
+            {
+              "id": "b000099",
+              "page": 2,
+              "bbox": [
+                309.142151,
+                329.02967900000004,
+                810.5545375992085,
+                338.45657
+              ]
+            },
+            {
+              "id": "b000100",
+              "page": 2,
+              "bbox": [
+                463.653292,
+                340.85527,
+                810.4339494007916,
+                348.65104499999995
+              ]
+            },
+            {
+              "id": "b000104",
+              "page": 2,
+              "bbox": [
+                285.16835100000003,
+                361.124285,
+                775.57280773,
+                369.66365699999994
+              ]
+            },
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.subletRestriction",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.subletRestriction",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.singleApplication",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.singleApplication",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대당 1건 신청",
+        "label": "세대당 1건 신청",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "• 1세대 1주택 무주택세대구성원에게 신청가능하며, 중복 신청할 경우 전부 무효 처리됩니다. * 이혼 등의 사유로 가족관계가 단절된 상태인 경우 실질적으로 부양의무를 이행하고 있는 부 또는 모의 소득을 조회\n중복입주 • 공공임대주택은 1세대 1주택 신청, 공급이 원칙입니다. 다만, 다른 공공임대주택에 거주 중인 사실과 다르거나, 이의가 있을 경우에는 재확인기간(소명기간)내에 증명서류(소명자료)를 제출",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3,
+            16
+          ],
+          "blocks": [
+            {
+              "id": "b000157",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                314.805388,
+                808.1571096735446,
+                324.54411
+              ]
+            },
+            {
+              "id": "b000985",
+              "page": 16,
+              "bbox": [
+                38.238211,
+                146.296713,
+                812.472082,
+                154.212423
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.education",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "대학생 또는 졸업·중퇴 2년 이내 취업준비생",
+        "expression": {
+          "any": [
+            {
+              "fact": "educationStatus",
+              "op": "eq",
+              "value": "ENROLLED_OR_INCOMING"
+            },
+            {
+              "all": [
+                {
+                  "fact": "educationStatus",
+                  "op": "eq",
+                  "value": "GRADUATED_OR_WITHDRAWN"
+                },
+                {
+                  "fact": "graduationMonths",
+                  "op": "lte",
+                  "value": 24
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.education",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "대학생 또는 졸업·중퇴 2년 이내 취업준비생",
+        "label": "대학생 또는 졸업·중퇴 2년 이내 취업준비생",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "입주자모집공고일(2026.09.18) 현재, 무주택자로서 아래의 요건(대학생은 ①-㉮와 ②～④, 취업준비생은 ①-㉯와\n①-㉮ (대학생) ‘대학’에 재학중이거나 다음 학기에 입학 또는 복학 예정일 것\n5. 실종선고 절차가 진행 중인 사람 ①-㉯ (취업준비생) ‘대학 또는 고등학교’를 졸업 또는 중퇴한 지 2년 이내일 것\n6. 가출 또는 행방불명으로 경찰서 등 행정관청에 신고된 후 1개월이 지났거나 가출 또는 행방불명 * 모든 학기 수료를 완료하였으나 아직 졸업을 하지 않은 경우 재학생으로 간주",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000148",
+              "page": 3,
+              "bbox": [
+                450.70744,
+                220.536478,
+                812.591951,
+                227.612643
+              ]
+            },
+            {
+              "id": "b000151",
+              "page": 3,
+              "bbox": [
+                456.22141400000004,
+                246.68230800000003,
+                707.3469690000001,
+                253.75847300000004
+              ]
+            },
+            {
+              "id": "b000152",
+              "page": 3,
+              "bbox": [
+                48.786683000000004,
+                257.116653,
+                718.614655,
+                265.152298
+              ]
+            },
+            {
+              "id": "b000153",
+              "page": 3,
+              "bbox": [
+                48.786683000000004,
+                268.510478,
+                716.9368246402723,
+                276.426188
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.unmarried",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "미혼",
+        "expression": {
+          "fact": "maritalStatus",
+          "op": "eq",
+          "value": "single"
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.unmarried",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "미혼",
+        "label": "미혼",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "사실을 특별자치시장·특별자치도지사·시장·군수·구청장(자치구의 구청장을 말하며, 이하 “시장·군수·구청장”이라 ② 혼인 중이 아닐 것",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000154",
+              "page": 3,
+              "bbox": [
+                58.73581,
+                279.90430299999997,
+                527.183862,
+                287.820013
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.noHome",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신청자 본인 무주택",
+        "expression": {
+          "fact": "noHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.noHome",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "신청자 본인 무주택",
+        "label": "신청자 본인 무주택",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "입주자모집공고일(2026.09.18) 현재, 무주택자로서 아래의 요건(대학생은 ①-㉮와 ②～④, 취업준비생은 ①-㉯와\n* 대학생, 청년 계층의 주택 소유여부는 신청자 본인에 한하여 검증합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000148",
+              "page": 3,
+              "bbox": [
+                450.70744,
+                220.536478,
+                812.591951,
+                227.612643
+              ]
+            },
+            {
+              "id": "b000128",
+              "page": 3,
+              "bbox": [
+                43.512447,
+                43.27254800000003,
+                287.493689731,
+                50.348712999999975
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.income",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "본인·부모 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.income",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "본인·부모 소득 기준",
+        "label": "본인·부모 소득 기준",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "한다)이 확인한 사람 ③ 신청자 부모와 본인의 월평균소득 합계가 전년도 도시근로자 가구원수별 가구당 월평균소득의 100퍼센트 이하\n7. 공급신청자와 생계 및 주거를 달리한다고 시장·군수·구청장이 확인한 사람 ※ 단, 가구원 수가 1인인 경우에는 120퍼센트, 2인인 경우에는 110퍼센트 이하일 것\n가구원수 월평균소득금액 기준\n1인 4,576,036원 이하 120%\n배우자의 이전 혼인 미성년자녀의 경우에는 신청자와 동일한 주민등록표에 등재된 미성년자녀만 인정합니다. 2인 6,452,897원 이하 110%\n3인 8,168,429원 이하 100%\n■ 신청자격별 소득·자산 기준 4인 8,802,202원 이하 100%\n5인 9,326,985원 이하 100%\n• 행복주택의 신청자격별 소득·자산기준은 “3. 신청자격 및 입주자 선정방법”의 공급대상별 상세 6인 9,906,263원 이하 100%",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000155",
+              "page": 3,
+              "bbox": [
+                59.335155,
+                291.178193,
+                786.9402966735446,
+                299.213838
+              ]
+            },
+            {
+              "id": "b000156",
+              "page": 3,
+              "bbox": [
+                48.786683000000004,
+                302.572018,
+                710.703301,
+                310.487728
+              ]
+            },
+            {
+              "id": "b000158",
+              "page": 3,
+              "bbox": [
+                501.531896,
+                324.759993,
+                784.063129,
+                331.836158
+              ]
+            },
+            {
+              "id": "b000160",
+              "page": 3,
+              "bbox": [
+                510.162464,
+                333.875053,
+                785.7800126870001,
+                340.951218
+              ]
+            },
+            {
+              "id": "b000161",
+              "page": 3,
+              "bbox": [
+                43.272709,
+                342.53436,
+                785.7800126870001,
+                350.33013500000004
+              ]
+            },
+            {
+              "id": "b000162",
+              "page": 3,
+              "bbox": [
+                510.162464,
+                352.105173,
+                785.7800126870001,
+                359.181338
+              ]
+            },
+            {
+              "id": "b000163",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                361.220233,
+                785.7800126870001,
+                369.039995
+              ]
+            },
+            {
+              "id": "b000164",
+              "page": 3,
+              "bbox": [
+                510.162464,
+                370.215358,
+                785.7800126870001,
+                377.291523
+              ]
+            },
+            {
+              "id": "b000165",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                378.27499,
+                785.7800126870001,
+                386.406583
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.assets",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "본인 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.assets",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "본인 총자산 기준",
+        "label": "본인 총자산 기준",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "중복시 합산 적용됩니다. ④ 신청자 본인의 총 자산가액 합산기준이 10,800만원 이하이고, 자동차가액 산출대상 자동차를 소유하고 있지 않을 것\n◎ 소득기준 가산 내용 《 대학생 계층 출생자녀 수에 따른 가산 소득·자산 기준 》\n② 출산자녀 수 가산항목 및 비율 : 출산자녀 2인 이상 20% 가산, 출산자녀 1인 10% 가산 가산항목 최종 소득 · 자산기준 (한도)\n1인 0인 120% 108,000,000원 -\n1인 120% 119,000,000원 -\n(단, 주택공급 신청자 또는 동 배우자와 같은 세대별 주민등록표에 등재되어 있는 경우에 한함, 이하 동일) 대학생 0인 100% 108,000,000원 -\n3인 이상 1인 110% 119,000,000원 -\n2인 이상 120% 130,000,000원 -",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000167",
+              "page": 3,
+              "bbox": [
+                43.15284,
+                399.839303,
+                809.11575,
+                409.578025
+              ]
+            },
+            {
+              "id": "b000168",
+              "page": 3,
+              "bbox": [
+                48.187338000000004,
+                414.111568,
+                729.662261516,
+                421.667473
+              ]
+            },
+            {
+              "id": "b000170",
+              "page": 3,
+              "bbox": [
+                55.259609000000005,
+                435.340063,
+                766.449937747,
+                443.495643
+              ]
+            },
+            {
+              "id": "b000173",
+              "page": 3,
+              "bbox": [
+                550.078841,
+                468.202253,
+                777.49310911,
+                475.278418
+              ]
+            },
+            {
+              "id": "b000177",
+              "page": 3,
+              "bbox": [
+                604.259629,
+                486.432373,
+                777.49310911,
+                493.508538
+              ]
+            },
+            {
+              "id": "b000178",
+              "page": 3,
+              "bbox": [
+                64.010046,
+                490.98990299999997,
+                777.49310911,
+                502.623598
+              ]
+            },
+            {
+              "id": "b000179",
+              "page": 3,
+              "bbox": [
+                541.208535,
+                504.662493,
+                777.49310911,
+                511.738658
+              ]
+            },
+            {
+              "id": "b000181",
+              "page": 3,
+              "bbox": [
+                595.389323,
+                513.777553,
+                777.49310911,
+                520.8537180000001
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.vehicle",
+      "supplyType": "student",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "자동차를 소유하지 않음",
+        "expression": {
+          "fact": "vehicleValue",
+          "op": "eq",
+          "value": 0
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.vehicle",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "자동차를 소유하지 않음",
+        "label": "자동차를 소유하지 않음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "중복시 합산 적용됩니다. ④ 신청자 본인의 총 자산가액 합산기준이 10,800만원 이하이고, 자동차가액 산출대상 자동차를 소유하고 있지 않을 것\n1인 0인 120% 108,000,000원 -",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000167",
+              "page": 3,
+              "bbox": [
+                43.15284,
+                399.839303,
+                809.11575,
+                409.578025
+              ]
+            },
+            {
+              "id": "b000173",
+              "page": 3,
+              "bbox": [
+                550.078841,
+                468.202253,
+                777.49310911,
+                475.278418
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "student.rank1",
+      "supplyType": "student",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "제주 거주 또는 제주 대학 재학",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "schoolRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.student.rank1",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "제주 거주 또는 제주 대학 재학",
+        "label": "제주 거주 또는 제주 대학 재학",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "• 순위 0인 110% 251,000,000원 45,420,000원\n1순위 해당 주택건설지역(제주특별자치도)이 거주지이거나 재학 중인 대학 소재지인 자 세대원(본인) 0인 100% 251,000,000원 45,420,000원\n2순위 제1순위에 해당되지 않는 자\n※ ‘재학 중인 대학 소재지’란 실제 본인이 재학 중이거나 다음 학기에 입·복학 예정인 캠퍼스 소재지를 말함 경우에는 기준일 이전 출생한 기존 미성년자녀도 포함하여 최대 2자녀로 인정",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000236",
+              "page": 4,
+              "bbox": [
+                33.803058,
+                450.59579500000007,
+                783.224046,
+                461.246023
+              ]
+            },
+            {
+              "id": "b000239",
+              "page": 4,
+              "bbox": [
+                50.34498,
+                468.921863,
+                783.224046,
+                480.795428
+              ]
+            },
+            {
+              "id": "b000242",
+              "page": 4,
+              "bbox": [
+                50.34498,
+                496.626848,
+                180.163107,
+                503.703013
+              ]
+            },
+            {
+              "id": "b000244",
+              "page": 4,
+              "bbox": [
+                30.206988000000003,
+                516.895863,
+                708.6655040049832,
+                526.970403
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.applicantAgeOrException",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.applicantAgeOrException",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "성년 신청자 또는 미성년 세대주 예외",
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "tableLabel": null,
+        "pageNumber": 2,
+        "textExcerpt": "공 형 급 별 공 대 급 상 건 호 설 수 공 호 가 수 중 예 자 인 비 우선일반 주 전 거 용 주 공 거 용기 공 타 용면 주 적 차 합계 계 계약 잔금 임 (천 대 월 원 료 ) 보 한 (천 증 도 원 금 액 ) 보 임 증 대 금 임대 월 료 거 기 (년 주 간 ) 난 및 방 ■ • 입 입 주 주 자 자 선 신 정 청 에 자 격 필요한 자격 해당여부는 공급신청자를 기준으로 합니다.\n(천원) (원) • 주택공급신청자는 성년자(자녀를 부양하거나 직계존속의 사망, 실종신고 및 행방불명 등으로\n형제자매를 부양하여야 하는 세대주인 미성년자, 부 또는 모가 외국인인 한부모가족으로서 미성년\n(-)27,000 5,606228,190 리트 단, 대학생, 청년, 예비신혼부부, 한부모가족은 성년자가 아닌 경우에도 신청가능합니다.\n대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            2,
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000097",
+              "page": 2,
+              "bbox": [
+                32.36463,
+                302.524044,
+                718.850197585,
+                328.262095
+              ]
+            },
+            {
+              "id": "b000099",
+              "page": 2,
+              "bbox": [
+                309.142151,
+                329.02967900000004,
+                810.5545375992085,
+                338.45657
+              ]
+            },
+            {
+              "id": "b000100",
+              "page": 2,
+              "bbox": [
+                463.653292,
+                340.85527,
+                810.4339494007916,
+                348.65104499999995
+              ]
+            },
+            {
+              "id": "b000104",
+              "page": 2,
+              "bbox": [
+                285.16835100000003,
+                361.124285,
+                775.57280773,
+                369.66365699999994
+              ]
+            },
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.subletRestriction",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.subletRestriction",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.singleApplication",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.singleApplication",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대당 1건 신청",
+        "label": "세대당 1건 신청",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "• 1세대 1주택 무주택세대구성원에게 신청가능하며, 중복 신청할 경우 전부 무효 처리됩니다. * 이혼 등의 사유로 가족관계가 단절된 상태인 경우 실질적으로 부양의무를 이행하고 있는 부 또는 모의 소득을 조회\n중복입주 • 공공임대주택은 1세대 1주택 신청, 공급이 원칙입니다. 다만, 다른 공공임대주택에 거주 중인 사실과 다르거나, 이의가 있을 경우에는 재확인기간(소명기간)내에 증명서류(소명자료)를 제출",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3,
+            16
+          ],
+          "blocks": [
+            {
+              "id": "b000157",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                314.805388,
+                808.1571096735446,
+                324.54411
+              ]
+            },
+            {
+              "id": "b000985",
+              "page": 16,
+              "bbox": [
+                38.238211,
+                146.296713,
+                812.472082,
+                154.212423
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.category",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "청년 또는 소득활동 5년 이내 사회초년생",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "age",
+                  "op": "gte",
+                  "value": 19
+                },
+                {
+                  "fact": "age",
+                  "op": "lte",
+                  "value": 39
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "WORKER"
+                    },
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "RECENTLY_UNEMPLOYED"
+                    },
+                    {
+                      "fact": "youthActivityCategory",
+                      "op": "eq",
+                      "value": "ARTIST"
+                    }
+                  ]
+                },
+                {
+                  "fact": "totalIncomeWorkMonths",
+                  "op": "lte",
+                  "value": 60
+                }
+              ]
+            }
+          ]
+        },
+        "documents": [
+          "주민등록표등본",
+          "국민연금 가입증명서",
+          "건강보험자격득실확인서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.category",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "청년 또는 소득활동 5년 이내 사회초년생",
+        "label": "청년 또는 소득활동 5년 이내 사회초년생",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "100% 110% 120% 입주자모집공고일(2026.09.18) 현재, 무주택자로서 아래의 요건(신청자 본인이 청년인 경우 ①-㉮와 ②～⑤를\n충족하면 되고, 사회초년생의 경우 ①-㉯와 ②～⑤를 만족하면 됨)을 모두 갖춘 자\n2인 - 6,452,897원 이하 7,039,524원 이하 ➀-㉮ (청년) 19세 이상 39세 이하인 자(출생일 1986.09.18.∼2007.09.17.)\n3인 8,168,429원 이하 8,985,272원 이하 9,802,115원 이하 ➀-㉯ (사회초년생) 아래 1), 2), 3) 중 하나에 해당하는 자로서, 소득이 있는 업무에 종사한 기간이 총 5년 이내인 자\n4인 8,802,202원 이하 9,682,422원 이하 10,562,642원 이하 1) 소득이 있는 업무에 종사중인 자\n5인 9,326,985원 이하 10,259,684원 이하 11,192,382원 이하 2) 퇴직한 후 1년이 지나지 않은 사람으로서 「고용보험법」 제43조에 따라 구직급여 수급자격을 인정받은 자\n6인 9,906,263원 이하 10,896,889원 이하 11,887,516원 이하 3) 「예술인 복지법」제2조제2호에 따른 예술인",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000190",
+              "page": 4,
+              "bbox": [
+                145.04149,
+                77.21415300000001,
+                812.472082,
+                85.84947299999999
+              ]
+            },
+            {
+              "id": "b000191",
+              "page": 4,
+              "bbox": [
+                450.70744,
+                86.44914799999998,
+                711.062908,
+                93.52531299999998
+              ]
+            },
+            {
+              "id": "b000193",
+              "page": 4,
+              "bbox": [
+                72.041269,
+                100.96128299999998,
+                695.127906749089,
+                111.15575799999999
+              ]
+            },
+            {
+              "id": "b000194",
+              "page": 4,
+              "bbox": [
+                72.041269,
+                112.11523799999998,
+                809.595226,
+                122.18977799999999
+              ]
+            },
+            {
+              "id": "b000195",
+              "page": 4,
+              "bbox": [
+                72.041269,
+                123.14925800000003,
+                590.234956,
+                133.223798
+              ]
+            },
+            {
+              "id": "b000196",
+              "page": 4,
+              "bbox": [
+                72.041269,
+                134.30321300000003,
+                808.7561430000001,
+                144.137883
+              ]
+            },
+            {
+              "id": "b000197",
+              "page": 4,
+              "bbox": [
+                72.041269,
+                145.45716800000002,
+                626.555263,
+                155.171903
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.unmarried",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "미혼",
+        "expression": {
+          "fact": "maritalStatus",
+          "op": "eq",
+          "value": "single"
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.unmarried",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "미혼",
+        "label": "미혼",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "② 혼인 중이 아닐 것",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000199",
+              "page": 4,
+              "bbox": [
+                456.22141400000004,
+                159.12975800000004,
+                527.183862,
+                166.20592300000004
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.noHome",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신청자 본인 무주택",
+        "expression": {
+          "fact": "noHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.noHome",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "신청자 본인 무주택",
+        "label": "신청자 본인 무주택",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "100% 110% 120% 입주자모집공고일(2026.09.18) 현재, 무주택자로서 아래의 요건(신청자 본인이 청년인 경우 ①-㉮와 ②～⑤를\n※ ‘무주택자’란 주택을 소유하고 있지 않은 자를 말함(세대 내 다른 구성원이 주택을 소유해도 신청 가능함)",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000190",
+              "page": 4,
+              "bbox": [
+                145.04149,
+                77.21415300000001,
+                812.472082,
+                85.84947299999999
+              ]
+            },
+            {
+              "id": "b000201",
+              "page": 4,
+              "bbox": [
+                30.206988000000003,
+                173.52195799999998,
+                383.932735384,
+                180.598123
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.income",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.income",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 소득 기준",
+        "label": "해당 세대 소득 기준",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "③ 해당 세대의(주택공급신청자가 세대원인 경우 주택공급신청자 본인 기준) 월평균소득이 전년도 도시근로자\n가구원수별 가구당 월평균소득의 100퍼센트 이하\n※ 단, 가구원수가 1인인 경우에는 120퍼센트, 2인인 경우에는 110퍼센트 이하일 것\n1인 4,576,036원 이하 120%\n2인 6,452,897원 이하 110%\n따른 고등‧고등기술학교와 동등 학력 인정자 포함하며 인정학력 취득시를 졸업시점으로 간주함 세대주인 청년 3인 8,168,429원 이하 100%\n※ 대학생계층의 월평균소득기준 적용을 위한 가구원수는 다음과 같음 (세대기준) 4인 8,802,202원 이하 100%\n5인 9,326,985원 이하 100%\n적용 대상 비고 6인 9,906,263원 이하 100%",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000200",
+              "page": 4,
+              "bbox": [
+                456.22141400000004,
+                170.16377799999998,
+                810.5538303799,
+                177.23994299999998
+              ]
+            },
+            {
+              "id": "b000202",
+              "page": 4,
+              "bbox": [
+                467.369231,
+                181.19779800000003,
+                627.6344196402723,
+                188.27396300000004
+              ]
+            },
+            {
+              "id": "b000204",
+              "page": 4,
+              "bbox": [
+                466.170541,
+                192.23181799999998,
+                711.062908,
+                199.30798299999998
+              ]
+            },
+            {
+              "id": "b000208",
+              "page": 4,
+              "bbox": [
+                546.6026400000001,
+                225.33387800000003,
+                775.4716263071,
+                232.41004300000003
+              ]
+            },
+            {
+              "id": "b000210",
+              "page": 4,
+              "bbox": [
+                546.6026400000001,
+                234.568873,
+                775.4716263071,
+                241.645038
+              ]
+            },
+            {
+              "id": "b000211",
+              "page": 4,
+              "bbox": [
+                39.916377000000004,
+                241.43275304999997,
+                775.4716263071,
+                250.88003299999997
+              ]
+            },
+            {
+              "id": "b000212",
+              "page": 4,
+              "bbox": [
+                30.206988000000003,
+                252.918928,
+                775.4716263071,
+                261.194443
+              ]
+            },
+            {
+              "id": "b000213",
+              "page": 4,
+              "bbox": [
+                546.6026400000001,
+                262.393793,
+                775.4716263071,
+                269.469958
+              ]
+            },
+            {
+              "id": "b000214",
+              "page": 4,
+              "bbox": [
+                77.91485,
+                269.350023,
+                775.4716263071,
+                278.704953
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.assets",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.assets",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 총자산 기준",
+        "label": "해당 세대 총자산 기준",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "④ 해당세대가 보유하고 있는 총 자산가액이 25,100만원 이하이고 총 자산 중 자동차가액이 4,542만원 이하\n《 청년 계층 출생자녀 수에 따른 가산 소득·자산 기준 》\n하던 부 또는 모(부 또는 모가 같이 있을 경우 부 또는 모 중 1인 선택)를 말함 1인 0인 120% 251,000,000원 45,420,000원\n※ ‘다음 학기’에 입학 예정인 대학생은 공고일 현재 합격증명서 등을 통해 입학을 증빙할 수 있어야 하며, 입학 후 세대주인 청년 1인 120% 276,000,000원 49,960,000원\n1개월 이내에 입학증명서 또는 등록금납부확인서 제출하지 않을 경우에는 당첨 및 계약을 취소함 (세대기준) 0인 100% 251,000,000원 45,420,000원\n경우에는 당첨 및 계약을 취소함 2인 이상 120% 301,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000217",
+              "page": 4,
+              "bbox": [
+                456.22141400000004,
+                301.012863,
+                769.7990296735445,
+                308.089028
+              ]
+            },
+            {
+              "id": "b000221",
+              "page": 4,
+              "bbox": [
+                544.2052600000001,
+                330.996613,
+                726.186060516,
+                338.072778
+              ]
+            },
+            {
+              "id": "b000228",
+              "page": 4,
+              "bbox": [
+                39.916377000000004,
+                383.648078,
+                783.224046,
+                393.02699500000006
+              ]
+            },
+            {
+              "id": "b000231",
+              "page": 4,
+              "bbox": [
+                30.206988000000003,
+                404.396833,
+                783.224046,
+                412.192608
+              ]
+            },
+            {
+              "id": "b000232",
+              "page": 4,
+              "bbox": [
+                39.676639,
+                414.951113,
+                783.224046,
+                422.746888
+              ]
+            },
+            {
+              "id": "b000234",
+              "page": 4,
+              "bbox": [
+                40.036246,
+                434.500518,
+                783.224046,
+                443.975383
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.vehicle",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.vehicle",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 자동차 기준",
+        "label": "해당 세대 자동차 기준",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "④ 해당세대가 보유하고 있는 총 자산가액이 25,100만원 이하이고 총 자산 중 자동차가액이 4,542만원 이하\n하던 부 또는 모(부 또는 모가 같이 있을 경우 부 또는 모 중 1인 선택)를 말함 1인 0인 120% 251,000,000원 45,420,000원\n※ ‘다음 학기’에 입학 예정인 대학생은 공고일 현재 합격증명서 등을 통해 입학을 증빙할 수 있어야 하며, 입학 후 세대주인 청년 1인 120% 276,000,000원 49,960,000원\n1개월 이내에 입학증명서 또는 등록금납부확인서 제출하지 않을 경우에는 당첨 및 계약을 취소함 (세대기준) 0인 100% 251,000,000원 45,420,000원\n경우에는 당첨 및 계약을 취소함 2인 이상 120% 301,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000217",
+              "page": 4,
+              "bbox": [
+                456.22141400000004,
+                301.012863,
+                769.7990296735445,
+                308.089028
+              ]
+            },
+            {
+              "id": "b000228",
+              "page": 4,
+              "bbox": [
+                39.916377000000004,
+                383.648078,
+                783.224046,
+                393.02699500000006
+              ]
+            },
+            {
+              "id": "b000231",
+              "page": 4,
+              "bbox": [
+                30.206988000000003,
+                404.396833,
+                783.224046,
+                412.192608
+              ]
+            },
+            {
+              "id": "b000232",
+              "page": 4,
+              "bbox": [
+                39.676639,
+                414.951113,
+                783.224046,
+                422.746888
+              ]
+            },
+            {
+              "id": "b000234",
+              "page": 4,
+              "bbox": [
+                40.036246,
+                434.500518,
+                783.224046,
+                443.975383
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.account",
+      "supplyType": "youth",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주 전까지 청약통장 가입사실 증명",
+        "expression": {
+          "fact": "canProveSubscriptionByMoveIn",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.account",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "입주 전까지 청약통장 가입사실 증명",
+        "label": "입주 전까지 청약통장 가입사실 증명",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "⑤ 본인 입주전까지 주택청약종합저축(청약저축 포함) 가입사실을 증명할 수 있을 것",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000219",
+              "page": 4,
+              "bbox": [
+                456.22141400000004,
+                312.046883,
+                733.59828,
+                319.123048
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "youth.rank1",
+      "supplyType": "youth",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "제주 거주 또는 제주 소득 근거지",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "incomeSourceRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.youth.rank1",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "제주 거주 또는 제주 소득 근거지",
+        "label": "제주 거주 또는 제주 소득 근거지",
+        "tableLabel": null,
+        "pageNumber": 4,
+        "textExcerpt": "• 순위 0인 110% 251,000,000원 45,420,000원\n1순위 해당 주택건설지역(제주특별자치도)이 거주지이거나 재학 중인 대학 소재지인 자 세대원(본인) 0인 100% 251,000,000원 45,420,000원\n2순위 제1순위에 해당되지 않는 자",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            4
+          ],
+          "blocks": [
+            {
+              "id": "b000236",
+              "page": 4,
+              "bbox": [
+                33.803058,
+                450.59579500000007,
+                783.224046,
+                461.246023
+              ]
+            },
+            {
+              "id": "b000239",
+              "page": 4,
+              "bbox": [
+                50.34498,
+                468.921863,
+                783.224046,
+                480.795428
+              ]
+            },
+            {
+              "id": "b000242",
+              "page": 4,
+              "bbox": [
+                50.34498,
+                496.626848,
+                180.163107,
+                503.703013
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.applicantAgeOrException",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.applicantAgeOrException",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "성년 신청자 또는 미성년 세대주 예외",
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "tableLabel": null,
+        "pageNumber": 2,
+        "textExcerpt": "공 형 급 별 공 대 급 상 건 호 설 수 공 호 가 수 중 예 자 인 비 우선일반 주 전 거 용 주 공 거 용기 공 타 용면 주 적 차 합계 계 계약 잔금 임 (천 대 월 원 료 ) 보 한 (천 증 도 원 금 액 ) 보 임 증 대 금 임대 월 료 거 기 (년 주 간 ) 난 및 방 ■ • 입 입 주 주 자 자 선 신 정 청 에 자 격 필요한 자격 해당여부는 공급신청자를 기준으로 합니다.\n(천원) (원) • 주택공급신청자는 성년자(자녀를 부양하거나 직계존속의 사망, 실종신고 및 행방불명 등으로\n형제자매를 부양하여야 하는 세대주인 미성년자, 부 또는 모가 외국인인 한부모가족으로서 미성년\n(-)27,000 5,606228,190 리트 단, 대학생, 청년, 예비신혼부부, 한부모가족은 성년자가 아닌 경우에도 신청가능합니다.\n대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            2,
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000097",
+              "page": 2,
+              "bbox": [
+                32.36463,
+                302.524044,
+                718.850197585,
+                328.262095
+              ]
+            },
+            {
+              "id": "b000099",
+              "page": 2,
+              "bbox": [
+                309.142151,
+                329.02967900000004,
+                810.5545375992085,
+                338.45657
+              ]
+            },
+            {
+              "id": "b000100",
+              "page": 2,
+              "bbox": [
+                463.653292,
+                340.85527,
+                810.4339494007916,
+                348.65104499999995
+              ]
+            },
+            {
+              "id": "b000104",
+              "page": 2,
+              "bbox": [
+                285.16835100000003,
+                361.124285,
+                775.57280773,
+                369.66365699999994
+              ]
+            },
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.subletRestriction",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.subletRestriction",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.singleApplication",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.singleApplication",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대당 1건 신청",
+        "label": "세대당 1건 신청",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "• 1세대 1주택 무주택세대구성원에게 신청가능하며, 중복 신청할 경우 전부 무효 처리됩니다. * 이혼 등의 사유로 가족관계가 단절된 상태인 경우 실질적으로 부양의무를 이행하고 있는 부 또는 모의 소득을 조회\n중복입주 • 공공임대주택은 1세대 1주택 신청, 공급이 원칙입니다. 다만, 다른 공공임대주택에 거주 중인 사실과 다르거나, 이의가 있을 경우에는 재확인기간(소명기간)내에 증명서류(소명자료)를 제출",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3,
+            16
+          ],
+          "blocks": [
+            {
+              "id": "b000157",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                314.805388,
+                808.1571096735446,
+                324.54411
+              ]
+            },
+            {
+              "id": "b000985",
+              "page": 16,
+              "bbox": [
+                38.238211,
+                146.296713,
+                812.472082,
+                154.212423
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.category",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "신혼부부·예비신혼부부·한부모가족",
+        "expression": {
+          "any": [
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "married"
+                },
+                {
+                  "any": [
+                    {
+                      "fact": "marriageWithin7Years",
+                      "op": "eq",
+                      "value": true
+                    },
+                    {
+                      "fact": "hasChildUnder7",
+                      "op": "eq",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "engaged"
+                },
+                {
+                  "fact": "plannedMarriageWithinDeadline",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "fact": "familyCategory",
+                  "op": "eq",
+                  "value": "singleParent"
+                },
+                {
+                  "fact": "singleParentQualified",
+                  "op": "eq",
+                  "value": true
+                },
+                {
+                  "fact": "hasChildUnder7",
+                  "op": "eq",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.category",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "신혼부부·예비신혼부부·한부모가족",
+        "label": "신혼부부·예비신혼부부·한부모가족",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "1인 - - 4,576,036원 이하 입주자모집공고일(2026.09.18) 현재, 무주택세대구성원(예비신혼부부의 경우 혼인으로 구성될 세대의 세대구성원\n2인 - 6,452,897원 이하 7,039,524원 이하 모두 무주택자)으로서 아래의 요건(신혼부부는 ➀-㉮와 ②～⑤를, 예비신혼부부는 ➀-㉯와 ③～⑥를, 한부모가족은\n3인 8,168,429원 이하 8,985,272원 이하 9,802,115원 이하 ➀-㉰와 ③～⑤를 모두 갖춘 자\n6인 9,906,263원 이하 10,896,889원 이하 11,887,516원 이하 ➀-㉮ (신혼부부) 혼인중인 자\n* 7인이상의 가구는 6인가구 기준소득금액에 추가 1인당 평균금액 579,278원을 합산하여 산정 ➀-㉯ (예비신혼부부) 혼인을 계획 중이며 입주 전까지 혼인사실을 증명할 수 있을 것\n※ ‘무주택자’란 주택을 소유하고 있지 않은 자를 말함(세대 내 다른 구성원이 주택을 소유해도 신청가능함) ➀-㉰ (한부모가족) 6세이하 자녀를 둔 한부모인 자(태아포함)\n※ 소득이 없는 청년 계층의 경우 동일면적 대학생계층 임대조건을 적용 ② 혼인기간이 7년 이내일 것 또는 6세 이하 자녀(태아포함)를 둔 자",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5
+          ],
+          "blocks": [
+            {
+              "id": "b000252",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                82.61122799999998,
+                812.4731128592555,
+                91.72628800000001
+              ]
+            },
+            {
+              "id": "b000253",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                93.79276804999995,
+                812.4723696360942,
+                102.76030800000001
+              ]
+            },
+            {
+              "id": "b000254",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                105.06665805,
+                552.715959,
+                113.79432800000001
+              ]
+            },
+            {
+              "id": "b000257",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                139.820223,
+                555.472946,
+                148.45554299999998
+              ]
+            },
+            {
+              "id": "b000258",
+              "page": 5,
+              "bbox": [
+                47.348255,
+                149.894763,
+                739.831468,
+                159.84936799999997
+              ]
+            },
+            {
+              "id": "b000259",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                163.95474304999993,
+                659.5115663839999,
+                171.722933
+              ]
+            },
+            {
+              "id": "b000260",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                175.440918,
+                684.691728,
+                182.996823
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.householdNoHome",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "현재 또는 미래 세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.householdNoHome",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "현재 또는 미래 세대 전원 무주택",
+        "label": "현재 또는 미래 세대 전원 무주택",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "1인 - - 4,576,036원 이하 입주자모집공고일(2026.09.18) 현재, 무주택세대구성원(예비신혼부부의 경우 혼인으로 구성될 세대의 세대구성원\n2인 - 6,452,897원 이하 7,039,524원 이하 모두 무주택자)으로서 아래의 요건(신혼부부는 ➀-㉮와 ②～⑤를, 예비신혼부부는 ➀-㉯와 ③～⑥를, 한부모가족은\n⑥ 혼인으로 구성될 세대의 세대구성원 모두 무주택자일 것\n※ 무주택세대구성원이란 해당 세대 구성원 전원이 주택을 소유하지 않는 것을 말함(“예비신혼부부”는 혼인으 * 가산 적용 : 출산자녀 2인 이상 20% 가산, 출산자녀 1인 10% 가산\n로 구성될 세대 구성원 전원이 주택을 소유하지 않을 것)을 말함 최종 소득 · 자산기준",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5,
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000252",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                82.61122799999998,
+                812.4731128592555,
+                91.72628800000001
+              ]
+            },
+            {
+              "id": "b000253",
+              "page": 5,
+              "bbox": [
+                71.681662,
+                93.79276804999995,
+                812.4723696360942,
+                102.76030800000001
+              ]
+            },
+            {
+              "id": "b000288",
+              "page": 5,
+              "bbox": [
+                463.29368500000004,
+                376.332043,
+                658.320548,
+                383.408208
+              ]
+            },
+            {
+              "id": "b000354",
+              "page": 6,
+              "bbox": [
+                30.206988000000003,
+                392.76313799999997,
+                746.304394,
+                401.638328
+              ]
+            },
+            {
+              "id": "b000355",
+              "page": 6,
+              "bbox": [
+                39.796508,
+                404.756638,
+                747.9822123799,
+                413.991633
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.income",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 소득 기준",
+        "label": "해당 세대 소득 기준",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "연금 가입증명서 및 건강보험자격득실확인서 등을 통해 소득이 있는 여부를 판단함 ③ 해당세대(예비신혼부부는 혼인으로 구성될 세대)의 월평균소득이 전년도 도시근로자 가구원수별 가구당\n※ ➀-㉯의 ‘소득이 있는 업무에 종사한 기간’은 국민연금 가입증명서 및 건강보험공단 자격득실확인서 등을 통해 월평균소득의 100퍼센트 이하(맞벌이 부부 120퍼센트 이하)일 것\n소득이 있었던 기간을 합산함 ※ 단, 가구원 수가 2인인 경우에는 110퍼센트, 맞벌이 2인 가구의 경우 130퍼센트 이하일 것\n2인 6,452,897원 이하 110% 7,626,151원 이하 130%\n3인 8,168,429원 이하 100% 9,802,115원 이하 120%\n4인 8,802,202원 이하 100% 10,562,642원 이하 120%\n5인 9,326,985원 이하 100% 11,192,382원 이하 120%\n구분 해당세대 범위 6인 9,906,263원 이하 100% 11,887,516원 이하 120%\n2인 0인 130% 345,000,000원 45,420,000원\n0인 120% 345,000,000원 45,420,000원\n○ 3인 1 0 인 인 1 1 3 2 0 0 % % 3 3 7 4 9 5 , , 0 0 0 0 0 0 , , 0 0 0 0 0 0 원 원 4 4 9 5 , , 9 4 6 2 0 0 , , 0 0 0 0 0 0 원 원 1순위 신 청 자 ( 제 본 주 인 특 또 별 는 자 치 배 도 우 ) 자 거 (예 주 비 지 신 이 혼 거 부 나 부 소 의 득 경 근 우 거 지 대 인 표 자 신청자 또는 예비배우자)가 해당 주택건설지역\n4인 이상 1인 130% 379,000,000원 49,960,000원\n2인 이상 140% 413,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5,
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000262",
+              "page": 5,
+              "bbox": [
+                39.55677,
+                198.228568,
+                810.434309,
+                205.784473
+              ]
+            },
+            {
+              "id": "b000263",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                209.502458,
+                683.852645,
+                217.05836300000004
+              ]
+            },
+            {
+              "id": "b000264",
+              "page": 5,
+              "bbox": [
+                39.676639,
+                220.89628300000004,
+                746.064656,
+                228.45218800000004
+              ]
+            },
+            {
+              "id": "b000269",
+              "page": 5,
+              "bbox": [
+                498.175564,
+                260.714703,
+                791.533724687,
+                267.790868
+              ]
+            },
+            {
+              "id": "b000271",
+              "page": 5,
+              "bbox": [
+                498.175564,
+                271.868658,
+                791.533724687,
+                278.944823
+              ]
+            },
+            {
+              "id": "b000273",
+              "page": 5,
+              "bbox": [
+                498.175564,
+                282.902678,
+                791.533724687,
+                289.978843
+              ]
+            },
+            {
+              "id": "b000275",
+              "page": 5,
+              "bbox": [
+                498.175564,
+                294.056633,
+                791.533724687,
+                301.132798
+              ]
+            },
+            {
+              "id": "b000276",
+              "page": 5,
+              "bbox": [
+                80.791706,
+                302.811888,
+                791.533724687,
+                312.286753
+              ]
+            },
+            {
+              "id": "b000312",
+              "page": 6,
+              "bbox": [
+                155.470093,
+                44.711768000000006,
+                377.10787400000004,
+                51.78793299999995
+              ]
+            },
+            {
+              "id": "b000313",
+              "page": 6,
+              "bbox": [
+                202.57861,
+                53.82682799999998,
+                377.10787400000004,
+                60.902992999999924
+              ]
+            },
+            {
+              "id": "b000314",
+              "page": 6,
+              "bbox": [
+                116.27293,
+                58.264422999999965,
+                807.5583760125168,
+                79.01317799999993
+              ]
+            },
+            {
+              "id": "b000315",
+              "page": 6,
+              "bbox": [
+                146.599787,
+                81.05207300000006,
+                377.10787400000004,
+                88.12823800000001
+              ]
+            },
+            {
+              "id": "b000316",
+              "page": 6,
+              "bbox": [
+                193.708304,
+                90.16713299999998,
+                377.10787400000004,
+                97.24329799999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.assets",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.assets",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 총자산 기준",
+        "label": "해당 세대 총자산 기준",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "④ 해당 세대(예비신혼부부는 혼인으로 구성될 세대)가 보유하고 있는 총 자산가액 합산기준 34,500만원 이하이고,\n총 자산 중 자동차가액이 4,542만원 이하 일 것\n※ 공고일 현재 주택청약저축 미가입자의 경우 입주전까지 청약통장 사본을 제출하지 않을 시 당첨 취소 및 《 신혼부부·한부모가족 계층 출생자녀 수에 따른 가산 소득·자산 기준 》\n1순위 해당 주택건설지역(제주특별자치도)이 거주지이거나 소득 근거지인 자 0인 110% 345,000,000원 45,420,000원\n1인 120% 379,000,000원 49,960,000원\n한부모가족 X 0인 100% 345,000,000원 45,420,000원\n2순위 제1순위에 해당되지 않는 자 3인 이상 1인 110% 379,000,000원 49,960,000원\n2인 이상 120% 413,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5
+          ],
+          "blocks": [
+            {
+              "id": "b000280",
+              "page": 5,
+              "bbox": [
+                462.814209,
+                330.87667799999997,
+                810.4177670780001,
+                337.952843
+              ]
+            },
+            {
+              "id": "b000282",
+              "page": 5,
+              "bbox": [
+                471.08517,
+                342.270503,
+                620.681682,
+                349.346668
+              ]
+            },
+            {
+              "id": "b000289",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                391.443853,
+                749.680384516,
+                399.719368
+              ]
+            },
+            {
+              "id": "b000295",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                444.335188,
+                797.608326,
+                453.929988
+              ]
+            },
+            {
+              "id": "b000297",
+              "page": 5,
+              "bbox": [
+                623.079062,
+                455.968883,
+                797.608326,
+                463.045048
+              ]
+            },
+            {
+              "id": "b000298",
+              "page": 5,
+              "bbox": [
+                476.599144,
+                465.083943,
+                797.608326,
+                472.160108
+              ]
+            },
+            {
+              "id": "b000299",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                473.479393,
+                797.608326,
+                481.275168
+              ]
+            },
+            {
+              "id": "b000300",
+              "page": 5,
+              "bbox": [
+                614.208756,
+                483.314063,
+                797.608326,
+                490.390228
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.vehicle",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 자동차 기준",
+        "label": "해당 세대 자동차 기준",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "④ 해당 세대(예비신혼부부는 혼인으로 구성될 세대)가 보유하고 있는 총 자산가액 합산기준 34,500만원 이하이고,\n총 자산 중 자동차가액이 4,542만원 이하 일 것\n(태아포함) 소득기준 총자산가액 자동차가액\n1순위 해당 주택건설지역(제주특별자치도)이 거주지이거나 소득 근거지인 자 0인 110% 345,000,000원 45,420,000원\n1인 120% 379,000,000원 49,960,000원\n한부모가족 X 0인 100% 345,000,000원 45,420,000원\n2순위 제1순위에 해당되지 않는 자 3인 이상 1인 110% 379,000,000원 49,960,000원\n2인 이상 120% 413,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5
+          ],
+          "blocks": [
+            {
+              "id": "b000280",
+              "page": 5,
+              "bbox": [
+                462.814209,
+                330.87667799999997,
+                810.4177670780001,
+                337.952843
+              ]
+            },
+            {
+              "id": "b000282",
+              "page": 5,
+              "bbox": [
+                471.08517,
+                342.270503,
+                620.681682,
+                349.346668
+              ]
+            },
+            {
+              "id": "b000294",
+              "page": 5,
+              "bbox": [
+                612.290852,
+                436.659348,
+                797.3682403799,
+                444.814928
+              ]
+            },
+            {
+              "id": "b000295",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                444.335188,
+                797.608326,
+                453.929988
+              ]
+            },
+            {
+              "id": "b000297",
+              "page": 5,
+              "bbox": [
+                623.079062,
+                455.968883,
+                797.608326,
+                463.045048
+              ]
+            },
+            {
+              "id": "b000298",
+              "page": 5,
+              "bbox": [
+                476.599144,
+                465.083943,
+                797.608326,
+                472.160108
+              ]
+            },
+            {
+              "id": "b000299",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                473.479393,
+                797.608326,
+                481.275168
+              ]
+            },
+            {
+              "id": "b000300",
+              "page": 5,
+              "bbox": [
+                614.208756,
+                483.314063,
+                797.608326,
+                490.390228
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "supplyType": "newlywed",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "입주 전까지 본인 또는 배우자 청약통장 가입사실 증명",
+        "expression": {
+          "fact": "canProveSubscriptionByMoveIn",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.account",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "입주 전까지 본인 또는 배우자 청약통장 가입사실 증명",
+        "label": "입주 전까지 본인 또는 배우자 청약통장 가입사실 증명",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "⑤ 본인 또는 배우자(예비신혼부부의 경우는 혼인 예정인 배우자) 중 1인이 입주 전까지 주택청약종합저\n• 신청자가 세대원인 경우 축(청약저축 포함) 가입사실을 증명할 수 있을 것 (단, 한부모가족은 본인만 해당)\n※ 공고일 현재 주택청약저축 미가입자의 경우 입주전까지 청약통장 사본을 제출하지 않을 시 당첨 취소 및 《 신혼부부·한부모가족 계층 출생자녀 수에 따른 가산 소득·자산 기준 》",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5
+          ],
+          "blocks": [
+            {
+              "id": "b000284",
+              "page": 5,
+              "bbox": [
+                463.053947,
+                353.544393,
+                810.4339613799,
+                360.620558
+              ]
+            },
+            {
+              "id": "b000285",
+              "page": 5,
+              "bbox": [
+                36.200438,
+                363.738868,
+                736.587333384,
+                372.014383
+              ]
+            },
+            {
+              "id": "b000289",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                391.443853,
+                749.680384516,
+                399.719368
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "supplyType": "newlywed",
+      "stage": "PRIORITY",
+      "category": "STAGE",
+      "config": {
+        "label": "본인·배우자의 제주 거주 또는 소득 근거지",
+        "expression": {
+          "any": [
+            {
+              "fact": "residence",
+              "op": "eq",
+              "value": "제주특별자치도"
+            },
+            {
+              "fact": "incomeSourceRegion",
+              "op": "eq",
+              "value": "제주특별자치도"
+            }
+          ]
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.newlywed.rank1",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "본인·배우자의 제주 거주 또는 소득 근거지",
+        "label": "본인·배우자의 제주 거주 또는 소득 근거지",
+        "tableLabel": null,
+        "pageNumber": 5,
+        "textExcerpt": "• 순위 가산항목 최종 소득 · 자산기준 (한도)\n1순위 해당 주택건설지역(제주특별자치도)이 거주지이거나 소득 근거지인 자 0인 110% 345,000,000원 45,420,000원\n2순위 제1순위에 해당되지 않는 자 3인 이상 1인 110% 379,000,000원 49,960,000원\n※ ‘소득 근거지’란 사업자등록증(법인등기부등본 등)으로 확인하며 단, 실제 근무지가 사업자등록증의 소재지와\n■ 경쟁 시 입주자 선정기준 : 순위 → 추첨 4인 이상",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            5
+          ],
+          "blocks": [
+            {
+              "id": "b000291",
+              "page": 5,
+              "bbox": [
+                33.803058,
+                417.349813,
+                775.919588747,
+                427.56827499999997
+              ]
+            },
+            {
+              "id": "b000295",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                444.335188,
+                797.608326,
+                453.929988
+              ]
+            },
+            {
+              "id": "b000299",
+              "page": 5,
+              "bbox": [
+                50.34498,
+                473.479393,
+                797.608326,
+                481.275168
+              ]
+            },
+            {
+              "id": "b000302",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                497.346458,
+                392.09254186030006,
+                504.422623
+              ]
+            },
+            {
+              "id": "b000308",
+              "page": 5,
+              "bbox": [
+                30.206988000000003,
+                532.7272829999999,
+                595.868799,
+                541.8663300000001
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.applicantAgeOrException",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.applicantAgeOrException",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "성년 신청자 또는 미성년 세대주 예외",
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "tableLabel": null,
+        "pageNumber": 2,
+        "textExcerpt": "공 형 급 별 공 대 급 상 건 호 설 수 공 호 가 수 중 예 자 인 비 우선일반 주 전 거 용 주 공 거 용기 공 타 용면 주 적 차 합계 계 계약 잔금 임 (천 대 월 원 료 ) 보 한 (천 증 도 원 금 액 ) 보 임 증 대 금 임대 월 료 거 기 (년 주 간 ) 난 및 방 ■ • 입 입 주 주 자 자 선 신 정 청 에 자 격 필요한 자격 해당여부는 공급신청자를 기준으로 합니다.\n(천원) (원) • 주택공급신청자는 성년자(자녀를 부양하거나 직계존속의 사망, 실종신고 및 행방불명 등으로\n형제자매를 부양하여야 하는 세대주인 미성년자, 부 또는 모가 외국인인 한부모가족으로서 미성년\n(-)27,000 5,606228,190 리트 단, 대학생, 청년, 예비신혼부부, 한부모가족은 성년자가 아닌 경우에도 신청가능합니다.\n대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            2,
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000097",
+              "page": 2,
+              "bbox": [
+                32.36463,
+                302.524044,
+                718.850197585,
+                328.262095
+              ]
+            },
+            {
+              "id": "b000099",
+              "page": 2,
+              "bbox": [
+                309.142151,
+                329.02967900000004,
+                810.5545375992085,
+                338.45657
+              ]
+            },
+            {
+              "id": "b000100",
+              "page": 2,
+              "bbox": [
+                463.653292,
+                340.85527,
+                810.4339494007916,
+                348.65104499999995
+              ]
+            },
+            {
+              "id": "b000104",
+              "page": 2,
+              "bbox": [
+                285.16835100000003,
+                361.124285,
+                775.57280773,
+                369.66365699999994
+              ]
+            },
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.subletRestriction",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.subletRestriction",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.singleApplication",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.singleApplication",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대당 1건 신청",
+        "label": "세대당 1건 신청",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "• 1세대 1주택 무주택세대구성원에게 신청가능하며, 중복 신청할 경우 전부 무효 처리됩니다. * 이혼 등의 사유로 가족관계가 단절된 상태인 경우 실질적으로 부양의무를 이행하고 있는 부 또는 모의 소득을 조회\n중복입주 • 공공임대주택은 1세대 1주택 신청, 공급이 원칙입니다. 다만, 다른 공공임대주택에 거주 중인 사실과 다르거나, 이의가 있을 경우에는 재확인기간(소명기간)내에 증명서류(소명자료)를 제출",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3,
+            16
+          ],
+          "blocks": [
+            {
+              "id": "b000157",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                314.805388,
+                808.1571096735446,
+                324.54411
+              ]
+            },
+            {
+              "id": "b000985",
+              "page": 16,
+              "bbox": [
+                38.238211,
+                146.296713,
+                812.472082,
+                154.212423
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.age",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "만 65세 이상",
+        "expression": {
+          "fact": "age",
+          "op": "gte",
+          "value": 65
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.age",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "만 65세 이상",
+        "label": "만 65세 이상",
+        "tableLabel": null,
+        "pageNumber": 6,
+        "textExcerpt": "2인 - 6,452,897원 이하 7,039,524원 이하 7,626,151원 이하 8,212,778원 이하 3-4. 고령자\n■ 일반공급대상자\n입주자모집공고일(2026.09.18) 현재, 무주택세대구성원으로서 아래의 요건을 모두 갖춘 65세 이상인 자",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000327",
+              "page": 6,
+              "bbox": [
+                52.023146000000004,
+                191.68011700000005,
+                508.364429,
+                200.26746299999996
+              ]
+            },
+            {
+              "id": "b000329",
+              "page": 6,
+              "bbox": [
+                450.70744,
+                213.72416999999996,
+                515.7954679247915,
+                221.51994499999995
+              ]
+            },
+            {
+              "id": "b000331",
+              "page": 6,
+              "bbox": [
+                450.70744,
+                226.17342299999996,
+                779.867714,
+                233.24958799999996
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.householdNoHome",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.householdNoHome",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대 전원 무주택",
+        "label": "세대 전원 무주택",
+        "tableLabel": null,
+        "pageNumber": 6,
+        "textExcerpt": "입주자모집공고일(2026.09.18) 현재, 무주택세대구성원으로서 아래의 요건을 모두 갖춘 65세 이상인 자\n※ 무주택세대구성원이란 해당 세대 구성원 전원이 주택을 소유하지 않는 것을 말함(“예비신혼부부”는 혼인으 * 가산 적용 : 출산자녀 2인 이상 20% 가산, 출산자녀 1인 10% 가산\n로 구성될 세대 구성원 전원이 주택을 소유하지 않을 것)을 말함 최종 소득 · 자산기준",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000331",
+              "page": 6,
+              "bbox": [
+                450.70744,
+                226.17342299999996,
+                779.867714,
+                233.24958799999996
+              ]
+            },
+            {
+              "id": "b000354",
+              "page": 6,
+              "bbox": [
+                30.206988000000003,
+                392.76313799999997,
+                746.304394,
+                401.638328
+              ]
+            },
+            {
+              "id": "b000355",
+              "page": 6,
+              "bbox": [
+                39.796508,
+                404.756638,
+                747.9822123799,
+                413.991633
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.income",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 소득 기준",
+        "expression": {
+          "fact": "incomeWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.income",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 소득 기준",
+        "label": "해당 세대 소득 기준",
+        "tableLabel": null,
+        "pageNumber": 6,
+        "textExcerpt": "① 해당 세대의 월평균소득이 전년도 도시근로자 가구원수별 가구당 월평균소득의 100퍼센트 이하\n※ 단, 가구원수가 1인인 경우에는 120퍼센트, 2인인 경우에는 110퍼센트 이하일 것\n가구원수 월평균소득금액 기준\n※ ‘신혼부부, 한부모가족‘의 해당 세대의 범위는 다음과 같음 1인 4,576,036원 이하 120%\n적용 대상 비고 2인 6,452,897원 이하 110%\n• 신청자 본인 3인 8,168,429원 이하 100%\n4인 8,802,202원 이하 100%\n5인 9,326,985원 이하 100%\n• 신청자 배우자의 직계존속 등재되어 있는 사람 6인 9,906,263원 이하 100%",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000333",
+              "page": 6,
+              "bbox": [
+                456.22141400000004,
+                238.646663,
+                779.987583,
+                245.722828
+              ]
+            },
+            {
+              "id": "b000335",
+              "page": 6,
+              "bbox": [
+                469.40700400000003,
+                249.320878,
+                714.4192400000001,
+                256.397043
+              ]
+            },
+            {
+              "id": "b000337",
+              "page": 6,
+              "bbox": [
+                512.799582,
+                263.952948,
+                774.233871,
+                271.029113
+              ]
+            },
+            {
+              "id": "b000338",
+              "page": 6,
+              "bbox": [
+                30.206988000000003,
+                277.025863,
+                776.070623687,
+                285.061508
+              ]
+            },
+            {
+              "id": "b000339",
+              "page": 6,
+              "bbox": [
+                80.671837,
+                290.218713,
+                776.070623687,
+                298.734098
+              ]
+            },
+            {
+              "id": "b000340",
+              "page": 6,
+              "bbox": [
+                36.200438,
+                303.291628,
+                776.070623687,
+                310.847533
+              ]
+            },
+            {
+              "id": "b000343",
+              "page": 6,
+              "bbox": [
+                521.43015,
+                316.484478,
+                776.070623687,
+                323.560643
+              ]
+            },
+            {
+              "id": "b000345",
+              "page": 6,
+              "bbox": [
+                521.43015,
+                329.557393,
+                776.070623687,
+                336.633558
+              ]
+            },
+            {
+              "id": "b000347",
+              "page": 6,
+              "bbox": [
+                36.200438,
+                342.630308,
+                776.070623687,
+                351.625433
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.assets",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 총자산 기준",
+        "expression": {
+          "fact": "assetsWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.assets",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 총자산 기준",
+        "label": "해당 세대 총자산 기준",
+        "tableLabel": null,
+        "pageNumber": 6,
+        "textExcerpt": "신청자와 같은 세대별 주민등록표에 등재된 사람 ② 해당 세대가 보유하고 있는 총 자산가액이 34,500만원 이하이고 총 자산 중 자동차가액이 4,542만원 이하\n《 고령자 계층 출생자녀 수에 따른 가산 소득·자산 기준 》\n제출하여야 하며 입주 전까지 혼인으로 구성된 세대를 확인하기 위한 혼인관계증명서, 가족관계증명서, 주민 1인 0인 120% 345,000,000원 45,420,000원\n자모집 시 신청한 예비신혼부부 당사자와 추후 입주하기 위해 제출한 혼인관계증명서상의 부부 및 가구원 명단이 1인 120% 379,000,000원 49,960,000원\n일치하지 않는 경우에 별도의 통지 없이 당첨 취소 및 임대차계약은 해지 처리됨. 0인 100% 345,000,000원 45,420,000원\n2인 이상 120% 413,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000351",
+              "page": 6,
+              "bbox": [
+                169.13515900000002,
+                371.174838,
+                783.1045006675168,
+                379.570288
+              ]
+            },
+            {
+              "id": "b000353",
+              "page": 6,
+              "bbox": [
+                538.931024,
+                383.887948,
+                727.864226516,
+                390.964113
+              ]
+            },
+            {
+              "id": "b000360",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                440.977008,
+                787.898937,
+                448.916705
+              ]
+            },
+            {
+              "id": "b000363",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                464.004528,
+                787.898937,
+                472.160108
+              ]
+            },
+            {
+              "id": "b000365",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                475.158483,
+                787.898937,
+                484.273543
+              ]
+            },
+            {
+              "id": "b000367",
+              "page": 6,
+              "bbox": [
+                587.717707,
+                497.346458,
+                787.898937,
+                504.422623
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "senior.vehicle",
+      "supplyType": "senior",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "해당 세대 자동차 기준",
+        "expression": {
+          "fact": "vehicleWithinAnnouncementLimit",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.senior.vehicle",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "해당 세대 자동차 기준",
+        "label": "해당 세대 자동차 기준",
+        "tableLabel": null,
+        "pageNumber": 6,
+        "textExcerpt": "신청자와 같은 세대별 주민등록표에 등재된 사람 ② 해당 세대가 보유하고 있는 총 자산가액이 34,500만원 이하이고 총 자산 중 자동차가액이 4,542만원 이하\n《 고령자 계층 출생자녀 수에 따른 가산 소득·자산 기준 》\n제출하여야 하며 입주 전까지 혼인으로 구성된 세대를 확인하기 위한 혼인관계증명서, 가족관계증명서, 주민 1인 0인 120% 345,000,000원 45,420,000원\n자모집 시 신청한 예비신혼부부 당사자와 추후 입주하기 위해 제출한 혼인관계증명서상의 부부 및 가구원 명단이 1인 120% 379,000,000원 49,960,000원\n일치하지 않는 경우에 별도의 통지 없이 당첨 취소 및 임대차계약은 해지 처리됨. 0인 100% 345,000,000원 45,420,000원\n2인 이상 120% 413,000,000원 54,510,000원",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            6
+          ],
+          "blocks": [
+            {
+              "id": "b000351",
+              "page": 6,
+              "bbox": [
+                169.13515900000002,
+                371.174838,
+                783.1045006675168,
+                379.570288
+              ]
+            },
+            {
+              "id": "b000353",
+              "page": 6,
+              "bbox": [
+                538.931024,
+                383.887948,
+                727.864226516,
+                390.964113
+              ]
+            },
+            {
+              "id": "b000360",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                440.977008,
+                787.898937,
+                448.916705
+              ]
+            },
+            {
+              "id": "b000363",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                464.004528,
+                787.898937,
+                472.160108
+              ]
+            },
+            {
+              "id": "b000365",
+              "page": 6,
+              "bbox": [
+                39.436901,
+                475.158483,
+                787.898937,
+                484.273543
+              ]
+            },
+            {
+              "id": "b000367",
+              "page": 6,
+              "bbox": [
+                587.717707,
+                497.346458,
+                787.898937,
+                504.422623
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.applicantAgeOrException",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "expression": {
+          "fact": "adultOrMinorHouseholdHeadException",
+          "op": "eq",
+          "value": true
+        },
+        "documents": [
+          "주민등록표등본",
+          "가족관계증명서"
+        ]
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.housingBenefit.applicantAgeOrException",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "성년 신청자 또는 미성년 세대주 예외",
+        "label": "성년 신청자 또는 미성년 세대주 예외",
+        "tableLabel": null,
+        "pageNumber": 2,
+        "textExcerpt": "공 형 급 별 공 대 급 상 건 호 설 수 공 호 가 수 중 예 자 인 비 우선일반 주 전 거 용 주 공 거 용기 공 타 용면 주 적 차 합계 계 계약 잔금 임 (천 대 월 원 료 ) 보 한 (천 증 도 원 금 액 ) 보 임 증 대 금 임대 월 료 거 기 (년 주 간 ) 난 및 방 ■ • 입 입 주 주 자 자 선 신 정 청 에 자 격 필요한 자격 해당여부는 공급신청자를 기준으로 합니다.\n(천원) (원) • 주택공급신청자는 성년자(자녀를 부양하거나 직계존속의 사망, 실종신고 및 행방불명 등으로\n형제자매를 부양하여야 하는 세대주인 미성년자, 부 또는 모가 외국인인 한부모가족으로서 미성년\n(-)27,000 5,606228,190 리트 단, 대학생, 청년, 예비신혼부부, 한부모가족은 성년자가 아닌 경우에도 신청가능합니다.\n대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            2,
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000097",
+              "page": 2,
+              "bbox": [
+                32.36463,
+                302.524044,
+                718.850197585,
+                328.262095
+              ]
+            },
+            {
+              "id": "b000099",
+              "page": 2,
+              "bbox": [
+                309.142151,
+                329.02967900000004,
+                810.5545375992085,
+                338.45657
+              ]
+            },
+            {
+              "id": "b000100",
+              "page": 2,
+              "bbox": [
+                463.653292,
+                340.85527,
+                810.4339494007916,
+                348.65104499999995
+              ]
+            },
+            {
+              "id": "b000104",
+              "page": 2,
+              "bbox": [
+                285.16835100000003,
+                361.124285,
+                775.57280773,
+                369.66365699999994
+              ]
+            },
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.subletRestriction",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "expression": {
+          "fact": "noPublicRentalSubletRestriction",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.housingBenefit.subletRestriction",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "label": "공공임대 불법양도·전대 재입주 제한이 없음",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "대상에 포함 ■ 불법전대자 입주자격 제한\n가족관계등록부에 등재되고 외국인 등록(또는 국내거 불법양도・전대자 재입주 금지 규정(공공주택 특별법 시행규칙 제36조의2)에 따라 신청자의 세대\n소신고)을 한 사람으로서, 포함) 그와 혼인관계에 있는 자는 구성원중에 과거에 공공임대주택 임차인으로서 불법양도・전대 행위로 적발된 후 4년이 경과되지\n외국인 신청자 또는 분리배우자의 세대별 주민등록표등본에 임대주택신청이 불가능합니다.",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3
+          ],
+          "blocks": [
+            {
+              "id": "b000137",
+              "page": 3,
+              "bbox": [
+                100.929698,
+                116.456885,
+                561.4663959999999,
+                124.25265999999999
+              ]
+            },
+            {
+              "id": "b000139",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                128.21651175,
+                806.957988131,
+                136.24615999999997
+              ]
+            },
+            {
+              "id": "b000140",
+              "page": 3,
+              "bbox": [
+                93.617689,
+                136.941783,
+                806.9576285317914,
+                148.7194
+              ]
+            },
+            {
+              "id": "b000141",
+              "page": 3,
+              "bbox": [
+                53.701312,
+                147.016323,
+                370.498537078,
+                155.65164299999998
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.singleApplication",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대당 1건 신청",
+        "expression": {
+          "fact": "singleHouseholdApplicationClear",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.housingBenefit.singleApplication",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대당 1건 신청",
+        "label": "세대당 1건 신청",
+        "tableLabel": null,
+        "pageNumber": 3,
+        "textExcerpt": "• 1세대 1주택 무주택세대구성원에게 신청가능하며, 중복 신청할 경우 전부 무효 처리됩니다. * 이혼 등의 사유로 가족관계가 단절된 상태인 경우 실질적으로 부양의무를 이행하고 있는 부 또는 모의 소득을 조회\n중복입주 • 공공임대주택은 1세대 1주택 신청, 공급이 원칙입니다. 다만, 다른 공공임대주택에 거주 중인 사실과 다르거나, 이의가 있을 경우에는 재확인기간(소명기간)내에 증명서류(소명자료)를 제출",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            3,
+            16
+          ],
+          "blocks": [
+            {
+              "id": "b000157",
+              "page": 3,
+              "bbox": [
+                35.720962,
+                314.805388,
+                808.1571096735446,
+                324.54411
+              ]
+            },
+            {
+              "id": "b000985",
+              "page": 16,
+              "bbox": [
+                38.238211,
+                146.296713,
+                812.472082,
+                154.212423
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.recipient",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "주거급여 수급자",
+        "expression": {
+          "fact": "housingBenefitRecipient",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.housingBenefit.recipient",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "주거급여 수급자",
+        "label": "주거급여 수급자",
+        "tableLabel": null,
+        "pageNumber": 7,
+        "textExcerpt": "3-5. 주거급여수급자\n100% 110% 120% ■ 일반공급대상자\n입주자모집공고일(2026.09.18) 현재 무주택세대구성원인 주거급여수급자\n※ ‘주거급여수급자’란 「주거급여법」 제2조 제2호 및 제3호에 따른 수급권자 또는 수급자를 말함",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            7
+          ],
+          "blocks": [
+            {
+              "id": "b000376",
+              "page": 7,
+              "bbox": [
+                463.89303,
+                45.719221999999945,
+                542.407225,
+                54.23460699999998
+              ]
+            },
+            {
+              "id": "b000379",
+              "page": 7,
+              "bbox": [
+                143.12358600000002,
+                65.82032800000002,
+                515.7954679247915,
+                75.31918000000007
+              ]
+            },
+            {
+              "id": "b000381",
+              "page": 7,
+              "bbox": [
+                450.70744,
+                81.53181300000006,
+                680.8555723799,
+                88.607978
+              ]
+            },
+            {
+              "id": "b000393",
+              "page": 7,
+              "bbox": [
+                450.70744,
+                149.65489300000002,
+                766.682124,
+                156.73105800000002
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ruleKey": "housingBenefit.householdNoHome",
+      "supplyType": "housingBenefit",
+      "stage": null,
+      "category": "ELIGIBILITY",
+      "config": {
+        "label": "세대 전원 무주택",
+        "expression": {
+          "fact": "householdNoHome",
+          "op": "eq",
+          "value": true
+        },
+        "documents": []
+      },
+      "evidence": {
+        "id": "lh.jeju.happy.20260918.housingBenefit.householdNoHome",
+        "documentId": "620be476-2073-4bf4-8db9-0bacb6ae1b29",
+        "source": "제주일도·삼도 행복주택 예비입주자 모집공고(2026.09.18.)",
+        "section": "세대 전원 무주택",
+        "label": "세대 전원 무주택",
+        "tableLabel": null,
+        "pageNumber": 7,
+        "textExcerpt": "입주자모집공고일(2026.09.18) 현재 무주택세대구성원인 주거급여수급자\n※ ‘주거급여수급자‘의 해당 세대란 ① 신청자 본인 ② 신청자의 배우자 ③ 신청자 직계존속 및 신청자의 배우자의\n직계존속으로 신청자 또는 신청자의 배우자와 같은 세대별 주민등록표에 등재된 사람 ④ 신청자 직계비속 및\n신청자 직계비속의 배우자로 신청자 또는 신청자의 배우자와 같은 세대별 주민등록표에 등재된 사람 ⑤ 신청자의\n배우자의 직계비속 및 신청자의 배우자의 직계비속의 배우자로 신청자와 같은 세대별 주민등록표에 등재된 사람\n※ 무주택세대구성원이란 해당 세대 구성원 전원이 주택을 소유하지 않는 것을 말함",
+        "sourceUrl": null,
+        "locator": {
+          "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+          "parserVersion": "document-parser-v1",
+          "pages": [
+            7
+          ],
+          "blocks": [
+            {
+              "id": "b000381",
+              "page": 7,
+              "bbox": [
+                450.70744,
+                81.53181300000006,
+                680.8555723799,
+                88.607978
+              ]
+            },
+            {
+              "id": "b000383",
+              "page": 7,
+              "bbox": [
+                450.70744,
+                92.805703,
+                812.4723936381832,
+                99.881868
+              ]
+            },
+            {
+              "id": "b000385",
+              "page": 7,
+              "bbox": [
+                460.29696,
+                104.19952799999999,
+                812.472082,
+                111.27569299999999
+              ]
+            },
+            {
+              "id": "b000387",
+              "page": 7,
+              "bbox": [
+                460.29696,
+                115.59335299999998,
+                812.4720100149495,
+                122.66951799999998
+              ]
+            },
+            {
+              "id": "b000389",
+              "page": 7,
+              "bbox": [
+                460.29696,
+                126.86724300000003,
+                804.9206706402723,
+                133.94340800000003
+              ]
+            },
+            {
+              "id": "b000391",
+              "page": 7,
+              "bbox": [
+                450.70744,
+                138.26106800000002,
+                725.806795,
+                145.33723300000003
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

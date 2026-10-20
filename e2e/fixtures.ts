@@ -73,4 +73,11 @@ export const NEEDS_PROFILE = scenario('youth-needs-profile', 'youth', {}, barePr
 
 export const profileSeed = (supply: SupplyType) => samdoApplicant(supply).profile;
 export const PROFILE_STORAGE_KEY = 'wanpan-e:applicant-profile-v2';
-export const SUPPLY_TAB = { youth: '청년 특별공급', newlywed: '신혼부부 특별공급', firstHome: '생애최초 특별공급' } as const;
+export const SUPPLY_TAB = {
+  youth: '청년 특별공급',
+  newlywed: '신혼부부 특별공급',
+  firstHome: '생애최초 특별공급',
+  student: '대학생',
+  senior: '고령자',
+  housingBenefit: '주거급여수급자',
+} as const;

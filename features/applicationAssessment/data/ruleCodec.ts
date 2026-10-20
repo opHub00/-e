@@ -1,6 +1,7 @@
 import type { AnnouncementRules, ConditionRule, ScoreRule, Scalar, SupplyType, Stage } from '../types.ts';
 import type { RuleLookup, RuleReadResult } from './ruleRepository.ts';
 import * as v from './validation.ts';
+import { SUPPLY_TYPE_SET } from '../supplyTypes.ts';
 
 /** Wire schema 1 stores each condition/score separately. Layout is a completeness manifest. */
 export function decodeRuleSet(payload: unknown, lookup: RuleLookup): RuleReadResult {
@@ -43,7 +44,7 @@ export function decodeRuleSet(payload: unknown, lookup: RuleLookup): RuleReadRes
     const supplies = v.array(config.supplies).map(raw => {
       const s = v.object(raw), type = v.string(s.type);
       if (Object.keys(s).some(k => !['type', 'eligibility', 'stages'].includes(k))) throw new Error('unknown supply config');
-      if (!['youth', 'newlywed', 'firstHome'].includes(type) || types.has(type)) throw new Error('unsupported/duplicate supply');
+      if (!SUPPLY_TYPE_SET.has(type) || types.has(type)) throw new Error('unsupported/duplicate supply');
       types.add(type);
       const eligibility = v.array(s.eligibility).map(key => read(key, type, null, 'ELIGIBILITY') as ConditionRule);
       if (!eligibility.length) throw new Error('empty eligibility');

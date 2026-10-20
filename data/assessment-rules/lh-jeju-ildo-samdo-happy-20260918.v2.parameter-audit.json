@@ -1,0 +1,1262 @@
+{
+  "documentSha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+  "parserVersion": "document-parser-v1",
+  "parameterCount": 147,
+  "counts": {
+    "MATCH": 138,
+    "MISMATCH": 0,
+    "MANUAL_REVIEW": 9
+  },
+  "findings": [
+    {
+      "key": "threshold.student.incomeFact",
+      "value": "parentApplicantMonthlyIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for student",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.youth.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for youth",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.newlywed.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for newlywed",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.single.1",
+      "value": 120,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF p5 t00016/size:1",
+      "note": "신혼부부 표에 1인 셀이 없음; 해당 공급유형의 실효성 검토 필요"
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.dual.1",
+      "value": 120,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF p5 t00016/size:1",
+      "note": "신혼부부 표에 1인 셀이 없음; 해당 공급유형의 실효성 검토 필요"
+    },
+    {
+      "key": "threshold.senior.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for senior",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.student.vehicle.0",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:0",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    },
+    {
+      "key": "threshold.student.vehicle.1",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:1",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    },
+    {
+      "key": "threshold.student.vehicle.2",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:2",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    }
+  ],
+  "parameters": [
+    {
+      "key": "threshold.student.incomeFact",
+      "value": "parentApplicantMonthlyIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for student",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.student.incomeMaxPercent",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF t00007 maximum applied income percent",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.incomePercent.single.1",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF p3 t00006/size:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.incomePercent.single.2",
+      "value": 110,
+      "status": "MATCH",
+      "expected": 110,
+      "source": "PDF p3 t00006/size:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.incomePercent.single.default",
+      "value": 100,
+      "status": "MATCH",
+      "expected": 100,
+      "source": "PDF p3 t00006/size:3",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.1.120",
+      "value": 4576036,
+      "status": "MATCH",
+      "expected": 4576036,
+      "source": "PDF p3 t00006/row:1/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.2.110",
+      "value": 6452897,
+      "status": "MATCH",
+      "expected": 6452897,
+      "source": "PDF p6 t00022/row:2/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.2.120",
+      "value": 7039524,
+      "status": "MATCH",
+      "expected": 7039524,
+      "source": "PDF p6 t00022/row:2/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.2.130",
+      "value": 7626151,
+      "status": "MATCH",
+      "expected": 7626151,
+      "source": "PDF p6 t00022/row:2/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.2.140",
+      "value": 8212778,
+      "status": "MATCH",
+      "expected": 8212778,
+      "source": "PDF p6 t00022/row:2/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.3.100",
+      "value": 8168429,
+      "status": "MATCH",
+      "expected": 8168429,
+      "source": "PDF p6 t00022/row:3/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.3.110",
+      "value": 8985272,
+      "status": "MATCH",
+      "expected": 8985272,
+      "source": "PDF p6 t00022/row:3/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.3.120",
+      "value": 9802115,
+      "status": "MATCH",
+      "expected": 9802115,
+      "source": "PDF p6 t00022/row:3/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.3.130",
+      "value": 10618958,
+      "status": "MATCH",
+      "expected": 10618958,
+      "source": "PDF p6 t00022/row:3/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.3.140",
+      "value": 11435801,
+      "status": "MATCH",
+      "expected": 11435801,
+      "source": "PDF p6 t00022/row:3/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.4.100",
+      "value": 8802202,
+      "status": "MATCH",
+      "expected": 8802202,
+      "source": "PDF p6 t00022/row:4/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.4.110",
+      "value": 9682422,
+      "status": "MATCH",
+      "expected": 9682422,
+      "source": "PDF p6 t00022/row:4/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.4.120",
+      "value": 10562642,
+      "status": "MATCH",
+      "expected": 10562642,
+      "source": "PDF p6 t00022/row:4/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.4.130",
+      "value": 11442863,
+      "status": "MATCH",
+      "expected": 11442863,
+      "source": "PDF p6 t00022/row:4/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.4.140",
+      "value": 12323083,
+      "status": "MATCH",
+      "expected": 12323083,
+      "source": "PDF p6 t00022/row:4/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.5.100",
+      "value": 9326985,
+      "status": "MATCH",
+      "expected": 9326985,
+      "source": "PDF p6 t00022/row:5/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.5.110",
+      "value": 10259684,
+      "status": "MATCH",
+      "expected": 10259684,
+      "source": "PDF p6 t00022/row:5/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.5.120",
+      "value": 11192382,
+      "status": "MATCH",
+      "expected": 11192382,
+      "source": "PDF p6 t00022/row:5/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.5.130",
+      "value": 12125081,
+      "status": "MATCH",
+      "expected": 12125081,
+      "source": "PDF p6 t00022/row:5/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.5.140",
+      "value": 13057779,
+      "status": "MATCH",
+      "expected": 13057779,
+      "source": "PDF p6 t00022/row:5/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.6.100",
+      "value": 9906263,
+      "status": "MATCH",
+      "expected": 9906263,
+      "source": "PDF p6 t00022/row:6/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.6.110",
+      "value": 10896889,
+      "status": "MATCH",
+      "expected": 10896889,
+      "source": "PDF p6 t00022/row:6/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.6.120",
+      "value": 11887516,
+      "status": "MATCH",
+      "expected": 11887516,
+      "source": "PDF p6 t00022/row:6/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.6.130",
+      "value": 12878142,
+      "status": "MATCH",
+      "expected": 12878142,
+      "source": "PDF p6 t00022/row:6/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.income.6.140",
+      "value": 13868768,
+      "status": "MATCH",
+      "expected": 13868768,
+      "source": "PDF p6 t00022/row:6/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for youth",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.youth.incomeMaxPercent",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF t00012 maximum applied income percent",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.incomePercent.single.1",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF p4 t00010/size:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.incomePercent.single.2",
+      "value": 110,
+      "status": "MATCH",
+      "expected": 110,
+      "source": "PDF p4 t00010/size:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.incomePercent.single.default",
+      "value": 100,
+      "status": "MATCH",
+      "expected": 100,
+      "source": "PDF p4 t00010/size:3",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.1.120",
+      "value": 4576036,
+      "status": "MATCH",
+      "expected": 4576036,
+      "source": "PDF p3 t00006/row:1/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.2.110",
+      "value": 6452897,
+      "status": "MATCH",
+      "expected": 6452897,
+      "source": "PDF p6 t00022/row:2/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.2.120",
+      "value": 7039524,
+      "status": "MATCH",
+      "expected": 7039524,
+      "source": "PDF p6 t00022/row:2/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.2.130",
+      "value": 7626151,
+      "status": "MATCH",
+      "expected": 7626151,
+      "source": "PDF p6 t00022/row:2/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.2.140",
+      "value": 8212778,
+      "status": "MATCH",
+      "expected": 8212778,
+      "source": "PDF p6 t00022/row:2/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.3.100",
+      "value": 8168429,
+      "status": "MATCH",
+      "expected": 8168429,
+      "source": "PDF p6 t00022/row:3/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.3.110",
+      "value": 8985272,
+      "status": "MATCH",
+      "expected": 8985272,
+      "source": "PDF p6 t00022/row:3/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.3.120",
+      "value": 9802115,
+      "status": "MATCH",
+      "expected": 9802115,
+      "source": "PDF p6 t00022/row:3/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.3.130",
+      "value": 10618958,
+      "status": "MATCH",
+      "expected": 10618958,
+      "source": "PDF p6 t00022/row:3/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.3.140",
+      "value": 11435801,
+      "status": "MATCH",
+      "expected": 11435801,
+      "source": "PDF p6 t00022/row:3/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.4.100",
+      "value": 8802202,
+      "status": "MATCH",
+      "expected": 8802202,
+      "source": "PDF p6 t00022/row:4/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.4.110",
+      "value": 9682422,
+      "status": "MATCH",
+      "expected": 9682422,
+      "source": "PDF p6 t00022/row:4/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.4.120",
+      "value": 10562642,
+      "status": "MATCH",
+      "expected": 10562642,
+      "source": "PDF p6 t00022/row:4/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.4.130",
+      "value": 11442863,
+      "status": "MATCH",
+      "expected": 11442863,
+      "source": "PDF p6 t00022/row:4/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.4.140",
+      "value": 12323083,
+      "status": "MATCH",
+      "expected": 12323083,
+      "source": "PDF p6 t00022/row:4/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.5.100",
+      "value": 9326985,
+      "status": "MATCH",
+      "expected": 9326985,
+      "source": "PDF p6 t00022/row:5/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.5.110",
+      "value": 10259684,
+      "status": "MATCH",
+      "expected": 10259684,
+      "source": "PDF p6 t00022/row:5/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.5.120",
+      "value": 11192382,
+      "status": "MATCH",
+      "expected": 11192382,
+      "source": "PDF p6 t00022/row:5/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.5.130",
+      "value": 12125081,
+      "status": "MATCH",
+      "expected": 12125081,
+      "source": "PDF p6 t00022/row:5/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.5.140",
+      "value": 13057779,
+      "status": "MATCH",
+      "expected": 13057779,
+      "source": "PDF p6 t00022/row:5/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.6.100",
+      "value": 9906263,
+      "status": "MATCH",
+      "expected": 9906263,
+      "source": "PDF p6 t00022/row:6/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.6.110",
+      "value": 10896889,
+      "status": "MATCH",
+      "expected": 10896889,
+      "source": "PDF p6 t00022/row:6/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.6.120",
+      "value": 11887516,
+      "status": "MATCH",
+      "expected": 11887516,
+      "source": "PDF p6 t00022/row:6/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.6.130",
+      "value": 12878142,
+      "status": "MATCH",
+      "expected": 12878142,
+      "source": "PDF p6 t00022/row:6/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.income.6.140",
+      "value": 13868768,
+      "status": "MATCH",
+      "expected": 13868768,
+      "source": "PDF p6 t00022/row:6/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for newlywed",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.newlywed.incomeMaxPercent",
+      "value": 140,
+      "status": "MATCH",
+      "expected": 140,
+      "source": "PDF t00018+t00020 maximum applied income percent",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.single.1",
+      "value": 120,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF p5 t00016/size:1",
+      "note": "신혼부부 표에 1인 셀이 없음; 해당 공급유형의 실효성 검토 필요"
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.single.2",
+      "value": 110,
+      "status": "MATCH",
+      "expected": 110,
+      "source": "PDF p5 t00016/size:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.single.default",
+      "value": 100,
+      "status": "MATCH",
+      "expected": 100,
+      "source": "PDF p5 t00016/size:3",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.dual.1",
+      "value": 120,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF p5 t00016/size:1",
+      "note": "신혼부부 표에 1인 셀이 없음; 해당 공급유형의 실효성 검토 필요"
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.dual.2",
+      "value": 130,
+      "status": "MATCH",
+      "expected": 130,
+      "source": "PDF p5 t00016/size:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.incomePercent.dual.default",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF p5 t00016/size:3",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.1.120",
+      "value": 4576036,
+      "status": "MATCH",
+      "expected": 4576036,
+      "source": "PDF p3 t00006/row:1/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.2.110",
+      "value": 6452897,
+      "status": "MATCH",
+      "expected": 6452897,
+      "source": "PDF p6 t00022/row:2/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.2.120",
+      "value": 7039524,
+      "status": "MATCH",
+      "expected": 7039524,
+      "source": "PDF p6 t00022/row:2/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.2.130",
+      "value": 7626151,
+      "status": "MATCH",
+      "expected": 7626151,
+      "source": "PDF p6 t00022/row:2/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.2.140",
+      "value": 8212778,
+      "status": "MATCH",
+      "expected": 8212778,
+      "source": "PDF p6 t00022/row:2/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.3.100",
+      "value": 8168429,
+      "status": "MATCH",
+      "expected": 8168429,
+      "source": "PDF p6 t00022/row:3/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.3.110",
+      "value": 8985272,
+      "status": "MATCH",
+      "expected": 8985272,
+      "source": "PDF p6 t00022/row:3/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.3.120",
+      "value": 9802115,
+      "status": "MATCH",
+      "expected": 9802115,
+      "source": "PDF p6 t00022/row:3/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.3.130",
+      "value": 10618958,
+      "status": "MATCH",
+      "expected": 10618958,
+      "source": "PDF p6 t00022/row:3/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.3.140",
+      "value": 11435801,
+      "status": "MATCH",
+      "expected": 11435801,
+      "source": "PDF p6 t00022/row:3/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.4.100",
+      "value": 8802202,
+      "status": "MATCH",
+      "expected": 8802202,
+      "source": "PDF p6 t00022/row:4/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.4.110",
+      "value": 9682422,
+      "status": "MATCH",
+      "expected": 9682422,
+      "source": "PDF p6 t00022/row:4/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.4.120",
+      "value": 10562642,
+      "status": "MATCH",
+      "expected": 10562642,
+      "source": "PDF p6 t00022/row:4/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.4.130",
+      "value": 11442863,
+      "status": "MATCH",
+      "expected": 11442863,
+      "source": "PDF p6 t00022/row:4/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.4.140",
+      "value": 12323083,
+      "status": "MATCH",
+      "expected": 12323083,
+      "source": "PDF p6 t00022/row:4/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.5.100",
+      "value": 9326985,
+      "status": "MATCH",
+      "expected": 9326985,
+      "source": "PDF p6 t00022/row:5/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.5.110",
+      "value": 10259684,
+      "status": "MATCH",
+      "expected": 10259684,
+      "source": "PDF p6 t00022/row:5/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.5.120",
+      "value": 11192382,
+      "status": "MATCH",
+      "expected": 11192382,
+      "source": "PDF p6 t00022/row:5/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.5.130",
+      "value": 12125081,
+      "status": "MATCH",
+      "expected": 12125081,
+      "source": "PDF p6 t00022/row:5/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.5.140",
+      "value": 13057779,
+      "status": "MATCH",
+      "expected": 13057779,
+      "source": "PDF p6 t00022/row:5/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.6.100",
+      "value": 9906263,
+      "status": "MATCH",
+      "expected": 9906263,
+      "source": "PDF p6 t00022/row:6/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.6.110",
+      "value": 10896889,
+      "status": "MATCH",
+      "expected": 10896889,
+      "source": "PDF p6 t00022/row:6/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.6.120",
+      "value": 11887516,
+      "status": "MATCH",
+      "expected": 11887516,
+      "source": "PDF p6 t00022/row:6/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.6.130",
+      "value": 12878142,
+      "status": "MATCH",
+      "expected": 12878142,
+      "source": "PDF p6 t00022/row:6/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.income.6.140",
+      "value": 13868768,
+      "status": "MATCH",
+      "expected": 13868768,
+      "source": "PDF p6 t00022/row:6/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.incomeFact",
+      "value": "householdIncome",
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF supply scope section for senior",
+      "note": "문자열 fact→신청자/부모/현재·미래 세대 mapping은 금액표만으로 검증할 수 없음"
+    },
+    {
+      "key": "threshold.senior.incomeMaxPercent",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF t00026 maximum applied income percent",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.incomePercent.single.1",
+      "value": 120,
+      "status": "MATCH",
+      "expected": 120,
+      "source": "PDF p6 t00024/size:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.incomePercent.single.2",
+      "value": 110,
+      "status": "MATCH",
+      "expected": 110,
+      "source": "PDF p6 t00024/size:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.incomePercent.single.default",
+      "value": 100,
+      "status": "MATCH",
+      "expected": 100,
+      "source": "PDF p6 t00024/size:3",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.1.120",
+      "value": 4576036,
+      "status": "MATCH",
+      "expected": 4576036,
+      "source": "PDF p3 t00006/row:1/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.2.110",
+      "value": 6452897,
+      "status": "MATCH",
+      "expected": 6452897,
+      "source": "PDF p6 t00022/row:2/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.2.120",
+      "value": 7039524,
+      "status": "MATCH",
+      "expected": 7039524,
+      "source": "PDF p6 t00022/row:2/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.2.130",
+      "value": 7626151,
+      "status": "MATCH",
+      "expected": 7626151,
+      "source": "PDF p6 t00022/row:2/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.2.140",
+      "value": 8212778,
+      "status": "MATCH",
+      "expected": 8212778,
+      "source": "PDF p6 t00022/row:2/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.3.100",
+      "value": 8168429,
+      "status": "MATCH",
+      "expected": 8168429,
+      "source": "PDF p6 t00022/row:3/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.3.110",
+      "value": 8985272,
+      "status": "MATCH",
+      "expected": 8985272,
+      "source": "PDF p6 t00022/row:3/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.3.120",
+      "value": 9802115,
+      "status": "MATCH",
+      "expected": 9802115,
+      "source": "PDF p6 t00022/row:3/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.3.130",
+      "value": 10618958,
+      "status": "MATCH",
+      "expected": 10618958,
+      "source": "PDF p6 t00022/row:3/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.3.140",
+      "value": 11435801,
+      "status": "MATCH",
+      "expected": 11435801,
+      "source": "PDF p6 t00022/row:3/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.4.100",
+      "value": 8802202,
+      "status": "MATCH",
+      "expected": 8802202,
+      "source": "PDF p6 t00022/row:4/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.4.110",
+      "value": 9682422,
+      "status": "MATCH",
+      "expected": 9682422,
+      "source": "PDF p6 t00022/row:4/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.4.120",
+      "value": 10562642,
+      "status": "MATCH",
+      "expected": 10562642,
+      "source": "PDF p6 t00022/row:4/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.4.130",
+      "value": 11442863,
+      "status": "MATCH",
+      "expected": 11442863,
+      "source": "PDF p6 t00022/row:4/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.4.140",
+      "value": 12323083,
+      "status": "MATCH",
+      "expected": 12323083,
+      "source": "PDF p6 t00022/row:4/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.5.100",
+      "value": 9326985,
+      "status": "MATCH",
+      "expected": 9326985,
+      "source": "PDF p6 t00022/row:5/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.5.110",
+      "value": 10259684,
+      "status": "MATCH",
+      "expected": 10259684,
+      "source": "PDF p6 t00022/row:5/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.5.120",
+      "value": 11192382,
+      "status": "MATCH",
+      "expected": 11192382,
+      "source": "PDF p6 t00022/row:5/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.5.130",
+      "value": 12125081,
+      "status": "MATCH",
+      "expected": 12125081,
+      "source": "PDF p6 t00022/row:5/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.5.140",
+      "value": 13057779,
+      "status": "MATCH",
+      "expected": 13057779,
+      "source": "PDF p6 t00022/row:5/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.6.100",
+      "value": 9906263,
+      "status": "MATCH",
+      "expected": 9906263,
+      "source": "PDF p6 t00022/row:6/column:100%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.6.110",
+      "value": 10896889,
+      "status": "MATCH",
+      "expected": 10896889,
+      "source": "PDF p6 t00022/row:6/column:110%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.6.120",
+      "value": 11887516,
+      "status": "MATCH",
+      "expected": 11887516,
+      "source": "PDF p6 t00022/row:6/column:120%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.6.130",
+      "value": 12878142,
+      "status": "MATCH",
+      "expected": 12878142,
+      "source": "PDF p6 t00022/row:6/column:130%",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.income.6.140",
+      "value": 13868768,
+      "status": "MATCH",
+      "expected": 13868768,
+      "source": "PDF p6 t00022/row:6/column:140%",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.assets.0",
+      "value": 108000000,
+      "status": "MATCH",
+      "expected": 108000000,
+      "source": "PDF t00007 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.vehicle.0",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:0",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    },
+    {
+      "key": "threshold.student.assets.1",
+      "value": 119000000,
+      "status": "MATCH",
+      "expected": 119000000,
+      "source": "PDF t00007 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.vehicle.1",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:1",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    },
+    {
+      "key": "threshold.student.assets.2",
+      "value": 130000000,
+      "status": "MATCH",
+      "expected": 130000000,
+      "source": "PDF t00007 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.student.vehicle.2",
+      "value": 0,
+      "status": "MANUAL_REVIEW",
+      "expected": null,
+      "source": "PDF t00007 children:2",
+      "note": "대학생 자동차 미소유 조건은 금액 0 셀이 아니라 문장 근거로 별도 검수"
+    },
+    {
+      "key": "threshold.youth.assets.0",
+      "value": 251000000,
+      "status": "MATCH",
+      "expected": 251000000,
+      "source": "PDF t00012 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.vehicle.0",
+      "value": 45420000,
+      "status": "MATCH",
+      "expected": 45420000,
+      "source": "PDF t00012 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.assets.1",
+      "value": 276000000,
+      "status": "MATCH",
+      "expected": 276000000,
+      "source": "PDF t00012 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.vehicle.1",
+      "value": 49960000,
+      "status": "MATCH",
+      "expected": 49960000,
+      "source": "PDF t00012 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.assets.2",
+      "value": 301000000,
+      "status": "MATCH",
+      "expected": 301000000,
+      "source": "PDF t00012 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.youth.vehicle.2",
+      "value": 54510000,
+      "status": "MATCH",
+      "expected": 54510000,
+      "source": "PDF t00012 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.assets.0",
+      "value": 345000000,
+      "status": "MATCH",
+      "expected": 345000000,
+      "source": "PDF t00018+t00020 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.vehicle.0",
+      "value": 45420000,
+      "status": "MATCH",
+      "expected": 45420000,
+      "source": "PDF t00018+t00020 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.assets.1",
+      "value": 379000000,
+      "status": "MATCH",
+      "expected": 379000000,
+      "source": "PDF t00018+t00020 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.vehicle.1",
+      "value": 49960000,
+      "status": "MATCH",
+      "expected": 49960000,
+      "source": "PDF t00018+t00020 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.assets.2",
+      "value": 413000000,
+      "status": "MATCH",
+      "expected": 413000000,
+      "source": "PDF t00018+t00020 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.newlywed.vehicle.2",
+      "value": 54510000,
+      "status": "MATCH",
+      "expected": 54510000,
+      "source": "PDF t00018+t00020 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.assets.0",
+      "value": 345000000,
+      "status": "MATCH",
+      "expected": 345000000,
+      "source": "PDF t00026 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.vehicle.0",
+      "value": 45420000,
+      "status": "MATCH",
+      "expected": 45420000,
+      "source": "PDF t00026 children:0",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.assets.1",
+      "value": 379000000,
+      "status": "MATCH",
+      "expected": 379000000,
+      "source": "PDF t00026 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.vehicle.1",
+      "value": 49960000,
+      "status": "MATCH",
+      "expected": 49960000,
+      "source": "PDF t00026 children:1",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.assets.2",
+      "value": 413000000,
+      "status": "MATCH",
+      "expected": 413000000,
+      "source": "PDF t00026 children:2",
+      "note": ""
+    },
+    {
+      "key": "threshold.senior.vehicle.2",
+      "value": 54510000,
+      "status": "MATCH",
+      "expected": 54510000,
+      "source": "PDF t00026 children:2",
+      "note": ""
+    }
+  ]
+}

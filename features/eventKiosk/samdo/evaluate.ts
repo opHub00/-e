@@ -14,7 +14,7 @@ import type {
   SamdoSupplyType,
 } from './types.ts';
 
-const TYPE_MAP: Record<SupplyType, SamdoSupplyType> = { youth: 'YOUTH', newlywed: 'NEWLYWED', firstHome: 'FIRST_HOME' };
+const TYPE_MAP: Partial<Record<SupplyType, SamdoSupplyType>> = { youth: 'YOUTH', newlywed: 'NEWLYWED', firstHome: 'FIRST_HOME' };
 
 type Check = { value: boolean | null; fact: string; pass: string; fail: string; evidence?: string };
 
@@ -263,6 +263,7 @@ function evaluateGeneral(input: AssessmentInput, rules: AnnouncementRules, deepP
 
 function mapGeneric(result: ApplicationAssessmentResult, deepPackage: SamdoDeepRulePackage): SamdoSupplyEvaluation {
   const type = TYPE_MAP[result.supplyType];
+  if (!type) throw new Error('SAMDO_SUPPLY_TYPE_NOT_SUPPORTED');
   const supply = deepPackage.supplies.find(item => item.supplyType === type)!;
   const hasInputMissing = result.missingInformation.some(item => item.startsWith('input:'));
   // A separate review item must not hide an already-proven hard failure in the generic engine result.

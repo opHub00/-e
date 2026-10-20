@@ -28,6 +28,7 @@ import type { ReviewSeedAnnotation } from './annotations.ts';
 export const REVIEW_CATEGORY_BY_CONCEPT: Readonly<Record<string, CriticalCategory>> = {
   age: 'AGE',
   adult: 'AGE',
+  applicantAgeOrException: 'AGE',
   housing: 'HOUSING',
   household: 'HOUSING',
   head: 'HOUSING',
@@ -35,9 +36,13 @@ export const REVIEW_CATEGORY_BY_CONCEPT: Readonly<Record<string, CriticalCategor
   size: 'HOUSING',
   single: 'HOUSING',
   restrictions: 'HOUSING',
+  noHome: 'HOUSING',
+  householdNoHome: 'HOUSING',
+  subletRestriction: 'HOUSING',
   specialHistory: 'SUBSCRIPTION',
   reWinning: 'SUBSCRIPTION',
   account: 'SUBSCRIPTION',
+  singleApplication: 'SUBSCRIPTION',
   months: 'SUBSCRIPTION',
   payments: 'SUBSCRIPTION',
   rank: 'SUBSCRIPTION',
@@ -50,13 +55,17 @@ export const REVIEW_CATEGORY_BY_CONCEPT: Readonly<Record<string, CriticalCategor
   realEstate: 'ASSET',
   vehicle: 'ASSET',
   tax: 'TAX',
+  education: 'SCOPE',
+  unmarried: 'SCOPE',
+  category: 'SCOPE',
+  recipient: 'SCOPE',
   residence: 'SCOPE',
   overseas: 'EXCEPTION',
   exceptions: 'EXCEPTION',
   childbirth: 'EXCEPTION',
 };
 
-/** Concepts stated for the whole household. Youth supply is always assessed on the applicant alone. */
+/** Default scope for household concepts; package scopeMode and rule expression override it. */
 const HOUSEHOLD_CONCEPTS = new Set(['housing', 'household', 'size', 'assets', 'realEstate', 'vehicle', 'income', 'family', 'fiveYears', 'head']);
 const APPLICANT_ONLY_SUPPLIES = new Set(['youth']);
 /** Concepts that are recorded for review but do not block activation on their own. */
@@ -87,7 +96,19 @@ export function reviewCategoryOf(rule: Pick<SourceRule, 'ruleKey' | 'category'>)
   return category;
 }
 
-function scopeOf(rule: SourceRule): string {
+function scopeOf(rule: SourceRule, pkg: ImportPackage): string {
+  const parameters = pkg.ruleSet.config.parameters as Record<string, unknown> | undefined;
+  const mode = parameters?.[`threshold.${rule.supplyType}.scopeMode`];
+  const concept = conceptOf(rule.ruleKey);
+  if (['income', 'assets', 'vehicle'].includes(concept)) {
+    if (mode === 'HOUSEHOLD_HEAD_OR_SELF') return 'HEAD_HOUSEHOLD_OR_MEMBER_APPLICANT';
+    if (mode === 'CURRENT_OR_FUTURE_HOUSEHOLD') return 'CURRENT_OR_FUTURE_HOUSEHOLD';
+    if (mode === 'APPLICANT_AND_PARENTS') return concept === 'income' ? 'APPLICANT_AND_PARENTS' : 'APPLICANT';
+  }
+  const expression = JSON.stringify(rule.config.expression ?? {});
+  if (expression.includes('spouseCanProveSubscriptionByMoveIn') || expression.includes('spouseResidence') ||
+    expression.includes('spouseIncomeSourceRegion')) return 'APPLICANT_OR_SPOUSE';
+  if (expression.includes('futureHouseholdNoHome')) return 'CURRENT_OR_FUTURE_HOUSEHOLD';
   return !APPLICANT_ONLY_SUPPLIES.has(rule.supplyType) && HOUSEHOLD_CONCEPTS.has(conceptOf(rule.ruleKey)) ? 'HOUSEHOLD' : 'APPLICANT';
 }
 
@@ -113,7 +134,7 @@ function assertAnnotationMatches(pkg: ImportPackage, annotation: ReviewSeedAnnot
   if (new Set(ids).size !== ids.length) throw new Error('REVIEW_ANNOTATION_DUPLICATE_ID');
 }
 
-function snapshot(rule: SourceRule, relatedExceptionRuleIds: string[], warnings: string[]): ReviewableRuleSnapshot {
+function snapshot(rule: SourceRule, pkg: ImportPackage, relatedExceptionRuleIds: string[], warnings: string[]): ReviewableRuleSnapshot {
   const expression = rule.config.expression as { op?: string; value?: unknown; all?: unknown[] } | undefined;
   return {
     ruleKey: rule.ruleKey,
@@ -123,7 +144,7 @@ function snapshot(rule: SourceRule, relatedExceptionRuleIds: string[], warnings:
     category: reviewCategoryOf(rule),
     operator: expression?.op ?? null,
     value: expression?.value ?? expression?.all ?? null,
-    scope: scopeOf(rule),
+    scope: scopeOf(rule, pkg),
     stage: rule.stage,
     // The package carries no scoring table, so no score is invented here.
     score: null,
@@ -180,7 +201,7 @@ export function buildAssessmentReviewSeed(
       required: critical && category !== 'EXCEPTION',
       candidateStatus: safetyBlockers.length > 0 || category === 'EXCEPTION' ? 'REVIEW_REQUIRED' : 'AUTO_SAFE_CANDIDATE',
       safetyBlockers,
-      originalCandidate: snapshot(rule, [...new Set(related)], [...new Set(warnings)]),
+      originalCandidate: snapshot(rule, pkg, [...new Set(related)], [...new Set(warnings)]),
     };
   });
 

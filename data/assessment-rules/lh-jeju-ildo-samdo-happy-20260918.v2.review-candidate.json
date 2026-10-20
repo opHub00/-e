@@ -1,0 +1,3501 @@
+{
+  "schemaVersion": 1,
+  "status": "REVIEW_CANDIDATE",
+  "public": false,
+  "approved": false,
+  "active": false,
+  "source": {
+    "url": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?aisTpCd=10&ccrCnntSysDsCd=03&mi=1026&panId=2015122300020804&uppAisTpCd=06",
+    "pdfUrl": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68665434",
+    "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+    "pages": 18,
+    "parserVersion": "document-parser-v1"
+  },
+  "ruleSet": {
+    "id": "bd20aacc-a52b-4fc9-92fe-a70cdb0a170f",
+    "version": "OFFICIAL-2026-09-18-review-v2",
+    "previousId": "20b37b91-9edf-479a-a56a-ac9d3b70c424",
+    "previousVersion": "DRAFT-2026-09-18-transcription-1",
+    "ruleCount": 44,
+    "supplyTypes": [
+      "student",
+      "youth",
+      "newlywed",
+      "senior",
+      "housingBenefit"
+    ]
+  },
+  "artifacts": {
+    "ruleSet": "lh-jeju-ildo-samdo-happy-20260918.v2.json",
+    "semanticDiff": "lh-jeju-ildo-samdo-happy-20260918.v2.review-diff.json",
+    "parameterAudit": "lh-jeju-ildo-samdo-happy-20260918.v2.parameter-audit.json",
+    "annotations": "lh-jeju-ildo-samdo-happy-20260918.v2.review-annotations.json"
+  },
+  "manualParameters": [
+    {
+      "parameterId": "threshold.student.incomeFact",
+      "supplyType": "student",
+      "v1Value": "parentApplicantMonthlyIncome",
+      "v2CandidateValue": "parentApplicantMonthlyIncome",
+      "effectiveV2ScopeMode": "APPLICANT_AND_PARENTS",
+      "source": {
+        "page": 3,
+        "section": "대학생 소득",
+        "locator": "p3 b000155; p4 t00009·가구원 산정표",
+        "sourceWording": "신청자 본인과 부모의 월평균소득 합계"
+      },
+      "interpretation": "부모가 등본에 없어도 포함하되 관계 단절·실질 부양 예외와 추가 동거인 산정은 관리자 확인. 별도 parentApplicantIncomeHouseholdSize가 비면 보류.",
+      "confidence": "HIGH",
+      "decision": "VERIFIED_WITH_SCOPE_NOTE",
+      "reviewerAction": "부모가 등본에 없어도 포함하되 관계 단절·실질 부양 예외와 추가 동거인 산정은 관리자 확인. 별도 parentApplicantIncomeHouseholdSize가 비면 보류."
+    },
+    {
+      "parameterId": "threshold.youth.incomeFact",
+      "supplyType": "youth",
+      "v1Value": "householdIncome",
+      "v2CandidateValue": "householdIncome",
+      "effectiveV2ScopeMode": "HOUSEHOLD_HEAD_OR_SELF",
+      "source": {
+        "page": 4,
+        "section": "청년 소득",
+        "locator": "p4 b000200·t00010",
+        "sourceWording": "세대주 청년은 해당 세대, 세대원 청년은 본인 기준"
+      },
+      "interpretation": "v2 scopeMode가 세대주 여부에 따라 householdIncome/monthlyIncome을 선택하는지 확인.",
+      "confidence": "HIGH",
+      "decision": "VERIFIED_WITH_SCOPE_NOTE",
+      "reviewerAction": "v2 scopeMode가 세대주 여부에 따라 householdIncome/monthlyIncome을 선택하는지 확인."
+    },
+    {
+      "parameterId": "threshold.newlywed.incomeFact",
+      "supplyType": "newlywed",
+      "v1Value": "householdIncome",
+      "v2CandidateValue": "householdIncome",
+      "effectiveV2ScopeMode": "CURRENT_OR_FUTURE_HOUSEHOLD",
+      "source": {
+        "page": 5,
+        "section": "신혼부부·예비신혼부부 소득",
+        "locator": "p5 b000262-b000264·t00016; p6 t00022",
+        "sourceWording": "예비신혼은 혼인으로 구성될 세대 소득"
+      },
+      "interpretation": "미래 세대 가구원수·맞벌이·소득을 현재 세대에서 추정하지 않는지 확인.",
+      "confidence": "HIGH",
+      "decision": "VERIFIED_WITH_SCOPE_NOTE",
+      "reviewerAction": "미래 세대 가구원수·맞벌이·소득을 현재 세대에서 추정하지 않는지 확인."
+    },
+    {
+      "parameterId": "threshold.newlywed.incomePercent.single.1",
+      "supplyType": "newlywed",
+      "v1Value": 120,
+      "v2CandidateValue": null,
+      "effectiveV2ScopeMode": "CURRENT_OR_FUTURE_HOUSEHOLD",
+      "source": {
+        "page": 5,
+        "section": "신혼부부 일반 소득표",
+        "locator": "p5 t00016·1인 행 없음",
+        "sourceWording": "표는 2인 가구부터 시작"
+      },
+      "interpretation": "v2 null 유지. 1인 신혼/예비신혼 판정 시 기본 비율 대체 금지.",
+      "confidence": "HIGH",
+      "decision": "NOT_IN_SOURCE",
+      "reviewerAction": "v2 null 유지. 1인 신혼/예비신혼 판정 시 기본 비율 대체 금지."
+    },
+    {
+      "parameterId": "threshold.newlywed.incomePercent.dual.1",
+      "supplyType": "newlywed",
+      "v1Value": 120,
+      "v2CandidateValue": null,
+      "effectiveV2ScopeMode": "CURRENT_OR_FUTURE_HOUSEHOLD",
+      "source": {
+        "page": 5,
+        "section": "신혼부부 맞벌이 소득표",
+        "locator": "p5 t00016·1인 행 없음",
+        "sourceWording": "표는 2인 가구부터 시작"
+      },
+      "interpretation": "v2 null 유지. 맞벌이 1인 값 추정 금지.",
+      "confidence": "HIGH",
+      "decision": "NOT_IN_SOURCE",
+      "reviewerAction": "v2 null 유지. 맞벌이 1인 값 추정 금지."
+    },
+    {
+      "parameterId": "threshold.senior.incomeFact",
+      "supplyType": "senior",
+      "v1Value": "householdIncome",
+      "v2CandidateValue": "householdIncome",
+      "effectiveV2ScopeMode": null,
+      "source": {
+        "page": 6,
+        "section": "고령자 소득",
+        "locator": "p6 b000331-b000333·t00024",
+        "sourceWording": "해당 세대의 월평균소득"
+      },
+      "interpretation": "가구원수별 한도와 현재 세대 소득을 사용.",
+      "confidence": "HIGH",
+      "decision": "VERIFIED",
+      "reviewerAction": "가구원수별 한도와 현재 세대 소득을 사용."
+    },
+    {
+      "parameterId": "threshold.student.vehicle.0",
+      "supplyType": "student",
+      "v1Value": 0,
+      "v2CandidateValue": null,
+      "effectiveV2ScopeMode": "APPLICANT_AND_PARENTS",
+      "source": {
+        "page": 3,
+        "section": "대학생 자동차",
+        "locator": "p3 b000167·t00007·자동차 열",
+        "sourceWording": "신청자 본인은 자동차를 소유하지 않을 것; 표의 자동차 열은 대시"
+      },
+      "interpretation": "금액 0원 한도로 해석하지 않음. v2 null; 본인 자동차 미소유 Rule을 별도 검수.",
+      "confidence": "HIGH",
+      "decision": "NOT_IN_SOURCE",
+      "reviewerAction": "금액 0원 한도로 해석하지 않음. v2 null; 본인 자동차 미소유 Rule을 별도 검수."
+    },
+    {
+      "parameterId": "threshold.student.vehicle.1",
+      "supplyType": "student",
+      "v1Value": 0,
+      "v2CandidateValue": null,
+      "effectiveV2ScopeMode": "APPLICANT_AND_PARENTS",
+      "source": {
+        "page": 3,
+        "section": "대학생 자동차·출생자녀 1명",
+        "locator": "p3 b000167·t00007·자동차 열",
+        "sourceWording": "신청자 본인 자동차 미소유; 금액 셀 없음"
+      },
+      "interpretation": "출생자녀 가산으로 자동차 보유 허용을 추정하지 않음. v2 null.",
+      "confidence": "HIGH",
+      "decision": "NOT_IN_SOURCE",
+      "reviewerAction": "출생자녀 가산으로 자동차 보유 허용을 추정하지 않음. v2 null."
+    },
+    {
+      "parameterId": "threshold.student.vehicle.2",
+      "supplyType": "student",
+      "v1Value": 0,
+      "v2CandidateValue": null,
+      "effectiveV2ScopeMode": "APPLICANT_AND_PARENTS",
+      "source": {
+        "page": 3,
+        "section": "대학생 자동차·출생자녀 2명 이상",
+        "locator": "p3 b000167·t00007·자동차 열",
+        "sourceWording": "신청자 본인 자동차 미소유; 금액 셀 없음"
+      },
+      "interpretation": "출생자녀 가산으로 자동차 보유 허용을 추정하지 않음. v2 null.",
+      "confidence": "HIGH",
+      "decision": "NOT_IN_SOURCE",
+      "reviewerAction": "출생자녀 가산으로 자동차 보유 허용을 추정하지 않음. v2 null."
+    }
+  ],
+  "warnings": [
+    {
+      "id": "W01",
+      "ruleId": "student.income",
+      "supplyType": "student",
+      "message": "본인·부모 합산 소득과 1~6인 가구별 100/110/120% 표의 읽기 순서를 원문과 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "부모 포함 가구원수와 관계 단절 예외를 실제 입력과 대조"
+    },
+    {
+      "id": "W02",
+      "ruleId": "student.assets",
+      "supplyType": "student",
+      "message": "본인 자산과 출생자녀 0/1/2명 가산 표를 원문과 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "신청자 본인 총자산만 선택되는지 검증"
+    },
+    {
+      "id": "W03",
+      "ruleId": "student.vehicle",
+      "supplyType": "student",
+      "message": "대학생은 자동차를 소유하지 않는 조건과 출생자녀 가산 표의 자동차 열을 함께 확인해 주세요.",
+      "classification": "RULE_SEMANTIC_RISK",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": true,
+      "recommendedAction": "0원 자동차가액 한도 대신 본인 자동차 미소유를 확인"
+    },
+    {
+      "id": "W04",
+      "ruleId": "student.rank1",
+      "supplyType": "student",
+      "message": "제주 거주 또는 제주 대학 소재지 중 하나가 1순위인 표를 확인해 주세요.",
+      "classification": "EVIDENCE_RISK",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "대학생 1순위 표의 제주 거주·학교 소재지 셀 확인"
+    },
+    {
+      "id": "W05",
+      "ruleId": "youth.income",
+      "supplyType": "youth",
+      "message": "세대주/세대원 분기와 1~6인 가구별 100/110/120% 한도를 함께 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "세대주/세대원 소득 분기와 1인 기준 대조"
+    },
+    {
+      "id": "W06",
+      "ruleId": "youth.assets",
+      "supplyType": "youth",
+      "message": "세대주/세대원 자산 대상과 출생자녀 0/1/2명 가산 한도를 함께 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "세대주/세대원 자산 적용 대상을 대조"
+    },
+    {
+      "id": "W07",
+      "ruleId": "youth.vehicle",
+      "supplyType": "youth",
+      "message": "세대주/세대원 자동차 대상과 출생자녀 0/1/2명 가산 한도를 함께 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "세대주/세대원 자동차 적용 대상을 대조"
+    },
+    {
+      "id": "W08",
+      "ruleId": "newlywed.category",
+      "supplyType": "newlywed",
+      "message": "신혼·예비신혼·한부모의 요건 번호와 미래 세대 적용 범위를 원문에서 각각 확인해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "신혼·예비신혼·한부모 조건 분기를 대조"
+    },
+    {
+      "id": "W09",
+      "ruleId": "newlywed.income",
+      "supplyType": "newlywed",
+      "message": "맞벌이 여부·가구원 수·출생자녀 수별 100~140% 한도를 원문 표와 대조해 주세요.",
+      "classification": "RULE_SEMANTIC_RISK",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": true,
+      "recommendedAction": "맞벌이·가구원수·자녀 가산과 1인 빈 셀 확인"
+    },
+    {
+      "id": "W10",
+      "ruleId": "newlywed.assets",
+      "supplyType": "newlywed",
+      "message": "현재/미래 세대 자산과 0/1/2명 출생자녀 가산 한도를 원문 표와 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "예비신혼 미래 세대 자산 범위 확인"
+    },
+    {
+      "id": "W11",
+      "ruleId": "newlywed.vehicle",
+      "supplyType": "newlywed",
+      "message": "현재/미래 세대 자동차와 0/1/2명 출생자녀 가산 한도를 원문 표와 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "예비신혼 미래 세대 자동차 범위 확인"
+    },
+    {
+      "id": "W12",
+      "ruleId": "newlywed.rank1",
+      "supplyType": "newlywed",
+      "message": "PDF 6쪽의 본인·배우자·예비배우자 거주지 또는 소득근거지 기준을 확인해 주세요.",
+      "classification": "EVIDENCE_RISK",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "수정된 p6 t00021 1순위 셀을 관리자 확인"
+    },
+    {
+      "id": "W13",
+      "ruleId": "senior.income",
+      "supplyType": "senior",
+      "message": "가구원 수별 100/110/120% 표와 출생자녀 가산 한도를 원문과 대조해 주세요.",
+      "classification": "SAFE_WARNING",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": false,
+      "recommendedAction": "표 셀 수치 147개 audit의 MATCH 근거 확인"
+    },
+    {
+      "id": "W14",
+      "ruleId": "senior.assets",
+      "supplyType": "senior",
+      "message": "3억 4,500만원 기본 한도와 0/1/2명 출생자녀 가산 한도를 대조해 주세요.",
+      "classification": "SAFE_WARNING",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": false,
+      "recommendedAction": "표 셀 수치 147개 audit의 MATCH 근거 확인"
+    },
+    {
+      "id": "W15",
+      "ruleId": "senior.vehicle",
+      "supplyType": "senior",
+      "message": "4,542만원 기본 한도와 0/1/2명 출생자녀 가산 한도를 대조해 주세요.",
+      "classification": "SAFE_WARNING",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": false,
+      "recommendedAction": "표 셀 수치 147개 audit의 MATCH 근거 확인"
+    },
+    {
+      "id": "W16",
+      "ruleId": "housingBenefit.recipient",
+      "supplyType": "housingBenefit",
+      "message": "주거급여 수급권자 또는 수급자 정의와 세대 범위를 대조해 주세요.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "주거급여 수급권자·수급자 범위 확인"
+    },
+    {
+      "id": "W17",
+      "ruleId": "student.income",
+      "supplyType": "student",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "v2 부모 합산 소득·가구원수 입력 경로 확인"
+    },
+    {
+      "id": "W18",
+      "ruleId": "youth.income",
+      "supplyType": "youth",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다.",
+      "classification": "REQUIRES_ADMIN_DECISION",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "v2 세대주/세대원 소득 입력 경로 확인"
+    },
+    {
+      "id": "W19",
+      "ruleId": "newlywed.householdNoHome",
+      "supplyType": "newlywed",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다.",
+      "classification": "RULE_SEMANTIC_RISK",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": true,
+      "recommendedAction": "예비신혼 미래 세대 무주택을 현재 세대에서 유추하지 않는지 확인"
+    },
+    {
+      "id": "W20",
+      "ruleId": "newlywed.account",
+      "supplyType": "newlywed",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다.",
+      "classification": "RULE_SEMANTIC_RISK",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": false,
+      "adminDecisionRequired": true,
+      "recommendedAction": "한부모 본인 및 신혼 부부 중 1인 계좌 증빙 분기 확인"
+    },
+    {
+      "id": "W21",
+      "ruleId": "newlywed.rank1",
+      "supplyType": "newlywed",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다.",
+      "classification": "EVIDENCE_RISK",
+      "assessmentImpactPossible": false,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "신청자·배우자 제주 거주/소득근거지와 p6 근거 확인"
+    },
+    {
+      "id": "W22",
+      "ruleId": "newlywed.income",
+      "supplyType": "newlywed",
+      "message": "공고 표에 1인 신혼 가구 소득 셀이 없어 v1의 1인 percentage parameter 2개를 null로 보류했습니다. 승인 전 적용 가능성을 별도 검수해야 합니다.",
+      "classification": "BLOCKER",
+      "assessmentImpactPossible": true,
+      "evidenceImpactPossible": true,
+      "adminDecisionRequired": true,
+      "recommendedAction": "표에 없는 1인 소득 비율 두 셀을 null로 유지하고 보류 판정 확인"
+    }
+  ],
+  "unresolved": {
+    "unresolvedId": "jeju-v2-human-scope-review",
+    "type": "SCOPE_AND_PARAMETER_REVIEW_REQUIRED",
+    "description": "147개 중 수동 확인 9개와 신규 scoped fact 입력 경로를 승인 전 대조해야 합니다.",
+    "ruleKeys": [
+      "student.income",
+      "youth.income",
+      "newlywed.income",
+      "newlywed.account",
+      "newlywed.rank1"
+    ],
+    "decision": "UNRESOLVED_BLOCKER",
+    "causes": [
+      "SOURCE_CELL_ABSENT",
+      "INPUT_SCOPE_MAPPING_NOT_VERIFIED",
+      "REVIEW_SEED_SCOPE_PRESENTATION_MISMATCH"
+    ],
+    "nextAction": "1인 표 셀 보류를 유지하고, 부모·세대주·미래 세대 입력 및 관리자 검수 화면의 scope를 확인한다."
+  },
+  "semanticChanges": [
+    {
+      "ruleId": "student.applicantAgeOrException",
+      "supplyType": "student",
+      "v1Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "성년·미성년 세대주 예외 조건; 두 단이 섞인 근거",
+      "v2Scope": "같은 조건; p2 오른쪽 단락 crop 근거",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p2 원문과 예외 적용 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "student.income",
+      "supplyType": "student",
+      "v1Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "부모·본인 합산 소득이나 현재 가구원수로 한도 선택",
+      "v2Scope": "부모·본인 합산 소득과 별도 산정 가구원수",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000155",
+            "page": 3,
+            "bbox": [
+              59.335155,
+              291.178193,
+              786.9402966735446,
+              299.213838
+            ]
+          },
+          {
+            "id": "b000156",
+            "page": 3,
+            "bbox": [
+              48.786683000000004,
+              302.572018,
+              710.703301,
+              310.487728
+            ]
+          },
+          {
+            "id": "b000158",
+            "page": 3,
+            "bbox": [
+              501.531896,
+              324.759993,
+              784.063129,
+              331.836158
+            ]
+          },
+          {
+            "id": "b000160",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              333.875053,
+              785.7800126870001,
+              340.951218
+            ]
+          },
+          {
+            "id": "b000161",
+            "page": 3,
+            "bbox": [
+              43.272709,
+              342.53436,
+              785.7800126870001,
+              350.33013500000004
+            ]
+          },
+          {
+            "id": "b000162",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              352.105173,
+              785.7800126870001,
+              359.181338
+            ]
+          },
+          {
+            "id": "b000163",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              361.220233,
+              785.7800126870001,
+              369.039995
+            ]
+          },
+          {
+            "id": "b000164",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              370.215358,
+              785.7800126870001,
+              377.291523
+            ]
+          },
+          {
+            "id": "b000165",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              378.27499,
+              785.7800126870001,
+              386.406583
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000155",
+            "page": 3,
+            "bbox": [
+              59.335155,
+              291.178193,
+              786.9402966735446,
+              299.213838
+            ]
+          },
+          {
+            "id": "b000156",
+            "page": 3,
+            "bbox": [
+              48.786683000000004,
+              302.572018,
+              710.703301,
+              310.487728
+            ]
+          },
+          {
+            "id": "b000158",
+            "page": 3,
+            "bbox": [
+              501.531896,
+              324.759993,
+              784.063129,
+              331.836158
+            ]
+          },
+          {
+            "id": "b000160",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              333.875053,
+              785.7800126870001,
+              340.951218
+            ]
+          },
+          {
+            "id": "b000161",
+            "page": 3,
+            "bbox": [
+              43.272709,
+              342.53436,
+              785.7800126870001,
+              350.33013500000004
+            ]
+          },
+          {
+            "id": "b000162",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              352.105173,
+              785.7800126870001,
+              359.181338
+            ]
+          },
+          {
+            "id": "b000163",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              361.220233,
+              785.7800126870001,
+              369.039995
+            ]
+          },
+          {
+            "id": "b000164",
+            "page": 3,
+            "bbox": [
+              510.162464,
+              370.215358,
+              785.7800126870001,
+              377.291523
+            ]
+          },
+          {
+            "id": "b000165",
+            "page": 3,
+            "bbox": [
+              35.720962,
+              378.27499,
+              785.7800126870001,
+              386.406583
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "부모 포함 규모 미상이면 확인 필요",
+      "regressionImpact": "부모 포함 규모 미상이면 확인 필요",
+      "adminReviewPoint": "부모 관계 단절·동거인 산정 대조",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "student.assets",
+      "supplyType": "student",
+      "v1Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "현재 세대 총자산",
+      "v2Scope": "신청자 본인 총자산",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000168",
+            "page": 3,
+            "bbox": [
+              48.187338000000004,
+              414.111568,
+              729.662261516,
+              421.667473
+            ]
+          },
+          {
+            "id": "b000170",
+            "page": 3,
+            "bbox": [
+              55.259609000000005,
+              435.340063,
+              766.449937747,
+              443.495643
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          },
+          {
+            "id": "b000177",
+            "page": 3,
+            "bbox": [
+              604.259629,
+              486.432373,
+              777.49310911,
+              493.508538
+            ]
+          },
+          {
+            "id": "b000178",
+            "page": 3,
+            "bbox": [
+              64.010046,
+              490.98990299999997,
+              777.49310911,
+              502.623598
+            ]
+          },
+          {
+            "id": "b000179",
+            "page": 3,
+            "bbox": [
+              541.208535,
+              504.662493,
+              777.49310911,
+              511.738658
+            ]
+          },
+          {
+            "id": "b000181",
+            "page": 3,
+            "bbox": [
+              595.389323,
+              513.777553,
+              777.49310911,
+              520.8537180000001
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000168",
+            "page": 3,
+            "bbox": [
+              48.187338000000004,
+              414.111568,
+              729.662261516,
+              421.667473
+            ]
+          },
+          {
+            "id": "b000170",
+            "page": 3,
+            "bbox": [
+              55.259609000000005,
+              435.340063,
+              766.449937747,
+              443.495643
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          },
+          {
+            "id": "b000177",
+            "page": 3,
+            "bbox": [
+              604.259629,
+              486.432373,
+              777.49310911,
+              493.508538
+            ]
+          },
+          {
+            "id": "b000178",
+            "page": 3,
+            "bbox": [
+              64.010046,
+              490.98990299999997,
+              777.49310911,
+              502.623598
+            ]
+          },
+          {
+            "id": "b000179",
+            "page": 3,
+            "bbox": [
+              541.208535,
+              504.662493,
+              777.49310911,
+              511.738658
+            ]
+          },
+          {
+            "id": "b000181",
+            "page": 3,
+            "bbox": [
+              595.389323,
+              513.777553,
+              777.49310911,
+              520.8537180000001
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "동거 세대 재산만으로 탈락시키지 않음",
+      "regressionImpact": "동거 세대 재산만으로 탈락시키지 않음",
+      "adminReviewPoint": "본인 자산 fact 입력 경로",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "student.vehicle",
+      "supplyType": "student",
+      "v1Condition": {
+        "fact": "vehicleValue",
+        "op": "eq",
+        "value": 0
+      },
+      "v2Condition": {
+        "fact": "applicantOwnsVehicle",
+        "op": "eq",
+        "value": false
+      },
+      "v1Scope": "세대 자동차가액=0",
+      "v2Scope": "신청자 본인 자동차 보유 여부=false; 금액표 셀 null",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000167",
+            "page": 3,
+            "bbox": [
+              43.15284,
+              399.839303,
+              809.11575,
+              409.578025
+            ]
+          },
+          {
+            "id": "b000173",
+            "page": 3,
+            "bbox": [
+              550.078841,
+              468.202253,
+              777.49310911,
+              475.278418
+            ]
+          }
+        ]
+      },
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "userImpact": "세대원 차량 때문에 자동 탈락하지 않음",
+      "regressionImpact": "세대원 차량 때문에 자동 탈락하지 않음",
+      "adminReviewPoint": "자동차 소유 사실과 평가액 구별",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "youth.applicantAgeOrException",
+      "supplyType": "youth",
+      "v1Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "성년·미성년 세대주 예외 조건; 두 단이 섞인 근거",
+      "v2Scope": "같은 조건; p2 오른쪽 단락 crop 근거",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p2 원문과 예외 적용 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "youth.income",
+      "supplyType": "youth",
+      "v1Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "모두 세대 소득",
+      "v2Scope": "세대주는 세대 소득, 세대원은 본인 소득·1인 한도",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000200",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              170.16377799999998,
+              810.5538303799,
+              177.23994299999998
+            ]
+          },
+          {
+            "id": "b000202",
+            "page": 4,
+            "bbox": [
+              467.369231,
+              181.19779800000003,
+              627.6344196402723,
+              188.27396300000004
+            ]
+          },
+          {
+            "id": "b000204",
+            "page": 4,
+            "bbox": [
+              466.170541,
+              192.23181799999998,
+              711.062908,
+              199.30798299999998
+            ]
+          },
+          {
+            "id": "b000208",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              225.33387800000003,
+              775.4716263071,
+              232.41004300000003
+            ]
+          },
+          {
+            "id": "b000210",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              234.568873,
+              775.4716263071,
+              241.645038
+            ]
+          },
+          {
+            "id": "b000211",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              241.43275304999997,
+              775.4716263071,
+              250.88003299999997
+            ]
+          },
+          {
+            "id": "b000212",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              252.918928,
+              775.4716263071,
+              261.194443
+            ]
+          },
+          {
+            "id": "b000213",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              262.393793,
+              775.4716263071,
+              269.469958
+            ]
+          },
+          {
+            "id": "b000214",
+            "page": 4,
+            "bbox": [
+              77.91485,
+              269.350023,
+              775.4716263071,
+              278.704953
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000200",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              170.16377799999998,
+              810.5538303799,
+              177.23994299999998
+            ]
+          },
+          {
+            "id": "b000202",
+            "page": 4,
+            "bbox": [
+              467.369231,
+              181.19779800000003,
+              627.6344196402723,
+              188.27396300000004
+            ]
+          },
+          {
+            "id": "b000204",
+            "page": 4,
+            "bbox": [
+              466.170541,
+              192.23181799999998,
+              711.062908,
+              199.30798299999998
+            ]
+          },
+          {
+            "id": "b000208",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              225.33387800000003,
+              775.4716263071,
+              232.41004300000003
+            ]
+          },
+          {
+            "id": "b000210",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              234.568873,
+              775.4716263071,
+              241.645038
+            ]
+          },
+          {
+            "id": "b000211",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              241.43275304999997,
+              775.4716263071,
+              250.88003299999997
+            ]
+          },
+          {
+            "id": "b000212",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              252.918928,
+              775.4716263071,
+              261.194443
+            ]
+          },
+          {
+            "id": "b000213",
+            "page": 4,
+            "bbox": [
+              546.6026400000001,
+              262.393793,
+              775.4716263071,
+              269.469958
+            ]
+          },
+          {
+            "id": "b000214",
+            "page": 4,
+            "bbox": [
+              77.91485,
+              269.350023,
+              775.4716263071,
+              278.704953
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "세대원 판정 결과가 달라질 수 있음",
+      "regressionImpact": "세대원 판정 결과가 달라질 수 있음",
+      "adminReviewPoint": "세대주 여부 미상이면 보류",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "youth.assets",
+      "supplyType": "youth",
+      "v1Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "모두 세대 자산",
+      "v2Scope": "세대주는 세대 자산, 세대원은 본인 자산",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000221",
+            "page": 4,
+            "bbox": [
+              544.2052600000001,
+              330.996613,
+              726.186060516,
+              338.072778
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000221",
+            "page": 4,
+            "bbox": [
+              544.2052600000001,
+              330.996613,
+              726.186060516,
+              338.072778
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "세대원 자산 판정이 달라질 수 있음",
+      "regressionImpact": "세대원 자산 판정이 달라질 수 있음",
+      "adminReviewPoint": "세대주/세대원 자산 source",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "youth.vehicle",
+      "supplyType": "youth",
+      "v1Condition": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "모두 세대 자동차",
+      "v2Scope": "세대주는 세대 자동차, 세대원은 본인 자동차",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000217",
+            "page": 4,
+            "bbox": [
+              456.22141400000004,
+              301.012863,
+              769.7990296735445,
+              308.089028
+            ]
+          },
+          {
+            "id": "b000228",
+            "page": 4,
+            "bbox": [
+              39.916377000000004,
+              383.648078,
+              783.224046,
+              393.02699500000006
+            ]
+          },
+          {
+            "id": "b000231",
+            "page": 4,
+            "bbox": [
+              30.206988000000003,
+              404.396833,
+              783.224046,
+              412.192608
+            ]
+          },
+          {
+            "id": "b000232",
+            "page": 4,
+            "bbox": [
+              39.676639,
+              414.951113,
+              783.224046,
+              422.746888
+            ]
+          },
+          {
+            "id": "b000234",
+            "page": 4,
+            "bbox": [
+              40.036246,
+              434.500518,
+              783.224046,
+              443.975383
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "세대원 차량 판정이 달라질 수 있음",
+      "regressionImpact": "세대원 차량 판정이 달라질 수 있음",
+      "adminReviewPoint": "가구/본인 차량 입력 분리",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "youth.rank1",
+      "supplyType": "youth",
+      "v1Condition": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "v2Condition": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "v1Scope": "제주 거주 또는 소득 근거지; 잘못된 표 locator",
+      "v2Scope": "같은 조건; p5 t00019 1순위 셀",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          4
+        ],
+        "blocks": [
+          {
+            "id": "b000236",
+            "page": 4,
+            "bbox": [
+              33.803058,
+              450.59579500000007,
+              783.224046,
+              461.246023
+            ]
+          },
+          {
+            "id": "b000239",
+            "page": 4,
+            "bbox": [
+              50.34498,
+              468.921863,
+              783.224046,
+              480.795428
+            ]
+          },
+          {
+            "id": "b000242",
+            "page": 4,
+            "bbox": [
+              50.34498,
+              496.626848,
+              180.163107,
+              503.703013
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "tables": [
+          {
+            "id": "t00019",
+            "page": 5,
+            "row": 0,
+            "columns": [
+              0,
+              1
+            ],
+            "bbox": [
+              34.762,
+              433.507,
+              384.659,
+              491.20799999999997
+            ]
+          }
+        ],
+        "normalization": "PDF_TABLE_CELL_READING_ORDER_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p5 표 셀 직접 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.applicantAgeOrException",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "성년·미성년 세대주 예외 조건; 두 단이 섞인 근거",
+      "v2Scope": "같은 조건; p2 오른쪽 단락 crop 근거",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p2 원문과 예외 적용 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.householdNoHome",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "householdNoHome",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "engaged"
+              },
+              {
+                "fact": "futureHouseholdNoHome",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "singleParent"
+                  }
+                ]
+              },
+              {
+                "fact": "householdNoHome",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "v1Scope": "현재 세대 무주택",
+      "v2Scope": "예비신혼은 혼인 예정 세대, 그 외 현재 세대 무주택",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000252",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              82.61122799999998,
+              812.4731128592555,
+              91.72628800000001
+            ]
+          },
+          {
+            "id": "b000253",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              93.79276804999995,
+              812.4723696360942,
+              102.76030800000001
+            ]
+          },
+          {
+            "id": "b000288",
+            "page": 5,
+            "bbox": [
+              463.29368500000004,
+              376.332043,
+              658.320548,
+              383.408208
+            ]
+          },
+          {
+            "id": "b000354",
+            "page": 6,
+            "bbox": [
+              30.206988000000003,
+              392.76313799999997,
+              746.304394,
+              401.638328
+            ]
+          },
+          {
+            "id": "b000355",
+            "page": 6,
+            "bbox": [
+              39.796508,
+              404.756638,
+              747.9822123799,
+              413.991633
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000252",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              82.61122799999998,
+              812.4731128592555,
+              91.72628800000001
+            ]
+          },
+          {
+            "id": "b000253",
+            "page": 5,
+            "bbox": [
+              71.681662,
+              93.79276804999995,
+              812.4723696360942,
+              102.76030800000001
+            ]
+          },
+          {
+            "id": "b000288",
+            "page": 5,
+            "bbox": [
+              463.29368500000004,
+              376.332043,
+              658.320548,
+              383.408208
+            ]
+          },
+          {
+            "id": "b000354",
+            "page": 6,
+            "bbox": [
+              30.206988000000003,
+              392.76313799999997,
+              746.304394,
+              401.638328
+            ]
+          },
+          {
+            "id": "b000355",
+            "page": 6,
+            "bbox": [
+              39.796508,
+              404.756638,
+              747.9822123799,
+              413.991633
+            ]
+          }
+        ]
+      },
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "userImpact": "현재 세대 소유 때문에 예비신혼 자동 탈락 금지",
+      "regressionImpact": "현재 세대 소유 때문에 예비신혼 자동 탈락 금지",
+      "adminReviewPoint": "미래 세대 구성원 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.income",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "incomeWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "현재 세대 소득·규모·맞벌이",
+      "v2Scope": "예비신혼은 미래 세대 소득·규모·맞벌이; 1인 셀 보류",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000262",
+            "page": 5,
+            "bbox": [
+              39.55677,
+              198.228568,
+              810.434309,
+              205.784473
+            ]
+          },
+          {
+            "id": "b000263",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              209.502458,
+              683.852645,
+              217.05836300000004
+            ]
+          },
+          {
+            "id": "b000264",
+            "page": 5,
+            "bbox": [
+              39.676639,
+              220.89628300000004,
+              746.064656,
+              228.45218800000004
+            ]
+          },
+          {
+            "id": "b000269",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              260.714703,
+              791.533724687,
+              267.790868
+            ]
+          },
+          {
+            "id": "b000271",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              271.868658,
+              791.533724687,
+              278.944823
+            ]
+          },
+          {
+            "id": "b000273",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              282.902678,
+              791.533724687,
+              289.978843
+            ]
+          },
+          {
+            "id": "b000275",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              294.056633,
+              791.533724687,
+              301.132798
+            ]
+          },
+          {
+            "id": "b000276",
+            "page": 5,
+            "bbox": [
+              80.791706,
+              302.811888,
+              791.533724687,
+              312.286753
+            ]
+          },
+          {
+            "id": "b000312",
+            "page": 6,
+            "bbox": [
+              155.470093,
+              44.711768000000006,
+              377.10787400000004,
+              51.78793299999995
+            ]
+          },
+          {
+            "id": "b000313",
+            "page": 6,
+            "bbox": [
+              202.57861,
+              53.82682799999998,
+              377.10787400000004,
+              60.902992999999924
+            ]
+          },
+          {
+            "id": "b000314",
+            "page": 6,
+            "bbox": [
+              116.27293,
+              58.264422999999965,
+              807.5583760125168,
+              79.01317799999993
+            ]
+          },
+          {
+            "id": "b000315",
+            "page": 6,
+            "bbox": [
+              146.599787,
+              81.05207300000006,
+              377.10787400000004,
+              88.12823800000001
+            ]
+          },
+          {
+            "id": "b000316",
+            "page": 6,
+            "bbox": [
+              193.708304,
+              90.16713299999998,
+              377.10787400000004,
+              97.24329799999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5,
+          6
+        ],
+        "blocks": [
+          {
+            "id": "b000262",
+            "page": 5,
+            "bbox": [
+              39.55677,
+              198.228568,
+              810.434309,
+              205.784473
+            ]
+          },
+          {
+            "id": "b000263",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              209.502458,
+              683.852645,
+              217.05836300000004
+            ]
+          },
+          {
+            "id": "b000264",
+            "page": 5,
+            "bbox": [
+              39.676639,
+              220.89628300000004,
+              746.064656,
+              228.45218800000004
+            ]
+          },
+          {
+            "id": "b000269",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              260.714703,
+              791.533724687,
+              267.790868
+            ]
+          },
+          {
+            "id": "b000271",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              271.868658,
+              791.533724687,
+              278.944823
+            ]
+          },
+          {
+            "id": "b000273",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              282.902678,
+              791.533724687,
+              289.978843
+            ]
+          },
+          {
+            "id": "b000275",
+            "page": 5,
+            "bbox": [
+              498.175564,
+              294.056633,
+              791.533724687,
+              301.132798
+            ]
+          },
+          {
+            "id": "b000276",
+            "page": 5,
+            "bbox": [
+              80.791706,
+              302.811888,
+              791.533724687,
+              312.286753
+            ]
+          },
+          {
+            "id": "b000312",
+            "page": 6,
+            "bbox": [
+              155.470093,
+              44.711768000000006,
+              377.10787400000004,
+              51.78793299999995
+            ]
+          },
+          {
+            "id": "b000313",
+            "page": 6,
+            "bbox": [
+              202.57861,
+              53.82682799999998,
+              377.10787400000004,
+              60.902992999999924
+            ]
+          },
+          {
+            "id": "b000314",
+            "page": 6,
+            "bbox": [
+              116.27293,
+              58.264422999999965,
+              807.5583760125168,
+              79.01317799999993
+            ]
+          },
+          {
+            "id": "b000315",
+            "page": 6,
+            "bbox": [
+              146.599787,
+              81.05207300000006,
+              377.10787400000004,
+              88.12823800000001
+            ]
+          },
+          {
+            "id": "b000316",
+            "page": 6,
+            "bbox": [
+              193.708304,
+              90.16713299999998,
+              377.10787400000004,
+              97.24329799999998
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "미래 세대 값 미상이면 확인 필요",
+      "regressionImpact": "미래 세대 값 미상이면 확인 필요",
+      "adminReviewPoint": "미래 세대 및 null 셀",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.assets",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "assetsWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "현재 세대 자산",
+      "v2Scope": "예비신혼은 미래 세대 자산",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "현 세대 자산으로 예비신혼 탈락 금지",
+      "regressionImpact": "현 세대 자산으로 예비신혼 탈락 금지",
+      "adminReviewPoint": "미래 세대 자산 입력",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.vehicle",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "vehicleWithinAnnouncementLimit",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "현재 세대 자동차",
+      "v2Scope": "예비신혼은 미래 세대 자동차",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000294",
+            "page": 5,
+            "bbox": [
+              612.290852,
+              436.659348,
+              797.3682403799,
+              444.814928
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000280",
+            "page": 5,
+            "bbox": [
+              462.814209,
+              330.87667799999997,
+              810.4177670780001,
+              337.952843
+            ]
+          },
+          {
+            "id": "b000282",
+            "page": 5,
+            "bbox": [
+              471.08517,
+              342.270503,
+              620.681682,
+              349.346668
+            ]
+          },
+          {
+            "id": "b000294",
+            "page": 5,
+            "bbox": [
+              612.290852,
+              436.659348,
+              797.3682403799,
+              444.814928
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000297",
+            "page": 5,
+            "bbox": [
+              623.079062,
+              455.968883,
+              797.608326,
+              463.045048
+            ]
+          },
+          {
+            "id": "b000298",
+            "page": 5,
+            "bbox": [
+              476.599144,
+              465.083943,
+              797.608326,
+              472.160108
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000300",
+            "page": 5,
+            "bbox": [
+              614.208756,
+              483.314063,
+              797.608326,
+              490.390228
+            ]
+          }
+        ]
+      },
+      "changeReason": "SCOPED_PARAMETER_MAPPING",
+      "userImpact": "현 세대 차량으로 예비신혼 탈락 금지",
+      "regressionImpact": "현 세대 차량으로 예비신혼 탈락 금지",
+      "adminReviewPoint": "미래 세대 자동차 입력",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.account",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "fact": "canProveSubscriptionByMoveIn",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "singleParent"
+              },
+              {
+                "fact": "applicantCanProveSubscriptionByMoveIn",
+                "op": "eq",
+                "value": true
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "engaged"
+                  }
+                ]
+              },
+              {
+                "any": [
+                  {
+                    "fact": "applicantCanProveSubscriptionByMoveIn",
+                    "op": "eq",
+                    "value": true
+                  },
+                  {
+                    "fact": "spouseCanProveSubscriptionByMoveIn",
+                    "op": "eq",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "v1Scope": "청약통장 증빙 단일 사실",
+      "v2Scope": "신혼·예비신혼은 본인/배우자 중 1인, 한부모는 본인",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000284",
+            "page": 5,
+            "bbox": [
+              463.053947,
+              353.544393,
+              810.4339613799,
+              360.620558
+            ]
+          },
+          {
+            "id": "b000285",
+            "page": 5,
+            "bbox": [
+              36.200438,
+              363.738868,
+              736.587333384,
+              372.014383
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000284",
+            "page": 5,
+            "bbox": [
+              463.053947,
+              353.544393,
+              810.4339613799,
+              360.620558
+            ]
+          },
+          {
+            "id": "b000285",
+            "page": 5,
+            "bbox": [
+              36.200438,
+              363.738868,
+              736.587333384,
+              372.014383
+            ]
+          },
+          {
+            "id": "b000289",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              391.443853,
+              749.680384516,
+              399.719368
+            ]
+          }
+        ]
+      },
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "userImpact": "배우자 계좌 허용 범위가 달라짐",
+      "regressionImpact": "배우자 계좌 허용 범위가 달라짐",
+      "adminReviewPoint": "한부모에 배우자 계좌 차용 금지",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "newlywed.rank1",
+      "supplyType": "newlywed",
+      "v1Condition": {
+        "any": [
+          {
+            "fact": "residence",
+            "op": "eq",
+            "value": "제주특별자치도"
+          },
+          {
+            "fact": "incomeSourceRegion",
+            "op": "eq",
+            "value": "제주특별자치도"
+          }
+        ]
+      },
+      "v2Condition": {
+        "any": [
+          {
+            "all": [
+              {
+                "fact": "familyCategory",
+                "op": "eq",
+                "value": "singleParent"
+              },
+              {
+                "any": [
+                  {
+                    "fact": "residence",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  },
+                  {
+                    "fact": "incomeSourceRegion",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "any": [
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "married"
+                  },
+                  {
+                    "fact": "familyCategory",
+                    "op": "eq",
+                    "value": "engaged"
+                  }
+                ]
+              },
+              {
+                "any": [
+                  {
+                    "any": [
+                      {
+                        "fact": "residence",
+                        "op": "eq",
+                        "value": "제주특별자치도"
+                      },
+                      {
+                        "fact": "incomeSourceRegion",
+                        "op": "eq",
+                        "value": "제주특별자치도"
+                      }
+                    ]
+                  },
+                  {
+                    "fact": "spouseResidence",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  },
+                  {
+                    "fact": "spouseIncomeSourceRegion",
+                    "op": "eq",
+                    "value": "제주특별자치도"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "v1Scope": "신청자 제주 거주/소득근거지만 사용; 잘못된 표 locator",
+      "v2Scope": "신청자·배우자·예비배우자 중 제주 거주/소득근거지; p6 t00021",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          5
+        ],
+        "blocks": [
+          {
+            "id": "b000291",
+            "page": 5,
+            "bbox": [
+              33.803058,
+              417.349813,
+              775.919588747,
+              427.56827499999997
+            ]
+          },
+          {
+            "id": "b000295",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              444.335188,
+              797.608326,
+              453.929988
+            ]
+          },
+          {
+            "id": "b000299",
+            "page": 5,
+            "bbox": [
+              50.34498,
+              473.479393,
+              797.608326,
+              481.275168
+            ]
+          },
+          {
+            "id": "b000302",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              497.346458,
+              392.09254186030006,
+              504.422623
+            ]
+          },
+          {
+            "id": "b000308",
+            "page": 5,
+            "bbox": [
+              30.206988000000003,
+              532.7272829999999,
+              595.868799,
+              541.8663300000001
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          6
+        ],
+        "tables": [
+          {
+            "id": "t00021",
+            "page": 6,
+            "row": 0,
+            "columns": [
+              0,
+              1
+            ],
+            "bbox": [
+              455.262,
+              52.891199999999984,
+              811.3582857142857,
+              115.618
+            ]
+          }
+        ],
+        "normalization": "PDF_TABLE_CELL_READING_ORDER_VERIFIED"
+      },
+      "changeReason": "CONDITION_SCOPE_CORRECTION",
+      "userImpact": "배우자로 1순위 충족 가능",
+      "regressionImpact": "배우자로 1순위 충족 가능",
+      "adminReviewPoint": "배우자 사실·표 셀 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "senior.applicantAgeOrException",
+      "supplyType": "senior",
+      "v1Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "성년·미성년 세대주 예외 조건; 두 단이 섞인 근거",
+      "v2Scope": "같은 조건; p2 오른쪽 단락 crop 근거",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p2 원문과 예외 적용 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    },
+    {
+      "ruleId": "housingBenefit.applicantAgeOrException",
+      "supplyType": "housingBenefit",
+      "v1Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v2Condition": {
+        "fact": "adultOrMinorHouseholdHeadException",
+        "op": "eq",
+        "value": true
+      },
+      "v1Scope": "성년·미성년 세대주 예외 조건; 두 단이 섞인 근거",
+      "v2Scope": "같은 조건; p2 오른쪽 단락 crop 근거",
+      "v1Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2,
+          3
+        ],
+        "blocks": [
+          {
+            "id": "b000097",
+            "page": 2,
+            "bbox": [
+              32.36463,
+              302.524044,
+              718.850197585,
+              328.262095
+            ]
+          },
+          {
+            "id": "b000099",
+            "page": 2,
+            "bbox": [
+              309.142151,
+              329.02967900000004,
+              810.5545375992085,
+              338.45657
+            ]
+          },
+          {
+            "id": "b000100",
+            "page": 2,
+            "bbox": [
+              463.653292,
+              340.85527,
+              810.4339494007916,
+              348.65104499999995
+            ]
+          },
+          {
+            "id": "b000104",
+            "page": 2,
+            "bbox": [
+              285.16835100000003,
+              361.124285,
+              775.57280773,
+              369.66365699999994
+            ]
+          },
+          {
+            "id": "b000137",
+            "page": 3,
+            "bbox": [
+              100.929698,
+              116.456885,
+              561.4663959999999,
+              124.25265999999999
+            ]
+          },
+          {
+            "id": "b000139",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              128.21651175,
+              806.957988131,
+              136.24615999999997
+            ]
+          },
+          {
+            "id": "b000140",
+            "page": 3,
+            "bbox": [
+              93.617689,
+              136.941783,
+              806.9576285317914,
+              148.7194
+            ]
+          },
+          {
+            "id": "b000141",
+            "page": 3,
+            "bbox": [
+              53.701312,
+              147.016323,
+              370.498537078,
+              155.65164299999998
+            ]
+          }
+        ]
+      },
+      "v2Locator": {
+        "sha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+        "parserVersion": "document-parser-v1",
+        "pages": [
+          2
+        ],
+        "regions": [
+          {
+            "page": 2,
+            "bbox": [
+              400,
+              280,
+              820,
+              390
+            ]
+          }
+        ],
+        "normalization": "RIGHT_COLUMN_VISUALLY_VERIFIED"
+      },
+      "changeReason": "EVIDENCE_LOCATOR_CORRECTION",
+      "userImpact": "판정값 변화 없음, 근거 표시 수정",
+      "regressionImpact": "판정값 변화 없음, 근거 표시 수정",
+      "adminReviewPoint": "p2 원문과 예외 적용 확인",
+      "sourceHash": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e"
+    }
+  ],
+  "boundaryComparisons": [
+    {
+      "id": "youth-member",
+      "persona": "청년 세대원",
+      "v1Result": "INELIGIBLE",
+      "v2Result": "ELIGIBLE",
+      "sourceLocator": "p4 t00010·t00012",
+      "reason": "본인 소득·자산으로 분기"
+    },
+    {
+      "id": "student-own-assets",
+      "persona": "대학생 본인 자산 상한·부모 고액 자산",
+      "v1Result": "INELIGIBLE",
+      "v2Result": "ELIGIBLE",
+      "sourceLocator": "p3 b000167·t00007",
+      "reason": "본인 총자산 108,000,000원 경계 포함"
+    },
+    {
+      "id": "student-own-car",
+      "persona": "대학생 본인 자동차 보유",
+      "v1Result": "ELIGIBLE",
+      "v2Result": "INELIGIBLE",
+      "sourceLocator": "p3 b000167",
+      "reason": "금액 0과 보유 여부를 분리"
+    },
+    {
+      "id": "spouse-account",
+      "persona": "배우자만 입주 전 청약저축 증명",
+      "v1Result": "INELIGIBLE",
+      "v2Result": "ELIGIBLE",
+      "sourceLocator": "p5 b000284-b000285",
+      "reason": "신혼은 본인/배우자 중 1인"
+    },
+    {
+      "id": "future-household",
+      "persona": "예비신혼의 현재·미래 세대 불일치",
+      "v1Result": "INELIGIBLE",
+      "v2Result": "ELIGIBLE",
+      "sourceLocator": "p5 b000252-b000253·p6 b000338-b000355",
+      "reason": "미래 세대 기준으로만 평가"
+    },
+    {
+      "id": "one-person-cell",
+      "persona": "신혼 1인 소득표 빈 셀",
+      "v1Result": "ELIGIBLE",
+      "v2Result": "NEEDS_MORE_INFORMATION",
+      "sourceLocator": "p5 t00016",
+      "reason": "원문에 없는 1인 비율 보류"
+    },
+    {
+      "id": "spouse-priority",
+      "persona": "배우자 제주 거주 1순위",
+      "v1Result": "ELIGIBLE/GENERAL",
+      "v2Result": "ELIGIBLE/PRIORITY",
+      "sourceLocator": "p6 t00021",
+      "reason": "배우자·예비배우자 지역 포함"
+    },
+    {
+      "id": "minor-exception",
+      "persona": "미성년 세대주 예외·근거 교정",
+      "v1Result": "ELIGIBLE",
+      "v2Result": "ELIGIBLE",
+      "sourceLocator": "p2 오른쪽 단락",
+      "reason": "판정 동일, 근거 위치만 교정"
+    }
+  ],
+  "recommendedAdminDecisions": [
+    "금액표에 없는 5개 파라미터는 null/NOT_IN_SOURCE로 보존",
+    "청년 세대주/세대원 및 예비신혼 미래 세대 입력 경로를 실제 질문지와 대조",
+    "공고 p5 t00019·p6 t00021 및 p2 공통 예외 근거를 사람 검수",
+    "22 warning과 unresolved blocker 해소 후에만 별도 인증된 승인 경로 검토"
+  ],
+  "integrationRisks": [
+    "Product V3 createImportedPackageAdapter는 import 시 Notice/RulePackage를 무조건 APPROVED로 표시하므로 미승인 v2에 직접 사용 금지",
+    "기존 review seed의 youth scope는 항상 APPLICANT로 표시되어 세대주/세대원 조건부 범위를 정확히 표현하지 못함",
+    "v2의 추가 scoped input fact는 Product V3 프로필·질문지·API 계약으로 아직 포팅되지 않음",
+    "RAG metadata, reviewer/admin audit, activation/binding은 미등록 상태"
+  ]
+}

@@ -31,6 +31,9 @@ export const SCORING_TARGET_LABEL: Record<ScoringTarget, string> = {
   youth: '청년 특별공급',
   newlywed: '신혼부부 특별공급',
   firstHome: '생애최초 특별공급',
+  student: '대학생 계층',
+  senior: '고령자 계층',
+  housingBenefit: '주거급여수급자 계층',
 };
 
 /** 한 구간. 경계는 양끝을 포함한다(min 이상 max 이하). */

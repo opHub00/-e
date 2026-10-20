@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "announcementId": "902916ae-bb9a-4ddf-a3cc-505d18a20e25",
+  "documentSha256": "76c89334fb042564569d9856acd073c85a84c425f124474891bdb01303d6404e",
+  "ruleSetVersion": "OFFICIAL-2026-09-18-review-v2",
+  "safetyBlockers": [
+    {
+      "ruleKey": "student.income",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "student.assets",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "youth.income",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "youth.assets",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "youth.vehicle",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.householdNoHome",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.assets",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "codes": [
+        "SCOPE_MISMATCH"
+      ],
+      "reason": "v2 적용 대상과 실제 신청자·세대 입력 범위를 관리자 검수 전까지 확정할 수 없습니다."
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "codes": [
+        "SCOPE_MISMATCH",
+        "PARTIAL_RANGE_BINDING"
+      ],
+      "reason": "예비신혼 미래 세대 소득과 공고 표에 없는 1인 셀을 관리자 검수 전까지 확정할 수 없습니다."
+    }
+  ],
+  "exceptions": [],
+  "warnings": [
+    {
+      "ruleKey": "student.income",
+      "message": "본인·부모 합산 소득과 1~6인 가구별 100/110/120% 표의 읽기 순서를 원문과 대조해 주세요."
+    },
+    {
+      "ruleKey": "student.assets",
+      "message": "본인 자산과 출생자녀 0/1/2명 가산 표를 원문과 대조해 주세요."
+    },
+    {
+      "ruleKey": "student.vehicle",
+      "message": "대학생은 자동차를 소유하지 않는 조건과 출생자녀 가산 표의 자동차 열을 함께 확인해 주세요."
+    },
+    {
+      "ruleKey": "student.rank1",
+      "message": "제주 거주 또는 제주 대학 소재지 중 하나가 1순위인 표를 확인해 주세요."
+    },
+    {
+      "ruleKey": "youth.income",
+      "message": "세대주/세대원 분기와 1~6인 가구별 100/110/120% 한도를 함께 대조해 주세요."
+    },
+    {
+      "ruleKey": "youth.assets",
+      "message": "세대주/세대원 자산 대상과 출생자녀 0/1/2명 가산 한도를 함께 대조해 주세요."
+    },
+    {
+      "ruleKey": "youth.vehicle",
+      "message": "세대주/세대원 자동차 대상과 출생자녀 0/1/2명 가산 한도를 함께 대조해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.category",
+      "message": "신혼·예비신혼·한부모의 요건 번호와 미래 세대 적용 범위를 원문에서 각각 확인해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "message": "맞벌이 여부·가구원 수·출생자녀 수별 100~140% 한도를 원문 표와 대조해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.assets",
+      "message": "현재/미래 세대 자산과 0/1/2명 출생자녀 가산 한도를 원문 표와 대조해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.vehicle",
+      "message": "현재/미래 세대 자동차와 0/1/2명 출생자녀 가산 한도를 원문 표와 대조해 주세요."
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "message": "PDF 6쪽의 본인·배우자·예비배우자 거주지 또는 소득근거지 기준을 확인해 주세요."
+    },
+    {
+      "ruleKey": "senior.income",
+      "message": "가구원 수별 100/110/120% 표와 출생자녀 가산 한도를 원문과 대조해 주세요."
+    },
+    {
+      "ruleKey": "senior.assets",
+      "message": "3억 4,500만원 기본 한도와 0/1/2명 출생자녀 가산 한도를 대조해 주세요."
+    },
+    {
+      "ruleKey": "senior.vehicle",
+      "message": "4,542만원 기본 한도와 0/1/2명 출생자녀 가산 한도를 대조해 주세요."
+    },
+    {
+      "ruleKey": "housingBenefit.recipient",
+      "message": "주거급여 수급권자 또는 수급자 정의와 세대 범위를 대조해 주세요."
+    },
+    {
+      "ruleKey": "student.income",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다."
+    },
+    {
+      "ruleKey": "youth.income",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다."
+    },
+    {
+      "ruleKey": "newlywed.householdNoHome",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다."
+    },
+    {
+      "ruleKey": "newlywed.account",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다."
+    },
+    {
+      "ruleKey": "newlywed.rank1",
+      "message": "v2에서 교정한 적용 범위와 새 입력 fact가 실제 신청자·부모·혼인 예정 세대를 나타내는지 관리자가 확인해야 합니다."
+    },
+    {
+      "ruleKey": "newlywed.income",
+      "message": "공고 표에 1인 신혼 가구 소득 셀이 없어 v1의 1인 percentage parameter 2개를 null로 보류했습니다. 승인 전 적용 가능성을 별도 검수해야 합니다."
+    }
+  ],
+  "conflicts": [],
+  "unresolved": [
+    {
+      "unresolvedId": "jeju-v2-human-scope-review",
+      "type": "SCOPE_AND_PARAMETER_REVIEW_REQUIRED",
+      "description": "147개 중 수동 확인 9개와 신규 scoped fact 입력 경로를 승인 전 대조해야 합니다.",
+      "ruleKeys": [
+        "student.income",
+        "youth.income",
+        "newlywed.income",
+        "newlywed.account",
+        "newlywed.rank1"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import type { ApplicantProfileV2 } from '../profile/domain.ts';
 
-export type SupplyType = 'youth' | 'newlywed' | 'firstHome';
+export type SupplyType = 'youth' | 'newlywed' | 'firstHome' | 'student' | 'senior' | 'housingBenefit';
 export type Stage = 'PRIORITY' | 'GENERAL' | 'LOTTERY';
 export type Status = 'ELIGIBLE' | 'INELIGIBLE' | 'NEEDS_MORE_INFORMATION';
 export type RuleSourceStatus = 'REFERENCE' | 'DRAFT_SOURCE_VERIFIED' | 'OFFICIAL_VERIFIED';
@@ -9,7 +9,7 @@ export type Scalar = string | number | boolean;
  * birthDate is the earliest possible birth date. birthDateLatest is set only when the date is
  * known to month or year precision; facts are then kept only if both ends agree.
  */
-export type Child = { birthDate?: string; birthDateLatest?: string; unborn: boolean };
+export type Child = { birthDate?: string; birthDateLatest?: string; unborn: boolean; adopted?: boolean };
 
 /** Additional exact, announcement-date inputs. Existing profile stays the source of truth. */
 export type AssessmentInput = {
@@ -21,10 +21,12 @@ export type AssessmentInput = {
     accountKindEligible: boolean;
     firstRank: boolean;
     isHouseholdHead: boolean;
-    /** 만 19세 미만 신청자가 자녀를 양육하거나 형제·자매를 부양하는 세대주인지 여부. */
+    /** Existing Product V3 exception fact is preserved for earlier rule packages. */
     minorHouseholdHeadException: boolean;
     householdNoWinningFiveYears: boolean;
     incomeHouseholdSize: number;
+    /** Applicant + parents, and any additional people counted by the notice; not the current household size. */
+    parentApplicantIncomeHouseholdSize: number;
     plannedMarriageWithinDeadline: boolean;
     singleParentQualified: boolean;
     unmarriedChildInHousehold: boolean;
@@ -33,6 +35,8 @@ export type AssessmentInput = {
     marriageDateLatest: string;
     familyCategory: 'married' | 'engaged' | 'singleParent';
     spouse: { birthDate?: string };
+    spouseResidence: string;
+    spouseIncomeSourceRegion: string;
     children: Child[];
     householdMembers: { birthDate?: string; relationship: string }[];
     currentResidence: string;
@@ -47,21 +51,49 @@ export type AssessmentInput = {
     monthlyIncome: number;
     spouseIncome: number;
     householdIncome: number;
+    /** The household that will exist after marriage; never inferred from the current household. */
+    futureHouseholdIncome: number;
+    futureHouseholdIncomeSize: number;
+    futureHouseholdDualIncome: boolean;
     dualIncome: boolean;
     earnedIncome: number;
     businessIncome: number;
     totalAssets: number;
+    applicantTotalAssets: number;
+    futureHouseholdTotalAssets: number;
     parentAssets: number;
     /** 세대가 보유한 부동산(건물+토지) 가액 합계. 부동산·자동차를 따로 보는 자산기준용. */
     realEstateAssets: number;
     /** 세대 보유 자동차 중 가장 높은 차량가액. 없으면 0. */
     vehicleValue: number;
+    applicantVehicleValue: number;
+    /** Vehicle ownership is not inferred from a zero valuation. */
+    applicantOwnsVehicle: boolean;
+    futureHouseholdVehicleValue: number;
+    futureHouseholdNoHome: boolean;
     workStartedAt: string;
     youthPriorityTarget: boolean;
     newlywedPriorityTarget: boolean;
     specialSupplyHistory: boolean;
     reWinningRestriction: boolean;
     specialExceptions: string[];
+    /** Reusable raw facts used by rental announcements. */
+    educationStatus: 'ENROLLED_OR_INCOMING' | 'GRADUATED_OR_WITHDRAWN' | 'OTHER';
+    graduationDate: string;
+    schoolRegion: string;
+    incomeSourceRegion: string;
+    youthActivityCategory: 'WORKER' | 'RECENTLY_UNEMPLOYED' | 'ARTIST' | 'OTHER';
+    totalIncomeWorkMonths: number;
+    parentApplicantMonthlyIncome: number;
+    housingBenefitRecipient: boolean;
+    /** Announcement-scoped confirmations. These must not be inferred from a result. */
+    canProveSubscriptionByMoveIn: boolean;
+    applicantCanProveSubscriptionByMoveIn: boolean;
+    spouseCanProveSubscriptionByMoveIn: boolean;
+    adultOrMinorHouseholdHeadException: boolean;
+    applicationResidencyEligible: boolean;
+    noPublicRentalSubletRestriction: boolean;
+    singleHouseholdApplicationClear: boolean;
   }>;
 };
 
@@ -135,6 +167,8 @@ export type ApplicationAssessmentResult = {
   status: Status;
   eligible: boolean | null;
   stage: Stage | null;
+  /** Announcement-defined wording such as `1순위`; stage remains the stable engine enum. */
+  stageLabel?: string;
   stageExplanation: string;
   regionalPriority?: { status: 'LOCAL' | 'REMAINDER_ONLY' | 'NEEDS_REVIEW'; label: string };
   inputDates: Record<string, string>;

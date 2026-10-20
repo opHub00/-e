@@ -22,10 +22,15 @@ const mapResult = (value: ApplicationAssessmentResult): NoticeSupplyAssessment =
   autoRecommend: true, rank: 0,
 });
 
-/** A verified imported package enters the same N-notice pipeline without district-specific code. */
-export function createImportedPackageAdapter(raw: unknown): NoticeAdapter {
+/** Import is structural only: source verification never implies review approval or publication. */
+export function createImportedPackageAdapter(raw: unknown, candidate?: {
+  announcementId: string; documentSha256: string; ruleSetVersion: string; reviewBlockers: readonly string[];
+}): NoticeAdapter {
   const { package: pkg, rules } = validateImportPackage(raw);
-  const noticeId = `import-${pkg.announcement.housingManagementNumber ?? pkg.announcement.id}`.toLowerCase();
+  if (candidate && (candidate.announcementId !== pkg.announcement.id || candidate.documentSha256 !== pkg.document.sha256 ||
+    candidate.ruleSetVersion !== pkg.ruleSet.version)) throw new Error('REVIEW_CANDIDATE_IDENTITY_MISMATCH');
+  // Versions of one notice family coexist; no imported candidate replaces another by ID.
+  const noticeId = `import-${pkg.announcement.id}-${pkg.ruleSet.id}`.toLowerCase();
   const evidence = new Map<string, Evidence>();
   for (const supply of rules.supplies) {
     for (const rule of [...supply.eligibility, ...supply.stages.flatMap(stage => [...stage.conditions, ...(stage.scores ?? [])])]) evidence.set(rule.evidence.id, rule.evidence);
@@ -39,7 +44,7 @@ export function createImportedPackageAdapter(raw: unknown): NoticeAdapter {
     id: noticeId, title: pkg.announcement.title, managementNumber: pkg.announcement.housingManagementNumber ?? '',
     listing: { id: rules.listingId, complexId: noticeId, title: pkg.announcement.title, address: '', region: pkg.announcement.regionName },
     complex: { id: noticeId, name: pkg.announcement.title, region: pkg.announcement.regionName, address: '' },
-    noticeDate: pkg.announcement.announcementDate, status: 'APPROVED',
+    noticeDate: pkg.announcement.announcementDate, status: candidate ? 'REVIEW_REQUIRED' : 'DRAFT',
     sourceDocument: { fileName: pkg.document.fileName, sha256: pkg.document.sha256, official: pkg.document.isOfficial },
     supplyTypes: rules.supplies.map(supply => ({ id: supply.type.toUpperCase(), label: supply.type, supplyCount: 0, assessmentMode: 'RULE_ENGINE' })),
     createdAt: date, updatedAt: date, activatedAt: null,
@@ -47,7 +52,15 @@ export function createImportedPackageAdapter(raw: unknown): NoticeAdapter {
   return {
     notice,
     rulePackage: { id: pkg.ruleSet.id, noticeId, version: pkg.ruleSet.version, sourceStatus: pkg.ruleSet.sourceStatus,
-      status: 'APPROVED', sourceHash: pkg.document.sha256, rules: ruleRows, validationErrors: [], createdAt: date, updatedAt: date },
+      status: 'DRAFT', sourceHash: pkg.document.sha256, rules: ruleRows,
+      // Structural validity is not a review decision. The existing Admin service
+      // refuses approval while validationErrors remain, including this marker.
+      validationErrors: [candidate ? 'REVIEW_CANDIDATE_NOT_APPROVED' : 'SOURCE_REVIEW_REQUIRED', ...(candidate?.reviewBlockers ?? [])],
+      createdAt: date, updatedAt: date },
+    lifecycle: { sourceVerificationState: pkg.ruleSet.sourceStatus === 'REFERENCE' ? 'UNVERIFIED' : 'SOURCE_VERIFIED',
+      reviewStatus: candidate ? 'REVIEW_REQUIRED' : 'DRAFT', publicationStatus: 'INACTIVE' },
+    binding: { noticeId, rulePackageId: pkg.ruleSet.id, sourceHash: pkg.document.sha256, status: 'INACTIVE' },
+    reviewBlockers: candidate ? [...candidate.reviewBlockers] : [],
     ragSource: { id: `${noticeId}-rag`, noticeId, version: pkg.ruleSet.version, sourceHash: pkg.document.sha256,
       chunks: pkg.rules.flatMap(row => row.evidence.textExcerpt ? [{ id: row.evidence.id, section: row.evidence.section,
         kind: row.evidence.tableLabel ? 'table' as const : 'paragraph' as const, supplyTypeIds: [row.supplyType.toUpperCase()],

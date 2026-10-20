@@ -5,7 +5,7 @@ import ragData from '../../../data/event/samdo-dual-v2-rag.json' with { type: 'j
 import { validateImportPackage } from '../../applicationAssessment/server/importPackage.ts';
 import { buildSamdoRecommendation } from '../samdo/evaluate.ts';
 import { SAMDO_PERSONAS } from '../samdo/personas.test-data.ts';
-import { doesNotKnowPersona } from '../phase4Personas.ts';
+import { doesNotKnowPersona, evaluatePhase4Personas } from '../phase4Personas.ts';
 import { kioskEvent } from '../kioskEvent.ts';
 import { sendChat, startSamdoDualChat } from '../consult.ts';
 import { handleEventChat } from '../server/eventChat.ts';
@@ -272,4 +272,20 @@ test('unresolved answer detail remains within the server presentation contract f
     const answer = resolveSamdoDualConversation(assessment, '내가 뭘 더 갖춰야 해?', [], facts).answer;
     assert.ok((answer.detail ?? []).every(line => line.length <= 400), persona.id);
   }
+});
+
+test('known child birth date is not requested again when only childbirth evidence is pending', () => {
+  const event = kioskEvent();
+  if (!event.ok) throw new Error(event.error);
+  const persona = evaluatePhase4Personas(event.event).find(item => item.personaId === 'NEWLYWED_ONE_CHILD');
+  assert.ok(persona);
+  assert.equal(persona.finalAnswers.household.childBirthDates[0], '2025-01-15');
+  const assessment = buildSamdoDualAssessment(samdoInputFromAnswers(persona.finalAnswers));
+  const facts = getUnresolvedAssessmentFacts(assessment, { 'household.childBirthDates.0': 'ANSWERED' });
+  const childbirth = facts.find(item => item.factKey === 'childBirthDate');
+  assert.ok(childbirth);
+  assert.equal(childbirth.state, 'EVIDENCE_REQUIRED');
+  assert.equal(childbirth.label, '출산특례·자녀 관계 증빙');
+  assert.match(childbirth.evidenceNeeded, /가족관계증명서/);
+  assert.doesNotMatch(childbirth.userFacingQuestion, /생년월일/);
 });

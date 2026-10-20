@@ -40,18 +40,29 @@ export function getUnresolvedAssessmentFacts(
   const merged = new Map<string, SamdoUnresolvedAssessmentFact>();
   for (const district of assessment.districts) {
     for (const item of buildSamdoResolutionCenter(district.recommendation, answerStates)) {
+      // The rule's childbirth REVIEW can remain after an exact DOB was entered.
+      // It asks for documentary verification of the exception, not the date again.
+      const knownChildDate = item.id === 'childBirthDate' && item.currentState === 'EVIDENCE_REQUIRED'
+        && answerStates['household.childBirthDates.0'] === 'ANSWERED';
+      const label = knownChildDate ? '출산특례·자녀 관계 증빙' : item.label;
+      const reason = knownChildDate
+        ? '자녀 생년월일은 입력됐지만 출산특례 적용과 가족관계는 서류 확인이 필요해요.'
+        : item.reason;
+      const evidenceNeeded = knownChildDate
+        ? '가족관계증명서와 출산특례 적용 여부를 공고문 기준으로 확인해 주세요.'
+        : item.help;
       const current = merged.get(item.id);
       if (!current) {
         merged.set(item.id, {
           factKey: item.id,
-          label: item.label,
+          label,
           state: item.currentState,
           districts: [district.district.id],
           affectedSupplyTypes: [...item.affectedSupplyTypes],
           affectedSupplyLabels: [...item.affectedSupplyLabels],
-          userFacingQuestion: questionFor(item.label, item.inputKind),
-          reason: item.reason,
-          evidenceNeeded: item.help,
+          userFacingQuestion: knownChildDate ? '출산특례 적용 및 자녀 관계를 증빙할 서류를 확인했나요?' : questionFor(label, item.inputKind),
+          reason,
+          evidenceNeeded,
         });
         continue;
       }

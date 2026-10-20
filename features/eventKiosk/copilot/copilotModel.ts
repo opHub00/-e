@@ -296,19 +296,24 @@ export type CopilotIntent =
  * 화면 흐름 명령만 여기서 처리한다(질문 카드 열기·모름·나중에·왜·가정 열기). 내용 답변은 서버 상담으로 보낸다.
  * Codex 의 Copilot planner 가 생기면 이 함수 대신 planner 결과를 쓰면 된다.
  */
-export function copilotIntent(text: string): CopilotIntent {
+export function copilotIntent(text: string, conversation: readonly CopilotMessage[] = []): CopilotIntent {
   const t = text.replace(/\s+/g, '');
   if (/^(잘)?모르겠|^몰라|모르겠어요?$|기억(이)?안나/.test(t)) return { kind: 'DOES_NOT_KNOW' };
   if (/미뤄둔.*(다시|보여)|나중에.*질문.*다시/.test(t)) return { kind: 'RESUME_DEFERRED' };
   if (/나중에(답|할|확인)/.test(t)) return { kind: 'LATER' };
-  const plan = planCopilotAction(text).plan;
+  const plan = planCopilotAction(text, conversation.slice(-6)).plan;
   if (plan === 'RUN_SIMULATION') {
     const payment = /(청약)?통장.*?(\d+)\s*회/.exec(text.replace(/\s+/g, ' '));
     if (payment) return { kind: 'WHAT_IF', factId: 'paymentCount', value: Number(payment[2]) };
   }
   if (plan === 'COMPARE_NOTICES') return { kind: 'COMPARE' };
   if (plan === 'RUN_ASSESSMENT') return { kind: 'RECOMMEND' };
-  if (plan === 'ASK_FOLLOWUP') return /가장먼저.*(할일|해야)|지금뭐부터|먼저해야할/.test(t) ? { kind: 'FIRST_TASK' } : { kind: 'ASK_PENDING' };
+  if (plan === 'ASK_FOLLOWUP') {
+    if (/가장먼저.*(할일|해야)|지금뭐부터|먼저해야할/.test(t)) return { kind: 'FIRST_TASK' };
+    // Only an explicit request to be asked opens the question card. Questions about
+    // missing qualifications need an assessment-grounded answer, not another prompt.
+    return /물어봐|질문.*보여/.test(t) ? { kind: 'ASK_PENDING' } : { kind: 'SERVER' };
+  }
   if (plan === 'EXPLAIN_RESULT' && /물어|질문/.test(t)) return { kind: 'WHY' };
   return { kind: 'SERVER' };
 }

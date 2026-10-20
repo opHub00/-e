@@ -7,7 +7,8 @@ const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, '');
 
 export function classifySamdoRagIntent(question: string): SamdoRagIntent {
   const value = normalize(question);
-  if (/(언제|일정|접수|신청일|발표|계약)/.test(value)) return 'SCHEDULE';
+  // "신청하면 좋은 공고" is a recommendation question, not an application date.
+  if (/(언제|일정|접수|신청일|발표|계약|신청.*(날짜|기간)|청약.*(날짜|기간))/.test(value)) return 'SCHEDULE';
   if (/(분양가|분양가격|공급금액|가격)/.test(value)) return 'PRICE';
   if (/(토지임대료|월임대료|임대료)/.test(value)) return 'LAND_RENT';
   if (/(몇세대|공급세대|물량)/.test(value)) return 'SUPPLY_COUNT';

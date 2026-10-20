@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { defaultChatOutcome, sendChat, startChat, startSamdoChat, startSamdoDualChat, type KioskChat } from './consult.ts';
 import type { SamdoPresentationRecommendation } from './samdo/index.ts';
 import type { SamdoDualAssessment } from './samdoDual/types.ts';
+import { getUnresolvedAssessmentFacts } from './samdoDual/unresolved.ts';
 import { evaluateEvent, type KioskEvaluation } from './evaluate.ts';
 import type { AdaptiveQuestionPlan } from './adaptiveAssessment.ts';
 import type { LoadedEvent } from './eventConfig.ts';
@@ -161,7 +162,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
       answered: [...new Set([...state.answered, ...answeredKeys])],
       answerStates,
       stale: state.evaluation !== null,
-      chat: null,
+      chat: state.chat?.samdoDualAssessment ? state.chat : null,
     };
   }),
 
@@ -209,10 +210,17 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     answerStates: { ...state.answerStates, [key]: 'ANSWERED' },
   })),
 
-  markDoesNotKnow: (key) => set(state => ({
-    answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
-    answerStates: { ...state.answerStates, [key]: 'DOES_NOT_KNOW' },
-  })),
+  markDoesNotKnow: (key) => set(state => {
+    const answerStates: AnswerStateMap = { ...state.answerStates, [key]: 'DOES_NOT_KNOW' };
+    return {
+      answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
+      answerStates,
+      chat: state.chat?.samdoDualAssessment ? {
+        ...state.chat,
+        samdoUnresolvedFacts: getUnresolvedAssessmentFacts(state.chat.samdoDualAssessment, answerStates),
+      } : state.chat,
+    };
+  }),
 
   clearAnswerState: (key) => set(state => {
     const answerStates = { ...state.answerStates };
@@ -277,7 +285,8 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
   } : {})),
 
   refreshSamdoDualAssessment: (assessment) => set(state => (state.chat?.samdoDualAssessment ? {
-    chat: { ...state.chat, samdoDualAssessment: assessment },
+    chat: { ...state.chat, samdoDualAssessment: assessment,
+      samdoUnresolvedFacts: getUnresolvedAssessmentFacts(assessment, state.answerStates) },
   } : {})),
 
   reset: () => set(state => ({ sessionKey: state.sessionKey + 1, ...initial() })),

@@ -3,6 +3,7 @@ import type { SamdoRecommendationItem } from '../samdo/types.ts';
 import { retrieveSamdoEvidence } from './rag.ts';
 import type { SamdoDistrictAssessment, SamdoDualAssessment, SamdoRagIntent, SamdoUnitType } from './types.ts';
 import type { SamdoUnresolvedAssessmentFact } from './unresolved.ts';
+import { planCopilotAction } from '../../productV3/copilot/planner.ts';
 
 const won = (value: number) => `${value.toLocaleString('ko-KR')}원`;
 const officialDate = (value: string) => value.replaceAll('-', '.');
@@ -121,7 +122,8 @@ function objectiveComparison(assessment: SamdoDualAssessment): EventChatFallback
   ] };
 }
 
-const factDetail = (facts: readonly SamdoUnresolvedAssessmentFact[]) => facts.slice(0, 6).map((fact, index) => `${index + 1}. ${fact.label} · ${fact.reason} · 영향: ${fact.affectedSupplyLabels.join('·')}`);
+const factDetail = (facts: readonly SamdoUnresolvedAssessmentFact[]) => facts.slice(0, 6).map((fact, index) =>
+  `${index + 1}. ${fact.label} · ${fact.reason} · 영향: ${fact.districts.map(districtLabel).join('·')} ${fact.affectedSupplyLabels.join('·')} · 확인: ${fact.evidenceNeeded}`);
 
 function unresolvedAnswer(facts: readonly SamdoUnresolvedAssessmentFact[], unknownOnly: boolean, firstOnly = false): EventChatFallback {
   const selected = unknownOnly ? facts.filter(item => item.state === 'DOES_NOT_KNOW' || item.state === 'UNKNOWN') : [...facts];
@@ -153,6 +155,23 @@ function personalComparison(assessment: SamdoDualAssessment): EventChatFallback 
   return { text: `현재 입력 기준으로는 ${districtLabel(assessment.comparison.preferredDistrictId)}의 판정 순서가 먼저예요. 이것은 당첨확률 판단이 아니에요.`, detail: [...assessment.comparison.reasons, assessment.comparison.disclaimer] };
 }
 
+function recommendationAnswer(assessment: SamdoDualAssessment, unresolvedFacts: readonly SamdoUnresolvedAssessmentFact[]): EventChatFallback {
+  const comparison = personalComparison(assessment);
+  const options = assessment.districts.map(item => {
+    const recommended = item.recommendation.recommendedType;
+    return `${districtLabel(item.district.id)}: ${recommended
+      ? `${recommended.supplyLabel} · ${recommended.stageLabel}`
+      : '확정 추천유형 없음'}`;
+  });
+  return {
+    text: assessment.comparison.preferredDistrictId && assessment.comparison.basis !== 'SUPPLY_COUNT'
+      ? `현재 입력과 공고의 자격·공급단계·공식 점수 기준으로는 ${districtLabel(assessment.comparison.preferredDistrictId)}를 먼저 검토할 수 있어요. 당첨확률 판단은 아니에요.`
+      : '현재 입력만으로 어느 지구를 우선 추천할지 확정하기 어려워요. 두 지구의 판정 결과와 확인 필요 항목을 함께 보세요.',
+    detail: [...options, ...(comparison.detail?.slice(0, 2) ?? []),
+      ...(unresolvedFacts.length ? [`확인 필요: ${unresolvedFacts.slice(0, 2).map(item => item.label).join('·')}`] : [])],
+  };
+}
+
 function freeformFallback(assessment: SamdoDualAssessment, question: string, intent: SamdoRagIntent): EventChatFallback {
   const retrieval = retrieveSamdoEvidence(question);
   if (intent === 'LAND_LEASE') return { text: '토지임대부 분양주택은 토지는 공공이 소유하고 건물은 수분양자가 소유하는 방식으로, 공고에 정한 월 토지임대료를 납부해요.', detail: retrieval.chunks.slice(0, 2).map(chunk => `${districtLabel(chunk.districtId)} 공고문 ${chunk.section}`) };
@@ -168,8 +187,10 @@ export type SamdoDualConversationResolution = { resolution: EventChatResolution;
 export function resolveSamdoDualConversation(assessment: SamdoDualAssessment, question: string, history: readonly EventChatHistoryTurn[] = [], unresolvedFacts: readonly SamdoUnresolvedAssessmentFact[] = []): SamdoDualConversationResolution {
   const retrieval = retrieveSamdoEvidence(question);
   const value = question.replace(/\s+/g, '');
-  const priorUser = [...history].reverse().find(item => item.role === 'user')?.text ?? '';
-  const priorAssistant = [...history].reverse().find(item => item.role === 'assistant')?.text ?? '';
+  const recent = history.slice(-6);
+  const priorUser = [...recent].reverse().find(item => item.role === 'user')?.text ?? '';
+  const priorAssistant = [...recent].reverse().find(item => item.role === 'assistant')?.text ?? '';
+  const plan = planCopilotAction(question, recent, assessment.districts.map(item => item.district.id)).plan;
 
   if (/관리번호/.test(value)) {
     const selected = /1지구/.test(value) ? [assessment.districts[0]] : /2지구/.test(value) ? [assessment.districts[1]] : [...assessment.districts];
@@ -185,6 +206,7 @@ export function resolveSamdoDualConversation(assessment: SamdoDualAssessment, qu
   if (/(어떤정보|뭘더|무엇을더).*(입력|확인)|확정.*(추천|판정)|왜.*확정.*(안|못)|부족한조건/.test(value)
       || (/^(그럼|그러면)/.test(value) && /(신청가능|확정추천|판정)/.test(priorUser.replace(/\s+/g, '')))) return { resolution: 'ASSESSMENT_AWARE', answer: unresolvedAnswer(unresolvedFacts, false) };
   if (/(지금)?1순위로대비|제일먼저.*준비|우선.*(확인|준비)|지금.*대비해야/.test(value)) return { resolution: 'ASSESSMENT_AWARE', answer: unresolvedAnswer(unresolvedFacts, false, true) };
+  if (plan === 'ASK_FOLLOWUP') return { resolution: 'ASSESSMENT_AWARE', answer: unresolvedAnswer(unresolvedFacts, false) };
   if (/청약통장|입주자저축|납입횟수|저축총액/.test(value)) {
     const facts = unresolvedFacts.filter(item => /청약|통장|납입|저축/.test(`${item.label}${item.reason}`));
     return { resolution: 'ASSESSMENT_AWARE', answer: facts.length
@@ -194,7 +216,10 @@ export function resolveSamdoDualConversation(assessment: SamdoDualAssessment, qu
   if (/(둘다.*신청|신청.*가능|자격.*어때)/.test(value)) return { resolution: 'ASSESSMENT_AWARE', answer: eligibilityAnswer(assessment, unresolvedFacts) };
   if (/(1지구.*2지구|두지구).*(차이|비교)|차이점/.test(value)) return { resolution: 'ASSESSMENT_AWARE', answer: objectiveComparison(assessment) };
   if (/(나한테|내게|나는).*(어디|지구).*(맞|나아)|둘중/.test(value) || (/^(그러면|그럼)/.test(value) && /(차이|비교)/.test(priorUser))) return { resolution: 'ASSESSMENT_AWARE', answer: personalComparison(assessment) };
-  if (/^왜\??$|왜그래|왜그렇게/.test(value) && priorAssistant) return { resolution: 'ASSESSMENT_AWARE', answer: personalComparison(assessment) };
+  if (plan === 'COMPARE_NOTICES') return { resolution: 'ASSESSMENT_AWARE', answer: personalComparison(assessment) };
+  if (plan === 'RUN_ASSESSMENT') return { resolution: 'ASSESSMENT_AWARE', answer: recommendationAnswer(assessment, unresolvedFacts) };
+  if (plan === 'EXPLAIN_RESULT' && priorAssistant) return { resolution: 'ASSESSMENT_AWARE', answer:
+    /(준비|채워|부족|갖춰|대비|자격)/.test(priorUser) ? unresolvedAnswer(unresolvedFacts, false, true) : personalComparison(assessment) };
   if (/그조건만.*(충족|되면)|그것만.*(확인|알면)/.test(value)) return { resolution: 'ASSESSMENT_AWARE', answer: unresolvedFacts.length <= 1
     ? { text: '현재 판정에 남은 확인 항목은 그것 하나예요. 다만 실제 접수 때는 공고상 증빙서류 검증이 별도로 필요해요.' }
     : { text: '그 조건을 확인해도 다른 확인 항목이 남아 있어 확정 판정으로 자동 승격되지는 않아요.', detail: factDetail(unresolvedFacts.slice(1)) } };

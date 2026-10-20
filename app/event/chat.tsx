@@ -19,8 +19,6 @@ import { samdoInputFromAnswers } from '../../features/eventKiosk/samdoResult/sam
 import { buildSamdoDualAssessment } from '../../features/eventKiosk/samdoDual/evaluate';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { applySamdoResolvedFact } from '../../features/eventKiosk/samdoResult/samdoRefinement';
-import { noticePlatform } from '../../features/eventKiosk/noticePlatform';
-import { runCopilotTurn } from '../../features/productV3/copilot/service';
 import type { AnswerStateMap } from '../../features/eventKiosk/questionPolicy';
 import {
   buildCopilotSummary, copilotIntent, copilotOpenItems, copilotProgress, copilotRecommendationGroups, copilotWhatIf, nextCopilotQuestion, WHAT_IF_FACTS,
@@ -153,13 +151,7 @@ export default function ChatScreen() {
   const send = (text: string) => {
     if (!text.trim() || busy) return;
     setDraft('');
-    const intent = copilotIntent(text);
-    const turn = dual && (intent.kind === 'RECOMMEND' || intent.kind === 'COMPARE') ? runCopilotTurn(noticePlatform, {
-      profile: { ...samdoInputFromAnswers(answers), answerStates },
-      noticeIds: noticePlatform.getActiveNotices().map(notice => notice.id),
-      conversation: chat.messages.map(message => ({ role: message.role, text: message.text })),
-      question: text,
-    }) : null;
+    const intent = copilotIntent(text, chat.messages.slice(-6).map(message => ({ role: message.role, text: message.text })));
     // 남은 질문이 없을 때: 모름·나중에로 남긴 항목이 있으면 그것부터, 없으면 서류·일정 안내.
     const open = copilot?.open ?? { unknown: [], deferred: [] };
     const leftover = open.deferred[0]
@@ -168,22 +160,7 @@ export default function ChatScreen() {
         ? `모름으로 남긴 "${open.unknown[0]}"${open.unknown.length > 1 ? ` 외 ${open.unknown.length - 1}개` : ''}는 확인 필요로 판정했어요. 확인되면 결과 화면의 '추가로 확인하면' 목록에서 다시 입력해 주세요.`
         : null;
     const noQuestion = leftover ?? '판정에 필요한 정보는 지금 입력으로 모두 확인했어요. 남은 것은 서류 확인이에요.';
-    if (intent.kind === 'RECOMMEND' && copilot) {
-      setHighlight(true);
-      const lines = turn?.assessments.map(item => {
-        const title = noticePlatform.getNoticePresentation(item.noticeId).title;
-        const chosen = item.recommendation.recommended;
-        return `${title}: ${chosen ? `${chosen.supplyTypeLabel} · 신청 가능` : '확정 추천유형 없음'}`;
-      }) ?? [];
-      appendLocalExchange(text, { text: `현재 입력 기준의 두 공고 판정이에요.\n${lines.join('\n')}${question ? `\n"${question.title}"을 확인하면 판정이 더 정확해져요.` : ''}` });
-      return;
-    }
-    if (intent.kind === 'COMPARE' && turn?.comparison) {
-      const comparison = turn.comparison;
-      const lines = comparison.notices.map(item => `${item.title}: ${item.recommendedSupplyType ?? '확정 추천유형 없음'} · 확인 필요 ${item.unresolvedCount}건`);
-      appendLocalExchange(text, { text: `${lines.join('\n')}\n${comparison.reason}\n${comparison.disclaimer}` });
-      return;
-    }
+    if (intent.kind === 'RECOMMEND' || intent.kind === 'COMPARE') setHighlight(true);
     if (intent.kind === 'RESUME_DEFERRED') {
       setDeferred([]);
       appendLocalExchange(text, { text: open.deferred.length ? '미뤄 둔 질문을 다시 보여드릴게요.' : '미뤄 둔 질문은 없어요.' });

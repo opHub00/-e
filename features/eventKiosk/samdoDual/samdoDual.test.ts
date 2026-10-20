@@ -6,12 +6,15 @@ import { validateImportPackage } from '../../applicationAssessment/server/import
 import { buildSamdoRecommendation } from '../samdo/evaluate.ts';
 import { SAMDO_PERSONAS } from '../samdo/personas.test-data.ts';
 import { doesNotKnowPersona } from '../phase4Personas.ts';
+import { kioskEvent } from '../kioskEvent.ts';
+import { sendChat, startSamdoDualChat } from '../consult.ts';
+import { handleEventChat } from '../server/eventChat.ts';
 import { samdoInputFromAnswers } from '../samdoResult/samdoInput.ts';
 import { samdoRules } from '../samdoResult/samdoEvaluate.ts';
 import { answerSamdoDualDeterministically, buildSamdoDualChatContext, resolveSamdoDualConversation } from './chat.ts';
 import { SAMDO_DISTRICTS } from './config.ts';
 import { buildSamdoDualAssessment } from './evaluate.ts';
-import { retrieveSamdoEvidence } from './rag.ts';
+import { classifySamdoRagIntent, retrieveSamdoEvidence } from './rag.ts';
 import { SAMDO_DISTRICT2_DEEP_RULE_PACKAGE } from './rulePackages.ts';
 import { getUnresolvedAssessmentFacts } from './unresolved.ts';
 
@@ -193,4 +196,80 @@ test('comparison conversations answer objective differences before personal asse
   assert.equal(personal.resolution, 'ASSESSMENT_AWARE');
   assert.doesNotMatch(personal.answer.text, /당첨확률.*높/);
   assert.ok(why.answer.detail?.length);
+});
+
+test('six-turn qualification and recommendation conversation uses assessment, not repeated clarification', async () => {
+  const loaded = kioskEvent();
+  if (!loaded.ok) throw new Error(loaded.error);
+  const assessment = buildSamdoDualAssessment(samdoInputFromAnswers(doesNotKnowPersona.answers));
+  const facts = getUnresolvedAssessmentFacts(assessment, doesNotKnowPersona.answerStates);
+  let chat = startSamdoDualChat(loaded.event, assessment, doesNotKnowPersona.answerStates);
+  const questions = [
+    '내가 어떤걸 더 준비하면 좋을까?',
+    '내가 대비하거나, 더 채워야하는 조건은 없어?',
+    '그니까 자격 조건?',
+    '내가 지금 어떤 지구를 신청하는게 유리할까?',
+    '내가 지금 신청하면 좋은 공고는 어떤거야?',
+    '왜 그게 나한테 더 나아?',
+  ];
+  const replies: string[] = [];
+  const histories: Array<Array<{ role: string; text: string }>> = [];
+  for (const question of questions) {
+    chat = await sendChat(loaded.event, chat, question, {
+      allowNetwork: true,
+      fetcher: async (_url, init) => {
+        const body = JSON.parse(String(init?.body));
+        histories.push(body.history);
+        const result = await handleEventChat({ method: 'POST', body, headers: {} }, { env: {} });
+        return new Response(JSON.stringify(result.body), { status: result.status });
+      },
+    });
+    const reply = chat.messages.at(-1)!;
+    assert.equal(reply.role, 'assistant');
+    assert.equal(reply.response?.mode, 'deterministic');
+    assert.doesNotMatch(reply.text, /질문의 의미를 두 가지|신청 준비사항을 말씀/);
+    assert.doesNotMatch(JSON.stringify(reply), /(?:applicant|household|score)\.[A-Za-z]+|당첨확률이 높/);
+    replies.push(reply.text);
+  }
+  assert.ok(facts.length > 0);
+  assert.match(replies[0], /확정 판정|확인/);
+  assert.ok(chat.messages[2].detail?.some(line => facts.some(fact => line.includes(fact.label))));
+  assert.match(replies[3], /지구|판정/);
+  assert.match(replies[4], /지구|공고/);
+  assert.match(replies[5], /기준|판정/);
+  assert.equal(classifySamdoRagIntent(questions[4]), 'UNKNOWN');
+  assert.equal(histories[5].length, 6);
+  assert.ok(histories[5].some(turn => turn.role === 'user' && turn.text === questions[4]));
+});
+
+test('qualification, comparison and recommendation paraphrases use real assessment facts', () => {
+  const assessment = buildSamdoDualAssessment(samdoInputFromAnswers(doesNotKnowPersona.answers));
+  const facts = getUnresolvedAssessmentFacts(assessment, doesNotKnowPersona.answerStates);
+  const cases = [
+    ['어디 넣는 게 나아?', 'COMPARE'],
+    ['둘 중 뭐가 더 좋아?', 'COMPARE'],
+    ['내 조건에서 뭐가 부족해?', 'UNRESOLVED'],
+    ['내가 뭘 더 갖춰야 해?', 'UNRESOLVED'],
+    ['지금 지원하면 어디가 제일 맞아?', 'COMPARE'],
+    ['나한테 제일 맞는 공고 알려줘', 'RECOMMEND'],
+  ] as const;
+  for (const [question, expected] of cases) {
+    const result = resolveSamdoDualConversation(assessment, question, [], facts);
+    assert.equal(result.resolution, 'ASSESSMENT_AWARE', question);
+    assert.doesNotMatch(result.answer.text, /질문의 의미를 두 가지|당첨확률이 높/);
+    assert.doesNotMatch(JSON.stringify(result.answer), /(?:applicant|household|score)\.[A-Za-z]+/);
+    if (expected === 'UNRESOLVED') {
+      assert.ok((result.answer.detail ?? []).some(line => facts.some(fact => line.includes(fact.label))), question);
+    } else if (expected === 'COMPARE') assert.match(result.answer.text, /지구|판정/, question);
+    else assert.match(result.answer.text, /추천|검토|지구/, question);
+  }
+});
+
+test('unresolved answer detail remains within the server presentation contract for nine personas', () => {
+  for (const persona of SAMDO_PERSONAS) {
+    const assessment = buildSamdoDualAssessment(persona.input);
+    const facts = getUnresolvedAssessmentFacts(assessment);
+    const answer = resolveSamdoDualConversation(assessment, '내가 뭘 더 갖춰야 해?', [], facts).answer;
+    assert.ok((answer.detail ?? []).every(line => line.length <= 400), persona.id);
+  }
 });

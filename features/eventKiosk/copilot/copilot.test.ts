@@ -95,6 +95,13 @@ test('conversation commands map to Copilot actions; content questions go to the 
   for (const [text, kind] of cases) assert.equal(copilotIntent(text).kind, kind, text);
   const whatIf = copilotIntent('청약통장이 6회가 되면?');
   assert.ok(whatIf.kind === 'WHAT_IF' && whatIf.value === 6);
+  assert.equal(copilotIntent('내가 대비하거나, 더 채워야하는 조건은 없어?').kind, 'SERVER');
+  assert.equal(copilotIntent('내가 지금 어떤 지구를 신청하는게 유리할까?').kind, 'COMPARE');
+  assert.equal(copilotIntent('내가 지금 신청하면 좋은 공고는 어떤거야?').kind, 'RECOMMEND');
+  assert.equal(copilotIntent('그니까 자격 조건?', [
+    { role: 'user', text: '내가 대비하거나 더 채워야 하는 조건은 없어?' },
+    { role: 'assistant', text: '자격 조건을 확인해 볼게요.' },
+  ]).kind, 'SERVER');
 });
 
 test('Copilot UI never shows probability-like recommendation wording', () => {

@@ -38,11 +38,26 @@ test('candidate is neither approved nor active and direct-ID public APIs fail cl
   assert.equal(adapter.lifecycle.publicationStatus, 'INACTIVE');
   assert.deepEqual(platform.getActiveNotices().map(item => item.id), ['samdo-1', 'samdo-2']);
   assert.throws(() => platform.assessNotice(profile, adapter.notice.id), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.assessNotices(profile, ['samdo-1', adapter.notice.id]), /REVIEW_REQUIRED/);
   assert.throws(() => platform.retrieveNoticeEvidence(adapter.notice.id, '청년 소득'), /REVIEW_REQUIRED/);
   assert.throws(() => platform.getNoticePresentation(adapter.notice.id), /REVIEW_REQUIRED/);
   assert.throws(() => platform.rulePackage(adapter.notice.id), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.ragSource(adapter.notice.id), /REVIEW_REQUIRED/);
   const reviewerOnly = adapter.assess(profile);
   assert.throws(() => platform.compareAssessmentResults([reviewerOnly]), /REVIEW_REQUIRED/);
+});
+
+test('locally simulated Staging IN_REVIEW registration still cannot reach public or Copilot paths', () => {
+  const { adapter } = prepareJejuHappyV2Candidate();
+  const staged: NoticeAdapter = { ...adapter, lifecycle: { ...adapter.lifecycle, reviewStatus: 'IN_REVIEW',
+    publicationStatus: 'INACTIVE' }, rulePackage: { ...adapter.rulePackage, status: 'IN_REVIEW' } };
+  const platform = new NoticePlatform([...SAMDO_NOTICE_ADAPTERS, staged]);
+  assert.deepEqual(platform.getActiveNotices().map(item => item.id), ['samdo-1', 'samdo-2']);
+  assert.throws(() => platform.assessNotice(profile, staged.notice.id), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.assessNotices(profile, ['samdo-1', staged.notice.id]), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.getNoticePresentation(staged.notice.id), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.retrieveNoticeEvidence(staged.notice.id, '소득 기준'), /REVIEW_REQUIRED/);
+  assert.throws(() => platform.compareAssessmentResults([staged.assess(profile)]), /REVIEW_REQUIRED/);
 });
 
 test('unresolved blocker, source, binding and approval are independent gates', () => {

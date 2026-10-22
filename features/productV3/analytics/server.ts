@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { getActiveNotices } from '../../eventKiosk/noticePlatform/index.ts';
 import { resolveProductV3StagingTarget } from '../admin/stagingTarget.ts';
-import { analyticsGateFromEnv, getAnalyticsSummary, parseAnalyticsEvent, shouldCollect } from './core.ts';
+import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, parseAnalyticsEvent, shouldCollect } from './core.ts';
 import type { AnalyticsEvent, AnalyticsEventType, AnalyticsQuery, AnalyticsSummary, AnalyticsTrafficType, UnresolvedCategory } from './contract.ts';
 
 const safeUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -50,11 +50,21 @@ export async function recordAnalyticsEvent(event: AnalyticsEvent | null, env: Re
   return recordAnalyticsBatch(event ? [event] : [], env, fetcher);
 }
 
+/** Staging-only dry-run job contract. Execution needs separate retention/backup approval. */
+export function planStagingAnalyticsCleanup(env: Record<string, string | undefined>, now = new Date()) {
+  const target = resolveProductV3StagingTarget(env);
+  const plan = analyticsRetentionPlan(analyticsGateFromEnv(env), now);
+  return plan ? { projectRef: target.ref, table: 'product_v3_analytics_events', cutoff: plan.cutoff,
+    retentionDays: plan.retentionDays, mode: 'DRY_RUN' as const } : null;
+}
+
 export async function recordAnalyticsBatch(events: readonly AnalyticsEvent[], env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<boolean> {
   const gate = analyticsGateFromEnv(env);
   const accepted = events.flatMap(event => {
     const parsed = parseAnalyticsEvent(event);
     if (!parsed) return [];
+    const trusted = serverEvent({ anonymousSessionId: parsed.anonymousSessionId, noticeId: parsed.noticeId, eventType: parsed.eventType }, env);
+    if (!trusted || parsed.environment !== trusted.environment || parsed.trafficType !== trusted.trafficType || parsed.noticeVersion !== trusted.noticeVersion) return [];
     const notice = getActiveNotices().find(item => item.id === parsed.noticeId);
     const officialActiveVerified = notice?.status === 'ACTIVE' && notice.sourceDocument.official === true;
     return shouldCollect(parsed, gate, officialActiveVerified) ? [parsed] : [];
@@ -71,11 +81,27 @@ export async function recordAnalyticsBatch(events: readonly AnalyticsEvent[], en
   } catch { return false; }
 }
 
+/** Per-instance QA throttling. A distributed limit is required before real traffic is enabled. */
+const browserAttempts = new Map<string, { minute: number; minuteCount: number; lastSeen: number; acceptedIds: Set<string> }>();
+export function allowBrowserAnalyticsAttempt(sessionId: string, eventId: string, env: Record<string, string | undefined>, now = Date.now()): boolean {
+  const gate = analyticsGateFromEnv(env);
+  const minute = Math.floor(now / 60_000);
+  if (browserAttempts.size > 5000) for (const [key, state] of browserAttempts) if (state.lastSeen < now - 24 * 60 * 60_000) browserAttempts.delete(key);
+  if (!browserAttempts.has(sessionId) && browserAttempts.size >= 5000) return false;
+  const next = browserAttempts.get(sessionId) ?? { minute, minuteCount: 0, lastSeen: now, acceptedIds: new Set<string>() };
+  if (next.minute !== minute) { next.minute = minute; next.minuteCount = 0; }
+  if (next.acceptedIds.has(eventId)) return true;
+  if (next.minuteCount >= gate.endpointRateLimitPerMinute || next.acceptedIds.size >= gate.sessionEventCap) return false;
+  next.minuteCount += 1; next.lastSeen = now; next.acceptedIds.add(eventId); browserAttempts.set(sessionId, next);
+  return true;
+}
+
 /** Browser may trigger a UX event, but cannot set metadata, status, version, traffic or raw fact category. */
 export async function recordBrowserAnalytics(value: unknown, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<boolean> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const row = value as Record<string, unknown>;
   if (!browserTypes.has(row.eventType as AnalyticsEventType) || !safeUuid.test(String(row.eventId ?? '')) || !safeUuid.test(String(row.anonymousSessionId ?? ''))) return false;
+  if (!allowBrowserAnalyticsAttempt(String(row.anonymousSessionId), String(row.eventId), env)) return false;
   const event = serverEvent({ eventId: String(row.eventId), anonymousSessionId: String(row.anonymousSessionId),
     noticeId: String(row.noticeId ?? ''), eventType: row.eventType as AnalyticsEventType,
     ...(row.eventType === 'COPILOT_USED' && Number.isInteger(row.conversationTurnCount) ? { conversationTurnCount: Number(row.conversationTurnCount) } : {}),
@@ -86,11 +112,12 @@ export async function recordBrowserAnalytics(value: unknown, env: Record<string,
 
 /** Admin-authenticated server read; no client-side DB access and no unbounded scan. */
 export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<AnalyticsSummary> {
-  const target = resolveProductV3StagingTarget(env);
-  const from = new Date(`${query.from}T00:00:00Z`);
-  const to = new Date(`${query.to}T00:00:00Z`);
-  to.setUTCDate(to.getUTCDate() + 1);
-  if (query.previousPeriod) from.setTime(from.getTime() - (to.getTime() - from.getTime()));
+  let target: ReturnType<typeof resolveProductV3StagingTarget>;
+  try { target = resolveProductV3StagingTarget(env); }
+  catch { throw new Error('ANALYTICS_AUTH_UNAVAILABLE'); }
+  const window = analyticsWindow(query);
+  const from = new Date(query.previousPeriod ? window.previousFrom : window.from);
+  const to = new Date(window.to);
   const events: AnalyticsEvent[] = [];
   for (let offset = 0; offset < 100_000; offset += 1000) {
     const url = new URL('/rest/v1/product_v3_analytics_events', target.url);
@@ -102,11 +129,15 @@ export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<st
     if (query.noticeId) url.searchParams.set('notice_id', `eq.${query.noticeId}`);
     url.searchParams.set('order', 'occurred_at.asc,event_id.asc');
     url.searchParams.set('limit', '1000'); url.searchParams.set('offset', String(offset));
-    const response = await fetcher(url, { headers: { apikey: target.serviceRoleKey, authorization: `Bearer ${target.serviceRoleKey}` }, cache: 'no-store', signal: AbortSignal.timeout(6000) });
-    if (response.status === 404) throw new Error('ANALYTICS_SCHEMA_NOT_READY');
+    let response: Response;
+    try { response = await fetcher(url, { headers: { apikey: target.serviceRoleKey, authorization: `Bearer ${target.serviceRoleKey}` }, cache: 'no-store', signal: AbortSignal.timeout(6000) }); }
+    catch (error) { throw new Error(error instanceof Error && /timeout|abort/i.test(error.name) ? 'ANALYTICS_TIMEOUT' : 'ANALYTICS_READ_FAILED'); }
+    if (response.status === 404 || (response.status === 400 && /42P01|PGRST205/.test(await response.clone().text()))) throw new Error('ANALYTICS_SCHEMA_NOT_READY');
+    if (response.status === 401 || response.status === 403) throw new Error('ANALYTICS_AUTH_UNAVAILABLE');
     if (!response.ok) throw new Error('ANALYTICS_READ_FAILED');
-    const page: unknown = await response.json();
-    if (!Array.isArray(page)) throw new Error('ANALYTICS_RESPONSE_INVALID');
+    let page: unknown;
+    try { page = await response.json(); } catch { throw new Error('ANALYTICS_READ_FAILED'); }
+    if (!Array.isArray(page)) throw new Error('ANALYTICS_READ_FAILED');
     for (const value of page) {
       const row = value as Record<string, unknown>;
       const parsed = parseAnalyticsEvent({ eventId: row.event_id, anonymousSessionId: row.anonymous_session_id, noticeId: row.notice_id,
@@ -119,7 +150,14 @@ export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<st
         ...(row.fallback_reason ? { fallbackReason: row.fallback_reason } : {}) });
       if (parsed) events.push(parsed);
     }
-    if (page.length < 1000) return getAnalyticsSummary(events, query);
+    if (page.length < 1000) {
+      const gate = analyticsGateFromEnv(env);
+      const active = getActiveNotices().filter(notice => !query.noticeId || notice.id === query.noticeId);
+      const officialDataReady = active.some(notice => notice.status === gate.requiredOfficialState
+        && notice.sourceDocument.official === true && (/1\.8/.test(notice.sourceDocument.fileName) ? 'VER1.8' : 'UNKNOWN') === gate.requiredNoticeVersion);
+      const hasRealEvents = events.some(item => item.environment === 'production' && item.trafficType === 'real');
+      return getAnalyticsSummary(events, query, new Date(), analyticsCollectionStatus(gate, officialDataReady, hasRealEvents));
+    }
   }
-  throw new Error('ANALYTICS_PAGE_LIMIT');
+  throw new Error('ANALYTICS_READ_FAILED');
 }

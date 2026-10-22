@@ -25,7 +25,7 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   if (!token) return { status: 401, body: { error: 'AUTH_REQUIRED' } };
   let role: AuthResult;
   try { role = await dependencies.authorize(token); }
-  catch { return { status: 503, body: { error: 'ADMIN_AUTH_UNAVAILABLE' } }; }
+  catch { return { status: 503, body: { error: request.query?.analytics !== undefined ? 'ANALYTICS_AUTH_UNAVAILABLE' : 'ADMIN_AUTH_UNAVAILABLE' } }; }
   if (role === 'UNAUTHENTICATED') return { status: 401, body: { error: 'AUTH_REQUIRED' } };
   if (!role) return { status: 403, body: { error: 'FORBIDDEN' } };
   try {
@@ -50,7 +50,14 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
     }
     return { status: 200, body: snapshot };
   }
-  catch { return { status: 503, body: { error: 'ADMIN_STAGING_DATA_UNAVAILABLE' } }; }
+  catch (error) {
+    if (request.query?.analytics !== undefined) {
+      const code = error instanceof Error ? error.message : '';
+      return { status: 503, body: { error: ['ANALYTICS_SCHEMA_NOT_READY', 'ANALYTICS_READ_FAILED', 'ANALYTICS_AUTH_UNAVAILABLE', 'ANALYTICS_TIMEOUT'].includes(code)
+        ? code : 'ANALYTICS_READ_FAILED' } };
+    }
+    return { status: 503, body: { error: 'ADMIN_STAGING_DATA_UNAVAILABLE' } };
+  }
 }
 
 /** Existing Supabase review-access RPC is the authority, using the caller's JWT. */

@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { analyticsGateFromEnv, getAnalyticsSummary, parseAnalyticsEvent, parseAnalyticsQuery, shouldCollect } from './core.ts';
-import { recordAnalyticsBatch, recordAnalyticsEvent, recordBrowserAnalytics, serverEvent, stableAnalyticsEventId } from './server.ts';
+import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, parseAnalyticsEvent, parseAnalyticsQuery, shouldCollect } from './core.ts';
+import { allowBrowserAnalyticsAttempt, loadAnalyticsSummary, planStagingAnalyticsCleanup, recordAnalyticsBatch, recordAnalyticsEvent, recordBrowserAnalytics, serverEvent, stableAnalyticsEventId } from './server.ts';
 import { handleProductV3ConsoleRequest } from '../../adminConsole/server/consoleApi.ts';
 import type { AnalyticsEvent } from './contract.ts';
 
@@ -11,6 +11,7 @@ const staging = { WANPANE_ENV: 'staging', VERCEL_ENV: 'preview', SUPABASE_STAGIN
   EVENT_ANALYTICS_ENABLED: 'true', EVENT_ANALYTICS_ALLOWED_TRAFFIC_TYPES: 'qa', EVENT_ANALYTICS_TRAFFIC_TYPE: 'qa' };
 const session = '829c8bfe-b396-4ac8-9f04-4bd8974203f4';
 const id = '26d97871-03b6-4074-8010-6a3fcb2fa44a';
+const afterFixture = new Date('2026-10-29T00:00:00Z');
 const event = (type: AnalyticsEvent['eventType'], overrides: Partial<AnalyticsEvent> = {}): AnalyticsEvent => ({
   eventId: id, anonymousSessionId: session, noticeId: 'samdo-1', noticeVersion: 'VER1.8', eventType: type,
   occurredAt: '2026-10-28T03:00:00.000Z', environment: 'staging', trafficType: 'qa', ...overrides,
@@ -51,7 +52,7 @@ test('session metrics count sessions, not people; duplicate event IDs and comple
   ];
   const query = parseAnalyticsQuery({ from: '2026-10-28', to: '2026-10-28', environment: 'staging', trafficType: 'qa', previousPeriod: 'true' });
   assert.ok(query);
-  const summary = getAnalyticsSummary(rows, query);
+  const summary = getAnalyticsSummary(rows, query, afterFixture);
   assert.equal(summary.sessionsStarted, 1);
   assert.equal(summary.assessmentsStarted, 1);
   assert.equal(summary.assessmentsCompleted, 1);
@@ -59,9 +60,14 @@ test('session metrics count sessions, not people; duplicate event IDs and comple
   assert.deepEqual(summary.assessmentStatusDistribution, { COMPLETE: 1, NEEDS_USER_INPUT: 1, INELIGIBLE: 0, UNAVAILABLE: 0 });
   assert.equal(summary.unresolvedCategoryDistribution.income, 1);
   assert.equal(summary.qrCreates, 1);
+  assert.equal(summary.qrCreateSessions, 1);
+  assert.equal(summary.resultViewSessions, 1);
+  assert.equal(summary.lastEventAt, '2026-10-28T03:00:00.000Z');
+  assert.equal(summary.generatedAt, afterFixture.toISOString());
+  assert.deepEqual(summary.supplyTypeAssessmentDistribution.YOUTH, { COMPLETE: 1, NEEDS_USER_INPUT: 0, INELIGIBLE: 0, UNAVAILABLE: 0 });
   assert.equal(summary.averageTurns, 3);
-  assert.equal(getAnalyticsSummary(rows, { ...query, environment: 'production' }).sessionsStarted, 0);
-  assert.equal(getAnalyticsSummary(rows, { ...query, trafficType: 'real' }).sessionsStarted, 0);
+  assert.equal(getAnalyticsSummary(rows, { ...query, environment: 'production' }, afterFixture).sessionsStarted, 0);
+  assert.equal(getAnalyticsSummary(rows, { ...query, trafficType: 'real' }, afterFixture).sessionsStarted, 0);
 });
 
 test('server projects safe event and idempotent insert; outage never breaks caller', async () => {
@@ -110,4 +116,80 @@ test('analytics summary is Admin-only and validates scoped windows before readin
   assert.equal((admin.body as typeof summary).sessionsStarted, 0);
   assert.equal((await handleProductV3ConsoleRequest({ method: 'GET', headers: { authorization: 'Bearer token' },
     query: { ...query, from: '2026-02-30' } }, dependencies)).status, 400);
+});
+
+test('KST midnight, duplicate action sessions, notice filter and prior period use the same boundaries', () => {
+  const row = (type: AnalyticsEvent['eventType'], suffix: string, at: string, extra: Partial<AnalyticsEvent> = {}) =>
+    event(type, { eventId: stableAnalyticsEventId(id, suffix), occurredAt: at, ...extra });
+  const query = parseAnalyticsQuery({ from: '2026-10-28', to: '2026-10-28', environment: 'staging', trafficType: 'qa', previousPeriod: 'true' });
+  assert.ok(query);
+  assert.equal(new Date(analyticsWindow(query).from).toISOString(), '2026-10-27T15:00:00.000Z');
+  const rows = [row('RESULT_VIEWED', 'before', '2026-10-27T14:59:59.999Z'),
+    row('ASSESSMENT_STARTED', 'prior-start', '2026-10-27T14:59:59.999Z'),
+    row('ASSESSMENT_COMPLETED', 'prior-needs', '2026-10-27T14:59:59.999Z', { supplyType: 'YOUTH', assessmentStatus: 'NEEDS_USER_INPUT' }),
+    row('COPILOT_USED', 'prior-fallback', '2026-10-27T14:59:59.999Z', { aiMode: 'fallback' }),
+    row('RESULT_VIEWED', 'a', '2026-10-27T15:00:00.000Z'), row('RESULT_VIEWED', 'b', '2026-10-28T02:00:00.000Z'),
+    row('RESULT_SAVED', 'c', '2026-10-28T02:00:00.000Z'), row('QR_CREATED', 'd', '2026-10-28T02:00:00.000Z'),
+    row('ASSESSMENT_COMPLETED', 'e', '2026-10-28T02:00:00.000Z', { supplyType: 'YOUTH', assessmentStatus: 'NEEDS_USER_INPUT' }),
+    row('ASSESSMENT_COMPLETED', 'f', '2026-10-28T02:00:00.000Z', { supplyType: 'GENERAL', assessmentStatus: 'INELIGIBLE', noticeId: 'samdo-2' }),
+    row('COPILOT_USED', 'g', '2026-10-28T02:00:00.000Z', { aiMode: 'fallback' })];
+  const summary = getAnalyticsSummary(rows, query, afterFixture);
+  assert.equal(summary.resultViews, 2);
+  assert.equal(summary.resultViewSessions, 1);
+  assert.equal(summary.resultSaveSessions, 1);
+  assert.equal(summary.qrCreateSessions, 1);
+  assert.equal(summary.previousPeriodComparison?.resultViewSessions, 1);
+  assert.equal(summary.previousPeriodComparison?.assessmentsStarted, 1);
+  assert.equal(summary.previousPeriodComparison?.needsUserInput, 1);
+  assert.equal(summary.previousPeriodComparison?.fallback, 1);
+  assert.equal(summary.supplyTypeAssessmentDistribution.GENERAL.INELIGIBLE, 1);
+  assert.equal(summary.lastEventAt, '2026-10-28T02:00:00.000Z');
+  const filtered = getAnalyticsSummary(rows, { ...query, noticeId: 'samdo-1' }, afterFixture);
+  assert.equal(filtered.supplyTypeAssessmentDistribution.GENERAL, undefined);
+  assert.equal(filtered.supplyTypeAssessmentDistribution.YOUTH.NEEDS_USER_INPUT, 1);
+  assert.equal(getAnalyticsSummary([], query, afterFixture).lastEventAt, null);
+});
+
+test('collection state, retention plan and browser limits remain pre-launch or QA-only', () => {
+  const gate = analyticsGateFromEnv({ EVENT_ANALYTICS_ENABLED: 'true', EVENT_ANALYTICS_ALLOWED_TRAFFIC_TYPES: 'real',
+    EVENT_ANALYTICS_RETENTION_DAYS: '90', EVENT_ANALYTICS_SESSION_EVENT_CAP: '2', EVENT_ANALYTICS_RATE_LIMIT_PER_MINUTE: '2' });
+  assert.equal(analyticsCollectionStatus(gate, false, false, new Date('2026-10-28T00:00:00Z')).collectionState, 'PRE_LAUNCH');
+  assert.equal(analyticsCollectionStatus(gate, true, false, new Date('2026-10-28T00:00:00Z')).collectionState, 'READY_NOT_STARTED');
+  assert.equal(analyticsCollectionStatus(gate, true, true, new Date('2026-10-28T00:00:00Z')).collectionState, 'COLLECTING');
+  assert.equal(analyticsCollectionStatus({ ...gate, analyticsEnabled: false }, true, false, new Date('2026-10-28T00:00:00Z')).collectionState, 'PAUSED');
+  assert.equal(analyticsCollectionStatus({ ...gate, collectionStartAt: 'bad' }, true, false).collectionState, 'MISCONFIGURED');
+  assert.deepEqual(analyticsRetentionPlan(gate, new Date('2026-10-28T00:00:00Z')), { cutoff: '2026-07-30T00:00:00.000Z', retentionDays: 90 });
+  assert.deepEqual(planStagingAnalyticsCleanup({ ...staging, EVENT_ANALYTICS_RETENTION_DAYS: '90' }, new Date('2026-10-28T00:00:00Z')),
+    { projectRef: 'aaaaaaaaaaaaaaaaaaaa', table: 'product_v3_analytics_events', cutoff: '2026-07-30T00:00:00.000Z', retentionDays: 90, mode: 'DRY_RUN' });
+  assert.throws(() => planStagingAnalyticsCleanup({ ...staging, VERCEL_ENV: 'production', EVENT_ANALYTICS_RETENTION_DAYS: '90' }), /PRODUCT_V3_STAGING_ONLY/);
+  const key = '54a30986-a30c-4ad9-b868-8e0f3c675147';
+  const limited = { ...staging, EVENT_ANALYTICS_SESSION_EVENT_CAP: '2', EVENT_ANALYTICS_RATE_LIMIT_PER_MINUTE: '2' };
+  assert.equal(allowBrowserAnalyticsAttempt(key, 'one', limited, 0), true);
+  assert.equal(allowBrowserAnalyticsAttempt(key, 'one', limited, 0), true);
+  assert.equal(allowBrowserAnalyticsAttempt(key, 'two', limited, 0), true);
+  assert.equal(allowBrowserAnalyticsAttempt(key, 'three', limited, 60_000), false);
+});
+
+test('stable Admin analytics errors do not expose database messages', async () => {
+  const query = { analytics: 'summary', from: '2026-10-28', to: '2026-10-28', environment: 'staging', trafficType: 'qa' };
+  const request = { method: 'GET', headers: { authorization: 'Bearer token' }, query };
+  const base = { authorize: async () => 'admin' as const, loadSnapshot: async () => { throw new Error('unused'); } };
+  for (const code of ['ANALYTICS_SCHEMA_NOT_READY', 'ANALYTICS_READ_FAILED', 'ANALYTICS_AUTH_UNAVAILABLE', 'ANALYTICS_TIMEOUT']) {
+    const result = await handleProductV3ConsoleRequest(request, { ...base, loadAnalytics: async () => { throw new Error(code); } });
+    assert.deepEqual(result, { status: 503, body: { error: code } });
+  }
+  const unknown = await handleProductV3ConsoleRequest(request, { ...base, loadAnalytics: async () => { throw new Error('secret database detail'); } });
+  assert.deepEqual(unknown, { status: 503, body: { error: 'ANALYTICS_READ_FAILED' } });
+  const unavailable = await handleProductV3ConsoleRequest(request, { ...base, authorize: async () => { throw new Error('secret auth detail'); } });
+  assert.deepEqual(unavailable, { status: 503, body: { error: 'ANALYTICS_AUTH_UNAVAILABLE' } });
+});
+
+test('server reader distinguishes missing schema, auth failure, timeout and read failure', async () => {
+  const query = parseAnalyticsQuery({ from: '2026-10-28', to: '2026-10-28', environment: 'staging', trafficType: 'qa' });
+  assert.ok(query);
+  const failure = async (status: number) => loadAnalyticsSummary(query, staging, (async () => new Response('', { status })) as typeof fetch);
+  await assert.rejects(failure(404), /ANALYTICS_SCHEMA_NOT_READY/);
+  await assert.rejects(failure(403), /ANALYTICS_AUTH_UNAVAILABLE/);
+  await assert.rejects(failure(500), /ANALYTICS_READ_FAILED/);
+  await assert.rejects(loadAnalyticsSummary(query, staging, (async () => { const error = new Error('timeout'); error.name = 'TimeoutError'; throw error; }) as typeof fetch), /ANALYTICS_TIMEOUT/);
 });

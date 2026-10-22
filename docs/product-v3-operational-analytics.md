@@ -10,6 +10,16 @@
 
 익명 세션은 고유 **사람**이 아니다. Dashboard는 상담 세션·판정 세션·완료 세션만 표시한다. 완료율은 공급유형 셀 수가 아니라 판정을 시작한 익명 세션 중 완료 이벤트가 있는 세션의 비율이다. `FACT_MARKED_UNKNOWN`은 동일 세션·범주를 한 번 센다. QA/Staging/Production 및 `qa/internal/beta/real`은 독립 필터다.
 
+## Analytics 계약 v2
+
+기존 `resultViews`·`resultSaves`·`qrCreates`는 **이벤트 횟수**로 유지한다. 별도 `resultViewSessions`·`resultSaveSessions`·`qrCreateSessions`는 같은 이벤트를 여러 번 낸 익명 세션을 한 번만 센다. `supplyTypeAssessmentDistribution`은 공급유형별 COMPLETE/NEEDS_USER_INPUT/INELIGIBLE/UNAVAILABLE 판정 셀 수이며 당첨확률이 아니다. `generatedAt`은 서버 집계 시각, `lastEventAt`은 현재 필터에 맞는 마지막 이벤트 시각(없으면 null)이다. 이전 기간 비교에는 판정 시작, 결과 조회·저장·QR 세션, NEEDS_USER_INPUT 셀, fallback 이벤트도 포함한다.
+
+기간 `from`·`to`는 **Asia/Seoul 달력 날짜**다. 각 시작일 00:00 KST부터 종료일 다음 날 00:00 KST 직전까지 조회하고, 미래 이벤트는 집계 시각 이후에 포함하지 않는다. UI의 `today`/`7d`/`30d` 계산과 같은 날짜 경계를 쓴다. 임의 timezone 파라미터는 받지 않는다.
+
+서버 summary는 `collection.collectionState`(PRE_LAUNCH/READY_NOT_STARTED/COLLECTING/PAUSED/MISCONFIGURED), `officialDataReady`, `requiredNoticeVersion`, `collectionStartAt`을 함께 반환한다. UI는 로컬 기본 env로 공식 게시 여부를 결정하지 말고 이 서버 값을 사용해야 한다. 현재 보유 원문은 공식 게시·검증 전이므로 `officialDataReady=false`다. Claude UI 브랜치의 기존 필드는 변경하지 않았으며, 통합 시 이 additive 필드로 pre-launch 안내를 전환해야 한다.
+
+Admin summary 오류 응답은 원문 DB 에러 대신 안정적인 `ANALYTICS_SCHEMA_NOT_READY`, `ANALYTICS_READ_FAILED`, `ANALYTICS_AUTH_UNAVAILABLE`, `ANALYTICS_TIMEOUT` 중 하나다. 인증되지 않은 요청은 기존 `AUTH_REQUIRED`(401), Admin이 아닌 요청은 `FORBIDDEN`(403)을 유지한다.
+
 ## Staging 적용 전 절차
 
 1. 승인된 운영자가 migration chain을 확인한다. 다음 파일은 `supabase/migrations/20261022120000_product_v3_operational_analytics.sql` 하나여야 한다.
@@ -22,9 +32,13 @@
 
 `real`은 기본 허용 목록에 없다. 나중에 공식 1.8 원문 게시·해시 검증·Rule Package 승인·공고 ACTIVE가 완료되어 서버의 `sourceDocument.official=true`가 확인되고, 환경이 Production이며 시작시각과 공고 버전이 모두 일치해야만 gate 함수가 허용한다. 현재 두 삼도 공고의 `isOfficial`은 false이고 Production 쓰기 target은 구현하지 않았으므로 `real` 수집은 불가능하다. Production promotion에는 별도 승인, 복구 전략, 서버 측 공식 활성상태 재검증, 남용 방지, 부하/용량 검증이 필요하다.
 
+브라우저 입력의 `environment`·`trafficType`·`noticeVersion`·판정 상태는 폐기하고 서버가 등록된 공고와 배포 환경에서 다시 만든다. `EVENT_ANALYTICS_SESSION_EVENT_CAP`(기본 300)과 `EVENT_ANALYTICS_RATE_LIMIT_PER_MINUTE`(기본 60)는 현재 서버 인스턴스 단위의 QA 방어다. 서버리스 인스턴스 간 공유되지 않으므로 **Production real 수집의 충분한 abuse guard가 아니다**. 실운영 전에 공유 저장소 기반 rate/cap, 보호된 익명 세션 발급, 부하 검증을 별도로 통과해야 한다. eventId 기본키의 재시도 중복 제거는 유지한다.
+
 ## 보존 정책
 
 `EVENT_ANALYTICS_RETENTION_DAYS`는 1~3650일의 설정 계약만 준비했다. 보존기간 자체는 아직 결정하지 않았고 자동 삭제 작업도 없다. 운영 활성화 전 법무·개인정보·백업 요구사항과 기간을 결정하고, 삭제 작업을 별도 검수해야 한다. 무기한 보존을 운영 정책으로 간주하지 않는다.
+
+초기 제안은 **90일**이다. `planStagingAnalyticsCleanup`은 Staging 프로젝트 identity와 삭제 기준 시각을 검증해 `DRY_RUN` 계획만 반환한다. 실제 DELETE 권한·스케줄·Production 자동 삭제는 이 변경에 없다. Staging에서 계획을 검증하고 백업/복구 및 보존기간 승인 후 별도 migration/job으로 활성화한다.
 
 ## 한계
 

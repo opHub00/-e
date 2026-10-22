@@ -39,8 +39,20 @@ export type AnalyticsGate = {
   analyticsEnabled: boolean;
   collectionStartAt: string;
   requiredNoticeVersion: string;
+  requiredOfficialState: 'ACTIVE';
+  allowedEnvironment: 'production';
   allowedTrafficTypes: readonly AnalyticsTrafficType[];
+  sessionEventCap: number;
+  endpointRateLimitPerMinute: number;
   retentionDays: number | null;
+};
+
+export type AnalyticsCollectionState = 'PRE_LAUNCH' | 'READY_NOT_STARTED' | 'COLLECTING' | 'PAUSED' | 'MISCONFIGURED';
+export type AnalyticsCollectionStatus = {
+  collectionState: AnalyticsCollectionState;
+  officialDataReady: boolean;
+  requiredNoticeVersion: string;
+  collectionStartAt: string;
 };
 
 export type AnalyticsQuery = {
@@ -54,6 +66,9 @@ export type AnalyticsQuery = {
 
 export type AnalyticsSummary = {
   query: AnalyticsQuery;
+  generatedAt?: string;
+  lastEventAt?: string | null;
+  collection?: AnalyticsCollectionStatus;
   /** Distinct anonymous session IDs, never unique people. */
   sessionsStarted: number;
   assessmentsStarted: number;
@@ -62,14 +77,30 @@ export type AnalyticsSummary = {
   resultViews: number;
   resultSaves: number;
   qrCreates: number;
+  resultViewSessions?: number;
+  resultSaveSessions?: number;
+  qrCreateSessions?: number;
   assessmentStatusDistribution: Record<AnalyticsAssessmentStatus, number>;
   unresolvedCategoryDistribution: Partial<Record<UnresolvedCategory, number>>;
   noticeDistribution: Record<string, number>;
   supplyTypeDistribution: Record<string, number>;
+  /** Completed assessment cells only; not a success probability. */
+  supplyTypeAssessmentDistribution?: Record<string, Record<AnalyticsAssessmentStatus, number>>;
   copilotUsage: number;
   aiModeDistribution: Partial<Record<AnalyticsAiMode, number>>;
   fallbackDistribution: Partial<Record<AnalyticsFallbackReason, number>>;
   averageTurns: number | null;
   durationBuckets: Partial<Record<DurationBucket, number>>;
-  previousPeriodComparison: { sessionsStarted: number; assessmentsCompleted: number; completionRate: number | null } | null;
+  previousPeriodComparison: {
+    sessionsStarted: number; assessmentsStarted: number; assessmentsCompleted: number; completionRate: number | null;
+    resultViewSessions?: number; resultSaveSessions?: number; qrCreateSessions?: number;
+    needsUserInput?: number; fallback?: number;
+  } | null;
+};
+
+/** Server responses always include v2 fields; optional base fields preserve existing UI fixtures. */
+export type AnalyticsSummaryV2 = AnalyticsSummary & {
+  generatedAt: string; lastEventAt: string | null; collection: AnalyticsCollectionStatus;
+  resultViewSessions: number; resultSaveSessions: number; qrCreateSessions: number;
+  supplyTypeAssessmentDistribution: Record<string, Record<AnalyticsAssessmentStatus, number>>;
 };

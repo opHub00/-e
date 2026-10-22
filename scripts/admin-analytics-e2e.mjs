@@ -18,21 +18,32 @@ const VIEWPORTS = [
 ];
 // [예시 상황, 반드시 보일 표지, 보이면 안 되는 표지]
 const SCENARIOS = [
-  ['prelaunch', 'analytics-prelaunch', 'analytics-kpis'],
-  ['qa0', 'analytics-empty', 'analytics-kpis'],
-  ['qa20', 'analytics-report', 'analytics-prelaunch'],
-  ['qa100', 'analytics-report', 'analytics-prelaunch'],
-  ['qa500', 'analytics-report', 'analytics-prelaunch'],
-  ['live', 'analytics-report', 'analytics-official-banner'],
+  ['prelaunch', 'analytics-collection-pre_launch', 'analytics-kpis'],
+  ['ready', 'analytics-collection-ready_not_started', 'analytics-kpis'],
+  ['live', 'analytics-report', 'analytics-qa-banner'],
   ['live0', 'analytics-empty', 'analytics-kpis'],
   ['live500', 'analytics-report', 'analytics-qa-banner'],
-  ['aiwarn', 'analytics-ai-warnings', 'analytics-prelaunch'],
-  ['stale', 'analytics-stale', 'analytics-fetched'],
-  ['error', 'analytics-error', 'analytics-kpis'],
-  ['timeout', 'analytics-error-timeout', 'analytics-kpis'],
-  ['forbidden', 'analytics-forbidden', 'analytics-kpis'],
-  ['unauthorized', 'analytics-error-unauthorized', 'analytics-kpis'],
+  ['paused', 'analytics-collection-paused', 'analytics-collection-pre_launch'],
+  ['misconfigured', 'analytics-collection-misconfigured', 'analytics-kpis'],
+  ['stale', 'analytics-stale', 'analytics-last-event'],
+  ['aiwarn', 'analytics-ai-warnings', 'analytics-qa-banner'],
+  ['qa0', 'analytics-no-events', 'analytics-kpis'],
+  ['qa20', 'analytics-report', 'analytics-collection-pre_launch'],
+  ['qa100', 'analytics-report', 'analytics-collection-pre_launch'],
+  ['qa500', 'analytics-report', 'analytics-collection-pre_launch'],
+  ['schema', 'analytics-error-analytics_schema_not_ready', 'analytics-kpis'],
+  ['readfail', 'analytics-error-analytics_read_failed', 'analytics-kpis'],
+  ['authunavail', 'analytics-error-analytics_auth_unavailable', 'analytics-kpis'],
+  ['timeout', 'analytics-error-analytics_timeout', 'analytics-kpis'],
+  ['network', 'analytics-error-network', 'analytics-kpis'],
+  ['forbidden', 'analytics-error-forbidden', 'analytics-kpis'],
+  ['unauthorized', 'analytics-error-auth_required', 'analytics-kpis'],
 ];
+const ERROR_TITLES = {
+  schema: '운영 지표 저장소가 아직 준비되지 않았어요', readfail: '운영 데이터를 읽는 중 문제가 발생했어요',
+  authunavail: '관리자 권한 확인 경로가 응답하지 않아요', timeout: '운영 데이터 조회가 지연되고 있어요',
+};
+const QA = ['qa0', 'qa20', 'qa100', 'qa500'];
 const BANNED = ['사용자 수', '방문자 수', '신청자 수', '이용자 수', '당첨 가능성', '당첨 확률'];
 
 const browser = await chromium.launch();
@@ -88,8 +99,21 @@ for (const vp of VIEWPORTS) {
     ok(result.bannedHits.length === 0, `${vp.name} ${scenario}: banned wording ${result.bannedHits}`);
     ok(result.statusOk, `${vp.name} ${scenario}: status rows carry text labels`);
     // QA·비운영 기록이면 항상 표시, 운영 개시 전이면 공식 상태 표시
-    if (['qa20', 'qa100', 'qa500', 'qa0'].includes(scenario)) ok(await tid('analytics-qa-banner').count() === 1, `${vp.name} ${scenario}: QA banner`);
-    if (['qa20', 'qa100', 'qa500', 'qa0'].includes(scenario)) ok(await tid('analytics-official-banner').count() === 1, `${vp.name} ${scenario}: official status banner`);
+    const text = await tid('console-analytics').innerText();
+    ok(!text.includes('UTC'), `${vp.name} ${scenario}: no UTC wording`);
+    ok(!text.includes('운영 데이터 서버에 문제가 있어요'), `${vp.name} ${scenario}: no generic 503 copy`);
+    if (QA.includes(scenario)) {
+      ok(await tid('analytics-qa-banner').count() === 1, `${vp.name} ${scenario}: QA banner`);
+      ok(await tid('analytics-official-banner').count() === 1, `${vp.name} ${scenario}: official status (server) banner`);
+    }
+    if (QA.includes(scenario) && scenario !== 'qa0') ok(await tid('analytics-qa-tag').count() === 4, `${vp.name} ${scenario}: every KPI tile tagged QA`);
+    if (ERROR_TITLES[scenario]) ok(text.includes(ERROR_TITLES[scenario]), `${vp.name} ${scenario}: stable code copy`);
+    if (['live', 'live500', 'qa100', 'paused'].includes(scenario)) {
+      for (const step of ['session', 'started', 'completed', 'viewed', 'saved', 'qr']) ok(await tid(`analytics-funnel-${step}`).count() === 1, `${vp.name} ${scenario}: funnel ${step}`);
+      for (const supply of ['YOUTH', 'NEWLYWED', 'NEWBORN', 'FIRST_HOME', 'GENERAL']) ok(await tid(`analytics-supply-${supply}`).count() === 1, `${vp.name} ${scenario}: supply ${supply}`);
+      ok(await tid('analytics-generated').count() === 1 && await tid('analytics-last-event').count() + await tid('analytics-stale').count() === 1, `${vp.name} ${scenario}: freshness lines`);
+    }
+    if (scenario === 'paused') ok(await tid('analytics-report').count() === 1, `${vp.name} paused keeps recorded numbers`);
     report.push({ viewport: vp.name, scenario, renderMs, ...result });
     await page.screenshot({ path: `${SHOT}/${vp.name}-${scenario}.png`, fullPage: true });
   }
@@ -103,7 +127,7 @@ for (const vp of VIEWPORTS) {
 
   // 흐름: 개시 전 → QA 데이터 보기 → 기간 · 공고 → 운영 데이터로 돌아가기
   await page.goto(`${BASE}/admin/console/analytics?demo=1&analytics=prelaunch`, { waitUntil: 'networkidle' });
-  await tid('analytics-prelaunch').waitFor();
+  await tid('analytics-collection-pre_launch').waitFor();
   ok(await page.getByText('아직 운영 집계가 시작되지 않았어요').filter({ visible: true }).count() === 1, `${vp.name} prelaunch copy`);
   await page.getByRole('button', { name: 'QA 데이터 보기' }).filter({ visible: true }).click();
   await tid('analytics-report').waitFor();
@@ -123,10 +147,10 @@ for (const vp of VIEWPORTS) {
   await tid('analytics-to').fill('2026-10-21');
   await tid('analytics-from').fill('2026-10-01');
   await page.getByRole('button', { name: '적용' }).filter({ visible: true }).click();
-  ok((await tid('analytics-scope-label').innerText()).includes('2026-10-01 ~ 2026-10-21'), `${vp.name} custom range applied`);
+  ok((await tid('analytics-scope-label').innerText()).includes('2026-10-01 ~ 2026-10-21 (KST)'), `${vp.name} custom range applied`);
   await page.screenshot({ path: `${SHOT}/${vp.name}-flow-filters.png`, fullPage: true });
   await page.getByRole('button', { name: '운영 데이터 보기' }).filter({ visible: true }).click();
-  await tid('analytics-prelaunch').waitFor();
+  await tid('analytics-collection-pre_launch').waitFor();
   ok(await tid('analytics-qa-banner').count() === 0, `${vp.name} back to operational view`);
 
   // 대시보드 카드 → 운영 지표, 메뉴에 운영 지표

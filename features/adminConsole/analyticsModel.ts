@@ -1,14 +1,13 @@
 import type {
-  AnalyticsAiMode, AnalyticsAssessmentStatus, AnalyticsEnvironment, AnalyticsFallbackReason, AnalyticsQuery,
-  AnalyticsSummary, AnalyticsTrafficType, DurationBucket, UnresolvedCategory,
+  AnalyticsAiMode, AnalyticsAssessmentStatus, AnalyticsCollectionState, AnalyticsCollectionStatus, AnalyticsEnvironment,
+  AnalyticsFallbackReason, AnalyticsQuery, AnalyticsSummary, AnalyticsTrafficType, DurationBucket, UnresolvedCategory,
 } from '../productV3/analytics/contract.ts';
-import { analyticsGateFromEnv } from '../productV3/analytics/core.ts';
 import { ALERT_THRESHOLDS, FALLBACK_REASON_LABEL, type AlertLevel } from './consoleModel.ts';
-import type { ConsoleNotice } from './contract.ts';
 
 /**
- * 운영 지표(Product V3 Analytics) 화면 모델. Codex 가 만든 AnalyticsSummary 를 읽기 좋은 모양으로만 바꾼다.
- * 여기서 새 집계를 만들거나 수치를 추정하지 않는다. 계약에 없는 값은 '제공 안 됨'으로 남긴다.
+ * 운영 지표(Product V3 Analytics, 계약 v2) 화면 모델. Codex 의 AnalyticsSummary 를 읽기 좋은 모양으로만 바꾼다.
+ * 새 집계를 만들거나 수치를 추정하지 않는다. 계약에 없는 값은 '제공 안 됨'으로 남긴다.
+ * 운영 개시 여부·공식 데이터 준비는 서버의 collection 값만 따른다(브라우저가 공고 상태를 추측하지 않는다).
  *
  * 단위 원칙: 익명 세션은 사람이 아니다. 세션 지표는 '세션', 이벤트 횟수는 '회', 공급유형 판정 결과는 '건'.
  */
@@ -56,8 +55,39 @@ export const NOTICE_FILTERS = [
 ] as const;
 export type NoticeFilter = typeof NOTICE_FILTERS[number]['key'];
 
-/** 운영 화면에 쓰면 안 되는 말. 익명 세션을 사람 수로 읽히게 한다. */
+/** 운영 화면에 쓰면 안 되는 말. 익명 세션을 사람 수로, 자격 판정을 당첨 예측으로 읽히게 한다. */
 export const BANNED_TERMS = ['사용자 수', '방문자 수', '신청자 수', '이용자 수', '명이 ', '당첨 가능성', '당첨 확률'];
+
+/* ── KST 날짜 · 시각 ────────────────────────────────────────────────────── */
+
+const DAY = 86_400_000;
+const KST = 9 * 3_600_000;
+/** 한국 날짜(YYYY-MM-DD). 서버 계약 v2 도 Asia/Seoul 달력 날짜로 집계한다. */
+export const kstDate = (time: number) => new Date(time + KST).toISOString().slice(0, 10);
+const validDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+/** '2026-10-23' → '10.23' */
+export const shortDay = (day: string) => `${Number(day.slice(5, 7))}.${Number(day.slice(8, 10))}`;
+/** ISO → '10.23 09:41 KST' */
+export function kstTime(iso: string): string {
+  const time = Date.parse(iso);
+  if (!Number.isFinite(time)) return '—';
+  const local = new Date(time + KST).toISOString();
+  return `${Number(local.slice(5, 7))}.${Number(local.slice(8, 10))} ${local.slice(11, 16)} KST`;
+}
+/** '2026-10-27T00:00:00+09:00' → '10월 27일 00:00 (KST)' */
+export function kstStamp(iso: string): string {
+  const time = Date.parse(iso);
+  if (!Number.isFinite(time)) return iso;
+  const local = new Date(time + KST).toISOString();
+  return `${Number(local.slice(5, 7))}월 ${Number(local.slice(8, 10))}일 ${local.slice(11, 16)} (KST)`;
+}
+export function ago(iso: string, now: Date): string {
+  const minutes = Math.max(0, Math.floor((now.getTime() - Date.parse(iso)) / 60_000));
+  if (minutes < 1) return '방금';
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.floor(minutes / 60);
+  return hours < 24 ? `${hours}시간 전` : `${Math.floor(hours / 24)}일 전`;
+}
 
 /* ── 기간 · 필터 ────────────────────────────────────────────────────────── */
 
@@ -66,7 +96,7 @@ export const PERIOD_LABEL: Record<PeriodKey, string> = { today: '오늘', '7d': 
 
 export type AnalyticsFilters = {
   period: PeriodKey;
-  /** period 가 custom 일 때만 쓴다. YYYY-MM-DD */
+  /** period 가 custom 일 때만 쓴다. YYYY-MM-DD (KST 날짜) */
   customFrom: string;
   customTo: string;
   environment: AnalyticsEnvironment;
@@ -74,15 +104,10 @@ export type AnalyticsFilters = {
   notice: NoticeFilter;
 };
 
-/** 운영 기본값: Production + 실제 운영(real) + 최근 7일. 개시 전이면 화면이 '집계 시작 전'을 안내한다. */
+/** 운영 기본값: Production + 실제 운영(real) + 최근 7일. 서버가 개시 전이라고 하면 화면이 '집계 시작 전'을 안내한다. */
 export const DEFAULT_FILTERS: AnalyticsFilters = { period: '7d', customFrom: '', customTo: '', environment: 'production', trafficType: 'real', notice: 'all' };
 /** 개시 전에 숫자를 확인하는 경로. 반드시 'QA 데이터'로 표시된다. */
 export const QA_FILTERS: Pick<AnalyticsFilters, 'environment' | 'trafficType'> = { environment: 'staging', trafficType: 'qa' };
-
-const DAY = 86_400_000;
-/** 한국 날짜(YYYY-MM-DD). 운영자는 KST 로 '오늘'을 읽는다. */
-export const kstDate = (time: number) => new Date(time + 9 * 3_600_000).toISOString().slice(0, 10);
-const validDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
 
 export type RangeResult = { ok: true; from: string; to: string; days: number } | { ok: false; error: string };
 
@@ -119,74 +144,150 @@ export function queryString(query: AnalyticsQuery): string {
 export const isOperationalView = (filters: Pick<AnalyticsFilters, 'environment' | 'trafficType'>) =>
   filters.environment === 'production' && filters.trafficType === 'real';
 
-export function scopeLabel(filters: AnalyticsFilters, now: Date): string {
+/** '최근 7일 (10.17~10.23 KST)' */
+export function periodLabel(filters: AnalyticsFilters, now: Date): string {
   const range = resolveRange(filters, now);
-  const period = filters.period === 'custom' ? (range.ok ? `${range.from} ~ ${range.to}` : '기간 입력 필요') : PERIOD_LABEL[filters.period];
-  const notice = NOTICE_FILTERS.find(item => item.key === filters.notice)?.label ?? '전체 공고';
-  return `${ENVIRONMENT_LABEL[filters.environment]} · ${TRAFFIC_LABEL[filters.trafficType]}(${filters.trafficType}) · ${period} · ${notice}`;
+  if (!range.ok) return '기간 입력 필요';
+  const span = range.from === range.to ? `${shortDay(range.from)} KST` : `${shortDay(range.from)}~${shortDay(range.to)} KST`;
+  return filters.period === 'custom' ? `${range.from} ~ ${range.to} (KST)` : `${PERIOD_LABEL[filters.period]} (${span})`;
 }
 
-/* ── 공식 운영 개시 상태 ─────────────────────────────────────────────────── */
+export function scopeLabel(filters: AnalyticsFilters, now: Date): string {
+  const notice = NOTICE_FILTERS.find(item => item.key === filters.notice)?.label ?? '전체 공고';
+  return `${ENVIRONMENT_LABEL[filters.environment]} · ${TRAFFIC_LABEL[filters.trafficType]}(${filters.trafficType}) · ${periodLabel(filters, now)} · ${notice}`;
+}
 
-export const OFFICIAL_NOTICE_IDS = ['samdo-1', 'samdo-2'] as const;
+/* ── 서버 집계 상태(collectionState) ────────────────────────────────────── */
 
-export type LaunchCheck = { key: 'official' | 'active' | 'start'; label: string; done: boolean; detail: string };
-export type LaunchState = {
-  /** real 집계 조건이 모두 갖춰졌는지. 서버 gate 와 같은 조건을 화면에서 다시 읽는다. */
-  launched: boolean;
-  checks: LaunchCheck[];
-  collectionStartAt: string;
-  requiredNoticeVersion: string;
+/** 서버가 collection 을 주지 않으면(계약 v1 서버) 개시 여부를 추측하지 않고 '알 수 없음'으로 둔다. */
+export type CollectionStateView = AnalyticsCollectionState | 'UNKNOWN';
+
+export const COLLECTION_META: Record<CollectionStateView, { label: string; title: string; body: string; icon: string; level: AlertLevel | null; showNumbers: boolean }> = {
+  PRE_LAUNCH: { label: '집계 시작 전', title: '아직 운영 집계가 시작되지 않았어요', icon: 'hourglass-top', level: 'INFO', showNumbers: false,
+    body: '공식 공고 데이터가 준비되고 집계 시작 시각이 지나야 실제 운영(real) 상담 세션이 여기에 집계돼요. 지금은 0건이 아니라 집계 전이에요.' },
+  READY_NOT_STARTED: { label: '준비 완료 · 시작 전', title: '운영 데이터 수집 준비가 완료됐지만 아직 시작되지 않았어요', icon: 'event-available', level: 'INFO', showNumbers: false,
+    body: '공식 데이터와 수집 설정은 준비됐어요. 아직 실제 운영(real) 이벤트가 하나도 들어오지 않았어요. 첫 상담이 시작되면 자동으로 집계돼요.' },
+  COLLECTING: { label: '집계 중', title: '운영 집계 중', icon: 'sensors', level: null, showNumbers: true, body: '' },
+  PAUSED: { label: '일시 중지', title: '운영 집계가 일시 중지돼 있어요', icon: 'pause-circle-outline', level: 'ACTION_REQUIRED', showNumbers: true,
+    body: '수집이 꺼져 있거나 실제 운영(real) 허용이 해제돼 있어요. 아래 숫자는 중지 전까지 기록된 값이고, 지금 들어오는 상담은 집계되지 않아요. 운영 담당자가 수집 설정을 확인해야 해요.' },
+  MISCONFIGURED: { label: '설정 오류', title: '운영 조치 필요 · 집계 설정이 올바르지 않아요', icon: 'report-gmailerrorred', level: 'ERROR', showNumbers: false,
+    body: '필수 공고 버전이나 집계 시작 시각 설정이 잘못돼 있어요. 설정을 고치기 전에는 운영 숫자를 믿을 수 없어 보여 주지 않아요. 서버 환경 설정을 확인해 주세요.' },
+  UNKNOWN: { label: '상태 미제공', title: '운영 조치 필요 · 서버가 집계 상태를 보내지 않았어요', icon: 'help-center', level: 'ACTION_REQUIRED', showNumbers: false,
+    body: '집계 상태(collectionState)가 응답에 없어요. 서버 버전이 맞는지 확인해 주세요. 개시 여부를 화면에서 추측하지 않아요.' },
 };
 
-/**
- * 서버 gate(shouldCollect)는 real 을 공식 원문 + ACTIVE + Production + 시작 시각 이후일 때만 받는다.
- * 화면은 그 조건을 공고 상태와 시각으로 다시 보여 줄 뿐이다. 시작 시각·버전은 gate 기본값(서버 env 값이 아님).
- */
-export function launchState(notices: readonly Pick<ConsoleNotice, 'id' | 'status' | 'provenance'>[], now: Date,
-  gate = analyticsGateFromEnv({})): LaunchState {
-  const targets = OFFICIAL_NOTICE_IDS.map(id => notices.find(notice => notice.id === id));
-  const official = targets.filter(notice => notice?.provenance.official).length;
-  const active = targets.filter(notice => notice?.status === 'ACTIVE').length;
-  const start = Date.parse(gate.collectionStartAt);
-  const started = Number.isFinite(start) && now.getTime() >= start;
-  const checks: LaunchCheck[] = [
-    { key: 'official', label: `공식 ${gate.requiredNoticeVersion} 원문 확인`, done: official === targets.length, detail: `삼도 1·2지구 중 ${official}/${targets.length}개 공식 원문` },
-    { key: 'active', label: '공고 운영 중(ACTIVE)', done: active === targets.length, detail: `${active}/${targets.length}개 ACTIVE` },
-    { key: 'start', label: '운영 집계 시작 시각', done: started, detail: `${kstStamp(gate.collectionStartAt)}${started ? ' 이후' : ' 전'}` },
-  ];
-  return { launched: checks.every(check => check.done), checks, collectionStartAt: gate.collectionStartAt, requiredNoticeVersion: gate.requiredNoticeVersion };
-}
+export const collectionOf = (summary: AnalyticsSummary | null): AnalyticsCollectionStatus | null => summary?.collection ?? null;
+export const collectionStateOf = (summary: AnalyticsSummary): CollectionStateView => summary.collection?.collectionState ?? 'UNKNOWN';
 
-/** '2026-10-27T00:00:00+09:00' → '10월 27일 00:00 (KST)' */
-export function kstStamp(iso: string): string {
-  const time = Date.parse(iso);
-  if (!Number.isFinite(time)) return iso;
-  const local = new Date(time + 9 * 3_600_000).toISOString();
-  return `${Number(local.slice(5, 7))}월 ${Number(local.slice(8, 10))}일 ${local.slice(11, 16)} (KST)`;
+export type LaunchCheck = { key: 'official' | 'start' | 'events'; label: string; done: boolean; detail: string };
+
+/** 서버 값을 그대로 체크리스트로 보인다. 시작 시각 도래 여부는 서버 집계 시각(generatedAt) 기준. */
+export function launchChecks(summary: AnalyticsSummary): LaunchCheck[] {
+  const collection = summary.collection;
+  if (!collection) return [];
+  const reference = summary.generatedAt ?? null;
+  const started = reference !== null && Date.parse(reference) >= Date.parse(collection.collectionStartAt);
+  return [
+    { key: 'official', label: `공식 ${collection.requiredNoticeVersion} 데이터 준비`, done: collection.officialDataReady,
+      detail: collection.officialDataReady ? '공식 원문·ACTIVE 확인됨' : '공식 게시·검증 전' },
+    { key: 'start', label: '집계 시작 시각', done: started, detail: `${kstStamp(collection.collectionStartAt)}${started ? ' 이후' : ' 전'}` },
+    { key: 'events', label: '실제 운영 이벤트 수집', done: collection.collectionState === 'COLLECTING',
+      detail: collection.collectionState === 'COLLECTING' ? '수집 중' : COLLECTION_META[collection.collectionState].label },
+  ];
 }
 
 /* ── 화면 상태 ──────────────────────────────────────────────────────────── */
 
 export type AnalyticsViewState =
-  | { kind: 'PRE_LAUNCH' }
   | { kind: 'INVALID_RANGE'; error: string }
-  | { kind: 'EMPTY'; operational: boolean }
-  | { kind: 'READY'; operational: boolean };
+  | { kind: 'WAITING' }
+  /** 실제 운영 화면인데 서버가 숫자를 보일 상태가 아니라고 함 */
+  | { kind: 'COLLECTION_GATE'; state: CollectionStateView }
+  | { kind: 'EMPTY'; operational: boolean; state: CollectionStateView }
+  | { kind: 'READY'; operational: boolean; state: CollectionStateView };
 
-/** real 운영 화면은 개시 전이면 숫자 대신 안내. 0건은 '실제로 0건'일 때만 0으로 보인다. */
-export function viewState(filters: AnalyticsFilters, launch: LaunchState, now: Date, summary: AnalyticsSummary | null): AnalyticsViewState {
+/**
+ * 실제 운영(Production · real) 화면: 서버 collectionState 가 숫자를 보일 수 있을 때만 숫자.
+ * QA·검증 화면: 언제나 숫자를 보이되 'QA 데이터' 표시를 붙인다(운영 실적으로 읽히지 않게).
+ */
+export function viewState(filters: AnalyticsFilters, now: Date, summary: AnalyticsSummary | null): AnalyticsViewState {
   const range = resolveRange(filters, now);
   if (!range.ok) return { kind: 'INVALID_RANGE', error: range.error };
+  if (!summary) return { kind: 'WAITING' };
   const operational = isOperationalView(filters);
-  if (filters.trafficType === 'real' && !launch.launched) return { kind: 'PRE_LAUNCH' };
-  if (summary && isEmptySummary(summary)) return { kind: 'EMPTY', operational };
-  return { kind: 'READY', operational };
+  const state = collectionStateOf(summary);
+  if (filters.trafficType === 'real' && !COLLECTION_META[state].showNumbers) return { kind: 'COLLECTION_GATE', state };
+  if (isEmptySummary(summary)) return { kind: 'EMPTY', operational, state };
+  return { kind: 'READY', operational, state };
 }
 
 export const isEmptySummary = (summary: AnalyticsSummary) =>
   !summary.sessionsStarted && !summary.assessmentsStarted && !summary.assessmentsCompleted && !summary.resultViews
   && !summary.resultSaves && !summary.qrCreates && !summary.copilotUsage;
+
+/* ── 신선도(generatedAt · lastEventAt) ──────────────────────────────────── */
+
+/** 실제 운영 중인데 마지막 이벤트가 이보다 오래되면 '수집이 멈췄는지' 확인을 권한다. */
+export const LAST_EVENT_STALE_HOURS = 6;
+
+export type Freshness = {
+  generated: string | null;
+  lastEvent: { text: string; stale: boolean } | null;
+  /** lastEventAt === null */
+  noEvents: boolean;
+  /** 서버가 v2 신선도 필드를 주지 않음 */
+  missing: boolean;
+};
+
+/**
+ * 오래된 데이터 경고는 마지막 이벤트(lastEventAt) 기준이다. 새로고침·집계 시각과 섞지 않는다.
+ * 기간이 오늘을 포함하고, 실제 운영이 집계 중일 때만 경고한다(과거 기간·QA 는 이벤트가 멈춰 있는 게 정상).
+ */
+export function freshness(summary: AnalyticsSummary, filters: AnalyticsFilters, now: Date): Freshness {
+  const generated = summary.generatedAt ? `${kstTime(summary.generatedAt)} (${ago(summary.generatedAt, now)})` : null;
+  if (summary.lastEventAt === undefined) return { generated, lastEvent: null, noEvents: false, missing: !summary.generatedAt };
+  if (summary.lastEventAt === null) return { generated, lastEvent: null, noEvents: true, missing: !summary.generatedAt };
+  const range = resolveRange(filters, now);
+  const includesToday = range.ok && range.to === kstDate(now.getTime());
+  const reference = summary.generatedAt ? Date.parse(summary.generatedAt) : now.getTime();
+  const stale = includesToday && isOperationalView(filters) && collectionStateOf(summary) === 'COLLECTING'
+    && reference - Date.parse(summary.lastEventAt) >= LAST_EVENT_STALE_HOURS * 3_600_000;
+  return { generated, lastEvent: { text: `${kstTime(summary.lastEventAt)} (${ago(summary.lastEventAt, now)})`, stale }, noEvents: false, missing: !summary.generatedAt };
+}
+
+/* ── 오류(안정 코드) ────────────────────────────────────────────────────── */
+
+export type AnalyticsErrorCode = 'ANALYTICS_SCHEMA_NOT_READY' | 'ANALYTICS_READ_FAILED' | 'ANALYTICS_AUTH_UNAVAILABLE' | 'ANALYTICS_TIMEOUT'
+  | 'AUTH_REQUIRED' | 'FORBIDDEN' | 'NETWORK';
+export const ANALYTICS_ERROR_CODES: AnalyticsErrorCode[] = ['ANALYTICS_SCHEMA_NOT_READY', 'ANALYTICS_READ_FAILED', 'ANALYTICS_AUTH_UNAVAILABLE', 'ANALYTICS_TIMEOUT', 'AUTH_REQUIRED', 'FORBIDDEN', 'NETWORK'];
+
+export const ANALYTICS_ERROR_COPY: Record<AnalyticsErrorCode, { title: string; body: string; icon: string; action: 'RETRY' | 'LOGIN' | 'NONE' }> = {
+  ANALYTICS_SCHEMA_NOT_READY: { title: '운영 지표 저장소가 아직 준비되지 않았어요', icon: 'storage', action: 'RETRY',
+    body: '운영 지표 테이블이 아직 만들어지지 않았어요(migration 적용 전). 0건이 아니라 저장소가 없는 상태예요. 운영 담당자가 Staging migration 적용 여부를 확인해야 해요.' },
+  ANALYTICS_READ_FAILED: { title: '운영 데이터를 읽는 중 문제가 발생했어요', icon: 'cloud-off', action: 'RETRY',
+    body: '저장소는 있지만 데이터를 읽지 못했어요. 0건으로 추정해 보이지 않아요. 잠시 후 다시 시도하고, 계속되면 서버 상태를 확인해 주세요.' },
+  ANALYTICS_AUTH_UNAVAILABLE: { title: '관리자 권한 확인 경로가 응답하지 않아요', icon: 'gpp-maybe', action: 'RETRY',
+    body: '권한이 없다는 뜻은 아니에요. 권한 확인 또는 데이터 접근 설정이 응답하지 않았어요. 잠시 후 다시 시도해 주세요.' },
+  ANALYTICS_TIMEOUT: { title: '운영 데이터 조회가 지연되고 있어요', icon: 'hourglass-empty', action: 'RETRY',
+    body: '정해진 시간 안에 집계가 끝나지 않았어요. 기간을 줄이거나 잠시 후 다시 시도해 주세요.' },
+  AUTH_REQUIRED: { title: '로그인이 필요해요', icon: 'login', action: 'LOGIN',
+    body: '운영 지표는 관리자 계정으로 로그인한 뒤 볼 수 있어요. 로그인 시간이 지났다면 다시 로그인해 주세요.' },
+  FORBIDDEN: { title: '운영 지표는 관리자만 볼 수 있어요', icon: 'admin-panel-settings', action: 'NONE',
+    body: '이 계정(검수자)에는 집계 조회 권한이 없어요. 다른 운영 콘솔 화면은 그대로 쓸 수 있어요. 필요하면 관리자에게 요청해 주세요.' },
+  NETWORK: { title: '네트워크에 연결되어 있지 않아요', icon: 'wifi-off', action: 'RETRY',
+    body: '이 기기의 인터넷 연결을 확인한 뒤 다시 시도해 주세요.' },
+};
+
+/** HTTP 상태 + 서버 error 코드 → 화면 코드. 모르는 503 은 '읽기 실패'로 보인다(일반 503 문구는 쓰지 않는다). */
+export function analyticsErrorCode(status: number | null, code: string | null, transport?: 'TIMEOUT' | 'NETWORK'): AnalyticsErrorCode {
+  if (transport === 'TIMEOUT') return 'ANALYTICS_TIMEOUT';
+  if (transport === 'NETWORK') return 'NETWORK';
+  if (code && (ANALYTICS_ERROR_CODES as string[]).includes(code)) return code as AnalyticsErrorCode;
+  if (status === 401) return 'AUTH_REQUIRED';
+  if (status === 403) return 'FORBIDDEN';
+  if (status === 408 || status === 504) return 'ANALYTICS_TIMEOUT';
+  return 'ANALYTICS_READ_FAILED';
+}
 
 /* ── 숫자 표기 ──────────────────────────────────────────────────────────── */
 
@@ -212,75 +313,92 @@ export function rateDelta(current: number | null, previous: number | null | unde
   return { text: `이전 기간 대비 ${points > 0 ? '+' : '−'}${Math.abs(points)}%p`, direction: points > 0 ? 'up' : 'down' };
 }
 
-/* ── KPI ────────────────────────────────────────────────────────────────── */
+/* ── KPI(대표 요약 4개) ─────────────────────────────────────────────────── */
 
 export type KpiTile = { key: string; label: string; value: string; unit: string; basis: string; delta: Delta; icon: string };
 
-export function buildKpis(summary: AnalyticsSummary): { primary: KpiTile[]; secondary: KpiTile[] } {
+export function buildKpis(summary: AnalyticsSummary): KpiTile[] {
   const prev = summary.previousPeriodComparison;
   const statusTotal = STATUS_ORDER.reduce((sum, key) => sum + summary.assessmentStatusDistribution[key], 0);
   const needs = summary.assessmentStatusDistribution.NEEDS_USER_INPUT;
-  return {
-    primary: [
-      { key: 'sessions', label: '상담 시작 세션', value: num(summary.sessionsStarted), unit: '세션', basis: '익명 세션 · 사람 수 아님', icon: 'forum',
-        delta: countDelta(summary.sessionsStarted, prev?.sessionsStarted, '세션') },
-      { key: 'completed', label: '판정 완료 세션', value: num(summary.assessmentsCompleted), unit: '세션', basis: '판정 결과를 받은 세션', icon: 'task-alt',
-        delta: countDelta(summary.assessmentsCompleted, prev?.assessmentsCompleted, '세션') },
-      { key: 'rate', label: '완료율', value: pct(summary.completionRate), unit: '', basis: '판정 시작 세션 중 완료 세션', icon: 'donut-large',
-        delta: rateDelta(summary.completionRate, prev ? prev.completionRate : undefined) },
-      { key: 'needs', label: '추가 확인 필요', value: num(needs), unit: '건', basis: statusTotal ? `공급유형 판정 결과 ${num(statusTotal)}건 중 ${pct(needs / statusTotal)}` : '공급유형 판정 결과 기준', icon: 'help-outline',
-        delta: countDelta(needs, undefined, '건') },
-    ],
-    secondary: [
-      { key: 'started', label: '판정 시작 세션', value: num(summary.assessmentsStarted), unit: '세션', basis: '분석을 시작한 세션', icon: 'play-circle-outline', delta: countDelta(0, undefined, '') },
-      { key: 'views', label: '결과 조회', value: num(summary.resultViews), unit: '회', basis: '조회 횟수 · 세션 아님', icon: 'visibility', delta: countDelta(0, undefined, '') },
-      { key: 'saves', label: '결과 저장', value: num(summary.resultSaves), unit: '회', basis: '저장 횟수', icon: 'bookmark-border', delta: countDelta(0, undefined, '') },
-      { key: 'qr', label: 'QR 생성', value: num(summary.qrCreates), unit: '회', basis: '생성 횟수 · 토큰 저장 안 함', icon: 'qr-code-2', delta: countDelta(0, undefined, '') },
-    ],
-  };
+  return [
+    { key: 'sessions', label: '상담 시작 세션', value: num(summary.sessionsStarted), unit: '세션', basis: '익명 세션 · 사람 수 아님', icon: 'forum',
+      delta: countDelta(summary.sessionsStarted, prev?.sessionsStarted, '세션') },
+    { key: 'completed', label: '판정 완료 세션', value: num(summary.assessmentsCompleted), unit: '세션', basis: '판정 결과를 받은 세션', icon: 'task-alt',
+      delta: countDelta(summary.assessmentsCompleted, prev?.assessmentsCompleted, '세션') },
+    { key: 'rate', label: '완료율', value: pct(summary.completionRate), unit: '', basis: '판정 시작 세션 중 완료 세션', icon: 'donut-large',
+      delta: rateDelta(summary.completionRate, prev ? prev.completionRate : undefined) },
+    { key: 'needs', label: '추가 확인 필요', value: num(needs), unit: '건', basis: statusTotal ? `공급유형 판정 결과 ${num(statusTotal)}건 중 ${pct(needs / statusTotal)}` : '공급유형 판정 결과 기준', icon: 'help-outline',
+      delta: countDelta(needs, prev?.needsUserInput, '건') },
+  ];
 }
 
-/* ── 퍼널 ───────────────────────────────────────────────────────────────── */
+/* ── 퍼널(세션만) ───────────────────────────────────────────────────────── */
 
 export type FunnelStep = {
-  key: string; label: string; count: number;
-  /** 첫 단계 대비. 첫 단계가 0이면 null */
+  key: string; label: string;
+  /** 계약에 값이 없으면 null(추정하지 않는다) */
+  count: number | null;
+  /** 첫 단계 대비 */
   ofTotal: number | null;
-  /** 이전 단계에서 빠진 세션. 첫 단계는 null. 다음 단계가 더 크면 음수 대신 anomaly */
+  /** 기준 단계 대비(저장·QR 은 결과 조회 세션 대비) */
+  base: { label: string; rate: number | null } | null;
+  /** 직전 단계에서 빠진 세션. 갈래 단계(저장·QR)는 이탈이 아니라 비율만 */
   dropFromPrevious: { count: number; rate: number } | null;
   anomaly: boolean;
+  delta: Delta;
+  branch: boolean;
 };
 
 /**
- * 세션 단위 퍼널: 상담 시작 → 판정 시작 → 판정 완료. 세 단계 모두 '고유 익명 세션 수'다.
- * 결과 조회·저장·QR 은 이벤트 횟수라 같은 막대에 섞지 않는다(afterActions).
+ * 세션 퍼널: 상담 시작 → 판정 시작 → 판정 완료 → 결과 조회 → (결과 저장 · QR 생성).
+ * 모든 단계가 '고유 익명 세션 수'다. 이벤트 횟수(회)는 actions 로 따로.
  */
-export function buildFunnel(summary: AnalyticsSummary): { steps: FunnelStep[]; afterActions: Array<{ key: string; label: string; count: number; perCompleted: number | null }> } {
-  const raw = [
-    { key: 'session', label: '상담 시작', count: summary.sessionsStarted },
-    { key: 'started', label: '판정 시작', count: summary.assessmentsStarted },
-    { key: 'completed', label: '판정 완료', count: summary.assessmentsCompleted },
+export function buildFunnel(summary: AnalyticsSummary): { steps: FunnelStep[]; actions: ActionRow[] } {
+  const prev = summary.previousPeriodComparison;
+  const first = summary.sessionsStarted;
+  const views = summary.resultViewSessions ?? null;
+  const linear: Array<{ key: string; label: string; count: number | null; previous: number | undefined }> = [
+    { key: 'session', label: '상담 시작', count: summary.sessionsStarted, previous: prev?.sessionsStarted },
+    { key: 'started', label: '판정 시작', count: summary.assessmentsStarted, previous: prev?.assessmentsStarted },
+    { key: 'completed', label: '판정 완료', count: summary.assessmentsCompleted, previous: prev?.assessmentsCompleted },
+    { key: 'viewed', label: '결과 조회', count: views, previous: prev?.resultViewSessions },
   ];
-  const first = raw[0].count;
-  const steps = raw.map((step, index): FunnelStep => {
-    const previous = index ? raw[index - 1].count : null;
-    const anomaly = previous !== null && step.count > previous;
+  const steps: FunnelStep[] = linear.map((step, index) => {
+    const before = index ? linear[index - 1].count : null;
+    const anomaly = before !== null && step.count !== null && step.count > before;
     return {
-      ...step,
-      ofTotal: first ? step.count / first : null,
-      dropFromPrevious: previous === null || anomaly ? null : { count: previous - step.count, rate: previous ? (previous - step.count) / previous : 0 },
-      anomaly,
+      key: step.key, label: step.label, count: step.count,
+      ofTotal: first && step.count !== null ? step.count / first : null,
+      base: null,
+      dropFromPrevious: before === null || step.count === null || anomaly ? null : { count: before - step.count, rate: before ? (before - step.count) / before : 0 },
+      anomaly, branch: false,
+      delta: step.count === null ? countDelta(0, undefined, '세션') : countDelta(step.count, step.previous, '세션'),
     };
   });
-  const per = (count: number) => (summary.assessmentsCompleted ? count / summary.assessmentsCompleted : null);
-  return {
-    steps,
-    afterActions: [
-      { key: 'views', label: '결과 조회', count: summary.resultViews, perCompleted: per(summary.resultViews) },
-      { key: 'saves', label: '결과 저장', count: summary.resultSaves, perCompleted: per(summary.resultSaves) },
-      { key: 'qr', label: 'QR 생성', count: summary.qrCreates, perCompleted: per(summary.qrCreates) },
-    ],
-  };
+  for (const branch of [
+    { key: 'saved', label: '결과 저장', count: summary.resultSaveSessions ?? null, previous: prev?.resultSaveSessions },
+    { key: 'qr', label: 'QR 생성', count: summary.qrCreateSessions ?? null, previous: prev?.qrCreateSessions },
+  ]) {
+    steps.push({ key: branch.key, label: branch.label, count: branch.count,
+      ofTotal: first && branch.count !== null ? branch.count / first : null,
+      base: { label: '결과 조회 세션', rate: views && branch.count !== null ? branch.count / views : null },
+      dropFromPrevious: null, anomaly: views !== null && branch.count !== null && branch.count > views, branch: true,
+      delta: branch.count === null ? countDelta(0, undefined, '세션') : countDelta(branch.count, branch.previous, '세션') });
+  }
+  return { steps, actions: buildActions(summary) };
+}
+
+/** 행동 횟수(회). 같은 세션이 여러 번 할 수 있다. 세션당 평균은 같은 이벤트의 세션 수로 나눈다. */
+export type ActionRow = { key: string; label: string; count: number; sessions: number | null; perSession: number | null };
+export function buildActions(summary: AnalyticsSummary): ActionRow[] {
+  const row = (key: string, label: string, count: number, sessions: number | undefined): ActionRow =>
+    ({ key, label, count, sessions: sessions ?? null, perSession: sessions ? count / sessions : null });
+  return [
+    row('views', '결과 조회', summary.resultViews, summary.resultViewSessions),
+    row('saves', '결과 저장', summary.resultSaves, summary.resultSaveSessions),
+    row('qr', 'QR 생성', summary.qrCreates, summary.qrCreateSessions),
+  ];
 }
 
 /* ── 분포 ───────────────────────────────────────────────────────────────── */
@@ -301,14 +419,20 @@ export function unresolvedRows(summary: AnalyticsSummary): ShareRow[] {
     .map(([key, count]) => ({ key, label: CATEGORY_LABEL[key] ?? '기타 확인', raw: key, count, share: top ? count / top : 0 }));
 }
 
-/** 공급유형별 판정 결과 건수. 상태별 분리는 계약에 아직 없다(supplyTypeDistribution 은 건수만). */
-export function supplyRows(summary: AnalyticsSummary): ShareRow[] {
-  const entries = Object.entries(summary.supplyTypeDistribution);
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-  const known = SUPPLY_ORDER.map(key => ({ key, label: SUPPLY_LABEL[key], raw: key, count: summary.supplyTypeDistribution[key] ?? 0, share: total ? (summary.supplyTypeDistribution[key] ?? 0) / total : 0 }));
-  const other = entries.filter(([key]) => !SUPPLY_ORDER.includes(key))
-    .map(([key, count]) => ({ key, label: `기타 공급유형`, raw: key, count, share: total ? count / total : 0 }));
-  return [...known, ...other];
+/** 공급유형 × 판정 상태(계약 v2 supplyTypeAssessmentDistribution). 자격 판정 결과이며 당첨과 무관. */
+export type SupplyStatusRow = { key: string; label: string; raw: string; total: number; share: number; cells: Array<ShareRow & { status: AnalyticsAssessmentStatus }> };
+export function supplyStatusRows(summary: AnalyticsSummary): SupplyStatusRow[] | null {
+  const matrix = summary.supplyTypeAssessmentDistribution;
+  if (!matrix) return null;
+  const totals = Object.fromEntries(Object.entries(matrix).map(([key, cell]) => [key, STATUS_ORDER.reduce((sum, status) => sum + (cell[status] ?? 0), 0)]));
+  const all = Object.values(totals).reduce((sum, value) => sum + value, 0);
+  const keys = [...SUPPLY_ORDER, ...Object.keys(matrix).filter(key => !SUPPLY_ORDER.includes(key)).sort()];
+  return keys.map(key => {
+    const cell = matrix[key] ?? { COMPLETE: 0, NEEDS_USER_INPUT: 0, INELIGIBLE: 0, UNAVAILABLE: 0 };
+    const total = totals[key] ?? 0;
+    return { key, label: SUPPLY_LABEL[key] ?? '기타 공급유형', raw: key, total, share: all ? total / all : 0,
+      cells: STATUS_ORDER.map(status => ({ key: `${key}:${status}`, status, label: STATUS_META[status].label, raw: status, count: cell[status] ?? 0, share: total ? (cell[status] ?? 0) / total : 0 })) };
+  });
 }
 
 /* ── AI 상담 품질 ───────────────────────────────────────────────────────── */
@@ -319,6 +443,7 @@ export type AiQuality = {
   modes: ShareRow[];
   reasons: Array<ShareRow & { icon: string }>;
   fallbackRate: number | null;
+  fallbackDelta: Delta;
   averageTurns: number | null;
   durations: ShareRow[];
   warnings: AiWarning[];
@@ -344,11 +469,6 @@ export function buildAiQuality(summary: AnalyticsSummary): AiQuality {
     title: `대체 답변 비율 ${pct(fallbackRate)}`, body: `기준 ${pct(ALERT_THRESHOLDS.fallbackRate)} 이상이에요. 대체 사유를 먼저 확인해 주세요.` });
   if ((summary.fallbackDistribution.grounding_rejected ?? 0) > 0) warnings.push({ level: 'INFO', title: `근거 검증 실패 ${num(summary.fallbackDistribution.grounding_rejected ?? 0)}회`,
     body: '공고 근거와 맞지 않아 폐기된 AI 답변이에요. 반복되면 원문·RAG 범위를 확인해 주세요.' });
-  return { total, modes, reasons, fallbackRate, averageTurns: summary.averageTurns, durations, warnings };
+  return { total, modes, reasons, fallbackRate, fallbackDelta: countDelta(fallback, summary.previousPeriodComparison?.fallback, '회'),
+    averageTurns: summary.averageTurns, durations, warnings };
 }
-
-/* ── 데이터 기준 ────────────────────────────────────────────────────────── */
-
-/** 서버 요약에는 생성 시각이 없다. 화면은 '조회한 시각'을 기준 시각으로 보인다. */
-export const ANALYTICS_STALE_MINUTES = 15;
-export const isFetchStale = (fetchedAt: number, now: Date) => now.getTime() - fetchedAt >= ANALYTICS_STALE_MINUTES * 60_000;

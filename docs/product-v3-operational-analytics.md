@@ -18,6 +18,12 @@
 
 서버 summary는 `collection.collectionState`(PRE_LAUNCH/READY_NOT_STARTED/COLLECTING/PAUSED/MISCONFIGURED), `officialDataReady`, `requiredNoticeVersion`, `collectionStartAt`을 함께 반환한다. UI는 로컬 기본 env로 공식 게시 여부를 결정하지 말고 이 서버 값을 사용해야 한다. 현재 보유 원문은 공식 게시·검증 전이므로 `officialDataReady=false`다. Claude UI 브랜치의 기존 필드는 변경하지 않았으며, 통합 시 이 additive 필드로 pre-launch 안내를 전환해야 한다.
 
+### 전역 상태와 조회 필터 분리
+
+`globalCollection` 및 `globalCollectionState`·`globalOfficialDataReady`·`globalCollectionStartAt`·`globalRequiredNoticeVersion`·`globalTargetEnvironment`·`globalAllowedTrafficTypes`는 서버 설정과 공식 ACTIVE 원문 metadata만으로 계산한다. Admin의 공고·환경·트래픽 필터나 해당 필터의 이벤트 수를 이 상태에 사용하지 않는다. 기존 UI용 `collection`은 같은 전역 상태의 호환 alias다. `currentQuery`는 별도로 선택된 환경·트래픽과 `AVAILABLE`/`NO_EVENTS`/`STORE_UNAVAILABLE`, 필터별 `lastEventAt`을 담는다. Admin-only `GET /admin-api/product-v3?analytics=status`는 필터와 관계없이 전역 상태를 확인하는 경로다.
+
+현재 Analytics 물리 저장소는 **Staging 전용**이다. Preview/Staging QA 조회만 Staging Supabase를 읽는다. `environment=production` 조회는 Staging DB에 질의하지 않고 `currentQuery.dataState=STORE_UNAVAILABLE`을 반환한다. Production 저장소 URL·ref·비밀키와 별도 read/write adapter는 아직 구현하지 않았다. 따라서 공식 데이터가 준비되더라도 저장소가 미연결이면 전역 상태는 `MISCONFIGURED`이며, Staging 수치를 Production real 수치로 표시할 수 없다. 실제 Production 연결은 별도 승인·분리된 저장소·권한·복구 검증 이후에만 구현한다.
+
 Admin summary 오류 응답은 원문 DB 에러 대신 안정적인 `ANALYTICS_SCHEMA_NOT_READY`, `ANALYTICS_READ_FAILED`, `ANALYTICS_AUTH_UNAVAILABLE`, `ANALYTICS_TIMEOUT` 중 하나다. 인증되지 않은 요청은 기존 `AUTH_REQUIRED`(401), Admin이 아닌 요청은 `FORBIDDEN`(403)을 유지한다.
 
 ## Staging 적용 전 절차
@@ -27,6 +33,10 @@ Admin summary 오류 응답은 원문 DB 에러 대신 안정적인 `ANALYTICS_S
 3. RLS와 grants를 검증한다: `anon`/`authenticated` 읽기·쓰기 거부, `service_role` SELECT/INSERT만 허용. migration의 isolated PGlite 검사는 `node scripts/check-product-v3-analytics.mjs`이다.
 4. Staging Preview에서 `EVENT_ANALYTICS_ENABLED=true`, `EVENT_ANALYTICS_ALLOWED_TRAFFIC_TYPES=qa,internal,beta`, `EVENT_ANALYTICS_TRAFFIC_TYPE=qa`, `EVENT_ANALYTICS_COLLECTION_START_AT=2026-10-27T00:00:00+09:00`, `EVENT_ANALYTICS_REQUIRED_NOTICE_VERSION=VER1.8`을 **Preview 범위에서만** 설정한다. 기본은 수집 안 함이다.
 5. Admin이 실제 Staging QA 이벤트를 볼 수 있는지 인증된 계정으로 검사한다. `/admin-api/product-v3?analytics=summary&from=YYYY-MM-DD&to=YYYY-MM-DD&environment=staging&trafficType=qa`는 Admin 전용이다. Reviewer는 403이다. migration 전 Dashboard는 `아직 수집 전`으로 표시해야 한다.
+
+로컬 순서 검사는 `node scripts/check-product-v3-analytics.mjs`가 registry → operations → assessment events → RAG metadata → grants hardening → Analytics를 한 PGlite 인스턴스에 적용한다. migration version 중복·객체 충돌·RLS·권한을 검사하지만 **원격 Staging migration history와 schema를 확인하지는 않는다**. 승인 후 적용 직전에 원격 history의 다음 버전이 `20261022120000` 하나인지 다시 확인해야 한다.
+
+승인 관리자 세션을 이용한 읽기 전용 E2E 절차는 [Analytics Admin E2E 준비 문서](product-v3-analytics-admin-e2e.md)를 따른다. 계정 생성·인증 우회·서비스 키 브라우저 노출은 금지한다.
 
 ## 공식 운영 게이트
 

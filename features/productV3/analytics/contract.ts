@@ -53,6 +53,22 @@ export type AnalyticsCollectionStatus = {
   officialDataReady: boolean;
   requiredNoticeVersion: string;
   collectionStartAt: string;
+  targetEnvironment?: 'production';
+  allowedTrafficTypes?: readonly AnalyticsTrafficType[];
+};
+
+/** Independent of the Admin filter. A missing Production store must never be read from Staging. */
+export type AnalyticsGlobalCollectionStatus = AnalyticsCollectionStatus & {
+  targetEnvironment: 'production';
+  allowedTrafficTypes: readonly AnalyticsTrafficType[];
+  productionStoreReady: boolean;
+};
+export type AnalyticsQueryDataState = 'AVAILABLE' | 'NO_EVENTS' | 'STORE_UNAVAILABLE';
+export type AnalyticsCurrentQueryState = {
+  environment: AnalyticsEnvironment;
+  trafficType: AnalyticsTrafficType;
+  dataState: AnalyticsQueryDataState;
+  lastEventAt: string | null;
 };
 
 export type AnalyticsQuery = {
@@ -66,6 +82,15 @@ export type AnalyticsQuery = {
 
 export type AnalyticsSummary = {
   query: AnalyticsQuery;
+  /** Global launch state is server-derived, not inferred from this filtered result. */
+  globalCollection?: AnalyticsGlobalCollectionStatus;
+  globalCollectionState?: AnalyticsCollectionState;
+  globalOfficialDataReady?: boolean;
+  globalCollectionStartAt?: string;
+  globalRequiredNoticeVersion?: string;
+  globalTargetEnvironment?: 'production';
+  globalAllowedTrafficTypes?: readonly AnalyticsTrafficType[];
+  currentQuery?: AnalyticsCurrentQueryState;
   generatedAt?: string;
   lastEventAt?: string | null;
   collection?: AnalyticsCollectionStatus;
@@ -101,6 +126,10 @@ export type AnalyticsSummary = {
 /** Server responses always include v2 fields; optional base fields preserve existing UI fixtures. */
 export type AnalyticsSummaryV2 = AnalyticsSummary & {
   generatedAt: string; lastEventAt: string | null; collection: AnalyticsCollectionStatus;
+  globalCollection: AnalyticsGlobalCollectionStatus; currentQuery: AnalyticsCurrentQueryState;
+  globalCollectionState: AnalyticsCollectionState; globalOfficialDataReady: boolean;
+  globalCollectionStartAt: string; globalRequiredNoticeVersion: string;
+  globalTargetEnvironment: 'production'; globalAllowedTrafficTypes: readonly AnalyticsTrafficType[];
   resultViewSessions: number; resultSaveSessions: number; qrCreateSessions: number;
   supplyTypeAssessmentDistribution: Record<string, Record<AnalyticsAssessmentStatus, number>>;
 };

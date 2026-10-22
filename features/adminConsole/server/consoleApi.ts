@@ -3,7 +3,7 @@ import { resolveProductV3StagingTarget } from '../../productV3/admin/stagingTarg
 import { pageConsoleSnapshot, parseConsolePageQuery } from './pagination.ts';
 import { parseMetricWindowQuery, type MetricWindowQuery } from './metrics.ts';
 import { parseAnalyticsQuery } from '../../productV3/analytics/core.ts';
-import type { AnalyticsQuery, AnalyticsSummary } from '../../productV3/analytics/contract.ts';
+import type { AnalyticsGlobalCollectionStatus, AnalyticsQuery, AnalyticsSummary } from '../../productV3/analytics/contract.ts';
 export { loadProductV3StagingSnapshot } from './stagingSnapshot.ts';
 
 type Request = { method?: string; headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown> };
@@ -13,6 +13,7 @@ export type ConsoleApiDependencies = {
   authorize: (token: string) => Promise<AuthResult>;
   loadSnapshot: (window?: MetricWindowQuery, includeAnalytics?: boolean) => Promise<ConsoleSnapshot>;
   loadAnalytics?: (query: AnalyticsQuery) => Promise<AnalyticsSummary>;
+  loadAnalyticsStatus?: () => Promise<AnalyticsGlobalCollectionStatus>;
   loadJejuCandidate?: () => Promise<unknown>;
 };
 
@@ -31,6 +32,9 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   try {
     if (request.query?.analytics !== undefined) {
       if (role !== 'admin') return { status: 403, body: { error: 'FORBIDDEN' } };
+      if (request.query.analytics === 'status')
+        return dependencies.loadAnalyticsStatus ? { status: 200, body: await dependencies.loadAnalyticsStatus() }
+          : { status: 503, body: { error: 'ANALYTICS_READ_FAILED' } };
       if (request.query.analytics !== 'summary' || !dependencies.loadAnalytics) return { status: 400, body: { error: 'INVALID_ANALYTICS_QUERY' } };
       const query = parseAnalyticsQuery(request.query);
       return query ? { status: 200, body: await dependencies.loadAnalytics(query) } : { status: 400, body: { error: 'INVALID_ANALYTICS_QUERY' } };

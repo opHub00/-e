@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { getActiveNotices } from '../../eventKiosk/noticePlatform/index.ts';
 import { resolveProductV3StagingTarget } from '../admin/stagingTarget.ts';
-import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, parseAnalyticsEvent, shouldCollect } from './core.ts';
-import type { AnalyticsEvent, AnalyticsEventType, AnalyticsQuery, AnalyticsSummary, AnalyticsTrafficType, UnresolvedCategory } from './contract.ts';
+import { analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, globalAnalyticsCollectionStatus, parseAnalyticsEvent, shouldCollect } from './core.ts';
+import type { AnalyticsEvent, AnalyticsEventType, AnalyticsGlobalCollectionStatus, AnalyticsQuery, AnalyticsSummaryV2, AnalyticsTrafficType, UnresolvedCategory } from './contract.ts';
 
 const safeUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const browserTypes = new Set<AnalyticsEventType>(['SESSION_STARTED', 'QUESTION_ANSWERED', 'FACT_MARKED_UNKNOWN', 'RESULT_VIEWED', 'NOTICE_COMPARED', 'COPILOT_USED', 'SIMULATION_RUN', 'RESULT_SAVED', 'SESSION_COMPLETED']);
@@ -58,6 +58,16 @@ export function planStagingAnalyticsCleanup(env: Record<string, string | undefin
     retentionDays: plan.retentionDays, mode: 'DRY_RUN' as const } : null;
 }
 
+/** Global state uses server configuration and official notice metadata, never an Admin filter. */
+export function loadAnalyticsGlobalStatus(env: Record<string, string | undefined>, now = new Date()): AnalyticsGlobalCollectionStatus {
+  const gate = analyticsGateFromEnv(env);
+  const officialDataReady = getActiveNotices().some(notice => notice.status === gate.requiredOfficialState
+    && notice.sourceDocument.official === true
+    && (/1\.8/.test(notice.sourceDocument.fileName) ? 'VER1.8' : 'UNKNOWN') === gate.requiredNoticeVersion);
+  // No Production analytics store is configured in this release. Never infer COLLECTING from Staging rows.
+  return globalAnalyticsCollectionStatus(gate, officialDataReady, false, false, now);
+}
+
 export async function recordAnalyticsBatch(events: readonly AnalyticsEvent[], env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<boolean> {
   const gate = analyticsGateFromEnv(env);
   const accepted = events.flatMap(event => {
@@ -111,7 +121,11 @@ export async function recordBrowserAnalytics(value: unknown, env: Record<string,
 }
 
 /** Admin-authenticated server read; no client-side DB access and no unbounded scan. */
-export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<AnalyticsSummary> {
+export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<AnalyticsSummaryV2> {
+  const now = new Date();
+  const global = loadAnalyticsGlobalStatus(env, now);
+  // Production has no configured physical store. Do not query Staging and merely filter by environment.
+  if (query.environment === 'production') return getAnalyticsSummary([], query, now, global, 'STORE_UNAVAILABLE');
   let target: ReturnType<typeof resolveProductV3StagingTarget>;
   try { target = resolveProductV3StagingTarget(env); }
   catch { throw new Error('ANALYTICS_AUTH_UNAVAILABLE'); }
@@ -151,12 +165,7 @@ export async function loadAnalyticsSummary(query: AnalyticsQuery, env: Record<st
       if (parsed) events.push(parsed);
     }
     if (page.length < 1000) {
-      const gate = analyticsGateFromEnv(env);
-      const active = getActiveNotices().filter(notice => !query.noticeId || notice.id === query.noticeId);
-      const officialDataReady = active.some(notice => notice.status === gate.requiredOfficialState
-        && notice.sourceDocument.official === true && (/1\.8/.test(notice.sourceDocument.fileName) ? 'VER1.8' : 'UNKNOWN') === gate.requiredNoticeVersion);
-      const hasRealEvents = events.some(item => item.environment === 'production' && item.trafficType === 'real');
-      return getAnalyticsSummary(events, query, new Date(), analyticsCollectionStatus(gate, officialDataReady, hasRealEvents));
+      return getAnalyticsSummary(events, query, now, global);
     }
   }
   throw new Error('ANALYTICS_READ_FAILED');

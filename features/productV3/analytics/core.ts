@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENT_TYPES, UNRESOLVED_CATEGORIES, type AnalyticsCollectionStatus, type AnalyticsEvent, type AnalyticsGate, type AnalyticsQuery, type AnalyticsSummaryV2, type AnalyticsTrafficType } from './contract.ts';
+import { ANALYTICS_EVENT_TYPES, UNRESOLVED_CATEGORIES, type AnalyticsCollectionStatus, type AnalyticsEvent, type AnalyticsGate, type AnalyticsGlobalCollectionStatus, type AnalyticsQuery, type AnalyticsQueryDataState, type AnalyticsSummaryV2, type AnalyticsTrafficType } from './contract.ts';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const noticeId = /^[a-z][a-z0-9-]{1,62}$/;
@@ -66,6 +66,20 @@ export function analyticsCollectionStatus(gate: AnalyticsGate, officialDataReady
   return { collectionState, officialDataReady, requiredNoticeVersion: gate.requiredNoticeVersion, collectionStartAt: gate.collectionStartAt };
 }
 
+/** A global operational state never depends on the selected Admin environment, traffic or notice filter. */
+export function globalAnalyticsCollectionStatus(gate: AnalyticsGate, officialDataReady: boolean,
+  productionStoreReady: boolean, hasRealEvents: boolean, now = new Date()): AnalyticsGlobalCollectionStatus {
+  const base = analyticsCollectionStatus(gate, officialDataReady, hasRealEvents, now);
+  return {
+    ...base,
+    collectionState: base.collectionState === 'READY_NOT_STARTED' || base.collectionState === 'COLLECTING'
+      ? productionStoreReady ? base.collectionState : 'MISCONFIGURED' : base.collectionState,
+    targetEnvironment: gate.allowedEnvironment,
+    allowedTrafficTypes: [...gate.allowedTrafficTypes],
+    productionStoreReady,
+  };
+}
+
 /** Dry-run contract only. No deletion is scheduled or executed by this function. */
 export function analyticsRetentionPlan(gate: AnalyticsGate, now = new Date()): { cutoff: string; retentionDays: number } | null {
   return gate.retentionDays === null ? null : { cutoff: new Date(now.getTime() - gate.retentionDays * DAY_MS).toISOString(), retentionDays: gate.retentionDays };
@@ -95,7 +109,8 @@ export function parseAnalyticsQuery(raw: Record<string, unknown>): AnalyticsQuer
     ...(raw.noticeId ? { noticeId: String(raw.noticeId) } : {}), previousPeriod: raw.previousPeriod === 'true' };
 }
 
-export function getAnalyticsSummary(events: readonly AnalyticsEvent[], query: AnalyticsQuery, now?: Date, collection?: AnalyticsCollectionStatus): AnalyticsSummaryV2 {
+export function getAnalyticsSummary(events: readonly AnalyticsEvent[], query: AnalyticsQuery, now?: Date,
+  globalCollection?: AnalyticsGlobalCollectionStatus, queryDataState?: AnalyticsQueryDataState): AnalyticsSummaryV2 {
   const { from, to, previousFrom } = analyticsWindow(query);
   const generated = now ?? new Date();
   const matching = (start: number, end: number) => events.filter(event => event.environment === query.environment
@@ -107,6 +122,9 @@ export function getAnalyticsSummary(events: readonly AnalyticsEvent[], query: An
     return started ? unique(rows, 'ASSESSMENT_COMPLETED') / started : null;
   };
   const rows = [...new Map(matching(from, to).map(row => [row.eventId, row])).values()];
+  const lastEventAt = rows.length
+    ? new Date(rows.reduce((latest, row) => Math.max(latest, Date.parse(row.occurredAt)), -Infinity)).toISOString() : null;
+  const global = globalCollection ?? globalAnalyticsCollectionStatus(analyticsGateFromEnv({}), false, false, false, generated);
   const prior = query.previousPeriod ? [...new Map(matching(previousFrom, from).map(row => [row.eventId, row])).values()] : null;
   const count = (kind: AnalyticsEvent['eventType']) => rows.filter(row => row.eventType === kind).length;
   const distribution = <K extends string>(values: readonly (K | undefined)[]): Partial<Record<K, number>> => {
@@ -125,9 +143,13 @@ export function getAnalyticsSummary(events: readonly AnalyticsEvent[], query: An
   for (const row of rows) if (row.eventType === 'COPILOT_USED' && row.conversationTurnCount !== undefined)
     turnsBySession.set(row.anonymousSessionId, Math.max(turnsBySession.get(row.anonymousSessionId) ?? 0, row.conversationTurnCount));
   const turns = [...turnsBySession.values()];
-  return { query, generatedAt: generated.toISOString(), lastEventAt: rows.length
-    ? new Date(rows.reduce((latest, row) => Math.max(latest, Date.parse(row.occurredAt)), -Infinity)).toISOString() : null,
-    collection: collection ?? analyticsCollectionStatus(analyticsGateFromEnv({}), false, false, generated),
+  return { query, generatedAt: generated.toISOString(), lastEventAt,
+    collection: global, globalCollection: global,
+    globalCollectionState: global.collectionState, globalOfficialDataReady: global.officialDataReady,
+    globalCollectionStartAt: global.collectionStartAt, globalRequiredNoticeVersion: global.requiredNoticeVersion,
+    globalTargetEnvironment: global.targetEnvironment, globalAllowedTrafficTypes: global.allowedTrafficTypes,
+    currentQuery: { environment: query.environment, trafficType: query.trafficType,
+      dataState: queryDataState ?? (rows.length ? 'AVAILABLE' : 'NO_EVENTS'), lastEventAt },
     sessionsStarted: unique(rows, 'SESSION_STARTED'), assessmentsStarted: unique(rows, 'ASSESSMENT_STARTED'),
     assessmentsCompleted: unique(rows, 'ASSESSMENT_COMPLETED'), completionRate: rate(rows), resultViews: count('RESULT_VIEWED'),
     resultSaves: count('RESULT_SAVED'), qrCreates: count('QR_CREATED'),

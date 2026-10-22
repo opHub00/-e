@@ -25,6 +25,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     { method: request.method, headers: request.headers, query: request.query },
     { authorize: token => authorizeProductV3Admin(token, process.env), loadSnapshot: (window, includeAnalytics) => loadProductV3StagingSnapshot(process.env, fetch, () => new Date().toISOString(), window, includeAnalytics),
       loadAnalytics: async query => (await loadAnalyticsModule()).loadAnalyticsSummary(query, process.env),
+      loadAnalyticsStatus: async () => (await loadAnalyticsModule()).loadAnalyticsGlobalStatus(process.env),
       loadJejuCandidate: async () => (await loadCandidateModule()).buildJejuV2CandidateView() },
   );
   response.setHeader('Cache-Control', 'no-store');

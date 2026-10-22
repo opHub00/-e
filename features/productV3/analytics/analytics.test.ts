@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, parseAnalyticsEvent, parseAnalyticsQuery, shouldCollect } from './core.ts';
-import { allowBrowserAnalyticsAttempt, loadAnalyticsSummary, planStagingAnalyticsCleanup, recordAnalyticsBatch, recordAnalyticsEvent, recordBrowserAnalytics, serverEvent, stableAnalyticsEventId } from './server.ts';
+import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsRetentionPlan, analyticsWindow, getAnalyticsSummary, globalAnalyticsCollectionStatus, parseAnalyticsEvent, parseAnalyticsQuery, shouldCollect } from './core.ts';
+import { allowBrowserAnalyticsAttempt, loadAnalyticsGlobalStatus, loadAnalyticsSummary, planStagingAnalyticsCleanup, recordAnalyticsBatch, recordAnalyticsEvent, recordBrowserAnalytics, serverEvent, stableAnalyticsEventId } from './server.ts';
 import { handleProductV3ConsoleRequest } from '../../adminConsole/server/consoleApi.ts';
 import type { AnalyticsEvent } from './contract.ts';
 
@@ -192,4 +192,53 @@ test('server reader distinguishes missing schema, auth failure, timeout and read
   await assert.rejects(failure(403), /ANALYTICS_AUTH_UNAVAILABLE/);
   await assert.rejects(failure(500), /ANALYTICS_READ_FAILED/);
   await assert.rejects(loadAnalyticsSummary(query, staging, (async () => { const error = new Error('timeout'); error.name = 'TimeoutError'; throw error; }) as typeof fetch), /ANALYTICS_TIMEOUT/);
+});
+
+test('global collection state does not depend on the selected filter or QA event count', () => {
+  const gate = analyticsGateFromEnv({ EVENT_ANALYTICS_ENABLED: 'true', EVENT_ANALYTICS_ALLOWED_TRAFFIC_TYPES: 'real' });
+  const now = new Date('2026-10-29T00:00:00Z');
+  const collecting = globalAnalyticsCollectionStatus(gate, true, true, true, now);
+  const noEvents = globalAnalyticsCollectionStatus(gate, true, true, false, now);
+  const prelaunch = globalAnalyticsCollectionStatus(gate, false, true, true, now);
+  assert.equal(collecting.collectionState, 'COLLECTING');
+  assert.equal(noEvents.collectionState, 'READY_NOT_STARTED');
+  assert.equal(prelaunch.collectionState, 'PRE_LAUNCH');
+  assert.equal(globalAnalyticsCollectionStatus(gate, true, false, true, now).collectionState, 'MISCONFIGURED');
+  const qa = event('RESULT_VIEWED', { eventId: stableAnalyticsEventId(id, 'qa') });
+  const base = { from: '2026-10-28', to: '2026-10-28', environment: 'staging' as const, trafficType: 'qa' as const };
+  const qaSummary = getAnalyticsSummary([qa], base, now, collecting);
+  const otherFilter = getAnalyticsSummary([qa], { ...base, noticeId: 'samdo-2' }, now, collecting);
+  assert.equal(qaSummary.globalCollectionState, 'COLLECTING');
+  assert.equal(otherFilter.globalCollectionState, 'COLLECTING');
+  assert.equal(otherFilter.currentQuery.dataState, 'NO_EVENTS');
+  assert.equal(qaSummary.currentQuery.dataState, 'AVAILABLE');
+  assert.equal(qaSummary.collection.collectionState, 'COLLECTING');
+  assert.equal(qaSummary.globalTargetEnvironment, 'production');
+});
+
+test('Production analytics filter never reads the Staging physical store', async () => {
+  const query = { from: '2026-10-28', to: '2026-10-28', environment: 'production' as const, trafficType: 'real' as const };
+  let requests = 0;
+  const result = await loadAnalyticsSummary(query, staging, (async () => { requests += 1; throw new Error('Staging must not be read'); }) as typeof fetch);
+  assert.equal(requests, 0);
+  assert.equal(result.currentQuery.dataState, 'STORE_UNAVAILABLE');
+  assert.equal(result.currentQuery.environment, 'production');
+  assert.equal(result.globalCollection.productionStoreReady, false);
+  assert.equal(result.globalOfficialDataReady, false);
+  const status = loadAnalyticsGlobalStatus(staging, new Date('2026-10-28T00:00:00Z'));
+  assert.equal(status.collectionState, 'PRE_LAUNCH');
+  assert.equal(status.targetEnvironment, 'production');
+  assert.equal(status.productionStoreReady, false);
+  assert.equal(await recordAnalyticsEvent(event('SESSION_STARTED', { environment: 'production', trafficType: 'real' }), staging,
+    (async () => { requests += 1; return new Response(null, { status: 201 }); }) as typeof fetch), false);
+  assert.equal(requests, 0);
+});
+
+test('Admin status endpoint is authenticated and independent of summary filters', async () => {
+  const status = loadAnalyticsGlobalStatus(staging, new Date('2026-10-28T00:00:00Z'));
+  const deps = { authorize: async () => 'admin' as const, loadSnapshot: async () => { throw new Error('unused'); }, loadAnalyticsStatus: async () => status };
+  const request = { method: 'GET', headers: { authorization: 'Bearer token' }, query: { analytics: 'status' } };
+  assert.deepEqual(await handleProductV3ConsoleRequest(request, deps), { status: 200, body: status });
+  assert.equal((await handleProductV3ConsoleRequest({ ...request, headers: {} }, deps)).status, 401);
+  assert.equal((await handleProductV3ConsoleRequest(request, { ...deps, authorize: async () => 'reviewer' as const })).status, 403);
 });

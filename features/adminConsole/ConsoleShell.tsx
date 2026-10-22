@@ -23,6 +23,7 @@ type IconName = ComponentProps<typeof MaterialIcons>['name'];
 /** 통합 운영 콘솔 메뉴(Product V3). 운영자가 하는 일 순서. */
 export const CONSOLE_MENU: Array<{ key: string; label: string; hint: string; href: string; icon: IconName }> = [
   { key: 'dashboard', label: '대시보드', hint: '지금 정상인지', href: '/admin/console', icon: 'dashboard' },
+  { key: 'analytics', label: '운영 지표', hint: '상담·판정 세션 흐름', href: '/admin/console/analytics', icon: 'query-stats' },
   { key: 'notices', label: '공고', hint: '활성·검토 상태', href: '/admin/console/notices', icon: 'campaign' },
   { key: 'rules', label: '규칙 패키지', hint: '규칙 검토·승인', href: '/admin/console/rules', icon: 'fact-check' },
   { key: 'assessments', label: '판정 현황', hint: '사용자가 막히는 곳', href: '/admin/console/assessments', icon: 'insights' },
@@ -36,7 +37,9 @@ export type ConsoleMode = 'CONNECTED' | 'DEMO';
 
 /** 화면이 쓰는 공통 값: 기준 '지금'(예시 모드는 예시 기준 시각), 새로고침, 콘솔 안 링크. */
 export type ConsoleContextValue = { now: Date; refresh: () => void; link: (path: string, query?: Record<string, string>) => Href; mode: ConsoleMode;
-  loadPage: (query: ConsolePageQuery) => Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>> };
+  loadPage: (query: ConsolePageQuery) => Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>>;
+  /** 새로고침 버튼을 누를 때마다 1씩 오른다. 화면이 따로 부르는 데이터(운영 지표)도 함께 다시 부른다. */
+  refreshCount: number };
 const ConsoleContext = createContext<ConsoleContextValue | null>(null);
 export function useConsole(): ConsoleContextValue {
   const value = useContext(ConsoleContext);
@@ -132,7 +135,7 @@ export function ConsoleShell({ menuKey, title, subtitle, testID, children, needs
     return connectedPage(token, query);
   }, [demo, token]);
   return (
-    <ConsoleContext.Provider value={{ now, refresh, link, mode: demo ? 'DEMO' : 'CONNECTED', loadPage }}>
+    <ConsoleContext.Provider value={{ now, refresh, link, mode: demo ? 'DEMO' : 'CONNECTED', loadPage, refreshCount: nonce }}>
       <ConsoleChrome menuKey={menuKey} demo={demo} link={link}>
         {/* 라우터 기본 머리(경로 이름)를 숨긴다. 콘솔은 자체 사이드바·제목을 쓴다. */}
         <Stack.Screen options={{ headerShown: false, title: `${title} · 운영 콘솔` }} />

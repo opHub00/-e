@@ -87,10 +87,11 @@
     "benchmark:samdo:evaluate-v4": "node --experimental-strip-types scripts/evaluate-samdo-v4.mjs",
     "benchmark:samdo:evaluate-v3": "node --experimental-strip-types scripts/evaluate-samdo-v3.mjs",
     "test:hardcode-guard": "node --test scripts/announcement-hardcode-guard.test.mjs",
-    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/server/stagingSnapshot.test.ts features/adminConsole/server/metrics.test.ts features/adminConsole/server/jejuV2Candidate.test.ts features/assessmentRuleReview/fixtures/jejuV2Decisions.test.ts features/assessmentRuleReview/fixtures/jejuV2RegistrationPlan.test.ts features/productV3/admin/assessmentEvents.test.ts",
+    "test:admin-console": "node --experimental-strip-types --test features/adminConsole/adminConsole.test.ts features/adminConsole/analyticsModel.test.ts features/adminConsole/server/stagingSnapshot.test.ts features/adminConsole/server/metrics.test.ts features/adminConsole/server/jejuV2Candidate.test.ts features/assessmentRuleReview/fixtures/jejuV2Decisions.test.ts features/assessmentRuleReview/fixtures/jejuV2RegistrationPlan.test.ts features/productV3/admin/assessmentEvents.test.ts",
     "preflight:jeju-v2-review": "node --experimental-strip-types scripts/jeju-v2-registration-preflight.mjs",
     "qa:ui-quality": "node scripts/ui-quality-qa.mjs",
     "test:admin-console:e2e": "node scripts/admin-console-e2e.mjs",
+    "test:admin-analytics:e2e": "node scripts/admin-analytics-e2e.mjs",
     "qa:copilot": "node scripts/event-samdo-copilot-qa.mjs",
     "qa:ui-compare": "node scripts/ui-quality-compare.mjs",
     "qa:admin-ops": "node scripts/admin-ops-qa.mjs"

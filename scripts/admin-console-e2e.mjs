@@ -17,6 +17,7 @@ const VIEWPORTS = [
 ];
 const SCREENS = [
   ['dashboard', '/admin/console?demo=1', 'console-dashboard'],
+  ['analytics', '/admin/console/analytics?demo=1&analytics=qa100', 'console-analytics'],
   ['notices', '/admin/console/notices?demo=1', 'console-notices'],
   ['notice-detail', '/admin/console/notice?demo=1&id=demo-notice-a', 'console-notice-detail'],
   ['rules', '/admin/console/rules?demo=1', 'console-rules'],

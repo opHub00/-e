@@ -5,6 +5,8 @@ import { CONSOLE_DEMO_SNAPSHOT } from './demoData.ts';
 import type { ConsoleAiEvent, ConsoleAuditEntry, ConsoleNotice } from './contract.ts';
 import type { ConsolePage, ConsolePageQuery } from './server/pagination.ts';
 import type { JejuV2CandidateView } from './reviewCandidateContract.ts';
+import type { AnalyticsQuery, AnalyticsSummary } from '../productV3/analytics/contract.ts';
+import { queryString } from './analyticsModel.ts';
 
 /** 응답이 이보다 늦으면 '연결 지연'으로 알린다. */
 export const CONSOLE_REQUEST_TIMEOUT_MS = 15_000;
@@ -75,6 +77,25 @@ export async function connectedPage(
     throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
   }
   return response.json() as Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>>;
+}
+
+/** Admin-only analytics summary (Codex contract). Reviewer gets 403; the server validates the window again. */
+export async function connectedAnalytics(accessToken: string, query: AnalyticsQuery, fetcher: typeof fetch = fetch): Promise<AnalyticsSummary> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONSOLE_REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetcher(`/admin-api/product-v3?${queryString(query)}`, {
+      headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store', signal: controller.signal,
+    });
+  } catch {
+    throw new ConsoleLoadError(controller.signal.aborted ? 'TIMEOUT' : 'NETWORK');
+  } finally { clearTimeout(timer); }
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string } | null;
+    throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
+  }
+  return response.json() as Promise<AnalyticsSummary>;
 }
 
 /** 예시 데이터는 Demo 빌드(또는 개발 서버) + ?demo=1 에서만. 운영 빌드에서는 열리지 않는다. */

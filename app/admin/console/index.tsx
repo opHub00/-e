@@ -168,13 +168,17 @@ function Dashboard({ snapshot }: { snapshot: ConsoleSnapshot }) {
       </View>
 
       {/* 7. 일반 지표 */}
-      {snapshot.analytics ? <SectionCard title="상담·판정 세션" description={snapshot.analytics.status === 'CONNECTED' ? 'Staging · QA 기록만 표시 · 사람 수 아님' : 'Analytics migration 또는 수집 연결 전'}>
-        {snapshot.analytics.status === 'CONNECTED' ? <View style={styles.list}>
+      {snapshot.analytics ? <SectionCard
+        title="상담·판정 세션 · QA 기록"
+        description={snapshot.analytics.status === 'CONNECTED' ? 'Staging · QA · 최근 7일 · 운영 실적 아님 · 사람 수 아님' : 'Analytics migration 또는 수집 연결 전'}
+        action={<AdminButton label="운영 지표로" tone="quiet" icon="chevron-right" onPress={() => router.push(link('/admin/console/analytics'))} />}
+      >
+        {snapshot.analytics.status === 'CONNECTED' ? <View testID="console-analytics-card" style={styles.list}>
           <KpiGrid items={[
-            { label: '상담 세션', value: `${snapshot.analytics.summary.sessionsStarted}건`, hint: '익명 세션 기준', tone: 'purple', icon: 'chat' },
-            { label: '판정 세션', value: `${snapshot.analytics.summary.assessmentsStarted}건`, hint: '분석 시작', tone: 'purple', icon: 'insights' },
-            { label: '완료 세션', value: `${snapshot.analytics.summary.assessmentsCompleted}건`, hint: `완료율 ${percent(snapshot.analytics.summary.completionRate)}`, tone: 'green', icon: 'check-circle' },
-            { label: 'QR 생성', value: `${snapshot.analytics.summary.qrCreates}건`, hint: '토큰 저장 안 함', tone: 'neutral', icon: 'qr-code' },
+            { label: '상담 시작 세션', value: `${snapshot.analytics.summary.sessionsStarted}세션`, hint: '익명 세션 기준', tone: 'purple', icon: 'chat' },
+            { label: '판정 시작 세션', value: `${snapshot.analytics.summary.assessmentsStarted}세션`, hint: '분석 시작', tone: 'purple', icon: 'insights' },
+            { label: '판정 완료 세션', value: `${snapshot.analytics.summary.assessmentsCompleted}세션`, hint: `완료율 ${percent(snapshot.analytics.summary.completionRate)}`, tone: 'green', icon: 'check-circle' },
+            { label: 'QR 생성', value: `${snapshot.analytics.summary.qrCreates}회`, hint: '횟수 · 토큰 저장 안 함', tone: 'neutral', icon: 'qr-code' },
           ]} />
           <Text style={styles.lineMeta}>판정 결과 · 완료 {snapshot.analytics.summary.assessmentStatusDistribution.COMPLETE} · 추가 확인 {snapshot.analytics.summary.assessmentStatusDistribution.NEEDS_USER_INPUT} · 신청 어려움 {snapshot.analytics.summary.assessmentStatusDistribution.INELIGIBLE} · 판정 불가 {snapshot.analytics.summary.assessmentStatusDistribution.UNAVAILABLE}</Text>
           <Text style={styles.lineMeta}>많이 남은 확인 항목 · {Object.entries(snapshot.analytics.summary.unresolvedCategoryDistribution).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([key, count]) => `${analyticsCategoryLabel[key] ?? '기타 확인'} ${count}`).join(' · ') || '기록 없음'}</Text>

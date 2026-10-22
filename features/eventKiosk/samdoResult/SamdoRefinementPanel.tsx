@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { trackEventAnalytics } from '../analyticsClient.ts';
 import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { MotionPressable } from '../../../components/motion/MotionPressable';
@@ -218,7 +219,7 @@ function Simulator({ answers }: { answers: KioskAnswers }) {
   const [overrides, setOverrides] = useState<SamdoSimulationOverrides>({});
   const selectedDefinition = SAMDO_SIMULATION_FACTS.find(item => item.id === selected)!;
   const active = Object.keys(overrides).length > 0;
-  const apply = (value: SamdoFactValue) => setOverrides(current => ({ ...current, [selected]: value }));
+  const apply = (value: SamdoFactValue) => { trackEventAnalytics('SIMULATION_RUN', { noticeId: 'samdo-1' }); setOverrides(current => ({ ...current, [selected]: value })); };
   const reset = () => { setOverrides({}); setOpen(false); };
   return (
     <Card testID="samdo-simulator">

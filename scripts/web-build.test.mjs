@@ -28,10 +28,8 @@ test('listings function packages only its required event media modules', async (
 test('event chat function packages its server contract, privacy boundary and trusted Samdo RAG index', async () => {
   const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
   const includeFiles = config.functions?.['api/event-api/chat.ts']?.includeFiles ?? '';
-  assert.match(includeFiles, /features\/eventKiosk\/server\/eventChat\.ts/);
-  assert.match(includeFiles, /features\/eventKiosk\/chat\/\{contract\.ts,privacy\.ts,package\.json\}/);
-  assert.match(includeFiles, /features\/eventKiosk\/samdoDual\/\{rag\.ts,types\.ts,package\.json\}/);
-  assert.match(includeFiles, /features\/productV3\/admin\/staging\*\.ts/);
+  assert.match(includeFiles, /features\/eventKiosk\/\{server\/eventChat\.ts,chat\/\{contract\.ts,privacy\.ts,package\.json\},samdoDual\/\{rag\.ts,types\.ts,package\.json\}\}/);
+  assert.match(includeFiles, /features\/productV3\/\{admin\/staging\*\.ts,analytics\/server\.ts\}/);
   assert.match(includeFiles, /data\/event\/samdo-dual-v2-rag\.json/);
   assert.doesNotMatch(includeFiles, /features\/\*\*/);
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');

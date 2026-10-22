@@ -112,6 +112,8 @@ export type EventChatFallback = { text: string; detail?: string[] };
 export type EventChatResolution = 'EXACT_STRUCTURED' | 'ASSESSMENT_AWARE' | 'FREEFORM_RAG' | 'CLARIFICATION';
 
 export type EventChatRequest = {
+  /** Random memory-only session ID; never a person identifier. */
+  anonymousSessionId?: string;
   question: string;
   history: EventChatHistoryTurn[];
   context: EventChatContext;

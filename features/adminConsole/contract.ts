@@ -109,6 +109,8 @@ export type ConsoleSnapshot = {
   coverage?: ConsoleCoverage;
   /** Optional server-computed time window; dashboard charts can consume this without deriving rates. */
   trend?: import('./server/metrics.ts').MetricTrend;
+  /** Server-computed operational session metrics; never unique people. */
+  analytics?: { status: 'NOT_COLLECTED' } | { status: 'CONNECTED'; summary: import('../productV3/analytics/contract.ts').AnalyticsSummary };
 };
 
 export type ConsoleSource =

@@ -21,6 +21,7 @@ import {
 } from './model.ts';
 import { skippedQuestionKeys, type AnswerStateMap } from './questionPolicy.ts';
 import { samdoInputFromAnswers } from './samdoResult/samdoInput.ts';
+import { anonymousAnalyticsSessionId, clearAnalyticsSession, trackEventAnalytics } from './analyticsClient.ts';
 
 /**
  * 행사 체험 한 번의 상태.
@@ -196,7 +197,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
         const input = { ...source, profile: { ...source.profile, basic: { ...source.profile.basic, name: '' } }, answerStates: current.answerStates };
         void fetch('/event-api/assessments', {
           method: 'POST', headers: { 'content-type': 'application/json' }, cache: 'no-store',
-          body: JSON.stringify({ requestId: globalThis.crypto.randomUUID(), input }),
+          body: JSON.stringify({ requestId: globalThis.crypto.randomUUID(), anonymousSessionId: anonymousAnalyticsSessionId(), input }),
         }).catch(() => undefined);
       }
     } catch (error) {
@@ -205,12 +206,12 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     }
   },
 
-  markAnswered: (key) => set(state => ({
+  markAnswered: (key) => { if (!get().answered.includes(key)) trackEventAnalytics('QUESTION_ANSWERED'); set(state => ({
     answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
     answerStates: { ...state.answerStates, [key]: 'ANSWERED' },
-  })),
+  })); },
 
-  markDoesNotKnow: (key) => set(state => {
+  markDoesNotKnow: (key) => { if (get().answerStates[key] !== 'DOES_NOT_KNOW') trackEventAnalytics('FACT_MARKED_UNKNOWN'); set(state => {
     const answerStates: AnswerStateMap = { ...state.answerStates, [key]: 'DOES_NOT_KNOW' };
     return {
       answered: state.answered.includes(key) ? state.answered : [...state.answered, key],
@@ -220,7 +221,7 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
         samdoUnresolvedFacts: getUnresolvedAssessmentFacts(state.chat.samdoDualAssessment, answerStates),
       } : state.chat,
     };
-  }),
+  }); },
 
   clearAnswerState: (key) => set(state => {
     const answerStates = { ...state.answerStates };
@@ -280,16 +281,16 @@ export const useKioskStore = create<KioskState>()((set, get) => ({
     }
   },
 
-  appendLocalExchange: (userText, reply) => set(state => (state.chat ? {
+  appendLocalExchange: (userText, reply) => { trackEventAnalytics('COPILOT_USED', { noticeId: 'samdo-1' }); set(state => (state.chat ? {
     chat: { ...state.chat, messages: [...state.chat.messages, { role: 'user', text: userText }, { role: 'assistant', text: reply.text, detail: reply.detail }] },
-  } : {})),
+  } : {})); },
 
   refreshSamdoDualAssessment: (assessment) => set(state => (state.chat?.samdoDualAssessment ? {
     chat: { ...state.chat, samdoDualAssessment: assessment,
       samdoUnresolvedFacts: getUnresolvedAssessmentFacts(assessment, state.answerStates) },
   } : {})),
 
-  reset: () => set(state => ({ sessionKey: state.sessionKey + 1, ...initial() })),
+  reset: () => { clearAnalyticsSession(); set(state => ({ sessionKey: state.sessionKey + 1, ...initial() })); },
 
   qaLoadAnswers: (answers, answeredKeys) => set(state => ({
     sessionKey: state.sessionKey + 1,

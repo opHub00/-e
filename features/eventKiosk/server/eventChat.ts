@@ -47,6 +47,8 @@ type RequestLike = {
 export type EventChatHandlerResult = { status: number; body: EventChatResponse | { error: string } };
 export type EventChatEnvironment = Record<string, string | undefined>;
 export type EventChatTelemetry = {
+  anonymousSessionId?: string;
+  conversationTurnCount?: number;
   requestId: string;
   createdAt: string;
   sanitizedQuestion: string;
@@ -223,7 +225,8 @@ function isFallback(value: unknown, context: EventChatContext): value is EventCh
 }
 
 export function parseEventChatRequest(value: unknown): EventChatRequest | null {
-  if (!object(value) || !onlyKeys(value, ['question', 'history', 'context', 'fallback', 'resolution']) || typeof value.question !== 'string' || value.question.length > EVENT_CHAT_MAX_QUESTION_CHARS) return null;
+  if (!object(value) || !onlyKeys(value, ['question', 'history', 'context', 'fallback', 'resolution', 'anonymousSessionId']) || typeof value.question !== 'string' || value.question.length > EVENT_CHAT_MAX_QUESTION_CHARS) return null;
+  if (value.anonymousSessionId !== undefined && (typeof value.anonymousSessionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.anonymousSessionId))) return null;
   if (!['EXACT_STRUCTURED', 'ASSESSMENT_AWARE', 'FREEFORM_RAG', 'CLARIFICATION'].includes(String(value.resolution))) return null;
   if (!isEventChatContext(value.context) || !Array.isArray(value.history)) return null;
   if (!isFallback(value.fallback, value.context)) return null;
@@ -232,7 +235,8 @@ export function parseEventChatRequest(value: unknown): EventChatRequest | null {
   if (history.length > EVENT_CHAT_MAX_HISTORY_TURNS || history.reduce((sum, turn) => sum + turn.text.length, 0) > EVENT_CHAT_MAX_HISTORY_CHARS) return null;
   const question = redactEventChatText(value.question);
   if (!question) return null;
-  return { question, history, context: value.context, fallback: value.fallback, resolution: value.resolution as EventChatRequest['resolution'] };
+  return { question, history, context: value.context, fallback: value.fallback, resolution: value.resolution as EventChatRequest['resolution'],
+    ...(value.anonymousSessionId ? { anonymousSessionId: value.anonymousSessionId } : {}) };
 }
 
 function withTrustedEvidence(request: EventChatRequest): EventChatRequest {
@@ -317,6 +321,7 @@ export async function handleEventChat(requestLike: RequestLike, dependencies: Ev
     if (dependencies.monitor) {
       try {
         await dependencies.monitor({ requestId, createdAt: new Date(now).toISOString(), sanitizedQuestion: request.question,
+          ...(request.anonymousSessionId ? { anonymousSessionId: request.anonymousSessionId, conversationTurnCount: request.history.filter(turn => turn.role === 'user').length + 1 } : {}),
           resolver: request.resolution, mode: body.mode, provider: body.provider ?? null, model: body.model ?? null,
           ragEvidenceCount: request.context.schemaVersion === 2 ? request.context.retrievedEvidence.length : request.context.focus.evidence.length,
           groundingResult, fallbackReason: allowedReason, latencyMs: Math.max(0, Date.now() - startedAt), noticeIds });

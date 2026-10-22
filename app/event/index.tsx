@@ -21,6 +21,7 @@ import { STORY_AUTOPLAY_MS } from '../../features/eventKiosk/story/storyScript';
 import { buildDistrictComparison } from '../../features/eventKiosk/districts/districtAdapter';
 import { DISTRICT_COPY } from '../../features/eventKiosk/districts/districtCopy';
 import type { DistrictCardModel } from '../../features/eventKiosk/districts/districtContract';
+import { beginAnalyticsSession } from '../../features/eventKiosk/analyticsClient';
 
 /**
  * 처음 온 브라우저에서만 Product Story 를 자동으로 연다. 자동화 브라우저(회귀 점검)는 기존 흐름을 그대로 검사하도록 자동 재생하지 않는다.
@@ -51,6 +52,7 @@ export default function EventLanding() {
   const start = () => {
     // 시작할 때 한 번 더 비운다. 이전 방문자가 '처음으로'를 누르지 않고 떠났어도 남는 것이 없다.
     useKioskStore.getState().reset();
+    beginAnalyticsSession();
     router.push('/event/intro' as never);
   };
 

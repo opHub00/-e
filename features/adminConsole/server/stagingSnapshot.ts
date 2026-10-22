@@ -2,6 +2,7 @@ import type { ConsoleAssessmentStats, ConsoleAuditEntry, ConsoleNotice, ConsoleR
 import { resolveProductV3StagingTarget, sanitizeUnresolvedCategory, type ProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
 import { buildMetricTrend, type MetricWindowQuery } from './metrics.ts';
 import { getActiveNotices } from '../../eventKiosk/noticePlatform/index.ts';
+import { loadAnalyticsSummary } from '../../productV3/analytics/server.ts';
 
 type Row = Record<string, unknown>;
 type Table = 'announcements' | 'announcement_documents' | 'assessment_rule_sets' | 'assessment_rules' |
@@ -67,6 +68,7 @@ export async function loadProductV3StagingSnapshot(
   fetcher: typeof fetch = fetch,
   now: () => string = () => new Date().toISOString(),
   metricWindow?: MetricWindowQuery,
+  includeAnalytics = false,
 ): Promise<ConsoleSnapshot> {
   const target = resolveProductV3StagingTarget(env);
   const tables = Object.keys(selections) as Table[];
@@ -169,7 +171,11 @@ export async function loadProductV3StagingSnapshot(
     }
   }
   assessments.blockers = [...frequency].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'ko'));
-  return { generatedAt, notices, rules, assessments,
+  const analytics: ConsoleSnapshot['analytics'] = includeAnalytics ? await loadAnalyticsSummary({
+    from: new Date(Date.parse(generatedAt) - 6 * 86_400_000).toISOString().slice(0, 10), to: generatedAt.slice(0, 10),
+    environment: 'staging', trafficType: 'qa', previousPeriod: true,
+  }, env, fetcher).then(summary => ({ status: 'CONNECTED' as const, summary })).catch(() => ({ status: 'NOT_COLLECTED' as const })) : undefined;
+  return { generatedAt, notices, rules, assessments, ...(analytics ? { analytics } : {}),
     ...(metricWindow ? { trend: buildMetricTrend(
       data.product_v3_assessment_events.map(row => ({ created_at: row.created_at, status: row.status })),
       data.product_v3_ai_monitoring.map(row => ({ created_at: row.created_at, mode: row.mode })), metricWindow) } : {}),

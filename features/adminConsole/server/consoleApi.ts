@@ -2,6 +2,8 @@ import type { ConsoleSnapshot } from '../contract.ts';
 import { resolveProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
 import { pageConsoleSnapshot, parseConsolePageQuery } from './pagination.ts';
 import { parseMetricWindowQuery, type MetricWindowQuery } from './metrics.ts';
+import { parseAnalyticsQuery } from '../../productV3/analytics/core.ts';
+import type { AnalyticsQuery, AnalyticsSummary } from '../../productV3/analytics/contract.ts';
 export { loadProductV3StagingSnapshot } from './stagingSnapshot.ts';
 
 type Request = { method?: string; headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown> };
@@ -9,7 +11,8 @@ type Reply = { status: number; body: unknown };
 type AuthResult = 'admin' | 'reviewer' | 'UNAUTHENTICATED' | null;
 export type ConsoleApiDependencies = {
   authorize: (token: string) => Promise<AuthResult>;
-  loadSnapshot: (window?: MetricWindowQuery) => Promise<ConsoleSnapshot>;
+  loadSnapshot: (window?: MetricWindowQuery, includeAnalytics?: boolean) => Promise<ConsoleSnapshot>;
+  loadAnalytics?: (query: AnalyticsQuery) => Promise<AnalyticsSummary>;
   loadJejuCandidate?: () => Promise<unknown>;
 };
 
@@ -26,6 +29,12 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
   if (role === 'UNAUTHENTICATED') return { status: 401, body: { error: 'AUTH_REQUIRED' } };
   if (!role) return { status: 403, body: { error: 'FORBIDDEN' } };
   try {
+    if (request.query?.analytics !== undefined) {
+      if (role !== 'admin') return { status: 403, body: { error: 'FORBIDDEN' } };
+      if (request.query.analytics !== 'summary' || !dependencies.loadAnalytics) return { status: 400, body: { error: 'INVALID_ANALYTICS_QUERY' } };
+      const query = parseAnalyticsQuery(request.query);
+      return query ? { status: 200, body: await dependencies.loadAnalytics(query) } : { status: 400, body: { error: 'INVALID_ANALYTICS_QUERY' } };
+    }
     if (request.query?.reviewCandidate !== undefined) {
       if (request.query.reviewCandidate !== 'jeju-v2' || !dependencies.loadJejuCandidate)
         return { status: 400, body: { error: 'INVALID_REVIEW_CANDIDATE' } };
@@ -34,7 +43,7 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
     const metricRequested = request.query && ['from', 'to', 'bucket', 'previousPeriod'].some(key => key in request.query!);
     const metricWindow = metricRequested ? parseMetricWindowQuery(request.query!) : undefined;
     if (metricRequested && !metricWindow) return { status: 400, body: { error: 'INVALID_METRIC_WINDOW' } };
-    const snapshot = await dependencies.loadSnapshot(metricWindow ?? undefined);
+    const snapshot = await dependencies.loadSnapshot(metricWindow ?? undefined, role === 'admin');
     if (request.query?.collection !== undefined) {
       const query = parseConsolePageQuery(request.query);
       return query ? { status: 200, body: pageConsoleSnapshot(snapshot, query) } : { status: 400, body: { error: 'INVALID_PAGE_QUERY' } };

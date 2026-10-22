@@ -12,13 +12,16 @@
       "includeFiles": "{features/eventKiosk/server/**,features/productV3/admin/stagingTarget.ts,scripts/event-result-session-store.mjs}"
     },
     "api/event-api/chat.ts": {
-      "includeFiles": "{features/eventKiosk/server/eventChat.ts,features/eventKiosk/chat/{contract.ts,privacy.ts,package.json},features/eventKiosk/samdoDual/{rag.ts,types.ts,package.json},features/productV3/admin/staging*.ts,data/event/samdo-dual-v2-rag.json}"
+      "includeFiles": "{features/eventKiosk/{server/eventChat.ts,chat/{contract.ts,privacy.ts,package.json},samdoDual/{rag.ts,types.ts,package.json}},features/productV3/{admin/staging*.ts,analytics/server.ts},data/event/samdo-dual-v2-rag.json}"
     },
     "api/admin-api/product-v3.ts": {
       "includeFiles": "{features/{adminConsole/**,assessmentRuleReview/**,productV3/**,noticePlatform/**,profile/**,applicationAssessment/**,eventKiosk/**},data/{assessment-rules/{*v1.8,lh-jeju-ildo-samdo-happy-20260918*}.json,event/samdo-dual-v2-rag.json}}"
     },
     "api/event-api/assessments.ts": {
-      "includeFiles": "{features/{productV3/admin/{assessmentEvents.ts,stagingTarget.ts},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+      "includeFiles": "{features/{productV3/{admin/{assessmentEvents.ts,stagingTarget.ts},analytics/**},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+    },
+    "api/event-api/analytics.ts": {
+      "includeFiles": "{features/{productV3/{analytics/**,admin/stagingTarget.ts},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
     }
   },
   "headers": [
@@ -60,6 +63,10 @@
     {
       "source": "/event-api/assessments",
       "destination": "/api/event-api/assessments"
+    },
+    {
+      "source": "/event-api/analytics",
+      "destination": "/api/event-api/analytics"
     },
     {
       "source": "/discovery/:id",

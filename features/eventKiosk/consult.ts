@@ -17,6 +17,7 @@ import { buildSamdoDualChatContext, resolveSamdoDualConversation } from './samdo
 import type { SamdoDualAssessment } from './samdoDual/types.ts';
 import { getUnresolvedAssessmentFacts, type SamdoUnresolvedAssessmentFact } from './samdoDual/unresolved.ts';
 import type { AnswerStateMap } from './questionPolicy.ts';
+import { anonymousAnalyticsSessionId } from './analyticsClient.ts';
 
 export type KioskChatContext = {
   outcomeId: string | null;
@@ -298,6 +299,7 @@ export async function sendChat(event: LoadedEvent, chat: KioskChat, message: str
 
   if (context && canUseEndpoint) {
     const request: EventChatRequest = {
+      ...(anonymousAnalyticsSessionId() ? { anonymousSessionId: anonymousAnalyticsSessionId()! } : {}),
       question: redactEventChatText(text),
       history,
       context,

@@ -10,6 +10,12 @@ import {
 import { collected, emptyCopy } from '../../../features/adminConsole/consoleState';
 import type { ConsoleSnapshot } from '../../../features/adminConsole/contract';
 
+const analyticsCategoryLabel: Record<string, string> = {
+  residency: '거주', subscription_account: '청약통장', income: '소득', assets: '자산',
+  rewinning_restriction: '재당첨 제한', household: '세대·주택소유', marriage_child: '혼인·자녀',
+  evidence: '증빙 확인', other: '기타 확인',
+};
+
 /**
  * 통합 운영 콘솔 대시보드. 운영자가 첫 화면에서 볼 순서 그대로:
  * 1 장애·오류 → 2 검토 필요 → 3 대체 답변 → 4 근거 실패 → 5 판정이 멈추는 곳 → 6 최근 공고 변경 → 7 일반 지표.
@@ -162,6 +168,18 @@ function Dashboard({ snapshot }: { snapshot: ConsoleSnapshot }) {
       </View>
 
       {/* 7. 일반 지표 */}
+      {snapshot.analytics ? <SectionCard title="상담·판정 세션" description={snapshot.analytics.status === 'CONNECTED' ? 'Staging · QA 기록만 표시 · 사람 수 아님' : 'Analytics migration 또는 수집 연결 전'}>
+        {snapshot.analytics.status === 'CONNECTED' ? <View style={styles.list}>
+          <KpiGrid items={[
+            { label: '상담 세션', value: `${snapshot.analytics.summary.sessionsStarted}건`, hint: '익명 세션 기준', tone: 'purple', icon: 'chat' },
+            { label: '판정 세션', value: `${snapshot.analytics.summary.assessmentsStarted}건`, hint: '분석 시작', tone: 'purple', icon: 'insights' },
+            { label: '완료 세션', value: `${snapshot.analytics.summary.assessmentsCompleted}건`, hint: `완료율 ${percent(snapshot.analytics.summary.completionRate)}`, tone: 'green', icon: 'check-circle' },
+            { label: 'QR 생성', value: `${snapshot.analytics.summary.qrCreates}건`, hint: '토큰 저장 안 함', tone: 'neutral', icon: 'qr-code' },
+          ]} />
+          <Text style={styles.lineMeta}>판정 결과 · 완료 {snapshot.analytics.summary.assessmentStatusDistribution.COMPLETE} · 추가 확인 {snapshot.analytics.summary.assessmentStatusDistribution.NEEDS_USER_INPUT} · 신청 어려움 {snapshot.analytics.summary.assessmentStatusDistribution.INELIGIBLE} · 판정 불가 {snapshot.analytics.summary.assessmentStatusDistribution.UNAVAILABLE}</Text>
+          <Text style={styles.lineMeta}>많이 남은 확인 항목 · {Object.entries(snapshot.analytics.summary.unresolvedCategoryDistribution).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([key, count]) => `${analyticsCategoryLabel[key] ?? '기타 확인'} ${count}`).join(' · ') || '기록 없음'}</Text>
+        </View> : <Text style={styles.lineMeta}>아직 수집 전 · 0건으로 추정하지 않습니다.</Text>}
+      </SectionCard> : null}
       <SectionCard title="일반 지표" description={`${day} 기준`}>
         <KpiGrid items={[
           { label: '활성 공고', value: `${model.kpis.activeNotices}건`, hint: '사용자 화면에서 서비스 중', tone: 'green', icon: 'campaign' },

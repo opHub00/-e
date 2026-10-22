@@ -6,6 +6,7 @@ import { injectPersona, isDemoModeEnabled } from '../../features/eventKiosk/demo
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import type { Phase4PersonaId } from '../../features/eventKiosk/phase4Personas';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
+import { trackEventAnalytics } from '../../features/eventKiosk/analyticsClient';
 import { toSamdoPresentationRecommendation } from '../../features/eventKiosk/samdo';
 import { samdoRawRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
 import { samdoInputFromAnswers } from '../../features/eventKiosk/samdoResult/samdoInput';
@@ -70,6 +71,13 @@ export default function SamdoResultScreen() {
     layoutSample: layout === 'sample' && isDemoModeEnabled(),
   }), [layout, result]);
 
+  useEffect(() => {
+    if (attached && result && result !== 'error') {
+      trackEventAnalytics('RESULT_VIEWED');
+      trackEventAnalytics('NOTICE_COMPARED', { noticeId: 'samdo-1' });
+    }
+  }, [attached, result]);
+
   if (!load.ok) return null;
   const brand = load.event.config.copy.brand;
   if (!attached) return <KioskFrame brand={brand} confirmHome={false}><View /></KioskFrame>;
@@ -93,6 +101,8 @@ export default function SamdoResultScreen() {
     try {
       const summary = buildSamdoQrSummary({ eventId: load.event.config.id, date: new Date().toISOString().slice(0, 10), recommendation: result.recommendation, view: result.view });
       const created = await createResultSession(base, summary);
+      trackEventAnalytics('RESULT_SAVED', { noticeId: 'samdo-1' });
+      trackEventAnalytics('QR_CREATED', { noticeId: 'samdo-1' });
       setSession({ status: 'ready', link: created.url });
     } catch {
       setSession({ status: 'error' });

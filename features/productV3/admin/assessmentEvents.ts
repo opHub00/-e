@@ -1,6 +1,7 @@
 import type { NoticeAssessmentInput, Assessment, AssessmentFact, NoticeSupplyAssessment } from '../../noticePlatform/types.ts';
 import { noticePlatform } from '../../eventKiosk/noticePlatform/index.ts';
 import { resolveProductV3StagingTarget, sanitizeUnresolvedCategory } from './stagingTarget.ts';
+import { recordAnalyticsBatch, safeUnresolvedCategory, serverEvent, stableAnalyticsEventId } from '../analytics/server.ts';
 
 export type AssessmentEventStatus = 'COMPLETE' | 'NEEDS_USER_INPUT' | 'INELIGIBLE' | 'UNAVAILABLE';
 export type AssessmentEvent = {
@@ -58,12 +59,13 @@ export function assessmentEvents(requestId: string, assessments: readonly Assess
 }
 
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
-export function parseAssessmentRequest(value: unknown): { requestId: string; input: NoticeAssessmentInput } | null {
+export function parseAssessmentRequest(value: unknown): { requestId: string; anonymousSessionId: string; input: NoticeAssessmentInput } | null {
   if (!record(value) || !requestIdPattern.test(String(value.requestId ?? '')) || !record(value.input)) return null;
   const input = value.input;
   if (!record(input.profile) || input.profile.version !== 2 || !record(input.profile.basic) || input.profile.basic.name !== '' || !record(input.details)) return null;
   // The event route only assesses the two active Samdo notices. Client-provided statuses/counts/notice IDs are ignored.
-  return { requestId: String(value.requestId), input: input as NoticeAssessmentInput };
+  if (value.anonymousSessionId !== undefined && !requestIdPattern.test(String(value.anonymousSessionId))) return null;
+  return { requestId: String(value.requestId), anonymousSessionId: String(value.anonymousSessionId ?? value.requestId), input: input as NoticeAssessmentInput };
 }
 
 export async function evaluateAndRecordAssessment(
@@ -88,6 +90,19 @@ export async function evaluateAndRecordAssessment(
       body: JSON.stringify(events),
       signal: AbortSignal.timeout(6000),
     });
+    const analytics = [
+      ...['samdo-1', 'samdo-2'].map(noticeId => serverEvent({ eventId: stableAnalyticsEventId(parsed.requestId, `${noticeId}:started`), anonymousSessionId: parsed.anonymousSessionId,
+        noticeId, eventType: 'ASSESSMENT_STARTED' }, env)),
+      ...events.map(item => serverEvent({ eventId: stableAnalyticsEventId(parsed.requestId, `${item.notice_id}:${item.supply_type}:completed`),
+        anonymousSessionId: parsed.anonymousSessionId, noticeId: item.notice_id, eventType: 'ASSESSMENT_COMPLETED',
+        supplyType: item.supply_type, assessmentStatus: item.status }, env)),
+      ...events.flatMap(item => item.unresolved_categories.map(category => serverEvent({
+        eventId: stableAnalyticsEventId(parsed.requestId, `${item.notice_id}:${item.supply_type}:${category}:unresolved`),
+        anonymousSessionId: parsed.anonymousSessionId, noticeId: item.notice_id, eventType: 'FACT_MARKED_UNKNOWN',
+        supplyType: item.supply_type, unresolvedCategory: safeUnresolvedCategory(category),
+      }, env))),
+    ].filter((item): item is NonNullable<typeof item> => item !== null);
+    await recordAnalyticsBatch(analytics, env, fetcher);
     return { status: 200, body: { result: 'ASSESSMENT_COMPLETED', recorded: response.ok } };
   } catch {
     // Monitoring must never change the user's deterministic assessment.

@@ -6,7 +6,7 @@ import type { ConsoleAiEvent, ConsoleAuditEntry, ConsoleNotice } from './contrac
 import type { ConsolePage, ConsolePageQuery } from './server/pagination.ts';
 import type { JejuV2CandidateView } from './reviewCandidateContract.ts';
 import type { AnalyticsQuery, AnalyticsSummary } from '../productV3/analytics/contract.ts';
-import { queryString } from './analyticsModel.ts';
+import { analyticsErrorCode, queryString, type AnalyticsErrorCode } from './analyticsModel.ts';
 
 /** 응답이 이보다 늦으면 '연결 지연'으로 알린다. */
 export const CONSOLE_REQUEST_TIMEOUT_MS = 15_000;
@@ -79,7 +79,18 @@ export async function connectedPage(
   return response.json() as Promise<ConsolePage<ConsoleAiEvent | ConsoleAuditEntry | ConsoleNotice>>;
 }
 
-/** Admin-only analytics summary (Codex contract). Reviewer gets 403; the server validates the window again. */
+/** 운영 지표 조회 실패. 서버의 안정 코드(ANALYTICS_*)를 그대로 들고 온다. */
+export class AnalyticsLoadError extends Error {
+  readonly code: AnalyticsErrorCode;
+  readonly status: number | null;
+  constructor(code: AnalyticsErrorCode, status: number | null = null) {
+    super(code);
+    this.code = code;
+    this.status = status;
+  }
+}
+
+/** Admin-only analytics summary (Codex contract v2). Reviewer gets 403; the server validates the KST window again. */
 export async function connectedAnalytics(accessToken: string, query: AnalyticsQuery, fetcher: typeof fetch = fetch): Promise<AnalyticsSummary> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONSOLE_REQUEST_TIMEOUT_MS);
@@ -89,11 +100,11 @@ export async function connectedAnalytics(accessToken: string, query: AnalyticsQu
       headers: { authorization: `Bearer ${accessToken}` }, cache: 'no-store', signal: controller.signal,
     });
   } catch {
-    throw new ConsoleLoadError(controller.signal.aborted ? 'TIMEOUT' : 'NETWORK');
+    throw new AnalyticsLoadError(analyticsErrorCode(null, null, controller.signal.aborted ? 'TIMEOUT' : 'NETWORK'));
   } finally { clearTimeout(timer); }
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { error?: string } | null;
-    throw new ConsoleLoadError(classifyResponse(response.status, body?.error ?? null), response.status);
+    throw new AnalyticsLoadError(analyticsErrorCode(response.status, body?.error ?? null), response.status);
   }
   return response.json() as Promise<AnalyticsSummary>;
 }

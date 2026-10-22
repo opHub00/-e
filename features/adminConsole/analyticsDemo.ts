@@ -1,31 +1,32 @@
-import type { AnalyticsEvent, AnalyticsEnvironment, AnalyticsTrafficType, AnalyticsQuery, AnalyticsSummary, UnresolvedCategory } from '../productV3/analytics/contract.ts';
-import { getAnalyticsSummary } from '../productV3/analytics/core.ts';
-import type { ConsoleLoadErrorKind } from './consoleState.ts';
-import type { ConsoleNotice } from './contract.ts';
+import type { AnalyticsEnvironment, AnalyticsEvent, AnalyticsQuery, AnalyticsSummaryV2, AnalyticsTrafficType, UnresolvedCategory } from '../productV3/analytics/contract.ts';
+import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsWindow, getAnalyticsSummary } from '../productV3/analytics/core.ts';
 import { QA_FILTERS, type AnalyticsFilters } from './analyticsModel.ts';
 
 /**
  * 운영 지표 화면 점검용 예시. Demo 빌드 + ?demo=1&analytics=… 에서만 열린다.
- * 요약 숫자를 손으로 적지 않는다. 계약 모양의 가짜 이벤트를 만들고 Codex 의 getAnalyticsSummary 로 집계한다.
+ * 요약 숫자를 손으로 적지 않는다. 계약 모양의 가짜 이벤트를 만들고 Codex 의 getAnalyticsSummary(계약 v2)로 집계한다.
+ * collectionState 도 Codex 의 analyticsCollectionStatus 로 만든다(gate 설정만 상황마다 다르게).
  * 예시 이벤트에는 사람 정보·답변·대화가 없다(계약에 그런 필드가 없다).
  */
-export type AnalyticsDemoKey = 'prelaunch' | 'qa0' | 'qa20' | 'qa100' | 'qa500' | 'live' | 'live0' | 'live500' | 'aiwarn' | 'stale'
-  | 'error' | 'timeout' | 'forbidden' | 'unauthorized';
-export const ANALYTICS_DEMO_KEYS: AnalyticsDemoKey[] = ['prelaunch', 'qa0', 'qa20', 'qa100', 'qa500', 'live', 'live0', 'live500', 'aiwarn', 'stale', 'error', 'timeout', 'forbidden', 'unauthorized'];
+export type AnalyticsDemoKey = 'prelaunch' | 'ready' | 'live' | 'live0' | 'live500' | 'paused' | 'misconfigured' | 'stale' | 'aiwarn'
+  | 'qa0' | 'qa20' | 'qa100' | 'qa500'
+  | 'schema' | 'readfail' | 'authunavail' | 'timeout' | 'network' | 'forbidden' | 'unauthorized';
+export const ANALYTICS_DEMO_KEYS: AnalyticsDemoKey[] = ['prelaunch', 'ready', 'live', 'live0', 'live500', 'paused', 'misconfigured', 'stale', 'aiwarn',
+  'qa0', 'qa20', 'qa100', 'qa500', 'schema', 'readfail', 'authunavail', 'timeout', 'network', 'forbidden', 'unauthorized'];
 export const ANALYTICS_DEMO_LABEL: Record<AnalyticsDemoKey, string> = {
-  prelaunch: '운영 개시 전', qa0: 'QA 0세션', qa20: 'QA 20세션', qa100: 'QA 100세션', qa500: 'QA 500세션',
-  live: '운영 중', live0: '운영 중 · 0세션', live500: '운영 중 · 500세션', aiwarn: 'AI 경고', stale: '오래된 조회',
-  error: '집계 서버 오류', timeout: '집계 지연', forbidden: '관리자 아님', unauthorized: '로그인 필요',
+  prelaunch: '운영 개시 전(PRE_LAUNCH)', ready: '준비 완료·시작 전(READY_NOT_STARTED)', live: '운영 집계 중(COLLECTING)',
+  live0: '집계 중 · 기간 내 0세션', live500: '집계 중 · 500세션', paused: '일시 중지(PAUSED)', misconfigured: '설정 오류(MISCONFIGURED)',
+  stale: '마지막 이벤트 오래됨', aiwarn: 'AI 경고', qa0: 'QA 0세션', qa20: 'QA 20세션', qa100: 'QA 100세션', qa500: 'QA 500세션',
+  schema: '저장소 준비 전', readfail: '읽기 실패', authunavail: '권한 확인 불가', timeout: '조회 지연', network: '네트워크 끊김',
+  forbidden: '관리자 아님', unauthorized: '로그인 필요',
 };
 
+export type AnalyticsDemoFailure = { status: number | null; code: string | null; transport?: 'TIMEOUT' | 'NETWORK' };
 export type AnalyticsDemo = {
   now: Date;
-  notices: Array<Pick<ConsoleNotice, 'id' | 'status' | 'provenance'>>;
   initialFilters?: Partial<AnalyticsFilters>;
-  failure?: { kind: ConsoleLoadErrorKind; status: number | null };
-  /** 조회 시각을 이만큼 과거로(오래된 데이터 점검) */
-  staleMinutes?: number;
-  load: (query: AnalyticsQuery) => AnalyticsSummary;
+  failure?: AnalyticsDemoFailure;
+  load: (query: AnalyticsQuery) => AnalyticsSummaryV2;
 };
 
 export const parseAnalyticsDemo = (value: string | string[] | undefined): AnalyticsDemoKey => {
@@ -35,32 +36,48 @@ export const parseAnalyticsDemo = (value: string | string[] | undefined): Analyt
 
 const PRE_LAUNCH_NOW = new Date('2026-10-22T10:00:00+09:00');
 const LIVE_NOW = new Date('2026-11-12T10:00:00+09:00');
-const notices = (official: boolean): AnalyticsDemo['notices'] => ['samdo-1', 'samdo-2'].map(id => ({
-  id, status: 'ACTIVE' as const, provenance: { fileName: `(최종1.8) ${id}.hwp`, sha256: '', official },
-}));
 
-type Volume = { environment: AnalyticsEnvironment; trafficType: AnalyticsTrafficType; sessions: number; aiStress?: boolean };
+type Volume = { environment: AnalyticsEnvironment; trafficType: AnalyticsTrafficType; sessions: number; aiStress?: boolean; quietDays?: number };
+
+const FAILURES: Partial<Record<AnalyticsDemoKey, AnalyticsDemoFailure>> = {
+  schema: { status: 503, code: 'ANALYTICS_SCHEMA_NOT_READY' }, readfail: { status: 503, code: 'ANALYTICS_READ_FAILED' },
+  authunavail: { status: 503, code: 'ANALYTICS_AUTH_UNAVAILABLE' }, timeout: { status: 503, code: 'ANALYTICS_TIMEOUT' },
+  network: { status: null, code: null, transport: 'NETWORK' }, forbidden: { status: 403, code: 'FORBIDDEN' }, unauthorized: { status: 401, code: 'AUTH_REQUIRED' },
+};
 
 export function analyticsDemo(key: AnalyticsDemoKey): AnalyticsDemo {
-  // 조회 실패 상황은 운영 개시 후로 둔다(개시 전 real 화면은 요청 자체를 하지 않는다).
-  const live = ['live', 'live0', 'live500', 'aiwarn', 'stale', 'error', 'timeout', 'forbidden', 'unauthorized'].includes(key);
-  const now = live ? LIVE_NOW : PRE_LAUNCH_NOW;
-  const qaSessions = { qa0: 0, qa20: 20, qa100: 100, qa500: 500 }[key as 'qa0'] ?? 40;
-  const realSessions = key === 'live0' ? 0 : key === 'live500' ? 500 : live ? 120 : 0;
+  const launched = !['prelaunch', 'qa0', 'qa20', 'qa100', 'qa500'].includes(key);
+  const now = launched ? LIVE_NOW : PRE_LAUNCH_NOW;
+  const qaSessions = ({ qa0: 0, qa20: 20, qa100: 100, qa500: 500 } as Partial<Record<AnalyticsDemoKey, number>>)[key] ?? 40;
+  const realSessions = !launched || key === 'ready' || key === 'misconfigured' ? 0 : key === 'live500' ? 500 : 120;
   const volumes: Volume[] = [
     { environment: 'staging', trafficType: 'qa', sessions: qaSessions },
     { environment: 'staging', trafficType: 'internal', sessions: 6 },
-    ...(live ? [{ environment: 'production' as const, trafficType: 'real' as const, sessions: realSessions, aiStress: key === 'aiwarn' }] : []),
+    { environment: 'production', trafficType: 'real', sessions: realSessions, aiStress: key === 'aiwarn',
+      quietDays: key === 'live0' ? 8 : key === 'stale' ? 0.45 : 0 },
   ];
   const events = volumes.flatMap((volume, index) => generateEvents(volume, now, 7 + index * 101 + volume.sessions));
-  const failure = ({ error: { kind: 'SERVER', status: 503 }, timeout: { kind: 'TIMEOUT', status: null }, forbidden: { kind: 'FORBIDDEN', status: 403 }, unauthorized: { kind: 'UNAUTHORIZED', status: 401 } } as const)[key as 'error'];
+  // 서버와 같은 gate 해석. 상황마다 env 설정만 다르다.
+  const gate = analyticsGateFromEnv({
+    EVENT_ANALYTICS_ENABLED: key === 'paused' ? 'false' : 'true',
+    EVENT_ANALYTICS_ALLOWED_TRAFFIC_TYPES: 'qa,internal,beta,real',
+    ...(key === 'misconfigured' ? { EVENT_ANALYTICS_REQUIRED_NOTICE_VERSION: 'VER 1.8 (draft)' } : {}),
+  });
+  const officialDataReady = launched;
+  const failure = FAILURES[key];
   return {
     now,
-    notices: notices(live),
     ...(key.startsWith('qa') ? { initialFilters: QA_FILTERS } : {}),
     ...(failure ? { failure } : {}),
-    ...(key === 'stale' ? { staleMinutes: 42 } : {}),
-    load: query => getAnalyticsSummary(events, query),
+    load: query => {
+      // 서버(loadAnalyticsSummary)처럼: 조회 범위(이전 기간 포함) 안의 이벤트에 production·real 이 있으면 수집 중.
+      const window = analyticsWindow(query);
+      const loaded = events.filter(event => event.environment === query.environment && event.trafficType === query.trafficType
+        && (!query.noticeId || event.noticeId === query.noticeId)
+        && Date.parse(event.occurredAt) >= window.previousFrom && Date.parse(event.occurredAt) < window.to);
+      const hasRealEvents = loaded.some(event => event.environment === 'production' && event.trafficType === 'real');
+      return getAnalyticsSummary(loaded, query, now, analyticsCollectionStatus(gate, officialDataReady, hasRealEvents, now));
+    },
   };
 }
 
@@ -100,8 +117,9 @@ function generateEvents(volume: Volume, now: Date, seed: number): AnalyticsEvent
   const events: AnalyticsEvent[] = [];
   const day = 86_400_000;
   // 현재 30일 + 이전 30일(이전 기간 비교용, 조금 적게)
+  const quiet = volume.quietDays ?? 0;
   const sessions = [
-    ...Array.from({ length: volume.sessions }, () => now.getTime() - random() * 29.5 * day),
+    ...Array.from({ length: volume.sessions }, () => now.getTime() - (quiet + random() * (29.5 - quiet)) * day),
     ...Array.from({ length: Math.round(volume.sessions * 0.8) }, () => now.getTime() - (30 + random() * 30) * day),
   ];
   for (const start of sessions) {
@@ -111,7 +129,7 @@ function generateEvents(volume: Volume, now: Date, seed: number): AnalyticsEvent
     const push = (eventType: AnalyticsEvent['eventType'], extra: Partial<AnalyticsEvent> = {}, noticeId = sessionNotice) => {
       clock += 20_000 + random() * 50_000;
       events.push({ eventId: uuid(random), anonymousSessionId: sessionId, noticeId, noticeVersion: 'VER1.8', eventType,
-        occurredAt: new Date(Math.min(clock, now.getTime() - 1000)).toISOString(), environment: volume.environment, trafficType: volume.trafficType, ...extra });
+        occurredAt: new Date(Math.min(clock, now.getTime() - quiet * day - 1000)).toISOString(), environment: volume.environment, trafficType: volume.trafficType, ...extra });
     };
     push('SESSION_STARTED');
     if (random() < 0.86) {

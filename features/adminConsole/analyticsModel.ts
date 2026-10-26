@@ -48,12 +48,15 @@ const DURATION_ORDER: DurationBucket[] = ['under_1m', '1_to_3m', '3_to_10m', 'ov
 export const ENVIRONMENT_LABEL: Record<AnalyticsEnvironment, string> = { production: 'Production', staging: 'Staging', preview: 'Preview' };
 export const TRAFFIC_LABEL: Record<AnalyticsTrafficType, string> = { real: '실제 운영', beta: '베타', internal: '내부 확인', qa: 'QA' };
 
-export const NOTICE_FILTERS = [
-  { key: 'all', label: '전체 공고' },
-  { key: 'samdo-1', label: '삼도 1지구' },
-  { key: 'samdo-2', label: '삼도 2지구' },
-] as const;
-export type NoticeFilter = typeof NOTICE_FILTERS[number]['key'];
+/** 공고 필터. 공고 이름을 코드에 두지 않는다: 서버 스냅샷의 공고 목록(id·title)으로 만든다. 'all' = 전체. */
+export type NoticeFilter = string;
+export type NoticeOption = { id: string; title: string };
+export const ALL_NOTICES = 'all';
+export function noticeFilterOptions(notices: readonly NoticeOption[]): Array<{ key: NoticeFilter; label: string }> {
+  return [{ key: ALL_NOTICES, label: '전체 공고' }, ...notices.map(notice => ({ key: notice.id, label: notice.title }))];
+}
+export const noticeLabel = (notice: NoticeFilter, notices: readonly NoticeOption[]) =>
+  notice === ALL_NOTICES ? '전체 공고' : notices.find(item => item.id === notice)?.title ?? notice;
 
 /** 운영 화면에 쓰면 안 되는 말. 익명 세션을 사람 수로, 자격 판정을 당첨 예측으로 읽히게 한다. */
 export const BANNED_TERMS = ['사용자 수', '방문자 수', '신청자 수', '이용자 수', '명이 ', '당첨 가능성', '당첨 확률'];
@@ -130,7 +133,7 @@ export function toQuery(filters: AnalyticsFilters, now: Date): AnalyticsQuery | 
   const range = resolveRange(filters, now);
   if (!range.ok) return null;
   return { from: range.from, to: range.to, environment: filters.environment, trafficType: filters.trafficType,
-    ...(filters.notice !== 'all' ? { noticeId: filters.notice } : {}), previousPeriod: true };
+    ...(filters.notice !== ALL_NOTICES ? { noticeId: filters.notice } : {}), previousPeriod: true };
 }
 
 /** 계약의 쿼리 문자열. /admin-api/product-v3?analytics=summary&… */
@@ -152,8 +155,8 @@ export function periodLabel(filters: AnalyticsFilters, now: Date): string {
   return filters.period === 'custom' ? `${range.from} ~ ${range.to} (KST)` : `${PERIOD_LABEL[filters.period]} (${span})`;
 }
 
-export function scopeLabel(filters: AnalyticsFilters, now: Date): string {
-  const notice = NOTICE_FILTERS.find(item => item.key === filters.notice)?.label ?? '전체 공고';
+export function scopeLabel(filters: AnalyticsFilters, now: Date, notices: readonly NoticeOption[] = []): string {
+  const notice = noticeLabel(filters.notice, notices);
   return `${ENVIRONMENT_LABEL[filters.environment]} · ${TRAFFIC_LABEL[filters.trafficType]}(${filters.trafficType}) · ${periodLabel(filters, now)} · ${notice}`;
 }
 
@@ -176,14 +179,17 @@ export const COLLECTION_META: Record<CollectionStateView, { label: string; title
     body: '집계 상태(collectionState)가 응답에 없어요. 서버 버전이 맞는지 확인해 주세요. 개시 여부를 화면에서 추측하지 않아요.' },
 };
 
-export const collectionOf = (summary: AnalyticsSummary | null): AnalyticsCollectionStatus | null => summary?.collection ?? null;
-export const collectionStateOf = (summary: AnalyticsSummary): CollectionStateView => summary.collection?.collectionState ?? 'UNKNOWN';
+/** 전역 집계 상태(필터와 무관). globalCollection 이 기준이고 collection 은 서버의 호환 alias. */
+export const collectionOf = (summary: AnalyticsSummary | null): AnalyticsCollectionStatus | null => summary?.globalCollection ?? summary?.collection ?? null;
+export const collectionStateOf = (summary: AnalyticsSummary): CollectionStateView => collectionOf(summary)?.collectionState ?? 'UNKNOWN';
+/** 현재 조회의 저장소 상태. Production 저장소가 없으면 STORE_UNAVAILABLE(Staging 을 대신 읽지 않는다). */
+export const storeUnavailable = (summary: AnalyticsSummary) => summary.currentQuery?.dataState === 'STORE_UNAVAILABLE';
 
 export type LaunchCheck = { key: 'official' | 'start' | 'events'; label: string; done: boolean; detail: string };
 
 /** 서버 값을 그대로 체크리스트로 보인다. 시작 시각 도래 여부는 서버 집계 시각(generatedAt) 기준. */
 export function launchChecks(summary: AnalyticsSummary): LaunchCheck[] {
-  const collection = summary.collection;
+  const collection = collectionOf(summary);
   if (!collection) return [];
   const reference = summary.generatedAt ?? null;
   const started = reference !== null && Date.parse(reference) >= Date.parse(collection.collectionStartAt);
@@ -203,6 +209,8 @@ export type AnalyticsViewState =
   | { kind: 'WAITING' }
   /** 실제 운영 화면인데 서버가 숫자를 보일 상태가 아니라고 함 */
   | { kind: 'COLLECTION_GATE'; state: CollectionStateView }
+  /** 이 환경의 운영 지표 저장소가 연결되지 않음. 0건이 아니다 */
+  | { kind: 'STORE_UNAVAILABLE'; environment: AnalyticsEnvironment }
   | { kind: 'EMPTY'; operational: boolean; state: CollectionStateView }
   | { kind: 'READY'; operational: boolean; state: CollectionStateView };
 
@@ -217,6 +225,7 @@ export function viewState(filters: AnalyticsFilters, now: Date, summary: Analyti
   const operational = isOperationalView(filters);
   const state = collectionStateOf(summary);
   if (filters.trafficType === 'real' && !COLLECTION_META[state].showNumbers) return { kind: 'COLLECTION_GATE', state };
+  if (storeUnavailable(summary)) return { kind: 'STORE_UNAVAILABLE', environment: filters.environment };
   if (isEmptySummary(summary)) return { kind: 'EMPTY', operational, state };
   return { kind: 'READY', operational, state };
 }
@@ -245,14 +254,16 @@ export type Freshness = {
  */
 export function freshness(summary: AnalyticsSummary, filters: AnalyticsFilters, now: Date): Freshness {
   const generated = summary.generatedAt ? `${kstTime(summary.generatedAt)} (${ago(summary.generatedAt, now)})` : null;
-  if (summary.lastEventAt === undefined) return { generated, lastEvent: null, noEvents: false, missing: !summary.generatedAt };
-  if (summary.lastEventAt === null) return { generated, lastEvent: null, noEvents: true, missing: !summary.generatedAt };
+  // 현재 조회 기준 마지막 이벤트(currentQuery). 없으면 같은 의미의 최상위 lastEventAt.
+  const lastEventAt = summary.currentQuery ? summary.currentQuery.lastEventAt : summary.lastEventAt;
+  if (lastEventAt === undefined) return { generated, lastEvent: null, noEvents: false, missing: !summary.generatedAt };
+  if (lastEventAt === null) return { generated, lastEvent: null, noEvents: true, missing: !summary.generatedAt };
   const range = resolveRange(filters, now);
   const includesToday = range.ok && range.to === kstDate(now.getTime());
   const reference = summary.generatedAt ? Date.parse(summary.generatedAt) : now.getTime();
   const stale = includesToday && isOperationalView(filters) && collectionStateOf(summary) === 'COLLECTING'
-    && reference - Date.parse(summary.lastEventAt) >= LAST_EVENT_STALE_HOURS * 3_600_000;
-  return { generated, lastEvent: { text: `${kstTime(summary.lastEventAt)} (${ago(summary.lastEventAt, now)})`, stale }, noEvents: false, missing: !summary.generatedAt };
+    && reference - Date.parse(lastEventAt) >= LAST_EVENT_STALE_HOURS * 3_600_000;
+  return { generated, lastEvent: { text: `${kstTime(lastEventAt)} (${ago(lastEventAt, now)})`, stale }, noEvents: false, missing: !summary.generatedAt };
 }
 
 /* ── 오류(안정 코드) ────────────────────────────────────────────────────── */

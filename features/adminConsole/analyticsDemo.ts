@@ -1,11 +1,13 @@
 import type { AnalyticsEnvironment, AnalyticsEvent, AnalyticsQuery, AnalyticsSummaryV2, AnalyticsTrafficType, UnresolvedCategory } from '../productV3/analytics/contract.ts';
-import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsWindow, getAnalyticsSummary } from '../productV3/analytics/core.ts';
-import { QA_FILTERS, type AnalyticsFilters } from './analyticsModel.ts';
+import { analyticsGateFromEnv, analyticsWindow, getAnalyticsSummary, globalAnalyticsCollectionStatus } from '../productV3/analytics/core.ts';
+import { QA_FILTERS, type AnalyticsFilters, type NoticeOption } from './analyticsModel.ts';
 
 /**
  * 운영 지표 화면 점검용 예시. Demo 빌드 + ?demo=1&analytics=… 에서만 열린다.
  * 요약 숫자를 손으로 적지 않는다. 계약 모양의 가짜 이벤트를 만들고 Codex 의 getAnalyticsSummary(계약 v2)로 집계한다.
- * collectionState 도 Codex 의 analyticsCollectionStatus 로 만든다(gate 설정만 상황마다 다르게).
+ * 전역 집계 상태도 Codex 의 globalAnalyticsCollectionStatus 로 만든다(gate 설정만 상황마다 다르게).
+ * 개시 전 상황은 실제 서버와 같다: Production 저장소 미연결 → production 조회는 STORE_UNAVAILABLE.
+ * 개시 후 상황은 저장소가 연결된 미래를 가정한 예시다.
  * 예시 이벤트에는 사람 정보·답변·대화가 없다(계약에 그런 필드가 없다).
  */
 export type AnalyticsDemoKey = 'prelaunch' | 'ready' | 'live' | 'live0' | 'live500' | 'paused' | 'misconfigured' | 'stale' | 'aiwarn'
@@ -22,6 +24,13 @@ export const ANALYTICS_DEMO_LABEL: Record<AnalyticsDemoKey, string> = {
 };
 
 export type AnalyticsDemoFailure = { status: number | null; code: string | null; transport?: 'TIMEOUT' | 'NETWORK' };
+/** 예시 화면의 공고 목록(실제 화면은 서버 스냅샷의 공고 목록을 쓴다). */
+export const ANALYTICS_DEMO_NOTICES: NoticeOption[] = [
+  { id: 'demo-notice-a', title: '[예시] 공고 A' },
+  { id: 'demo-notice-b', title: '[예시] 공고 B' },
+];
+const NOTICE_IDS = ANALYTICS_DEMO_NOTICES.map(notice => notice.id);
+
 export type AnalyticsDemo = {
   now: Date;
   initialFilters?: Partial<AnalyticsFilters>;
@@ -70,13 +79,16 @@ export function analyticsDemo(key: AnalyticsDemoKey): AnalyticsDemo {
     ...(key.startsWith('qa') ? { initialFilters: QA_FILTERS } : {}),
     ...(failure ? { failure } : {}),
     load: query => {
-      // 서버(loadAnalyticsSummary)처럼: 조회 범위(이전 기간 포함) 안의 이벤트에 production·real 이 있으면 수집 중.
+      // 전역 상태는 필터와 무관하다(서버 loadAnalyticsGlobalStatus 와 같은 원칙).
+      const productionStoreReady = launched;
+      const hasRealEvents = events.some(event => event.environment === 'production' && event.trafficType === 'real');
+      const global = globalAnalyticsCollectionStatus(gate, officialDataReady, productionStoreReady, hasRealEvents, now);
+      if (query.environment === 'production' && !productionStoreReady) return getAnalyticsSummary([], query, now, global, 'STORE_UNAVAILABLE');
       const window = analyticsWindow(query);
       const loaded = events.filter(event => event.environment === query.environment && event.trafficType === query.trafficType
         && (!query.noticeId || event.noticeId === query.noticeId)
         && Date.parse(event.occurredAt) >= window.previousFrom && Date.parse(event.occurredAt) < window.to);
-      const hasRealEvents = loaded.some(event => event.environment === 'production' && event.trafficType === 'real');
-      return getAnalyticsSummary(loaded, query, now, analyticsCollectionStatus(gate, officialDataReady, hasRealEvents, now));
+      return getAnalyticsSummary(loaded, query, now, global);
     },
   };
 }
@@ -124,7 +136,7 @@ function generateEvents(volume: Volume, now: Date, seed: number): AnalyticsEvent
   ];
   for (const start of sessions) {
     const sessionId = uuid(random);
-    const sessionNotice = random() < 0.55 ? 'samdo-1' : 'samdo-2';
+    const sessionNotice = random() < 0.55 ? NOTICE_IDS[0] : NOTICE_IDS[1];
     let clock = start;
     const push = (eventType: AnalyticsEvent['eventType'], extra: Partial<AnalyticsEvent> = {}, noticeId = sessionNotice) => {
       clock += 20_000 + random() * 50_000;
@@ -133,9 +145,9 @@ function generateEvents(volume: Volume, now: Date, seed: number): AnalyticsEvent
     };
     push('SESSION_STARTED');
     if (random() < 0.86) {
-      for (const noticeId of ['samdo-1', 'samdo-2']) push('ASSESSMENT_STARTED', {}, noticeId);
+      for (const noticeId of NOTICE_IDS) push('ASSESSMENT_STARTED', {}, noticeId);
       if (random() < 0.82) {
-        for (const noticeId of ['samdo-1', 'samdo-2']) for (const supplyType of SUPPLIES) {
+        for (const noticeId of NOTICE_IDS) for (const supplyType of SUPPLIES) {
           const status = pick(random, [['COMPLETE', 34], ['NEEDS_USER_INPUT', 28], ['INELIGIBLE', 33], ['UNAVAILABLE', 5]] as const);
           push('ASSESSMENT_COMPLETED', { supplyType, assessmentStatus: status }, noticeId);
           if (status === 'NEEDS_USER_INPUT') for (let count = random() < 0.4 ? 2 : 1; count > 0; count -= 1)

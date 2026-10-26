@@ -9,12 +9,12 @@ import { FilterGroup, LevelBadge, LoadingView } from '../../../features/adminCon
 import { ADMIN_LOGIN_ROUTE } from '../../../features/adminPortal/navigation';
 import { useAuthStore } from '../../../features/auth/useAuthStore';
 import { AnalyticsLoadError, connectedAnalytics } from '../../../features/adminConsole/source';
-import { analyticsDemo, ANALYTICS_DEMO_LABEL, parseAnalyticsDemo } from '../../../features/adminConsole/analyticsDemo';
+import { analyticsDemo, ANALYTICS_DEMO_LABEL, ANALYTICS_DEMO_NOTICES, parseAnalyticsDemo } from '../../../features/adminConsole/analyticsDemo';
 import {
   AI_MODE_META, ANALYTICS_ERROR_COPY, analyticsErrorCode, buildAiQuality, buildFunnel, buildKpis, COLLECTION_META, collectionStateOf,
-  DEFAULT_FILTERS, ENVIRONMENT_LABEL, freshness, isOperationalView, kstStamp, launchChecks, NOTICE_FILTERS, num, PERIOD_LABEL, pct,
-  QA_FILTERS, resolveRange, scopeLabel, STATUS_META, statusRows, supplyStatusRows, toQuery, TRAFFIC_LABEL, unresolvedRows, viewState,
-  type AnalyticsErrorCode, type AnalyticsFilters, type CollectionStateView, type Delta, type FunnelStep, type KpiTile, type PeriodKey, type ShareRow,
+  DEFAULT_FILTERS, ENVIRONMENT_LABEL, freshness, isOperationalView, kstStamp, launchChecks, noticeFilterOptions, noticeLabel, num, PERIOD_LABEL, pct,
+  collectionOf, QA_FILTERS, resolveRange, scopeLabel, STATUS_META, statusRows, supplyStatusRows, toQuery, TRAFFIC_LABEL, unresolvedRows, viewState,
+  type AnalyticsErrorCode, type AnalyticsFilters, type NoticeOption, type CollectionStateView, type Delta, type FunnelStep, type KpiTile, type PeriodKey, type ShareRow,
 } from '../../../features/adminConsole/analyticsModel';
 import type { AnalyticsSummary } from '../../../features/productV3/analytics/contract';
 import type { ConsoleSnapshot } from '../../../features/adminConsole/contract';
@@ -51,7 +51,7 @@ type Load =
   | { kind: 'READY'; summary: AnalyticsSummary }
   | { kind: 'ERROR'; code: AnalyticsErrorCode; status: number | null };
 
-function Analytics({ mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
+function Analytics({ snapshot, mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
   const params = useLocalSearchParams<{ analytics?: string }>();
   const consoleCtx = useConsole();
   const router = useRouter();
@@ -59,6 +59,9 @@ function Analytics({ mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
   const demoKey = parseAnalyticsDemo(params.analytics);
   const demo = useMemo(() => (mode === 'DEMO' ? analyticsDemo(demoKey) : null), [mode, demoKey]);
   const now = demo ? demo.now : consoleCtx.now;
+  // 공고 필터 목록은 서버가 준 공고(id·제목)로 만든다. 예시 화면은 fixture 목록.
+  const notices: NoticeOption[] = useMemo(() => (demo ? ANALYTICS_DEMO_NOTICES
+    : snapshot.notices.map(notice => ({ id: notice.id, title: notice.title }))), [demo, snapshot.notices]);
   const [filters, setFilters] = useState<AnalyticsFilters>(() => ({ ...DEFAULT_FILTERS, ...demo?.initialFilters }));
   useEffect(() => { setFilters({ ...DEFAULT_FILTERS, ...demo?.initialFilters }); }, [demo]);
   const [nonce, setNonce] = useState(0);
@@ -101,13 +104,21 @@ function Analytics({ mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
       {!operational ? <DataKindBanner filters={filters} summary={summary} onOperational={() => set({ environment: 'production', trafficType: 'real' })} /> : null}
       {operational && summary && collectionStateOf(summary) === 'PAUSED' ? <CollectionBanner state="PAUSED" /> : null}
 
-      <ScopeBar filters={filters} now={now} summary={summary} onChange={set} />
+      <ScopeBar filters={filters} now={now} summary={summary} notices={notices} onChange={set} />
 
       {state.kind === 'INVALID_RANGE' ? <EmptyState title="기간을 다시 확인해 주세요" body={state.error} /> : null}
       {state.kind === 'WAITING' && (load.kind === 'LOADING' || load.kind === 'IDLE') ? <LoadingView label="운영 지표를 불러오는 중이에요" /> : null}
       {state.kind === 'WAITING' && load.kind === 'ERROR'
         ? <AnalyticsError code={load.code} status={load.status} onRetry={() => setNonce(value => value + 1)} onLogin={() => router.replace(ADMIN_LOGIN_ROUTE as Href)} />
         : null}
+      {state.kind === 'STORE_UNAVAILABLE' ? (
+        <View testID="analytics-store-unavailable" style={styles.hero}>
+          <View style={styles.heroIcon}><MaterialIcons name="storage" size={28} color={colors.primary} /></View>
+          <Text accessibilityRole="header" style={styles.heroTitle}>{ENVIRONMENT_LABEL[state.environment]} 운영 지표 저장소가 아직 연결되지 않았어요</Text>
+          <Text style={styles.heroBody}>0건이 아니라 읽을 저장소가 없는 상태예요. Staging 기록을 {ENVIRONMENT_LABEL[state.environment]} 숫자로 대신 보여 주지 않아요.</Text>
+          <View style={styles.heroActions}><AdminButton label="QA 데이터 보기" tone="quiet" icon="science" onPress={() => set(QA_FILTERS)} /></View>
+        </View>
+      ) : null}
       {state.kind === 'COLLECTION_GATE' && summary ? <CollectionHero state={state.state} summary={summary} onQa={() => set(QA_FILTERS)} /> : null}
       {state.kind === 'EMPTY' ? (
         <View testID="analytics-empty">
@@ -117,7 +128,7 @@ function Analytics({ mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
           />
         </View>
       ) : null}
-      {state.kind === 'READY' && summary ? <Report summary={summary} wide={wide} width={width} filters={filters} operational={state.operational} /> : null}
+      {state.kind === 'READY' && summary ? <Report summary={summary} wide={wide} width={width} filters={filters} notices={notices} operational={state.operational} /> : null}
     </View>
   );
 }
@@ -126,7 +137,7 @@ function Analytics({ mode }: { snapshot: ConsoleSnapshot; mode: ConsoleMode }) {
 
 /** QA·검증 기록: 어디서도 운영 실적으로 읽히지 않게. 공식 데이터 준비 여부는 서버 값만. */
 function DataKindBanner({ filters, summary, onOperational }: { filters: AnalyticsFilters; summary: AnalyticsSummary | null; onOperational: () => void }) {
-  const collection = summary?.collection ?? null;
+  const collection = collectionOf(summary);
   return (
     <View testID="analytics-qa-banner" accessibilityRole="alert" style={[styles.banner, { backgroundColor: tint.amber.bg }]}>
       <MaterialIcons name="science" size={20} color={tint.amber.fg} />
@@ -139,7 +150,7 @@ function DataKindBanner({ filters, summary, onOperational }: { filters: Analytic
             <Text style={[styles.bannerBody, { color: tint.amber.fg }]}>현재 운영 집계가 시작되지 않았습니다. 공식 {collection.requiredNoticeVersion} 활성화 이후 real traffic이 집계됩니다 ({kstStamp(collection.collectionStartAt)} 예정).</Text>
           </View>
         ) : collection ? (
-          <Text style={[styles.bannerBody, { color: tint.amber.fg }]}>운영(real) 집계 상태는 Production · 실제 운영 화면에서 확인해 주세요.</Text>
+          <Text style={[styles.bannerBody, { color: tint.amber.fg }]}>운영(real) 집계 상태: {COLLECTION_META[collection.collectionState].label} · 이 화면의 숫자와는 별개예요.</Text>
         ) : null}
       </View>
       <AdminButton label="운영 데이터 보기" tone="quiet" icon="swap-horiz" onPress={onOperational} />
@@ -173,7 +184,7 @@ function CollectionHero({ state, summary, onQa }: { state: CollectionStateView; 
         <Text accessibilityRole="header" style={styles.heroTitle}>{meta.title}</Text>
       </View>
       <Text style={styles.heroBody}>{meta.body}</Text>
-      {summary.collection ? <Text style={styles.raw}>서버 상태 {summary.collection.collectionState}</Text> : null}
+      {collectionOf(summary) ? <Text style={styles.raw}>서버 전역 상태 {collectionOf(summary)!.collectionState}{storeUnavailableNote(summary)}</Text> : null}
       {checks.length ? (
         <View testID="analytics-launch-checks" style={styles.checks}>
           {checks.map(check => (
@@ -195,8 +206,8 @@ function CollectionHero({ state, summary, onQa }: { state: CollectionStateView; 
 /* ── 보고 있는 데이터 · 신선도 · 필터 ────────────────────────────────────── */
 
 /** 지금 보는 범위는 늘 한 줄. 집계 생성 시각과 마지막 이벤트 시각은 따로 적는다. 새로고침은 콘솔 공통 버튼. */
-function ScopeBar({ filters, now, summary, onChange }: {
-  filters: AnalyticsFilters; now: Date; summary: AnalyticsSummary | null; onChange: (patch: Partial<AnalyticsFilters>) => void;
+function ScopeBar({ filters, now, summary, notices, onChange }: {
+  filters: AnalyticsFilters; now: Date; summary: AnalyticsSummary | null; notices: NoticeOption[]; onChange: (patch: Partial<AnalyticsFilters>) => void;
 }) {
   const [open, setOpen] = useState(false);
   const fresh = summary ? freshness(summary, filters, now) : null;
@@ -205,7 +216,7 @@ function ScopeBar({ filters, now, summary, onChange }: {
       <View style={styles.scopeHead}>
         <View style={styles.scopeCopy}>
           <Text style={styles.scopeLabel}>보고 있는 데이터</Text>
-          <Text testID="analytics-scope-label" style={styles.scopeValue}>{scopeLabel(filters, now)}</Text>
+          <Text testID="analytics-scope-label" style={styles.scopeValue}>{scopeLabel(filters, now, notices)}</Text>
           {fresh ? (
             <View testID="analytics-freshness" style={styles.freshList}>
               <View style={styles.stampRow}>
@@ -227,12 +238,12 @@ function ScopeBar({ filters, now, summary, onChange }: {
           <AdminButton label={open ? '조건 닫기' : '조건 바꾸기'} tone="quiet" icon={open ? 'expand-less' : 'tune'} onPress={() => setOpen(!open)} />
         </View>
       </View>
-      {open ? <FilterPanel filters={filters} now={now} onChange={onChange} /> : null}
+      {open ? <FilterPanel filters={filters} now={now} notices={notices} onChange={onChange} /> : null}
     </View>
   );
 }
 
-function FilterPanel({ filters, now, onChange }: { filters: AnalyticsFilters; now: Date; onChange: (patch: Partial<AnalyticsFilters>) => void }) {
+function FilterPanel({ filters, now, notices, onChange }: { filters: AnalyticsFilters; now: Date; notices: NoticeOption[]; onChange: (patch: Partial<AnalyticsFilters>) => void }) {
   const [from, setFrom] = useState(filters.customFrom);
   const [to, setTo] = useState(filters.customTo);
   const range = resolveRange({ ...filters, period: 'custom', customFrom: from, customTo: to }, now);
@@ -257,7 +268,7 @@ function FilterPanel({ filters, now, onChange }: { filters: AnalyticsFilters; no
         tabs={(['real', 'beta', 'internal', 'qa'] as const).map(key => ({ key, label: `${TRAFFIC_LABEL[key]} (${key})` }))} />
       <FilterGroup<AnalyticsFilters['notice']> label="공고" testID="analytics-notice" active={filters.notice}
         onChange={notice => onChange({ notice })}
-        tabs={NOTICE_FILTERS.map(item => ({ key: item.key, label: item.label }))} />
+        tabs={noticeFilterOptions(notices)} />
       <Text style={styles.caption}>기간은 한국 시간(KST) 날짜 기준이에요. 시작일 00:00부터 종료일 24:00 전까지 집계돼요. 운영 기본값은 Production · 실제 운영(real)이에요.</Text>
     </View>
   );
@@ -294,7 +305,7 @@ function AnalyticsError({ code, status, onRetry, onLogin }: { code: AnalyticsErr
 
 /* ── 보고서 본문 ────────────────────────────────────────────────────────── */
 
-function Report({ summary, wide, width, filters, operational }: { summary: AnalyticsSummary; wide: boolean; width: number; filters: AnalyticsFilters; operational: boolean }) {
+function Report({ summary, wide, width, filters, notices, operational }: { summary: AnalyticsSummary; wide: boolean; width: number; filters: AnalyticsFilters; notices: NoticeOption[]; operational: boolean }) {
   const kpis = buildKpis(summary);
   const funnel = buildFunnel(summary);
   const statuses = statusRows(summary);
@@ -312,7 +323,6 @@ function Report({ summary, wide, width, filters, operational }: { summary: Analy
       <View style={wide ? styles.col : null}>{right}</View>
     </View>
   );
-  const noticeLabel = NOTICE_FILTERS.find(item => item.key === filters.notice)?.label ?? '전체 공고';
   const linear = funnel.steps.filter(step => !step.branch);
   const branches = funnel.steps.filter(step => step.branch);
   return (
@@ -352,7 +362,7 @@ function Report({ summary, wide, width, filters, operational }: { summary: Analy
         </SectionCard>,
       )}
 
-      <SectionCard title="공급유형별 판정" description={`${tag}${noticeLabel} · 공급유형마다 판정 결과를 나눠 봐요. 자격 판정 결과이며 당첨과는 관계없어요.`}>
+      <SectionCard title="공급유형별 판정" description={`${tag}${noticeLabel(filters.notice, notices)} · 공급유형마다 판정 결과를 나눠 봐요. 자격 판정 결과이며 당첨과는 관계없어요.`}>
         {supplies ? (
           <View testID="analytics-supply" style={styles.grid}>
             {supplies.map(row => (
@@ -454,6 +464,8 @@ function Report({ summary, wide, width, filters, operational }: { summary: Analy
     </View>
   );
 }
+
+const storeUnavailableNote = (summary: AnalyticsSummary) => (summary.currentQuery?.dataState === 'STORE_UNAVAILABLE' ? ' · Production 저장소 미연결' : '');
 
 const DELTA_ICON: Record<Delta['direction'], IconName> = { up: 'north-east', down: 'south-east', flat: 'east', none: 'remove' };
 

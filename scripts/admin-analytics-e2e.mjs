@@ -138,8 +138,11 @@ for (const vp of VIEWPORTS) {
     await tid(`analytics-period-${key}`).click();
     ok(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth) <= 0, `${vp.name} period ${key}`);
   }
-  await tid('analytics-notice-samdo-1').click();
-  ok((await tid('analytics-scope-label').innerText()).includes('삼도 1지구'), `${vp.name} notice filter shown in scope`);
+  // 공고 이름은 쓰지 않는다: 공고 필터의 두 번째 칩(첫 공고)을 고르고 그 이름이 범위에 보이는지 본다.
+  const noticeTab = page.locator('[data-testid^="analytics-notice-"][role="tab"]').filter({ visible: true }).nth(1);
+  const noticeName = (await noticeTab.innerText()).trim();
+  await noticeTab.click();
+  ok((await tid('analytics-scope-label').innerText()).includes(noticeName), `${vp.name} notice filter shown in scope`);
   await tid('analytics-period-custom').click();
   await tid('analytics-from').fill('2026-10-30');
   await tid('analytics-to').fill('2026-10-01');
@@ -160,6 +163,14 @@ for (const vp of VIEWPORTS) {
   await tid('console-nav-analytics').click();
   await tid('console-analytics').waitFor();
   ok(true, `${vp.name} nav opens analytics`);
+
+  // Production 저장소 미연결: production·qa 는 0건이 아니라 '저장소 미연결'
+  await page.goto(`${BASE}/admin/console/analytics?demo=1&analytics=prelaunch`, { waitUntil: 'networkidle' });
+  await tid('analytics-collection-pre_launch').waitFor();
+  await page.getByRole('button', { name: '조건 바꾸기' }).filter({ visible: true }).click();
+  await tid('analytics-traffic-qa').click();
+  await tid('analytics-store-unavailable').waitFor();
+  ok(await tid('analytics-kpis').count() === 0 && await tid('analytics-qa-banner').count() === 1, `${vp.name} production store unavailable is not shown as numbers`);
 
   // 예시 격리: ?demo=1 없이는 예시 숫자가 없다
   await page.goto(`${BASE}/admin/console/analytics`, { waitUntil: 'networkidle' });

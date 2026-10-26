@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { analyticsCollectionStatus, analyticsGateFromEnv, analyticsWindow, parseAnalyticsQuery } from '../productV3/analytics/core.ts';
 import type { AnalyticsCollectionState, AnalyticsSummary } from '../productV3/analytics/contract.ts';
 import { handleProductV3ConsoleRequest } from './server/consoleApi.ts';
-import { analyticsDemo, ANALYTICS_DEMO_KEYS } from './analyticsDemo.ts';
+import { analyticsDemo, ANALYTICS_DEMO_KEYS, ANALYTICS_DEMO_NOTICES } from './analyticsDemo.ts';
 import {
   ANALYTICS_ERROR_CODES, ANALYTICS_ERROR_COPY, analyticsErrorCode, BANNED_TERMS, buildAiQuality, buildFunnel, buildKpis, COLLECTION_META,
   countDelta, DEFAULT_FILTERS, freshness, kstTime, launchChecks, periodLabel, queryString, rateDelta, resolveRange, supplyStatusRows,
@@ -33,7 +33,7 @@ test('UI queries pass the Codex v2 parser and the API handler unchanged; periods
   // KST 자정 직전·직후
   assert.equal((resolveRange(filters({ period: 'today' }), new Date('2026-10-26T14:59:00Z')) as { from: string }).from, '2026-10-26');
   assert.equal((resolveRange(filters({ period: 'today' }), new Date('2026-10-26T15:00:00Z')) as { from: string }).from, '2026-10-27');
-  for (const patch of [{}, { period: 'today' as const, notice: 'samdo-2' as const }, { environment: 'preview' as const, trafficType: 'qa' as const }]) {
+  for (const patch of [{}, { period: 'today' as const, notice: ANALYTICS_DEMO_NOTICES[1].id }, { environment: 'preview' as const, trafficType: 'qa' as const }]) {
     const query = toQuery(filters(patch), NOW)!;
     const raw = Object.fromEntries(new URLSearchParams(queryString(query)));
     assert.deepEqual(parseAnalyticsQuery(raw), query, 'UI query must round-trip through Codex parseAnalyticsQuery');
@@ -210,4 +210,21 @@ test('operator copy never calls sessions people, never says UTC, never prints ra
     assert.ok(!source.includes('launchState('), `${file} still guesses launch locally`);
     if (file.endsWith('.tsx')) assert.ok(!/JSON\.stringify\([^)]*summary/.test(source), `${file} renders raw summary JSON`);
   }
+});
+
+test('43d56b0 integration: global state is filter-independent and a missing Production store is never shown as 0', () => {
+  const prelaunch = analyticsDemo('prelaunch');
+  const production = prelaunch.load(toQuery(filters(), prelaunch.now)!);
+  const staging = prelaunch.load(toQuery(filters({ environment: 'staging', trafficType: 'qa' }), prelaunch.now)!);
+  assert.equal(production.currentQuery.dataState, 'STORE_UNAVAILABLE');
+  assert.equal(production.globalCollection.productionStoreReady, false);
+  assert.deepEqual(production.globalCollection, staging.globalCollection, 'filter must not change global state');
+  assert.equal(viewState(filters(), prelaunch.now, production).kind, 'COLLECTION_GATE');
+  assert.deepEqual(viewState(filters({ trafficType: 'qa' }), prelaunch.now, prelaunch.load(toQuery(filters({ trafficType: 'qa' }), prelaunch.now)!)),
+    { kind: 'STORE_UNAVAILABLE', environment: 'production' });
+  // globalCollection 이 collection(alias)보다 우선
+  assert.equal(viewState(filters(), LIVE, summary({ sessionsStarted: 3, collection: collection('COLLECTING'),
+    globalCollection: { ...collection('PRE_LAUNCH', false), targetEnvironment: 'production', allowedTrafficTypes: ['qa'], productionStoreReady: false } })).kind, 'COLLECTION_GATE');
+  // 현재 조회의 lastEventAt 을 쓴다
+  assert.equal(freshness(summary({ lastEventAt: null, currentQuery: { environment: 'production', trafficType: 'real', dataState: 'NO_EVENTS', lastEventAt: null } }), filters(), LIVE).noEvents, true);
 });

@@ -22,6 +22,12 @@
     },
     "api/event-api/analytics.ts": {
       "includeFiles": "{features/{productV3/{analytics/**,admin/stagingTarget.ts},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+    },
+    "api/event-api/consultation-contacts.ts": {
+      "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/stagingTarget.ts,scripts/event-result-session-store.mjs}"
+    },
+    "api/admin-api/consultation-contacts.ts": {
+      "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/{auth,stagingTarget}.ts,scripts/event-result-session-store.mjs}"
     }
   },
   "headers": [
@@ -67,6 +73,14 @@
     {
       "source": "/event-api/analytics",
       "destination": "/api/event-api/analytics"
+    },
+    {
+      "source": "/event-api/consultation-contacts",
+      "destination": "/api/event-api/consultation-contacts"
+    },
+    {
+      "source": "/admin-api/consultation-contacts",
+      "destination": "/api/admin-api/consultation-contacts"
     },
     {
       "source": "/discovery/:id",

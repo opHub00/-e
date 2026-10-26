@@ -44,6 +44,18 @@ test('persistent session POST/GET contract uses opaque token and six-hour TTL', 
   if (read.status === 'ok') assert.deepEqual(read.summary, summary);
 });
 
+test('contact linkage metadata stays server-side while preserving the anonymous session', async () => {
+  const repository = new MemoryRepository();
+  const token = 'c'.repeat(64);
+  const id = '26d97871-03b6-4074-8010-6a3fcb2fa44a';
+  const service = new PersistentResultSessionService(repository, { now: () => Date.parse('2026-10-26T10:00:00Z'), generateToken: () => token });
+  await service.create(summary, id);
+  assert.equal(repository.records.get(token)?.analyticsSessionId, id);
+  assert.equal(repository.records.get(token)?.createdAt, '2026-10-26T10:00:00.000Z');
+  assert.equal((await service.read(token)).status, 'ok');
+  await assert.rejects(() => service.create(summary, 'not-a-uuid'), /INVALID_ANALYTICS_SESSION_ID/);
+});
+
 test('invalid tokens are rejected without backend lookup', async () => {
   const repository = new MemoryRepository();
   const result = await new PersistentResultSessionService(repository).read('raw-profile-data');

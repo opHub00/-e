@@ -58,7 +58,10 @@ export class StagingSupabaseResultSessionRepository implements ResultSessionRepo
     if (serialized.length > 50_000) return { summary: null as never, expiresAt: '' };
     try {
       const value = JSON.parse(serialized) as Partial<StoredResultSession>;
-      return { summary: value.summary as StoredResultSession['summary'], expiresAt: value.expiresAt ?? '' };
+      return { summary: value.summary as StoredResultSession['summary'], expiresAt: value.expiresAt ?? '',
+        ...(typeof value.analyticsSessionId === 'string' ? { analyticsSessionId: value.analyticsSessionId } : {}),
+        ...(typeof value.createdAt === 'string' ? { createdAt: value.createdAt } : {}),
+        ...(typeof value.contactClaimHash === 'string' ? { contactClaimHash: value.contactClaimHash } : {}) };
     } catch {
       return { summary: null as never, expiresAt: '' };
     }

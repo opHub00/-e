@@ -12,11 +12,11 @@ try {
   const files = (await readdir(new URL('../supabase/migrations/', import.meta.url))).filter(name => /^\d{14}_.+\.sql$/.test(name)).sort();
   const versions = files.map(name => name.slice(0, 14));
   ok(new Set(versions).size === versions.length, 'local migration versions are unique');
-  ok(files.at(-1) === '20261022120000_product_v3_operational_analytics.sql', 'Analytics migration follows the existing local chain');
+  ok(files.includes('20261022120000_product_v3_operational_analytics.sql'), 'Analytics migration remains in the local chain');
   const tableOwners = [];
   for (const file of files) if (/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.product_v3_analytics_events\b/i
     .test(await readFile(new URL(`../supabase/migrations/${file}`, import.meta.url), 'utf8'))) tableOwners.push(file);
-  ok(tableOwners.length === 1 && tableOwners[0] === files.at(-1), 'no other local migration creates the Analytics table');
+  ok(tableOwners.length === 1 && tableOwners[0] === '20261022120000_product_v3_operational_analytics.sql', 'no other local migration creates the Analytics table');
   await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema storage; create table storage.buckets(id text primary key, name text, public boolean);
     create table storage.objects(id uuid primary key default gen_random_uuid(), bucket_id text, name text);

@@ -40,8 +40,18 @@ test('staging QR stores a token hash only, with private server credentials and s
     now: () => 1_000, generateToken: () => token,
   });
   assert.equal(stagingQrObjectPath(token).includes(token), false);
-  assert.equal((await service.create(summary)).expiresAt, new Date(1_000 + 21_600_000).toISOString());
-  assert.equal((await service.read(token)).status, 'ok');
+  const created = await service.create(summary, '26d97871-03b6-4074-8010-6a3fcb2fa44a');
+  assert.equal(created.expiresAt, new Date(1_000 + 21_600_000).toISOString());
+  assert.equal(created.contactClaim.length, 64);
+  assert.ok(!stagingQrObjectPath(token).includes(created.contactClaim));
+  const linked = await service.read(token);
+  assert.equal(linked.status, 'ok');
+  if (linked.status === 'ok') {
+    assert.equal(linked.analyticsSessionId, '26d97871-03b6-4074-8010-6a3fcb2fa44a');
+    assert.equal(linked.createdAt, new Date(1_000).toISOString());
+    assert.equal(linked.contactClaimHash?.length, 64);
+    assert.notEqual(linked.contactClaimHash, created.contactClaim);
+  }
   await service.delete(token);
   assert.equal((await service.read(token)).status, 'missing');
   assert.equal(objects.size, 0);

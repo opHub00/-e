@@ -1,5 +1,5 @@
 import type { ConsoleSnapshot } from '../contract.ts';
-import { resolveProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
+export { authorizeProductV3Admin } from '../../productV3/admin/auth.ts';
 import { pageConsoleSnapshot, parseConsolePageQuery } from './pagination.ts';
 import { parseMetricWindowQuery, type MetricWindowQuery } from './metrics.ts';
 import { parseAnalyticsQuery } from '../../productV3/analytics/core.ts';
@@ -62,19 +62,4 @@ export async function handleProductV3ConsoleRequest(request: Request, dependenci
     }
     return { status: 503, body: { error: 'ADMIN_STAGING_DATA_UNAVAILABLE' } };
   }
-}
-
-/** Existing Supabase review-access RPC is the authority, using the caller's JWT. */
-export async function authorizeProductV3Admin(token: string, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<AuthResult> {
-  const target = resolveProductV3StagingTarget(env, false);
-  const response = await fetcher(new URL('/rest/v1/rpc/get_assessment_review_access', target.url), {
-    method: 'POST', headers: { apikey: target.anonKey, authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: '{}',
-    signal: AbortSignal.timeout(6000),
-  });
-  if (response.status === 401) return 'UNAUTHENTICATED';
-  if (response.status === 403) return null;
-  if (!response.ok) throw new Error('ADMIN_AUTH_UNAVAILABLE');
-  const data: unknown = await response.json();
-  const role = data && typeof data === 'object' ? (data as { role?: unknown }).role : null;
-  return role === 'admin' || role === 'reviewer' ? role : null;
 }

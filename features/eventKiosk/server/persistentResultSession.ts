@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import type { ResultSummary } from '../summary.ts';
 import {
   isOpaqueResultToken,
@@ -9,6 +9,10 @@ import {
 export type StoredResultSession = {
   summary: ResultSummary;
   expiresAt: string;
+  /** Server-side linkage only; never included in QR URL or public GET response. */
+  analyticsSessionId?: string;
+  createdAt?: string;
+  contactClaimHash?: string;
 };
 
 export interface ResultSessionRepository {
@@ -18,7 +22,7 @@ export interface ResultSessionRepository {
 }
 
 export type PersistentSessionResult =
-  | { status: 'ok'; summary: ResultSummary; expiresAt: string }
+  | { status: 'ok'; summary: ResultSummary; expiresAt: string; analyticsSessionId?: string; createdAt?: string; contactClaimHash?: string }
   | { status: 'invalid' | 'missing' | 'expired' };
 
 export class PersistentResultSessionService {
@@ -41,15 +45,21 @@ export class PersistentResultSessionService {
     }
   }
 
-  async create(summary: unknown) {
+  async create(summary: unknown, analyticsSessionId?: string) {
     if (!isValidResultSummary(summary)) throw new Error('INVALID_SUMMARY');
+    if (analyticsSessionId !== undefined && (typeof analyticsSessionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(analyticsSessionId)))
+      throw new Error('INVALID_ANALYTICS_SESSION_ID');
     const expiresAt = new Date(this.#now() + this.#ttlMs).toISOString();
+    const createdAt = new Date(this.#now()).toISOString();
+    const contactClaim = randomBytes(32).toString('hex');
+    const contactClaimHash = createHash('sha256').update(contactClaim).digest('hex');
     const ttlSeconds = Math.ceil(this.#ttlMs / 1000);
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const token = this.#generateToken();
       if (!isOpaqueResultToken(token)) throw new Error('INVALID_SESSION_TOKEN');
-      const created = await this.#repository.putIfAbsent(token, { summary: structuredClone(summary), expiresAt }, ttlSeconds);
-      if (created) return { token, expiresAt };
+      const created = await this.#repository.putIfAbsent(token, { summary: structuredClone(summary), expiresAt, createdAt, contactClaimHash,
+        ...(analyticsSessionId ? { analyticsSessionId } : {}) }, ttlSeconds);
+      if (created) return { token, expiresAt, contactClaim };
     }
     throw new Error('SESSION_TOKEN_COLLISION');
   }
@@ -66,7 +76,10 @@ export class PersistentResultSessionService {
       await this.#repository.delete(token);
       return { status: 'invalid' };
     }
-    return { status: 'ok', summary: structuredClone(record.summary), expiresAt: record.expiresAt };
+    return { status: 'ok', summary: structuredClone(record.summary), expiresAt: record.expiresAt,
+      ...(record.analyticsSessionId ? { analyticsSessionId: record.analyticsSessionId } : {}),
+      ...(record.createdAt ? { createdAt: record.createdAt } : {}),
+      ...(record.contactClaimHash ? { contactClaimHash: record.contactClaimHash } : {}) };
   }
 
   async delete(token: string): Promise<boolean> {

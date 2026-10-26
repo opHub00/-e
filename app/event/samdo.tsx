@@ -6,7 +6,7 @@ import { injectPersona, isDemoModeEnabled } from '../../features/eventKiosk/demo
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
 import type { Phase4PersonaId } from '../../features/eventKiosk/phase4Personas';
 import { createResultSession } from '../../features/eventKiosk/resultSessionClient';
-import { trackEventAnalytics } from '../../features/eventKiosk/analyticsClient';
+import { anonymousAnalyticsSessionId, trackEventAnalytics } from '../../features/eventKiosk/analyticsClient';
 import { toSamdoPresentationRecommendation } from '../../features/eventKiosk/samdo';
 import { samdoRawRecommendationForAnswers } from '../../features/eventKiosk/samdoResult/samdoEvaluate';
 import { samdoInputFromAnswers } from '../../features/eventKiosk/samdoResult/samdoInput';
@@ -23,6 +23,7 @@ import { KioskButton, Notice } from '../../features/eventKiosk/ui/controls';
 import { KioskFrame } from '../../features/eventKiosk/ui/KioskFrame';
 import { resetToHome } from '../../features/eventKiosk/ui/navigation';
 import { QrCode } from '../../features/eventKiosk/ui/QrCode';
+import { ContactCapture } from '../../features/eventKiosk/contact/ContactCapture';
 import { EmptyState } from '../../features/eventKiosk/ui/resultParts';
 import { k } from '../../features/eventKiosk/ui/theme';
 
@@ -41,7 +42,7 @@ export default function SamdoResultScreen() {
   const answerStates = useKioskStore(state => state.answerStates);
   const applyRefinementAnswers = useKioskStore(state => state.applyRefinementAnswers);
   const openSamdoDualChat = useKioskStore(state => state.openSamdoDualChat);
-  const [session, setSession] = useState<{ status: 'idle' | 'creating' | 'error' } | { status: 'ready'; link: string }>({ status: 'idle' });
+  const [session, setSession] = useState<{ status: 'idle' | 'creating' | 'error' } | { status: 'ready'; link: string; token: string; contactClaim?: string }>({ status: 'idle' });
 
   useEffect(() => {
     if (!attached || !persona || !isDemoModeEnabled()) return;
@@ -100,22 +101,26 @@ export default function SamdoResultScreen() {
     setSession({ status: 'creating' });
     try {
       const summary = buildSamdoQrSummary({ eventId: load.event.config.id, date: new Date().toISOString().slice(0, 10), recommendation: result.recommendation, view: result.view });
-      const created = await createResultSession(base, summary);
+      const created = await createResultSession(base, summary, fetch, anonymousAnalyticsSessionId());
       trackEventAnalytics('RESULT_SAVED', { noticeId: 'samdo-1' });
       trackEventAnalytics('QR_CREATED', { noticeId: 'samdo-1' });
-      setSession({ status: 'ready', link: created.url });
+      setSession({ status: 'ready', link: created.url, token: created.token, contactClaim: created.contactClaim });
     } catch {
       setSession({ status: 'error' });
     }
   };
 
   const qrSlot = session.status === 'ready' ? (
-    <View testID="samdo-qr-panel" style={styles.qr}>
-      <View {...({ dataSet: { link: session.link } } as object)}><QrCode value={session.link} size={200} testID="samdo-qr-code" /></View>
-      <View style={styles.qrCopy}>
-        <Text style={[k.type.bodyStrong, { color: k.colors.text }]}>휴대폰 카메라로 찍어 주세요</Text>
-        <Text style={[k.type.caption, { color: k.colors.textMuted }]}>추천 유형과 준비 서류를 휴대폰에서 다시 볼 수 있어요. 링크는 6시간 뒤 만료되고 이름·생년월일·소득은 담지 않아요.</Text>
+    <View style={{ gap: 12 }}>
+      <View testID="samdo-qr-panel" style={styles.qr}>
+        <View {...({ dataSet: { link: session.link } } as object)}><QrCode value={session.link} size={200} testID="samdo-qr-code" /></View>
+        <View style={styles.qrCopy}>
+          <Text style={[k.type.bodyStrong, { color: k.colors.text }]}>휴대폰 카메라로 찍어 주세요</Text>
+          <Text style={[k.type.caption, { color: k.colors.textMuted }]}>추천 유형과 준비 서류를 휴대폰에서 다시 볼 수 있어요. 링크는 6시간 뒤 만료되고 이름·생년월일·소득은 담지 않아요.</Text>
+        </View>
       </View>
+      {session.contactClaim ? <ContactCapture token={session.token} claim={session.contactClaim} />
+        : <Notice tone="warn">연락처 등록은 아직 준비되지 않았어요. QR로 결과를 확인해 주세요.</Notice>}
     </View>
   ) : session.status === 'error' ? <Notice tone="warn">QR을 아직 만들지 못했어요. 잠시 후 다시 시도해 주세요.</Notice> : null;
 

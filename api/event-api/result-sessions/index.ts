@@ -41,12 +41,13 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   try {
     const [{ PersistentResultSessionService, resultSessionPublicBaseUrl }, { createResultSessionRepository }] = await loadSessionModules();
     const service = new PersistentResultSessionService(createResultSessionRepository());
-    const created = await service.create((request.body as { summary?: unknown } | null)?.summary);
+    const body = request.body as { summary?: unknown; analyticsSessionId?: unknown } | null;
+    const created = await service.create(body?.summary, body?.analyticsSessionId as string | undefined);
     const baseUrl = resultSessionPublicBaseUrl(process.env, host(request.headers));
     response.status(201).json({ ...created, url: `${baseUrl}/event/take?token=${created.token}` });
   } catch (error) {
     const code = error instanceof Error ? error.message : 'RESULT_SESSION_FAILED';
-    if (code === 'INVALID_SUMMARY') response.status(400).json({ error: code });
+    if (code === 'INVALID_SUMMARY' || code === 'INVALID_ANALYTICS_SESSION_ID') response.status(400).json({ error: code });
     else if (code === 'RESULT_SESSION_BACKEND_UNCONFIGURED' || code === 'PUBLIC_BASE_URL_UNCONFIGURED') response.status(503).json({ error: code });
     else response.status(500).json({ error: 'RESULT_SESSION_FAILED' });
   }

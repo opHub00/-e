@@ -4,6 +4,7 @@ export type ResultSessionResponse = {
   token: string;
   expiresAt: string;
   url: string;
+  contactClaim?: string;
 };
 
 const TOKEN = /^[a-f0-9]{64}$/;
@@ -22,16 +23,17 @@ export function assertOpaqueResultUrl(value: string, expectedToken?: string): vo
   if (url.pathname !== '/event/take') throw new Error('RESULT_SESSION_URL_INVALID');
 }
 
-export async function createResultSession(baseUrl: string, summary: ResultSummary, fetcher: typeof fetch = fetch): Promise<ResultSessionResponse> {
+export async function createResultSession(baseUrl: string, summary: ResultSummary, fetcher: typeof fetch = fetch, analyticsSessionId?: string | null): Promise<ResultSessionResponse> {
   const endpoint = new URL('/event-api/result-sessions', baseUrl);
   const response = await fetcher(endpoint, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ summary }),
+    body: JSON.stringify({ summary, ...(analyticsSessionId ? { analyticsSessionId } : {}) }),
   });
   if (!response.ok) throw new Error(`RESULT_SESSION_CREATE_FAILED:${response.status}`);
   const body = await response.json() as ResultSessionResponse;
   if (!isOpaqueResultToken(body.token)) throw new Error('RESULT_SESSION_TOKEN_INVALID');
+  if (body.contactClaim !== undefined && !isOpaqueResultToken(body.contactClaim)) throw new Error('RESULT_SESSION_CLAIM_INVALID');
   if (!Number.isFinite(Date.parse(body.expiresAt))) throw new Error('RESULT_SESSION_EXPIRY_INVALID');
   assertOpaqueResultUrl(body.url, body.token);
   return body;

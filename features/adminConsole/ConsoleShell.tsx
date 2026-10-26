@@ -24,6 +24,7 @@ type IconName = ComponentProps<typeof MaterialIcons>['name'];
 export const CONSOLE_MENU: Array<{ key: string; label: string; hint: string; href: string; icon: IconName }> = [
   { key: 'dashboard', label: '대시보드', hint: '지금 정상인지', href: '/admin/console', icon: 'dashboard' },
   { key: 'analytics', label: '운영 지표', hint: '상담·판정 세션 흐름', href: '/admin/console/analytics', icon: 'query-stats' },
+  { key: 'contacts', label: '상담 결과 전달', hint: '동의 연락처·전달 상태', href: '/admin/console/contacts', icon: 'sms' },
   { key: 'notices', label: '공고', hint: '활성·검토 상태', href: '/admin/console/notices', icon: 'campaign' },
   { key: 'rules', label: '규칙 패키지', hint: '규칙 검토·승인', href: '/admin/console/rules', icon: 'fact-check' },
   { key: 'assessments', label: '판정 현황', hint: '사용자가 막히는 곳', href: '/admin/console/assessments', icon: 'insights' },

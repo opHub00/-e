@@ -59,6 +59,28 @@ test('Product V3 admin function packages its authenticated server and notice dep
   }
 });
 
+test('assessment and analytics functions keep their required files within Vercel glob limits', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  for (const [name, { includeFiles }] of Object.entries(config.functions)) {
+    assert.equal(typeof includeFiles, 'string', `${name} includeFiles must use the supported string glob`);
+    assert.ok(includeFiles.length <= 256, `${name} includeFiles exceeds Vercel's 256-character limit`);
+  }
+  const assessment = config.functions['api/event-api/assessments.ts'].includeFiles;
+  assert.match(assessment, /productV3\/\{admin\/\{assessmentEvents,stagingTarget\}\.ts,analytics\/\*\*\}/);
+  assert.match(assessment, /\{noticePlatform,applicationAssessment,profile\}\/\*\*/);
+  assert.match(assessment, /eventKiosk\/\{noticePlatform,samdo,samdoDual,samdoResult\}\/\*\*/);
+  assert.match(assessment, /data\/\{assessment-rules\/\*v1\.8\.json,event\/samdo-dual-v2-rag\.json\}/);
+  assert.doesNotMatch(assessment, /features\/\*\*/);
+
+  const analytics = config.functions['api/event-api/analytics.ts'].includeFiles;
+  assert.match(analytics, /productV3\/\{analytics\/\*\*,admin\/stagingTarget\.ts\}/);
+  assert.match(analytics, /eventKiosk\/\{noticePlatform\/\*\*,samdo\/\*\*,samdoDual\/\*\*,samdoResult\/\*\*\}/);
+  assert.match(analytics, /noticePlatform\/\*\*,eventKiosk\//);
+  assert.match(analytics, /applicationAssessment\/\*\*,profile\/\*\*/);
+  assert.match(analytics, /data\/\{assessment-rules\/\*v1\.8\.json,event\/samdo-dual-v2-rag\.json\}/);
+  assert.doesNotMatch(analytics, /features\/\*\*/);
+});
+
 test('E2E environment is explicit and does not mutate its parent environment', () => {
   const parent = { KEEP: 'yes' };
   const env = createE2EBuildEnvironment(parent);

@@ -18,7 +18,7 @@
       "includeFiles": "{features/{adminConsole/**,assessmentRuleReview/**,productV3/**,noticePlatform/**,profile/**,applicationAssessment/**,eventKiosk/**},data/{assessment-rules/{*v1.8,lh-jeju-ildo-samdo-happy-20260918*}.json,event/samdo-dual-v2-rag.json}}"
     },
     "api/event-api/assessments.ts": {
-      "includeFiles": "{features/{productV3/{admin/{assessmentEvents.ts,stagingTarget.ts},analytics/**},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
+      "includeFiles": "{features/{productV3/{admin/{assessmentEvents,stagingTarget}.ts,analytics/**},{noticePlatform,applicationAssessment,profile}/**,eventKiosk/{noticePlatform,samdo,samdoDual,samdoResult}/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"
     },
     "api/event-api/analytics.ts": {
       "includeFiles": "{features/{productV3/{analytics/**,admin/stagingTarget.ts},noticePlatform/**,eventKiosk/{noticePlatform/**,samdo/**,samdoDual/**,samdoResult/**},applicationAssessment/**,profile/**},data/{assessment-rules/*v1.8.json,event/samdo-dual-v2-rag.json}}"

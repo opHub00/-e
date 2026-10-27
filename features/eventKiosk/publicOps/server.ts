@@ -4,7 +4,7 @@ import { maskKoreanMobile } from '../contact/contract.ts';
 const STAGING_REF = 'krkeiytshxpqojrlrmsx';
 const PRODUCTION_REF = 'ypdreeipoxcztbxtiklt';
 const MAX_EVENTS = 5_000;
-const allowedEvents = new Set(['SESSION_STARTED', 'SESSION_COMPLETED', 'RESULT_VIEWED']);
+const allowedEvents = new Set(['SESSION_STARTED', 'ASSESSMENT_COMPLETED', 'RESULT_VIEWED']);
 const allowedDelivery = new Set(['REQUESTED', 'PROVIDER_UNCONFIGURED', 'SENDING', 'SENT', 'FAILED', 'EXPIRED']);
 
 export function publicOpsEnabled(env: Record<string, string | undefined>) {
@@ -22,7 +22,7 @@ export function publicOpsProjection(events: EventRow[], contacts: ContactRow[], 
   for (const row of events) {
     if (typeof row.anonymous_session_id !== 'string' || !allowedEvents.has(String(row.event_type))) continue;
     if (row.event_type === 'SESSION_STARTED') sessions.started.add(row.anonymous_session_id);
-    if (row.event_type === 'SESSION_COMPLETED') sessions.completed.add(row.anonymous_session_id);
+    if (row.event_type === 'ASSESSMENT_COMPLETED') sessions.completed.add(row.anonymous_session_id);
     if (row.event_type === 'RESULT_VIEWED') sessions.viewed.add(row.anonymous_session_id);
   }
   const rows = contacts.slice(0, 10).flatMap(row => {
@@ -59,7 +59,7 @@ export async function loadPublicOps(env: Record<string, string | undefined>, fet
     url.searchParams.set('select', 'anonymous_session_id,event_type');
     url.searchParams.set('environment', 'eq.staging');
     url.searchParams.set('occurred_at', `gte.${since}`);
-    url.searchParams.set('event_type', 'in.(SESSION_STARTED,SESSION_COMPLETED,RESULT_VIEWED)');
+    url.searchParams.set('event_type', 'in.(SESSION_STARTED,ASSESSMENT_COMPLETED,RESULT_VIEWED)');
     url.searchParams.set('order', 'occurred_at.desc');
     url.searchParams.set('limit', '1000');
     url.searchParams.set('offset', String(offset));

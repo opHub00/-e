@@ -20,7 +20,7 @@ test('public projection deduplicates sessions and exposes only masked contact fi
   const snapshot = publicOpsProjection([
     { anonymous_session_id: 'qa-session', event_type: 'SESSION_STARTED' },
     { anonymous_session_id: 'qa-session', event_type: 'SESSION_STARTED' },
-    { anonymous_session_id: 'qa-session', event_type: 'SESSION_COMPLETED' },
+    { anonymous_session_id: 'qa-session', event_type: 'ASSESSMENT_COMPLETED' },
     { anonymous_session_id: 'qa-session', event_type: 'RESULT_VIEWED' },
   ], [privateContact],
   { registered: 1, requested: 1, unconfigured: 1 }, false);

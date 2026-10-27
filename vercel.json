@@ -27,7 +27,7 @@
       "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/stagingTarget.ts,scripts/event-result-session-store.mjs}"
     },
     "api/event-api/public-ops.ts": {
-      "includeFiles": "{features/eventKiosk/{publicOps/**,contact/contract.ts},features/productV3/admin/stagingTarget.ts}"
+      "includeFiles": "{features/eventKiosk/{publicOps/**,contact/contract.ts,samdoDual/config.ts,samdoDual/types.ts},features/productV3/admin/stagingTarget.ts}"
     },
     "api/admin-api/consultation-contacts.ts": {
       "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/{auth,stagingTarget}.ts,scripts/event-result-session-store.mjs}"

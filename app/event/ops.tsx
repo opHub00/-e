@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 type Snapshot = {
   period: 'LAST_24_HOURS'; approximate: boolean;
+  baseline: { noticeIds: string[]; noticeVersion: string; noticeTitles: string[]; sourceStatus: 'STAGING_EVENT_FINAL_UNVERIFIED' };
   metrics: { consultationSessions: number; completedSessions: number; resultViewedSessions: number;
     registeredContacts: number; deliveryRequested: number; deliveryUnconfigured: number };
   contacts: Array<{ phoneMasked: string; deliveryStatus: string; registeredAt: string | null }>;
@@ -34,13 +35,14 @@ export default function EventOps() {
   return <ScrollView style={styles.page} contentContainerStyle={styles.body}>
     <Text style={styles.eyebrow}>완판e · 행사 운영 시연</Text>
     <Text style={styles.title}>최근 24시간 상담 현황</Text>
-    <Text style={styles.description}>최근 24시간의 Staging 데이터입니다. 이 화면은 읽기 전용이며 연락처는 일부만 표시합니다.</Text>
+    <Text style={styles.description}>삼도이동 행사 기준 Staging QA 데이터입니다. 공식 게시 확인 전이며, 이 화면은 읽기 전용입니다.</Text>
     <Pressable accessibilityRole="button" style={styles.refresh} onPress={() => setRefresh(value => value + 1)}>
       <Text style={styles.refreshText}>새로고침</Text>
     </Pressable>
     {loading ? <ActivityIndicator accessibilityLabel="데이터를 불러오는 중" /> : null}
     {error ? <Text style={styles.error}>{error}</Text> : null}
     {snapshot ? <>
+      <Text style={styles.description}>{snapshot.baseline.noticeTitles.join(' · ')} · {snapshot.baseline.noticeVersion} · 공식 원문 확인 전</Text>
       {snapshot.approximate ? <Text style={styles.notice}>이벤트가 5,000건을 넘어 세션 지표는 일부만 집계되었습니다.</Text> : null}
       <View style={styles.grid}>{labels.map(([key, label]) => <View key={key} style={styles.card}>
         <Text style={styles.cardLabel}>{label}</Text><Text style={styles.cardValue}>{snapshot.metrics[key].toLocaleString()}</Text>

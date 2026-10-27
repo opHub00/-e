@@ -1,11 +1,20 @@
 import { resolveProductV3StagingTarget } from '../../productV3/admin/stagingTarget.ts';
 import { maskKoreanMobile } from '../contact/contract.ts';
+import { SAMDO_DISTRICTS } from '../samdoDual/config.ts';
 
 const STAGING_REF = 'krkeiytshxpqojrlrmsx';
 const PRODUCTION_REF = 'ypdreeipoxcztbxtiklt';
 const MAX_EVENTS = 5_000;
 const allowedEvents = new Set(['SESSION_STARTED', 'ASSESSMENT_COMPLETED', 'RESULT_VIEWED']);
 const allowedDelivery = new Set(['REQUESTED', 'PROVIDER_UNCONFIGURED', 'SENDING', 'SENT', 'FAILED', 'EXPIRED']);
+const eventNotices = Object.values(SAMDO_DISTRICTS);
+const eventVersion = 'VER1.8';
+const eventStart = '2026-10-27T00:00:00+09:00';
+const eventBaseline = {
+  noticeIds: eventNotices.map(notice => notice.id), noticeVersion: eventVersion,
+  noticeTitles: eventNotices.map(notice => notice.title),
+  sourceStatus: 'STAGING_EVENT_FINAL_UNVERIFIED' as const,
+};
 
 export function publicOpsEnabled(env: Record<string, string | undefined>) {
   if (env.EVENT_DEMO_PUBLIC_READONLY !== '1' || env.VERCEL_ENV !== 'preview'
@@ -35,6 +44,7 @@ export function publicOpsProjection(events: EventRow[], contacts: ContactRow[], 
     return [{ phoneMasked, deliveryStatus: status, registeredAt: typeof row.created_at === 'string' ? row.created_at : null }];
   });
   return { period: 'LAST_24_HOURS', approximate: totalEventsCapped,
+    baseline: eventBaseline,
     metrics: { consultationSessions: sessions.started.size, completedSessions: sessions.completed.size,
       resultViewedSessions: sessions.viewed.size, registeredContacts: counts.registered,
       deliveryRequested: counts.requested, deliveryUnconfigured: counts.unconfigured },
@@ -52,12 +62,15 @@ export async function loadPublicOps(env: Record<string, string | undefined>, fet
   if (!publicOpsEnabled(env)) throw new Error('PUBLIC_OPS_DISABLED');
   const target = resolveProductV3StagingTarget(env);
   const headers = { apikey: target.serviceRoleKey, authorization: `Bearer ${target.serviceRoleKey}` };
-  const since = new Date(now.getTime() - 86_400_000).toISOString();
+  const since = new Date(Math.max(now.getTime() - 86_400_000, Date.parse(eventStart))).toISOString();
   const eventRows: EventRow[] = [];
   for (let offset = 0; offset < MAX_EVENTS; offset += 1_000) {
     const url = new URL('/rest/v1/product_v3_analytics_events', target.url);
     url.searchParams.set('select', 'anonymous_session_id,event_type');
     url.searchParams.set('environment', 'eq.staging');
+    url.searchParams.set('traffic_type', 'eq.qa');
+    url.searchParams.set('notice_id', `in.(${eventBaseline.noticeIds.join(',')})`);
+    url.searchParams.set('notice_version', `eq.${eventVersion}`);
     url.searchParams.set('occurred_at', `gte.${since}`);
     url.searchParams.set('event_type', 'in.(SESSION_STARTED,ASSESSMENT_COMPLETED,RESULT_VIEWED)');
     url.searchParams.set('order', 'occurred_at.desc');
@@ -70,12 +83,14 @@ export async function loadPublicOps(env: Record<string, string | undefined>, fet
   const contactUrl = new URL('/rest/v1/consultation_contacts', target.url);
   contactUrl.searchParams.set('select', 'phone_e164,created_at,consultation_result_deliveries(delivery_status)');
   contactUrl.searchParams.set('created_at', `gte.${since}`);
+  contactUrl.searchParams.set('notice_id', 'eq.samdo-1');
   contactUrl.searchParams.set('order', 'created_at.desc');
   contactUrl.searchParams.set('limit', '10');
   const count = async (table: string, status?: string) => {
     const url = new URL(`/rest/v1/${table}`, target.url);
     url.searchParams.set('select', 'id');
     url.searchParams.set(table === 'consultation_contacts' ? 'created_at' : 'requested_at', `gte.${since}`);
+    url.searchParams.set('notice_id', 'eq.samdo-1');
     if (status) url.searchParams.set('delivery_status', `eq.${status}`);
     const response = await fetcher(url, { method: 'HEAD', headers: { ...headers, Prefer: 'count=exact' }, cache: 'no-store', signal: AbortSignal.timeout(6_000) });
     if (!response.ok) throw new Error('PUBLIC_OPS_STORE_UNAVAILABLE');

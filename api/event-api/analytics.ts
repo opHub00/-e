@@ -20,7 +20,14 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const accepted = await module.recordBrowserAnalytics(request.body, process.env);
     response.status(202).json({ accepted });
   } catch (error) {
-    console.warn('EVENT_ANALYTICS_HANDLER_ERROR', error instanceof Error ? error.name : 'UNKNOWN');
+    const message = error instanceof Error ? error.message : '';
+    const code = error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+      && /^[A-Z_]{3,40}$/.test(error.code) ? error.code : 'NO_CODE';
+    const area = message.includes('features/productV3/analytics') ? 'ANALYTICS_MODULE'
+      : message.includes('noticePlatform') ? 'NOTICE_MODULE'
+        : message.includes('node_modules') ? 'DEPENDENCY_MODULE' : 'OTHER';
+    const target = /^PRODUCT_V3_[A-Z_]+$/.test(message) ? message : 'NO_TARGET_CODE';
+    console.warn('EVENT_ANALYTICS_HANDLER_ERROR', error instanceof Error ? error.name : 'UNKNOWN', code, area, target);
     response.status(202).json({ accepted: false });
   }
 }

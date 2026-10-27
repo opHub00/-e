@@ -1,4 +1,4 @@
-import { Stack, type ErrorBoundaryProps } from 'expo-router';
+import { Stack, usePathname, type ErrorBoundaryProps } from 'expo-router';
 import { useCallback, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { kioskEvent } from '../../features/eventKiosk/kioskEvent';
@@ -13,6 +13,7 @@ import { useKioskStore } from '../../features/eventKiosk/useKioskStore';
  */
 export default function EventLayout() {
   const load = kioskEvent();
+  const pathname = usePathname();
   const touchRef = useRef<(() => void) | null>(null);
   const register = useCallback((touch: () => void) => { touchRef.current = touch; }, []);
 
@@ -28,11 +29,11 @@ export default function EventLayout() {
   return (
     <View style={styles.root} onTouchStart={() => touchRef.current?.()}>
       <Stack screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: k.colors.background } }} />
-      <IdleGuard
+      {pathname === '/event/ops' ? null : <IdleGuard
         resetSeconds={load.event.config.idleResetSeconds}
         warningSeconds={load.event.config.idleWarningSeconds}
         onActivityRef={register}
-      />
+      />}
     </View>
   );
 }

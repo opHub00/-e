@@ -26,6 +26,9 @@
     "api/event-api/consultation-contacts.ts": {
       "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/stagingTarget.ts,scripts/event-result-session-store.mjs}"
     },
+    "api/event-api/public-ops.ts": {
+      "includeFiles": "{features/eventKiosk/{publicOps/**,contact/contract.ts},features/productV3/admin/stagingTarget.ts}"
+    },
     "api/admin-api/consultation-contacts.ts": {
       "includeFiles": "{features/eventKiosk/{contact/**,server/**},features/productV3/admin/{auth,stagingTarget}.ts,scripts/event-result-session-store.mjs}"
     }
@@ -77,6 +80,10 @@
     {
       "source": "/event-api/consultation-contacts",
       "destination": "/api/event-api/consultation-contacts"
+    },
+    {
+      "source": "/event-api/public-ops",
+      "destination": "/api/event-api/public-ops"
     },
     {
       "source": "/admin-api/consultation-contacts",

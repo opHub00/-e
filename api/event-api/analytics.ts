@@ -19,5 +19,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const module = await nativeImport(pathToFileURL(join(process.cwd(), 'features/productV3/analytics/server.ts')).href) as AnalyticsModule;
     const accepted = await module.recordBrowserAnalytics(request.body, process.env);
     response.status(202).json({ accepted });
-  } catch { response.status(202).json({ accepted: false }); }
+  } catch (error) {
+    console.warn('EVENT_ANALYTICS_HANDLER_ERROR', error instanceof Error ? error.name : 'UNKNOWN');
+    response.status(202).json({ accepted: false });
+  }
 }

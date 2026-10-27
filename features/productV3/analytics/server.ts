@@ -79,7 +79,10 @@ export async function recordAnalyticsBatch(events: readonly AnalyticsEvent[], en
     const officialActiveVerified = notice?.status === 'ACTIVE' && notice.sourceDocument.official === true;
     return shouldCollect(parsed, gate, officialActiveVerified) ? [parsed] : [];
   });
-  if (!accepted.length) return false;
+  if (!accepted.length) {
+    if (events.length) console.warn('EVENT_ANALYTICS_NOT_COLLECTED', gate.analyticsEnabled ? 'EVENT_REJECTED' : 'DISABLED');
+    return false;
+  }
   try {
     const target = resolveProductV3StagingTarget(env);
     const response = await fetcher(new URL('/rest/v1/product_v3_analytics_events?on_conflict=event_id', target.url), {
@@ -87,8 +90,12 @@ export async function recordAnalyticsBatch(events: readonly AnalyticsEvent[], en
         'content-type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
       body: JSON.stringify(accepted.map(toRow)), signal: AbortSignal.timeout(6000),
     });
+    if (!response.ok) console.warn('EVENT_ANALYTICS_WRITE_HTTP', response.status);
     return response.ok;
-  } catch { return false; }
+  } catch (error) {
+    console.warn('EVENT_ANALYTICS_WRITE_ERROR', error instanceof Error ? error.name : 'UNKNOWN');
+    return false;
+  }
 }
 
 /** Per-instance QA throttling. A distributed limit is required before real traffic is enabled. */
@@ -108,10 +115,14 @@ export function allowBrowserAnalyticsAttempt(sessionId: string, eventId: string,
 
 /** Browser may trigger a UX event, but cannot set metadata, status, version, traffic or raw fact category. */
 export async function recordBrowserAnalytics(value: unknown, env: Record<string, string | undefined>, fetcher: typeof fetch = fetch): Promise<boolean> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) { console.warn('EVENT_ANALYTICS_BROWSER_INVALID'); return false; }
   const row = value as Record<string, unknown>;
-  if (!browserTypes.has(row.eventType as AnalyticsEventType) || !safeUuid.test(String(row.eventId ?? '')) || !safeUuid.test(String(row.anonymousSessionId ?? ''))) return false;
-  if (!allowBrowserAnalyticsAttempt(String(row.anonymousSessionId), String(row.eventId), env)) return false;
+  if (!browserTypes.has(row.eventType as AnalyticsEventType) || !safeUuid.test(String(row.eventId ?? '')) || !safeUuid.test(String(row.anonymousSessionId ?? ''))) {
+    console.warn('EVENT_ANALYTICS_BROWSER_INVALID'); return false;
+  }
+  if (!allowBrowserAnalyticsAttempt(String(row.anonymousSessionId), String(row.eventId), env)) {
+    console.warn('EVENT_ANALYTICS_BROWSER_RATE_LIMITED'); return false;
+  }
   const event = serverEvent({ eventId: String(row.eventId), anonymousSessionId: String(row.anonymousSessionId),
     noticeId: String(row.noticeId ?? ''), eventType: row.eventType as AnalyticsEventType,
     ...(row.eventType === 'COPILOT_USED' && Number.isInteger(row.conversationTurnCount) ? { conversationTurnCount: Number(row.conversationTurnCount) } : {}),

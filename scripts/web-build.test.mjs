@@ -28,9 +28,10 @@ test('listings function packages only its required event media modules', async (
 test('event chat function packages its server contract, privacy boundary and trusted Samdo RAG index', async () => {
   const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
   const includeFiles = config.functions?.['api/event-api/chat.ts']?.includeFiles ?? '';
-  assert.match(includeFiles, /features\/eventKiosk\/\{server\/eventChat\.ts,chat\/\{contract\.ts,privacy\.ts,package\.json\},samdoDual\/\{rag\.ts,types\.ts,package\.json\}\}/);
-  assert.match(includeFiles, /features\/productV3\/\{admin\/staging\*\.ts,analytics\/server\.ts\}/);
-  assert.match(includeFiles, /data\/event\/samdo-dual-v2-rag\.json/);
+  // 채팅은 Analytics(COPILOT_USED)도 기록하므로 eventKiosk 전체와 Analytics 의존 범위를 함께 싣는다(아래 closure 검사가 기준).
+  assert.match(includeFiles, /productV3\/\{admin\/staging\*\.ts,analytics\/\*\*\}/);
+  assert.match(includeFiles, /eventKiosk\}\/\*\*/);
+  assert.match(includeFiles, /event\/samdo-dual-v2-rag\.json/);
   assert.doesNotMatch(includeFiles, /features\/\*\*/);
   assert.ok(includeFiles.length <= 256, 'Vercel limits includeFiles strings to 256 characters');
   assert.ok(config.rewrites?.some(row => row.source === '/event-api/chat' && row.destination === '/api/event-api/chat'));
@@ -67,16 +68,14 @@ test('assessment and analytics functions keep their required files within Vercel
   }
   const assessment = config.functions['api/event-api/assessments.ts'].includeFiles;
   assert.match(assessment, /productV3\/\{admin\/\{assessmentEvents,stagingTarget\}\.ts,analytics\/\*\*\}/);
-  assert.match(assessment, /\{noticePlatform,applicationAssessment,profile\}\/\*\*/);
-  assert.match(assessment, /eventKiosk\/\{noticePlatform,samdo,samdoDual,samdoResult\}\/\*\*/);
+  // eventKiosk 전체: samdo/* 가 eventKiosk 루트(engineInput·model·presentation·questionPolicy)와 frozen/domain 을 import 한다.
+  assert.match(assessment, /\{noticePlatform,applicationAssessment,profile,eventKiosk\}\/\*\*/);
   assert.match(assessment, /data\/\{assessment-rules\/\*v1\.8\.json,event\/samdo-dual-v2-rag\.json\}/);
   assert.doesNotMatch(assessment, /features\/\*\*/);
 
   const analytics = config.functions['api/event-api/analytics.ts'].includeFiles;
   assert.match(analytics, /productV3\/\{analytics\/\*\*,admin\/stagingTarget\.ts\}/);
-  assert.match(analytics, /eventKiosk\/\{noticePlatform\/\*\*,samdo\/\*\*,samdoDual\/\*\*,samdoResult\/\*\*\}/);
-  assert.match(analytics, /noticePlatform\/\*\*,eventKiosk\//);
-  assert.match(analytics, /applicationAssessment\/\*\*,profile\/\*\*/);
+  assert.match(analytics, /\{noticePlatform,applicationAssessment,profile,eventKiosk\}\/\*\*/);
   assert.match(analytics, /data\/\{assessment-rules\/\*v1\.8\.json,event\/samdo-dual-v2-rag\.json\}/);
   assert.doesNotMatch(analytics, /features\/\*\*/);
 });
@@ -269,4 +268,60 @@ test('release bundle must inline its production target', async () => {
     await writeFile(join(root, 'entry.js'), 'allowsLocalReviewSeed)("production") isRuleReviewTestEnvironment)("production")', 'utf8');
     await assert.rejects(assertWebBuildProfile({ outputDir: root, profile: 'production', productionProjectRef: PRODUCTION, requireTarget: true }), /PRODUCTION_TARGET_NOT_INLINED/);
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+/**
+ * Every server module a function loads at runtime (nativeImport(join(process.cwd(), ...))) must have its whole
+ * static import graph inside that function's includeFiles. A missing file is ERR_MODULE_NOT_FOUND only in the
+ * deployed bundle; the handler then answers its generic error path (analytics: `accepted:false`).
+ */
+test('runtime-imported server modules are fully covered by each function includeFiles', async () => {
+  const { minimatch } = await import('minimatch');
+  const { existsSync, readFileSync, statSync } = await import('node:fs');
+  const { dirname, relative, sep } = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const strip = src => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const resolveSpec = (from, spec) => {
+    const base = join(dirname(from), spec);
+    for (const candidate of [base, `${base}.ts`, `${base}.tsx`, `${base}.mjs`, `${base}.js`, `${base}.json`, join(base, 'index.ts')])
+      if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+    return null;
+  };
+  const closure = entry => {
+    const seen = new Set();
+    const walk = file => {
+      const rel = relative(root, file).split(sep).join('/');
+      if (seen.has(rel)) return;
+      seen.add(rel);
+      if (!/\.(ts|tsx|mjs|js)$/.test(file)) return;
+      const src = strip(readFileSync(file, 'utf8'));
+      for (const match of src.matchAll(/(?:^|[;\n])\s*(import|export)\s+(?!type\s)([^'"]*?\bfrom\s+)?['"](\.[^'"]+)['"]/g)) {
+        if (match[1] === 'export' && !match[2]) continue;
+        const next = resolveSpec(file, match[3]);
+        assert.ok(next, `${rel}: unresolved import ${match[3]}`);
+        walk(next);
+      }
+    };
+    walk(join(root, entry));
+    return [...seen];
+  };
+  const entries = [];
+  for (const fn of Object.keys(config.functions ?? {})) {
+    if (fn.includes('*')) continue;
+    const handler = readFileSync(join(root, fn), 'utf8');
+    for (const match of handler.matchAll(/nativeImport\(pathToFileURL\(join\((?:process\.cwd\(\)|root), '([^']+)'\)\)/g)) entries.push([fn, match[1]]);
+  }
+  // Known, documented gap outside the event demo path (admin-only Jeju v2 review candidate). Rule-review packaging
+  // is not changed in this release; the entry is listed so any *new* gap still fails this test.
+  const KNOWN_GAPS = {
+    'api/admin-api/product-v3.ts features/assessmentRuleReview/fixtures/jejuV2CandidateView.ts': ['features/ruleExtraction/server/v4_1/exceptionRelations.ts'],
+  };
+  assert.ok(entries.some(([fn]) => fn === 'api/event-api/analytics.ts'), 'analytics handler entry discovered');
+  for (const [fn, entry] of entries) {
+    const known = KNOWN_GAPS[`${fn} ${entry}`] ?? [];
+    const missing = closure(entry).filter(file => !minimatch(file, config.functions[fn].includeFiles) && !known.includes(file));
+    assert.deepEqual(missing, [], `${fn} ships ${entry} without: ${missing.join(', ')}`);
+  }
 });
